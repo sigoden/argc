@@ -1,4 +1,8 @@
-use crate::{bail, Result};
+use crate::{
+    bail,
+    cli::{ArgData, ArgType},
+    Result,
+};
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_while},
@@ -9,72 +13,38 @@ use nom::{
 };
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Token<'a> {
-    value: TokenData<'a>,
-    position: Position,
+pub struct Event<'a> {
+    pub data: EventData<'a>,
+    pub position: usize,
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum TokenData<'a> {
-    /// App info. e.g. `@title A demo cli`
-    TitleTag(&'a str),
+pub enum EventData<'a> {
+    /// App title. e.g. `@title A demo cli`
+    Title(&'a str),
     /// App subcommand, e.g. `@cmd A sub command`
-    CmdTag(&'a str),
+    Command(&'a str),
     /// Option for app or subommand, e.g. `@option {string} str - A string option`
-    OptionTag(Arg<'a>),
+    OptionArg(ArgData<'a>),
     /// Positionl parameter for app or subommand, e.g. `@param {string} str - A string option`
-    ParamTag(Arg<'a>),
+    ParamArg(ArgData<'a>),
     /// A shell function. e.g `function cmd()` or `cmd()`
     Func(&'a str),
     /// Palaceholder for unrecognized tag
-    UnknownTag(&'a str),
-}
-
-/// The line number of
-pub type Position = usize;
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Arg<'a> {
-    pub name: &'a str,
-    pub title: Option<&'a str>,
-    pub arg_type: ArgType,
-    pub short: Option<char>,
-    pub choices: Option<Vec<&'a str>>,
-    pub multiple: bool,
-    pub required: bool,
-    pub default: Option<&'a str>,
-}
-
-impl<'a> Arg<'a> {
-    pub fn new(name: &'a str) -> Self {
-        Arg {
-            name,
-            title: None,
-            arg_type: ArgType::String,
-            short: None,
-            choices: None,
-            multiple: false,
-            required: false,
-            default: None,
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum ArgType {
-    String,
-    Boolean,
-    Number,
+    Unknown(&'a str),
 }
 
 /// Tokenize shell script
-pub fn parse(source: &str) -> Result<Vec<Token>> {
+pub fn parse(source: &str) -> Result<Vec<Event>> {
     let mut result = vec![];
     for (position, line) in source.lines().enumerate() {
         match parse_line(line) {
             Ok((_, maybe_token)) => {
                 if let Some(value) = maybe_token {
-                    result.push(Token { position, value })
+                    result.push(Event {
+                        position,
+                        data: value,
+                    })
                 }
             }
             Err(err) => {
@@ -85,30 +55,30 @@ pub fn parse(source: &str) -> Result<Vec<Token>> {
     Ok(result)
 }
 
-fn parse_line(line: &str) -> nom::IResult<&str, Option<TokenData>> {
+fn parse_line(line: &str) -> nom::IResult<&str, Option<EventData>> {
     alt((map(alt((parse_tag, parse_fn)), |v| Some(v)), success(None)))(line)
 }
 
-fn parse_tag(input: &str) -> nom::IResult<&str, TokenData> {
+fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
     preceded(
         tuple((char('#'), space0, char('@'))),
         alt((
-            map(preceded(tag("title"), parse_tail), |v| TokenData::TitleTag(v)),
-            map(preceded(tag("cmd"), parse_tail), |v| TokenData::CmdTag(v)),
-            map(preceded(tag("option"), parse_arg), |v| {
-                TokenData::OptionTag(v)
+            map(preceded(tag("title"), parse_tail), |v| EventData::Title(v)),
+            map(preceded(tag("cmd"), parse_tail), |v| EventData::Command(v)),
+            map(preceded(pair(tag("option"), space1), parse_arg), |v| {
+                EventData::OptionArg(v)
             }),
-            map(preceded(tag("param"), parse_arg), |v| {
-                TokenData::ParamTag(v)
+            map(preceded(pair(tag("param"), space1), parse_arg), |v| {
+                EventData::ParamArg(v)
             }),
-            map(parse_name, |v| TokenData::UnknownTag(v)),
+            map(parse_name, |v| EventData::Unknown(v)),
         )),
     )(input)
 }
 
-fn parse_fn(input: &str) -> nom::IResult<&str, TokenData> {
+fn parse_fn(input: &str) -> nom::IResult<&str, EventData> {
     map(alt((parse_fn_keyword, parse_fn_elision)), |v| {
-        TokenData::Func(v)
+        EventData::Func(v)
     })(input)
 }
 
@@ -125,18 +95,16 @@ fn parse_fn_elision(input: &str) -> nom::IResult<&str, &str> {
     )(input)
 }
 
-fn parse_arg(input: &str) -> nom::IResult<&str, Arg> {
-    let (i, (mut arg, short, title)) = preceded(
-        space0,
-        tuple((parse_arg_quote, opt(parse_arg_short), parse_tail)),
-    )(input)?;
+fn parse_arg(input: &str) -> nom::IResult<&str, ArgData> {
+    let (i, (mut arg, short, title)) =
+        tuple((parse_arg_quote, opt(parse_arg_short), parse_tail))(input)?;
     arg.short = short;
     arg.title = Some(title);
     Ok((i, arg))
 }
 
 // Parse arg  likes `<??>`
-fn parse_arg_quote(input: &str) -> nom::IResult<&str, Arg> {
+fn parse_arg_quote(input: &str) -> nom::IResult<&str, ArgData> {
     alt((
         map(
             delimited(char('<'), parse_arg_general, char('>')),
@@ -149,12 +117,12 @@ fn parse_arg_quote(input: &str) -> nom::IResult<&str, Arg> {
     ))(input)
 }
 
-fn parse_arg_general(input: &str) -> nom::IResult<&str, Arg> {
+fn parse_arg_general(input: &str) -> nom::IResult<&str, ArgData> {
     alt((parse_arg_multiple, parse_arg_assign, parse_arg_base))(input)
 }
 
 // Parse `str...`
-fn parse_arg_multiple(input: &str) -> nom::IResult<&str, Arg> {
+fn parse_arg_multiple(input: &str) -> nom::IResult<&str, ArgData> {
     map(terminated(parse_arg_base, tag("...")), |mut arg| {
         arg.multiple = true;
         arg
@@ -162,7 +130,7 @@ fn parse_arg_multiple(input: &str) -> nom::IResult<&str, Arg> {
 }
 
 // Parse `str=?`
-fn parse_arg_assign(input: &str) -> nom::IResult<&str, Arg> {
+fn parse_arg_assign(input: &str) -> nom::IResult<&str, ArgData> {
     map(
         separated_pair(parse_arg_base, char('='), parse_choices),
         |(mut arg, choices)| {
@@ -180,8 +148,8 @@ fn parse_arg_assign(input: &str) -> nom::IResult<&str, Arg> {
 }
 
 // Parse `str`
-fn parse_arg_base(input: &str) -> nom::IResult<&str, Arg> {
-    map(parse_name, |v| Arg::new(v))(input)
+fn parse_arg_base(input: &str) -> nom::IResult<&str, ArgData> {
+    map(parse_name, |v| ArgData::new(v))(input)
 }
 
 // Parse `-s`
@@ -225,7 +193,7 @@ mod tests {
         ($comment:literal, $kind:ident, $text:literal) => {
             assert_eq!(
                 parse_line($comment).unwrap().1,
-                Some(TokenData::$kind($text))
+                Some(EventData::$kind($text))
             )
         };
     }
@@ -241,9 +209,9 @@ mod tests {
 
     #[test]
     fn test_parse_line() {
-        assert_token!("# @title A demo cli", TitleTag, "A demo cli");
-        assert_token!("# @cmd A sub command", CmdTag, "A sub command");
-        assert_token!("# @cmd", CmdTag, "");
+        assert_token!("# @title A demo cli", Title, "A demo cli");
+        assert_token!("# @cmd A sub command", Command, "A sub command");
+        assert_token!("# @cmd", Command, "");
         assert_token!("foo()", Func, "foo");
         assert_token!("foo ()", Func, "foo");
         assert_token!("foo  ()", Func, "foo");
