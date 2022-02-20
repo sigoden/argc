@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.53"
-regex = "1.5.4"
+nom = "7"

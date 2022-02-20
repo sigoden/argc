@@ -1,8 +1,7 @@
 mod cli;
-mod arg;
-mod token;
+mod parser;
 
-use anyhow::bail as throw;
+use anyhow::bail;
 use anyhow::Error;
 
 pub use cli::Cli;
