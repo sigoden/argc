@@ -1,35 +1,10 @@
-#[derive(Debug)]
-pub struct App {
-    pub title: Option<String>,
-    pub version: Option<String>,
-    pub options: Vec<AppOption>,
-    pub commands: Vec<AppOption>,
-}
+mod cli;
+mod arg;
+mod token;
 
-#[derive(Debug)]
-pub struct AppOption {
-    pub name: String,
-    pub description: Option<String>,
-    pub kind: AppOptionType,
-    pub array: bool,
-    pub choices: Vec<String>,
-    pub short: String,
-    pub options: Vec<AppOption>,
-    pub params: Vec<AppOption>,
-}
+use anyhow::bail as throw;
+use anyhow::Error;
 
-impl AppOption {
-    pub fn parse() -> Self {
-        todo!()
-    }
-}
+pub use cli::Cli;
 
-
-#[derive(Debug)]
-pub enum AppOptionType {
-    String,
-    Boolean,
-    Number,
-}
-
-pub struct Settings {}
+pub type Result<T> = std::result::Result<T, Error>;
