@@ -5,7 +5,7 @@ use crate::Result;
 pub struct Cli<'a> {
     pub title: Option<&'a str>,
     pub options: Vec<Arg<'a>>,
-    pub params: Vec<Arg<'a>>,
+    pub commands: Vec<SubCommand<'a>>,
 }
 
 #[derive(Debug)]

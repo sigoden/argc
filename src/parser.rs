@@ -17,7 +17,7 @@ pub struct Token<'a> {
 #[derive(Debug, PartialEq, Clone)]
 pub enum TokenData<'a> {
     /// App info. e.g. `@title A demo cli`
-    AppTag(&'a str),
+    TitleTag(&'a str),
     /// App subcommand, e.g. `@cmd A sub command`
     CmdTag(&'a str),
     /// Option for app or subommand, e.g. `@option {string} str - A string option`
@@ -93,7 +93,7 @@ fn parse_tag(input: &str) -> nom::IResult<&str, TokenData> {
     preceded(
         tuple((char('#'), space0, char('@'))),
         alt((
-            map(preceded(tag("app"), parse_tail), |v| TokenData::AppTag(v)),
+            map(preceded(tag("title"), parse_tail), |v| TokenData::TitleTag(v)),
             map(preceded(tag("cmd"), parse_tail), |v| TokenData::CmdTag(v)),
             map(preceded(tag("option"), parse_arg), |v| {
                 TokenData::OptionTag(v)
@@ -241,7 +241,7 @@ mod tests {
 
     #[test]
     fn test_parse_line() {
-        assert_token!("# @app A demo cli", AppTag, "A demo cli");
+        assert_token!("# @title A demo cli", TitleTag, "A demo cli");
         assert_token!("# @cmd A sub command", CmdTag, "A sub command");
         assert_token!("# @cmd", CmdTag, "");
         assert_token!("foo()", Func, "foo");
