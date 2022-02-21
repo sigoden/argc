@@ -6,7 +6,7 @@
 # @option     --git-dir
 
 # @cmd        Add file contents to the index
-# @positional  pathspec*     Files to add content from. 
+# @option     pathspec*     Files to add content from. 
 # @flag       -n --dry-run  Don’t actually add the file
 add() {
 
@@ -14,8 +14,8 @@ add() {
 
 
 # @cmd        Update remote refs along with associated objects
-# @positional  repository!   The "remote" repository that is destination of a push operation.
-# @positional  refspec+      Specify what destination ref to update with what source object.
+# @option     repository!   The "remote" repository that is destination of a push operation.
+# @option     refspec+      Specify what destination ref to update with what source object.
 push() {
 
 }

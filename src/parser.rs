@@ -72,9 +72,8 @@ fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
             }),
             map(
                 alt((
+                    preceded(pair(tag("option"), space1), alt((parse_option_arg, parse_positional_arg))),
                     preceded(pair(tag("flag"), space1), parse_flag_arg),
-                    preceded(pair(tag("option"), space1), parse_option_arg),
-                    preceded(pair(tag("positional"), space1), parse_positional_arg),
                 )),
                 |v| EventData::Arg(v),
             ),
@@ -117,6 +116,17 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
     Ok((input, arg))
 }
 
+// Parse `@option`, positional only
+fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
+    let (i, (mut arg, summary)) = tuple((
+        preceded(space0, parse_arg_mark),
+        alt((parse_tail, parse_empty)),
+    ))(input)?;
+    arg.positional = true;
+    arg.summary = Some(summary);
+    Ok((i, arg))
+}
+
 // Parse `@flag`
 fn parse_flag_arg(input: &str) -> nom::IResult<&str, ArgData> {
     let (input, (short, mut arg, summary)) = tuple((
@@ -128,17 +138,6 @@ fn parse_flag_arg(input: &str) -> nom::IResult<&str, ArgData> {
     arg.summary = Some(summary);
     arg.flag = true;
     Ok((input, arg))
-}
-
-// Parse `@arg`
-fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
-    let (i, (mut arg, summary)) = tuple((
-        preceded(space0, parse_arg_mark),
-        alt((parse_tail, parse_empty)),
-    ))(input)?;
-    arg.positional = true;
-    arg.summary = Some(summary);
-    Ok((i, arg))
 }
 
 // Parse `str!` `str*` `str+` `str`
