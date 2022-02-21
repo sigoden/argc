@@ -117,6 +117,8 @@ fn parse_arg_quote(input: &str) -> nom::IResult<&str, ArgData> {
     ))(input)
 }
 
+// Parse `bool?`
+
 fn parse_arg_general(input: &str) -> nom::IResult<&str, ArgData> {
     alt((parse_arg_multiple, parse_arg_assign, parse_arg_base))(input)
 }
@@ -135,9 +137,7 @@ fn parse_arg_assign(input: &str) -> nom::IResult<&str, ArgData> {
         separated_pair(parse_arg_base, char('='), parse_choices),
         |(mut arg, choices)| {
             let value = choices[0].clone();
-            if value == "true" || value == "false" {
-                arg.arg_type = ArgType::Boolean;
-            } else if value.chars().all(|v| v.is_numeric()) {
+            if value.chars().all(|v| v.is_numeric()) {
                 arg.arg_type = ArgType::Number;
             }
             arg.default = Some(value);
@@ -230,9 +230,9 @@ mod tests {
         assert_arg!("<str>  required", name: "str", required: true);
         assert_arg!("str...  multiple", name: "str", multiple: true);
         assert_arg!("str=hello  default", name: "str", default: Some("hello"));
-        assert_arg!("str=a|b|c  choice", name: "str", default: Some("a"), choices: Some(vec!["a", "b", "c"]));
+        assert_arg!("<str>=a|b|c  choice", name: "str", default: Some("a"), choices: Some(vec!["a", "b", "c"]));
         assert_arg!("num=3   type: integer", arg_type: ArgType::Number, default: Some("3"));
-        assert_arg!("bool=true  type: boolean", arg_type: ArgType::Boolean, default: Some("true"));
-        assert_arg!("str -s short", short: Some('s'));
+        assert_arg!("bool=false  type: boolean", arg_type: ArgType::Boolean, default: Some("true"));
+        assert_arg!("str -s  short", short: Some('s'));
     }
 }

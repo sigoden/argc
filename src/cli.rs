@@ -2,43 +2,6 @@ use crate::parser::{parse, Event, EventData};
 use crate::Result;
 use clap::{Arg, Command};
 
-#[derive(Debug, Default)]
-pub struct Cli<'a> {
-    pub title: Option<&'a str>,
-    pub options: Vec<ArgData<'a>>,
-    pub commands: Vec<SubCommand<'a>>,
-}
-
-impl<'a> Cli<'a> {
-    pub fn parse(source: &'a str) -> Result<Self> {
-        CliParser::parse(source)
-    }
-    pub fn build(self) -> Result<Command<'a>> {
-        let mut app = Command::default();
-        for arg_data in self.options {
-            app = app.arg(arg_data.build()?);
-        }
-        for cmd in self.commands {
-            app = app.subcommand(cmd.build()?)
-        }
-        Ok(app)
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct SubCommand<'a> {
-    pub name: Option<&'a str>,
-    pub title: Option<&'a str>,
-    pub options: Vec<ArgData<'a>>,
-    pub params: Vec<ArgData<'a>>,
-}
-
-impl<'a> SubCommand<'a> {
-    fn build(self) -> Result<Command<'a>> {
-        todo!()
-    }
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct ArgData<'a> {
     pub name: &'a str,
@@ -64,72 +27,97 @@ impl<'a> ArgData<'a> {
             default: None,
         }
     }
-    pub fn build(self) -> Result<Arg<'a>> {
-        todo!()
+    pub fn build(self, index: Option<usize>) -> Result<Arg<'a>> {
+        let mut arg = Arg::new(self.name);
+        if let Some(idx) = index {
+            arg = arg.index(idx);
+        } else {
+            arg = arg.long(self.name);
+        }
+        if let Some(title) = self.title {
+            let title = title.trim();
+            if title.len() > 0 {
+                arg = arg.help(title);
+            }
+        }
+        if let Some(short) = self.short {
+            arg = arg.short(short);
+        }
+        if let Some(choices) = self.choices {
+            if choices.len() > 1 {
+                arg = arg.possible_values(choices);
+            }
+        }
+        if self.multiple {
+            arg = arg.multiple_values(true);
+        }
+        if self.required {
+            arg = arg.required(true);
+        }
+        if let Some(default) = self.default {
+            arg = arg.default_value(default);
+        }
+        match self.arg_type {
+            ArgType::Boolean => {
+            }
+            ArgType::String => {
+                arg = arg.takes_value(true);
+            }
+            ArgType::Number => {
+                arg = arg.takes_value(true);
+            }
+        }
+        Ok(arg)
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ArgType {
-    String,
     Boolean,
+    String,
     Number,
 }
 
-struct CliParser<'a> {
-    cli: Cli<'a>,
-    subcmd: Option<SubCommand<'a>>,
-}
-
-impl<'a> Default for CliParser<'a> {
-    fn default() -> Self {
-        Self {
-            cli: Cli::default(),
-            subcmd: None,
-        }
-    }
-}
-
-impl<'a> CliParser<'a> {
-    /// Create app from bash script
-    pub fn parse(source: &'a str) -> Result<Cli<'a>> {
-        let mut builder: Self = Default::default();
-        let events = parse(source)?;
-        for Event { data, .. } in events {
-            match data {
-                EventData::Title(value) => {
-                    builder.cli.title = Some(value);
+/// Parse shell script to generate command
+pub fn build(source: &str) -> Result<Command> {
+    let mut main = Command::default();
+    let mut subcmd: Option<Command> = None;
+    let mut subcmd_param_index: usize = 0;
+    let events = parse(source)?;
+    for Event { data, .. } in events {
+        match data {
+            EventData::Title(value) => {
+                main = main.about(value);
+            }
+            EventData::Command(value) => {
+                let mut cmd = Command::default();
+                if value.len() > 0 {
+                    cmd = cmd.about(value);
                 }
-                EventData::Command(value) => {
-                    let mut subcmd = SubCommand::default();
-                    if value.len() > 0 {
-                        subcmd.title = Some(value);
-                    }
-                    builder.subcmd = Some(subcmd);
-                }
-                EventData::OptionArg(arg) => {
-                    if let Some(cmd) = builder.subcmd.as_mut() {
-                        cmd.options.push(arg);
-                    } else {
-                        builder.cli.options.push(arg);
-                    }
-                }
-                EventData::ParamArg(arg) => {
-                    if let Some(cmd) = builder.subcmd.as_mut() {
-                        cmd.params.push(arg);
-                    }
-                }
-                EventData::Func(name) => {
-                    let maybe_subcmd = builder.subcmd.take();
-                    let mut subcmd = maybe_subcmd.unwrap_or_default();
-                    subcmd.name = Some(name);
-                    builder.cli.commands.push(subcmd);
-                }
-                EventData::Unknown(_) => {
-                    // todo: warning
+                subcmd = Some(cmd);
+            }
+            EventData::OptionArg(arg) => {
+                if let Some(cmd) = subcmd {
+                    let cmd = cmd.arg(arg.build(None)?);
+                    subcmd = Some(cmd);
+                } else {
+                    main = main.arg(arg.build(None)?);
                 }
             }
+            EventData::ParamArg(arg) => {
+                if let Some(cmd) = subcmd {
+                    let cmd = cmd.arg(arg.build(Some(subcmd_param_index))?);
+                    subcmd_param_index += 1;
+                    subcmd = Some(cmd);
+                }
+            }
+            EventData::Func(name) => {
+                let mut cmd = subcmd.unwrap_or_default();
+                cmd = cmd.name(name);
+                subcmd = Some(cmd)
+            }
+            EventData::Unknown(_) => {}
         }
-        Ok(builder.cli)
     }
+    Ok(main)
 }
