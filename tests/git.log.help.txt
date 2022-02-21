@@ -1,0 +1,13 @@
+git-log 
+Shows the commit log.
+
+USAGE:
+    git log [OPTIONS]
+
+OPTIONS:
+        --decorate <decorate>    If no --decorate-refs is given, pretend as if all refs were
+                                 included. [default: short] [possible values: short, full, auto, no]
+        --follow                 Continue listing the history of a file beyond renames
+        --grep <grep>...         Limit the commits output to ones with log message that matches the
+                                 specified pattern
+    -h, --help                   Print help information

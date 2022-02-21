@@ -1,0 +1,12 @@
+git-add 
+Add file contents to the index
+
+USAGE:
+    git add [OPTIONS] [pathspec]...
+
+ARGS:
+    <pathspec>...    Files to add content from.
+
+OPTIONS:
+    -h, --help       Print help information
+    -n, --dry-run    Don’t actually add the file

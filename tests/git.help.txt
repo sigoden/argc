@@ -1,0 +1,18 @@
+git 2.17.1
+A fictional versioning CLI
+
+USAGE:
+    git [OPTIONS] [SUBCOMMAND]
+
+OPTIONS:
+        --git-dir <git-dir>    
+    -h, --help                 Print help information
+        --no-pager             
+    -p, --paginate             
+    -V, --version              Print version information
+
+SUBCOMMANDS:
+    add     Add file contents to the index
+    help    Print this message or the help of the given subcommand(s)
+    log     Shows the commit log.
+    push    Update remote refs along with associated objects
