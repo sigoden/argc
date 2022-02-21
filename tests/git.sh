@@ -9,7 +9,7 @@
 # @option     pathspec*     Files to add content from. 
 # @flag       -n --dry-run  Don’t actually add the file
 add() {
-
+    echo "invoke add"
 }
 
 
@@ -17,7 +17,7 @@ add() {
 # @option     repository!   The "remote" repository that is destination of a push operation.
 # @option     refspec+      Specify what destination ref to update with what source object.
 push() {
-
+    echo "invoke push"
 }
 
 # @cmd        Shows the commit log.
@@ -25,5 +25,7 @@ push() {
 # @option     --decorate[=short|full|auto|no]  If no --decorate-refs is given, pretend as if all refs were included.
 # @option     --grep*       Limit the commits output to ones with log message that matches the specified pattern 
 log() {
-
+    echo "invoke log"
 }
+
+eval $(target/debug/argc -e $0 "$@")

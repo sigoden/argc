@@ -1,6 +1,6 @@
 use crate::parser::{parse, Event, EventData};
 use crate::Result;
-use clap::{ArgMatches, Command};
+use clap::Command;
 
 pub struct Cli<'a> {
     events: Vec<Event<'a>>,
@@ -13,8 +13,20 @@ impl<'a> Cli<'a> {
         Ok(Self { events })
     }
 
+    /// Run with arguments, returns (stdout, stderr)
+    pub fn eval(self, args: &[&'a str]) -> (String, String) {
+        let app = self.build(args[0]);
+        let res = app.try_get_matches_from(args);
+        match res {
+            Ok(_matches) => {
+                todo!()
+            }
+            Err(err) => (format!("exit 1"), err.to_string()),
+        }
+    }
+
     /// Parse shell script to generate command
-    pub fn build(self, name: &'a str) -> Command<'a> {
+    fn build(self, name: &'a str) -> Command<'a> {
         let mut app = Command::new(name);
         let mut app_positional_index: usize = 0;
         let mut subcmd: Option<Command> = None;
@@ -60,10 +72,5 @@ impl<'a> Cli<'a> {
             }
         }
         app
-    }
-
-    /// Generate eval script
-    pub fn eval(matches: ArgMatches) -> String {
-        todo!()
     }
 }

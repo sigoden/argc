@@ -72,7 +72,10 @@ fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
             }),
             map(
                 alt((
-                    preceded(pair(tag("option"), space1), alt((parse_option_arg, parse_positional_arg))),
+                    preceded(
+                        pair(tag("option"), space1),
+                        alt((parse_option_arg, parse_positional_arg)),
+                    ),
                     preceded(pair(tag("flag"), space1), parse_flag_arg),
                 )),
                 |v| EventData::Arg(v),
@@ -273,7 +276,7 @@ mod tests {
         assert_token!("# @cmd", Cmd, "");
         assert_token!("# @flag -f --foo", Arg);
         assert_token!("# @option -f --foo", Arg);
-        assert_token!("# @positional foo", Arg);
+        assert_token!("# @option foo", Arg);
         assert_token!("foo()", Func, "foo");
         assert_token!("foo ()", Func, "foo");
         assert_token!("foo  ()", Func, "foo");

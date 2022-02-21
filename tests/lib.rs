@@ -1,50 +1,52 @@
 #[macro_export]
-macro_rules! test_help {
+macro_rules! argc {
     (
-        source: $s:expr,
-        args: $a:expr,
-        help: $h:expr,
+        source: $source:expr,
+        args: $args:expr,
+        $(stdout: $stdout:expr,)?
+        $(stderr: $stderr:expr,)?
     ) => {
-        let cli = argc::Cli::from_str($s).unwrap();
-        let app = cli.build($a[0]);
-        let res = app.try_get_matches_from($a);
-        let err = res.unwrap_err();
-        assert_eq!(err.to_string(), $h)
+        let cli = argc::Cli::from_str($source).unwrap();
+        let output = cli.eval($args);
+        $(assert_eq!(output.1, $stderr);)?
+        $(assert_eq!(output.0, $stdout);)?
+
     };
 }
 
 #[test]
 fn test_git_help() {
-    test_help!(
+    argc!(
        source: include_str!("git.sh"),
-       args: ["git", "-h"],
-       help: include_str!("git.help.txt"),
+       args: &["git", "-h"],
+       stdout: "exit 1",
+       stderr: include_str!("git.help.txt"),
     );
 }
 
 #[test]
 fn test_git_add_help() {
-    test_help!(
+    argc!(
        source: include_str!("git.sh"),
-       args: ["git", "add", "-h"],
-       help: include_str!("git.add.help.txt"),
+       args: &["git", "add", "-h"],
+       stderr: include_str!("git.add.help.txt"),
     );
 }
 
 #[test]
 fn test_git_remote_help() {
-    test_help!(
+    argc!(
        source: include_str!("git.sh"),
-       args: ["git", "push", "-h"],
-       help: include_str!("git.push.help.txt"),
+       args: &["git", "push", "-h"],
+       stderr: include_str!("git.push.help.txt"),
     );
 }
 
 #[test]
 fn test_git_log_help() {
-    test_help!(
+    argc!(
        source: include_str!("git.sh"),
-       args: ["git", "log", "-h"],
-       help: include_str!("git.log.help.txt"),
+       args: &["git", "log", "-h"],
+       stderr: include_str!("git.log.help.txt"),
     );
 }
