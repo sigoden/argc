@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 anyhow = "1"
 clap = "3"
+convert_case = "0.5"
 nom = "7"

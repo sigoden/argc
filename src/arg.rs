@@ -1,4 +1,5 @@
-use clap::Arg;
+use clap::{Arg, ArgMatches};
+use convert_case::{Case, Casing};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ArgData<'a> {
@@ -55,5 +56,23 @@ impl<'a> ArgData<'a> {
             }
         }
         arg
+    }
+    pub fn retrive(&'a self, matches: &ArgMatches) -> Option<String> {
+        let name = self.name.to_case(Case::Snake);
+        if !matches.is_present(self.name) {
+            return None;
+        }
+        if self.flag {
+            return Some(format!("argc_{}=1\n", name));
+        }
+        if self.multiple {
+            return matches.values_of(self.name).map(|values| {
+                let values: Vec<&str> = values.collect();
+                format!("argc_{}=( {} )\n", name, values.join(" "))
+            });
+        }
+        matches
+            .value_of(self.name)
+            .map(|value| format!("argc_{}={}\n", name, value))
     }
 }

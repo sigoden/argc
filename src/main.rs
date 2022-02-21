@@ -22,8 +22,12 @@ fn main() {
         args = &args[1..];
         match eval(&args) {
             Ok((stdout, stderr)) => {
-                eprintln!("{}", &stderr);
-                print!("{}", &stdout)
+                if let Some(stdout) = stdout {
+                    print!("{}", &stdout)
+                }
+                if let Some(stderr) = stderr {
+                    eprintln!("{}", &stderr)
+                }
             }
             Err(err) => {
                 eprintln!("{}", err);
@@ -68,7 +72,7 @@ For more information try --help"###,
     );
 }
 
-fn eval(args: &[String]) -> Result<(String, String)> {
+fn eval(args: &[String]) -> Result<(Option<String>, Option<String>)> {
     let script_file = args[0].as_str();
     let args: Vec<&str> = args[1..].iter().map(|v| v.as_str()).collect();
     eprintln!("{} {:?}", script_file, args);

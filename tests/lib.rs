@@ -7,8 +7,8 @@ macro_rules! argc {
         $(stderr: $stderr:expr,)?
     ) => {
         let output = argc::eval($source, $args).unwrap();
-        $(assert_eq!(output.1, $stderr);)?
-        $(assert_eq!(output.0, $stdout);)?
+        $(assert_eq!(output.1.unwrap(), $stderr);)?
+        $(assert_eq!(output.0.unwrap(), $stdout);)?
 
     };
 }
