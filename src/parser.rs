@@ -16,8 +16,10 @@ pub struct Event<'a> {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum EventData<'a> {
-    /// Description of command or subcommand. e.g. `@summary A demo cli`
-    Description(&'a str),
+    /// Describe of command or subcommand. e.g. `@summary A demo cli`
+    Describe(&'a str),
+    /// Version of command e.g. `@version 1.0.0`
+    Version(&'a str),
     /// Define a subcommand, e.g. `@cmd A sub command`
     Cmd(&'a str),
     /// Define a arguemtn
@@ -58,17 +60,21 @@ fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
         tuple((char('#'), space0, char('@'))),
         alt((
             map(
-                preceded(tag("description"), alt((parse_tail, parse_empty))),
-                |v| EventData::Description(v),
+                preceded(tag("describe"), alt((parse_tail, parse_empty))),
+                |v| EventData::Describe(v),
+            ),
+            map(
+                preceded(tag("version"), alt((parse_tail, parse_empty))),
+                |v| EventData::Version(v),
             ),
             map(preceded(tag("cmd"), alt((parse_tail, parse_empty))), |v| {
                 EventData::Cmd(v)
             }),
             map(
                 alt((
-                    preceded(pair(tag("option"), space1), parse_option_arg),
                     preceded(pair(tag("flag"), space1), parse_flag_arg),
-                    preceded(pair(tag("arg"), space1), parse_param_arg),
+                    preceded(pair(tag("option"), space1), parse_option_arg),
+                    preceded(pair(tag("positional"), space1), parse_positional_arg),
                 )),
                 |v| EventData::Arg(v),
             ),
@@ -98,14 +104,15 @@ fn parse_fn_elision(input: &str) -> nom::IResult<&str, &str> {
 
 // Parse `@option`
 fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
-    let (input, (short, mut arg, choices, summary)) = tuple((
+    let (input, (short, mut arg, summary)) = tuple((
         opt(parse_arg_short),
-        parse_arg_long_suffix,
-        opt(parse_arg_choices),
+        preceded(
+            pair(space0, tag("--")),
+            alt((parse_arg_choices, parse_arg_assign, parse_arg_mark)),
+        ),
         alt((parse_tail, parse_empty)),
     ))(input)?;
     arg.short = short;
-    arg.choices = choices;
     arg.summary = Some(summary);
     Ok((input, arg))
 }
@@ -114,7 +121,7 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
 fn parse_flag_arg(input: &str) -> nom::IResult<&str, ArgData> {
     let (input, (short, mut arg, summary)) = tuple((
         opt(parse_arg_short),
-        parse_arg_long,
+        preceded(pair(space0, tag("--")), parse_arg_name),
         alt((parse_tail, parse_empty)),
     ))(input)?;
     arg.short = short;
@@ -124,38 +131,40 @@ fn parse_flag_arg(input: &str) -> nom::IResult<&str, ArgData> {
 }
 
 // Parse `@arg`
-fn parse_param_arg(input: &str) -> nom::IResult<&str, ArgData> {
-    let (i, (mut arg, summary)) =
-        tuple((parse_param_arg_suffix, alt((parse_tail, parse_empty))))(input)?;
+fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
+    let (i, (mut arg, summary)) = tuple((
+        preceded(space0, parse_arg_mark),
+        alt((parse_tail, parse_empty)),
+    ))(input)?;
+    arg.positional = true;
     arg.summary = Some(summary);
     Ok((i, arg))
 }
 
-// Parse `str!` `str*` `str+`
-fn parse_arg_long_suffix(input: &str) -> nom::IResult<&str, ArgData> {
+// Parse `str!` `str*` `str+` `str`
+fn parse_arg_mark(input: &str) -> nom::IResult<&str, ArgData> {
     alt((
-        map(terminated(parse_arg_long, tag("!")), |mut arg| {
+        map(terminated(parse_arg_name, tag("!")), |mut arg| {
             arg.required = true;
             arg
         }),
-        map(terminated(parse_arg_long, tag("*")), |mut arg| {
+        map(terminated(parse_arg_name, tag("*")), |mut arg| {
             arg.multiple = true;
             arg
         }),
-        map(terminated(parse_arg_long, tag("+")), |mut arg| {
+        map(terminated(parse_arg_name, tag("+")), |mut arg| {
             arg.required = true;
             arg.multiple = true;
             arg
         }),
-        parse_arg_assign,
-        parse_arg_long,
+        parse_arg_name,
     ))(input)
 }
 
 // Parse `str=value`
 fn parse_arg_assign(input: &str) -> nom::IResult<&str, ArgData> {
     map(
-        separated_pair(parse_arg_long, char('='), parse_value),
+        separated_pair(parse_arg_name, char('='), parse_value),
         |(mut arg, value)| {
             arg.default = Some(value);
             arg
@@ -163,38 +172,24 @@ fn parse_arg_assign(input: &str) -> nom::IResult<&str, ArgData> {
     )(input)
 }
 
-// Parse `--str`
-fn parse_arg_long(input: &str) -> nom::IResult<&str, ArgData> {
-    map(preceded(pair(space0, tag("--")), parse_name), |v| {
-        ArgData::new(v)
-    })(input)
-}
-
-fn parse_param_arg_suffix(input: &str) -> nom::IResult<&str, ArgData> {
-    alt((
-        map(terminated(parse_param_arg_name, tag("!")), |mut arg| {
-            arg.required = true;
+// Parse `str[a|b|c]` or `str[=a|b|c]`
+fn parse_arg_choices(input: &str) -> nom::IResult<&str, ArgData> {
+    map(
+        pair(
+            parse_arg_name,
+            delimited(char('['), parse_choices, char(']')),
+        ),
+        |(mut arg, (choices, default))| {
+            arg.choices = Some(choices);
+            arg.default = default;
             arg
-        }),
-        map(terminated(parse_param_arg_name, tag("*")), |mut arg| {
-            arg.multiple = true;
-            arg
-        }),
-        map(terminated(parse_param_arg_name, tag("+")), |mut arg| {
-            arg.required = true;
-            arg.multiple = true;
-            arg
-        }),
-        parse_param_arg_name,
-    ))(input)
+        },
+    )(input)
 }
 
 // Parse `str`
-fn parse_param_arg_name(input: &str) -> nom::IResult<&str, ArgData> {
-    map(preceded(space0, parse_name), |v| {
-        let mut arg = ArgData::new(v);
-        arg
-    })(input)
+fn parse_arg_name(input: &str) -> nom::IResult<&str, ArgData> {
+    map(parse_name, |v| ArgData::new(v))(input)
 }
 
 // Parse `-s`
@@ -205,18 +200,17 @@ fn parse_arg_short(input: &str) -> nom::IResult<&str, char> {
     )(input)
 }
 
-// Parse `[1|2|3]`
-fn parse_arg_choices(input: &str) -> nom::IResult<&str, Vec<&str>> {
-    preceded(space1, delimited(char('['), parse_choices, char(']')))(input)
-}
-
-// Parse `1|2|3`
-fn parse_choices(input: &str) -> nom::IResult<&str, Vec<&str>> {
-    let (input, (value, other_values)) =
-        pair(parse_value, many1(preceded(char('|'), parse_value)))(input)?;
-    let mut result = vec![value];
-    result.extend(other_values);
-    Ok((input, result))
+// Parse `a|b|c`, `=a|b|c`
+fn parse_choices(input: &str) -> nom::IResult<&str, (Vec<&str>, Option<&str>)> {
+    let (input, (equal, value, other_values)) = tuple((
+        opt(char('=')),
+        parse_value,
+        many1(preceded(char('|'), parse_value)),
+    ))(input)?;
+    let mut choices = vec![value];
+    let default_choice = equal.map(|_| value);
+    choices.extend(other_values);
+    Ok((input, (choices, default_choice)))
 }
 
 fn parse_value(input: &str) -> nom::IResult<&str, &str> {
@@ -232,7 +226,7 @@ fn parse_empty(input: &str) -> nom::IResult<&str, &str> {
 }
 
 fn parse_name(input: &str) -> nom::IResult<&str, &str> {
-    take_while(|c: char| c.is_ascii_alphanumeric() || c == '_')(input)
+    take_while(|c: char| c.is_ascii_alphanumeric() || c == '_' || c == '-')(input)
 }
 
 fn parse_quote(input: &str) -> nom::IResult<&str, &str> {
@@ -265,21 +259,9 @@ mod tests {
     }
 
     macro_rules! assert_arg {
-        (option, $text:literal, $($k:ident : $v:expr),+ $(,)?) => {
+        ($parser:tt, $text:literal, $($k:ident : $v:expr),+ $(,)?) => {
             {
-                let (_, arg) = parse_option_arg($text).unwrap();
-                $(assert_eq!(arg.$k, $v);)+
-            }
-        };
-        (flag, $text:literal, $($k:ident : $v:expr),+ $(,)?) => {
-            {
-                let (_, arg) = parse_flag_arg($text).unwrap();
-                $(assert_eq!(arg.$k, $v);)+
-            }
-        };
-        (arg, $text:literal, $($k:ident : $v:expr),+ $(,)?) => {
-            {
-                let (_, arg) = parse_param_arg($text).unwrap();
+                let (_, arg) = $parser($text).unwrap();
                 $(assert_eq!(arg.$k, $v);)+
             }
         };
@@ -287,11 +269,12 @@ mod tests {
 
     #[test]
     fn test_parse_line() {
-        assert_token!("# @description A demo cli", Description, "A demo cli");
+        assert_token!("# @describe A demo cli", Describe, "A demo cli");
+        assert_token!("# @version 1.0.0", Version, "1.0.0");
         assert_token!("# @cmd", Cmd, "");
         assert_token!("# @flag -f --foo", Arg);
         assert_token!("# @option -f --foo", Arg);
-        assert_token!("# @arg foo", Arg);
+        assert_token!("# @positional foo", Arg);
         assert_token!("foo()", Func, "foo");
         assert_token!("foo ()", Func, "foo");
         assert_token!("foo  ()", Func, "foo");
@@ -306,45 +289,47 @@ mod tests {
 
     #[test]
     fn test_parse_option_arg() {
-        assert_arg!(option, "--foo", name: "foo", required: false);
-        assert_arg!(option, "--foo!", required: true);
-        assert_arg!(option, "--foo+", multiple: true, required: true);
-        assert_arg!(option, "--foo*", multiple: true, required: false);
-        assert_arg!(option, "-f --foo", short: Some('f'));
-        assert_arg!(option, "--foo=a", default: Some("a"), required: false);
+        assert_arg!(parse_option_arg, "--foo", name: "foo", required: false);
+        assert_arg!(parse_option_arg, "--foo!", required: true);
+        assert_arg!(parse_option_arg, "--foo+", multiple: true, required: true);
+        assert_arg!(parse_option_arg, "--foo*", multiple: true, required: false);
+        assert_arg!(parse_option_arg, "-f --foo", short: Some('f'));
+        assert_arg!(parse_option_arg, "--foo=a", default: Some("a"), required: false);
         assert_arg!(
-            option,
-            "--foo=a [a|b|c]",
-            choices: Some(vec!["a", "b", "c"])
+            parse_option_arg,
+            "--foo[=a|b|c]",
+            choices: Some(vec!["a", "b", "c"]),
+            default: Some("a")
         );
         assert_arg!(
-            option,
-            "--foo [a|b|c]",
+            parse_option_arg,
+            "--foo[a|b|c]",
             choices: Some(vec!["a", "b", "c"]),
             default: None
         );
-        assert_arg!(option, "--foo A foo option", summary: Some("A foo option"));
-        assert_arg!(option, "--foo", summary: Some(""));
-        assert_arg!(option, "--foo ", summary: Some(""));
+        assert_arg!(parse_option_arg, "--foo A foo parse_option_arg", summary: Some("A foo parse_option_arg"));
+        assert_arg!(parse_option_arg, "--foo", summary: Some(""));
+        assert_arg!(parse_option_arg, "--foo ", summary: Some(""));
+        assert_arg!(parse_option_arg, "--max-count ", name: "max-count");
     }
 
     #[test]
     fn test_parse_flag_arg() {
-        assert_arg!(flag, "--foo", name: "foo", flag: true);
-        assert_arg!(flag, "-f --foo", flag: true, short: Some('f'));
-        assert_arg!(option, "--foo A foo flag", summary: Some("A foo flag"));
-        assert_arg!(option, "--foo", summary: Some(""));
-        assert_arg!(option, "--foo ", summary: Some(""));
+        assert_arg!(parse_flag_arg, "--foo", name: "foo", flag: true);
+        assert_arg!(parse_flag_arg, "-f --foo",  flag: true, short: Some('f'));
+        assert_arg!(parse_flag_arg, "--foo A foo parse_flat_arg", summary: Some("A foo parse_flat_arg"));
+        assert_arg!(parse_flag_arg, "--foo", summary: Some(""));
+        assert_arg!(parse_flag_arg, "--foo ", summary: Some(""));
     }
 
     #[test]
     fn test_parse_param_arg() {
-        assert_arg!(arg, "foo", name: "foo", required: false);
-        assert_arg!(arg, "foo!", required: true);
-        assert_arg!(arg, "foo+", multiple: true, required: true);
-        assert_arg!(arg, "foo*", multiple: true, required: false);
-        assert_arg!(arg, "foo A foo argument", summary: Some("A foo argument"));
-        assert_arg!(arg, "foo ", summary: Some(""));
-        assert_arg!(arg, "foo", summary: Some(""));
+        assert_arg!(parse_positional_arg, "foo", name: "foo", required: false, positional: true);
+        assert_arg!(parse_positional_arg, "foo!", required: true);
+        assert_arg!(parse_positional_arg, "foo+", multiple: true, required: true);
+        assert_arg!(parse_positional_arg, "foo*", multiple: true, required: false);
+        assert_arg!(parse_positional_arg, "foo A foo argument", summary: Some("A foo argument"));
+        assert_arg!(parse_positional_arg, "foo ", summary: Some(""));
+        assert_arg!(parse_positional_arg, "foo", summary: Some(""));
     }
 }

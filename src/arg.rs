@@ -1,4 +1,3 @@
-use crate::Result;
 use clap::Arg;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -10,6 +9,7 @@ pub struct ArgData<'a> {
     pub choices: Option<Vec<&'a str>>,
     pub multiple: bool,
     pub required: bool,
+    pub positional: bool,
     pub default: Option<&'a str>,
 }
 
@@ -23,10 +23,11 @@ impl<'a> ArgData<'a> {
             choices: None,
             multiple: false,
             required: false,
+            positional: false,
             default: None,
         }
     }
-    pub fn build(self, index: Option<usize>) -> Result<Arg<'a>> {
+    pub fn build(self, index: usize) -> Arg<'a> {
         let mut arg = Arg::new(self.name)
             .takes_value(!self.flag)
             .required(self.required)
@@ -37,22 +38,22 @@ impl<'a> ArgData<'a> {
                 arg = arg.help(title);
             }
         }
-        if let Some(idx) = index {
-            arg = arg.index(idx);
+        if self.positional {
+            arg = arg.index(index + 1);
         } else {
             arg = arg.long(self.name);
-        }
-        if let Some(short) = self.short {
-            arg = arg.short(short);
-        }
-        if let Some(choices) = self.choices {
-            if choices.len() > 1 {
-                arg = arg.possible_values(choices);
+            if let Some(short) = self.short {
+                arg = arg.short(short);
+            }
+            if let Some(choices) = self.choices {
+                if choices.len() > 1 {
+                    arg = arg.possible_values(choices);
+                }
+            }
+            if let Some(default) = self.default {
+                arg = arg.default_value(default);
             }
         }
-        if let Some(default) = self.default {
-            arg = arg.default_value(default);
-        }
-        Ok(arg)
+        arg
     }
 }
