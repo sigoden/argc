@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use argc::Cli;
 use std::{env, fs, path::Path, process};
 
 fn main() {
@@ -79,8 +78,7 @@ fn eval(args: &[String]) -> Result<(String, String)> {
         .unwrap_or(env!("CARGO_CRATE_NAME"));
     let source =
         fs::read_to_string(script_file).map_err(|e| anyhow!("Fail to read script, {}", e))?;
-    let cli = Cli::from_str(&source)?;
     let mut cmd_args = vec![name];
     cmd_args.extend(args);
-    Ok(cli.eval(&cmd_args))
+    argc::eval(&source, &cmd_args)
 }

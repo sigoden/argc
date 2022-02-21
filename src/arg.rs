@@ -27,7 +27,7 @@ impl<'a> ArgData<'a> {
             default: None,
         }
     }
-    pub fn build(self, index: usize) -> Arg<'a> {
+    pub fn build(&'a self, index: usize) -> Arg<'a> {
         let mut arg = Arg::new(self.name)
             .takes_value(!self.flag)
             .required(self.required)
@@ -45,7 +45,7 @@ impl<'a> ArgData<'a> {
             if let Some(short) = self.short {
                 arg = arg.short(short);
             }
-            if let Some(choices) = self.choices {
+            if let Some(choices) = &self.choices {
                 if choices.len() > 1 {
                     arg = arg.possible_values(choices);
                 }

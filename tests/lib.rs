@@ -6,8 +6,7 @@ macro_rules! argc {
         $(stdout: $stdout:expr,)?
         $(stderr: $stderr:expr,)?
     ) => {
-        let cli = argc::Cli::from_str($source).unwrap();
-        let output = cli.eval($args);
+        let output = argc::eval($source, $args).unwrap();
         $(assert_eq!(output.1, $stderr);)?
         $(assert_eq!(output.0, $stdout);)?
 
