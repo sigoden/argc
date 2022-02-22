@@ -33,8 +33,8 @@ pub enum EventData<'a> {
     Arg(ArgData<'a>),
     /// A shell function. e.g `function cmd()` or `cmd()`
     Func(&'a str),
-    /// Palaceholder for unrecognized tag
-    Unknown(&'a str),
+    /// Palaceholder for unknown or invalid tag
+    Unexpect(&'a str),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -55,6 +55,20 @@ pub enum ArgKind {
     Flag,
     Option,
     Positional,
+}
+
+impl Display for ArgKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                ArgKind::Flag => "@flag",
+                ArgKind::Option => "@option",
+                ArgKind::Positional => "@arg",
+            }
+        )
+    }
 }
 
 impl<'a> Display for ArgData<'a> {
@@ -151,18 +165,18 @@ impl<'a> ArgData<'a> {
 /// Tokenize shell script
 pub fn parse(source: &str) -> Result<Vec<Event>> {
     let mut result = vec![];
-    for (position, line) in source.lines().enumerate() {
+    for (line_idx, line) in source.lines().enumerate() {
         match parse_line(line) {
             Ok((_, maybe_token)) => {
                 if let Some(value) = maybe_token {
                     result.push(Event {
-                        position,
+                        position: line_idx + 1,
                         data: value,
                     })
                 }
             }
             Err(err) => {
-                bail!("Parse fail code at line {}, {}", line, err)
+                bail!("Parse fail code line {}, {}", line, err)
             }
         }
     }
@@ -200,7 +214,7 @@ fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
                 )),
                 |v| EventData::Arg(v),
             ),
-            map(parse_name, |v| EventData::Unknown(v)),
+            map(parse_name, |v| EventData::Unexpect(v)),
         )),
     )(input)
 }

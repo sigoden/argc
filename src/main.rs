@@ -24,7 +24,7 @@ fn main() {
                 }
             }
             Err(err) => {
-                eprintln!("{}", err);
+                eprintln!("error: {}", err);
                 std::process::exit(1);
             }
         },

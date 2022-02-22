@@ -3,6 +3,7 @@ use crate::Result;
 use anyhow::bail;
 use clap::{Arg, ArgMatches, Command};
 use convert_case::{Case, Casing};
+use std::collections::{HashMap, HashSet};
 use std::ops::Deref;
 
 const ENTRYPOINT: &'static str = "main";
@@ -11,14 +12,15 @@ const ENTRYPOINT: &'static str = "main";
 pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<(Option<String>, Option<String>)> {
     let events = parse(source)?;
     let name = args[0];
-    let (mut cmd, has_main) = Cmd::create(&events);
-    cmd.name = Some((&name, name.to_string()));
-    let command = cmd.build()?;
+    let mut rootcmd = Cmd::create(&events)?;
+    let rootinfo = &rootcmd.rootinfo.unwrap();
+    rootcmd.name = Some((&name, name.to_string()));
+    let command = rootcmd.build()?;
     let res = command.try_get_matches_from(args);
     match res {
         Ok(matches) => {
-            let mut output = cmd.retrive(&matches);
-            if matches.subcommand_name().is_none() && has_main {
+            let mut output = rootcmd.retrive(&matches);
+            if matches.subcommand_name().is_none() && *rootinfo == true {
                 output.push_str(ENTRYPOINT)
             }
             Ok((Some(output), None))
@@ -34,19 +36,21 @@ struct Cmd<'a> {
     describe: Option<&'a str>,
     version: Option<&'a str>,
     pos_index: usize,
-    root: bool,
     args: Vec<WrapArgData<'a>>,
-    subcmds: Vec<Cmd<'a>>,
+    subcmds: HashMap<&'a str, Cmd<'a>>,
+    // root cmd prop
+    rootinfo: Option<bool>,
+    // for conflict detecting
+    names: (HashSet<&'a str>, HashSet<char>),
 }
 
 impl<'a> Cmd<'a> {
-    fn create(events: &'a [Event]) -> (Self, bool) {
+    fn create(events: &'a [Event]) -> Result<Self> {
         let mut maybe_subcmd: Option<Cmd> = None;
         let mut rootcmd = Cmd::default();
-        rootcmd.root = true;
+        let mut rootinfo = Some(false);
         let mut is_root_scope = true;
-        let mut has_main = false;
-        for Event { data, .. } in events {
+        for Event { data, position } in events {
             match data {
                 EventData::Describe(value) => {
                     if let Some(_) = maybe_subcmd {
@@ -74,38 +78,50 @@ impl<'a> Cmd<'a> {
                     }
                     maybe_subcmd = Some(cmd);
                     if *value == ENTRYPOINT {
-                        has_main = true;
+                        rootinfo.as_mut().map(|v| *v = true);
                     }
                 }
                 EventData::Arg(arg_data) => {
                     if let Some(cmd) = &mut maybe_subcmd {
                         let arg_data = WrapArgData::new(arg_data, cmd.pos_index);
+                        arg_data.detect_conflict(&mut cmd.names, *position)?;
                         cmd.args.push(arg_data);
                         cmd.pos_index += 1;
                     } else {
                         if is_root_scope {
                             let arg_data = WrapArgData::new(arg_data, rootcmd.pos_index);
+                            arg_data.detect_conflict(&mut rootcmd.names, *position)?;
                             rootcmd.args.push(arg_data);
                             rootcmd.pos_index += 1;
                         } else {
-                            // todo wraning miss @cmd
+                            bail!(
+                                "{}(line {}) is unexpected, maybe miss @cmd?",
+                                arg_data.kind,
+                                position
+                            )
                         }
                     }
                 }
                 EventData::Func(name) => {
                     if let Some(mut cmd) = maybe_subcmd.take() {
                         cmd.name = Some((name, name.to_case(Case::Kebab)));
-                        rootcmd.subcmds.push(cmd);
+                        if rootcmd.subcmds.get(name).is_some() {
+                            bail!("function {}(line {}) is redefined", name, position)
+                        }
+                        rootcmd.subcmds.insert(*name, cmd);
                     }
                 }
-                EventData::Unknown(_) => {}
+                EventData::Unexpect(name) => {
+                    bail!("@{}(line {}) is unsupported or invalid", name, position);
+                }
             }
         }
-        (rootcmd, has_main)
+        rootcmd.rootinfo = rootinfo;
+        Ok(rootcmd)
     }
     fn build(&'a self) -> Result<Command<'a>> {
         if self.name.is_none() {
-            bail!("Miss command name");
+            bail!("Why miss command name");
         }
         let (_, cmd_name) = self.name.as_ref().unwrap();
         let mut cmd = Command::new(cmd_name);
@@ -121,7 +137,7 @@ impl<'a> Cmd<'a> {
         for arg_data in &self.args {
             cmd = cmd.arg(arg_data.build()?);
         }
-        for subcmd in &self.subcmds {
+        for (_, subcmd) in &self.subcmds {
             let subcmd = subcmd.build()?;
             cmd = cmd.subcommand(subcmd);
         }
@@ -130,11 +146,11 @@ impl<'a> Cmd<'a> {
     fn retrive(&'a self, matches: &ArgMatches) -> String {
         let mut values = vec![];
         for arg_data in &self.args {
-            if let Some(value) = arg_data.retrive(&matches) {
+            if let Some(value) = arg_data.retrive_match_value(&matches) {
                 values.push(value);
             }
         }
-        for subcmd in &self.subcmds {
+        for (_, subcmd) in &self.subcmds {
             if let Some((fn_name, cmd_name)) = &subcmd.name {
                 if let Some((subcmd_name, subcmd_matches)) = matches.subcommand() {
                     if cmd_name.as_str() == subcmd_name {
@@ -230,7 +246,7 @@ impl<'a> WrapArgData<'a> {
         };
         Ok(arg)
     }
-    fn retrive(&self, matches: &ArgMatches) -> Option<String> {
+    fn retrive_match_value(&self, matches: &ArgMatches) -> Option<String> {
         let name = self.name.to_case(Case::Snake);
         if !matches.is_present(self.name) {
             return None;
@@ -247,6 +263,48 @@ impl<'a> WrapArgData<'a> {
         matches
             .value_of(self.name)
             .map(|value| format!("selfc_{}={}\n", name, normalize_value(value)))
+    }
+    fn detect_conflict(
+        &self,
+        names: &mut (HashSet<&'a str>, HashSet<char>),
+        position: usize,
+    ) -> Result<()> {
+        match self.kind {
+            ArgKind::Positional => {
+                if let Some(_) = names.0.get(self.name) {
+                    bail!(
+                        "{}(line {}) is invalid, name has been used",
+                        self.kind,
+                        position
+                    );
+                } else {
+                    names.0.insert(self.name);
+                }
+            }
+            _ => {
+                if let Some(_) = names.0.get(self.name) {
+                    bail!(
+                        "{}(line {}) is invalid, long name has been used",
+                        self.kind,
+                        position
+                    )
+                } else {
+                    names.0.insert(self.name);
+                }
+                if let Some(c) = self.short {
+                    if let Some(_) = names.1.get(&c) {
+                        bail!(
+                            "{}(line {}) is invalid, short name has been used",
+                            self.kind,
+                            position
+                        )
+                    } else {
+                        names.1.insert(c);
+                    }
+                }
+            }
+        }
+        Ok(())
     }
 }
 
