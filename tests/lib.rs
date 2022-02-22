@@ -9,7 +9,8 @@ macro_rules! assert_argc {
         let args = $args.join(" ");
         let stdout = stdout.unwrap_or_default();
         let stderr = stderr.unwrap_or_default();
-        let output = format!(r###"RUN
+        let output = format!(
+            r###"RUN
 {}
 
 STDOUT
@@ -17,7 +18,9 @@ STDOUT
 
 STDERR
 {}
-"###, args, stdout, stderr);
+"###,
+            args, stdout, stderr
+        );
         assert_snapshot!(output);
     };
 }

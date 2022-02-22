@@ -155,9 +155,13 @@ impl<'a> Deref for WrapArgData<'a> {
 
 impl<'a> WrapArgData<'a> {
     fn new(data: &'a ArgData<'a>, pos_index: usize) -> Self {
+        let value_name = data
+            .value_name
+            .map(|v| v.to_owned())
+            .unwrap_or_else(|| data.name.to_case(Case::Cobol));
         Self {
             data,
-            value_name: data.name.to_case(Case::Cobol),
+            value_name,
             pos_index,
         }
     }

@@ -36,6 +36,7 @@ pub enum EventData<'a> {
 pub struct ArgData<'a> {
     pub name: &'a str,
     pub summary: Option<&'a str>,
+    pub value_name: Option<&'a str>,
     pub flag: bool,
     pub short: Option<char>,
     pub choices: Option<Vec<&'a str>>,
@@ -50,6 +51,7 @@ impl<'a> ArgData<'a> {
         ArgData {
             name,
             summary: None,
+            value_name: None,
             flag: false,
             short: None,
             choices: None,
@@ -139,16 +141,18 @@ fn parse_fn_elision(input: &str) -> nom::IResult<&str, &str> {
 
 // Parse `@option`
 fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
-    let (input, (short, mut arg, summary)) = tuple((
+    let (input, (short, mut arg, value_name, summary)) = tuple((
         opt(parse_arg_short),
         preceded(
             pair(space0, tag("--")),
             alt((parse_arg_choices, parse_arg_assign, parse_arg_mark)),
         ),
+        opt(parse_arg_value_notation),
         alt((parse_tail, parse_empty)),
     ))(input)?;
     arg.short = short;
     arg.summary = Some(summary);
+    arg.value_name = value_name;
     Ok((input, arg))
 }
 
@@ -235,6 +239,17 @@ fn parse_arg_short(input: &str) -> nom::IResult<&str, char> {
     )(input)
 }
 
+fn parse_arg_value_notation(input: &str) -> nom::IResult<&str, &str> {
+    preceded(
+        space1,
+        delimited(
+            char('<'),
+            take_while(|c: char| c.is_ascii_uppercase() || c == '-'),
+            char('>'),
+        ),
+    )(input)
+}
+
 // Parse `a|b|c`, `=a|b|c`
 fn parse_choices(input: &str) -> nom::IResult<&str, (Vec<&str>, Option<&str>)> {
     let (input, (equal, value, other_values)) = tuple((
@@ -306,8 +321,12 @@ mod tests {
     fn test_parse_line() {
         assert_token!("# @describe A demo cli", Describe, "A demo cli");
         assert_token!("# @version 1.0.0", Version, "1.0.0");
-        assert_token!("# @author nobody <nobody@example.com>", Author, "nobody <nobody@example.com>");
-        assert_token!("# @cmd", Cmd, "");
+        assert_token!(
+            "# @author nobody <nobody@example.com>",
+            Author,
+            "nobody <nobody@example.com>"
+        );
+        assert_token!("# @cmd A subcommand", Cmd, "A subcommand");
         assert_token!("# @flag -f --foo", Arg);
         assert_token!("# @option -f --foo", Arg);
         assert_token!("# @arg foo", Arg);
@@ -329,6 +348,7 @@ mod tests {
         assert_arg!(parse_option_arg, "--foo!", required: true);
         assert_arg!(parse_option_arg, "--foo+", multiple: true, required: true);
         assert_arg!(parse_option_arg, "--foo*", multiple: true, required: false);
+        assert_arg!(parse_option_arg, "--foo <FOO>", value_name: Some("FOO"));
         assert_arg!(parse_option_arg, "-f --foo", short: Some('f'));
         assert_arg!(parse_option_arg, "--foo=a", default: Some("a"), required: false);
         assert_arg!(
