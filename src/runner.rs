@@ -101,20 +101,22 @@ impl<'a> Cmd<'a> {
                     }
                 }
                 EventData::Func(name) => {
+                    is_root_scope = false;
                     if let Some(mut cmd) = maybe_subcmd.take() {
-                        cmd.name = Some((name, name.to_case(Case::Kebab)));
                         if rootcmd.subcmds.get(name).is_some() {
                             bail!("function {}(line {}) is redefined", name, position)
                         }
+                        cmd.name = Some((name, name.to_case(Case::Kebab)));
                         rootcmd.subcmds.insert(*name, cmd);
                     } else {
                         if *name == ENTRYPOINT {
                             rootcmd.has_main_fn = true;
                         }
                     }
+                    // println!("{:?}", rootcmd.subcmds)
                 }
                 EventData::Unexpect(name) => {
-                    bail!("@{}(line {}) is unsupported or invalid", name, position);
+                    bail!("@{}(line {}) is invalid", name, position);
                 }
             }
         }

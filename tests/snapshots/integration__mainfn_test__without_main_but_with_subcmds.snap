@@ -1,0 +1,21 @@
+---
+source: tests/mainfn_test.rs
+assertion_line: 54
+expression: output
+
+---
+RUN
+prog
+
+STDOUT
+exit 1
+
+STDERR
+error: 'prog' requires a subcommand but one was not provided
+
+USAGE:
+    prog [OPTIONS] <SUBCOMMAND>
+
+For more information try --help
+
+

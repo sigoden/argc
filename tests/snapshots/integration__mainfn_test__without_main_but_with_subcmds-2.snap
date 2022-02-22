@@ -1,0 +1,27 @@
+---
+source: tests/mainfn_test.rs
+assertion_line: 55
+expression: output
+
+---
+RUN
+prog -h
+
+STDOUT
+exit 1
+
+STDERR
+prog 
+
+USAGE:
+    prog [OPTIONS] <SUBCOMMAND>
+
+OPTIONS:
+        --foo     
+    -h, --help    Print help information
+
+SUBCOMMANDS:
+    cmd     
+    help    Print this message or the help of the given subcommand(s)
+
+
