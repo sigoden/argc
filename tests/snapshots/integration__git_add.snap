@@ -1,9 +1,16 @@
 ---
 source: tests/lib.rs
-assertion_line: 22
-expression: stderr.unwrap_or_default()
+assertion_line: 32
+expression: output
 
 ---
+RUN
+git add -h
+
+STDOUT
+exit 1
+
+STDERR
 git-add 
 Add file contents to the index
 
@@ -16,4 +23,5 @@ ARGS:
 OPTIONS:
     -h, --help       Print help information
     -n, --dry-run    Don’t actually add the file
+
 

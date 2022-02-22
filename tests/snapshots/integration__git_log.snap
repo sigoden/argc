@@ -1,14 +1,24 @@
 ---
 source: tests/lib.rs
-assertion_line: 32
-expression: stderr.unwrap_or_default()
+assertion_line: 42
+expression: output
 
 ---
+RUN
+git log -h
+
+STDOUT
+exit 1
+
+STDERR
 git-log 
 Shows the commit log.
 
 USAGE:
-    git log [OPTIONS]
+    git log [OPTIONS] [--] [refspec]...
+
+ARGS:
+    <refspec>...    Specify what destination ref to update with what source object.
 
 OPTIONS:
         --decorate <DECORATE>    If no --decorate-refs is given, pretend as if all refs were
@@ -17,4 +27,5 @@ OPTIONS:
         --grep <GREP>...         Limit the commits output to ones with log message that matches the
                                  specified pattern
     -h, --help                   Print help information
+
 

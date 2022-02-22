@@ -1,7 +1,0 @@
----
-source: tests/lib.rs
-assertion_line: 22
-expression: stdout.unwrap_or_default()
-
----
-exit 1

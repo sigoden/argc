@@ -16,13 +16,15 @@ pub struct Event<'a> {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum EventData<'a> {
-    /// Describe of command or subcommand. e.g. `@summary A demo cli`
+    /// Description
     Describe(&'a str),
-    /// Version of command e.g. `@version 1.0.0`
+    /// Version info
     Version(&'a str),
+    /// Author info
+    Author(&'a str),
     /// Define a subcommand, e.g. `@cmd A sub command`
     Cmd(&'a str),
-    /// Define a arguemtn
+    /// Define a arguement
     Arg(ArgData<'a>),
     /// A shell function. e.g `function cmd()` or `cmd()`
     Func(&'a str),
@@ -96,15 +98,17 @@ fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
                 preceded(tag("version"), alt((parse_tail, parse_empty))),
                 |v| EventData::Version(v),
             ),
+            map(
+                preceded(tag("author"), alt((parse_tail, parse_empty))),
+                |v| EventData::Author(v),
+            ),
             map(preceded(tag("cmd"), alt((parse_tail, parse_empty))), |v| {
                 EventData::Cmd(v)
             }),
             map(
                 alt((
-                    preceded(
-                        pair(tag("option"), space1),
-                        alt((parse_option_arg, parse_positional_arg)),
-                    ),
+                    preceded(pair(tag("option"), space1), parse_option_arg),
+                    preceded(pair(tag("arg"), space1), parse_positional_arg),
                     preceded(pair(tag("flag"), space1), parse_flag_arg),
                 )),
                 |v| EventData::Arg(v),
@@ -302,10 +306,11 @@ mod tests {
     fn test_parse_line() {
         assert_token!("# @describe A demo cli", Describe, "A demo cli");
         assert_token!("# @version 1.0.0", Version, "1.0.0");
+        assert_token!("# @author nobody <nobody@example.com>", Author, "nobody <nobody@example.com>");
         assert_token!("# @cmd", Cmd, "");
         assert_token!("# @flag -f --foo", Arg);
         assert_token!("# @option -f --foo", Arg);
-        assert_token!("# @option foo", Arg);
+        assert_token!("# @arg foo", Arg);
         assert_token!("foo()", Func, "foo");
         assert_token!("foo ()", Func, "foo");
         assert_token!("foo  ()", Func, "foo");

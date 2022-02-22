@@ -1,14 +1,24 @@
 use insta::assert_snapshot;
 
-#[macro_export]
 macro_rules! assert_argc {
     (
         $source:expr,
         $args:expr
     ) => {
         let (stdout, stderr) = argc::run($source, $args).unwrap();
-        assert_snapshot!(stderr.unwrap_or_default());
-        assert_snapshot!(stdout.unwrap_or_default());
+        let args = $args.join(" ");
+        let stdout = stdout.unwrap_or_default();
+        let stderr = stderr.unwrap_or_default();
+        let output = format!(r###"RUN
+{}
+
+STDOUT
+{}
+
+STDERR
+{}
+"###, args, stdout, stderr);
+        assert_snapshot!(output);
     };
 }
 

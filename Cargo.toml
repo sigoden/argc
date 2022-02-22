@@ -2,14 +2,27 @@
 name = "argc"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["sigoden <sigoden@gmail.com>"]
+description = "Command line arguments utility"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/sigoden/argc"
+repository = "https://github.com/sigoden/argc"
+autotests = false
+categories = ["command-line-utilities"]
+keywords = ["command-line", "args", "utility"]
 
 [dependencies]
 anyhow = "1"
-clap = "3"
+clap = { version = "3", default_features = false, features = ["std"] }
 convert_case = "0.5"
 nom = "7"
 
 [dev-dependencies]
 insta = "1.12"
+
+[profile.release]
+lto = true
+
+[[test]]
+name = "integration"
+path = "tests/lib.rs"

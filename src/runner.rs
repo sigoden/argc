@@ -5,18 +5,20 @@ use convert_case::{Case, Casing};
 use std::collections::HashMap;
 use std::ops::Deref;
 
+const ENTRYPOINT: &'static str = "main";
+
 /// Run script with arguments, returns (stdout, stderr)
 pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<(Option<String>, Option<String>)> {
     let events = parse(source)?;
     let name = args[0];
-    let cmd = Cmd::new(&events);
+    let (cmd, has_main) = Cmd::create(&events);
     let command = cmd.build(name);
     let res = command.try_get_matches_from(args);
     match res {
         Ok(matches) => {
             let mut output = cmd.retrive(&matches);
-            if matches.subcommand_name().is_none() {
-                output.push_str("main")
+            if matches.subcommand_name().is_none() && has_main {
+                output.push_str(ENTRYPOINT)
             }
             Ok((Some(output), None))
         }
@@ -27,6 +29,7 @@ pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<(Option<String>, Opt
 #[derive(Debug, Default)]
 struct Cmd<'a> {
     name: Option<&'a str>,
+    author: Option<&'a str>,
     describe: Option<&'a str>,
     version: Option<&'a str>,
     pos_index: usize,
@@ -36,9 +39,10 @@ struct Cmd<'a> {
 }
 
 impl<'a> Cmd<'a> {
-    fn new(events: &'a [Event]) -> Self {
+    fn create(events: &'a [Event]) -> (Self, bool) {
         let mut maybe_subcmd: Option<Cmd> = None;
         let mut rootcmd = Cmd::default();
+        let mut has_main = false;
         rootcmd.root = true;
         for Event { data, .. } in events {
             match data {
@@ -54,12 +58,21 @@ impl<'a> Cmd<'a> {
                         rootcmd.version = Some(*value);
                     }
                 }
+                EventData::Author(value) => {
+                    if let Some(_) = maybe_subcmd {
+                    } else {
+                        rootcmd.author = Some(*value);
+                    }
+                }
                 EventData::Cmd(value) => {
                     let mut cmd = Cmd::default();
                     if value.len() > 0 {
                         cmd.describe = Some(*value);
                     }
                     maybe_subcmd = Some(cmd);
+                    if *value == ENTRYPOINT {
+                        has_main = true;
+                    }
                 }
                 EventData::Arg(arg_data) => {
                     if let Some(cmd) = &mut maybe_subcmd {
@@ -81,7 +94,7 @@ impl<'a> Cmd<'a> {
                 EventData::Unknown(_) => {}
             }
         }
-        rootcmd
+        (rootcmd, has_main)
     }
     fn build(&'a self, name: &'a str) -> Command<'a> {
         let mut rootcmd = Command::new(name);
@@ -93,6 +106,9 @@ impl<'a> Cmd<'a> {
         }
         if let Some(version) = self.version {
             rootcmd = rootcmd.version(version);
+        }
+        if let Some(author) = self.author {
+            rootcmd = rootcmd.author(author);
         }
         for arg_data in &self.args {
             rootcmd = rootcmd.arg(arg_data.build());
@@ -146,9 +162,7 @@ impl<'a> WrapArgData<'a> {
         }
     }
     fn build(&'a self) -> Arg<'a> {
-        let mut arg = Arg::new(self.name)
-            .required(self.required)
-            .multiple_values(self.multiple);
+        let mut arg = Arg::new(self.name).required(self.required);
         if let Some(summary) = self.summary {
             let title = summary.trim();
             if title.len() > 0 {
@@ -156,11 +170,17 @@ impl<'a> WrapArgData<'a> {
             }
         }
         if self.positional {
-            arg = arg.index(self.pos_index + 1);
+            arg = arg.index(self.pos_index + 1).multiple_values(self.multiple);
         } else {
             arg = arg.long(self.name);
+            if self.multiple {
+                arg = arg
+                    .multiple_values(true)
+                    .use_value_delimiter(true)
+                    .multiple_occurrences(true);
+            }
             if !self.flag {
-                arg = arg.value_name(&self.value_name)
+                arg = arg.value_name(&self.value_name);
             }
             if let Some(short) = self.short {
                 arg = arg.short(short);
@@ -186,12 +206,16 @@ impl<'a> WrapArgData<'a> {
         }
         if self.multiple {
             return matches.values_of(self.name).map(|values| {
-                let values: Vec<&str> = values.collect();
+                let values: Vec<String> = values.map(normalize_value).collect();
                 format!("selfc_{}=( {} )\n", name, values.join(" "))
             });
         }
         matches
             .value_of(self.name)
-            .map(|value| format!("selfc_{}={}\n", name, value))
+            .map(|value| format!("selfc_{}={}\n", name, normalize_value(value)))
     }
+}
+
+fn normalize_value(value: &str) -> String {
+    format!("\"{}\"", value.escape_debug())
 }

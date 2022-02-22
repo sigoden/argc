@@ -1,10 +1,18 @@
 ---
 source: tests/lib.rs
-assertion_line: 21
-expression: stderr.unwrap_or_default()
+assertion_line: 27
+expression: output
 
 ---
+RUN
+git -h
+
+STDOUT
+exit 1
+
+STDERR
 git 2.17.1
+nobody <nobody@example.com>
 A fictional versioning CLI
 
 USAGE:
@@ -22,4 +30,5 @@ SUBCOMMANDS:
     help    Print this message or the help of the given subcommand(s)
     log     Shows the commit log.
     push    Update remote refs along with associated objects
+
 
