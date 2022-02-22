@@ -1,0 +1,34 @@
+---
+source: tests/spec_test.rs
+assertion_line: 5
+expression: output
+
+---
+RUN
+spec -h
+
+STDOUT
+exit 1
+
+STDERR
+spec 
+Test all aspects
+
+USAGE:
+    spec [SUBCOMMAND]
+
+OPTIONS:
+    -h, --help    Print help information
+
+SUBCOMMANDS:
+    cmd-flag-formats           All kindof flags
+    cmd-omitted                Omitted
+    cmd-option-formats         Optiona all kindof formats
+    cmd-option-names           Options all kindof names
+    cmd-option-quotes          Option value quoted
+    cmd-positional-only        Poistional One required
+    cmd-positional-requires    Poistional All required
+    cmd-prefered               Preferred
+    help                       Print this message or the help of the given subcommand(s)
+
+

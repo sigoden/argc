@@ -1,0 +1,28 @@
+---
+source: tests/spec_test.rs
+assertion_line: 23
+expression: output
+
+---
+RUN
+spec cmd-omitted -h
+
+STDOUT
+exit 1
+
+STDERR
+spec-cmd-omitted 
+Omitted
+
+USAGE:
+    spec cmd-omitted [OPTIONS] [ARG-1]
+
+ARGS:
+    <ARG-1>    
+
+OPTIONS:
+        --flag1           
+    -h, --help            Print help information
+        --opt1 <OPT-1>    
+
+

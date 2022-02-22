@@ -1,3 +1,3 @@
 #[macro_use]
 mod macros;
-mod git_test;
+mod spec_test;

@@ -1,0 +1,27 @@
+---
+source: tests/spec_test.rs
+assertion_line: 54
+expression: output
+
+---
+RUN
+spec cmd-flag-formats -h
+
+STDOUT
+exit 1
+
+STDERR
+spec-cmd-flag-formats 
+All kindof flags
+
+USAGE:
+    spec cmd-flag-formats [OPTIONS]
+
+OPTIONS:
+    -a, --foo2    
+    -b, --foo4    With description
+        --foo1    
+        --foo3    With description
+    -h, --help    Print help information
+
+

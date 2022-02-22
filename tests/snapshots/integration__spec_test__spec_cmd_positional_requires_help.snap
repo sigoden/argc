@@ -1,0 +1,27 @@
+---
+source: tests/spec_test.rs
+assertion_line: 83
+expression: output
+
+---
+RUN
+spec cmd-positional-requires -h
+
+STDOUT
+exit 1
+
+STDERR
+spec-cmd-positional-requires 
+Poistional All required
+
+USAGE:
+    spec cmd-positional-requires <ARG-1> <ARG-2>...
+
+ARGS:
+    <ARG-1>       A required arg
+    <ARG-2>...    A required arg, multiple
+
+OPTIONS:
+    -h, --help    Print help information
+
+

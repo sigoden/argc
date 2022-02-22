@@ -43,8 +43,9 @@ impl<'a> Cmd<'a> {
     fn create(events: &'a [Event]) -> (Self, bool) {
         let mut maybe_subcmd: Option<Cmd> = None;
         let mut rootcmd = Cmd::default();
-        let mut has_main = false;
         rootcmd.root = true;
+        let mut is_root_scope = true;
+        let mut has_main = false;
         for Event { data, .. } in events {
             match data {
                 EventData::Describe(value) => {
@@ -66,6 +67,7 @@ impl<'a> Cmd<'a> {
                     }
                 }
                 EventData::Cmd(value) => {
+                    is_root_scope = false;
                     let mut cmd = Cmd::default();
                     if value.len() > 0 {
                         cmd.describe = Some(*value);
@@ -81,9 +83,13 @@ impl<'a> Cmd<'a> {
                         cmd.args.push(arg_data);
                         cmd.pos_index += 1;
                     } else {
-                        let arg_data = WrapArgData::new(arg_data, rootcmd.pos_index);
-                        rootcmd.args.push(arg_data);
-                        rootcmd.pos_index += 1;
+                        if is_root_scope {
+                            let arg_data = WrapArgData::new(arg_data, rootcmd.pos_index);
+                            rootcmd.args.push(arg_data);
+                            rootcmd.pos_index += 1;
+                        } else {
+                            // todo wraning miss @cmd
+                        }
                     }
                 }
                 EventData::Func(name) => {

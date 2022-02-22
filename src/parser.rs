@@ -2,8 +2,11 @@ use crate::Result;
 use anyhow::bail;
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_while},
-    character::complete::{alphanumeric1, char, satisfy, space0, space1},
+    bytes::complete::{escaped, tag, take_till, take_while},
+    character::{
+        complete::{char, satisfy, space0, space1},
+        streaming::none_of,
+    },
     combinator::{eof, map, opt, rest, success},
     multi::many1,
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
@@ -74,10 +77,25 @@ impl<'a> Display for ArgData<'a> {
                     if self.default.is_some() {
                         prefix.push('=');
                     }
-                    name.push_str(&format!("[{}{}]", prefix, choices.join("|")))
+                    let values: Vec<String> = choices
+                        .iter()
+                        .map(|value| {
+                            if value.chars().any(forbid_chars_choice) {
+                                format!("\"{}\"", value)
+                            } else {
+                                value.to_string()
+                            }
+                        })
+                        .collect();
+                    name.push_str(&format!("[{}{}]", prefix, values.join("|")))
                 } else {
                     if let Some(default) = self.default {
-                        name.push_str(&format!("={}", default));
+                        let value = if default.chars().any(forbid_chars_default) {
+                            format!("\"{}\"", default)
+                        } else {
+                            default.to_string()
+                        };
+                        name.push_str(&format!("={}", value));
                     } else if let Some(c) = self.name_modifer() {
                         name.push(c)
                     }
@@ -276,7 +294,7 @@ fn parse_arg_mark(input: &str) -> nom::IResult<&str, ArgData> {
 // Parse `str=value`
 fn parse_arg_assign(input: &str) -> nom::IResult<&str, ArgData> {
     map(
-        separated_pair(parse_arg_name, char('='), parse_value),
+        separated_pair(parse_arg_name, char('='), parse_default_value),
         |(mut arg, value)| {
             arg.default = Some(value);
             arg
@@ -327,17 +345,13 @@ fn parse_arg_value_notation(input: &str) -> nom::IResult<&str, &str> {
 fn parse_choices(input: &str) -> nom::IResult<&str, (Vec<&str>, Option<&str>)> {
     let (input, (equal, value, other_values)) = tuple((
         opt(char('=')),
-        parse_value,
-        many1(preceded(char('|'), parse_value)),
+        parse_choice_value,
+        many1(preceded(char('|'), parse_choice_value)),
     ))(input)?;
     let mut choices = vec![value];
     let default_choice = equal.map(|_| value);
     choices.extend(other_values);
     Ok((input, (choices, default_choice)))
-}
-
-fn parse_value(input: &str) -> nom::IResult<&str, &str> {
-    alt((parse_name, parse_quote))(input)
 }
 
 fn parse_tail(input: &str) -> nom::IResult<&str, &str> {
@@ -352,8 +366,44 @@ fn parse_name(input: &str) -> nom::IResult<&str, &str> {
     take_while(|c: char| c.is_ascii_alphanumeric() || c == '_' || c == '-')(input)
 }
 
-fn parse_quote(input: &str) -> nom::IResult<&str, &str> {
-    preceded(char('\"'), terminated(alphanumeric1, char('\"')))(input)
+fn parse_default_value(input: &str) -> nom::IResult<&str, &str> {
+    alt((
+        parse_single_quote,
+        parse_double_quote,
+        take_till(forbid_chars_default),
+    ))(input)
+}
+
+fn forbid_chars_default(c: char) -> bool {
+    c.is_whitespace()
+}
+
+fn parse_choice_value(input: &str) -> nom::IResult<&str, &str> {
+    alt((
+        parse_single_quote,
+        parse_double_quote,
+        take_till(forbid_chars_choice),
+    ))(input)
+}
+
+fn forbid_chars_choice(c: char) -> bool {
+    return c == '|' || c == ']';
+}
+
+fn parse_single_quote(input: &str) -> nom::IResult<&str, &str> {
+    delimited(
+        char('\''),
+        alt((escaped(none_of("\\\'"), '\\', tag("'")), tag(""))),
+        char('\''),
+    )(input)
+}
+
+fn parse_double_quote(input: &str) -> nom::IResult<&str, &str> {
+    delimited(
+        char('"'),
+        alt((escaped(none_of("\\\""), '\\', tag("\"")), tag(""))),
+        char('"'),
+    )(input)
 }
 
 #[cfg(test)]
@@ -424,52 +474,19 @@ mod tests {
     }
 
     #[test]
-    fn test_option_arg_display() {
-        let mut arg = ArgData::new("foo");
-        assert_eq!(arg.to_string().as_str(), "--foo");
-        arg.short = Some('f');
-        assert_eq!(arg.to_string().as_str(), "-f --foo");
-        arg.multiple = true;
-        assert_eq!(arg.to_string().as_str(), "-f --foo*");
-        arg.required = true;
-        assert_eq!(arg.to_string().as_str(), "-f --foo+");
-        arg.multiple = false;
-        assert_eq!(arg.to_string().as_str(), "-f --foo!");
-        arg.required = false;
-        arg.choices = Some(vec!["a", "b"]);
-        assert_eq!(arg.to_string().as_str(), "-f --foo[a|b]");
-        arg.default = Some("a");
-        assert_eq!(arg.to_string().as_str(), "-f --foo[=a|b]");
-        arg.choices = None;
-        assert_eq!(arg.to_string().as_str(), "-f --foo=a");
-        arg.value_name = Some("FOO");
-        assert_eq!(arg.to_string().as_str(), "-f --foo=a <FOO>");
-        arg.summary = Some("A foo option");
-        assert_eq!(arg.to_string().as_str(), "-f --foo=a <FOO> A foo option");
-    }
-
-    #[test]
     fn test_parse_option_arg() {
         assert_parse_option_arg!("-f --foo=a <FOO> A foo option");
         assert_parse_option_arg!("--foo!");
         assert_parse_option_arg!("--foo+");
         assert_parse_option_arg!("--foo*");
         assert_parse_option_arg!("--foo!");
+        assert_parse_option_arg!("--foo=a");
         assert_parse_option_arg!("--foo[a|b]");
         assert_parse_option_arg!("--foo[=a|b]");
         assert_parse_option_arg!("--foo <FOO>");
         assert_parse_option_arg!("--foo-abc <FOO>");
-    }
-
-    #[test]
-    fn test_flag_arg_display() {
-        let mut arg = ArgData::new("foo");
-        arg.kind = ArgKind::Flag;
-        assert_eq!(arg.to_string().as_str(), "--foo");
-        arg.short = Some('f');
-        assert_eq!(arg.to_string().as_str(), "-f --foo");
-        arg.summary = Some("A foo flag");
-        assert_eq!(arg.to_string().as_str(), "-f --foo A foo flag");
+        assert_parse_option_arg!("--foo=\"a b\"");
+        assert_parse_option_arg!("--foo[\"a|b\"|\"c]d\"]");
     }
 
     #[test]
@@ -480,28 +497,12 @@ mod tests {
     }
 
     #[test]
-    fn test_positional_arg_display() {
-        let mut arg = ArgData::new("foo");
-        arg.kind = ArgKind::Positional;
-        assert_eq!(arg.to_string().as_str(), "foo");
-        arg.required = true;
-        assert_eq!(arg.to_string().as_str(), "foo!");
-        arg.multiple = true;
-        assert_eq!(arg.to_string().as_str(), "foo+");
-        arg.required = false;
-        assert_eq!(arg.to_string().as_str(), "foo*");
-        arg.multiple = false;
-        arg.summary = Some("A foo arg");
-        assert_eq!(arg.to_string().as_str(), "foo A foo arg");
-    }
-
-    #[test]
     fn test_parse_positional_arg() {
+        assert_parse_positional_arg!("foo A foo arg");
         assert_parse_positional_arg!("foo");
         assert_parse_positional_arg!("foo!");
         assert_parse_positional_arg!("foo+");
         assert_parse_positional_arg!("foo*");
-        assert_parse_positional_arg!("foo A foo arg");
     }
 
     #[test]

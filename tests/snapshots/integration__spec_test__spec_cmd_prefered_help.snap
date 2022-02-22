@@ -1,0 +1,28 @@
+---
+source: tests/spec_test.rs
+assertion_line: 10
+expression: output
+
+---
+RUN
+spec cmd-prefered -h
+
+STDOUT
+exit 1
+
+STDERR
+spec-cmd-prefered 
+Preferred
+
+USAGE:
+    spec cmd-prefered [OPTIONS] [ARG-1]...
+
+ARGS:
+    <ARG-1>...    A positonal arg
+
+OPTIONS:
+    -f, --flag1           A flag
+    -h, --help            Print help information
+    -o, --opt1 <OPT-1>    A option
+
+

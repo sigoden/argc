@@ -1,0 +1,26 @@
+---
+source: tests/spec_test.rs
+assertion_line: 75
+expression: output
+
+---
+RUN
+spec cmd-positional-only -h
+
+STDOUT
+exit 1
+
+STDERR
+spec-cmd-positional-only 
+Poistional One required
+
+USAGE:
+    spec cmd-positional-only <ARG-1>
+
+ARGS:
+    <ARG-1>    A required arg
+
+OPTIONS:
+    -h, --help    Print help information
+
+
