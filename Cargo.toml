@@ -10,3 +10,6 @@ anyhow = "1"
 clap = "3"
 convert_case = "0.5"
 nom = "7"
+
+[dev-dependencies]
+insta = "1.12"

@@ -1,10 +1,8 @@
-mod arg;
-mod cli;
 mod parser;
+mod runner;
 
 use anyhow::bail;
 use anyhow::Error;
-use arg::ArgData;
-pub use cli::eval;
+pub use runner::run;
 
 pub type Result<T> = std::result::Result<T, Error>;

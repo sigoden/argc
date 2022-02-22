@@ -1,3 +1,9 @@
+---
+source: tests/lib.rs
+assertion_line: 27
+expression: stderr.unwrap_or_default()
+
+---
 git-push 
 Update remote refs along with associated objects
 
@@ -10,3 +16,4 @@ ARGS:
 
 OPTIONS:
     -h, --help    Print help information
+

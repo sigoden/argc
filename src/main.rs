@@ -84,5 +84,5 @@ fn eval(args: &[String]) -> Result<(Option<String>, Option<String>)> {
         fs::read_to_string(script_file).map_err(|e| anyhow!("Fail to read script, {}", e))?;
     let mut cmd_args = vec![name];
     cmd_args.extend(args);
-    argc::eval(&source, &cmd_args)
+    argc::run(&source, &cmd_args)
 }

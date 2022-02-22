@@ -1,4 +1,4 @@
-use crate::{bail, ArgData, Result};
+use crate::{bail, Result};
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_while},
@@ -28,6 +28,35 @@ pub enum EventData<'a> {
     Func(&'a str),
     /// Palaceholder for unrecognized tag
     Unknown(&'a str),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ArgData<'a> {
+    pub name: &'a str,
+    pub summary: Option<&'a str>,
+    pub flag: bool,
+    pub short: Option<char>,
+    pub choices: Option<Vec<&'a str>>,
+    pub multiple: bool,
+    pub required: bool,
+    pub positional: bool,
+    pub default: Option<&'a str>,
+}
+
+impl<'a> ArgData<'a> {
+    pub fn new(name: &'a str) -> Self {
+        ArgData {
+            name,
+            summary: None,
+            flag: false,
+            short: None,
+            choices: None,
+            multiple: false,
+            required: false,
+            positional: false,
+            default: None,
+        }
+    }
 }
 
 /// Tokenize shell script

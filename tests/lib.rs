@@ -1,51 +1,33 @@
-#[macro_export]
-macro_rules! argc {
-    (
-        source: $source:expr,
-        args: $args:expr,
-        $(stdout: $stdout:expr,)?
-        $(stderr: $stderr:expr,)?
-    ) => {
-        let output = argc::eval($source, $args).unwrap();
-        $(assert_eq!(output.1.unwrap(), $stderr);)?
-        $(assert_eq!(output.0.unwrap(), $stdout);)?
+use insta::assert_snapshot;
 
+#[macro_export]
+macro_rules! assert_argc {
+    (
+        $source:expr,
+        $args:expr
+    ) => {
+        let (stdout, stderr) = argc::run($source, $args).unwrap();
+        assert_snapshot!(stderr.unwrap_or_default());
+        assert_snapshot!(stdout.unwrap_or_default());
     };
 }
 
 #[test]
-fn test_git_help() {
-    argc!(
-       source: include_str!("git.sh"),
-       args: &["git", "-h"],
-       stdout: "exit 1",
-       stderr: include_str!("git.help.txt"),
-    );
+fn test_git() {
+    assert_argc!(include_str!("git.sh"), &["git", "-h"]);
 }
 
 #[test]
-fn test_git_add_help() {
-    argc!(
-       source: include_str!("git.sh"),
-       args: &["git", "add", "-h"],
-       stderr: include_str!("git.add.help.txt"),
-    );
+fn test_git_add() {
+    assert_argc!(include_str!("git.sh"), &["git", "add", "-h"]);
 }
 
 #[test]
-fn test_git_remote_help() {
-    argc!(
-       source: include_str!("git.sh"),
-       args: &["git", "push", "-h"],
-       stderr: include_str!("git.push.help.txt"),
-    );
+fn test_git_remote() {
+    assert_argc!(include_str!("git.sh"), &["git", "push", "-h"]);
 }
 
 #[test]
-fn test_git_log_help() {
-    argc!(
-       source: include_str!("git.sh"),
-       args: &["git", "log", "-h"],
-       stderr: include_str!("git.log.help.txt"),
-    );
+fn test_git_log() {
+    assert_argc!(include_str!("git.sh"), &["git", "log", "-h"]);
 }
