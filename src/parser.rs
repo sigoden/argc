@@ -191,21 +191,14 @@ fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
     preceded(
         tuple((char('#'), space0, char('@'))),
         alt((
-            map(
-                preceded(tag("describe"), alt((parse_tail, parse_empty))),
-                |v| EventData::Describe(v),
-            ),
-            map(
-                preceded(tag("version"), alt((parse_tail, parse_empty))),
-                |v| EventData::Version(v),
-            ),
-            map(
-                preceded(tag("author"), alt((parse_tail, parse_empty))),
-                |v| EventData::Author(v),
-            ),
-            map(preceded(tag("cmd"), alt((parse_tail, parse_empty))), |v| {
-                EventData::Cmd(v)
+            map(preceded(tag("describe"), parse_end), |v| {
+                EventData::Describe(v)
             }),
+            map(preceded(tag("version"), parse_end), |v| {
+                EventData::Version(v)
+            }),
+            map(preceded(tag("author"), parse_end), |v| EventData::Author(v)),
+            map(preceded(tag("cmd"), parse_end), |v| EventData::Cmd(v)),
             map(
                 alt((
                     preceded(pair(tag("option"), space1), parse_option_arg),
@@ -247,7 +240,7 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
             alt((parse_arg_choices, parse_arg_assign, parse_arg_mark)),
         ),
         opt(parse_arg_value_notation),
-        alt((parse_tail, parse_empty)),
+        parse_end,
     ))(input)?;
     arg.short = short;
     if summary.len() > 0 {
@@ -259,10 +252,7 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
 
 // Parse `@option`, positional only
 fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
-    let (i, (mut arg, summary)) = tuple((
-        preceded(space0, parse_arg_mark),
-        alt((parse_tail, parse_empty)),
-    ))(input)?;
+    let (i, (mut arg, summary)) = tuple((preceded(space0, parse_arg_mark), parse_end))(input)?;
     arg.kind = ArgKind::Positional;
     if summary.len() > 0 {
         arg.summary = Some(summary);
@@ -275,7 +265,7 @@ fn parse_flag_arg(input: &str) -> nom::IResult<&str, ArgData> {
     let (input, (short, mut arg, summary)) = tuple((
         opt(parse_arg_short),
         preceded(pair(space0, tag("--")), parse_arg_name),
-        alt((parse_tail, parse_empty)),
+        parse_end,
     ))(input)?;
     arg.short = short;
     if summary.len() > 0 {
@@ -368,12 +358,11 @@ fn parse_choices(input: &str) -> nom::IResult<&str, (Vec<&str>, Option<&str>)> {
     Ok((input, (choices, default_choice)))
 }
 
-fn parse_tail(input: &str) -> nom::IResult<&str, &str> {
-    map(preceded(space1, rest), |v: &str| v.trim())(input)
-}
-
-fn parse_empty(input: &str) -> nom::IResult<&str, &str> {
-    map(alt((eof, preceded(space1, eof))), |v: &str| v.trim())(input)
+fn parse_end(input: &str) -> nom::IResult<&str, &str> {
+    alt((
+        eof,
+        preceded(space1, alt((eof, map(rest, |v: &str| v.trim())))),
+    ))(input)
 }
 
 fn parse_name(input: &str) -> nom::IResult<&str, &str> {
@@ -403,6 +392,7 @@ fn parse_choice_value(input: &str) -> nom::IResult<&str, &str> {
 fn forbid_chars_choice(c: char) -> bool {
     return c == '|' || c == ']';
 }
+
 
 fn parse_single_quote(input: &str) -> nom::IResult<&str, &str> {
     delimited(
