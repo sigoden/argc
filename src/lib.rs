@@ -1,7 +1,6 @@
 mod parser;
 mod runner;
 
-use anyhow::bail;
 use anyhow::Error;
 pub use runner::run;
 

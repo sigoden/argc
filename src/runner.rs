@@ -1,8 +1,8 @@
-use crate::parser::{parse, ArgData, Event, EventData};
+use crate::parser::{parse, ArgData, ArgKind, Event, EventData};
 use crate::Result;
+use anyhow::bail;
 use clap::{Arg, ArgMatches, Command};
 use convert_case::{Case, Casing};
-use std::collections::HashMap;
 use std::ops::Deref;
 
 const ENTRYPOINT: &'static str = "main";
@@ -11,8 +11,9 @@ const ENTRYPOINT: &'static str = "main";
 pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<(Option<String>, Option<String>)> {
     let events = parse(source)?;
     let name = args[0];
-    let (cmd, has_main) = Cmd::create(&events);
-    let command = cmd.build(name);
+    let (mut cmd, has_main) = Cmd::create(&events);
+    cmd.name = Some((&name, name.to_string()));
+    let command = cmd.build()?;
     let res = command.try_get_matches_from(args);
     match res {
         Ok(matches) => {
@@ -28,14 +29,14 @@ pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<(Option<String>, Opt
 
 #[derive(Debug, Default)]
 struct Cmd<'a> {
-    name: Option<&'a str>,
+    name: Option<(&'a str, String)>,
     author: Option<&'a str>,
     describe: Option<&'a str>,
     version: Option<&'a str>,
     pos_index: usize,
     root: bool,
     args: Vec<WrapArgData<'a>>,
-    subcmds: HashMap<&'a str, Cmd<'a>>,
+    subcmds: Vec<Cmd<'a>>,
 }
 
 impl<'a> Cmd<'a> {
@@ -87,8 +88,8 @@ impl<'a> Cmd<'a> {
                 }
                 EventData::Func(name) => {
                     if let Some(mut cmd) = maybe_subcmd.take() {
-                        cmd.name = Some(name);
-                        rootcmd.subcmds.insert(*name, cmd);
+                        cmd.name = Some((name, name.to_case(Case::Kebab)));
+                        rootcmd.subcmds.push(cmd);
                     }
                 }
                 EventData::Unknown(_) => {}
@@ -96,27 +97,29 @@ impl<'a> Cmd<'a> {
         }
         (rootcmd, has_main)
     }
-    fn build(&'a self, name: &'a str) -> Command<'a> {
-        let mut rootcmd = Command::new(name);
-        if let Some(name) = self.name {
-            rootcmd = rootcmd.name(name);
+    fn build(&'a self) -> Result<Command<'a>> {
+        if self.name.is_none() {
+            bail!("Miss command name");
         }
+        let (_, cmd_name) = self.name.as_ref().unwrap();
+        let mut cmd = Command::new(cmd_name);
         if let Some(describe) = self.describe {
-            rootcmd = rootcmd.about(describe);
+            cmd = cmd.about(describe);
         }
         if let Some(version) = self.version {
-            rootcmd = rootcmd.version(version);
+            cmd = cmd.version(version);
         }
         if let Some(author) = self.author {
-            rootcmd = rootcmd.author(author);
+            cmd = cmd.author(author);
         }
         for arg_data in &self.args {
-            rootcmd = rootcmd.arg(arg_data.build());
+            cmd = cmd.arg(arg_data.build()?);
         }
-        for (name, subcmd) in &self.subcmds {
-            rootcmd = rootcmd.subcommand(subcmd.build(name));
+        for subcmd in &self.subcmds {
+            let subcmd = subcmd.build()?;
+            cmd = cmd.subcommand(subcmd);
         }
-        rootcmd
+        Ok(cmd)
     }
     fn retrive(&'a self, matches: &ArgMatches) -> String {
         let mut values = vec![];
@@ -125,12 +128,14 @@ impl<'a> Cmd<'a> {
                 values.push(value);
             }
         }
-        for (name, subcmd) in &self.subcmds {
-            if let Some((subcmd_name, subcmd_matches)) = matches.subcommand() {
-                if *name == subcmd_name {
-                    values.push(subcmd.retrive(&subcmd_matches));
-                    if self.subcmds.is_empty() {
-                        values.push(name.to_string());
+        for subcmd in &self.subcmds {
+            if let Some((fn_name, cmd_name)) = &subcmd.name {
+                if let Some((subcmd_name, subcmd_matches)) = matches.subcommand() {
+                    if cmd_name.as_str() == subcmd_name {
+                        values.push(subcmd.retrive(&subcmd_matches));
+                        if self.subcmds.is_empty() {
+                            values.push(fn_name.to_string());
+                        }
                     }
                 }
             }
@@ -165,47 +170,66 @@ impl<'a> WrapArgData<'a> {
             pos_index,
         }
     }
-    fn build(&'a self) -> Arg<'a> {
-        let mut arg = Arg::new(self.name).required(self.required);
+    fn build(&'a self) -> Result<Arg<'a>> {
+        let mut arg = Arg::new(self.name);
         if let Some(summary) = self.summary {
             let title = summary.trim();
             if title.len() > 0 {
                 arg = arg.help(title);
             }
         }
-        if self.positional {
-            arg = arg.index(self.pos_index + 1).multiple_values(self.multiple);
-        } else {
-            arg = arg.long(self.name);
-            if self.multiple {
-                arg = arg
-                    .multiple_values(true)
-                    .use_value_delimiter(true)
-                    .multiple_occurrences(true);
-            }
-            if !self.flag {
-                arg = arg.value_name(&self.value_name);
-            }
-            if let Some(short) = self.short {
-                arg = arg.short(short);
-            }
-            if let Some(choices) = &self.choices {
-                if choices.len() > 1 {
-                    arg = arg.possible_values(choices);
+        let arg = match &self.kind {
+            ArgKind::Flag => {
+                let mut arg = arg.long(self.name);
+                if let Some(s) = self.short {
+                    arg = arg.short(s);
                 }
+                arg
             }
-            if let Some(default) = self.default {
-                arg = arg.default_value(default);
+            ArgKind::Option => {
+                let mut arg = arg
+                    .long(self.name)
+                    .required(self.required)
+                    .value_name(&self.value_name);
+                if let Some(s) = self.short {
+                    arg = arg.short(s);
+                }
+                if self.multiple {
+                    arg = arg
+                        .multiple_values(true)
+                        .use_value_delimiter(true)
+                        .multiple_occurrences(true);
+                }
+                if let Some(choices) = &self.choices {
+                    if choices.len() > 1 {
+                        arg = arg.possible_values(choices);
+                    }
+                }
+                if let Some(default) = self.default {
+                    arg = arg.default_value(default);
+                }
+                arg
             }
-        }
-        arg
+            ArgKind::Positional => {
+                let mut arg = arg
+                    .index(self.pos_index + 1)
+                    .required(self.required)
+                    .value_name(&self.value_name);
+
+                if self.multiple {
+                    arg = arg.multiple_values(true)
+                }
+                arg
+            }
+        };
+        Ok(arg)
     }
     fn retrive(&self, matches: &ArgMatches) -> Option<String> {
         let name = self.name.to_case(Case::Snake);
         if !matches.is_present(self.name) {
             return None;
         }
-        if self.flag {
+        if self.kind == ArgKind::Flag {
             return Some(format!("selfc_{}=1\n", name));
         }
         if self.multiple {

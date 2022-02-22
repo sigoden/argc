@@ -1,0 +1,27 @@
+---
+source: tests/git_test.rs
+assertion_line: 15
+expression: output
+
+---
+RUN
+git push -h
+
+STDOUT
+exit 1
+
+STDERR
+git-push 
+Update remote refs along with associated objects
+
+USAGE:
+    git push <REPOSITORY> <REFSPEC>...
+
+ARGS:
+    <REPOSITORY>    The "remote" repository that is destination of a push operation.
+    <REFSPEC>...    Specify what destination ref to update with what source object.
+
+OPTIONS:
+    -h, --help    Print help information
+
+

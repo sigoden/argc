@@ -1,6 +1,6 @@
 ---
-source: tests/lib.rs
-assertion_line: 32
+source: tests/git_test.rs
+assertion_line: 10
 expression: output
 
 ---
@@ -15,10 +15,10 @@ git-add
 Add file contents to the index
 
 USAGE:
-    git add [OPTIONS] [pathspec]...
+    git add [OPTIONS] [PATHSPEC]...
 
 ARGS:
-    <pathspec>...    Files to add content from.
+    <PATHSPEC>...    Files to add content from.
 
 OPTIONS:
     -h, --help       Print help information

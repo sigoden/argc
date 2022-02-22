@@ -25,4 +25,4 @@ lto = true
 
 [[test]]
 name = "integration"
-path = "tests/lib.rs"
+path = "tests/tests.rs"

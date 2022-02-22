@@ -1,6 +1,6 @@
 ---
-source: tests/lib.rs
-assertion_line: 45
+source: tests/git_test.rs
+assertion_line: 20
 expression: output
 
 ---
@@ -15,10 +15,10 @@ git-log
 Shows the commit log.
 
 USAGE:
-    git log [OPTIONS] [--] [refspec]...
+    git log [OPTIONS] [--] [REFSPEC]...
 
 ARGS:
-    <refspec>...    Specify what destination ref to update with what source object.
+    <REFSPEC>...    Specify what destination ref to update with what source object.
 
 OPTIONS:
         --decorate <DECORATE>    If no --decorate-refs is given, pretend as if all refs were

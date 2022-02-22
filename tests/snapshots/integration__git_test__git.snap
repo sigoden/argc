@@ -1,6 +1,6 @@
 ---
-source: tests/lib.rs
-assertion_line: 27
+source: tests/git_test.rs
+assertion_line: 6
 expression: output
 
 ---
