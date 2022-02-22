@@ -110,7 +110,7 @@ impl<'a> Display for ArgData<'a> {
                             default.to_string()
                         };
                         name.push_str(&format!("={}", value));
-                    } else if let Some(c) = self.name_modifer() {
+                    } else if let Some(c) = self.name_suffix() {
                         name.push(c)
                     }
                 }
@@ -121,7 +121,7 @@ impl<'a> Display for ArgData<'a> {
             }
             ArgKind::Positional => {
                 let mut name = self.name.to_string();
-                if let Some(c) = self.name_modifer() {
+                if let Some(c) = self.name_suffix() {
                     name.push(c)
                 }
                 segments.push(name);
@@ -148,7 +148,10 @@ impl<'a> ArgData<'a> {
             default: None,
         }
     }
-    fn name_modifer(&self) -> Option<char> {
+    pub fn is_positional(&self) -> bool {
+        self.kind == ArgKind::Positional
+    }
+    fn name_suffix(&self) -> Option<char> {
         if self.multiple {
             return Some(match self.required {
                 true => '+',
@@ -392,7 +395,6 @@ fn parse_choice_value(input: &str) -> nom::IResult<&str, &str> {
 fn forbid_chars_choice(c: char) -> bool {
     return c == '|' || c == ']';
 }
-
 
 fn parse_single_quote(input: &str) -> nom::IResult<&str, &str> {
     delimited(

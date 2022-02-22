@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 33
+assertion_line: 70
 expression: output
 
 ---
@@ -8,13 +8,13 @@ RUN
 spec cmd-option-names --opt2 value2 --opt3 value3_0,value3_1 --opt4 value4_0 --opt4 value4_1 --opt6 a
 
 STDOUT
-selfc_opt_2="value2"
-selfc_opt_3=( "value3_0" "value3_1" )
-selfc_opt_4=( "value4_0" "value4_1" )
-selfc_opt_5="a"
-selfc_opt_6="a"
-selfc_opt_7="a"
-
+argc_opt_2="value2"
+argc_opt_3=( "value3_0" "value3_1" )
+argc_opt_4=( "value4_0" "value4_1" )
+argc_opt_5="a"
+argc_opt_6="a"
+argc_opt_7="a"
+cmd_option_names
 
 STDERR
 

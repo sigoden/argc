@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 15
+assertion_line: 62
 expression: output
 
 ---
@@ -8,10 +8,10 @@ RUN
 spec cmd-prefered -f -o A AB C D
 
 STDOUT
-selfc_arg_1=( "AB" "C D" )
-selfc_flag_1=1
-selfc_opt_1="A"
-
+argc_arg_1=( "AB" "C D" )
+argc_flag_1=1
+argc_opt_1="A"
+cmd_prefered
 
 STDERR
 

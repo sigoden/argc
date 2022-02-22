@@ -13,14 +13,13 @@ pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<(Option<String>, Opt
     let events = parse(source)?;
     let name = args[0];
     let mut rootcmd = Cmd::create(&events)?;
-    let rootinfo = &rootcmd.rootinfo.unwrap();
     rootcmd.name = Some((&name, name.to_string()));
     let command = rootcmd.build()?;
     let res = command.try_get_matches_from(args);
     match res {
         Ok(matches) => {
             let mut output = rootcmd.retrive(&matches);
-            if matches.subcommand_name().is_none() && *rootinfo == true {
+            if matches.subcommand_name().is_none() && rootcmd.has_main_fn == true {
                 output.push_str(ENTRYPOINT)
             }
             Ok((Some(output), None))
@@ -35,11 +34,10 @@ struct Cmd<'a> {
     author: Option<&'a str>,
     describe: Option<&'a str>,
     version: Option<&'a str>,
-    pos_index: usize,
+    postional_idx: usize,
     args: Vec<WrapArgData<'a>>,
     subcmds: HashMap<&'a str, Cmd<'a>>,
-    // root cmd prop
-    rootinfo: Option<bool>,
+    has_main_fn: bool,
     // for conflict detecting
     names: (HashSet<&'a str>, HashSet<char>),
 }
@@ -48,7 +46,6 @@ impl<'a> Cmd<'a> {
     fn create(events: &'a [Event]) -> Result<Self> {
         let mut maybe_subcmd: Option<Cmd> = None;
         let mut rootcmd = Cmd::default();
-        let mut rootinfo = Some(false);
         let mut is_root_scope = true;
         for Event { data, position } in events {
             match data {
@@ -77,22 +74,23 @@ impl<'a> Cmd<'a> {
                         cmd.describe = Some(*value);
                     }
                     maybe_subcmd = Some(cmd);
-                    if *value == ENTRYPOINT {
-                        rootinfo.as_mut().map(|v| *v = true);
-                    }
                 }
                 EventData::Arg(arg_data) => {
                     if let Some(cmd) = &mut maybe_subcmd {
-                        let arg_data = WrapArgData::new(arg_data, cmd.pos_index);
+                        let arg_data = WrapArgData::new(arg_data, cmd.postional_idx);
                         arg_data.detect_conflict(&mut cmd.names, *position)?;
+                        if arg_data.is_positional() {
+                            cmd.postional_idx += 1;
+                        }
                         cmd.args.push(arg_data);
-                        cmd.pos_index += 1;
                     } else {
                         if is_root_scope {
-                            let arg_data = WrapArgData::new(arg_data, rootcmd.pos_index);
+                            let arg_data = WrapArgData::new(arg_data, rootcmd.postional_idx);
                             arg_data.detect_conflict(&mut rootcmd.names, *position)?;
+                            if arg_data.is_positional() {
+                                rootcmd.postional_idx += 1;
+                            }
                             rootcmd.args.push(arg_data);
-                            rootcmd.pos_index += 1;
                         } else {
                             bail!(
                                 "{}(line {}) is unexpected, maybe miss @cmd?",
@@ -109,6 +107,10 @@ impl<'a> Cmd<'a> {
                             bail!("function {}(line {}) is redefined", name, position)
                         }
                         rootcmd.subcmds.insert(*name, cmd);
+                    } else {
+                        if *name == ENTRYPOINT {
+                            rootcmd.has_main_fn = true;
+                        }
                     }
                 }
                 EventData::Unexpect(name) => {
@@ -116,7 +118,6 @@ impl<'a> Cmd<'a> {
                 }
             }
         }
-        rootcmd.rootinfo = rootinfo;
         Ok(rootcmd)
     }
     fn build(&'a self) -> Result<Command<'a>> {
@@ -141,6 +142,9 @@ impl<'a> Cmd<'a> {
             let subcmd = subcmd.build()?;
             cmd = cmd.subcommand(subcmd);
         }
+        if self.subcmds.len() > 0 && !self.has_main_fn {
+            cmd = cmd.subcommand_required(true);
+        }
         Ok(cmd)
     }
     fn retrive(&'a self, matches: &ArgMatches) -> String {
@@ -152,12 +156,10 @@ impl<'a> Cmd<'a> {
         }
         for (_, subcmd) in &self.subcmds {
             if let Some((fn_name, cmd_name)) = &subcmd.name {
-                if let Some((subcmd_name, subcmd_matches)) = matches.subcommand() {
-                    if cmd_name.as_str() == subcmd_name {
+                if let Some((match_name, subcmd_matches)) = matches.subcommand() {
+                    if cmd_name.as_str() == match_name {
                         values.push(subcmd.retrive(&subcmd_matches));
-                        if self.subcmds.is_empty() {
-                            values.push(fn_name.to_string());
-                        }
+                        values.push(fn_name.to_string());
                     }
                 }
             }
@@ -252,17 +254,17 @@ impl<'a> WrapArgData<'a> {
             return None;
         }
         if self.kind == ArgKind::Flag {
-            return Some(format!("selfc_{}=1\n", name));
+            return Some(format!("argc_{}=1\n", name));
         }
         if self.multiple {
             return matches.values_of(self.name).map(|values| {
                 let values: Vec<String> = values.map(normalize_value).collect();
-                format!("selfc_{}=( {} )\n", name, values.join(" "))
+                format!("argc_{}=( {} )\n", name, values.join(" "))
             });
         }
         matches
             .value_of(self.name)
-            .map(|value| format!("selfc_{}={}\n", name, normalize_value(value)))
+            .map(|value| format!("argc_{}={}\n", name, normalize_value(value)))
     }
     fn detect_conflict(
         &self,

@@ -15,7 +15,7 @@ spec
 Test all aspects
 
 USAGE:
-    spec [SUBCOMMAND]
+    spec <SUBCOMMAND>
 
 OPTIONS:
     -h, --help    Print help information
