@@ -7,7 +7,7 @@ fn main() {
     let mut script_args: Vec<String> = vec![];
     for arg in std::env::args() {
         if script_args.is_empty() {
-            if !args.is_empty() && !arg.trim().starts_with("-") {
+            if !args.is_empty() && !arg.trim().starts_with('-') {
                 script_args.push(arg.clone());
             }
             args.push(arg)

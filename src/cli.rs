@@ -6,9 +6,9 @@ use convert_case::{Case, Casing};
 use std::collections::HashMap;
 use std::ops::Deref;
 
-const VARIABLE_PREFIX: &'static str = env!("CARGO_CRATE_NAME");
+const VARIABLE_PREFIX: &str = env!("CARGO_CRATE_NAME");
 
-const ENTRYPOINT: &'static str = "main";
+const ENTRYPOINT: &str = "main";
 
 pub struct Runner<'a> {
     source: &'a str,
@@ -33,7 +33,7 @@ impl<'a> Runner<'a> {
         let command = cmd.build(name)?;
         let res = command.try_get_matches_from(args);
         match res {
-            Ok(matches) => Ok(Ok(cmd.retrive(&matches, &self))),
+            Ok(matches) => Ok(Ok(cmd.retrive(&matches, self))),
             Err(err) => Ok(Err(err.to_string())),
         }
     }
@@ -74,27 +74,24 @@ impl<'a> Cmd<'a> {
         for Event { data, position } in events {
             match data {
                 EventData::Describe(value) => {
-                    if let Some(_) = maybe_subcmd {
-                    } else {
+                    if is_root_scope {
                         rootcmd.describe = Some(*value);
                     }
                 }
                 EventData::Version(value) => {
-                    if let Some(_) = maybe_subcmd {
-                    } else {
+                    if is_root_scope {
                         rootdata.version = Some(*value);
                     }
                 }
                 EventData::Author(value) => {
-                    if let Some(_) = maybe_subcmd {
-                    } else {
+                    if is_root_scope {
                         rootdata.author = Some(*value);
                     }
                 }
                 EventData::Cmd(value) => {
                     is_root_scope = false;
                     let mut cmd = Cmd::default();
-                    if value.len() > 0 {
+                    if !value.is_empty() {
                         cmd.describe = Some(*value);
                     }
                     maybe_subcmd = Some(cmd);
@@ -102,16 +99,14 @@ impl<'a> Cmd<'a> {
                 EventData::Arg(arg_data) => {
                     if let Some(cmd) = &mut maybe_subcmd {
                         cmd.add_arg(arg_data, position)?;
+                    } else if is_root_scope {
+                        rootcmd.add_arg(arg_data, position)?;
                     } else {
-                        if is_root_scope {
-                            rootcmd.add_arg(arg_data, position)?;
-                        } else {
-                            bail!(
-                                "{}(line {}) is unexpected, maybe miss @cmd?",
-                                arg_data.kind,
-                                position
-                            )
-                        }
+                        bail!(
+                            "{}(line {}) is unexpected, maybe miss @cmd?",
+                            arg_data.kind,
+                            position
+                        )
                     }
                 }
                 EventData::Func(name) => {
@@ -122,10 +117,8 @@ impl<'a> Cmd<'a> {
                         }
                         cmd.name = Some((name, name.to_case(Case::Kebab)));
                         rootcmd.subcmds.insert(*name, cmd);
-                    } else {
-                        if *name == ENTRYPOINT {
-                            rootdata.main = true;
-                        }
+                    } else if *name == ENTRYPOINT {
+                        rootdata.main = true;
                     }
                 }
                 EventData::Unknown(name) => {
@@ -148,14 +141,14 @@ impl<'a> Cmd<'a> {
             if let Some(author) = rootdata.author {
                 cmd = cmd.author(author);
             }
-            if self.subcmds.len() > 0 && !rootdata.main {
+            if !self.subcmds.is_empty() && !rootdata.main {
                 cmd = cmd.subcommand_required(true);
             }
         }
         for arg_data in &self.args {
             cmd = cmd.arg(arg_data.build()?);
         }
-        for (_, subcmd) in &self.subcmds {
+        for subcmd in self.subcmds.values() {
             let subcmd = subcmd.build(subcmd.name.as_ref().unwrap().1.as_str())?;
             cmd = cmd.subcommand(subcmd);
         }
@@ -164,16 +157,16 @@ impl<'a> Cmd<'a> {
     fn retrive(&'a self, matches: &ArgMatches, runner: &Runner) -> String {
         let mut values = vec![];
         for arg_data in &self.args {
-            if let Some(value) = arg_data.retrive_match_value(&matches) {
+            if let Some(value) = arg_data.retrive_match_value(matches) {
                 values.push(value);
             }
         }
         let mut call_fn: Option<String> = None;
-        for (_, subcmd) in &self.subcmds {
+        for subcmd in self.subcmds.values() {
             if let Some((fn_name, cmd_name)) = &subcmd.name {
                 if let Some((match_name, subcmd_matches)) = matches.subcommand() {
                     if cmd_name.as_str() == match_name {
-                        values.push(subcmd.retrive(&subcmd_matches, runner));
+                        values.push(subcmd.retrive(subcmd_matches, runner));
                         call_fn = Some(fn_name.to_string());
                     }
                 }
@@ -182,11 +175,11 @@ impl<'a> Cmd<'a> {
         call_fn = call_fn.or_else(|| {
             self.root
                 .as_ref()
-                .and_then(|v| if v.main { Some(format!("main")) } else { None })
+                .and_then(|v| if v.main { Some("main".to_string()) } else { None })
         });
         if let Some(fn_name) = call_fn {
             if runner.eval {
-                values.push(format!("{}", fn_name));
+                values.push(fn_name);
             }
         }
         values.join("")
@@ -212,7 +205,7 @@ struct WrapArgData<'a> {
 impl<'a> Deref for WrapArgData<'a> {
     type Target = ArgData<'a>;
     fn deref(&self) -> &Self::Target {
-        &self.data
+        self.data
     }
 }
 
@@ -232,7 +225,7 @@ impl<'a> WrapArgData<'a> {
         let mut arg = Arg::new(self.name);
         if let Some(summary) = self.summary {
             let title = summary.trim();
-            if title.len() > 0 {
+            if !title.is_empty() {
                 arg = arg.help(title);
             }
         }

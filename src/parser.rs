@@ -104,17 +104,15 @@ impl<'a> Display for ArgData<'a> {
                         })
                         .collect();
                     name.push_str(&format!("[{}{}]", prefix, values.join("|")))
-                } else {
-                    if let Some(default) = self.default {
-                        let value = if default.chars().any(is_terminate_char_default_value) {
-                            format!("\"{}\"", default)
-                        } else {
-                            default.to_string()
-                        };
-                        name.push_str(&format!("={}", value));
-                    } else if let Some(c) = self.name_suffix() {
-                        name.push(c)
-                    }
+                } else if let Some(default) = self.default {
+                    let value = if default.chars().any(is_terminate_char_default_value) {
+                        format!("\"{}\"", default)
+                    } else {
+                        default.to_string()
+                    };
+                    name.push_str(&format!("={}", value));
+                } else if let Some(c) = self.name_suffix() {
+                    name.push(c)
                 }
                 segments.push(format!("--{}", name));
                 if let Some(value_name) = self.value_name {
@@ -191,7 +189,7 @@ pub fn parse(source: &str) -> Result<Vec<Event>> {
 }
 
 fn parse_line(line: &str) -> nom::IResult<&str, Option<Option<EventData>>> {
-    alt((map(alt((parse_tag, parse_fn)), |v| Some(v)), success(None)))(line)
+    alt((map(alt((parse_tag, parse_fn)), Some), success(None)))(line)
 }
 
 fn parse_fn(input: &str) -> nom::IResult<&str, Option<EventData>> {
@@ -269,7 +267,7 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
         )),
         |(short, mut arg, value_name, summary)| {
             arg.short = short;
-            if summary.len() > 0 {
+            if !summary.is_empty() {
                 arg.summary = Some(summary);
             }
             arg.value_name = value_name;
@@ -282,7 +280,7 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
 fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
     map(pair(parse_arg_mark, parse_tail), |(mut arg, summary)| {
         arg.kind = ArgKind::Positional;
-        if summary.len() > 0 {
+        if !summary.is_empty() {
             arg.summary = Some(summary);
         }
         arg
@@ -299,7 +297,7 @@ fn parse_flag_arg(input: &str) -> nom::IResult<&str, ArgData> {
         )),
         |(short, mut arg, summary)| {
             arg.short = short;
-            if summary.len() > 0 {
+            if !summary.is_empty() {
                 arg.summary = Some(summary);
             }
             arg.kind = ArgKind::Flag;
@@ -356,7 +354,7 @@ fn parse_arg_choices(input: &str) -> nom::IResult<&str, ArgData> {
 
 // Parse `str`
 fn parse_arg_name(input: &str) -> nom::IResult<&str, ArgData> {
-    map(parse_name, |v| ArgData::new(v))(input)
+    map(parse_name, ArgData::new)(input)
 }
 
 // Parse `-s`
@@ -426,7 +424,7 @@ fn parse_choice_value(input: &str) -> nom::IResult<&str, &str> {
 }
 
 fn is_terminate_char_choice_value(c: char) -> bool {
-    return c == '|' || c == ']';
+    c == '|' || c == ']'
 }
 
 fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
