@@ -5,11 +5,6 @@ on:
     tags:
     - v[0-9]+.[0-9]+.[0-9]+*
 
-
-defaults:
-  run:
-    shell: bash
-
 jobs:
   all:
     name: All
@@ -42,26 +37,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install Rust Toolchain Components
-      uses: actions-rs/toolchain@v1
-      with:
-        override: true
-        target: ${{ matrix.target }}
-        toolchain: stable
-        profile: minimal # minimal component installation (ie, no documentation)
-
-    - name: Install AArch64 Toolchain
-      if: ${{ matrix.target == 'aarch64-unknown-linux-musl' }}
-      run: |
-        sudo apt-get update
-        sudo apt-get install gcc-aarch64-linux-gnu
-
-    - name: Install ARM7 Toolchain
-      if: ${{ matrix.target == 'armv7-unknown-linux-musleabihf' }}
-      run: |
-        sudo apt-get update
-        sudo apt-get install gcc-arm-linux-gnueabihf
-
     - name: Check Tag
       id: check-tag
       shell: bash
@@ -74,7 +49,24 @@ jobs:
           echo "::set-output name=rc::true"
         fi
 
-    - name: Show version information (Rust, cargo, GCC)
+
+    - name: Install Rust Toolchain Components
+      uses: actions-rs/toolchain@v1
+      with:
+        override: true
+        target: ${{ matrix.target }}
+        toolchain: stable
+        profile: minimal # minimal component installation (ie, no documentation)
+
+    - name: Install prerequisites
+      shell: bash
+      run: |
+        case ${{ matrix.target }} in
+          armv7-unknown-linux-*) sudo apt-get -y update ; sudo apt-get -y install gcc-arm-linux-gnueabihf ;;
+          aarch64-unknown-linux-musl) sudo apt-get -y update ; sudo apt-get -y install gcc-aarch64-linux-gnu ;;
+        esac
+
+    - name: Show Version Information (Rust, cargo, GCC)
       shell: bash
       run: |
         gcc --version || true
@@ -91,7 +83,9 @@ jobs:
         command: build
         args: --locked --release --target=${{ matrix.target }}
 
-    - name: Build archive
+    - name: Build Archive
+      shell: bash
+      id: package
       env:
         target: ${{ matrix.target }}
         version:  ${{ steps.check-tag.outputs.version }}
