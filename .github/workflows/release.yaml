@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-    - '*'
+    - "[0-9]+.[0-9]+.[0-9]+"
 
 defaults:
   run:
@@ -62,19 +62,51 @@ jobs:
         sudo apt-get update
         sudo apt-get install gcc-arm-linux-gnueabihf
 
-    - name: Ref Type
-      id: ref-type
-      run: cargo run --package ref-type -- --reference ${{ github.ref }}
-
-    - name: Package
-      id: package
-      env:
-        TARGET: ${{ matrix.target }}
-        REF: ${{ github.ref }}
-        OS: ${{ matrix.os }}
-        TARGET_RUSTFLAGS: ${{ matrix.target_rustflags }}
-      run: ./bin/package
+    - name: Check Tag
+      id: check-tag
       shell: bash
+      run: |
+        tag=${GITHUB_REF##*/}
+        echo "::set-output name=version::$tag"
+        if [[ "$tag" =~ [0-9]+.[0-9]+.[0-9]+$ ]]; then
+          echo "::set-output name=rc::false"
+        else
+          echo "::set-output name=rc::true"
+        fi
+
+
+    - name: Build archive
+      env:
+        target: ${{ matrix.target }}
+        version:  ${{ steps.check-tag.outputs.version }}
+      run: |
+        set -euxo pipefail
+
+        bin=${GITHUB_REPOSITORY##*/}
+        src=`pwd`
+        dist=$src/dist
+        name=$bin-$version-$target
+        executable=target/$target/release/$bin
+
+        cargo build --target $target --release 
+
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          executable=$executable.exe
+        fi
+
+        mkdir $dist
+        cp $executable $dist
+        cd $dist
+
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+            archive=$dist/$name.zip
+            7z a $archive *
+            echo "::set-output name=archive::`pwd -W`/$name.zip"
+        else
+            archive=$dist/$name.tar.gz
+            tar czf $archive *
+            echo "::set-output name=archive::$archive"
+        fi
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v0.1.5
@@ -82,20 +114,16 @@ jobs:
       with:
         draft: false
         files: ${{ steps.package.outputs.archive }}
-        prerelease: ${{ steps.ref-type.outputs.value != 'release' }}
+        prerelease: ${{ steps.check-tag.outputs.rc == 'true' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish Changelog
       uses: softprops/action-gh-release@v0.1.5
-      if: >-
-        ${{
-          startsWith(github.ref, 'refs/tags/')
-          && matrix.target == 'x86_64-unknown-linux-musl'
-        }}
+      if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
       with:
         draft: false
         files: CHANGELOG.md
-        prerelease: ${{ steps.ref-type.outputs.value != 'release' }}
+        prerelease: ${{ steps.check-tag.outputs.rc == 'true' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
