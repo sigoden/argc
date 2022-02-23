@@ -1,6 +1,6 @@
 # Argc
 
-Argc: is a handy way to handle cli parameters of shell script.
+Argc is a handy way to handle cli parameters for shell script.
 
 ## Example
 

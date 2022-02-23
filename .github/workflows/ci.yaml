@@ -42,7 +42,7 @@ jobs:
 
     - name: Check Lockfile
       run: |
-        cargo update --locked --package just
+        cargo update --locked --package argc
 
     - name: Test
       run: cargo test --all
