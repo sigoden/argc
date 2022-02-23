@@ -173,9 +173,13 @@ impl<'a> Cmd<'a> {
             }
         }
         call_fn = call_fn.or_else(|| {
-            self.root
-                .as_ref()
-                .and_then(|v| if v.main { Some("main".to_string()) } else { None })
+            self.root.as_ref().and_then(|v| {
+                if v.main {
+                    Some("main".to_string())
+                } else {
+                    None
+                }
+            })
         });
         if let Some(fn_name) = call_fn {
             if runner.eval {
