@@ -125,13 +125,3 @@ jobs:
         prerelease: ${{ steps.check-tag.outputs.rc == 'true' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Publish Changelog
-      uses: softprops/action-gh-release@v0.1.5
-      if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
-      with:
-        draft: false
-        files: CHANGELOG.md
-        prerelease: ${{ steps.check-tag.outputs.rc == 'true' }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
