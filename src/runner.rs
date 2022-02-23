@@ -1,9 +1,9 @@
-use crate::parser::{parse, ArgData, ArgKind, Event, EventData};
+use crate::parser::{parse, ArgData, ArgKind, Event, EventData, Position};
 use crate::Result;
 use anyhow::bail;
 use clap::{Arg, ArgMatches, Command};
 use convert_case::{Case, Casing};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::ops::Deref;
 
 const ENTRYPOINT: &'static str = "main";
@@ -39,7 +39,7 @@ struct Cmd<'a> {
     subcmds: HashMap<&'a str, Cmd<'a>>,
     has_main_fn: bool,
     // for conflict detecting
-    names: (HashSet<&'a str>, HashSet<char>),
+    names: (HashMap<&'a str, Position>, HashMap<char, Position>),
 }
 
 impl<'a> Cmd<'a> {
@@ -104,7 +104,7 @@ impl<'a> Cmd<'a> {
                     is_root_scope = false;
                     if let Some(mut cmd) = maybe_subcmd.take() {
                         if rootcmd.subcmds.get(name).is_some() {
-                            bail!("function {}(line {}) is redefined", name, position)
+                            bail!("{}(line {}) already exists", name, position)
                         }
                         cmd.name = Some((name, name.to_case(Case::Kebab)));
                         rootcmd.subcmds.insert(*name, cmd);
@@ -270,40 +270,46 @@ impl<'a> WrapArgData<'a> {
     }
     fn detect_conflict(
         &self,
-        names: &mut (HashSet<&'a str>, HashSet<char>),
-        position: usize,
+        names: &mut (HashMap<&'a str, Position>, HashMap<char, Position>),
+        current: Position,
     ) -> Result<()> {
         match self.kind {
             ArgKind::Positional => {
-                if let Some(_) = names.0.get(self.name) {
+                if let Some(position) = names.0.get(self.name) {
                     bail!(
-                        "{}(line {}) is invalid, name has been used",
+                        "{}(line {}) has `{}` already exists at line {}",
                         self.kind,
-                        position
+                        current,
+                        self.name,
+                        position,
                     );
                 } else {
-                    names.0.insert(self.name);
+                    names.0.insert(self.name, current);
                 }
             }
             _ => {
-                if let Some(_) = names.0.get(self.name) {
+                if let Some(position) = names.0.get(self.name) {
                     bail!(
-                        "{}(line {}) is invalid, long name has been used",
+                        "{}(line {}) has --{} already exists at line {}",
                         self.kind,
-                        position
+                        current,
+                        self.name,
+                        position,
                     )
                 } else {
-                    names.0.insert(self.name);
+                    names.0.insert(self.name, current);
                 }
-                if let Some(c) = self.short {
-                    if let Some(_) = names.1.get(&c) {
+                if let Some(short) = self.short {
+                    if let Some(position) = names.1.get(&short) {
                         bail!(
-                            "{}(line {}) is invalid, short name has been used",
+                            "{}(line {}) has -{} already exists at line {}",
                             self.kind,
-                            position
+                            current,
+                            short,
+                            position,
                         )
                     } else {
-                        names.1.insert(c);
+                        names.1.insert(short, current);
                     }
                 }
             }

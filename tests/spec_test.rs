@@ -1,4 +1,3 @@
-
 #[test]
 fn test_spec_help() {
     snapshot!(include_str!("spec.sh"), &["spec", "-h"]);

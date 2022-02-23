@@ -16,8 +16,10 @@ use std::fmt::Display;
 #[derive(Debug, PartialEq, Clone)]
 pub struct Event<'a> {
     pub data: EventData<'a>,
-    pub position: usize,
+    pub position: Position,
 }
+
+pub type Position = usize;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum EventData<'a> {
@@ -179,7 +181,7 @@ pub fn parse(source: &str) -> Result<Vec<Event>> {
                 }
             }
             Err(err) => {
-                bail!("Parse fail code line {}, {}", line, err)
+                bail!("Parse fail at line {}, {}", line, err)
             }
         }
     }

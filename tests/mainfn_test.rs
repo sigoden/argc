@@ -1,4 +1,3 @@
-
 #[test]
 fn test_no_mainfn_no_subcmds() {
     let script = r###"

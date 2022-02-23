@@ -42,7 +42,6 @@ macro_rules! plain {
     };
 }
 
-
 #[macro_export]
 macro_rules! fatal {
     (
@@ -52,5 +51,5 @@ macro_rules! fatal {
     ) => {
         let err = argc::run($source, $args).unwrap_err();
         assert_eq!(err.to_string().as_str(), $err);
-    }
+    };
 }
