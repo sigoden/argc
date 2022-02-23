@@ -1,6 +1,6 @@
 ---
 source: tests/mainfn_test.rs
-assertion_line: 55
+assertion_line: 53
 expression: output
 
 ---
@@ -8,7 +8,7 @@ RUN
 prog -h
 
 STDOUT
-exit 1
+
 
 STDERR
 prog 

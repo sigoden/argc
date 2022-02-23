@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 83
+assertion_line: 52
 expression: output
 
 ---
@@ -8,7 +8,7 @@ RUN
 spec cmd-positional-requires -h
 
 STDOUT
-exit 1
+
 
 STDERR
 spec-cmd-positional-requires 

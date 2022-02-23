@@ -27,5 +27,5 @@ log() {
     echo "git log"
 }
 
-eval $(argc $0 "$@")
+eval $(argc -e $0 "$@")
 ```

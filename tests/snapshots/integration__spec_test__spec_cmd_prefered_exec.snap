@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 62
+assertion_line: 60
 expression: output
 
 ---
@@ -11,7 +11,7 @@ STDOUT
 argc_arg_1=( "AB" "C D" )
 argc_flag_1=1
 argc_opt_1="A"
-cmd_prefered
+argc__call=cmd_prefered
 
 STDERR
 

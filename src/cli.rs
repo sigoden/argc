@@ -6,10 +6,12 @@ use convert_case::{Case, Casing};
 use std::collections::HashMap;
 use std::ops::Deref;
 
+const VARIABLE_PREFIX: &'static str = env!("CARGO_CRATE_NAME");
+
 const ENTRYPOINT: &'static str = "main";
 
 /// Run script with arguments, returns (stdout, stderr)
-pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<(Option<String>, Option<String>)> {
+pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<std::result::Result<String, String>> {
     let events = parse(source)?;
     let name = args[0];
     let mut rootcmd = Cmd::from_events(&events)?;
@@ -17,16 +19,8 @@ pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<(Option<String>, Opt
     let command = rootcmd.build()?;
     let res = command.try_get_matches_from(args);
     match res {
-        Ok(matches) => {
-            let mut output = rootcmd.retrive(&matches);
-            if matches.subcommand_name().is_none()
-                && rootcmd.root.map(|v| v.main).unwrap_or(false) == true
-            {
-                output.push_str(ENTRYPOINT)
-            }
-            Ok((Some(output), None))
-        }
-        Err(err) => Ok((Some(format!("exit 1")), Some(err.to_string()))),
+        Ok(matches) => Ok(Ok(rootcmd.retrive(&matches))),
+        Err(err) => Ok(Err(err.to_string())),
     }
 }
 
@@ -157,15 +151,24 @@ impl<'a> Cmd<'a> {
                 values.push(value);
             }
         }
+        let mut call_fn: Option<String> = None;
         for (_, subcmd) in &self.subcmds {
             if let Some((fn_name, cmd_name)) = &subcmd.name {
                 if let Some((match_name, subcmd_matches)) = matches.subcommand() {
                     if cmd_name.as_str() == match_name {
                         values.push(subcmd.retrive(&subcmd_matches));
-                        values.push(fn_name.to_string());
+                        call_fn = Some(fn_name.to_string());
                     }
                 }
             }
+        }
+        call_fn = call_fn.or_else(|| {
+            self.root
+                .as_ref()
+                .and_then(|v| if v.main { Some(format!("main")) } else { None })
+        });
+        if let Some(fn_name) = call_fn {
+            values.push(format!("{}__call={}", VARIABLE_PREFIX, fn_name));
         }
         values.join("")
     }
@@ -261,23 +264,22 @@ impl<'a> WrapArgData<'a> {
         Ok(arg)
     }
     fn retrive_match_value(&self, matches: &ArgMatches) -> Option<String> {
-        let prefix = env!("CARGO_CRATE_NAME");
         let name = self.name.to_case(Case::Snake);
         if !matches.is_present(self.name) {
             return None;
         }
         if self.kind == ArgKind::Flag {
-            return Some(format!("{}_{}=1\n", prefix, name));
+            return Some(format!("{}_{}=1\n", VARIABLE_PREFIX, name));
         }
         if self.multiple {
             return matches.values_of(self.name).map(|values| {
                 let values: Vec<String> = values.map(normalize_value).collect();
-                format!("{}_{}=( {} )\n", prefix, name, values.join(" "))
+                format!("{}_{}=( {} )\n", VARIABLE_PREFIX, name, values.join(" "))
             });
         }
         matches
             .value_of(self.name)
-            .map(|value| format!("{}_{}={}\n", prefix, name, normalize_value(value)))
+            .map(|value| format!("{}_{}={}\n", VARIABLE_PREFIX, name, normalize_value(value)))
     }
     fn detect_conflict(
         &self,

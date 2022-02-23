@@ -15,7 +15,7 @@ main() {
 
 }
     "###;
-    plain!(script, &["prog"], stdout: "main",);
+    plain!(script, &["prog"], stdout: "argc__call=main",);
 }
 
 #[test]
@@ -32,8 +32,8 @@ main() {
 
 }
     "###;
-    plain!(script, &["prog"], stdout: "main",);
-    plain!(script, &["prog", "cmd"], stdout: "cmd",);
+    plain!(script, &["prog"], stdout: "argc__call=main",);
+    plain!(script, &["prog", "cmd"], stdout: "argc__call=cmd",);
     snapshot!(script, &["prog", "-h"]);
 }
 
@@ -49,6 +49,6 @@ cmd() {
 
     "###;
     snapshot!(script, &["prog"]);
-    plain!(script, &["prog", "cmd"], stdout: "cmd",);
+    plain!(script, &["prog", "cmd"], stdout: "argc__call=cmd",);
     snapshot!(script, &["prog", "-h"]);
 }

@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 54
+assertion_line: 39
 expression: output
 
 ---
@@ -8,7 +8,7 @@ RUN
 spec cmd-flag-formats -h
 
 STDOUT
-exit 1
+
 
 STDERR
 spec-cmd-flag-formats 

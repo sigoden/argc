@@ -4,10 +4,12 @@ macro_rules! snapshot {
         $source:expr,
         $args:expr
     ) => {
-        let (stdout, stderr) = argc::run($source, $args).unwrap();
+        let (stdout, stderr) = match argc::run($source, $args).unwrap() {
+            Ok(stdout) => (stdout, String::new()),
+            Err(stderr) => (String::new(), stderr),
+        };
+
         let args = $args.join(" ");
-        let stdout = stdout.unwrap_or_default();
-        let stderr = stderr.unwrap_or_default();
         let output = format!(
             r###"RUN
 {}
@@ -32,12 +34,15 @@ macro_rules! plain {
         $(stdout: $stdout:expr,)?
         $(stderr: $stderr:expr,)?
     ) => {
-        let result = argc::run($source, $args).unwrap();
+        let result = match argc::run($source, $args).unwrap()  {
+            Ok(stdout) => (stdout, String::new()),
+            Err(stderr) => (String::new(), stderr),
+        };
         $({
-            assert_eq!(result.0.unwrap_or_default().as_str(), $stdout);
+            assert_eq!(result.0.as_str(), $stdout);
         })?
         $({
-            assert_eq!(result.1.unwrap_or_default().as_str(), $stderr);
+            assert_eq!(result.1.as_str(), $stderr);
         })?
     };
 }

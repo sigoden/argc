@@ -1,5 +1,5 @@
-mod parser;
 mod cli;
+mod parser;
 
 use anyhow::Error;
 pub use cli::run;

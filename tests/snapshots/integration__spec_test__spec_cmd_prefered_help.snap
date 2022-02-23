@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 10
+assertion_line: 8
 expression: output
 
 ---
@@ -8,7 +8,7 @@ RUN
 spec cmd-prefered -h
 
 STDOUT
-exit 1
+
 
 STDERR
 spec-cmd-prefered 

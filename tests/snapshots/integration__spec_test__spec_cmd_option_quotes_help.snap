@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 33
+assertion_line: 31
 expression: output
 
 ---
@@ -8,7 +8,7 @@ RUN
 spec cmd-option-quotes -h
 
 STDOUT
-exit 1
+
 
 STDERR
 spec-cmd-option-quotes 
