@@ -25,19 +25,17 @@ jobs:
         include:
         - target: aarch64-unknown-linux-musl
           os: ubuntu-latest
-          target_rustflags: '--codegen linker=aarch64-linux-gnu-gcc'
+          use-cross: true
         - target: armv7-unknown-linux-musleabihf
           os: ubuntu-latest
-          target_rustflags: '--codegen linker=arm-linux-gnueabihf-gcc'
+          use-cross: true
         - target: x86_64-apple-darwin
           os: macos-latest
-          target_rustflags: ''
         - target: x86_64-pc-windows-msvc
           os: windows-2016
-          target_rustflags: ''
         - target: x86_64-unknown-linux-musl
           os: ubuntu-latest
-          target_rustflags: ''
+          use-cross: true
 
     runs-on: ${{matrix.os}}
 
@@ -50,6 +48,7 @@ jobs:
         override: true
         target: ${{ matrix.target }}
         toolchain: stable
+        profile: minimal # minimal component installation (ie, no documentation)
 
     - name: Install AArch64 Toolchain
       if: ${{ matrix.target == 'aarch64-unknown-linux-musl' }}
@@ -75,12 +74,27 @@ jobs:
           echo "::set-output name=rc::true"
         fi
 
+    - name: Show version information (Rust, cargo, GCC)
+      shell: bash
+      run: |
+        gcc --version || true
+        rustup -V
+        rustup toolchain list
+        rustup default
+        cargo -V
+        rustc -V
+      
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: ${{ matrix.job.use-cross }}
+        command: build
+        args: --locked --release --target=${{ matrix.job.target }}
 
     - name: Build archive
       env:
         target: ${{ matrix.target }}
         version:  ${{ steps.check-tag.outputs.version }}
-        target_rustflags: ${{ matrix.target_rustflags }}
       run: |
         set -euxo pipefail
 
@@ -89,9 +103,6 @@ jobs:
         dist=$src/dist
         name=$bin-$version-$target
         executable=target/$target/release/$bin
-
-        RUSTFLAGS="--deny warnings --codegen target-feature=+crt-static $target_rustflags"
-        cargo build --release --target $target
 
         if [[ "$RUNNER_OS" == "Windows" ]]; then
           executable=$executable.exe
