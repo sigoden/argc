@@ -87,9 +87,9 @@ jobs:
     - name: Build
       uses: actions-rs/cargo@v1
       with:
-        use-cross: ${{ matrix.job.use-cross }}
+        use-cross: ${{ matrix.use-cross }}
         command: build
-        args: --locked --release --target=${{ matrix.job.target }}
+        args: --locked --release --target=${{ matrix.target }}
 
     - name: Build archive
       env:
