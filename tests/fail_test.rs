@@ -11,7 +11,7 @@ fn test_invalid_tag() {
     let script = r###"
 # @flag -f
     "###;
-    fatal!(script, &["prog"], "@flag(line 2) is invalid");
+    fatal!(script, &["prog"], "syntax error at line 2");
 }
 
 #[test]

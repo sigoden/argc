@@ -171,57 +171,32 @@ impl<'a> ArgData<'a> {
 pub fn parse(source: &str) -> Result<Vec<Event>> {
     let mut result = vec![];
     for (line_idx, line) in source.lines().enumerate() {
+        let position = line_idx + 1;
         match parse_line(line) {
             Ok((_, maybe_token)) => {
-                if let Some(value) = maybe_token {
-                    result.push(Event {
-                        position: line_idx + 1,
-                        data: value,
-                    })
+                if let Some(maybe_data) = maybe_token {
+                    if let Some(data) = maybe_data {
+                        result.push(Event { position, data });
+                    } else {
+                        bail!("syntax error at line {}", position)
+                    }
                 }
             }
             Err(err) => {
-                bail!("Parse fail at line {}, {}", line, err)
+                bail!("fail to parse at line {}, {}", position, err)
             }
         }
     }
     Ok(result)
 }
 
-fn parse_line(line: &str) -> nom::IResult<&str, Option<EventData>> {
+fn parse_line(line: &str) -> nom::IResult<&str, Option<Option<EventData>>> {
     alt((map(alt((parse_tag, parse_fn)), |v| Some(v)), success(None)))(line)
 }
 
-fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
-    preceded(
-        tuple((char('#'), space0, char('@'))),
-        alt((
-            map(preceded(tag("describe"), parse_tail), |v| {
-                EventData::Describe(v)
-            }),
-            map(preceded(tag("version"), parse_tail), |v| {
-                EventData::Version(v)
-            }),
-            map(preceded(tag("author"), parse_tail), |v| {
-                EventData::Author(v)
-            }),
-            map(preceded(tag("cmd"), parse_tail), |v| EventData::Cmd(v)),
-            map(
-                alt((
-                    preceded(pair(tag("option"), space1), parse_option_arg),
-                    preceded(pair(tag("arg"), space1), parse_positional_arg),
-                    preceded(pair(tag("flag"), space1), parse_flag_arg),
-                )),
-                |v| EventData::Arg(v),
-            ),
-            map(parse_name, |v| EventData::Unexpect(v)),
-        )),
-    )(input)
-}
-
-fn parse_fn(input: &str) -> nom::IResult<&str, EventData> {
+fn parse_fn(input: &str) -> nom::IResult<&str, Option<EventData>> {
     map(alt((parse_fn_keyword, parse_fn_no_keyword)), |v| {
-        EventData::Func(v)
+        Some(EventData::Func(v))
     })(input)
 }
 
@@ -236,6 +211,48 @@ fn parse_fn_no_keyword(input: &str) -> nom::IResult<&str, &str> {
         space0,
         terminated(parse_name, tuple((space0, char('('), space0, char(')')))),
     )(input)
+}
+
+fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
+    preceded(
+        tuple((many1(char('#')), space0, char('@'))),
+        alt((parse_tag_text, parse_tag_arg, parse_tag_unknown)),
+    )(input)
+}
+
+fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
+    map(
+        pair(
+            alt((tag("describe"), tag("version"), tag("author"), tag("cmd"))),
+            parse_tail,
+        ),
+        |(tag, text)| {
+            Some(match tag {
+                "describe" => EventData::Describe(text),
+                "version" => EventData::Version(text),
+                "author" => EventData::Author(text),
+                "cmd" => EventData::Cmd(text),
+                _ => unreachable!(),
+            })
+        },
+    )(input)
+}
+
+fn parse_tag_arg(input: &str) -> nom::IResult<&str, Option<EventData>> {
+    let check = peek(alt((tag("option"), tag("flag"), tag("arg"))));
+    let arg = map(
+        alt((
+            tuple((tag("option"), space1, parse_option_arg)),
+            tuple((tag("flag"), space1, parse_flag_arg)),
+            tuple((tag("arg"), space1, parse_positional_arg)),
+        )),
+        |(_, _, data)| Some(EventData::Arg(data)),
+    );
+    preceded(check, alt((arg, success(None))))(input)
+}
+
+fn parse_tag_unknown(input: &str) -> nom::IResult<&str, Option<EventData>> {
+    map(parse_name, |v| Some(EventData::Unexpect(v)))(input)
 }
 
 // Parse `@option`
@@ -431,12 +448,15 @@ mod tests {
     use super::*;
 
     macro_rules! assert_token {
-        ($comment:literal, None) => {
+        ($comment:literal, Ignore) => {
             assert_eq!(parse_line($comment).unwrap().1, None)
+        };
+        ($comment:literal, Error) => {
+            assert_eq!(parse_line($comment).unwrap().1.unwrap(), None)
         };
         ($comment:literal, $kind:ident) => {
             assert!(
-                if let Some(EventData::$kind(_)) = parse_line($comment).unwrap().1 {
+                if let Some(Some(EventData::$kind(_))) = parse_line($comment).unwrap().1 {
                     true
                 } else {
                     false
@@ -446,7 +466,7 @@ mod tests {
         ($comment:literal, $kind:ident, $text:literal) => {
             assert_eq!(
                 parse_line($comment).unwrap().1,
-                Some(EventData::$kind($text))
+                Some(Some(EventData::$kind($text)))
             )
         };
     }
@@ -542,7 +562,7 @@ mod tests {
         assert_token!("function foo", Func, "foo");
         assert_token!("function  foo", Func, "foo");
         assert_token!(" function foo", Func, "foo");
-        assert_token!("foo=bar", None);
-        assert_token!("#!", None);
+        assert_token!("foo=bar", Ignore);
+        assert_token!("#!/bin/bash", Ignore);
     }
 }
