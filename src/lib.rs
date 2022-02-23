@@ -1,7 +1,7 @@
 mod parser;
-mod runner;
+mod cli;
 
 use anyhow::Error;
-pub use runner::run;
+pub use cli::run;
 
 pub type Result<T> = std::result::Result<T, Error>;

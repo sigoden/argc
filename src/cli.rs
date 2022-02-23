@@ -12,7 +12,7 @@ const ENTRYPOINT: &'static str = "main";
 pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<(Option<String>, Option<String>)> {
     let events = parse(source)?;
     let name = args[0];
-    let mut rootcmd = Cmd::create(&events)?;
+    let mut rootcmd = Cmd::from_events(&events)?;
     rootcmd.name = Some((&name, name.to_string()));
     let command = rootcmd.build()?;
     let res = command.try_get_matches_from(args);
@@ -51,7 +51,7 @@ struct RootData<'a> {
 }
 
 impl<'a> Cmd<'a> {
-    fn create(events: &'a [Event]) -> Result<Self> {
+    fn from_events(events: &'a [Event]) -> Result<Self> {
         let mut rootcmd = Cmd::default();
         let mut rootdata = RootData::default();
         let mut is_root_scope = true;
@@ -113,8 +113,8 @@ impl<'a> Cmd<'a> {
                         }
                     }
                 }
-                EventData::Unexpect(name) => {
-                    bail!("@{}(line {}) is invalid", name, position);
+                EventData::Unknown(name) => {
+                    bail!("@{}(line {}) is unknown", name, position);
                 }
             }
         }

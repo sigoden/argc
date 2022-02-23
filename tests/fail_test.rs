@@ -1,17 +1,17 @@
 #[test]
-fn test_unsupport_tag() {
-    let script = r###"
-# @baz
-    "###;
-    fatal!(script, &["prog"], "@baz(line 2) is invalid");
-}
-
-#[test]
-fn test_invalid_tag() {
+fn test_syntax_error() {
     let script = r###"
 # @flag -f
     "###;
     fatal!(script, &["prog"], "syntax error at line 2");
+}
+
+#[test]
+fn test_unsupport_tag() {
+    let script = r###"
+# @baz
+    "###;
+    fatal!(script, &["prog"], "@baz(line 2) is unknown");
 }
 
 #[test]

@@ -36,7 +36,7 @@ pub enum EventData<'a> {
     /// A shell function. e.g `function cmd()` or `cmd()`
     Func(&'a str),
     /// Palaceholder for unknown or invalid tag
-    Unexpect(&'a str),
+    Unknown(&'a str),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -252,7 +252,7 @@ fn parse_tag_arg(input: &str) -> nom::IResult<&str, Option<EventData>> {
 }
 
 fn parse_tag_unknown(input: &str) -> nom::IResult<&str, Option<EventData>> {
-    map(parse_name, |v| Some(EventData::Unexpect(v)))(input)
+    map(parse_name, |v| Some(EventData::Unknown(v)))(input)
 }
 
 // Parse `@option`
@@ -564,5 +564,6 @@ mod tests {
         assert_token!(" function foo", Func, "foo");
         assert_token!("foo=bar", Ignore);
         assert_token!("#!/bin/bash", Ignore);
+        assert_token!("# @flag -f", Error);
     }
 }

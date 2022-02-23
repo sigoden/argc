@@ -9,7 +9,7 @@
     - [short](#short)
     - [long](#long)
     - [modifer](#modifer)
-    - [value notaion](#value-notaion)
+    - [notaion](#notaion)
   - [@flag](#flag)
   - [@arg](#arg)
     - [modifer](#modifer-1)
@@ -33,15 +33,15 @@
 ## @cmd
 
 ```
-@cmd [help string]
+@cmd [string]
 ```
 Define a subcommand.
 
 ## @option
 ```
-@cmd [short] [long][modifer] [value notation] [help string]
+@cmd [short] [long][modifer] [notation] [string]
 ```
-Define a option.
+Define value option.
 
 For examples.
 ```sh
@@ -60,16 +60,16 @@ A long flag is a -- followed by either a bare-word or a string, like --foo
 
 ### modifer
 
-- `*`: occur multiple times, is optional
-- `+`: occur multiple times, is required
-- `!`: is required
-- `=value`: has default value
+- `*`: occur multiple times, optional
+- `+`: occur multiple times, required
+- `!`: required
+- `=value`: default value
 - `[a|b|c]`: choices
-- `[=a|b|c]`: choices, the first choice is is default value.
+- `[=a|b|c]`: choices, first is default.
 
-### value notaion
+### notaion
 
-A value notation is set by placing bare-word between `<>` like <FOO>.
+A notation is set by placing bare-word between `<>` like <FOO>.
 
 It also very helpful when describing the type of input the user should be using, such as FILE, INTERFACE, etc.
 
@@ -77,13 +77,19 @@ It also very helpful when describing the type of input the user should be using,
 ```
 @flag [short] [long] [help string]
 ```
-Define a flag.
+Define flag option.
+
+For examples.
+```sh
+# @flag  --no-pager
+# @flag  -q, --quiet Do not print anything to stdout
+```
 
 ## @arg
 ```
 @arg <name>[modifer] [help string]
 ```
-Define a positoinal argument
+Define positoinal argument
 
 For examples.
 ```sh
@@ -92,6 +98,6 @@ For examples.
 
 ### modifer
 
-- `*`: occur multiple times, is optional
-- `+`: occur multiple times, is required
-- `!`: is required
+- `*`: occur multiple times, optional
+- `+`: occur multiple times, required
+- `!`: required
