@@ -90,7 +90,8 @@ jobs:
         name=$bin-$version-$target
         executable=target/$target/release/$bin
 
-        cargo build --release --target $target --deny warnings --codegen target-feature=+crt-static $target_rustflags
+        RUSTFLAGS="--deny warnings --codegen target-feature=+crt-static $target_rustflags"
+        cargo build --release --target $target
 
         if [[ "$RUNNER_OS" == "Windows" ]]; then
           executable=$executable.exe
