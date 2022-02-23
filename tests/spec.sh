@@ -1,5 +1,6 @@
 # @describe Test all aspects
-
+# @version    0.10
+# @author     nobody <nobody@example.com>
 # @cmd Preferred
 # @arg        arg1*            A positonal arg
 # @flag       -f --flag1       A flag

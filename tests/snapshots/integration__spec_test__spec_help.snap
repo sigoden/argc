@@ -11,14 +11,16 @@ STDOUT
 
 
 STDERR
-spec 
+spec 0.10
+nobody <nobody@example.com>
 Test all aspects
 
 USAGE:
     spec <SUBCOMMAND>
 
 OPTIONS:
-    -h, --help    Print help information
+    -h, --help       Print help information
+    -V, --version    Print version information
 
 SUBCOMMANDS:
     cmd-flag-formats           All kindof flags

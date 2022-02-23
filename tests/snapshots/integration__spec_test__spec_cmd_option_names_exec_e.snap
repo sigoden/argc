@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 68
+assertion_line: 89
 expression: output
 
 ---
@@ -14,7 +14,7 @@ argc_opt_4=( "value4_0" "value4_1" )
 argc_opt_5="a"
 argc_opt_6="a"
 argc_opt_7="a"
-
+cmd_option_names
 
 STDERR
 

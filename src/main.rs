@@ -25,7 +25,7 @@ fn main() {
         .author(env!("CARGO_PKG_AUTHORS"))
         .disable_help_subcommand(true)
         .about(about.as_str())
-        .arg(arg!(-e --eval "Generate for using with eval"))
+        .arg(arg!(-e --eval "Adjust to run in sh eval"))
         .arg(arg!(<SCRIPT> "Script file to be parsed"))
         .arg(arg!([ARGUMENTS]... "Arguments passed to script file"))
         .try_get_matches_from(&args);
@@ -33,12 +33,9 @@ fn main() {
     match res {
         Ok(matches) => {
             let eval = matches.is_present("eval");
-            match run(&script_args) {
+            match run(&script_args, eval) {
                 Ok(result) => match result {
-                    Ok(mut stdout) => {
-                        if eval {
-                            stdout.push_str(&format!("\n${}__call", env!("CARGO_CRATE_NAME")));
-                        }
+                    Ok(stdout) => {
                         println!("{}", stdout)
                     }
                     Err(stderr) => {
@@ -66,16 +63,17 @@ fn main() {
         }
     }
 }
-fn run(args: &[String]) -> Result<std::result::Result<String, String>> {
+fn run(args: &[String], eval: bool) -> Result<std::result::Result<String, String>> {
     let script_file = args[0].as_str();
     let args: Vec<&str> = args[1..].iter().map(|v| v.as_str()).collect();
     let name = Path::new(script_file)
         .file_stem()
         .and_then(|v| v.to_str())
-        .unwrap_or(env!("CARGO_CRATE_NAME"));
+        .ok_or(anyhow!("Fail to get command name"))?;
     let source = fs::read_to_string(script_file)
         .map_err(|e| anyhow!("Fail to load '{}', {}", script_file, e))?;
     let mut cmd_args = vec![name];
     cmd_args.extend(args);
-    argc::run(&source, &cmd_args)
+    let runner = argc::Runner::new(&source).set_eval(eval);
+    runner.run(&cmd_args)
 }

@@ -10,18 +10,39 @@ const VARIABLE_PREFIX: &'static str = env!("CARGO_CRATE_NAME");
 
 const ENTRYPOINT: &'static str = "main";
 
+pub struct Runner<'a> {
+    source: &'a str,
+    eval: bool,
+}
+
+impl<'a> Runner<'a> {
+    pub fn new(source: &'a str) -> Self {
+        Self {
+            source,
+            eval: false,
+        }
+    }
+    pub fn set_eval(mut self, eval: bool) -> Self {
+        self.eval = eval;
+        self
+    }
+    pub fn run(&self, args: &[&'a str]) -> Result<std::result::Result<String, String>> {
+        let events = parse(self.source)?;
+        let cmd = Cmd::create(&events)?;
+        let name = args[0];
+        let command = cmd.build(name)?;
+        let res = command.try_get_matches_from(args);
+        match res {
+            Ok(matches) => Ok(Ok(cmd.retrive(&matches, &self))),
+            Err(err) => Ok(Err(err.to_string())),
+        }
+    }
+}
+
 /// Run script with arguments, returns (stdout, stderr)
 pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<std::result::Result<String, String>> {
-    let events = parse(source)?;
-    let name = args[0];
-    let mut rootcmd = Cmd::from_events(&events)?;
-    rootcmd.name = Some((&name, name.to_string()));
-    let command = rootcmd.build()?;
-    let res = command.try_get_matches_from(args);
-    match res {
-        Ok(matches) => Ok(Ok(rootcmd.retrive(&matches))),
-        Err(err) => Ok(Err(err.to_string())),
-    }
+    let runner = Runner::new(source);
+    runner.run(args)
 }
 
 #[derive(Debug, Default)]
@@ -45,7 +66,7 @@ struct RootData<'a> {
 }
 
 impl<'a> Cmd<'a> {
-    fn from_events(events: &'a [Event]) -> Result<Self> {
+    fn create(events: &'a [Event]) -> Result<Self> {
         let mut rootcmd = Cmd::default();
         let mut rootdata = RootData::default();
         let mut is_root_scope = true;
@@ -115,12 +136,8 @@ impl<'a> Cmd<'a> {
         rootcmd.root = Some(rootdata);
         Ok(rootcmd)
     }
-    fn build(&'a self) -> Result<Command<'a>> {
-        if self.name.is_none() {
-            bail!("command must have name");
-        }
-        let (_, cmd_name) = self.name.as_ref().unwrap();
-        let mut cmd = Command::new(cmd_name);
+    fn build(&'a self, name: &'a str) -> Result<Command<'a>> {
+        let mut cmd = Command::new(name);
         if let Some(describe) = self.describe {
             cmd = cmd.about(describe);
         }
@@ -139,12 +156,12 @@ impl<'a> Cmd<'a> {
             cmd = cmd.arg(arg_data.build()?);
         }
         for (_, subcmd) in &self.subcmds {
-            let subcmd = subcmd.build()?;
+            let subcmd = subcmd.build(subcmd.name.as_ref().unwrap().1.as_str())?;
             cmd = cmd.subcommand(subcmd);
         }
         Ok(cmd)
     }
-    fn retrive(&'a self, matches: &ArgMatches) -> String {
+    fn retrive(&'a self, matches: &ArgMatches, runner: &Runner) -> String {
         let mut values = vec![];
         for arg_data in &self.args {
             if let Some(value) = arg_data.retrive_match_value(&matches) {
@@ -156,7 +173,7 @@ impl<'a> Cmd<'a> {
             if let Some((fn_name, cmd_name)) = &subcmd.name {
                 if let Some((match_name, subcmd_matches)) = matches.subcommand() {
                     if cmd_name.as_str() == match_name {
-                        values.push(subcmd.retrive(&subcmd_matches));
+                        values.push(subcmd.retrive(&subcmd_matches, runner));
                         call_fn = Some(fn_name.to_string());
                     }
                 }
@@ -168,7 +185,9 @@ impl<'a> Cmd<'a> {
                 .and_then(|v| if v.main { Some(format!("main")) } else { None })
         });
         if let Some(fn_name) = call_fn {
-            values.push(format!("{}__call={}", VARIABLE_PREFIX, fn_name));
+            if runner.eval {
+                values.push(format!("{}", fn_name));
+            }
         }
         values.join("")
     }

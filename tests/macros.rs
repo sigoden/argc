@@ -2,9 +2,12 @@
 macro_rules! snapshot {
     (
         $source:expr,
-        $args:expr
+        $args:expr,
+        $(eval: $eval:expr,)?
     ) => {
-        let (stdout, stderr) = match argc::run($source, $args).unwrap() {
+        let runner = argc::Runner::new($source);
+        $(let runner = runner.set_eval($eval);)?
+        let (stdout, stderr) = match runner.run($args).unwrap() {
             Ok(stdout) => (stdout, String::new()),
             Err(stderr) => (String::new(), stderr),
         };

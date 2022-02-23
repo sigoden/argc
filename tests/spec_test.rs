@@ -1,28 +1,28 @@
 #[test]
 fn test_spec_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "-h"]);
+    snapshot!(include_str!("spec.sh"), &["spec", "-h"],);
 }
 
 #[test]
 fn test_spec_cmd_prefered_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-prefered", "-h"]);
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd-prefered", "-h"],);
 }
 
 #[test]
 fn test_spec_cmd_omitted_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-omitted", "-h"]);
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd-omitted", "-h"],);
 }
 
 #[test]
 fn test_spec_cmd_option_names_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-option-names", "-h"]);
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd-option-names", "-h"],);
 }
 
 #[test]
 fn test_spec_cmd_option_formats_help() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-option-formats", "-h"]
+        &["spec", "cmd-option-formats", "-h"],
     );
 }
 
@@ -30,20 +30,20 @@ fn test_spec_cmd_option_formats_help() {
 fn test_spec_cmd_option_quotes_help() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-option-quotes", "-h"]
+        &["spec", "cmd-option-quotes", "-h"],
     );
 }
 
 #[test]
 fn test_spec_cmd_flag_formats_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-flag-formats", "-h"]);
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd-flag-formats", "-h"],);
 }
 
 #[test]
 fn test_spec_cmd_positional_only_help() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-only", "-h"]
+        &["spec", "cmd-positional-only", "-h"],
     );
 }
 
@@ -51,7 +51,7 @@ fn test_spec_cmd_positional_only_help() {
 fn test_spec_cmd_positional_requires_help() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-requires", "-h"]
+        &["spec", "cmd-positional-requires", "-h"],
     );
 }
 
@@ -59,7 +59,7 @@ fn test_spec_cmd_positional_requires_help() {
 fn test_spec_cmd_prefered_exec() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-prefered", "-f", "-o", "A", "AB", "C D"]
+        &["spec", "cmd-prefered", "-f", "-o", "A", "AB", "C D"],
     );
 }
 
@@ -80,6 +80,28 @@ fn test_spec_cmd_option_names_exec() {
             "value4_1",
             "--opt6",
             "a",
-        ]
+        ],
+    );
+}
+
+#[test]
+fn test_spec_cmd_option_names_exec_e() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &[
+            "spec",
+            "cmd-option-names",
+            "--opt2",
+            "value2",
+            "--opt3",
+            "value3_0,value3_1",
+            "--opt4",
+            "value4_0",
+            "--opt4",
+            "value4_1",
+            "--opt6",
+            "a",
+        ],
+        eval: true,
     );
 }
