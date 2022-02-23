@@ -80,6 +80,7 @@ jobs:
       env:
         target: ${{ matrix.target }}
         version:  ${{ steps.check-tag.outputs.version }}
+        target_rustflags: ${{ matrix.target_rustflags }}
       run: |
         set -euxo pipefail
 
@@ -89,7 +90,7 @@ jobs:
         name=$bin-$version-$target
         executable=target/$target/release/$bin
 
-        cargo build --target $target --release 
+        cargo build --release --target $target --deny warnings --codegen target-feature=+crt-static $target_rustflags
 
         if [[ "$RUNNER_OS" == "Windows" ]]; then
           executable=$executable.exe
