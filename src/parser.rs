@@ -7,7 +7,7 @@ use nom::{
         complete::{char, satisfy, space0, space1},
         streaming::none_of,
     },
-    combinator::{eof, map, opt, rest, success},
+    combinator::{eof, map, opt, peek, rest, success},
     multi::many1,
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
@@ -96,7 +96,7 @@ impl<'a> Display for ArgData<'a> {
                     let values: Vec<String> = choices
                         .iter()
                         .map(|value| {
-                            if value.chars().any(forbid_chars_choice) {
+                            if value.chars().any(is_terminate_char_choice_value) {
                                 format!("\"{}\"", value)
                             } else {
                                 value.to_string()
@@ -106,7 +106,7 @@ impl<'a> Display for ArgData<'a> {
                     name.push_str(&format!("[{}{}]", prefix, values.join("|")))
                 } else {
                     if let Some(default) = self.default {
-                        let value = if default.chars().any(forbid_chars_default) {
+                        let value = if default.chars().any(is_terminate_char_default_value) {
                             format!("\"{}\"", default)
                         } else {
                             default.to_string()
@@ -196,14 +196,16 @@ fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
     preceded(
         tuple((char('#'), space0, char('@'))),
         alt((
-            map(preceded(tag("describe"), parse_end), |v| {
+            map(preceded(tag("describe"), parse_tail), |v| {
                 EventData::Describe(v)
             }),
-            map(preceded(tag("version"), parse_end), |v| {
+            map(preceded(tag("version"), parse_tail), |v| {
                 EventData::Version(v)
             }),
-            map(preceded(tag("author"), parse_end), |v| EventData::Author(v)),
-            map(preceded(tag("cmd"), parse_end), |v| EventData::Cmd(v)),
+            map(preceded(tag("author"), parse_tail), |v| {
+                EventData::Author(v)
+            }),
+            map(preceded(tag("cmd"), parse_tail), |v| EventData::Cmd(v)),
             map(
                 alt((
                     preceded(pair(tag("option"), space1), parse_option_arg),
@@ -218,7 +220,7 @@ fn parse_tag(input: &str) -> nom::IResult<&str, EventData> {
 }
 
 fn parse_fn(input: &str) -> nom::IResult<&str, EventData> {
-    map(alt((parse_fn_keyword, parse_fn_elision)), |v| {
+    map(alt((parse_fn_keyword, parse_fn_no_keyword)), |v| {
         EventData::Func(v)
     })(input)
 }
@@ -229,7 +231,7 @@ fn parse_fn_keyword(input: &str) -> nom::IResult<&str, &str> {
 }
 
 // Parse fn likes `foo ()`
-fn parse_fn_elision(input: &str) -> nom::IResult<&str, &str> {
+fn parse_fn_no_keyword(input: &str) -> nom::IResult<&str, &str> {
     preceded(
         space0,
         terminated(parse_name, tuple((space0, char('('), space0, char(')')))),
@@ -238,46 +240,55 @@ fn parse_fn_elision(input: &str) -> nom::IResult<&str, &str> {
 
 // Parse `@option`
 fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
-    let (input, (short, mut arg, value_name, summary)) = tuple((
-        opt(parse_arg_short),
-        preceded(
-            pair(space0, tag("--")),
-            alt((parse_arg_choices, parse_arg_assign, parse_arg_mark)),
-        ),
-        opt(parse_arg_value_notation),
-        parse_end,
-    ))(input)?;
-    arg.short = short;
-    if summary.len() > 0 {
-        arg.summary = Some(summary);
-    }
-    arg.value_name = value_name;
-    Ok((input, arg))
+    map(
+        tuple((
+            parse_short,
+            preceded(
+                pair(space0, tag("--")),
+                alt((parse_arg_choices, parse_arg_assign, parse_arg_mark)),
+            ),
+            parse_value_notation,
+            parse_tail,
+        )),
+        |(short, mut arg, value_name, summary)| {
+            arg.short = short;
+            if summary.len() > 0 {
+                arg.summary = Some(summary);
+            }
+            arg.value_name = value_name;
+            arg
+        },
+    )(input)
 }
 
 // Parse `@option`, positional only
 fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
-    let (i, (mut arg, summary)) = tuple((preceded(space0, parse_arg_mark), parse_end))(input)?;
-    arg.kind = ArgKind::Positional;
-    if summary.len() > 0 {
-        arg.summary = Some(summary);
-    }
-    Ok((i, arg))
+    map(pair(parse_arg_mark, parse_tail), |(mut arg, summary)| {
+        arg.kind = ArgKind::Positional;
+        if summary.len() > 0 {
+            arg.summary = Some(summary);
+        }
+        arg
+    })(input)
 }
 
 // Parse `@flag`
 fn parse_flag_arg(input: &str) -> nom::IResult<&str, ArgData> {
-    let (input, (short, mut arg, summary)) = tuple((
-        opt(parse_arg_short),
-        preceded(pair(space0, tag("--")), parse_arg_name),
-        parse_end,
-    ))(input)?;
-    arg.short = short;
-    if summary.len() > 0 {
-        arg.summary = Some(summary);
-    }
-    arg.kind = ArgKind::Flag;
-    Ok((input, arg))
+    map(
+        tuple((
+            parse_short,
+            preceded(pair(space0, tag("--")), parse_arg_name),
+            parse_tail,
+        )),
+        |(short, mut arg, summary)| {
+            arg.short = short;
+            if summary.len() > 0 {
+                arg.summary = Some(summary);
+            }
+            arg.kind = ArgKind::Flag;
+            arg
+        },
+    )(input)
 }
 
 // Parse `str!` `str*` `str+` `str`
@@ -332,38 +343,43 @@ fn parse_arg_name(input: &str) -> nom::IResult<&str, ArgData> {
 }
 
 // Parse `-s`
-fn parse_arg_short(input: &str) -> nom::IResult<&str, char> {
-    preceded(
-        pair(space0, char('-')),
+fn parse_short(input: &str) -> nom::IResult<&str, Option<char>> {
+    let short = delimited(
+        char('-'),
         satisfy(|c| c.is_ascii_alphabetic()),
-    )(input)
+        peek(space1),
+    );
+    opt(short)(input)
 }
 
-fn parse_arg_value_notation(input: &str) -> nom::IResult<&str, &str> {
-    preceded(
-        space1,
-        delimited(
-            char('<'),
-            take_while(|c: char| c.is_ascii_uppercase() || c == '-'),
-            char('>'),
-        ),
-    )(input)
+// Parse '<FOO>'
+fn parse_value_notation(input: &str) -> nom::IResult<&str, Option<&str>> {
+    let main = delimited(
+        char('<'),
+        take_while(|c: char| c.is_ascii_uppercase() || c == '-'),
+        char('>'),
+    );
+    opt(preceded(space0, main))(input)
 }
 
 // Parse `a|b|c`, `=a|b|c`
 fn parse_choices(input: &str) -> nom::IResult<&str, (Vec<&str>, Option<&str>)> {
-    let (input, (equal, value, other_values)) = tuple((
-        opt(char('=')),
-        parse_choice_value,
-        many1(preceded(char('|'), parse_choice_value)),
-    ))(input)?;
-    let mut choices = vec![value];
-    let default_choice = equal.map(|_| value);
-    choices.extend(other_values);
-    Ok((input, (choices, default_choice)))
+    map(
+        tuple((
+            opt(char('=')),
+            parse_choice_value,
+            many1(preceded(char('|'), parse_choice_value)),
+        )),
+        |(default, head, tail)| {
+            let mut choices = vec![head];
+            choices.extend(tail);
+            let default_choice = default.map(|_| head);
+            (choices, default_choice)
+        },
+    )(input)
 }
 
-fn parse_end(input: &str) -> nom::IResult<&str, &str> {
+fn parse_tail(input: &str) -> nom::IResult<&str, &str> {
     alt((
         eof,
         preceded(space1, alt((eof, map(rest, |v: &str| v.trim())))),
@@ -376,42 +392,38 @@ fn parse_name(input: &str) -> nom::IResult<&str, &str> {
 
 fn parse_default_value(input: &str) -> nom::IResult<&str, &str> {
     alt((
-        parse_single_quote,
-        parse_double_quote,
-        take_till(forbid_chars_default),
+        parse_quoted_string,
+        take_till(is_terminate_char_default_value),
     ))(input)
 }
 
-fn forbid_chars_default(c: char) -> bool {
+fn is_terminate_char_default_value(c: char) -> bool {
     c.is_whitespace()
 }
 
 fn parse_choice_value(input: &str) -> nom::IResult<&str, &str> {
     alt((
-        parse_single_quote,
-        parse_double_quote,
-        take_till(forbid_chars_choice),
+        parse_quoted_string,
+        take_till(is_terminate_char_choice_value),
     ))(input)
 }
 
-fn forbid_chars_choice(c: char) -> bool {
+fn is_terminate_char_choice_value(c: char) -> bool {
     return c == '|' || c == ']';
 }
 
-fn parse_single_quote(input: &str) -> nom::IResult<&str, &str> {
-    delimited(
+fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
+    let single = delimited(
         char('\''),
-        alt((escaped(none_of("\\\'"), '\\', tag("'")), tag(""))),
+        alt((escaped(none_of("\\\'"), '\\', char('\'')), tag(""))),
         char('\''),
-    )(input)
-}
-
-fn parse_double_quote(input: &str) -> nom::IResult<&str, &str> {
-    delimited(
+    );
+    let double = delimited(
         char('"'),
-        alt((escaped(none_of("\\\""), '\\', tag("\"")), tag(""))),
+        alt((escaped(none_of("\\\""), '\\', char('"')), tag(""))),
         char('"'),
-    )(input)
+    );
+    alt((single, double))(input)
 }
 
 #[cfg(test)]
@@ -517,11 +529,7 @@ mod tests {
     fn test_parse_line() {
         assert_token!("# @describe A demo cli", Describe, "A demo cli");
         assert_token!("# @version 1.0.0", Version, "1.0.0");
-        assert_token!(
-            "# @author nobody <nobody@example.com>",
-            Author,
-            "nobody <nobody@example.com>"
-        );
+        assert_token!("# @author Somebody", Author, "Somebody");
         assert_token!("# @cmd A subcommand", Cmd, "A subcommand");
         assert_token!("# @flag -f --foo", Arg);
         assert_token!("# @option -f --foo", Arg);
