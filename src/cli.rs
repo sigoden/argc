@@ -184,6 +184,8 @@ impl<'a> Cmd<'a> {
         if let Some(fn_name) = call_fn {
             if runner.eval {
                 values.push(fn_name);
+            } else {
+                values.push(format!("{}__{}={}", VARIABLE_PREFIX, "call", fn_name));
             }
         }
         values.join("")
