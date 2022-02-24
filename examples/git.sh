@@ -12,14 +12,14 @@
 # @option     --decorate[=no|short|full|auto]
 # @option     --grep* <REGEX>     Limit the commits output
 log() {
-    echo "git log"
+    echo git log ${argc_refspec[@]}
 }
 
 # @cmd        Add file contents to the index
 # @arg        pathspec+           Files to add content from. 
 # @flag       -n --dry-run        Don’t actually add the file
 add() {
-    echo "git add"
+    echo git add ${argc_pathspec[@]}
 }
 
-eval $(argc -e $0 "$@")
+eval "$(argc -e $0 "$@")"

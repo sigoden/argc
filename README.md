@@ -1,187 +1,242 @@
 # Argc
 
-Argc is a handy way to handle cli parameters for shell script.
+Argc is a handy way to parse shellscript parameters.
 
-## Example
+## Install
 
-The content of the sample file `git.sh` is as follows
+Download from [Relase](https://github.com/sigoden/argc/releases)
+
+or 
+
+```
+cargo install argc
+```
+
+## Get Started
+
+Write the following `demo.sh` script
 
 ```sh
-#!/bin/bash
+# @flag     -q --quit                   Do not print anything to stdout
+# @option   --grep* <REGEX>             Limit the commits output
+# @option   --color[auto|always|never]  Print colorful output 
+# @arg      pathspec+                   Files to handle
+```
+
+Argc parses command arguments and prints variables
+
+```sh
+argc demo.sh --grep FOO --grep BAR BAZ -q README.md CHANGELOG.md
+```
+
+```
+argc_quit=1
+argc_grep=( "FOO" "BAR" "BAZ" )
+argc_color="auto"
+argc_pathspec=( "README.md" "CHANGELOG.md" )
+```
+
+Argc recognizes `-h` option and prints help text
+
+
+```sh
+argc demo.sh -h
+```
+
+```
+demo 
+
+USAGE:
+    demo [OPTIONS] <PATHSPEC>...
+
+ARGS:
+    <PATHSPEC>...    Files to handle
+
+OPTIONS:
+        --color <COLOR>      Print colorful output [default: auto] [possible values: auto, always,
+                             never]
+        --grep <REGEX>...    Limit the commits output
+    -h, --help               Print help information
+    -q, --quit               Do not print anything to stdout
+```
+
+Argc identifies parameter errors and prints error text
+
+```
+argc demo.sh --color=none
+```
+
+```
+error: "none" isn't a valid value for '--color <COLOR>'
+        [possible values: auto, always, never]
+
+USAGE:
+    demo --color <COLOR> <PATHSPEC>...
+
+For more information try --help
+
+```
+
+How Argc works:
+
+1. Extract parameter definitions from script comments
+2. Parse command line arguments
+3. If the parameter is abnormal, output error text or help information
+4. If everything is normal, output the parsed parameter variable
+
+
+```sh
+res=$(argc $0 "$@")
+if [ $? -eq  1 ]; then
+    echo -n $res
+    exit 1
+fi
+eval "$res"
+
+echo ${argc_pathspec[@]}
+```
+
+The above code is too redundant, and Argc provides the `-e` option to rescue
+
+
+```sh
+eval "(argc -e $0 "$@")"
+
+echo ${argc_pathspec[@]}
+```
+
+## Tag
+
+
+Argc generates parsing rules and help documentation based on tags (fields marked with `@` in comments).
+
+```sh
 # @describe   A fictional versioning CLI
 # @version    2.17.1 
 # @author     nobody <nobody@example.com>
 # @flag       --no-pager          Do not pipe Git output into a pager
-# @flag       -p --paginate       Pipe all output into less or $PAGER
 # @option     --git-dir=.git      Set the path to the repository
 
 # @cmd        Shows the commit log.
 # @arg        refspec*            Specify what destination ref
-# @flag       --source            Print out the ref name
-# @option     --decorate[=no|short|full|auto]
-# @option     --grep* <REGEX>     Limit the commits output
 log() {
-    echo "git log"
+    echo git log ${argc_refspec[@]}
 }
-
-# @cmd        Add file contents to the index
-# @arg        pathspec+           Files to add content from. 
-# @flag       -n --dry-run        Don’t actually add the file
-add() {
-    echo "git add"
-}
-
-eval $(argc -e $0 "$@")
-```
-
-Argc generate help
-
-```sh
-argc git.sh help
 ```
 
 ```
-git 2.17.1
+test2 2.17.1
 nobody <nobody@example.com>
 A fictional versioning CLI
 
 USAGE:
-    git [OPTIONS] <SUBCOMMAND>
+    test2 [OPTIONS] <SUBCOMMAND>
 
 OPTIONS:
         --git-dir <GIT-DIR>    Set the path to the repository [default: .git]
     -h, --help                 Print help information
         --no-pager             Do not pipe Git output into a pager
-    -p, --paginate             Pipe all output into less or $PAGER
     -V, --version              Print version information
 
 SUBCOMMANDS:
-    add     Add file contents to the index
     help    Print this message or the help of the given subcommand(s)
     log     Shows the commit log.
 ```
 
-Argc generate help for subcommand.
+### @describe
 
 ```sh
-argc git.sh log -h
+# @describe [string]
+
+# @describe A fictional versioning CLI
 ```
 
-```
-git-log 
-Shows the commit log.
+Define description
 
-USAGE:
-    git log [OPTIONS] [--] [REFSPEC]...
-
-ARGS:
-    <REFSPEC>...    Specify what destination ref
-
-OPTIONS:
-        --decorate <DECORATE>    [default: no] [possible values: no, short, full, auto]
-        --grep <REGEX>...        Limit the commits output
-    -h, --help                   Print help information
-        --source                 Print out the ref name
-```
-
-Argc parsing parameter got error:
-
-```
-argc git.sh -p log --decorate shot
-```
+### @version
 
 ```sh
-error: "shot" isn't a valid value for '--decorate <DECORATE>'
-        [possible values: no, short, full, auto]
-
-USAGE:
-    git log --decorate <DECORATE>
-
-For more information try --help
+# @version [string]
+# @version 2.17.1 
 ```
 
-> content is output to stderr, exit code  `$?` = 1
+Define version
 
-Argc successfully parses arguments.
+
+### @author
 
 ```sh
-argc git.sh -p log --grep ARG1 --grep ARG2
+# @author [string]
+# @author nobody <nobody@example.com>
 ```
 
-```
-argc_paginate=1
-argc_git_dir=".git"
-argc_decorate="no"
-argc_grep=( "ARG1" "ARG2" )
-```
+Define author
 
-> content is output to stderr, exit code  `$?` = 2
-
-## How it works
-
-How Argc works:
-
-1. Extract parameter definitions from script comments
-2. Parse and match command line arguments
-3. If the parameter is abnormal, output error text or help information
-4. If everything is normal, output the parsed parameter variable
-
-Argc generates parsing rules and help documentation based on tags (fields marked with `@` in comments).
-
-`@describe`, `@version`, `@author` define description, version, author respectively.
-
-`@flag` defines flag options, `@option` defines value options, and `@arg` defines positional arguments.
-
-`@cmd` marks subcommands.
-
-A parameter or option name followed by `*` means zero (i.e. optional) or more values are allowed
-
-A parameter or option name followed by `+` means that one (i.e. required) or more values are allowed
-
-The parameter followed by `=` indicates the default value
-
-The parameter followed by `[]` indicates optional values, the optional values are separated by `|`, and `=` is inserted before the first optional value to indicate that it is also the default value
-
-Check [syntax](./docs//SYNTAX.md) if you have any trouble with tags.
-
-## `-e` option
-
-Argc has a `-e` option, which when turned on means to adjust the output specifically for the sh `eval` command.
+### @cmd
 
 ```sh
-argc -e git.sh -p log --grep ARG1 --grep ARG2
+# @cmd [string]
+
+# @cmd Shows the commit log.
+log() {
+}
 ```
+Define subcommand
 
-```
-...
-argc_grep=( "ARG1" "ARG2" )
-log
-```
-
-Function calls are inserted at the end of normal output.
-
-
-Let's check  the help text/error prompt output.
+### @option
 
 ```sh
-argc -e git.sh log -h 2>/dev/null
+# @cmd [short] [long][modifer] [notation] [string]
+
+# @option -j, --threads <NUM>       Number of threads to use.
+# @option --grep* <PATTERN>
+# @option --dump-format[=json|yaml]
+# @option --shell-arg=-cu 
 ```
 
-The normal mode is that stdout is blank, now insert the following script:
+Define value option
+
+#### modifer
+
+The symbol after the long option name is the modifier, such as `*` in `--grep*`
+
+- `*`: occur multiple times, optional
+- `+`: occur multiple times, required
+- `!`: required
+- `=value`: default value
+- `[a|b|c]`: choices
+- `[=a|b|c]`: choices, first is default.
+
+#### notation
+
+Used to indicate that the option is a value option, other than a flag option.
+
+If not provided, the option name is used as a placeholder by default.
+
+You can use placeholder hint option value types `<NUM>`, `<PATH>`, `<PATTERN>`, `<DATE>`
+
+### @flag
 
 ```sh
-exit 1
-```
-This way the script will automatically exit if the parameter is wrong.
+# @flag [short] [long] [help string]
 
-We can insert the following code at the end of the script:
+## @flag  --no-pager
+## @flag  -q, --quiet Do not print anything to stdout
+```
+
+Define flag option
+
+### @arg
 
 ```sh
-eval $(argc -e $0 "$@")
+# @arg <name>[modifer] [help string]
+
+## @arg pathspec* Files to add content from.
 ```
+Define positional arguement
 
-Delegate Argc to handle command line arguments for our script.
+#### modifer
 
-If the arguments are OK, the variable is assigned and the function is called.
-
-If the parameter is abnormal, print help or error message and exit execution.
+- `*`: occur multiple times, optional
+- `+`: occur multiple times, required
+- `!`: required
