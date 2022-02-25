@@ -1,6 +1,6 @@
 # Argc
 
-Argc is a handy way to parse shellscript parameters.
+Argc is a handy way to parse shell script parameters.
 
 ## Install
 
@@ -9,7 +9,7 @@ Download from [Relase](https://github.com/sigoden/argc/releases)
 or 
 
 ```
-cargo install argc
+cargo install --locked argc
 ```
 
 ## Get Started

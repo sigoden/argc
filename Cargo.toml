@@ -3,7 +3,7 @@ name = "argc"
 version = "0.2.0"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "Parse sehllscript parameters"
+description = "Parse shell script parameters"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
@@ -22,6 +22,8 @@ insta = "1.12"
 
 [profile.release]
 lto = true
+strip = true
+opt-level = "z"
 
 [[test]]
 name = "integration"
