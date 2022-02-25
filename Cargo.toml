@@ -1,6 +1,6 @@
 [package]
 name = "argc"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
 description = "Parse shell script parameters"
@@ -9,7 +9,7 @@ homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
 autotests = false
 categories = ["command-line-utilities"]
-keywords = ["command-line", "args", "utility"]
+keywords = ["command-line", "shell-script", "argument-parser"]
 
 [dependencies]
 anyhow = "1"
