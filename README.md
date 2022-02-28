@@ -1,16 +1,6 @@
 # Argc
 
-Argc is a handy way to parse shell script parameters.
-
-## Install
-
-Download from [Relase](https://github.com/sigoden/argc/releases)
-
-or 
-
-```
-cargo install --locked argc
-```
+A sh/bash cli framework. Generate cli inteface from comments
 
 ## Get Started
 
@@ -88,10 +78,10 @@ How Argc works:
 ```sh
 res=$(argc $0 "$@")
 if [ $? -eq  1 ]; then
-    echo -n $res
+    echo -n $res # print help text or error messages
     exit 1
 fi
-eval "$res"
+eval "$res" # load generated variables
 
 echo ${argc_pathspec[@]}
 ```
@@ -240,3 +230,11 @@ Define positional arguement
 - `*`: occur multiple times, optional
 - `+`: occur multiple times, required
 - `!`: required
+
+## License
+
+Copyright (c) 2022 argc-developers.
+
+argc is made available under the terms of either the MIT License or the Apache License 2.0, at your option.
+
+See the LICENSE-APACHE and LICENSE-MIT files for license details.

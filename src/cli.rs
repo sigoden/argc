@@ -142,7 +142,7 @@ impl<'a> Cmd<'a> {
                 cmd = cmd.author(author);
             }
             if !self.subcmds.is_empty() && !rootdata.main {
-                cmd = cmd.subcommand_required(true);
+                cmd = cmd.subcommand_required(true).arg_required_else_help(true);
             }
         }
         for arg_data in &self.args {
