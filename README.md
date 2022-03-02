@@ -1,71 +1,8 @@
 # Argc
 
-A sh/bash cli framework. Generate cli inteface from comments
+A sh/bash cli framework.
 
-## Get Started
-
-Write the following `demo.sh` script
-
-```sh
-# @flag     -q --quit                   Do not print anything to stdout
-# @option   --grep* <REGEX>             Limit the commits output
-# @option   --color[auto|always|never]  Print colorful output 
-# @arg      pathspec+                   Files to handle
-```
-
-Argc parses command arguments and prints variables
-
-```sh
-argc demo.sh --grep FOO --grep BAR BAZ -q README.md CHANGELOG.md
-```
-
-```
-argc_quit=1
-argc_grep=( "FOO" "BAR" "BAZ" )
-argc_color="auto"
-argc_pathspec=( "README.md" "CHANGELOG.md" )
-```
-
-Argc recognizes `-h` option and prints help text
-
-
-```sh
-argc demo.sh -h
-```
-
-```
-demo 
-
-USAGE:
-    demo [OPTIONS] <PATHSPEC>...
-
-ARGS:
-    <PATHSPEC>...    Files to handle
-
-OPTIONS:
-        --color <COLOR>      Print colorful output [default: auto] [possible values: auto, always,
-                             never]
-        --grep <REGEX>...    Limit the commits output
-    -h, --help               Print help information
-    -q, --quit               Do not print anything to stdout
-```
-
-Argc identifies parameter errors and prints error text
-
-```
-argc demo.sh --color=none
-```
-
-```
-error: "none" isn't a valid value for '--color <COLOR>'
-        [possible values: auto, always, never]
-
-USAGE:
-    demo --color <COLOR> <PATHSPEC>...
-
-For more information try --help
-
-```
+![demo](https://user-images.githubusercontent.com/4012553/156291669-65461f81-4d7e-4c0f-851b-7276196c94f2.gif)
 
 How Argc works:
 
@@ -74,64 +11,9 @@ How Argc works:
 3. If the parameter is abnormal, output error text or help information
 4. If everything is normal, output the parsed parameter variable
 
-
-```sh
-res=$(argc $0 "$@")
-if [ $? -eq  1 ]; then
-    echo -n $res # print help text or error messages
-    exit 1
-fi
-eval "$res" # load generated variables
-
-echo ${argc_pathspec[@]}
-```
-
-The above code is too redundant, and Argc provides the `-e` option to rescue
-
-
-```sh
-eval "(argc -e $0 "$@")"
-
-echo ${argc_pathspec[@]}
-```
-
 ## Tag
 
-
 Argc generates parsing rules and help documentation based on tags (fields marked with `@` in comments).
-
-```sh
-# @describe   A fictional versioning CLI
-# @version    2.17.1 
-# @author     nobody <nobody@example.com>
-# @flag       --no-pager          Do not pipe Git output into a pager
-# @option     --git-dir=.git      Set the path to the repository
-
-# @cmd        Shows the commit log.
-# @arg        refspec*            Specify what destination ref
-log() {
-    echo git log ${argc_refspec[@]}
-}
-```
-
-```
-test2 2.17.1
-nobody <nobody@example.com>
-A fictional versioning CLI
-
-USAGE:
-    test2 [OPTIONS] <SUBCOMMAND>
-
-OPTIONS:
-        --git-dir <GIT-DIR>    Set the path to the repository [default: .git]
-    -h, --help                 Print help information
-        --no-pager             Do not pipe Git output into a pager
-    -V, --version              Print version information
-
-SUBCOMMANDS:
-    help    Print this message or the help of the given subcommand(s)
-    log     Shows the commit log.
-```
 
 ### @describe
 
@@ -147,6 +29,7 @@ Define description
 
 ```sh
 # @version [string]
+
 # @version 2.17.1 
 ```
 
@@ -157,6 +40,7 @@ Define version
 
 ```sh
 # @author [string]
+
 # @author nobody <nobody@example.com>
 ```
 
