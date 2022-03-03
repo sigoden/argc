@@ -1,26 +1,53 @@
 # Argc
 
-A sh/bash cli framework.
+A handy way to handle sh/bash cli parameters.
 
 ![demo](https://user-images.githubusercontent.com/4012553/156291669-65461f81-4d7e-4c0f-851b-7276196c94f2.gif)
 
 How Argc works:
 
-1. Extract parameter definitions from script comments
+To write a command line program with Argc, we only need to do two things:
+
+1. Describe the options, parameters, and subcommands in comments
+2. Call the following command to entrust Argc to process command line parameters for us
+
+```sh
+eval "(argc -e $0 "$@")"
+```
+
+Argc will do the following for us:
+
+1. Extract parameter definitions from comments
 2. Parse command line arguments
 3. If the parameter is abnormal, output error text or help information
 4. If everything is normal, output the parsed parameter variable
+5. If there is a subcommand, call the subcommand function
+
+We can easily access the corresponding option or parameter through the variable `$argc_<name>`.
+
+Try [examples/demo.sh](examples/demo.sh) your self.
 
 ## Tag
 
 Argc generates parsing rules and help documentation based on tags (fields marked with `@` in comments).
 
+ - [@describe](#describe)
+ - [@version](#version)
+ - [@author](#author)
+ - [@cmd](#cmd)
+ - [@option](#option)
+   - [modifier](#modifier)
+   - [notation](#notation)
+ - [@flag](#flag)
+ - [@arg](#arg)
+   - [modifier](#modifier-1)
+
 ### @describe
 
 ```sh
-# @describe [string]
+@describe [string]
 
-# @describe A fictional versioning CLI
+# @describe A demo cli
 ```
 
 Define description
@@ -28,7 +55,7 @@ Define description
 ### @version
 
 ```sh
-# @version [string]
+@version [string]
 
 # @version 2.17.1 
 ```
@@ -39,7 +66,7 @@ Define version
 ### @author
 
 ```sh
-# @author [string]
+@author [string]
 
 # @author nobody <nobody@example.com>
 ```
@@ -49,10 +76,14 @@ Define author
 ### @cmd
 
 ```sh
-# @cmd [string]
+@cmd [string]
 
-# @cmd Shows the commit log.
-log() {
+# @cmd Upload a file
+upload() {
+}
+
+# @cmd Download a file
+download() {
 }
 ```
 Define subcommand
@@ -60,19 +91,24 @@ Define subcommand
 ### @option
 
 ```sh
-# @cmd [short] [long][modifer] [notation] [string]
+ @option [short] [long][modifer] [notation] [string]
 
-# @option -j, --threads <NUM>       Number of threads to use.
-# @option --grep* <PATTERN>
-# @option --dump-format[=json|yaml]
-# @option --shell-arg=-cu 
+ ## @option    --foo                A option
+ ## @option -f --foo                A option with short alias
+ ## @option    --foo <PATH>         A option with notation
+ ## @option    --foo!               A required option
+ ## @option    --foo*               A option with multiple values
+ ## @option    --foo+               A required option with multiple values
+ ## @option    --foo[a|b]           A option with choices
+ ## @option    --foo[=a|b]          A option with choices and default value
+ ## @option -f --foo <PATH>         A option with short alias and notation
 ```
 
 Define value option
 
-#### modifer
+#### modifier
 
-The symbol after the long option name is the modifier, such as `*` in `--grep*`
+The symbol after the long option name is the modifier
 
 - `*`: occur multiple times, optional
 - `+`: occur multiple times, required
@@ -92,10 +128,10 @@ You can use placeholder hint option value types `<NUM>`, `<PATH>`, `<PATTERN>`, 
 ### @flag
 
 ```sh
-# @flag [short] [long] [help string]
+@flag [short] [long] [help string]
 
-## @flag  --no-pager
-## @flag  -q, --quiet Do not print anything to stdout
+# @flag     --foo       A flag
+# @flag  -f --foo       A flag with short alias
 ```
 
 Define flag option
@@ -103,13 +139,16 @@ Define flag option
 ### @arg
 
 ```sh
-# @arg <name>[modifer] [help string]
+@arg <name>[modifier] [help string]
 
-## @arg pathspec* Files to add content from.
+# @arg value            A positional argument
+# @arg value!           A required positional argument
+# @arg value*           A positional argument support multiple values
+# @arg value+           A required positional argument support multiple values
 ```
-Define positional arguement
+Define positional argument
 
-#### modifer
+#### modifier
 
 - `*`: occur multiple times, optional
 - `+`: occur multiple times, required
