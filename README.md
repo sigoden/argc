@@ -12,7 +12,7 @@ To write a command line program with Argc, we only need to do two things:
 2. Call the following command to entrust Argc to process command line parameters for us
 
 ```sh
-eval "(argc -e $0 "$@")"
+eval "$(argc -e $0 "$@")"
 ```
 
 Argc will do the following for us:
