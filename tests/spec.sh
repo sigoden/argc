@@ -48,7 +48,7 @@ cmd_option_formats() {
 # @option      --opt4[=a b|c d|e f]
 # @option      --opt5[="a|b"|"c]d"|ef]
 cmd_option_quotes() {
-
+    print_argc_vars
 }
 
 # @cmd All kindof flags
@@ -70,6 +70,11 @@ cmd_positional_only() {
 # @arg   arg1!  A required arg
 # @arg   arg2+  A required arg, multiple
 cmd_positional_requires() {
+    print_argc_vars
+}
+
+# @cmd Command without any arg
+cmd_without_any_arg() {
     print_argc_vars
 }
 

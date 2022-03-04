@@ -1,0 +1,15 @@
+---
+source: tests/spec_test.rs
+assertion_line: 112
+expression: output
+
+---
+RUN
+spec cmd-without-any-arg
+
+STDOUT
+argc__call=cmd_without_any_arg
+
+STDERR
+
+

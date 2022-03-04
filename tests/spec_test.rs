@@ -105,3 +105,8 @@ fn test_spec_cmd_option_names_exec_e() {
         eval: true,
     );
 }
+
+#[test]
+fn test_spec_cmd_without_any_arg() {
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd-without-any-arg"],);
+}
