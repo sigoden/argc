@@ -8,10 +8,10 @@ upload() {
 }
 
 # @cmd Download a file
-# @flag     -f --force              Override existed file
+# @flag     -f --force              Override existing file
 # @option   -t --tries <NUMBER>     Set number of retries to NUMBER
 # @arg      source!                 Url to download from
-# @arg      target                  Svae file to
+# @arg      target                  Save file to
 download() {
     echo "cmd:                      download"
     echo "flag:   --force           $argc_force"
