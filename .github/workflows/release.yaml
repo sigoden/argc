@@ -126,6 +126,14 @@ jobs:
           breaking: Breaking Changes
           feat: New Features
           fix: Bug Fixes
+          revert: Reverts
+          docs: Documentation Changes
+          style: Code Style Changes
+          build: Build System
+          ci: Continuous Integration
+          test: Tests
+          chore: Chores
+          other: Other Changes
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v0.1.5
