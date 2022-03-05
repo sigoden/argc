@@ -350,5 +350,5 @@ impl<'a> WrapArgData<'a> {
 }
 
 fn normalize_value(value: &str) -> String {
-    format!("\"{}\"", value.escape_debug())
+    format!("'{}'", value.escape_debug())
 }

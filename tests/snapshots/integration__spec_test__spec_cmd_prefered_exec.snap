@@ -8,9 +8,9 @@ RUN
 spec cmd-prefered -f -o A AB C D
 
 STDOUT
-argc_arg_1=( "AB" "C D" )
+argc_arg_1=( 'AB' 'C D' )
 argc_flag_1=1
-argc_opt_1="A"
+argc_opt_1='A'
 argc__call=cmd_prefered
 
 STDERR
