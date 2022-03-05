@@ -118,11 +118,14 @@ jobs:
 
     - name: Build changelog
       id: build-changelog
-      uses: ardalanamini/auto-changelog@v1
+      uses: ardalanamini/auto-changelog@v2
       if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        exclude: 'build,ci'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        commit-types: |
+          breaking: Breaking Changes
+          feat: New Features
+          fix: Bug Fixes
 
     - name: Publish Archive
       uses: softprops/action-gh-release@v0.1.5
