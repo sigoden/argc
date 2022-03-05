@@ -116,32 +116,12 @@ jobs:
             echo "::set-output name=archive::$archive"
         fi
 
-    - name: Build changelog
-      id: build-changelog
-      uses: ardalanamini/auto-changelog@v2
-      if: ${{ matrix.target == 'x86_64-unknown-linux-musl' }}
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        commit-types: |
-          breaking: Breaking Changes
-          feat: New Features
-          fix: Bug Fixes
-          revert: Reverts
-          docs: Documentation Changes
-          style: Code Style Changes
-          build: Build System
-          ci: Continuous Integration
-          test: Tests
-          chore: Chores
-          other: Other Changes
-
     - name: Publish Archive
       uses: softprops/action-gh-release@v0.1.5
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
       with:
         draft: false
         files: ${{ steps.package.outputs.archive }}
-        body: ${{steps.build-changelog.outputs.changelog}}
         prerelease: ${{ steps.check-tag.outputs.rc == 'true' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
