@@ -23,15 +23,29 @@ OPTIONS:
     -V, --version    Print version information
 
 SUBCOMMANDS:
-    cmd-flag-formats           All kindof flags
-    cmd-omitted                Omitted
-    cmd-option-formats         Optiona all kindof formats
-    cmd-option-names           Options all kindof names
-    cmd-option-quotes          Option value quoted
-    cmd-positional-only        Poistional One required
-    cmd-positional-requires    Poistional All required
-    cmd-prefered               Preferred
-    cmd-without-any-arg        Command without any arg
-    help                       Print this message or the help of the given subcommand(s)
+    cmd-flag-formats
+            All kind of flags
+    cmd-omitted
+            Omitted
+    cmd-option-formats
+            Options all kind of formats
+    cmd-option-names
+            Options all kind of names
+    cmd-option-quotes
+            Option value quoted
+    cmd-positional-only
+            Positional one required
+    cmd-positional-requires
+            Positional all required
+    cmd-positional-with-choices
+            Positional with choices
+    cmd-positional-with-choices-and-default
+            Positional with choices and value
+    cmd-preferred
+            Preferred
+    cmd-without-any-arg
+            Command without any arg
+    help
+            Print this message or the help of the given subcommand(s)
 
 

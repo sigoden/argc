@@ -12,7 +12,7 @@ STDOUT
 
 STDERR
 spec-cmd-option-names 
-Options all kindof names
+Options all kind of names
 
 USAGE:
     spec cmd-option-names [OPTIONS] --opt2 <OPT-2> --opt4 <OPT-4>...
