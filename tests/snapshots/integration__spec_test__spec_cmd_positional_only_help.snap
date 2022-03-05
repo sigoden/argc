@@ -12,7 +12,7 @@ STDOUT
 
 STDERR
 spec-cmd-positional-only 
-Poistional One required
+Positional one required
 
 USAGE:
     spec cmd-positional-only <ARG-1>

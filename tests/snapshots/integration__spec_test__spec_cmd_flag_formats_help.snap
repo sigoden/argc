@@ -12,7 +12,7 @@ STDOUT
 
 STDERR
 spec-cmd-flag-formats 
-All kindof flags
+All kind of flags
 
 USAGE:
     spec cmd-flag-formats [OPTIONS]

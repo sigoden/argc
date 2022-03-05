@@ -12,7 +12,7 @@ STDOUT
 
 STDERR
 spec-cmd-positional-requires 
-Poistional All required
+Positional all required
 
 USAGE:
     spec cmd-positional-requires <ARG-1> <ARG-2>...

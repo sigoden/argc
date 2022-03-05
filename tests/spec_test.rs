@@ -4,8 +4,8 @@ fn test_spec_help() {
 }
 
 #[test]
-fn test_spec_cmd_prefered_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-prefered", "-h"],);
+fn test_spec_cmd_preferred_help() {
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd-preferred", "-h"],);
 }
 
 #[test]
@@ -56,10 +56,10 @@ fn test_spec_cmd_positional_requires_help() {
 }
 
 #[test]
-fn test_spec_cmd_prefered_exec() {
+fn test_spec_cmd_preferred_exec() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-prefered", "-f", "-o", "A", "AB", "C D"],
+        &["spec", "cmd-preferred", "-f", "-o", "A", "AB", "C D"],
     );
 }
 
@@ -85,7 +85,7 @@ fn test_spec_cmd_option_names_exec() {
 }
 
 #[test]
-fn test_spec_cmd_option_names_exec_e() {
+fn test_spec_cmd_option_names_exec_eval() {
     snapshot!(
         include_str!("spec.sh"),
         &[
@@ -103,6 +103,46 @@ fn test_spec_cmd_option_names_exec_e() {
             "a",
         ],
         eval: true,
+    );
+}
+
+#[test]
+fn test_spec_cmd_positional_with_choices() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-positional-with-choices", "-h"],
+    );
+}
+
+#[test]
+fn test_spec_cmd_positional_with_choices_exec() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-positional-with-choices", "a"],
+    );
+}
+
+#[test]
+fn test_spec_cmd_positional_with_choices_exec_fail() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-positional-with-choices", "x"],
+    );
+}
+
+#[test]
+fn test_spec_cmd_positional_with_choices_and_default() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-positional-with-choices-and-default", "-h"],
+    );
+}
+
+#[test]
+fn test_spec_cmd_positional_with_choices_and_default_exec() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-positional-with-choices-and-default"],
     );
 }
 

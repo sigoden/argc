@@ -87,43 +87,14 @@ impl<'a> Display for ArgData<'a> {
                 if let Some(s) = self.short {
                     segments.push(format!("-{}", s));
                 }
-                let mut name = self.name.to_string();
-                if let Some(choices) = &self.choices {
-                    let mut prefix = String::new();
-                    if self.default.is_some() {
-                        prefix.push('=');
-                    }
-                    let values: Vec<String> = choices
-                        .iter()
-                        .map(|value| {
-                            if value.chars().any(is_terminate_char_choice_value) {
-                                format!("\"{}\"", value)
-                            } else {
-                                value.to_string()
-                            }
-                        })
-                        .collect();
-                    name.push_str(&format!("[{}{}]", prefix, values.join("|")))
-                } else if let Some(default) = self.default {
-                    let value = if default.chars().any(is_terminate_char_default_value) {
-                        format!("\"{}\"", default)
-                    } else {
-                        default.to_string()
-                    };
-                    name.push_str(&format!("={}", value));
-                } else if let Some(c) = self.name_suffix() {
-                    name.push(c)
-                }
+                let name = self.name_data();
                 segments.push(format!("--{}", name));
                 if let Some(value_name) = self.value_name {
                     segments.push(format!("<{}>", value_name));
                 }
             }
             ArgKind::Positional => {
-                let mut name = self.name.to_string();
-                if let Some(c) = self.name_suffix() {
-                    name.push(c)
-                }
+                let name = self.name_data();
                 segments.push(name);
             }
         }
@@ -150,6 +121,36 @@ impl<'a> ArgData<'a> {
     }
     pub fn is_positional(&self) -> bool {
         self.kind == ArgKind::Positional
+    }
+    fn name_data(&self) -> String {
+        let mut name = self.name.to_string();
+        if let Some(choices) = &self.choices {
+            let mut prefix = String::new();
+            if self.default.is_some() {
+                prefix.push('=');
+            }
+            let values: Vec<String> = choices
+                .iter()
+                .map(|value| {
+                    if value.chars().any(is_terminate_char_choice_value) {
+                        format!("\"{}\"", value)
+                    } else {
+                        value.to_string()
+                    }
+                })
+                .collect();
+            name.push_str(&format!("[{}{}]", prefix, values.join("|")))
+        } else if let Some(default) = self.default {
+            let value = if default.chars().any(is_terminate_char_default_value) {
+                format!("\"{}\"", default)
+            } else {
+                default.to_string()
+            };
+            name.push_str(&format!("={}", value));
+        } else if let Some(c) = self.name_suffix() {
+            name.push(c)
+        }
+        name
     }
     fn name_suffix(&self) -> Option<char> {
         if self.multiple {
@@ -278,13 +279,16 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
 
 // Parse `@option`, positional only
 fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
-    map(pair(parse_arg_mark, parse_tail), |(mut arg, summary)| {
-        arg.kind = ArgKind::Positional;
-        if !summary.is_empty() {
-            arg.summary = Some(summary);
-        }
-        arg
-    })(input)
+    map(
+        pair(alt((parse_arg_choices, parse_arg_mark)), parse_tail),
+        |(mut arg, summary)| {
+            arg.kind = ArgKind::Positional;
+            if !summary.is_empty() {
+                arg.summary = Some(summary);
+            }
+            arg
+        },
+    )(input)
 }
 
 // Parse `@flag`
@@ -541,6 +545,8 @@ mod tests {
         assert_parse_positional_arg!("foo!");
         assert_parse_positional_arg!("foo+");
         assert_parse_positional_arg!("foo*");
+        assert_parse_positional_arg!("foo[a|b]");
+        assert_parse_positional_arg!("foo[=a|b]");
     }
 
     #[test]

@@ -5,20 +5,20 @@ expression: output
 
 ---
 RUN
-spec cmd-prefered -h
+spec cmd-preferred -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-prefered 
+spec-cmd-preferred 
 Preferred
 
 USAGE:
-    spec cmd-prefered [OPTIONS] [ARG-1]...
+    spec cmd-preferred [OPTIONS] [ARG-1]...
 
 ARGS:
-    <ARG-1>...    A positonal arg
+    <ARG-1>...    A positional arg
 
 OPTIONS:
     -f, --flag1           A flag

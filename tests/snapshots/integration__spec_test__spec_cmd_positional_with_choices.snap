@@ -1,0 +1,26 @@
+---
+source: tests/spec_test.rs
+assertion_line: 111
+expression: output
+
+---
+RUN
+spec cmd-positional-with-choices -h
+
+STDOUT
+
+
+STDERR
+spec-cmd-positional-with-choices 
+Positional with choices
+
+USAGE:
+    spec cmd-positional-with-choices [ARG-1]
+
+ARGS:
+    <ARG-1>    A arg with choices [possible values: a, b]
+
+OPTIONS:
+    -h, --help    Print help information
+
+

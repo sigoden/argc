@@ -2,10 +2,10 @@
 # @version    0.10
 # @author     nobody <nobody@example.com>
 # @cmd Preferred
-# @arg        arg1*            A positonal arg
+# @arg        arg1*            A positional arg
 # @flag       -f --flag1       A flag
 # @option     -o --opt1        A option
-cmd_prefered() {
+cmd_preferred() {
     print_argc_vars
 }
 
@@ -17,7 +17,7 @@ cmd_omitted() {
     print_argc_vars
 }
 
-# @cmd Options all kindof names
+# @cmd Options all kind of names
 # @option      --opt1           optional
 # @option      --opt2!          required
 # @option      --opt3*          optional, multiple
@@ -29,7 +29,7 @@ cmd_option_names() {
     print_argc_vars
 }
 
-# @cmd Optiona all kindof formats
+# @cmd Options all kind of formats
 # @option      --opt1
 # @option  -a  --opt2
 # @option      --opt3 <OPT>    
@@ -51,7 +51,7 @@ cmd_option_quotes() {
     print_argc_vars
 }
 
-# @cmd All kindof flags
+# @cmd All kind of flags
 # @flag      --foo1
 # @flag   -a --foo2    
 # @flag      --foo3     With description
@@ -60,16 +60,28 @@ cmd_flag_formats() {
     print_argc_vars
 }
 
-# @cmd  Poistional One required
+# @cmd  Positional one required
 # @arg   arg1!   A required arg
 cmd_positional_only() {
     print_argc_vars
 }
 
-# @cmd  Poistional All required
+# @cmd  Positional all required
 # @arg   arg1!  A required arg
 # @arg   arg2+  A required arg, multiple
 cmd_positional_requires() {
+    print_argc_vars
+}
+
+# @cmd  Positional with choices
+# @arg   arg1[a|b]   A arg with choices
+cmd_positional_with_choices() {
+    print_argc_vars
+}
+
+# @cmd  Positional with choices and value
+# @arg   arg1[=a|b]   A arg with choices and default value
+cmd_positional_with_choices_and_default() {
     print_argc_vars
 }
 

@@ -1,6 +1,6 @@
 ---
 source: tests/mainfn_test.rs
-assertion_line: 37
+assertion_line: 36
 expression: output
 
 ---

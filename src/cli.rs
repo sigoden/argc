@@ -272,7 +272,11 @@ impl<'a> WrapArgData<'a> {
                     .index(self.pos_index + 1)
                     .required(self.required)
                     .value_name(&self.value_name);
-
+                if let Some(choices) = &self.choices {
+                    if choices.len() > 1 {
+                        arg = arg.possible_values(choices);
+                    }
+                }
                 if self.multiple {
                     arg = arg.multiple_values(true)
                 }

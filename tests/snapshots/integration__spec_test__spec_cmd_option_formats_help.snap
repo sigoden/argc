@@ -12,7 +12,7 @@ STDOUT
 
 STDERR
 spec-cmd-option-formats 
-Optiona all kindof formats
+Options all kind of formats
 
 USAGE:
     spec cmd-option-formats [OPTIONS]
