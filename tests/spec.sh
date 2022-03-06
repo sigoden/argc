@@ -85,8 +85,14 @@ cmd_positional_with_choices_and_default() {
     print_argc_vars
 }
 
-# @cmd Command without any arg
+# @cmd  Command without any arg
 cmd_without_any_arg() {
+    print_argc_vars
+}
+
+# @cmd  Command with alias
+# @alias a,alias
+cmd_alias() {
     print_argc_vars
 }
 

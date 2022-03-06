@@ -51,17 +51,19 @@ struct Cmd<'a> {
     describe: Option<&'a str>,
     positional_idx: usize,
     args: Vec<WrapArgData<'a>>,
-    subcmds: HashMap<&'a str, Cmd<'a>>,
+    cmds: Vec<Cmd<'a>>,
     // for conflict detecting
     names: (HashMap<&'a str, Position>, HashMap<char, Position>),
     // root only props
     root: Option<RootData<'a>>,
+    aliases: Vec<&'a str>,
 }
 
 #[derive(Debug, Default)]
 struct RootData<'a> {
     author: Option<&'a str>,
     version: Option<&'a str>,
+    names: HashMap<&'a str, Position>,
     main: bool,
 }
 
@@ -96,6 +98,23 @@ impl<'a> Cmd<'a> {
                     }
                     maybe_subcmd = Some(cmd);
                 }
+                EventData::Aliases(values) => {
+                    if let Some(cmd) = &mut maybe_subcmd {
+                        for name in values {
+                            if let Some(pos) = rootdata.names.get(name) {
+                                bail!(
+                                    "@alias(line {}) is conflicted with cmd or alias at line {}",
+                                    position,
+                                    pos
+                                );
+                            }
+                            rootdata.names.insert(name, *position);
+                        }
+                        cmd.aliases = values.to_vec();
+                    } else {
+                        bail!("@alias(line {}) is unexpected", position)
+                    }
+                }
                 EventData::Arg(arg_data) => {
                     if let Some(cmd) = &mut maybe_subcmd {
                         cmd.add_arg(arg_data, position)?;
@@ -112,11 +131,17 @@ impl<'a> Cmd<'a> {
                 EventData::Func(name) => {
                     is_root_scope = false;
                     if let Some(mut cmd) = maybe_subcmd.take() {
-                        if rootcmd.subcmds.get(name).is_some() {
-                            bail!("{}(line {}) already exists", name, position)
+                        if let Some(pos) = rootdata.names.get(name) {
+                            bail!(
+                                "{}(line {}) is conflicted with cmd or alias at line {}",
+                                name,
+                                position,
+                                pos
+                            )
                         }
+                        rootdata.names.insert(name, *position);
                         cmd.name = Some((name, name.to_case(Case::Kebab)));
-                        rootcmd.subcmds.insert(*name, cmd);
+                        rootcmd.cmds.push(cmd);
                     } else if *name == ENTRYPOINT {
                         rootdata.main = true;
                     }
@@ -141,14 +166,17 @@ impl<'a> Cmd<'a> {
             if let Some(author) = rootdata.author {
                 cmd = cmd.author(author);
             }
-            if !self.subcmds.is_empty() && !rootdata.main {
+            if !self.cmds.is_empty() && !rootdata.main {
                 cmd = cmd.subcommand_required(true).arg_required_else_help(true);
             }
+        }
+        if !self.aliases.is_empty() {
+            cmd = cmd.visible_aliases(&self.aliases);
         }
         for arg_data in &self.args {
             cmd = cmd.arg(arg_data.build()?);
         }
-        for subcmd in self.subcmds.values() {
+        for subcmd in &self.cmds {
             let subcmd = subcmd.build(subcmd.name.as_ref().unwrap().1.as_str())?;
             cmd = cmd.subcommand(subcmd);
         }
@@ -162,7 +190,7 @@ impl<'a> Cmd<'a> {
             }
         }
         let mut call_fn: Option<String> = None;
-        for subcmd in self.subcmds.values() {
+        for subcmd in &self.cmds {
             if let Some((fn_name, cmd_name)) = &subcmd.name {
                 if let Some((match_name, subcmd_matches)) = matches.subcommand() {
                     if cmd_name.as_str() == match_name {
