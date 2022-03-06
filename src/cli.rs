@@ -383,14 +383,18 @@ impl<'a> WrapArgData<'a> {
 
 fn escape_value(value: &str) -> String {
     let mut output = String::new();
+    if value.is_empty() {
+        return "''".to_string();
+    }
     for ch in value.chars() {
         if !ch.is_ascii() {
             output.push(ch)
         }
         match ch {
-            'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-' | '.' | ',' | ':' | '/' | '@' | '\n' => {
+            'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-' | '.' | ',' | ':' | '/' | '@' => {
                 output.push(ch)
             }
+            '\n' => output.push_str("'\n'"),
             _ => {
                 output.push('\\');
                 output.push(ch);
