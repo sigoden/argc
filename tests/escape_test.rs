@@ -11,4 +11,6 @@ fn test_syntax_error() {
     plain!(SCRIPT, &["prog", "\\1"], stdout: "argc_value=\\\\1",);
     plain!(SCRIPT, &["prog", ""], stdout: "argc_value=''",);
     plain!(SCRIPT, &["prog", "\n"], stdout: "argc_value='\n'",);
+    plain!(SCRIPT, &["prog", "世界"], stdout: "argc_value=\\世\\界",);
+    plain!(SCRIPT, &["prog", " "], stdout: "argc_value=\\ ",);
 }

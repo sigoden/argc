@@ -186,7 +186,9 @@ impl<'a> Cmd<'a> {
         let mut values = vec![];
         for arg_data in &self.args {
             if let Some(value) = arg_data.retrieve_match_value(matches) {
-                values.push(value);
+                if !value.is_empty() {
+                    values.push(value);
+                }
             }
         }
         let mut call_fn: Option<String> = None;
@@ -194,7 +196,10 @@ impl<'a> Cmd<'a> {
             if let Some((fn_name, cmd_name)) = &subcmd.name {
                 if let Some((match_name, subcmd_matches)) = matches.subcommand() {
                     if cmd_name.as_str() == match_name {
-                        values.push(subcmd.retrieve(subcmd_matches, runner));
+                        let value = subcmd.retrieve(subcmd_matches, runner);
+                        if !value.is_empty() {
+                            values.push(value);
+                        }
                         call_fn = Some(fn_name.to_string());
                     }
                 }
@@ -216,7 +221,7 @@ impl<'a> Cmd<'a> {
                 values.push(format!("{}__{}={}", VARIABLE_PREFIX, "call", fn_name));
             }
         }
-        values.join("\n").trim().to_string()
+        values.join("\n")
     }
     fn add_arg(&mut self, arg_data: &'a ArgData, position: &Position) -> Result<()> {
         let arg_data = WrapArgData::new(arg_data, self.positional_idx);
@@ -387,9 +392,6 @@ fn escape_value(value: &str) -> String {
         return "''".to_string();
     }
     for ch in value.chars() {
-        if !ch.is_ascii() {
-            output.push(ch)
-        }
         match ch {
             'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-' | '.' | ',' | ':' | '/' | '@' => {
                 output.push(ch)
