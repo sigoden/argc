@@ -323,13 +323,13 @@ impl<'a> WrapArgData<'a> {
         }
         if self.multiple {
             return matches.values_of(self.name).map(|values| {
-                let values: Vec<String> = values.map(normalize_value).collect();
+                let values: Vec<String> = values.map(escape_value).collect();
                 format!("{}_{}=( {} )\n", VARIABLE_PREFIX, name, values.join(" "))
             });
         }
         matches
             .value_of(self.name)
-            .map(|value| format!("{}_{}={}\n", VARIABLE_PREFIX, name, normalize_value(value)))
+            .map(|value| format!("{}_{}={}\n", VARIABLE_PREFIX, name, escape_value(value)))
     }
     fn detect_conflict(
         &self,
@@ -381,6 +381,21 @@ impl<'a> WrapArgData<'a> {
     }
 }
 
-fn normalize_value(value: &str) -> String {
-    format!("'{}'", value.escape_debug())
+fn escape_value(value: &str) -> String {
+    let mut output = String::new();
+    for ch in value.chars() {
+        if !ch.is_ascii() {
+            output.push(ch)
+        }
+        match ch {
+            'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-' | '.' | ',' | ':' | '/' | '@' | '\n' => {
+                output.push(ch)
+            }
+            _ => {
+                output.push('\\');
+                output.push(ch);
+            }
+        }
+    }
+    output
 }
