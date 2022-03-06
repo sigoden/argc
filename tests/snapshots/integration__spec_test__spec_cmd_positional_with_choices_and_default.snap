@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 128
+assertion_line: 139
 expression: output
 
 ---
@@ -15,10 +15,10 @@ spec-cmd-positional-with-choices-and-default
 Positional with choices and value
 
 USAGE:
-    spec cmd-positional-with-choices-and-default [ARG-1]
+    spec cmd-positional-with-choices-and-default [ARG]
 
 ARGS:
-    <ARG-1>    A arg with choices and default value [possible values: a, b]
+    <ARG>    A arg with choices and default value [default: a] [possible values: a, b]
 
 OPTIONS:
     -h, --help    Print help information

@@ -25,6 +25,7 @@ cmd_omitted() {
 # @option      --opt5=a         optional, default
 # @option      --opt6[a|b|c]    choices
 # @option      --opt7[=a|b|c]   choices, default
+# @option      --opt8![a|b|c]   required, choices
 cmd_option_names() {
     print_argc_vars
 }
@@ -74,14 +75,20 @@ cmd_positional_requires() {
 }
 
 # @cmd  Positional with choices
-# @arg   arg1[a|b]   A arg with choices
+# @arg   arg[a|b]   A arg with choices
 cmd_positional_with_choices() {
     print_argc_vars
 }
 
 # @cmd  Positional with choices and value
-# @arg   arg1[=a|b]   A arg with choices and default value
+# @arg   arg[=a|b]   A arg with choices and default value
 cmd_positional_with_choices_and_default() {
+    print_argc_vars
+}
+
+# @cmd  Positional with choices and required
+# @arg   arg![a|b]   A arg with choices and required
+cmd_positional_with_choices_and_required() {
     print_argc_vars
 }
 

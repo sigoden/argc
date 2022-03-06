@@ -161,6 +161,7 @@ Define flag option
 # @arg value*           A positional argument support multiple values
 # @arg value+           A required positional argument support multiple values
 # @arg value[a|b]       A positional argument with choices
+# @arg value[=a|b]      A positional argument with choices and default value
 # @arg value![a|b]      A required positional argument with choices
 ```
 Define positional argument

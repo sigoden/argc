@@ -7,7 +7,7 @@ use nom::{
         complete::{char, satisfy, space0, space1},
         streaming::none_of,
     },
-    combinator::{eof, map, opt, peek, rest, success},
+    combinator::{eof, fail, map, opt, peek, rest, success},
     multi::{many1, separated_list1},
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
@@ -141,7 +141,11 @@ impl<'a> ArgData<'a> {
                     }
                 })
                 .collect();
-            name.push_str(&format!("[{}{}]", prefix, values.join("|")))
+            let choices_value = format!("[{}{}]", prefix, values.join("|"));
+            if self.required {
+                name.push('!')
+            }
+            name.push_str(&choices_value);
         } else if let Some(default) = self.default {
             let value = if default.chars().any(is_terminate_char_default_value) {
                 format!("\"{}\"", default)
@@ -280,7 +284,13 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
             parse_short,
             preceded(
                 pair(space0, tag("--")),
-                alt((parse_arg_choices, parse_arg_assign, parse_arg_mark)),
+                alt((
+                    parse_arg_choices_default,
+                    parse_arg_choices_required,
+                    parse_arg_choices,
+                    parse_arg_assign,
+                    parse_arg_mark,
+                )),
             ),
             parse_value_notation,
             parse_tail,
@@ -299,7 +309,15 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
 // Parse `@option`, positional only
 fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
     map(
-        pair(alt((parse_arg_choices, parse_arg_mark)), parse_tail),
+        pair(
+            alt((
+                parse_arg_choices_default,
+                parse_arg_choices_required,
+                parse_arg_choices,
+                parse_arg_mark,
+            )),
+            parse_tail,
+        ),
         |(mut arg, summary)| {
             arg.kind = ArgKind::Positional;
             if !summary.is_empty() {
@@ -360,7 +378,7 @@ fn parse_arg_assign(input: &str) -> nom::IResult<&str, ArgData> {
     )(input)
 }
 
-// Parse `str[a|b|c]` or `str[=a|b|c]`
+// Parse `str[a|b|c]`
 fn parse_arg_choices(input: &str) -> nom::IResult<&str, ArgData> {
     map(
         pair(
@@ -369,6 +387,37 @@ fn parse_arg_choices(input: &str) -> nom::IResult<&str, ArgData> {
         ),
         |(mut arg, (choices, default))| {
             arg.choices = Some(choices);
+            arg.default = default;
+            arg
+        },
+    )(input)
+}
+
+// Parse `str[=a|b|c]`
+fn parse_arg_choices_default(input: &str) -> nom::IResult<&str, ArgData> {
+    map(
+        pair(
+            parse_arg_name,
+            delimited(char('['), parse_choices_default, char(']')),
+        ),
+        |(mut arg, (choices, default))| {
+            arg.choices = Some(choices);
+            arg.default = default;
+            arg
+        },
+    )(input)
+}
+
+// Parse `str![a|b|c]`
+fn parse_arg_choices_required(input: &str) -> nom::IResult<&str, ArgData> {
+    map(
+        pair(
+            terminated(parse_arg_name, char('!')),
+            delimited(char('['), parse_choices, char(']')),
+        ),
+        |(mut arg, (choices, default))| {
+            arg.choices = Some(choices);
+            arg.required = true;
             arg.default = default;
             arg
         },
@@ -400,19 +449,25 @@ fn parse_value_notation(input: &str) -> nom::IResult<&str, Option<&str>> {
     opt(preceded(space0, main))(input)
 }
 
-// Parse `a|b|c`, `=a|b|c`
+// Parse `a|b|c`
 fn parse_choices(input: &str) -> nom::IResult<&str, (Vec<&str>, Option<&str>)> {
+    map(separated_list1(char('|'), parse_choice_value), |choices| {
+        (choices, None)
+    })(input)
+}
+
+// Parse `=a|b|c`
+fn parse_choices_default(input: &str) -> nom::IResult<&str, (Vec<&str>, Option<&str>)> {
     map(
         tuple((
-            opt(char('=')),
+            char('='),
             parse_choice_value,
             many1(preceded(char('|'), parse_choice_value)),
         )),
-        |(default, head, tail)| {
+        |(_, head, tail)| {
             let mut choices = vec![head];
             choices.extend(tail);
-            let default_choice = default.map(|_| head);
-            (choices, default_choice)
+            (choices, Some(head))
         },
     )(input)
 }
@@ -444,6 +499,9 @@ fn is_terminate_char_default_value(c: char) -> bool {
 }
 
 fn parse_choice_value(input: &str) -> nom::IResult<&str, &str> {
+    if input.starts_with('=') {
+        return fail(input);
+    }
     alt((
         parse_quoted_string,
         take_till(is_terminate_char_choice_value),
@@ -552,6 +610,7 @@ mod tests {
         assert_parse_option_arg!("--foo-abc <FOO>");
         assert_parse_option_arg!("--foo=\"a b\"");
         assert_parse_option_arg!("--foo[\"a|b\"|\"c]d\"]");
+        assert_parse_option_arg!("--foo![a|b]");
     }
 
     #[test]
@@ -570,6 +629,7 @@ mod tests {
         assert_parse_positional_arg!("foo*");
         assert_parse_positional_arg!("foo[a|b]");
         assert_parse_positional_arg!("foo[=a|b]");
+        assert_parse_positional_arg!("foo![a|b]");
     }
 
     #[test]
@@ -594,5 +654,7 @@ mod tests {
         assert_token!("foo=bar", Ignore);
         assert_token!("#!/bin/bash", Ignore);
         assert_token!("# @flag -f", Error);
+        assert_token!("# @option -foo![=a|b]", Error);
+        assert_token!("# @arg foo![=a|b]", Error);
     }
 }
