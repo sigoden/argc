@@ -216,7 +216,7 @@ impl<'a> Cmd<'a> {
                 values.push(format!("{}__{}={}", VARIABLE_PREFIX, "call", fn_name));
             }
         }
-        values.join("")
+        values.join("\n").trim().to_string()
     }
     fn add_arg(&mut self, arg_data: &'a ArgData, position: &Position) -> Result<()> {
         let arg_data = WrapArgData::new(arg_data, self.positional_idx);
@@ -319,17 +319,17 @@ impl<'a> WrapArgData<'a> {
             return None;
         }
         if self.kind == ArgKind::Flag {
-            return Some(format!("{}_{}=1\n", VARIABLE_PREFIX, name));
+            return Some(format!("{}_{}=1", VARIABLE_PREFIX, name));
         }
         if self.multiple {
             return matches.values_of(self.name).map(|values| {
                 let values: Vec<String> = values.map(escape_value).collect();
-                format!("{}_{}=( {} )\n", VARIABLE_PREFIX, name, values.join(" "))
+                format!("{}_{}=( {} )", VARIABLE_PREFIX, name, values.join(" "))
             });
         }
         matches
             .value_of(self.name)
-            .map(|value| format!("{}_{}={}\n", VARIABLE_PREFIX, name, escape_value(value)))
+            .map(|value| format!("{}_{}={}", VARIABLE_PREFIX, name, escape_value(value)))
     }
     fn detect_conflict(
         &self,
