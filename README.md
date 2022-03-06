@@ -115,6 +115,7 @@ Define alias for a subcommand
  ## @option    --foo[a|b]           A option with choices
  ## @option    --foo[=a|b]          A option with choices and default value
  ## @option -f --foo <PATH>         A option with short alias and notation
+ ## @option    --foo![a|b]          A required option with choices
 ```
 
 Define value option
@@ -129,6 +130,7 @@ The symbol after the long option name is the modifier
 - `=value`: default value
 - `[a|b|c]`: choices
 - `[=a|b|c]`: choices, first is default.
+- `![a|b|c]`: choices, required
 
 #### notation
 
@@ -159,7 +161,7 @@ Define flag option
 # @arg value*           A positional argument support multiple values
 # @arg value+           A required positional argument support multiple values
 # @arg value[a|b]       A positional argument with choices
-# @arg value[=a|b]      A positional argument with choices and default value
+# @arg value![a|b]      A required positional argument with choices
 ```
 Define positional argument
 
@@ -169,7 +171,7 @@ Define positional argument
 - `+`: occur multiple times, required
 - `!`: required
 - `[a|b|c]`: choices
-- `[=a|b|c]`: choices, first is default.
+- `![a|b|c]`: choices, required
 
 ## License
 
