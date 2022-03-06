@@ -80,6 +80,8 @@ fn test_spec_cmd_option_names_exec() {
             "value4_1",
             "--opt6",
             "a",
+            "--opt8",
+            "a",
         ],
     );
 }
@@ -100,6 +102,8 @@ fn test_spec_cmd_option_names_exec_eval() {
             "--opt4",
             "value4_1",
             "--opt6",
+            "a",
+            "--opt8",
             "a",
         ],
         eval: true,
@@ -143,6 +147,22 @@ fn test_spec_cmd_positional_with_choices_and_default_exec() {
     snapshot!(
         include_str!("spec.sh"),
         &["spec", "cmd-positional-with-choices-and-default"],
+    );
+}
+
+#[test]
+fn test_spec_cmd_positional_with_choices_and_required() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-positional-with-choices-and-required", "-h"],
+    );
+}
+
+#[test]
+fn test_spec_cmd_positional_with_choices_and_required_exec_fail() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-positional-with-choices-and-required"],
     );
 }
 

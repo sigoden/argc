@@ -15,7 +15,7 @@ spec-cmd-option-names
 Options all kind of names
 
 USAGE:
-    spec cmd-option-names [OPTIONS] --opt2 <OPT-2> --opt4 <OPT-4>...
+    spec cmd-option-names [OPTIONS] --opt2 <OPT-2> --opt4 <OPT-4>... --opt8 <OPT-8>
 
 OPTIONS:
     -h, --help               Print help information
@@ -26,5 +26,6 @@ OPTIONS:
         --opt5 <OPT-5>       optional, default [default: a]
         --opt6 <OPT-6>       choices [possible values: a, b, c]
         --opt7 <OPT-7>       choices, default [default: a] [possible values: a, b, c]
+        --opt8 <OPT-8>       required, choices [possible values: a, b, c]
 
 

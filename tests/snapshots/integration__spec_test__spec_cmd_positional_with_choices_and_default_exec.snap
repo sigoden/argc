@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 143
+assertion_line: 147
 expression: output
 
 ---
@@ -8,6 +8,7 @@ RUN
 spec cmd-positional-with-choices-and-default
 
 STDOUT
+argc_arg=a
 argc__call=cmd_positional_with_choices_and_default
 
 STDERR

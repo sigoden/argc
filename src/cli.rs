@@ -313,6 +313,9 @@ impl<'a> WrapArgData<'a> {
                 if self.multiple {
                     arg = arg.multiple_values(true)
                 }
+                if let Some(default) = self.default {
+                    arg = arg.default_value(default);
+                }
                 arg
             }
         };
