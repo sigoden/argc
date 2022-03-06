@@ -31,11 +31,11 @@ pub enum EventData<'a> {
     Author(&'a str),
     /// Define a subcommand, e.g. `@cmd A sub command`
     Cmd(&'a str),
-    /// Define a arguement
+    /// Define a argument
     Arg(ArgData<'a>),
     /// A shell function. e.g `function cmd()` or `cmd()`
     Func(&'a str),
-    /// Palaceholder for unknown or invalid tag
+    /// Placeholder for unknown or invalid tag
     Unknown(&'a str),
 }
 

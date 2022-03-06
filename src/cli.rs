@@ -33,7 +33,7 @@ impl<'a> Runner<'a> {
         let command = cmd.build(name)?;
         let res = command.try_get_matches_from(args);
         match res {
-            Ok(matches) => Ok(Ok(cmd.retrive(&matches, self))),
+            Ok(matches) => Ok(Ok(cmd.retrieve(&matches, self))),
             Err(err) => Ok(Err(err.to_string())),
         }
     }
@@ -49,7 +49,7 @@ pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<std::result::Result<
 struct Cmd<'a> {
     name: Option<(&'a str, String)>,
     describe: Option<&'a str>,
-    postional_idx: usize,
+    positional_idx: usize,
     args: Vec<WrapArgData<'a>>,
     subcmds: HashMap<&'a str, Cmd<'a>>,
     // for conflict detecting
@@ -154,10 +154,10 @@ impl<'a> Cmd<'a> {
         }
         Ok(cmd)
     }
-    fn retrive(&'a self, matches: &ArgMatches, runner: &Runner) -> String {
+    fn retrieve(&'a self, matches: &ArgMatches, runner: &Runner) -> String {
         let mut values = vec![];
         for arg_data in &self.args {
-            if let Some(value) = arg_data.retrive_match_value(matches) {
+            if let Some(value) = arg_data.retrieve_match_value(matches) {
                 values.push(value);
             }
         }
@@ -166,7 +166,7 @@ impl<'a> Cmd<'a> {
             if let Some((fn_name, cmd_name)) = &subcmd.name {
                 if let Some((match_name, subcmd_matches)) = matches.subcommand() {
                     if cmd_name.as_str() == match_name {
-                        values.push(subcmd.retrive(subcmd_matches, runner));
+                        values.push(subcmd.retrieve(subcmd_matches, runner));
                         call_fn = Some(fn_name.to_string());
                     }
                 }
@@ -191,10 +191,10 @@ impl<'a> Cmd<'a> {
         values.join("")
     }
     fn add_arg(&mut self, arg_data: &'a ArgData, position: &Position) -> Result<()> {
-        let arg_data = WrapArgData::new(arg_data, self.postional_idx);
+        let arg_data = WrapArgData::new(arg_data, self.positional_idx);
         arg_data.detect_conflict(&mut self.names, *position)?;
         if arg_data.is_positional() {
-            self.postional_idx += 1;
+            self.positional_idx += 1;
         }
         self.args.push(arg_data);
         Ok(())
@@ -285,7 +285,7 @@ impl<'a> WrapArgData<'a> {
         };
         Ok(arg)
     }
-    fn retrive_match_value(&self, matches: &ArgMatches) -> Option<String> {
+    fn retrieve_match_value(&self, matches: &ArgMatches) -> Option<String> {
         let name = self.name.to_case(Case::Snake);
         if !matches.is_present(self.name) {
             return None;
