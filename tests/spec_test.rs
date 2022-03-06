@@ -147,6 +147,11 @@ fn test_spec_cmd_positional_with_choices_and_default_exec() {
 }
 
 #[test]
+fn test_spec_cmd_alias() {
+    snapshot!(include_str!("spec.sh"), &["spec", "alias"],);
+}
+
+#[test]
 fn test_spec_cmd_without_any_arg() {
     snapshot!(include_str!("spec.sh"), &["spec", "cmd-without-any-arg"],);
 }

@@ -8,7 +8,7 @@ use nom::{
         streaming::none_of,
     },
     combinator::{eof, map, opt, peek, rest, success},
-    multi::many1,
+    multi::{many1, separated_list1},
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
 use std::fmt::Display;
@@ -31,6 +31,8 @@ pub enum EventData<'a> {
     Author(&'a str),
     /// Define a subcommand, e.g. `@cmd A sub command`
     Cmd(&'a str),
+    /// Define alias for a subcommand, e.g. `@alias t,tst`
+    Aliases(Vec<&'a str>),
     /// Define a argument
     Arg(ArgData<'a>),
     /// A shell function. e.g `function cmd()` or `cmd()`
@@ -215,7 +217,12 @@ fn parse_fn_no_keyword(input: &str) -> nom::IResult<&str, &str> {
 fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
     preceded(
         tuple((many1(char('#')), space0, char('@'))),
-        alt((parse_tag_text, parse_tag_arg, parse_tag_unknown)),
+        alt((
+            parse_tag_text,
+            parse_tag_arg,
+            parse_tag_alias,
+            parse_tag_unknown,
+        )),
     )(input)
 }
 
@@ -248,6 +255,18 @@ fn parse_tag_arg(input: &str) -> nom::IResult<&str, Option<EventData>> {
         |(_, _, data)| Some(EventData::Arg(data)),
     );
     preceded(check, alt((arg, success(None))))(input)
+}
+
+fn parse_tag_alias(input: &str) -> nom::IResult<&str, Option<EventData>> {
+    map(
+        pair(tag("alias"), preceded(space1, parse_name_list)),
+        |(tag, list)| {
+            Some(match tag {
+                "alias" => EventData::Aliases(list),
+                _ => unreachable!(),
+            })
+        },
+    )(input)
 }
 
 fn parse_tag_unknown(input: &str) -> nom::IResult<&str, Option<EventData>> {
@@ -405,6 +424,10 @@ fn parse_tail(input: &str) -> nom::IResult<&str, &str> {
     ))(input)
 }
 
+fn parse_name_list(input: &str) -> nom::IResult<&str, Vec<&str>> {
+    separated_list1(char(','), delimited(space0, parse_name, space0))(input)
+}
+
 fn parse_name(input: &str) -> nom::IResult<&str, &str> {
     take_while(|c: char| c.is_ascii_alphanumeric() || c == '_' || c == '-')(input)
 }
@@ -465,7 +488,7 @@ mod tests {
                 }
             );
         };
-        ($comment:literal, $kind:ident, $text:literal) => {
+        ($comment:literal, $kind:ident, $text:expr) => {
             assert_eq!(
                 parse_line($comment).unwrap().1,
                 Some(Some(EventData::$kind($text)))
@@ -555,6 +578,8 @@ mod tests {
         assert_token!("# @version 1.0.0", Version, "1.0.0");
         assert_token!("# @author Somebody", Author, "Somebody");
         assert_token!("# @cmd A subcommand", Cmd, "A subcommand");
+        assert_token!("# @alias tst", Aliases, vec!["tst"]);
+        assert_token!("# @alias t,tst", Aliases, vec!["t", "tst"]);
         assert_token!("# @flag -f --foo", Arg);
         assert_token!("# @option -f --foo", Arg);
         assert_token!("# @arg foo", Arg);

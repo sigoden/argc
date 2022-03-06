@@ -35,6 +35,7 @@ Argc generates parsing rules and help documentation based on tags (fields marked
  - [@version](#version)
  - [@author](#author)
  - [@cmd](#cmd)
+ - [@alias](#alias)
  - [@option](#option)
    - [modifier](#modifier)
    - [notation](#notation)
@@ -87,6 +88,18 @@ download() {
 }
 ```
 Define subcommand
+
+### @alias
+
+```sh
+@alias name(,name)+
+
+# @cmd
+# @alias t,tst
+test() {
+}
+```
+Define alias for a subcommand
 
 ### @option
 

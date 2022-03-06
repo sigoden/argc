@@ -23,6 +23,8 @@ OPTIONS:
     -V, --version    Print version information
 
 SUBCOMMANDS:
+    cmd-alias
+            Command with alias [aliases: a, alias]
     cmd-flag-formats
             All kind of flags
     cmd-omitted

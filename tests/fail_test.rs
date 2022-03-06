@@ -45,7 +45,11 @@ foo() {
 
 }
     "###;
-    fatal!(script, &["prog"], "foo(line 9) already exists");
+    fatal!(
+        script,
+        &["prog"],
+        "foo(line 9) is conflicted with cmd or alias at line 5"
+    );
 }
 
 #[test]
@@ -110,5 +114,24 @@ fn test_conflict_positional() {
         script,
         &["prog"],
         "@arg(line 3) has `foo` already exists at line 2"
+    );
+}
+
+#[test]
+fn test_conflict_alias() {
+    let script = r###"
+# @cmd
+# @alias t,tst
+test() {
+}
+# @cmd
+# @alias t
+try() {
+}
+    "###;
+    fatal!(
+        script,
+        &["prog"],
+        "@alias(line 7) is conflicted with cmd or alias at line 3"
     );
 }

@@ -1,0 +1,15 @@
+---
+source: tests/spec_test.rs
+assertion_line: 151
+expression: output
+
+---
+RUN
+spec alias
+
+STDOUT
+argc__call=cmd_alias
+
+STDERR
+
+
