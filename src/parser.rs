@@ -314,6 +314,7 @@ fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
                 parse_arg_choices_default,
                 parse_arg_choices_required,
                 parse_arg_choices,
+                parse_arg_assign,
                 parse_arg_mark,
             )),
             parse_tail,
@@ -627,6 +628,7 @@ mod tests {
         assert_parse_positional_arg!("foo!");
         assert_parse_positional_arg!("foo+");
         assert_parse_positional_arg!("foo*");
+        assert_parse_positional_arg!("foo=a");
         assert_parse_positional_arg!("foo[a|b]");
         assert_parse_positional_arg!("foo[=a|b]");
         assert_parse_positional_arg!("foo![a|b]");

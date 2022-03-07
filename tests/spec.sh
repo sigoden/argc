@@ -62,14 +62,14 @@ cmd_flag_formats() {
 }
 
 # @cmd  Positional one required
-# @arg   arg1!   A required arg
+# @arg   arg1!     A required arg
 cmd_positional_only() {
     print_argc_vars
 }
 
 # @cmd  Positional all required
-# @arg   arg1!  A required arg
-# @arg   arg2+  A required arg, multiple
+# @arg   arg1!     A required arg
+# @arg   arg2+     A required arg, multiple
 cmd_positional_requires() {
     print_argc_vars
 }
@@ -77,6 +77,12 @@ cmd_positional_requires() {
 # @cmd  Positional with choices
 # @arg   arg[a|b]   A arg with choices
 cmd_positional_with_choices() {
+    print_argc_vars
+}
+
+# @cmd  Positional with default value
+# @arg   arg=a      A arg with default value
+cmd_positional_with_default() {
     print_argc_vars
 }
 

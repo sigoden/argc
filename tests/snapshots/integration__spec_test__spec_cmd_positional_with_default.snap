@@ -1,0 +1,26 @@
+---
+source: tests/spec_test.rs
+assertion_line: 115
+expression: output
+
+---
+RUN
+spec cmd-positional-with-default -h
+
+STDOUT
+
+
+STDERR
+spec-cmd-positional-with-default 
+Positional with default value
+
+USAGE:
+    spec cmd-positional-with-default [ARG]
+
+ARGS:
+    <ARG>    A arg with default value [default: a]
+
+OPTIONS:
+    -h, --help    Print help information
+
+
