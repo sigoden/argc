@@ -1,5 +1,8 @@
 # Argc
 
+[![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
+[![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
+
 A handy way to handle sh/bash cli parameters.
 
 ![demo](https://user-images.githubusercontent.com/4012553/156678751-0a72e309-75f2-40eb-bad6-1bcf03402e2e.gif)
@@ -111,7 +114,7 @@ Define alias for a subcommand
  ## @option    --foo!               A required option
  ## @option    --foo*               A option with multiple values
  ## @option    --foo+               A required option with multiple values
- ## @option    --foo=a              A option with default
+ ## @option    --foo=a              A option with default value
  ## @option    --foo[a|b]           A option with choices
  ## @option    --foo[=a|b]          A option with choices and default value
  ## @option    --foo![a|b]          A required option with choices
