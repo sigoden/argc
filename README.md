@@ -41,7 +41,6 @@ Argc generates parsing rules and help documentation based on tags (fields marked
    - [notation](#notation)
  - [@flag](#flag)
  - [@arg](#arg)
-   - [modifier](#modifier-1)
 
 ### @describe
 
@@ -168,9 +167,7 @@ Define flag option
 ```
 Define positional argument
 
-#### modifier
-
-See [option's modifier](#modifier)
+arg's modifier is same to [option's modifier](#modifier)
 
 ## License
 
