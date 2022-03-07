@@ -111,6 +111,22 @@ fn test_spec_cmd_option_names_exec_eval() {
 }
 
 #[test]
+fn test_spec_cmd_positional_with_default() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-positional-with-default", "-h"],
+    );
+}
+
+#[test]
+fn test_spec_cmd_positional_with_default_exec() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-positional-with-default"],
+    );
+}
+
+#[test]
 fn test_spec_cmd_positional_with_choices() {
     snapshot!(
         include_str!("spec.sh"),

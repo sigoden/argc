@@ -45,6 +45,8 @@ SUBCOMMANDS:
             Positional with choices and value
     cmd-positional-with-choices-and-required
             Positional with choices and required
+    cmd-positional-with-default
+            Positional with default value
     cmd-preferred
             Preferred
     cmd-without-any-arg
