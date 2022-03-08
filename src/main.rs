@@ -68,7 +68,7 @@ fn run(args: &[String], eval: bool) -> Result<std::result::Result<String, String
     let name = Path::new(script_file)
         .file_stem()
         .and_then(|v| v.to_str())
-        .ok_or(anyhow!("Fail to get command name"))?;
+        .ok_or_else(|| anyhow!("Fail to get command name"))?;
     let source = fs::read_to_string(script_file)
         .map_err(|e| anyhow!("Fail to load '{}', {}", script_file, e))?;
     let mut cmd_args = vec![name];
