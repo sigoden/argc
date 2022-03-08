@@ -15,16 +15,15 @@ fn main() {
             script_args.push(arg);
         }
     }
-    let about = format!(
-        "{} - {}",
-        env!("CARGO_PKG_DESCRIPTION"),
-        env!("CARGO_PKG_REPOSITORY")
-    );
     let res = Command::new(env!("CARGO_CRATE_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .disable_help_subcommand(true)
-        .about(about.as_str())
+        .about(concat!(
+            env!("CARGO_PKG_DESCRIPTION"),
+            " - ",
+            env!("CARGO_PKG_REPOSITORY")
+        ))
         .arg(arg!(-e --eval "Adjust to run in sh eval"))
         .arg(arg!(<SCRIPT> "Script file to be parsed"))
         .arg(arg!([ARGUMENTS]... "Arguments passed to script file"))
