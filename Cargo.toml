@@ -12,10 +12,10 @@ categories = ["command-line-utilities"]
 keywords = ["command-line", "shell-script", "argument-parser"]
 
 [dependencies]
-anyhow = "1"
-clap = { version = "3", default_features = false, features = ["std"] }
-convert_case = "0.5"
-nom = "7"
+anyhow = "1.0.56"
+clap = { version = "3.1.6", default_features = false, features = ["std"] }
+convert_case = "0.5.0"
+nom = "7.1.0"
 
 [dev-dependencies]
 insta = "1.12"
