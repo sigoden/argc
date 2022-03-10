@@ -7,19 +7,7 @@ A handy way to handle sh/bash cli parameters.
 
 ![demo](https://user-images.githubusercontent.com/4012553/156678751-0a72e309-75f2-40eb-bad6-1bcf03402e2e.gif)
 
-## Install
-
-### With cargo
-
-```
-cargo install argc
-```
-
-### Binaries on macOS, Linux, Windows
-
-Download from [Github Releases](https://github.com/sigoden/argc/releases),  unzip and add argc to your $PATH.
-
-How Argc works:
+## How Argc works
 
 To write a command line program with Argc, we only need to do two things:
 
@@ -41,6 +29,18 @@ Argc will do the following for us:
 We can easily access the corresponding option or parameter through the variable `$argc_<name>`.
 
 Try [examples/demo.sh](examples/demo.sh) your self.
+
+## Install
+
+### With cargo
+
+```
+cargo install argc
+```
+
+### Binaries on macOS, Linux, Windows
+
+Download from [Github Releases](https://github.com/sigoden/argc/releases),  unzip and add argc to your $PATH.
 
 ## Tag
 
