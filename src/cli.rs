@@ -1,8 +1,8 @@
 use crate::parser::{parse, ArgData, ArgKind, Event, EventData, Position};
+use crate::utils::*;
 use crate::Result;
 use anyhow::bail;
 use clap::{Arg, ArgMatches, Command};
-use convert_case::{Case, Casing};
 use std::collections::HashMap;
 use std::ops::Deref;
 
@@ -140,7 +140,7 @@ impl<'a> Cmd<'a> {
                             )
                         }
                         rootdata.names.insert(name, *position);
-                        cmd.name = Some((name, name.to_case(Case::Kebab)));
+                        cmd.name = Some((name, to_kebab_case(name)));
                         rootcmd.cmds.push(cmd);
                     } else if *name == ENTRYPOINT {
                         rootdata.main = true;
@@ -237,6 +237,7 @@ impl<'a> Cmd<'a> {
 #[derive(Debug)]
 struct WrapArgData<'a> {
     data: &'a ArgData<'a>,
+    arg_name: String,
     value_name: String,
     pos_index: usize,
 }
@@ -252,10 +253,12 @@ impl<'a> WrapArgData<'a> {
     fn new(data: &'a ArgData<'a>, pos_index: usize) -> Self {
         let value_name = data
             .value_name
-            .map(|v| v.to_owned())
-            .unwrap_or_else(|| data.name.to_case(Case::Cobol));
+            .map(to_cobol_case)
+            .unwrap_or_else(|| to_cobol_case(data.name));
+        let arg_name = to_snake_case(data.name);
         Self {
             data,
+            arg_name,
             value_name,
             pos_index,
         }
@@ -322,22 +325,27 @@ impl<'a> WrapArgData<'a> {
         Ok(arg)
     }
     fn retrieve_match_value(&self, matches: &ArgMatches) -> Option<String> {
-        let name = self.name.to_case(Case::Snake);
+        let arg_name = self.arg_name.as_str();
         if !matches.is_present(self.name) {
             return None;
         }
         if self.kind == ArgKind::Flag {
-            return Some(format!("{}_{}=1", VARIABLE_PREFIX, name));
+            return Some(format!("{}_{}=1", VARIABLE_PREFIX, arg_name));
         }
         if self.multiple {
             return matches.values_of(self.name).map(|values| {
-                let values: Vec<String> = values.map(escape_value).collect();
-                format!("{}_{}=( {} )", VARIABLE_PREFIX, name, values.join(" "))
+                let values: Vec<String> = values.map(escape_shell_words).collect();
+                format!("{}_{}=( {} )", VARIABLE_PREFIX, arg_name, values.join(" "))
             });
         }
-        matches
-            .value_of(self.name)
-            .map(|value| format!("{}_{}={}", VARIABLE_PREFIX, name, escape_value(value)))
+        matches.value_of(self.name).map(|value| {
+            format!(
+                "{}_{}={}",
+                VARIABLE_PREFIX,
+                arg_name,
+                escape_shell_words(value)
+            )
+        })
     }
     fn detect_conflict(
         &self,
@@ -387,24 +395,4 @@ impl<'a> WrapArgData<'a> {
         }
         Ok(())
     }
-}
-
-fn escape_value(value: &str) -> String {
-    let mut output = String::new();
-    if value.is_empty() {
-        return "''".to_string();
-    }
-    for ch in value.chars() {
-        match ch {
-            'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-' | '.' | ',' | ':' | '/' | '@' => {
-                output.push(ch)
-            }
-            '\n' => output.push_str("'\n'"),
-            _ => {
-                output.push('\\');
-                output.push(ch);
-            }
-        }
-    }
-    output
 }

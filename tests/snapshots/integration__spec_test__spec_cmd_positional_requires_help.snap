@@ -2,7 +2,6 @@
 source: tests/spec_test.rs
 assertion_line: 52
 expression: output
-
 ---
 RUN
 spec cmd-positional-requires -h
@@ -15,11 +14,11 @@ spec-cmd-positional-requires
 Positional all required
 
 USAGE:
-    spec cmd-positional-requires <ARG-1> <ARG-2>...
+    spec cmd-positional-requires <ARG1> <ARG2>...
 
 ARGS:
-    <ARG-1>       A required arg
-    <ARG-2>...    A required arg, multiple
+    <ARG1>       A required arg
+    <ARG2>...    A required arg, multiple
 
 OPTIONS:
     -h, --help    Print help information

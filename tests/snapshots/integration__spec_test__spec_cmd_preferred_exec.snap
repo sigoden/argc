@@ -2,15 +2,14 @@
 source: tests/spec_test.rs
 assertion_line: 60
 expression: output
-
 ---
 RUN
 spec cmd-preferred -f -o A AB C D
 
 STDOUT
-argc_arg_1=( AB C\ D )
-argc_flag_1=1
-argc_opt_1=A
+argc_arg1=( AB C\ D )
+argc_flag1=1
+argc_opt1=A
 argc__call=cmd_preferred
 
 STDERR

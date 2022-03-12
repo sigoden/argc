@@ -2,7 +2,6 @@
 source: tests/spec_test.rs
 assertion_line: 23
 expression: output
-
 ---
 RUN
 spec cmd-option-formats -h
@@ -18,13 +17,13 @@ USAGE:
     spec cmd-option-formats [OPTIONS]
 
 OPTIONS:
-    -a, --opt2 <OPT-2>    
-    -b, --opt5 <OPT-5>    With description
-    -c, --opt6 <OPT>      
-    -h, --help            Print help information
-        --opt1 <OPT-1>    
-        --opt3 <OPT>      
-        --opt4 <OPT-4>    With description
-        --opt7 <OPT>      With description
+    -a, --opt2 <OPT2>    
+    -b, --opt5 <OPT5>    With description
+    -c, --opt6 <OPT>     
+    -h, --help           Print help information
+        --opt1 <OPT1>    
+        --opt3 <OPT>     
+        --opt4 <OPT4>    With description
+        --opt7 <OPT>     With description
 
 

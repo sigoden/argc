@@ -2,7 +2,6 @@
 source: tests/spec_test.rs
 assertion_line: 18
 expression: output
-
 ---
 RUN
 spec cmd-option-names -h
@@ -15,17 +14,17 @@ spec-cmd-option-names
 Options all kind of names
 
 USAGE:
-    spec cmd-option-names [OPTIONS] --opt2 <OPT-2> --opt4 <OPT-4>... --opt8 <OPT-8>
+    spec cmd-option-names [OPTIONS] --opt2 <OPT2> --opt4 <OPT4>... --opt8 <OPT8>
 
 OPTIONS:
-    -h, --help               Print help information
-        --opt1 <OPT-1>       optional
-        --opt2 <OPT-2>       required
-        --opt3 <OPT-3>...    optional, multiple
-        --opt4 <OPT-4>...    required, multiple
-        --opt5 <OPT-5>       optional, default [default: a]
-        --opt6 <OPT-6>       choices [possible values: a, b, c]
-        --opt7 <OPT-7>       choices, default [default: a] [possible values: a, b, c]
-        --opt8 <OPT-8>       required, choices [possible values: a, b, c]
+    -h, --help              Print help information
+        --opt1 <OPT1>       optional
+        --opt2 <OPT2>       required
+        --opt3 <OPT3>...    optional, multiple
+        --opt4 <OPT4>...    required, multiple
+        --opt5 <OPT5>       optional, default [default: a]
+        --opt6 <OPT6>       choices [possible values: a, b, c]
+        --opt7 <OPT7>       choices, default [default: a] [possible values: a, b, c]
+        --opt8 <OPT8>       required, choices [possible values: a, b, c]
 
 

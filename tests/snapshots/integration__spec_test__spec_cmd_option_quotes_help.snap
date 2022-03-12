@@ -2,7 +2,6 @@
 source: tests/spec_test.rs
 assertion_line: 31
 expression: output
-
 ---
 RUN
 spec cmd-option-quotes -h
@@ -18,11 +17,11 @@ USAGE:
     spec cmd-option-quotes [OPTIONS]
 
 OPTIONS:
-    -h, --help            Print help information
-        --opt1 <OPT-1>    [default: a]
-        --opt2 <OPT-2>    [default: "a b"]
-        --opt3 <OPT-3>    [possible values: "a 3", b, c]
-        --opt4 <OPT-4>    [default: "a b"] [possible values: "a b", "c d", "e f"]
-        --opt5 <OPT-5>    [default: a|b] [possible values: a|b, c]d, ef]
+    -h, --help           Print help information
+        --opt1 <OPT1>    [default: a]
+        --opt2 <OPT2>    [default: "a b"]
+        --opt3 <OPT3>    [possible values: "a 3", b, c]
+        --opt4 <OPT4>    [default: "a b"] [possible values: "a b", "c d", "e f"]
+        --opt5 <OPT5>    [default: a|b] [possible values: a|b, c]d, ef]
 
 

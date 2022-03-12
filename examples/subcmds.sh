@@ -1,50 +1,50 @@
 
 # @cmd A simple positional argument
 # @arg value 
-cmda() {
+cmd1() {
     :;
 }
 
 # @cmd A required positional argument
 # @arg value!
-cmdb() {
+cmd2() {
     :;
 }
 
 # @cmd A positional argument support multiple values
 # @arg value*
-cmdc() {
+cmd3() {
     :;
 }
 
 # @cmd A required positional argument support multiple values
 # @arg value*
-cmdd() {
+cmd4() {
     :;
 }
 
 # @cmd A positional argument with default value
 # @arg value=a
-cmde() {
+cmd5() {
     :;
 }
 
 # @cmd A positional argument with choices
 # @arg value[x|y|z]
-cmdx() {
+cmd6() {
     :;
 }
 
 
 # @cmd A positional argument with choices and default value
 # @arg value[=x|y|z]
-cmdy() {
+cmd7() {
     :;
 }
 
 # @cmd A required positional argument with choices
 # @arg value![x|y|z]
-cmdz() {
+cmd8() {
     :;
 }
 
