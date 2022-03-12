@@ -2,7 +2,6 @@
 source: tests/spec_test.rs
 assertion_line: 8
 expression: output
-
 ---
 RUN
 spec cmd-preferred -h
@@ -15,14 +14,14 @@ spec-cmd-preferred
 Preferred
 
 USAGE:
-    spec cmd-preferred [OPTIONS] [ARG-1]...
+    spec cmd-preferred [OPTIONS] [ARG1]...
 
 ARGS:
-    <ARG-1>...    A positional arg
+    <ARG1>...    A positional arg
 
 OPTIONS:
-    -f, --flag1           A flag
-    -h, --help            Print help information
-    -o, --opt1 <OPT-1>    A option
+    -f, --flag1          A flag
+    -h, --help           Print help information
+    -o, --opt1 <OPT1>    A option
 
 

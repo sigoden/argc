@@ -1,12 +1,12 @@
 # @describe    All kind of options
-# @option      -a --opta           A option
-# @option      -b --optb!          A required option
-# @option      -c --optc*          A option with multiple values
-# @option      -d --optd+          A required option with multiple values
-# @option      -e --opte=a         A option with default value
-# @option      -x --optx[x|y|z]    A option with choices
-# @option      -y --opty[=x|y|z]   A option with choices and default value
-# @option      -z --optz![x|y|z]   A required option with choices
+# @option      -a --opt1           A option
+# @option      -b --opt2!          A required option
+# @option      -c --opt3*          A option with multiple values
+# @option      -d --opt4+          A required option with multiple values
+# @option      -e --opt5=a         A option with default value
+# @option      -x --opt6[x|y|z]    A option with choices
+# @option      -y --opt7[=x|y|z]   A option with choices and default value
+# @option      -z --opt8![x|y|z]   A required option with choices
 
 eval "$(argc -e $0 "$@")"
 

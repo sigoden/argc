@@ -2,7 +2,6 @@
 source: tests/spec_test.rs
 assertion_line: 13
 expression: output
-
 ---
 RUN
 spec cmd-omitted -h
@@ -15,14 +14,14 @@ spec-cmd-omitted
 Omitted
 
 USAGE:
-    spec cmd-omitted [OPTIONS] [ARG-1]
+    spec cmd-omitted [OPTIONS] [ARG1]
 
 ARGS:
-    <ARG-1>    
+    <ARG1>    
 
 OPTIONS:
-        --flag1           
-    -h, --help            Print help information
-        --opt1 <OPT-1>    
+        --flag1          
+    -h, --help           Print help information
+        --opt1 <OPT1>    
 
 

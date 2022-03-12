@@ -2,7 +2,6 @@
 source: tests/spec_test.rs
 assertion_line: 44
 expression: output
-
 ---
 RUN
 spec cmd-positional-only -h
@@ -15,10 +14,10 @@ spec-cmd-positional-only
 Positional one required
 
 USAGE:
-    spec cmd-positional-only <ARG-1>
+    spec cmd-positional-only <ARG1>
 
 ARGS:
-    <ARG-1>    A required arg
+    <ARG1>    A required arg
 
 OPTIONS:
     -h, --help    Print help information
