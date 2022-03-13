@@ -14,7 +14,7 @@ spec-cmd-option-names
 Options all kind of names
 
 USAGE:
-    spec cmd-option-names [OPTIONS] --opt2 <OPT2> --opt4 <OPT4>... --opt8 <OPT8>
+    spec cmd-option-names [OPTIONS] --opt2 <OPT2> --opt4 <OPT4>... --opt8 <OPT8> [--]
 
 OPTIONS:
     -h, --help              Print help information

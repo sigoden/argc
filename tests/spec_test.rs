@@ -191,3 +191,11 @@ fn test_spec_cmd_alias() {
 fn test_spec_cmd_without_any_arg() {
     snapshot!(include_str!("spec.sh"), &["spec", "cmd-without-any-arg"],);
 }
+
+#[test]
+fn test_spec_cmd_without_any_arg_exec() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-without-any-arg", "foo", "bar"],
+    );
+}
