@@ -1,8 +1,7 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 147
+assertion_line: 163
 expression: output
-
 ---
 RUN
 spec cmd-positional-with-choices-and-default
@@ -10,6 +9,7 @@ spec cmd-positional-with-choices-and-default
 STDOUT
 argc_arg=a
 argc__call=cmd_positional_with_choices_and_default
+argc__call_args=( a )
 
 STDERR
 
