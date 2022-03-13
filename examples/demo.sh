@@ -20,4 +20,4 @@ download() {
     echo "arg:    target            $argc_target"
 }
 
-eval "$(argc -e $0 "$@")"
+eval "$(argc $0 "$@")"
