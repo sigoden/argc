@@ -1,14 +1,13 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 151
+assertion_line: 186
 expression: output
-
 ---
 RUN
 spec alias
 
 STDOUT
-argc__call=cmd_alias
+cmd_alias
 
 STDERR
 

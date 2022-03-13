@@ -10,8 +10,7 @@ STDOUT
 argc_arg1=( AB C\ D )
 argc_flag1=1
 argc_opt1=A
-argc__call=cmd_preferred
-argc__call_args=( AB C\ D )
+cmd_preferred AB C\ D
 
 STDERR
 

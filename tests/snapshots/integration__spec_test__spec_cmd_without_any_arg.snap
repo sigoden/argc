@@ -1,14 +1,13 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 156
+assertion_line: 191
 expression: output
-
 ---
 RUN
 spec cmd-without-any-arg
 
 STDOUT
-argc__call=cmd_without_any_arg
+cmd_without_any_arg
 
 STDERR
 

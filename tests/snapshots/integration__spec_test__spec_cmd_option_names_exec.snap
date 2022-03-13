@@ -14,7 +14,7 @@ argc_opt5=a
 argc_opt6=a
 argc_opt7=a
 argc_opt8=a
-argc__call=cmd_option_names
+cmd_option_names
 
 STDERR
 

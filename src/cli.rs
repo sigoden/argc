@@ -12,20 +12,11 @@ const ENTRYPOINT: &str = "main";
 
 pub struct Runner<'a> {
     source: &'a str,
-    eval: bool,
 }
 
 impl<'a> Runner<'a> {
     pub fn new(source: &'a str) -> Self {
-        Self {
-            source,
-            eval: false,
-        }
-    }
-
-    pub fn set_eval(mut self, eval: bool) -> Self {
-        self.eval = eval;
-        self
+        Self { source }
     }
 
     pub fn run(&self, args: &[&'a str]) -> Result<std::result::Result<String, String>> {
@@ -38,7 +29,7 @@ impl<'a> Runner<'a> {
         match res {
             Ok(matches) => {
                 let values = cmd.retrieve(&matches, self);
-                let output = to_string_retrive_values(values, self.eval);
+                let output = to_string_retrive_values(values);
                 Ok(Ok(output))
             }
             Err(err) => Ok(Err(err.to_string())),
@@ -270,7 +261,7 @@ pub enum RetriveValue<'a> {
     FnName(&'a str),
 }
 
-fn to_string_retrive_values(values: Vec<RetriveValue>, eval: bool) -> String {
+fn to_string_retrive_values(values: Vec<RetriveValue>) -> String {
     let mut variables = vec![];
     let mut positional_args = vec![];
     for value in values {
@@ -300,21 +291,10 @@ fn to_string_retrive_values(values: Vec<RetriveValue>, eval: bool) -> String {
                 positional_args.extend(values);
             }
             RetriveValue::FnName(name) => {
-                if eval {
-                    if positional_args.is_empty() {
-                        variables.push(name.to_string());
-                    } else {
-                        variables.push(format!("{} {}", name, positional_args.join(" ")));
-                    }
+                if positional_args.is_empty() {
+                    variables.push(name.to_string());
                 } else {
-                    variables.push(format!("{}__call={}", VARIABLE_PREFIX, name));
-                    if !positional_args.is_empty() {
-                        variables.push(format!(
-                            "{}__call_args=( {} )",
-                            VARIABLE_PREFIX,
-                            positional_args.join(" ")
-                        ));
-                    }
+                    variables.push(format!("{} {}", name, positional_args.join(" ")));
                 }
             }
         }
