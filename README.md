@@ -5,7 +5,7 @@
 
 A handy way to handle sh/bash cli parameters.
 
-![demo](https://user-images.githubusercontent.com/4012553/156678751-0a72e309-75f2-40eb-bad6-1bcf03402e2e.gif)
+![demo](https://user-images.githubusercontent.com/4012553/158063004-e7a3534c-eb1a-47fb-9bbd-89a49345589a.gif)
 
 ## How Argc works
 

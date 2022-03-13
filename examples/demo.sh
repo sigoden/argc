@@ -1,6 +1,7 @@
 # @describe A demo cli
 
 # @cmd Upload a file
+# @alias    u
 # @arg target!                      File to upload
 upload() {
     echo "cmd                       upload"
@@ -8,8 +9,9 @@ upload() {
 }
 
 # @cmd Download a file
+# @alias    d
 # @flag     -f --force              Override existing file
-# @option   -t --tries <NUM>        Set number of retries to NUMBER
+# @option   -t --tries <NUM>        Set number of retries to NUM
 # @arg      source!                 Url to download from
 # @arg      target                  Save file to
 download() {
