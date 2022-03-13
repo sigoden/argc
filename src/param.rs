@@ -1,5 +1,5 @@
 use crate::cli::RetrieveValue;
-use crate::parser::{ArgData, Position};
+use crate::parser::Position;
 use crate::utils::{
     escape_shell_words, is_choice_value_terminate, is_default_value_terminate, to_cobol_case,
 };
@@ -21,6 +21,27 @@ pub trait Param<'a> {
     fn is_positional(&'a self) -> bool;
 }
 
+#[derive(Debug, Clone)]
+pub struct ParamData<'a> {
+    pub name: &'a str,
+    pub choices: Option<Vec<&'a str>>,
+    pub multiple: bool,
+    pub required: bool,
+    pub default: Option<&'a str>,
+}
+
+impl<'a> ParamData<'a> {
+    pub fn new(name: &'a str) -> Self {
+        Self {
+            name,
+            choices: None,
+            multiple: false,
+            required: false,
+            default: None,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct FlagParam<'a> {
     name: &'a str,
@@ -29,7 +50,7 @@ pub struct FlagParam<'a> {
 }
 
 impl<'a> FlagParam<'a> {
-    pub fn new(arg: ArgData<'a>, summary: &'a str, short: Option<char>) -> Self {
+    pub fn new(arg: ParamData<'a>, summary: &'a str, short: Option<char>) -> Self {
         FlagParam {
             name: arg.name,
             short,
@@ -93,7 +114,7 @@ pub struct OptionParam<'a> {
 
 impl<'a> OptionParam<'a> {
     pub fn new(
-        arg: ArgData<'a>,
+        arg: ParamData<'a>,
         summary: &'a str,
         short: Option<char>,
         value_name: Option<&'a str>,
@@ -204,7 +225,7 @@ pub struct PositionalParam<'a> {
 }
 
 impl<'a> PositionalParam<'a> {
-    pub fn new(arg: ArgData<'a>, summary: &'a str) -> Self {
+    pub fn new(arg: ParamData<'a>, summary: &'a str) -> Self {
         PositionalParam {
             name: arg.name,
             summary,

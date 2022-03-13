@@ -1,4 +1,4 @@
-use crate::param::{FlagParam, OptionParam, PositionalParam};
+use crate::param::{FlagParam, OptionParam, ParamData, PositionalParam};
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
 use anyhow::bail;
@@ -43,27 +43,6 @@ pub enum EventData<'a> {
     Func(&'a str),
     /// Placeholder for unknown or invalid tag
     Unknown(&'a str),
-}
-
-#[derive(Debug, Clone)]
-pub struct ArgData<'a> {
-    pub name: &'a str,
-    pub choices: Option<Vec<&'a str>>,
-    pub multiple: bool,
-    pub required: bool,
-    pub default: Option<&'a str>,
-}
-
-impl<'a> ArgData<'a> {
-    pub fn new(name: &'a str) -> Self {
-        Self {
-            name,
-            choices: None,
-            multiple: false,
-            required: false,
-            default: None,
-        }
-    }
 }
 
 /// Tokenize shell script
@@ -185,11 +164,11 @@ fn parse_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
             preceded(
                 pair(space0, tag("--")),
                 alt((
-                    parse_arg_choices_default,
-                    parse_arg_choices_required,
-                    parse_arg_choices,
-                    parse_arg_assign,
-                    parse_arg_mark,
+                    parse_param_choices_default,
+                    parse_param_choices_required,
+                    parse_param_choices,
+                    parse_param_assign,
+                    parse_param_mark,
                 )),
             ),
             parse_value_notation,
@@ -204,11 +183,11 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
     map(
         pair(
             alt((
-                parse_arg_choices_default,
-                parse_arg_choices_required,
-                parse_arg_choices,
-                parse_arg_assign,
-                parse_arg_mark,
+                parse_param_choices_default,
+                parse_param_choices_required,
+                parse_param_choices,
+                parse_param_assign,
+                parse_param_mark,
             )),
             parse_tail,
         ),
@@ -221,7 +200,7 @@ fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
     map(
         tuple((
             parse_short,
-            preceded(pair(space0, tag("--")), parse_arg_name),
+            preceded(pair(space0, tag("--")), parse_param_name),
             parse_tail,
         )),
         |(short, arg, summary)| FlagParam::new(arg, summary, short),
@@ -229,29 +208,29 @@ fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
 }
 
 // Parse `str!` `str*` `str+` `str`
-fn parse_arg_mark(input: &str) -> nom::IResult<&str, ArgData> {
+fn parse_param_mark(input: &str) -> nom::IResult<&str, ParamData> {
     alt((
-        map(terminated(parse_arg_name, tag("!")), |mut arg| {
+        map(terminated(parse_param_name, tag("!")), |mut arg| {
             arg.required = true;
             arg
         }),
-        map(terminated(parse_arg_name, tag("*")), |mut arg| {
+        map(terminated(parse_param_name, tag("*")), |mut arg| {
             arg.multiple = true;
             arg
         }),
-        map(terminated(parse_arg_name, tag("+")), |mut arg| {
+        map(terminated(parse_param_name, tag("+")), |mut arg| {
             arg.required = true;
             arg.multiple = true;
             arg
         }),
-        parse_arg_name,
+        parse_param_name,
     ))(input)
 }
 
 // Parse `str=value`
-fn parse_arg_assign(input: &str) -> nom::IResult<&str, ArgData> {
+fn parse_param_assign(input: &str) -> nom::IResult<&str, ParamData> {
     map(
-        separated_pair(parse_arg_name, char('='), parse_default_value),
+        separated_pair(parse_param_name, char('='), parse_default_value),
         |(mut arg, value)| {
             arg.default = Some(value);
             arg
@@ -260,10 +239,10 @@ fn parse_arg_assign(input: &str) -> nom::IResult<&str, ArgData> {
 }
 
 // Parse `str[a|b|c]`
-fn parse_arg_choices(input: &str) -> nom::IResult<&str, ArgData> {
+fn parse_param_choices(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         pair(
-            parse_arg_name,
+            parse_param_name,
             delimited(char('['), parse_choices, char(']')),
         ),
         |(mut arg, (choices, default))| {
@@ -275,10 +254,10 @@ fn parse_arg_choices(input: &str) -> nom::IResult<&str, ArgData> {
 }
 
 // Parse `str[=a|b|c]`
-fn parse_arg_choices_default(input: &str) -> nom::IResult<&str, ArgData> {
+fn parse_param_choices_default(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         pair(
-            parse_arg_name,
+            parse_param_name,
             delimited(char('['), parse_choices_default, char(']')),
         ),
         |(mut arg, (choices, default))| {
@@ -290,10 +269,10 @@ fn parse_arg_choices_default(input: &str) -> nom::IResult<&str, ArgData> {
 }
 
 // Parse `str![a|b|c]`
-fn parse_arg_choices_required(input: &str) -> nom::IResult<&str, ArgData> {
+fn parse_param_choices_required(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         pair(
-            terminated(parse_arg_name, char('!')),
+            terminated(parse_param_name, char('!')),
             delimited(char('['), parse_choices, char(']')),
         ),
         |(mut arg, (choices, default))| {
@@ -306,8 +285,8 @@ fn parse_arg_choices_required(input: &str) -> nom::IResult<&str, ArgData> {
 }
 
 // Parse `str`
-fn parse_arg_name(input: &str) -> nom::IResult<&str, ArgData> {
-    map(parse_name, ArgData::new)(input)
+fn parse_param_name(input: &str) -> nom::IResult<&str, ParamData> {
+    map(parse_name, ParamData::new)(input)
 }
 
 // Parse `-s`
