@@ -1,11 +1,10 @@
 ---
-source: tests/mainfn_test.rs
-assertion_line: 36
+source: tests/main_fn_test.rs
+assertion_line: 51
 expression: output
-
 ---
 RUN
-prog -h
+prog
 
 STDOUT
 
@@ -14,7 +13,7 @@ STDERR
 prog 
 
 USAGE:
-    prog [OPTIONS] [SUBCOMMAND]
+    prog [OPTIONS] <SUBCOMMAND>
 
 OPTIONS:
         --foo     

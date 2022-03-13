@@ -1,8 +1,7 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 139
+assertion_line: 154
 expression: output
-
 ---
 RUN
 spec cmd-positional-with-choices-and-default -h

@@ -7,7 +7,7 @@ fn test_syntax_error() {
 }
 
 #[test]
-fn test_unsupport_tag() {
+fn test_unsupported_tag() {
     let script = r###"
 # @baz
     "###;
@@ -15,7 +15,7 @@ fn test_unsupport_tag() {
 }
 
 #[test]
-fn test_unexpect_arg() {
+fn test_unexpected_arg() {
     let script = r###"
 # @flag --foo
 foo() {

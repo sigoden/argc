@@ -2,7 +2,6 @@
 source: tests/spec_test.rs
 assertion_line: 3
 expression: output
-
 ---
 RUN
 spec -h

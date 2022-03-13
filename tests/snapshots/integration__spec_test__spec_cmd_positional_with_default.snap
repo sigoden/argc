@@ -1,8 +1,7 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 115
+assertion_line: 114
 expression: output
-
 ---
 RUN
 spec cmd-positional-with-default -h

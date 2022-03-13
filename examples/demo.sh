@@ -9,7 +9,7 @@ upload() {
 
 # @cmd Download a file
 # @flag     -f --force              Override existing file
-# @option   -t --tries <NUMBER>     Set number of retries to NUMBER
+# @option   -t --tries <NUM>        Set number of retries to NUMBER
 # @arg      source!                 Url to download from
 # @arg      target                  Save file to
 download() {

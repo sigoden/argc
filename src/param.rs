@@ -1,4 +1,4 @@
-use crate::cli::RetriveValue;
+use crate::cli::RetrieveValue;
 use crate::parser::{ArgData, Position};
 use crate::utils::{
     escape_shell_words, is_choice_value_terminate, is_default_value_terminate, to_cobol_case,
@@ -16,7 +16,7 @@ pub trait Param<'a> {
     fn tag_name(&'a self) -> &'static str;
     fn render(&'a self) -> String;
     fn build_arg(&'a self, index: usize) -> Result<Arg<'a>>;
-    fn retrive_value(&'a self, matches: &ArgMatches) -> Option<RetriveValue<'a>>;
+    fn retrieve_value(&'a self, matches: &ArgMatches) -> Option<RetrieveValue<'a>>;
     fn detect_conflict(&'a self, names: &mut ParamNames<'a>, pos: Position) -> Result<()>;
     fn is_positional(&'a self) -> bool;
 }
@@ -60,11 +60,11 @@ impl<'a> Param<'a> for FlagParam<'a> {
         Ok(arg)
     }
 
-    fn retrive_value(&'a self, matches: &ArgMatches) -> Option<RetriveValue<'a>> {
+    fn retrieve_value(&'a self, matches: &ArgMatches) -> Option<RetrieveValue<'a>> {
         if !matches.is_present(self.name) {
             return None;
         }
-        Some(RetriveValue::Single(self.name, "1".to_string()))
+        Some(RetrieveValue::Single(self.name, "1".to_string()))
     }
 
     fn detect_conflict(&self, names: &mut ParamNames<'a>, pos: Position) -> Result<()> {
@@ -164,7 +164,7 @@ impl<'a> Param<'a> for OptionParam<'a> {
         Ok(arg)
     }
 
-    fn retrive_value(&'a self, matches: &ArgMatches) -> Option<RetriveValue<'a>> {
+    fn retrieve_value(&'a self, matches: &ArgMatches) -> Option<RetrieveValue<'a>> {
         if !matches.is_present(self.name) {
             return None;
         }
@@ -174,10 +174,10 @@ impl<'a> Param<'a> for OptionParam<'a> {
                 .unwrap()
                 .map(escape_shell_words)
                 .collect();
-            Some(RetriveValue::Multiple(self.name, values))
+            Some(RetrieveValue::Multiple(self.name, values))
         } else {
             let value = escape_shell_words(matches.value_of(self.name).unwrap());
-            Some(RetriveValue::Single(self.name, value))
+            Some(RetrieveValue::Single(self.name, value))
         }
     }
 
@@ -273,7 +273,7 @@ impl<'a> Param<'a> for PositionalParam<'a> {
         Ok(arg)
     }
 
-    fn retrive_value(&'a self, matches: &ArgMatches) -> Option<RetriveValue<'a>> {
+    fn retrieve_value(&'a self, matches: &ArgMatches) -> Option<RetrieveValue<'a>> {
         if !matches.is_present(self.name) {
             return None;
         }
@@ -283,10 +283,10 @@ impl<'a> Param<'a> for PositionalParam<'a> {
                 .unwrap()
                 .map(escape_shell_words)
                 .collect();
-            Some(RetriveValue::PositionalMultiple(self.name, values))
+            Some(RetrieveValue::PositionalMultiple(self.name, values))
         } else {
             let value = escape_shell_words(matches.value_of(self.name).unwrap());
-            Some(RetriveValue::PositionalSingle(self.name, value))
+            Some(RetrieveValue::PositionalSingle(self.name, value))
         }
     }
 

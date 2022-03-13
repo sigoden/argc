@@ -1,5 +1,5 @@
 #[test]
-fn test_no_main_no_subcmds() {
+fn test_no_main_no_subcommands() {
     let script = r###"
 # @flag --foo
     "###;
@@ -7,7 +7,7 @@ fn test_no_main_no_subcmds() {
 }
 
 #[test]
-fn test_with_main_no_subcmds() {
+fn test_with_main_no_subcommands() {
     let script = r###"
 # @flag --foo
 
@@ -19,7 +19,7 @@ main() {
 }
 
 #[test]
-fn test_with_main_and_subcmds() {
+fn test_with_main_and_subcommands() {
     let script = r###"
 # @flag --foo
 
@@ -37,7 +37,7 @@ main() {
 }
 
 #[test]
-fn test_without_main_but_with_subcmds() {
+fn test_without_main_but_with_subcommands() {
     let script = r###"
 # @flag --foo
 
@@ -52,7 +52,7 @@ cmd() {
 }
 
 #[test]
-fn test_without_main_but_with_subcmds2() {
+fn test_without_main_but_with_subcommands2() {
     let script = r###"
 # @flag --foo
 

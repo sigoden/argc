@@ -1,11 +1,10 @@
 ---
-source: tests/mainfn_test.rs
-assertion_line: 51
+source: tests/main_fn_test.rs
+assertion_line: 65
 expression: output
-
 ---
 RUN
-prog
+prog -h
 
 STDOUT
 
