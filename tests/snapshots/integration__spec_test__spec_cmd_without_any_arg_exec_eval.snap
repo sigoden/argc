@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 197
+assertion_line: 205
 expression: output
 ---
 RUN
@@ -8,8 +8,7 @@ spec cmd-without-any-arg foo bar
 
 STDOUT
 argc__args=( foo bar )
-argc__call=cmd_without_any_arg
-argc__call_args=( foo bar )
+cmd_without_any_arg foo bar
 
 STDERR
 

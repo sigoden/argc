@@ -283,10 +283,10 @@ impl<'a> Param<'a> for PositionalParam<'a> {
                 .unwrap()
                 .map(escape_shell_words)
                 .collect();
-            Some(RetriveValue::Multiple(self.name, values))
+            Some(RetriveValue::PositionalMultiple(self.name, values))
         } else {
             let value = escape_shell_words(matches.value_of(self.name).unwrap());
-            Some(RetriveValue::Single(self.name, value))
+            Some(RetriveValue::PositionalSingle(self.name, value))
         }
     }
 

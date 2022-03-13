@@ -199,3 +199,12 @@ fn test_spec_cmd_without_any_arg_exec() {
         &["spec", "cmd-without-any-arg", "foo", "bar"],
     );
 }
+
+#[test]
+fn test_spec_cmd_without_any_arg_exec_eval() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &["spec", "cmd-without-any-arg", "foo", "bar"],
+        eval: true,
+    );
+}

@@ -38,7 +38,7 @@ impl<'a> Runner<'a> {
         match res {
             Ok(matches) => {
                 let values = cmd.retrieve(&matches, self);
-                let output = to_string_retrive_values(&values, self.eval);
+                let output = to_string_retrive_values(values, self.eval);
                 Ok(Ok(output))
             }
             Err(err) => Ok(Err(err.to_string())),
@@ -265,34 +265,61 @@ impl<'a> Cmd<'a> {
 pub enum RetriveValue<'a> {
     Single(&'a str, String),
     Multiple(&'a str, Vec<String>),
+    PositionalSingle(&'a str, String),
+    PositionalMultiple(&'a str, Vec<String>),
     FnName(&'a str),
 }
 
-fn to_string_retrive_values(values: &[RetriveValue], eval: bool) -> String {
-    let mut lines = vec![];
+fn to_string_retrive_values(values: Vec<RetriveValue>, eval: bool) -> String {
+    let mut variables = vec![];
+    let mut positional_args = vec![];
     for value in values {
         match value {
             RetriveValue::Single(name, value) => {
-                lines.push(format!("{}_{}={}", VARIABLE_PREFIX, name, value));
+                variables.push(format!("{}_{}={}", VARIABLE_PREFIX, name, value));
             }
             RetriveValue::Multiple(name, values) => {
-                lines.push(format!(
+                variables.push(format!(
                     "{}_{}=( {} )",
                     VARIABLE_PREFIX,
                     name,
                     values.join(" ")
                 ));
             }
+            RetriveValue::PositionalSingle(name, value) => {
+                variables.push(format!("{}_{}={}", VARIABLE_PREFIX, name, &value));
+                positional_args.push(value);
+            }
+            RetriveValue::PositionalMultiple(name, values) => {
+                variables.push(format!(
+                    "{}_{}=( {} )",
+                    VARIABLE_PREFIX,
+                    name,
+                    values.join(" ")
+                ));
+                positional_args.extend(values);
+            }
             RetriveValue::FnName(name) => {
                 if eval {
-                    lines.push(name.to_string());
+                    if positional_args.is_empty() {
+                        variables.push(name.to_string());
+                    } else {
+                        variables.push(format!("{} {}", name, positional_args.join(" ")));
+                    }
                 } else {
-                    lines.push(format!("{}__{}={}", VARIABLE_PREFIX, "call", name));
+                    variables.push(format!("{}__call={}", VARIABLE_PREFIX, name));
+                    if !positional_args.is_empty() {
+                        variables.push(format!(
+                            "{}__call_args=( {} )",
+                            VARIABLE_PREFIX,
+                            positional_args.join(" ")
+                        ));
+                    }
                 }
             }
         }
     }
-    lines.join("\n")
+    variables.join("\n")
 }
 
 fn unexpect_param(tag_name: &str, pos: Position) -> Error {
