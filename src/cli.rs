@@ -170,6 +170,14 @@ impl<'a> Cmd<'a> {
                 cmd = cmd.subcommand_required(true).arg_required_else_help(true);
             }
         }
+        if self.positional_idx == 0 {
+            cmd = cmd.arg(
+                Arg::new("$@")
+                    .multiple_values(true)
+                    .takes_value(true)
+                    .hide(true),
+            );
+        }
         if !self.aliases.is_empty() {
             cmd = cmd.visible_aliases(&self.aliases);
         }
@@ -190,6 +198,9 @@ impl<'a> Cmd<'a> {
                     values.push(value);
                 }
             }
+        }
+        if let Some(value) = self.retrive_default_postional(matches) {
+            values.push(value);
         }
         let mut call_fn: Option<String> = None;
         for subcmd in &self.cmds {
@@ -231,6 +242,22 @@ impl<'a> Cmd<'a> {
         }
         self.args.push(arg_data);
         Ok(())
+    }
+    fn retrive_default_postional(&self, matches: &ArgMatches) -> Option<String> {
+        if self.positional_idx != 0 {
+            return None;
+        }
+        match matches.values_of("$@") {
+            Some(values) => {
+                let values: Vec<String> = values.map(escape_shell_words).collect();
+                Some(format!(
+                    "{}__args=( {} )",
+                    VARIABLE_PREFIX,
+                    values.join(" ")
+                ))
+            }
+            None => None,
+        }
     }
 }
 
