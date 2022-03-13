@@ -1,3 +1,5 @@
+use crate::param::{FlagParam, OptionParam, PositionalParam};
+use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
 use anyhow::bail;
 use nom::{
@@ -11,8 +13,6 @@ use nom::{
     multi::{many1, separated_list1},
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
-use std::fmt::Display;
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct Event<'a> {
     pub data: EventData<'a>,
@@ -33,142 +33,36 @@ pub enum EventData<'a> {
     Cmd(&'a str),
     /// Define alias for a subcommand, e.g. `@alias t,tst`
     Aliases(Vec<&'a str>),
-    /// Define a argument
-    Arg(ArgData<'a>),
+    /// Define a option parameter
+    Option(OptionParam<'a>),
+    /// Define a positional parameter
+    Positional(PositionalParam<'a>),
+    /// Define a flag
+    Flag(FlagParam<'a>),
     /// A shell function. e.g `function cmd()` or `cmd()`
     Func(&'a str),
     /// Placeholder for unknown or invalid tag
     Unknown(&'a str),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct ArgData<'a> {
     pub name: &'a str,
-    pub kind: ArgKind,
-    pub summary: Option<&'a str>,
-    pub value_name: Option<&'a str>,
-    pub short: Option<char>,
     pub choices: Option<Vec<&'a str>>,
     pub multiple: bool,
     pub required: bool,
     pub default: Option<&'a str>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum ArgKind {
-    Flag,
-    Option,
-    Positional,
-}
-
-impl Display for ArgKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                ArgKind::Flag => "@flag",
-                ArgKind::Option => "@option",
-                ArgKind::Positional => "@arg",
-            }
-        )
-    }
-}
-
-impl<'a> Display for ArgData<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut segments: Vec<String> = vec![];
-        match self.kind {
-            ArgKind::Flag => {
-                if let Some(s) = self.short {
-                    segments.push(format!("-{}", s));
-                }
-                segments.push(format!("--{}", self.name));
-            }
-            ArgKind::Option => {
-                if let Some(s) = self.short {
-                    segments.push(format!("-{}", s));
-                }
-                let name = self.name_data();
-                segments.push(format!("--{}", name));
-                if let Some(value_name) = self.value_name {
-                    segments.push(format!("<{}>", value_name));
-                }
-            }
-            ArgKind::Positional => {
-                let name = self.name_data();
-                segments.push(name);
-            }
-        }
-        if let Some(summary) = self.summary {
-            segments.push(summary.to_string());
-        }
-        write!(f, "{}", segments.join(" "))
-    }
-}
-
 impl<'a> ArgData<'a> {
     pub fn new(name: &'a str) -> Self {
-        ArgData {
+        Self {
             name,
-            summary: None,
-            kind: ArgKind::Option,
-            value_name: None,
-            short: None,
             choices: None,
             multiple: false,
             required: false,
             default: None,
         }
-    }
-    pub fn is_positional(&self) -> bool {
-        self.kind == ArgKind::Positional
-    }
-    fn name_data(&self) -> String {
-        let mut name = self.name.to_string();
-        if let Some(choices) = &self.choices {
-            let mut prefix = String::new();
-            if self.default.is_some() {
-                prefix.push('=');
-            }
-            let values: Vec<String> = choices
-                .iter()
-                .map(|value| {
-                    if value.chars().any(is_terminate_char_choice_value) {
-                        format!("\"{}\"", value)
-                    } else {
-                        value.to_string()
-                    }
-                })
-                .collect();
-            let choices_value = format!("[{}{}]", prefix, values.join("|"));
-            if self.required {
-                name.push('!')
-            }
-            name.push_str(&choices_value);
-        } else if let Some(default) = self.default {
-            let value = if default.chars().any(is_terminate_char_default_value) {
-                format!("\"{}\"", default)
-            } else {
-                default.to_string()
-            };
-            name.push_str(&format!("={}", value));
-        } else if let Some(c) = self.name_suffix() {
-            name.push(c)
-        }
-        name
-    }
-    fn name_suffix(&self) -> Option<char> {
-        if self.multiple {
-            return Some(match self.required {
-                true => '+',
-                false => '*',
-            });
-        }
-        if self.required {
-            return Some('!');
-        }
-        None
     }
 }
 
@@ -223,7 +117,7 @@ fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
         tuple((many1(char('#')), space0, char('@'))),
         alt((
             parse_tag_text,
-            parse_tag_arg,
+            parse_tag_param,
             parse_tag_alias,
             parse_tag_unknown,
         )),
@@ -248,16 +142,22 @@ fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
     )(input)
 }
 
-fn parse_tag_arg(input: &str) -> nom::IResult<&str, Option<EventData>> {
+fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
     let check = peek(alt((tag("option"), tag("flag"), tag("arg"))));
-    let arg = map(
-        alt((
-            tuple((tag("option"), space1, parse_option_arg)),
-            tuple((tag("flag"), space1, parse_flag_arg)),
-            tuple((tag("arg"), space1, parse_positional_arg)),
-        )),
-        |(_, _, data)| Some(EventData::Arg(data)),
-    );
+    let arg = alt((
+        map(
+            preceded(pair(tag("flag"), space1), parse_flag_param),
+            |param| Some(EventData::Flag(param)),
+        ),
+        map(
+            preceded(pair(tag("option"), space1), parse_option_param),
+            |param| Some(EventData::Option(param)),
+        ),
+        map(
+            preceded(pair(tag("arg"), space1), parse_positional_param),
+            |param| Some(EventData::Positional(param)),
+        ),
+    ));
     preceded(check, alt((arg, success(None))))(input)
 }
 
@@ -278,7 +178,7 @@ fn parse_tag_unknown(input: &str) -> nom::IResult<&str, Option<EventData>> {
 }
 
 // Parse `@option`
-fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
+fn parse_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
     map(
         tuple((
             parse_short,
@@ -295,19 +195,12 @@ fn parse_option_arg(input: &str) -> nom::IResult<&str, ArgData> {
             parse_value_notation,
             parse_tail,
         )),
-        |(short, mut arg, value_name, summary)| {
-            arg.short = short;
-            if !summary.is_empty() {
-                arg.summary = Some(summary);
-            }
-            arg.value_name = value_name;
-            arg
-        },
+        |(short, arg, value_name, summary)| OptionParam::new(arg, summary, short, value_name),
     )(input)
 }
 
 // Parse `@option`, positional only
-fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
+fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
     map(
         pair(
             alt((
@@ -319,32 +212,19 @@ fn parse_positional_arg(input: &str) -> nom::IResult<&str, ArgData> {
             )),
             parse_tail,
         ),
-        |(mut arg, summary)| {
-            arg.kind = ArgKind::Positional;
-            if !summary.is_empty() {
-                arg.summary = Some(summary);
-            }
-            arg
-        },
+        |(arg, summary)| PositionalParam::new(arg, summary),
     )(input)
 }
 
 // Parse `@flag`
-fn parse_flag_arg(input: &str) -> nom::IResult<&str, ArgData> {
+fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
     map(
         tuple((
             parse_short,
             preceded(pair(space0, tag("--")), parse_arg_name),
             parse_tail,
         )),
-        |(short, mut arg, summary)| {
-            arg.short = short;
-            if !summary.is_empty() {
-                arg.summary = Some(summary);
-            }
-            arg.kind = ArgKind::Flag;
-            arg
-        },
+        |(short, arg, summary)| FlagParam::new(arg, summary, short),
     )(input)
 }
 
@@ -489,28 +369,14 @@ fn parse_name(input: &str) -> nom::IResult<&str, &str> {
 }
 
 fn parse_default_value(input: &str) -> nom::IResult<&str, &str> {
-    alt((
-        parse_quoted_string,
-        take_till(is_terminate_char_default_value),
-    ))(input)
-}
-
-fn is_terminate_char_default_value(c: char) -> bool {
-    c.is_whitespace()
+    alt((parse_quoted_string, take_till(is_default_value_terminate)))(input)
 }
 
 fn parse_choice_value(input: &str) -> nom::IResult<&str, &str> {
     if input.starts_with('=') {
         return fail(input);
     }
-    alt((
-        parse_quoted_string,
-        take_till(is_terminate_char_choice_value),
-    ))(input)
-}
-
-fn is_terminate_char_choice_value(c: char) -> bool {
-    c == '|' || c == ']'
+    alt((parse_quoted_string, take_till(is_choice_value_terminate)))(input)
 }
 
 fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
@@ -530,6 +396,7 @@ fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::param::Param;
 
     macro_rules! assert_token {
         ($comment:literal, Ignore) => {
@@ -558,13 +425,13 @@ mod tests {
     macro_rules! assert_parse_option_arg {
         ($data:literal, &expect:literal) => {
             assert_eq!(
-                parse_option_arg($data).unwrap().1.to_string().as_str(),
+                parse_option_param($data).unwrap().1.render().as_str(),
                 $expect
             );
         };
         ($data:literal) => {
             assert_eq!(
-                parse_option_arg($data).unwrap().1.to_string().as_str(),
+                parse_option_param($data).unwrap().1.render().as_str(),
                 $data
             );
         };
@@ -572,26 +439,23 @@ mod tests {
 
     macro_rules! assert_parse_flag_arg {
         ($data:literal, &expect:literal) => {
-            assert_eq!(
-                parse_flag_arg($data).unwrap().1.to_string().as_str(),
-                $expect
-            );
+            assert_eq!(parse_flag_arg($data).unwrap().1.render().as_str(), $expect);
         };
         ($data:literal) => {
-            assert_eq!(parse_flag_arg($data).unwrap().1.to_string().as_str(), $data);
+            assert_eq!(parse_flag_param($data).unwrap().1.render().as_str(), $data);
         };
     }
 
     macro_rules! assert_parse_positional_arg {
         ($data:literal, &expect:literal) => {
             assert_eq!(
-                parse_positional_arg($data).unwrap().1.to_string().as_str(),
+                parse_positional_param($data).unwrap().1.render().as_str(),
                 $expect
             );
         };
         ($data:literal) => {
             assert_eq!(
-                parse_positional_arg($data).unwrap().1.to_string().as_str(),
+                parse_positional_param($data).unwrap().1.render().as_str(),
                 $data
             );
         };
@@ -642,9 +506,9 @@ mod tests {
         assert_token!("# @cmd A subcommand", Cmd, "A subcommand");
         assert_token!("# @alias tst", Aliases, vec!["tst"]);
         assert_token!("# @alias t,tst", Aliases, vec!["t", "tst"]);
-        assert_token!("# @flag -f --foo", Arg);
-        assert_token!("# @option -f --foo", Arg);
-        assert_token!("# @arg foo", Arg);
+        assert_token!("# @flag -f --foo", Flag);
+        assert_token!("# @option -f --foo", Option);
+        assert_token!("# @arg foo", Positional);
         assert_token!("foo()", Func, "foo");
         assert_token!("foo ()", Func, "foo");
         assert_token!("foo  ()", Func, "foo");

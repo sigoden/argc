@@ -1,14 +1,5 @@
 use convert_case::{Boundary, Converter, Pattern};
 
-/// Transform into a lower case string with underscores between words. `foo-bar` => `foo_bar`
-pub fn to_snake_case(value: &str) -> String {
-    Converter::new()
-        .set_pattern(Pattern::Lowercase)
-        .set_delim("_")
-        .set_boundaries(&[Boundary::Underscore, Boundary::LowerUpper, Boundary::Hyphen])
-        .convert(value)
-}
-
 /// Transform into a lower cased string with dashes between words. `foo_bar` => `foo-bar`
 pub fn to_kebab_case(value: &str) -> String {
     Converter::new()
@@ -51,17 +42,17 @@ pub fn escape_shell_words(value: &str) -> String {
     output
 }
 
+pub fn is_choice_value_terminate(c: char) -> bool {
+    c == '|' || c == ']'
+}
+
+pub fn is_default_value_terminate(c: char) -> bool {
+    c.is_whitespace()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_snake() {
-        assert_eq!("foo_bar".to_string(), to_snake_case("fooBar"));
-        assert_eq!("foo_bar".to_string(), to_snake_case("foo-bar"));
-        assert_eq!("foo_bar".to_string(), to_snake_case("foo_bar"));
-        assert_eq!("foo1".to_string(), to_snake_case("foo1"));
-    }
 
     #[test]
     fn test_kebab() {
