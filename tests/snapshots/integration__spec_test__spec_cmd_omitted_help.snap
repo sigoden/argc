@@ -4,17 +4,17 @@ assertion_line: 13
 expression: output
 ---
 RUN
-spec cmd-omitted -h
+spec cmd_omitted -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-omitted 
+spec-cmd_omitted 
 Omitted
 
 USAGE:
-    spec cmd-omitted [OPTIONS] [ARG1]
+    spec cmd_omitted [OPTIONS] [ARG1]
 
 ARGS:
     <ARG1>    

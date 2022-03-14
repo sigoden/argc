@@ -4,17 +4,17 @@ assertion_line: 23
 expression: output
 ---
 RUN
-spec cmd-option-formats -h
+spec cmd_option_formats -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-option-formats 
+spec-cmd_option_formats 
 Options all kind of formats
 
 USAGE:
-    spec cmd-option-formats [OPTIONS]
+    spec cmd_option_formats [OPTIONS]
 
 OPTIONS:
     -a, --opt2 <OPT2>    

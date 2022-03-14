@@ -4,17 +4,17 @@ assertion_line: 114
 expression: output
 ---
 RUN
-spec cmd-positional-with-default -h
+spec cmd_positional_with_default -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-positional-with-default 
+spec-cmd_positional_with_default 
 Positional with default value
 
 USAGE:
-    spec cmd-positional-with-default [ARG]
+    spec cmd_positional_with_default [ARG]
 
 ARGS:
     <ARG>    A arg with default value [default: a]

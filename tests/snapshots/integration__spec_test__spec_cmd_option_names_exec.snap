@@ -4,7 +4,7 @@ assertion_line: 68
 expression: output
 ---
 RUN
-spec cmd-option-names --opt2 value2 --opt3 value3_0,value3_1 --opt4 value4_0 --opt4 value4_1 --opt6 a --opt8 a
+spec cmd_option_names --opt2 value2 --opt3 value3_0,value3_1 --opt4 value4_0 --opt4 value4_1 --opt6 a --opt8 a
 
 STDOUT
 argc_opt2=value2

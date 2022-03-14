@@ -4,7 +4,7 @@ use crate::Result;
 use anyhow::bail;
 use nom::{
     branch::alt,
-    bytes::complete::{escaped, tag, take_till, take_while},
+    bytes::complete::{escaped, tag, take_till, take_while1},
     character::{
         complete::{char, satisfy, space0, space1},
         streaming::none_of,
@@ -80,14 +80,14 @@ fn parse_fn(input: &str) -> nom::IResult<&str, Option<EventData>> {
 
 // Parse fn likes `function foo`
 fn parse_fn_keyword(input: &str) -> nom::IResult<&str, &str> {
-    preceded(tuple((space0, tag("function"), space1)), parse_name)(input)
+    preceded(tuple((space0, tag("function"), space1)), parse_fn_name)(input)
 }
 
 // Parse fn likes `foo ()`
 fn parse_fn_no_keyword(input: &str) -> nom::IResult<&str, &str> {
     preceded(
         space0,
-        terminated(parse_name, tuple((space0, char('('), space0, char(')')))),
+        terminated(parse_fn_name, tuple((space0, char('('), space0, char(')')))),
     )(input)
 }
 
@@ -303,7 +303,7 @@ fn parse_short(input: &str) -> nom::IResult<&str, Option<char>> {
 fn parse_value_notation(input: &str) -> nom::IResult<&str, Option<&str>> {
     let main = delimited(
         char('<'),
-        take_while(|c: char| c.is_ascii_uppercase() || c == '-'),
+        take_while1(|c: char| c.is_ascii_uppercase() || c == '-'),
         char('>'),
     );
     opt(preceded(space0, main))(input)
@@ -343,8 +343,12 @@ fn parse_name_list(input: &str) -> nom::IResult<&str, Vec<&str>> {
     separated_list1(char(','), delimited(space0, parse_name, space0))(input)
 }
 
+fn parse_fn_name(input: &str) -> nom::IResult<&str, &str> {
+    take_while1(is_not_fn_name_char)(input)
+}
+
 fn parse_name(input: &str) -> nom::IResult<&str, &str> {
-    take_while(|c: char| c.is_ascii_alphanumeric() || c == '_' || c == '-')(input)
+    take_while1(is_name_char)(input)
 }
 
 fn parse_default_value(input: &str) -> nom::IResult<&str, &str> {
@@ -370,6 +374,33 @@ fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
         char('"'),
     );
     alt((single, double))(input)
+}
+
+fn is_not_fn_name_char(c: char) -> bool {
+    !matches!(
+        c,
+        ' ' | '\t'
+            | '"'
+            | '\''
+            | '`'
+            | '('
+            | ')'
+            | '['
+            | ']'
+            | '{'
+            | '}'
+            | '<'
+            | '>'
+            | '$'
+            | '&'
+            | '\\'
+            | ';'
+            | '|'
+    )
+}
+
+fn is_name_char(c: char) -> bool {
+    c.is_ascii_alphanumeric() || c == '_' || c == '-'
 }
 
 #[cfg(test)]
@@ -493,9 +524,19 @@ mod tests {
         assert_token!("foo  ()", Func, "foo");
         assert_token!("foo ( )", Func, "foo");
         assert_token!(" foo ()", Func, "foo");
+        assert_token!("foo_bar ()", Func, "foo_bar");
+        assert_token!("foo-bar ()", Func, "foo-bar");
+        assert_token!("foo:bar ()", Func, "foo:bar");
+        assert_token!("foo.bar ()", Func, "foo.bar");
+        assert_token!("foo@bar ()", Func, "foo@bar");
         assert_token!("function foo", Func, "foo");
         assert_token!("function  foo", Func, "foo");
         assert_token!(" function foo", Func, "foo");
+        assert_token!("function foo_bar", Func, "foo_bar");
+        assert_token!("function foo-bar", Func, "foo-bar");
+        assert_token!("function foo:bar", Func, "foo:bar");
+        assert_token!("function foo.bar", Func, "foo.bar");
+        assert_token!("function foo@bar", Func, "foo@bar");
         assert_token!("foo=bar", Ignore);
         assert_token!("#!/bin/bash", Ignore);
         assert_token!("# @flag -f", Error);

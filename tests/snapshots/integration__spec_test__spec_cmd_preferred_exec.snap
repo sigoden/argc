@@ -4,7 +4,7 @@ assertion_line: 60
 expression: output
 ---
 RUN
-spec cmd-preferred -f -o A AB C D
+spec cmd_preferred -f -o A AB C D
 
 STDOUT
 argc_arg1=( AB C\ D )

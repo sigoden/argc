@@ -4,17 +4,17 @@ assertion_line: 154
 expression: output
 ---
 RUN
-spec cmd-positional-with-choices-and-default -h
+spec cmd_positional_with_choices_and_default -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-positional-with-choices-and-default 
+spec-cmd_positional_with_choices_and_default 
 Positional with choices and value
 
 USAGE:
-    spec cmd-positional-with-choices-and-default [ARG]
+    spec cmd_positional_with_choices_and_default [ARG]
 
 ARGS:
     <ARG>    A arg with choices and default value [default: a] [possible values: a, b]

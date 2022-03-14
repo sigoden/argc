@@ -4,7 +4,7 @@ assertion_line: 178
 expression: output
 ---
 RUN
-spec cmd-positional-with-choices-and-required
+spec cmd_positional_with_choices_and_required
 
 STDOUT
 
@@ -14,7 +14,7 @@ error: The following required arguments were not provided:
     <ARG>
 
 USAGE:
-    spec cmd-positional-with-choices-and-required <ARG>
+    spec cmd_positional_with_choices_and_required <ARG>
 
 For more information try --help
 

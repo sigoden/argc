@@ -1,6 +1,5 @@
 use crate::param::{Param, ParamNames, PositionalParam};
 use crate::parser::{parse, Event, EventData, Position};
-use crate::utils::*;
 use crate::Result;
 use anyhow::{anyhow, bail, Error};
 use clap::{ArgMatches, Command};
@@ -45,7 +44,7 @@ pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<std::result::Result<
 
 #[derive(Default)]
 struct Cmd<'a> {
-    name: Option<(&'a str, String)>,
+    name: Option<&'a str>,
     describe: Option<&'a str>,
     positional_index: usize,
     params: Vec<(&'a dyn Param<'a>, usize)>,
@@ -155,7 +154,7 @@ impl<'a> Cmd<'a> {
                             )
                         }
                         root_data.names.insert(name, *position);
-                        cmd.name = Some((name, to_kebab_case(name)));
+                        cmd.name = Some(name);
                         cmd.maybe_add_default_positional(default_positional_param)?;
                         root_cmd.subcommands.push(cmd);
                     } else if *name == ENTRYPOINT {
@@ -195,7 +194,7 @@ impl<'a> Cmd<'a> {
             cmd = cmd.arg(param.build_arg(*index)?);
         }
         for subcommand in &self.subcommands {
-            let subcommand = subcommand.build(subcommand.name.as_ref().unwrap().1.as_str())?;
+            let subcommand = subcommand.build(subcommand.name.as_ref().unwrap())?;
             cmd = cmd.subcommand(subcommand);
         }
         Ok(cmd)
@@ -210,9 +209,9 @@ impl<'a> Cmd<'a> {
         }
         let mut call_fn: Option<&str> = None;
         for subcommand in &self.subcommands {
-            if let Some((fn_name, cmd_name)) = &subcommand.name {
+            if let Some(fn_name) = &subcommand.name {
                 if let Some((match_name, subcommand_matches)) = matches.subcommand() {
-                    if cmd_name.as_str() == match_name {
+                    if *fn_name == match_name {
                         let subcommand_values = subcommand.retrieve(subcommand_matches, runner);
                         values.extend(subcommand_values);
                         call_fn = Some(fn_name);

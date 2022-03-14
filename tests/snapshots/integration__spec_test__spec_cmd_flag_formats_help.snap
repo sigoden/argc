@@ -4,17 +4,17 @@ assertion_line: 39
 expression: output
 ---
 RUN
-spec cmd-flag-formats -h
+spec cmd_flag_formats -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-flag-formats 
+spec-cmd_flag_formats 
 All kind of flags
 
 USAGE:
-    spec cmd-flag-formats [OPTIONS]
+    spec cmd_flag_formats [OPTIONS]
 
 OPTIONS:
     -a, --foo2    
