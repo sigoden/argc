@@ -4,17 +4,17 @@ assertion_line: 170
 expression: output
 ---
 RUN
-spec cmd-positional-with-choices-and-required -h
+spec cmd_positional_with_choices_and_required -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-positional-with-choices-and-required 
+spec-cmd_positional_with_choices_and_required 
 Positional with choices and required
 
 USAGE:
-    spec cmd-positional-with-choices-and-required <ARG>
+    spec cmd_positional_with_choices_and_required <ARG>
 
 ARGS:
     <ARG>    A arg with choices and required [possible values: a, b]

@@ -22,33 +22,33 @@ OPTIONS:
     -V, --version    Print version information
 
 SUBCOMMANDS:
-    cmd-alias
+    cmd_alias
             Command with alias [aliases: a, alias]
-    cmd-flag-formats
+    cmd_flag_formats
             All kind of flags
-    cmd-omitted
+    cmd_omitted
             Omitted
-    cmd-option-formats
+    cmd_option_formats
             Options all kind of formats
-    cmd-option-names
+    cmd_option_names
             Options all kind of names
-    cmd-option-quotes
+    cmd_option_quotes
             Option value quoted
-    cmd-positional-only
+    cmd_positional_only
             Positional one required
-    cmd-positional-requires
+    cmd_positional_requires
             Positional all required
-    cmd-positional-with-choices
+    cmd_positional_with_choices
             Positional with choices
-    cmd-positional-with-choices-and-default
+    cmd_positional_with_choices_and_default
             Positional with choices and value
-    cmd-positional-with-choices-and-required
+    cmd_positional_with_choices_and_required
             Positional with choices and required
-    cmd-positional-with-default
+    cmd_positional_with_default
             Positional with default value
-    cmd-preferred
+    cmd_preferred
             Preferred
-    cmd-without-any-arg
+    cmd_without_any_arg
             Command without any arg
     help
             Print this message or the help of the given subcommand(s)

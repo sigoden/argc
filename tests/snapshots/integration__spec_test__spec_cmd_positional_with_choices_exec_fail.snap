@@ -4,7 +4,7 @@ assertion_line: 146
 expression: output
 ---
 RUN
-spec cmd-positional-with-choices x
+spec cmd_positional_with_choices x
 
 STDOUT
 
@@ -14,7 +14,7 @@ error: "x" isn't a valid value for '<ARG>'
 	[possible values: a, b]
 
 USAGE:
-    spec cmd-positional-with-choices <ARG>
+    spec cmd_positional_with_choices <ARG>
 
 For more information try --help
 

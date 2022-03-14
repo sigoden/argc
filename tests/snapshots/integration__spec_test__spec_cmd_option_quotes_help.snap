@@ -4,17 +4,17 @@ assertion_line: 31
 expression: output
 ---
 RUN
-spec cmd-option-quotes -h
+spec cmd_option_quotes -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-option-quotes 
+spec-cmd_option_quotes 
 Option value quoted
 
 USAGE:
-    spec cmd-option-quotes [OPTIONS]
+    spec cmd_option_quotes [OPTIONS]
 
 OPTIONS:
     -h, --help           Print help information

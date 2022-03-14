@@ -4,17 +4,17 @@ assertion_line: 18
 expression: output
 ---
 RUN
-spec cmd-option-names -h
+spec cmd_option_names -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-option-names 
+spec-cmd_option_names 
 Options all kind of names
 
 USAGE:
-    spec cmd-option-names [OPTIONS] --opt2 <OPT2> --opt4 <OPT4>... --opt8 <OPT8> [--]
+    spec cmd_option_names [OPTIONS] --opt2 <OPT2> --opt4 <OPT4>... --opt8 <OPT8> [--]
 
 OPTIONS:
     -h, --help              Print help information

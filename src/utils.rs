@@ -1,18 +1,5 @@
 use convert_case::{Boundary, Converter, Pattern};
 
-/// Transform into a lower cased string with dashes between words. `foo_bar` => `foo-bar`
-pub fn to_kebab_case(value: &str) -> String {
-    Converter::new()
-        .set_pattern(Pattern::Lowercase)
-        .set_delim("-")
-        .set_boundaries(&[
-            Boundary::Underscore,
-            Boundary::LowerUpper,
-            Boundary::Underscore,
-        ])
-        .convert(value)
-}
-
 /// Transform into upper case string with an underscore between words. `foo-bar` => `FOO-BAR`
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()
@@ -53,13 +40,6 @@ pub fn is_default_value_terminate(c: char) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_kebab() {
-        assert_eq!("foo-bar".to_string(), to_kebab_case("fooBar"));
-        assert_eq!("foo-bar".to_string(), to_kebab_case("foo_bar"));
-        assert_eq!("foo1".to_string(), to_kebab_case("foo1"));
-    }
 
     #[test]
     fn test_cobol() {

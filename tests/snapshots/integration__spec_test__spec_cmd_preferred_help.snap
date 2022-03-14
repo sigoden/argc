@@ -4,17 +4,17 @@ assertion_line: 8
 expression: output
 ---
 RUN
-spec cmd-preferred -h
+spec cmd_preferred -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-preferred 
+spec-cmd_preferred 
 Preferred
 
 USAGE:
-    spec cmd-preferred [OPTIONS] [ARG1]...
+    spec cmd_preferred [OPTIONS] [ARG1]...
 
 ARGS:
     <ARG1>...    A positional arg

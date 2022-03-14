@@ -4,7 +4,7 @@ assertion_line: 191
 expression: output
 ---
 RUN
-spec cmd-without-any-arg
+spec cmd_without_any_arg
 
 STDOUT
 cmd_without_any_arg

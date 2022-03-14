@@ -4,7 +4,7 @@ assertion_line: 162
 expression: output
 ---
 RUN
-spec cmd-positional-with-choices-and-default
+spec cmd_positional_with_choices_and_default
 
 STDOUT
 argc_arg=a

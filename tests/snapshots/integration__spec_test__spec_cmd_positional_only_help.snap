@@ -4,17 +4,17 @@ assertion_line: 44
 expression: output
 ---
 RUN
-spec cmd-positional-only -h
+spec cmd_positional_only -h
 
 STDOUT
 
 
 STDERR
-spec-cmd-positional-only 
+spec-cmd_positional_only 
 Positional one required
 
 USAGE:
-    spec cmd-positional-only <ARG1>
+    spec cmd_positional_only <ARG1>
 
 ARGS:
     <ARG1>    A required arg

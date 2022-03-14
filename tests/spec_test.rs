@@ -5,24 +5,24 @@ fn test_spec_help() {
 
 #[test]
 fn test_spec_cmd_preferred_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-preferred", "-h"],);
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd_preferred", "-h"],);
 }
 
 #[test]
 fn test_spec_cmd_omitted_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-omitted", "-h"],);
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd_omitted", "-h"],);
 }
 
 #[test]
 fn test_spec_cmd_option_names_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-option-names", "-h"],);
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd_option_names", "-h"],);
 }
 
 #[test]
 fn test_spec_cmd_option_formats_help() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-option-formats", "-h"],
+        &["spec", "cmd_option_formats", "-h"],
     );
 }
 
@@ -30,20 +30,20 @@ fn test_spec_cmd_option_formats_help() {
 fn test_spec_cmd_option_quotes_help() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-option-quotes", "-h"],
+        &["spec", "cmd_option_quotes", "-h"],
     );
 }
 
 #[test]
 fn test_spec_cmd_flag_formats_help() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-flag-formats", "-h"],);
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd_flag_formats", "-h"],);
 }
 
 #[test]
 fn test_spec_cmd_positional_only_help() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-only", "-h"],
+        &["spec", "cmd_positional_only", "-h"],
     );
 }
 
@@ -51,7 +51,7 @@ fn test_spec_cmd_positional_only_help() {
 fn test_spec_cmd_positional_requires_help() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-requires", "-h"],
+        &["spec", "cmd_positional_requires", "-h"],
     );
 }
 
@@ -59,7 +59,7 @@ fn test_spec_cmd_positional_requires_help() {
 fn test_spec_cmd_preferred_exec() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-preferred", "-f", "-o", "A", "AB", "C D"],
+        &["spec", "cmd_preferred", "-f", "-o", "A", "AB", "C D"],
     );
 }
 
@@ -69,7 +69,7 @@ fn test_spec_cmd_option_names_exec() {
         include_str!("spec.sh"),
         &[
             "spec",
-            "cmd-option-names",
+            "cmd_option_names",
             "--opt2",
             "value2",
             "--opt3",
@@ -92,7 +92,7 @@ fn test_spec_cmd_option_names_exec_eval() {
         include_str!("spec.sh"),
         &[
             "spec",
-            "cmd-option-names",
+            "cmd_option_names",
             "--opt2",
             "value2",
             "--opt3",
@@ -113,7 +113,7 @@ fn test_spec_cmd_option_names_exec_eval() {
 fn test_spec_cmd_positional_with_default() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-with-default", "-h"],
+        &["spec", "cmd_positional_with_default", "-h"],
     );
 }
 
@@ -121,7 +121,7 @@ fn test_spec_cmd_positional_with_default() {
 fn test_spec_cmd_positional_with_default_exec() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-with-default"],
+        &["spec", "cmd_positional_with_default"],
     );
 }
 
@@ -129,7 +129,7 @@ fn test_spec_cmd_positional_with_default_exec() {
 fn test_spec_cmd_positional_with_choices() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-with-choices", "-h"],
+        &["spec", "cmd_positional_with_choices", "-h"],
     );
 }
 
@@ -137,7 +137,7 @@ fn test_spec_cmd_positional_with_choices() {
 fn test_spec_cmd_positional_with_choices_exec() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-with-choices", "a"],
+        &["spec", "cmd_positional_with_choices", "a"],
     );
 }
 
@@ -145,7 +145,7 @@ fn test_spec_cmd_positional_with_choices_exec() {
 fn test_spec_cmd_positional_with_choices_exec_fail() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-with-choices", "x"],
+        &["spec", "cmd_positional_with_choices", "x"],
     );
 }
 
@@ -153,7 +153,7 @@ fn test_spec_cmd_positional_with_choices_exec_fail() {
 fn test_spec_cmd_positional_with_choices_and_default() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-with-choices-and-default", "-h"],
+        &["spec", "cmd_positional_with_choices_and_default", "-h"],
     );
 }
 
@@ -161,7 +161,7 @@ fn test_spec_cmd_positional_with_choices_and_default() {
 fn test_spec_cmd_positional_with_choices_and_default_exec() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-with-choices-and-default"],
+        &["spec", "cmd_positional_with_choices_and_default"],
     );
 }
 
@@ -169,7 +169,7 @@ fn test_spec_cmd_positional_with_choices_and_default_exec() {
 fn test_spec_cmd_positional_with_choices_and_required() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-with-choices-and-required", "-h"],
+        &["spec", "cmd_positional_with_choices_and_required", "-h"],
     );
 }
 
@@ -177,7 +177,7 @@ fn test_spec_cmd_positional_with_choices_and_required() {
 fn test_spec_cmd_positional_with_choices_and_required_exec_fail() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-positional-with-choices-and-required"],
+        &["spec", "cmd_positional_with_choices_and_required"],
     );
 }
 
@@ -188,14 +188,14 @@ fn test_spec_cmd_alias() {
 
 #[test]
 fn test_spec_cmd_without_any_arg() {
-    snapshot!(include_str!("spec.sh"), &["spec", "cmd-without-any-arg"],);
+    snapshot!(include_str!("spec.sh"), &["spec", "cmd_without_any_arg"],);
 }
 
 #[test]
 fn test_spec_cmd_without_any_arg_exec() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-without-any-arg", "foo", "bar"],
+        &["spec", "cmd_without_any_arg", "foo", "bar"],
     );
 }
 
@@ -203,6 +203,6 @@ fn test_spec_cmd_without_any_arg_exec() {
 fn test_spec_cmd_without_any_arg_exec_eval() {
     snapshot!(
         include_str!("spec.sh"),
-        &["spec", "cmd-without-any-arg", "foo", "bar"],
+        &["spec", "cmd_without_any_arg", "foo", "bar"],
     );
 }
