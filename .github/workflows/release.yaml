@@ -13,7 +13,7 @@ jobs:
       matrix:
         target:
         - aarch64-unknown-linux-musl
-        - armv7-unknown-linux-musleabihf
+        - aarch64-apple-darwin
         - x86_64-apple-darwin
         - x86_64-pc-windows-msvc
         - x86_64-unknown-linux-musl
@@ -21,8 +21,8 @@ jobs:
         - target: aarch64-unknown-linux-musl
           os: ubuntu-latest
           use-cross: true
-        - target: armv7-unknown-linux-musleabihf
-          os: ubuntu-latest
+        - target: aarch64-apple-darwin
+          os: macos-latest
           use-cross: true
         - target: x86_64-apple-darwin
           os: macos-latest
@@ -62,7 +62,6 @@ jobs:
       shell: bash
       run: |
         case ${{ matrix.target }} in
-          armv7-unknown-linux-*) sudo apt-get -y update ; sudo apt-get -y install gcc-arm-linux-gnueabihf ;;
           aarch64-unknown-linux-musl) sudo apt-get -y update ; sudo apt-get -y install gcc-aarch64-linux-gnu ;;
         esac
 
