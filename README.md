@@ -40,7 +40,7 @@ cargo install argc
 
 ### Binaries on macOS, Linux, Windows
 
-Download from [Github Releases](https://github.com/sigoden/argc/releases),  unzip and add argc to your $PATH.
+Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip and add argc to your $PATH.
 
 ## Tag
 
