@@ -49,6 +49,7 @@ Argc generates parsing rules and help documentation based on tags (fields marked
  - [@describe](#describe)
  - [@version](#version)
  - [@author](#author)
+ - [@help](#help)
  - [@cmd](#cmd)
  - [@alias](#alias)
  - [@option](#option)
@@ -87,6 +88,19 @@ Define version
 ```
 
 Define author
+
+### @help
+
+```sh
+@help [false|string]
+
+# @help false   
+# @help Print help information
+```
+Customize help subcommand.
+
+1. disable help subcommand with `# @help false`
+2. custom help subcommand message with `# @help Print help information`
 
 ### @cmd
 

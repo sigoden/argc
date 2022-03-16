@@ -29,6 +29,8 @@ pub enum EventData<'a> {
     Version(&'a str),
     /// Author info
     Author(&'a str),
+    /// Help subcommand
+    Help(&'a str),
     /// Define a subcommand, e.g. `@cmd A sub command`
     Cmd(&'a str),
     /// Define alias for a subcommand, e.g. `@alias t,tst`
@@ -106,13 +108,20 @@ fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
 fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
     map(
         pair(
-            alt((tag("describe"), tag("version"), tag("author"), tag("cmd"))),
+            alt((
+                tag("describe"),
+                tag("version"),
+                tag("author"),
+                tag("cmd"),
+                tag("help"),
+            )),
             parse_tail,
         ),
         |(tag, text)| {
             Some(match tag {
                 "describe" => EventData::Describe(text),
                 "version" => EventData::Version(text),
+                "help" => EventData::Help(text),
                 "author" => EventData::Author(text),
                 "cmd" => EventData::Cmd(text),
                 _ => unreachable!(),

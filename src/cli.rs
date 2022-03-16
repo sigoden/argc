@@ -61,6 +61,7 @@ struct RootData<'a> {
     author: Option<&'a str>,
     version: Option<&'a str>,
     names: HashMap<&'a str, Position>,
+    help: Option<&'a str>,
     main: bool,
 }
 
@@ -88,6 +89,11 @@ impl<'a> Cmd<'a> {
                 EventData::Author(value) => {
                     if is_root_scope {
                         root_data.author = Some(*value);
+                    }
+                }
+                EventData::Help(value) => {
+                    if is_root_scope {
+                        root_data.help = Some(*value);
                     }
                 }
                 EventData::Cmd(value) => {
@@ -185,6 +191,13 @@ impl<'a> Cmd<'a> {
             }
             if !self.subcommands.is_empty() && !root_data.main {
                 cmd = cmd.subcommand_required(true).arg_required_else_help(true);
+            }
+            if let Some(help) = root_data.help {
+                if help == "false" {
+                    cmd = cmd.disable_help_subcommand(true);
+                } else {
+                    cmd = cmd.subcommand(Command::new("help").about(help))
+                }
             }
         }
         if !self.aliases.is_empty() {
