@@ -109,6 +109,14 @@ cmd_alias() {
     print_argc_vars
 }
 
+# @cmd  Command with hyphens
+# @arg       hyphen-positional
+# @flag     --hyphen-flag
+# @option   --hyphen-option
+cmd_with_hyphens() {
+    print_argc_vars
+}
+
 print_argc_vars() {
     ( set -o posix ; set ) | grep argc_
 }
