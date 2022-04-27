@@ -9,6 +9,10 @@ pub fn to_cobol_case(value: &str) -> String {
         .convert(value)
 }
 
+pub fn hyphens_to_underscores(name: &str) -> String {
+    name.replace('-', "_")
+}
+
 pub fn escape_shell_words(value: &str) -> String {
     let mut output = String::new();
     if value.is_empty() {

@@ -1,5 +1,6 @@
 use crate::param::{Param, ParamNames, PositionalParam};
 use crate::parser::{parse, Event, EventData, Position};
+use crate::utils::hyphens_to_underscores;
 use crate::Result;
 use anyhow::{anyhow, bail, Error};
 use clap::{ArgMatches, Command};
@@ -279,7 +280,12 @@ fn to_string_retrieve_values(values: Vec<RetrieveValue>) -> String {
     for value in values {
         match value {
             RetrieveValue::Single(name, value) => {
-                variables.push(format!("{}_{}={}", VARIABLE_PREFIX, hyphens_to_underscores(name), value));
+                variables.push(format!(
+                    "{}_{}={}",
+                    VARIABLE_PREFIX,
+                    hyphens_to_underscores(name),
+                    value
+                ));
             }
             RetrieveValue::Multiple(name, values) => {
                 variables.push(format!(
@@ -290,7 +296,12 @@ fn to_string_retrieve_values(values: Vec<RetrieveValue>) -> String {
                 ));
             }
             RetrieveValue::PositionalSingle(name, value) => {
-                variables.push(format!("{}_{}={}", VARIABLE_PREFIX, hyphens_to_underscores(name), &value));
+                variables.push(format!(
+                    "{}_{}={}",
+                    VARIABLE_PREFIX,
+                    hyphens_to_underscores(name),
+                    &value
+                ));
                 positional_args.push(value);
             }
             RetrieveValue::PositionalMultiple(name, values) => {
@@ -316,8 +327,4 @@ fn to_string_retrieve_values(values: Vec<RetrieveValue>) -> String {
 
 fn unexpected_param(tag_name: &str, pos: Position) -> Error {
     anyhow!("{}(line {}) is unexpected, maybe miss @cmd?", tag_name, pos,)
-}
-
-fn hyphens_to_underscores(name: &str) -> String {
-    name.replace("-", "_")
 }
