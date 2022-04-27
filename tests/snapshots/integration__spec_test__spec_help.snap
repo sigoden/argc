@@ -48,6 +48,8 @@ SUBCOMMANDS:
             Positional with default value
     cmd_preferred
             Preferred
+    cmd_with_hyphens
+            Command with hyphens
     cmd_without_any_arg
             Command without any arg
     help

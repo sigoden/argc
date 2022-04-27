@@ -206,3 +206,18 @@ fn test_spec_cmd_without_any_arg_exec_eval() {
         &["spec", "cmd_without_any_arg", "foo", "bar"],
     );
 }
+
+#[test]
+fn test_spec_cmd_with_hyphens() {
+    snapshot!(
+        include_str!("spec.sh"),
+        &[
+            "spec",
+            "cmd_with_hyphens",
+            "foo",
+            "--hyphen-flag",
+            "--hyphen-option",
+            "bar"
+        ],
+    );
+}
