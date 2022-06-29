@@ -3,7 +3,7 @@ name = "argc"
 version = "0.8.1"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "A easy way to handle sh/bash cli parameters"
+description = "make beautiful bash cli with ease"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
@@ -12,13 +12,13 @@ categories = ["command-line-utilities"]
 keywords = ["command-line", "shell-script", "argument-parser"]
 
 [dependencies]
-anyhow = "1.0.56"
-clap = { version = "3.1.6", default_features = false, features = ["std"] }
-convert_case = "0.5.0"
-nom = "7.1.0"
+anyhow = "1"
+clap = { version = "3", default_features = false, features = ["std"] }
+convert_case = "0.5"
+nom = "7.1"
 
 [dev-dependencies]
-insta = "1.12"
+insta = "1.15"
 
 [profile.release]
 lto = true

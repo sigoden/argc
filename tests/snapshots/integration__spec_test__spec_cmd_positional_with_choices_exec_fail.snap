@@ -13,9 +13,6 @@ STDERR
 error: "x" isn't a valid value for '<ARG>'
 	[possible values: a, b]
 
-USAGE:
-    spec cmd_positional_with_choices <ARG>
-
 For more information try --help
 
 

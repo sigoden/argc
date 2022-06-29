@@ -3,13 +3,13 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-A handy way to handle sh/bash cli parameters.
+Make beautiful bash cli with ease.
 
 ![demo](https://user-images.githubusercontent.com/4012553/158063004-e7a3534c-eb1a-47fb-9bbd-89a49345589a.gif)
 
 ## How Argc works
 
-To write a command line program with Argc, we only need to do two things:
+To write a command-line program with Argc, we only need to do two things:
 
 1. Describe the options, parameters, and subcommands in comments
 2. Call the following command to entrust Argc to process command line parameters for us
