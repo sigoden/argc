@@ -1,6 +1,6 @@
 [package]
 name = "argc"
-version = "0.8.1"
+version = "0.8.2"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
 description = "make beautiful bash cli with ease"
