@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Make beautiful bash cli with ease.
+An easier way to make a cli using bash, an alternative to getopt(s)
 
 ![demo](https://user-images.githubusercontent.com/4012553/158063004-e7a3534c-eb1a-47fb-9bbd-89a49345589a.gif)
 
