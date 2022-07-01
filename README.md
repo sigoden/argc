@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Describe cli with comments to make cli in bash. Time to say goodbye to getopt(s).
+Describe cli with comments to make cli. Time to say goodbye to bash getopt(s).
 
 ![demo](https://user-images.githubusercontent.com/4012553/158063004-e7a3534c-eb1a-47fb-9bbd-89a49345589a.gif)
 
