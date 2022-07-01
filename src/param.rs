@@ -7,6 +7,7 @@ use crate::utils::{
 use anyhow::{bail, Result};
 use clap::{Arg, ArgMatches};
 use std::collections::HashMap;
+use std::fmt::Write;
 
 pub const DEFAULT_SHELL_POSITIONAL_ARGS: &str = "_args";
 
@@ -367,7 +368,7 @@ fn render_name<'a>(
         } else {
             default.to_string()
         };
-        name.push_str(&format!("={}", value));
+        let _ = write!(name, "={}", value);
     } else if let Some(ch) = match (required, multiple) {
         (true, true) => Some('+'),
         (true, false) => Some('!'),
