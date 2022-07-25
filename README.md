@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Comment cli to make cli. Time to say goodbye to bash getopt(s).
+A new way to parse shell script arguments to make writing bash cli easier. Time to say goodbye to bash getopt(s).
 
 ![demo](https://user-images.githubusercontent.com/4012553/158063004-e7a3534c-eb1a-47fb-9bbd-89a49345589a.gif)
 
@@ -134,17 +134,17 @@ Define alias for a subcommand
 ```sh
  @option [short] [long][modifer] [notation] [string]
 
- ## @option    --foo                A option
- ## @option -f --foo                A option with short alias
- ## @option    --foo <PATH>         A option with notation
- ## @option    --foo!               A required option
- ## @option    --foo*               A option with multiple values
- ## @option    --foo+               A required option with multiple values
- ## @option    --foo=a              A option with default value
- ## @option    --foo[a|b]           A option with choices
- ## @option    --foo[=a|b]          A option with choices and default value
- ## @option    --foo![a|b]          A required option with choices
- ## @option -f --foo <PATH>         A option with short alias and notation
+ # @option    --foo                A option
+ # @option -f --foo                A option with short alias
+ # @option    --foo <PATH>         A option with notation
+ # @option    --foo!               A required option
+ # @option    --foo*               A option with multiple values
+ # @option    --foo+               A required option with multiple values
+ # @option    --foo=a              A option with default value
+ # @option    --foo[a|b]           A option with choices
+ # @option    --foo[=a|b]          A option with choices and default value
+ # @option    --foo![a|b]          A required option with choices
+ # @option -f --foo <PATH>         A option with short alias and notation
 ```
 
 Define value option
