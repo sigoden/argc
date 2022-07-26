@@ -60,7 +60,6 @@ macro_rules! fatal {
     };
 }
 
-
 #[macro_export]
 macro_rules! complete {
     (
