@@ -1,5 +1,6 @@
 #[macro_use]
 mod macros;
+mod complete_test;
 mod escape_test;
 mod fail_test;
 mod help_tag_test;
