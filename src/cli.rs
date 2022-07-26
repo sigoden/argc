@@ -12,11 +12,11 @@ const VARIABLE_PREFIX: &str = env!("CARGO_CRATE_NAME");
 
 const ENTRYPOINT: &str = "main";
 
-pub struct Runner<'a> {
+pub struct Cli<'a> {
     source: &'a str,
 }
 
-impl<'a> Runner<'a> {
+impl<'a> Cli<'a> {
     pub fn new(source: &'a str) -> Self {
         Self { source }
     }
@@ -46,12 +46,6 @@ impl<'a> Runner<'a> {
             Err(err) => Ok(Err(err.to_string())),
         }
     }
-}
-
-/// Run script with arguments, returns (stdout, stderr)
-pub fn run<'a>(source: &'a str, args: &[&'a str]) -> Result<std::result::Result<String, String>> {
-    let runner = Runner::new(source);
-    runner.run(args)
 }
 
 #[derive(Default)]
@@ -225,7 +219,7 @@ impl<'a> Cmd<'a> {
         Ok(cmd)
     }
 
-    fn retrieve(&'a self, matches: &ArgMatches, runner: &Runner) -> Vec<RetrieveValue> {
+    fn retrieve(&'a self, matches: &ArgMatches, cli: &Cli) -> Vec<RetrieveValue> {
         let mut values = vec![];
         for (param, _) in &self.params {
             if let Some(value) = param.retrieve_value(matches) {
@@ -237,7 +231,7 @@ impl<'a> Cmd<'a> {
             if let Some(fn_name) = &subcommand.name {
                 if let Some((match_name, subcommand_matches)) = matches.subcommand() {
                     if *fn_name == match_name {
-                        let subcommand_values = subcommand.retrieve(subcommand_matches, runner);
+                        let subcommand_values = subcommand.retrieve(subcommand_matches, cli);
                         values.extend(subcommand_values);
                         call_fn = Some(fn_name);
                     }

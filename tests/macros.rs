@@ -4,8 +4,8 @@ macro_rules! snapshot {
         $source:expr,
         $args:expr,
     ) => {
-        let runner = argc::Runner::new($source);
-        let (stdout, stderr) = match runner.run($args).unwrap() {
+        let cli = argc::Cli::new($source);
+        let (stdout, stderr) = match cli.run($args).unwrap() {
             Ok(stdout) => (stdout, String::new()),
             Err(stderr) => (String::new(), stderr),
         };
@@ -35,7 +35,8 @@ macro_rules! plain {
         $(stdout: $stdout:expr,)?
         $(stderr: $stderr:expr,)?
     ) => {
-        let result = match argc::run($source, $args).unwrap()  {
+        let cli = argc::Cli::new($source);
+        let result = match cli.run($args).unwrap()  {
             Ok(stdout) => (stdout, String::new()),
             Err(stderr) => (String::new(), stderr),
         };
@@ -55,7 +56,8 @@ macro_rules! fatal {
         $args:expr,
         $err:expr
     ) => {
-        let err = argc::run($source, $args).unwrap_err();
+        let cli = argc::Cli::new($source);
+        let err = cli.run($args).unwrap_err();
         assert_eq!(err.to_string().as_str(), $err);
     };
 }
@@ -66,9 +68,9 @@ macro_rules! complete {
         $source:expr,
         $name:expr
     ) => {
-        let runner = argc::Runner::new($source);
+        let cli = argc::Cli::new($source);
         let mut bufs: Vec<u8> = vec![];
-        runner.complete($name, &mut bufs).unwrap();
+        cli.complete($name, &mut bufs).unwrap();
         let output = std::str::from_utf8(&bufs).unwrap();
         insta::assert_snapshot!(output);
     };
