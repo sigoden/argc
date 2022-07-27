@@ -1,6 +1,6 @@
 # Command Runner
 
-  - [Turn shell function to task](#turn-shell-function-to-task)
+  - [Turn function to task](#turn-function-to-task)
   - [Task aliases](#task-aliases)
   - [Task dependencies](#task-dependencies)
   - [Default action](#default-action)
