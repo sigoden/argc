@@ -130,8 +130,13 @@ fn get_shell_path() -> Option<PathBuf> {
         Ok(v) => Path::new(&v).to_path_buf(),
         Err(_) => {
             if cfg!(windows) {
-                let git = which("git").ok()?;
-                git.parent()?.parent()?.join("bin").join("bash.exe")
+                let bash = which("bash").ok()?;
+                if bash.display().to_string().to_lowercase() == "c:\\windows\\system32\\bash.exe" {
+                    let git = which("git").ok()?;
+                    git.parent()?.parent()?.join("bin").join("bash.exe")
+                } else {
+                    bash
+                }
             } else {
                 which("bash").ok()?
             }
