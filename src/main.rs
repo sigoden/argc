@@ -77,8 +77,11 @@ fn run() -> Result<i32> {
             bail!("Recognized an infinite loop, did you forget to add the `--argc-eval` option in eval");
         }
         let shell = get_shell_path().ok_or_else(|| anyhow!("Not found shell"))?;
-        let (script_dir, script_file) =
-            get_script_path().ok_or_else(|| anyhow!("Not found {}", get_script_name()))?;
+        let script_names = candicate_script_names();
+        let (script_dir, script_file) = script_names
+            .into_iter()
+            .find_map(|v| get_script_path(&v))
+            .ok_or_else(|| anyhow!("Not found script file"))?;
         let mut command = process::Command::new(&shell);
         command.arg(&script_file);
         command.args(&script_args);
@@ -109,11 +112,10 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     Ok((source, cmd_args))
 }
 
-fn get_script_path() -> Option<(PathBuf, PathBuf)> {
-    let name = get_script_name();
+fn get_script_path(name: &str) -> Option<(PathBuf, PathBuf)> {
     let mut dir = env::current_dir().ok()?;
     loop {
-        let path = dir.join(&name);
+        let path = dir.join(name);
         if path.exists() {
             return Some((dir, path));
         }
@@ -121,8 +123,19 @@ fn get_script_path() -> Option<(PathBuf, PathBuf)> {
     }
 }
 
-fn get_script_name() -> String {
-    env::var("ARGC_SCRIPT").unwrap_or_else(|_| "argcfile".into())
+fn candicate_script_names() -> Vec<String> {
+    let mut names = vec![];
+    if let Ok(name) = env::var("ARGC_SCRIPT") {
+        names.push(name.clone());
+        if !name.ends_with(".sh") {
+            names.push(format!("{}.sh", name));
+        }
+    }
+    names.push("argcfile".into());
+    names.push("Argcfile".into());
+    names.push("argcfile.sh".into());
+    names.push("Argcfile.sh".into());
+    names
 }
 
 fn get_shell_path() -> Option<PathBuf> {
