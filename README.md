@@ -3,11 +3,13 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
+Make beautiful bash CLI with comments, also a task runner for bash.
+
 ## Usage
 
-### Make beautiful CLI with comments
+### Make beautiful cli with comments
 
-![demo](https://user-images.githubusercontent.com/4012553/158063004-e7a3534c-eb1a-47fb-9bbd-89a49345589a.gif)
+![demo](https://user-images.githubusercontent.com/4012553/181145104-ee9220e2-ecfc-4f6c-8ad9-89c765ebe498.gif)
 
 To write a command-line program with Argc, we only need to do two things:
 
@@ -31,22 +33,21 @@ We can easily access the corresponding option or parameter through the variable 
 
 Try [examples/demo.sh](examples/demo.sh) your self.
 
-### Command Runner
+### A task runner for bash
 
 When argc is executed without the `--argc-*` option, it will search for the argcfile file in the current project and its parent directory and execute it.
 
 `argcfile` is to `argc` what `makefile` is to `make`．
 
+![argcfile](https://user-images.githubusercontent.com/4012553/181147199-3c56e865-4057-48c6-b9d7-f8d594ffd49e.gif)
 
 > Note: in windows, you need to install git to provide bash for argc
 
-
-### Generate bash completion script
+### Generate completion script
 
 ```
-argc --argc-completion examples/demo.sh
+argc --argc-completion demo.sh
 ```
-
 
 ## Install
 
@@ -216,7 +217,7 @@ Define positional argument
 
 arg's modifier is same to [option's modifier](#modifier)
 
-## Cli
+## CLI
 
 ```
 Bash cli utility - https://github.com/sigoden/argc
