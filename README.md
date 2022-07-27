@@ -70,6 +70,16 @@ cargo install argc
 
 Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip and add argc to your $PATH.
 
+### GitHub Actions
+
+[extractions/setup-crate](https://github.com/marketplace/actions/setup-just) can be used to install just in a GitHub Actions workflow.
+
+```yaml
+- uses: extractions/setup-crate@v1
+  with:
+    owner: sigoden
+    name: argc
+```
 
 ## CLI
 
