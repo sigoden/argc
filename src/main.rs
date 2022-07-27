@@ -110,7 +110,7 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
 }
 
 fn get_script_path() -> Option<(PathBuf, PathBuf)> {
-	let name = get_script_name();
+    let name = get_script_name();
     let mut dir = env::current_dir().ok()?;
     loop {
         let path = dir.join(&name);
