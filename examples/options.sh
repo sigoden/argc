@@ -8,7 +8,7 @@
 # @option      -y --opt7[=x|y|z]   A option with choices and default value
 # @option      -z --opt8![x|y|z]   A required option with choices
 
-eval "$(argc $0 "$@")"
+eval "$(argc --argc-eval $0 "$@")"
 
 
 ( set -o posix ; set ) | grep argc_ # print variables with argc_ prefix

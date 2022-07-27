@@ -1,0 +1,39 @@
+#!/bin/bash 
+set -eo pipefail
+
+PKG_NAME=argc
+
+# @cmd Build binary and install
+# @alias i
+install() {
+    cargo build -r
+    ls -alh target/release/$PKG_NAME
+    cp target/release/$PKG_NAME $HOME/.cargo/bin
+}
+
+# @cmd Check outdated deps
+outdated() {
+    cargo outdated --root-deps-only $@
+}
+
+# @cmd Test all crates and modules
+# @alias t,test
+tst() {
+    cargo test --all
+}
+
+# @cmd Format/clippy code
+fmt() {
+    cargo clippy --all --all-targets
+    cargo fmt --all
+}
+
+# @cmd Run before commit
+# @alias pc
+pre:commit() {
+    fmt
+    outdated --exit-code 1
+    tst
+}
+
+eval "$(argc --argc-eval $0 "$@")"

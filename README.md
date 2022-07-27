@@ -3,19 +3,20 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-A new way to parse shell script arguments to make writing bash cli easier. Time to say goodbye to bash getopt(s).
+## Usage
+
+### Make beautiful CLI with comments
 
 ![demo](https://user-images.githubusercontent.com/4012553/158063004-e7a3534c-eb1a-47fb-9bbd-89a49345589a.gif)
-
-## How Argc works
 
 To write a command-line program with Argc, we only need to do two things:
 
 1. Describe the options, parameters, and subcommands in comments
 2. Call the following command to entrust Argc to process command line parameters for us
 
+
 ```sh
-eval "$(argc $0 "$@")"
+eval "$(argc --argc-eval $0 "$@")"
 ```
 
 Argc will do the following for us:
@@ -29,6 +30,23 @@ Argc will do the following for us:
 We can easily access the corresponding option or parameter through the variable `$argc_<name>`.
 
 Try [examples/demo.sh](examples/demo.sh) your self.
+
+### Command Runner
+
+When argc is executed without the `--argc-*` option, it will search for the argcfile file in the current project and its parent directory and execute it.
+
+`argcfile` is to `argc` what `makefile` is to `make`．
+
+
+> Note: in windows, you need to install git to provide bash for argc
+
+
+### Generate bash completion script
+
+```
+argc --argc-completion examples/demo.sh
+```
+
 
 ## Install
 
@@ -197,6 +215,26 @@ Define flag option
 Define positional argument
 
 arg's modifier is same to [option's modifier](#modifier)
+
+## Cli
+
+```
+Bash cli utility - https://github.com/sigoden/argc
+
+USAGE:
+    argc [OPTIONS] [ARGS]
+
+ARGS:
+    <SCRIPT>          Specific script file
+    <ARGUMENTS>...    Arguments passed to script file
+
+OPTIONS:
+        --argc-completion    Print bash completion script
+        --argc-eval          Print code snippets for eval
+        --argc-help          Print help information
+        --argc-version       Print version information
+```
+
 
 ## License
 

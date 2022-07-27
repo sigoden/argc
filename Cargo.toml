@@ -3,20 +3,21 @@ name = "argc"
 version = "0.8.2"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "A new way to parse shell script arguments."
+description = "Bash cli utility"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
 autotests = false
 categories = ["command-line-utilities"]
-keywords = ["command-line", "shell-script", "argument-parser"]
+keywords = ["command-line", "bash-script", "command-runner"]
 
 [dependencies]
 anyhow = "1"
 clap = { version = "3", default_features = false, features = ["std"] }
-clap_complete = "3.2.3"
+clap_complete = "3.2"
 convert_case = "0.5"
 nom = "7.1"
+which = "4.2"
 
 [dev-dependencies]
 insta = "1.15"
