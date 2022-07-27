@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Make beautiful bash CLI with comments, also a task runner for bash.
+Make beautiful bash cli with comments, also a command runner using bash.
 
 ## Usage
 
@@ -33,15 +33,24 @@ We can easily access the corresponding option or parameter through the variable 
 
 Try [examples/demo.sh](examples/demo.sh) your self.
 
-### A task runner for bash
 
-When argc is executed without the `--argc-*` option, it will search for the argcfile file in the current project and its parent directory and execute it.
+The `@cmd`, `@arg`, `@option` is comment tag(fields marked with `@` in comments), argc generates parsing rules and help documentation based on comment tags .
+
+See [docs/comment-tag.md](docs/comment-tag.md) for more details.
+
+
+### A command runner using bash
+
+When argc is executed without the `--argc-*` option, it will enter command runner mode. Argc will search for the `argcfile` file in the current project and its parent directory and execute it.
 
 `argcfile` is to `argc` what `makefile` is to `make`．
 
 ![argcfile](https://user-images.githubusercontent.com/4012553/181147199-3c56e865-4057-48c6-b9d7-f8d594ffd49e.gif)
 
 > Note: in windows, you need to install git to provide bash for argc
+
+See [docs/command-runner.md](docs/command-runner.md) for more details
+
 
 ### Generate completion script
 
@@ -61,161 +70,6 @@ cargo install argc
 
 Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip and add argc to your $PATH.
 
-## Tag
-
-Argc generates parsing rules and help documentation based on tags (fields marked with `@` in comments).
-
- - [@describe](#describe)
- - [@version](#version)
- - [@author](#author)
- - [@help](#help)
- - [@cmd](#cmd)
- - [@alias](#alias)
- - [@option](#option)
-   - [modifier](#modifier)
-   - [notation](#notation)
- - [@flag](#flag)
- - [@arg](#arg)
-
-### @describe
-
-```sh
-@describe [string]
-
-# @describe A demo cli
-```
-
-Define description
-
-### @version
-
-```sh
-@version [string]
-
-# @version 2.17.1 
-```
-
-Define version
-
-
-### @author
-
-```sh
-@author [string]
-
-# @author nobody <nobody@example.com>
-```
-
-Define author
-
-### @help
-
-```sh
-@help [false|string]
-
-# @help false   
-# @help Print help information
-```
-Customize help subcommand.
-
-1. disable help subcommand with `# @help false`
-2. custom help subcommand message with `# @help Print help information`
-
-### @cmd
-
-```sh
-@cmd [string]
-
-# @cmd Upload a file
-upload() {
-}
-
-# @cmd Download a file
-download() {
-}
-```
-Define subcommand
-
-### @alias
-
-```sh
-@alias name(,name)+
-
-# @cmd
-# @alias t,tst
-test() {
-}
-```
-Define alias for a subcommand
-
-### @option
-
-```sh
- @option [short] [long][modifer] [notation] [string]
-
- # @option    --foo                A option
- # @option -f --foo                A option with short alias
- # @option    --foo <PATH>         A option with notation
- # @option    --foo!               A required option
- # @option    --foo*               A option with multiple values
- # @option    --foo+               A required option with multiple values
- # @option    --foo=a              A option with default value
- # @option    --foo[a|b]           A option with choices
- # @option    --foo[=a|b]          A option with choices and default value
- # @option    --foo![a|b]          A required option with choices
- # @option -f --foo <PATH>         A option with short alias and notation
-```
-
-Define value option
-
-#### modifier
-
-The symbol after the long option name is the modifier
-
-- `*`: occur multiple times, optional
-- `+`: occur multiple times, required
-- `!`: required
-- `=value`: default value
-- `[a|b|c]`: choices
-- `[=a|b|c]`: choices, first is default.
-- `![a|b|c]`: choices, required
-
-#### notation
-
-Used to indicate that the option is a value option, other than a flag option.
-
-If not provided, the option name is used as a placeholder by default.
-
-You can use placeholder hint option value types `<NUM>`, `<PATH>`, `<PATTERN>`, `<DATE>`
-
-### @flag
-
-```sh
-@flag [short] [long] [help string]
-
-# @flag     --foo       A flag
-# @flag  -f --foo       A flag with short alias
-```
-
-Define flag option
-
-### @arg
-
-```sh
-@arg <name>[modifier] [help string]
-
-# @arg value            A positional argument
-# @arg value!           A required positional argument
-# @arg value*           A positional argument support multiple values
-# @arg value+           A required positional argument support multiple values
-# @arg value=a          A positional argument with default value
-# @arg value[a|b]       A positional argument with choices
-# @arg value[=a|b]      A positional argument with choices and default value
-# @arg value![a|b]      A required positional argument with choices
-```
-Define positional argument
-
-arg's modifier is same to [option's modifier](#modifier)
 
 ## CLI
 
@@ -235,7 +89,6 @@ OPTIONS:
         --argc-help          Print help information
         --argc-version       Print version information
 ```
-
 
 ## License
 
