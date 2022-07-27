@@ -5,7 +5,7 @@
 
 ## Usage
 
-### Comment bash to make cli
+### Make beautiful CLI with comments
 
 ![demo](https://user-images.githubusercontent.com/4012553/158063004-e7a3534c-eb1a-47fb-9bbd-89a49345589a.gif)
 
@@ -33,6 +33,13 @@ Try [examples/demo.sh](examples/demo.sh) your self.
 
 ### Command Runner
 
+When argc is executed without the `--argc-*` option, it will search for the argcfile file in the current project and its parent directory and execute it.
+
+`argcfile` is to `argc` what `makefile` is to `make`．
+
+
+> Note: in windows, you need to install git to provide bash for argc
+
 
 ### Generate bash completion script
 
@@ -53,7 +60,7 @@ cargo install argc
 
 Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip and add argc to your $PATH.
 
-## Tag 
+## Tag
 
 Argc generates parsing rules and help documentation based on tags (fields marked with `@` in comments).
 

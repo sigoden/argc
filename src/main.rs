@@ -78,7 +78,7 @@ fn run() -> Result<i32> {
         }
         let shell = get_shell_path().ok_or_else(|| anyhow!("Not found shell"))?;
         let (script_dir, script_file) =
-            get_script_path().ok_or_else(|| anyhow!("Not found script file"))?;
+            get_script_path().ok_or_else(|| anyhow!("Not found {}", get_script_name()))?;
         let mut command = process::Command::new(&shell);
         command.arg(&script_file);
         command.args(&script_args);
@@ -86,7 +86,7 @@ fn run() -> Result<i32> {
         command.env("ARGC_MODE", "true");
         let status = command
             .status()
-            .map_err(|err| anyhow!("Run `{}` throw {}", script_file, err))?;
+            .map_err(|err| anyhow!("Run `{}` throw {}", script_file.display(), err))?;
         return Ok(status.code().unwrap_or_default());
     }
     Ok(0)
@@ -109,20 +109,36 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     Ok((source, cmd_args))
 }
 
-fn get_script_path() -> Option<(PathBuf, String)> {
-    let name = env::var("ARGC_SCRIPT").unwrap_or_else(|_| "argcfile".into());
+fn get_script_path() -> Option<(PathBuf, PathBuf)> {
+	let name = get_script_name();
     let mut dir = env::current_dir().ok()?;
     loop {
         let path = dir.join(&name);
         if path.exists() {
-            return Some((dir, path.to_string_lossy().to_string()));
+            return Some((dir, path));
         }
         dir = dir.parent()?.to_path_buf();
     }
 }
 
-fn get_shell_path() -> Option<String> {
-    let exe = env::var("ARGC_SHELL").unwrap_or_else(|_| "bash".into());
-    let path = which(exe).ok()?;
-    Some(path.to_string_lossy().to_string())
+fn get_script_name() -> String {
+    env::var("ARGC_SCRIPT").unwrap_or_else(|_| "argcfile".into())
+}
+
+fn get_shell_path() -> Option<PathBuf> {
+    let shell = match env::var("ARGC_SHELL") {
+        Ok(v) => Path::new(&v).to_path_buf(),
+        Err(_) => {
+            if cfg!(windows) {
+                let git = which("git").ok()?;
+                git.parent()?.parent()?.join("bin").join("bash.exe")
+            } else {
+                which("bash").ok()?
+            }
+        }
+    };
+    if !shell.exists() {
+        return None;
+    }
+    Some(shell)
 }
