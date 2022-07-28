@@ -1,5 +1,5 @@
 #!/bin/bash 
-set -eo pipefail
+set -euo pipefail
 
 # @cmd Check outdated deps
 outdated() {
@@ -7,8 +7,8 @@ outdated() {
 }
 
 # @cmd Test all crates and modules
-# @alias t,test
-tst() {
+# @alias t
+test() {
     cargo test --all
 }
 
@@ -23,7 +23,7 @@ fmt() {
 pre:commit() {
     fmt
     outdated --exit-code 1
-    tst
+    test
 }
 
 eval "$(argc --argc-eval $0 "$@")"

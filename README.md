@@ -40,7 +40,7 @@ See [docs/comment-tag.md](docs/comment-tag.md) for more details.
 
 ### command runner
 
-argc will enter the command runner mode if you do not activate its other modes with the `--argc-*` option.
+Argc will enter the command runner mode if you do not activate its other modes with the `--argc-*` option.
 
 What argc does in command runner mode is: locate bash, search for `argcfile` in the current project and its parent directory, then run argcfile with bash.
 
@@ -56,7 +56,7 @@ Use the bash you are most familiar with, no need to learn another language or se
 
 You can also freely use GNU tools like `ls`, `rm`, `grep`, `find`, `sed`, `awk`, etc. Don't worry about windows incompatibility.
 
-![command runner](https://user-images.githubusercontent.com/4012553/181147199-3c56e865-4057-48c6-b9d7-f8d594ffd49e.gif)
+![command runner](https://user-images.githubusercontent.com/4012553/181433308-f7101415-c33d-4ce7-a9c3-3efa79d17ceb.png)
 
 See [docs/command-runner.md](docs/command-runner.md) for more details
 
