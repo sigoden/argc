@@ -3,13 +3,13 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Make beautiful bash cli with comments, also a command runner using bash.
+Make beautiful bash cli with comments, also is a cross-platform bash command runner.
 
 ## Usage
 
 ### Make beautiful cli with comments
 
-![demo](https://user-images.githubusercontent.com/4012553/181145104-ee9220e2-ecfc-4f6c-8ad9-89c765ebe498.gif)
+![cli](https://user-images.githubusercontent.com/4012553/181145104-ee9220e2-ecfc-4f6c-8ad9-89c765ebe498.gif)
 
 To write a command-line program with Argc, we only need to do two things:
 
@@ -38,16 +38,25 @@ The `@cmd`, `@arg`, `@option` is comment tag(fields marked with `@` in comments)
 
 See [docs/comment-tag.md](docs/comment-tag.md) for more details.
 
+### command runner
 
-### A command runner using bash
+argc will enter the command runner mode if you do not activate its other modes with the `--argc-*` option.
 
-When argc is executed without the `--argc-*` option, it will enter command runner mode. Argc will search for the `argcfile` file in the current project and its parent directory and execute it.
+What argc does in command runner mode is: locate bash, search for `argcfile` in the current project and its parent directory, then run argcfile with bash.
 
-`argcfile` is to `argc` what `makefile` is to `make`．
+> `argcfile` is a plain shell script, you can run it through `bash argcfile`.
 
-![argcfile](https://user-images.githubusercontent.com/4012553/181147199-3c56e865-4057-48c6-b9d7-f8d594ffd49e.gif)
+Argc is written in rust, It is cross-platform. It is a single executable file less than 1M without any dependencies. you just download it and put it into $PATH directory to install it.
 
-> Note: in windows, you need to install git to provide bash for argc
+Bash is already builtin in macos/linux. On Windows, most developers already have git installed, argc uses the bash that ships with git.
+
+So argc/argcfile is a cross-platform command runner solution.  
+
+Use the bash you are most familiar with, no need to learn another language or set of syntax.
+
+You can also freely use GNU tools like `ls`, `rm`, `grep`, `find`, `sed`, `awk`, etc. Don't worry about windows incompatibility.
+
+![command runner](https://user-images.githubusercontent.com/4012553/181147199-3c56e865-4057-48c6-b9d7-f8d594ffd49e.gif)
 
 See [docs/command-runner.md](docs/command-runner.md) for more details
 

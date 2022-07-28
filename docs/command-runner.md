@@ -1,5 +1,9 @@
 # Command Runner
 
+If you do not activate its other modes with the `--argc-*` option, argc will enter the command executor mode after startup
+
+It will search for the `argcfile` file in the current project and its parent directory and execute it.
+
   - [Turn function to task](#turn-function-to-task)
   - [Task aliases](#task-aliases)
   - [Task dependencies](#task-dependencies)
@@ -104,7 +108,7 @@ baz
 
 ## Default action
 
-if run `argc` without specific task, the `main` function will be executed.
+if run `argc` without specific command, the `main` function should be executed. if `main` function is not found, `argc` will print help message.
 
 ```sh
 # @cmd
@@ -205,6 +209,13 @@ ARGC_SHELL="C:\\Program Files\\Git\\bin\\bash.exe"
 ## Customize script file
 
 By default, argc searches for the `argcfile` file in the current project and its parent directory.
+
+The `argcfile` can be named any of the following. Using a .sh suffix helps with editor syntax highlighting.
+
+- argcfile
+- argcfile.sh
+- Argcfile
+- Argcfile.sh
 
 Use environment variable `ARGC_SCRIPT` to custom script file
 
