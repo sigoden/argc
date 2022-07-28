@@ -1,8 +1,6 @@
 # Command Runner
 
-If you do not activate its other modes with the `--argc-*` option, argc will enter the command executor mode after startup
-
-It will search for the `argcfile` file in the current project and its parent directory and execute it.
+Argc will enter the command runner mode if you do not activate its other modes with the `--argc-*` option.
 
   - [Turn function to task](#turn-function-to-task)
   - [Task aliases](#task-aliases)
