@@ -121,4 +121,4 @@ print_argc_vars() {
     ( set -o posix ; set ) | grep argc_
 }
 
-eval $(target/debug/argc $0 "$@")
+eval $(argc --argc-eval $0 "$@")
