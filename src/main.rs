@@ -57,7 +57,7 @@ fn run() -> Result<i32> {
         .arg(
             Arg::new("argc-eval")
                 .long("argc-eval")
-                .help(r#"Print code snippets for `eval "$(argc --argc-eval $0 "$@")"`"#),
+                .help(r#"Print code snippets for `eval $(argc --argc-eval "$0" "$@")`"#),
         )
         .arg(
             Arg::new("argc-complete")
