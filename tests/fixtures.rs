@@ -76,7 +76,7 @@ main() {{
 }}
 
 echo $PATH
-eval "$(argc --argc-eval $0 "$@")"
+eval $(argc --argc-eval "$0" "$@")
 "#
     )
 }

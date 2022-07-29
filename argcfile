@@ -1,5 +1,5 @@
 #!/bin/bash 
-set -euo pipefail
+set -eo pipefail
 
 # @cmd Check outdated deps
 outdated() {
@@ -26,4 +26,4 @@ pre:commit() {
     test
 }
 
-eval "$(argc --argc-eval $0 "$@")"
+eval $(argc --argc-eval "$0" "$@")

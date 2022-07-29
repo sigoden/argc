@@ -36,7 +36,7 @@ helper() {
   echo Not a task
 }
 
-eval "$(argc --argc-eval $0 "$@")"
+eval $(argc --argc-eval "$0" "$@")
 ```
 
 ```

@@ -9,7 +9,7 @@ Make beautiful bash cli with comments, also is a cross-platform bash command run
 
 ### Make beautiful cli with comments
 
-![cli](https://user-images.githubusercontent.com/4012553/181145104-ee9220e2-ecfc-4f6c-8ad9-89c765ebe498.gif)
+![cli](https://user-images.githubusercontent.com/4012553/181766283-8c91e672-30ff-40e5-b03a-a910e8923958.gif)
 
 To write a command-line program with Argc, we only need to do two things:
 
@@ -18,7 +18,7 @@ To write a command-line program with Argc, we only need to do two things:
 
 
 ```sh
-eval "$(argc --argc-eval $0 "$@")"
+eval $(argc --argc-eval "$0" "$@")
 ```
 
 Argc will do the following for us:
@@ -56,7 +56,7 @@ Use the bash you are most familiar with, no need to learn another language or se
 
 You can also freely use GNU tools like `ls`, `rm`, `grep`, `find`, `sed`, `awk`, etc. Don't worry about windows incompatibility.
 
-![command runner](https://user-images.githubusercontent.com/4012553/181433308-f7101415-c33d-4ce7-a9c3-3efa79d17ceb.png)
+![command runner](https://user-images.githubusercontent.com/4012553/181766750-c18e5aab-5308-4bd0-8c42-865d48519371.png)
 
 See [docs/command-runner.md](docs/command-runner.md) for more details
 
@@ -90,17 +90,13 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 Bash cli utility - https://github.com/sigoden/argc
 
 USAGE:
-    argc [OPTIONS] [ARGS]
-
-ARGS:
-    <SCRIPT>          Specific script file
-    <ARGUMENTS>...    Arguments passed to script file
+    argc [OPTIONS]
 
 OPTIONS:
-        --argc-completion    Print bash completion script
-        --argc-eval          Print code snippets for eval
-        --argc-help          Print help information
-        --argc-version       Print version information
+        --argc-complete <shell>    Print complete script [possible values: bash, zsh, powershell]
+        --argc-eval                Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
+        --argc-help                Print help information
+        --argc-version             Print version information
 ```
 
 ### Print argc help
