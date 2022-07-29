@@ -77,11 +77,8 @@ fn run() -> Result<i32> {
             bail!("Recognized an infinite loop, did you forget to add the `--argc-eval` option in eval");
         }
         let shell = get_shell_path().ok_or_else(|| anyhow!("Not found shell"))?;
-        let script_names = candicate_script_names();
-        let (script_dir, script_file) = script_names
-            .into_iter()
-            .find_map(|v| get_script_path(&v))
-            .ok_or_else(|| anyhow!("Not found script file"))?;
+        let (script_dir, script_file) =
+            get_script_path().ok_or_else(|| anyhow!("Not found script file"))?;
         let mut command = process::Command::new(&shell);
         command.arg(&script_file);
         command.args(&script_args);
@@ -112,12 +109,15 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     Ok((source, cmd_args))
 }
 
-fn get_script_path(name: &str) -> Option<(PathBuf, PathBuf)> {
+fn get_script_path() -> Option<(PathBuf, PathBuf)> {
+    let candicates = candicate_script_names();
     let mut dir = env::current_dir().ok()?;
     loop {
-        let path = dir.join(name);
-        if path.exists() {
-            return Some((dir, path));
+        for name in candicates.iter() {
+            let path = dir.join(name);
+            if path.exists() {
+                return Some((dir, path));
+            }
         }
         dir = dir.parent()?.to_path_buf();
     }
