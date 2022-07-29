@@ -29,7 +29,8 @@ fn help() {
 fn completion() {
     Command::cargo_bin("argc")
         .unwrap()
-        .arg("--argc-completion")
+        .arg("--argc-complete")
+        .arg("bash")
         .arg(Path::new("tests").join("spec.sh"))
         .assert()
         .stdout(predicates::str::contains("_spec.sh() {"))

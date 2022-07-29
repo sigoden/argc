@@ -9,5 +9,5 @@ cmd() {
 }
 
     "###;
-    complete!(script, "prog");
+    complete!(script, "prog", "bash");
 }
