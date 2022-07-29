@@ -162,5 +162,5 @@ fn get_bash_path() -> Option<PathBuf> {
 
 #[cfg(not(windows))]
 fn get_bash_path() -> Option<PathBuf> {
-    which("bash").ok()?
+    which("bash").ok()
 }
