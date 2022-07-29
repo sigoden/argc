@@ -8,7 +8,10 @@ fn version() {
         .unwrap()
         .arg("--argc-version")
         .assert()
-        .stderr(predicates::str::contains("argc"))
+        .stderr(predicates::str::contains(format!(
+            "argc {}",
+            env!("CARGO_PKG_VERSION")
+        )))
         .failure();
 }
 
@@ -18,7 +21,7 @@ fn help() {
         .unwrap()
         .arg("--argc-help")
         .assert()
-        .stderr(predicates::str::contains("argc [OPTIONS] [ARGS]"))
+        .stderr(predicates::str::contains(env!("CARGO_PKG_DESCRIPTION")))
         .failure();
 }
 

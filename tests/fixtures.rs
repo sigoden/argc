@@ -59,7 +59,6 @@ pub fn get_path_env_var() -> String {
     let argc_path = cargo_bin("argc");
     let argc_dir = argc_path.parent().unwrap();
     let path_env_var = std::env::var("PATH").unwrap();
-    #[cfg(not(windows))]
     if cfg!(windows) {
         format!("{};{}", path_env_var, argc_dir.display())
     } else {
