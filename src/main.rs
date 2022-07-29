@@ -101,7 +101,7 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     let source = fs::read_to_string(script_file)
         .map_err(|e| anyhow!("Failed to load '{}', {}", script_file, e))?;
     let name = Path::new(script_file)
-        .file_stem()
+        .file_name()
         .and_then(|v| v.to_str())
         .ok_or_else(|| anyhow!("Failed to get script name"))?;
     let mut cmd_args = vec![name.to_string()];

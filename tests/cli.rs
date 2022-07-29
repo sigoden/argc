@@ -32,6 +32,6 @@ fn completion() {
         .arg("--argc-completion")
         .arg(Path::new("tests").join("spec.sh"))
         .assert()
-        .stdout(predicates::str::contains("_spec() {"))
+        .stdout(predicates::str::contains("_spec.sh() {"))
         .success();
 }

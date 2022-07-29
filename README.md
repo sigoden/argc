@@ -61,12 +61,6 @@ You can also freely use GNU tools like `ls`, `rm`, `grep`, `find`, `sed`, `awk`,
 See [docs/command-runner.md](docs/command-runner.md) for more details
 
 
-### Generate completion script
-
-```
-argc --argc-completion demo.sh
-```
-
 ## Install
 
 ### With cargo
@@ -107,6 +101,18 @@ OPTIONS:
         --argc-eval          Print code snippets for eval
         --argc-help          Print help information
         --argc-version       Print version information
+```
+
+### Print argc help
+
+```
+argc --argc-help
+```
+
+### Generate bash completion for a script
+
+```
+argc --argc-completion demo.sh
 ```
 
 ## License
