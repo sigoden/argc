@@ -1,3 +1,4 @@
+use assert_cmd::cargo::cargo_bin;
 use assert_fs::fixture::TempDir;
 use assert_fs::prelude::*;
 use rstest::fixture;
@@ -54,6 +55,18 @@ pub fn tmpdir() -> TempDir {
     tmpdir
 }
 
+pub fn get_path_env_var() -> String {
+    let argc_path = cargo_bin("argc");
+    let argc_dir = argc_path.parent().unwrap();
+    let path_env_var = std::env::var("PATH").unwrap();
+    #[cfg(not(windows))]
+    if cfg!(windows) {
+        format!("{};{}", path_env_var, argc_dir.display())
+    } else {
+        format!("{}:{}", path_env_var, argc_dir.display())
+    }
+}
+
 fn get_argc_file(name: &str) -> String {
     format!(
         r#"
@@ -63,6 +76,7 @@ main() {{
   echo "{name}"
 }}
 
+echo $PATH
 eval "$(argc --argc-eval $0 "$@")"
 "#
     )

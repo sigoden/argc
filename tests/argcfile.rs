@@ -1,17 +1,13 @@
 use assert_fs::{fixture::PathChild, TempDir};
 use rstest::rstest;
 
-use crate::fixtures::{tmpdir, Error};
-use assert_cmd::{cargo::cargo_bin, prelude::*};
+use crate::fixtures::{get_path_env_var, tmpdir, Error};
+use assert_cmd::prelude::*;
 use std::process::Command;
 
 #[rstest]
 fn argcfile(tmpdir: TempDir) -> Result<(), Error> {
-    let argc_path = cargo_bin("argc");
-    let argc_dir = argc_path.parent().unwrap();
-    let mut path_env_var = std::env::var("PATH").unwrap();
-    path_env_var = format!("{};{}", path_env_var, argc_dir.display());
-
+    let path_env_var = get_path_env_var();
     Command::cargo_bin("argc")?
         .current_dir(tmpdir.child("dir1").path())
         .env("PATH", path_env_var.clone())
@@ -55,7 +51,7 @@ fn argcfile(tmpdir: TempDir) -> Result<(), Error> {
 
     Command::cargo_bin("argc")?
         .current_dir(tmpdir.child("dir4").path())
-        .env("PATH", path_env_var.clone())
+        .env("PATH", path_env_var)
         .assert()
         .stdout(predicates::str::contains("dir4-Argcfile.sh"))
         .success();
