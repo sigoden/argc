@@ -1,5 +1,5 @@
 use anyhow::{anyhow, bail, Result};
-use clap::{arg, ArgAction, Command};
+use clap::{arg, Arg, ArgAction, Command};
 use std::{
     env, fs, io,
     path::{Path, PathBuf},
@@ -24,16 +24,24 @@ fn main() {
 fn run() -> Result<i32> {
     let mut args: Vec<String> = vec![];
     let mut script_args: Vec<String> = vec![];
-    for (i, arg) in std::env::args().enumerate() {
-        if i == 0 {
+    let mut is_arg = true;
+    for arg in std::env::args() {
+        if is_arg {
             args.push(arg);
+            is_arg = false;
             continue;
         }
         if script_args.is_empty() && arg.starts_with("--argc-") {
+            if matches!(arg.as_str(), "--argc-complete") {
+                is_arg = true;
+            } else {
+                is_arg = false;
+            }
             args.push(arg);
             continue;
         }
         script_args.push(arg);
+        is_arg = false;
     }
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
@@ -46,19 +54,27 @@ fn run() -> Result<i32> {
             " - ",
             env!("CARGO_PKG_REPOSITORY")
         ))
-        .arg(arg!(--"argc-eval" "Print code snippets for eval"))
-        .arg(arg!(--"argc-completion" "Print bash completion script"))
+        .arg(
+            Arg::new("argc-eval")
+                .long("argc-eval")
+                .help(r#"Print code snippets for `eval "$(argc --argc-eval $0 "$@")"`"#),
+        )
+        .arg(
+            Arg::new("argc-complete")
+                .long("argc-complete")
+                .value_name("shell")
+                .possible_values(["bash", "zsh", "powershell"])
+                .help("Print complete script"),
+        )
         .arg(arg!(--"argc-version" "Print version information").action(ArgAction::Version))
         .arg(arg!(--"argc-help" "Print help information").action(ArgAction::Help))
-        .arg(arg!([SCRIPT] "Specific script file"))
-        .arg(arg!([ARGUMENTS]... "Arguments passed to script file"))
         .try_get_matches_from(&args)?;
 
-    if matches.is_present("argc-completion") {
+    if let Some(shell) = matches.value_of("argc-complete") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cli = argc::Cli::new(&source);
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        cli.complete(cmd_args[0], &mut io::stdout())?;
+        cli.complete(shell, cmd_args[0], &mut io::stdout())?;
     } else if matches.is_present("argc-eval") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cli = argc::Cli::new(&source);
