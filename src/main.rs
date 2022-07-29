@@ -141,22 +141,26 @@ fn candicate_script_names() -> Vec<String> {
 fn get_shell_path() -> Option<PathBuf> {
     let shell = match env::var("ARGC_SHELL") {
         Ok(v) => Path::new(&v).to_path_buf(),
-        Err(_) => {
-            if cfg!(windows) {
-                let bash = which("bash").ok()?;
-                if bash.display().to_string().to_lowercase() == "c:\\windows\\system32\\bash.exe" {
-                    let git = which("git").ok()?;
-                    git.parent()?.parent()?.join("bin").join("bash.exe")
-                } else {
-                    bash
-                }
-            } else {
-                which("bash").ok()?
-            }
-        }
+        Err(_) => get_bash_path()?,
     };
     if !shell.exists() {
         return None;
     }
     Some(shell)
+}
+
+#[cfg(windows)]
+fn get_bash_path() -> Option<PathBuf> {
+    if let Ok(bash) = which("bash") {
+        if bash.display().to_string().to_lowercase() != "c:\\windows\\system32\\bash.exe" {
+            return Some(bash);
+        }
+    }
+    let git = which("git").ok()?;
+    Some(git.parent()?.parent()?.join("bin").join("bash.exe"))
+}
+
+#[cfg(not(windows))]
+fn get_bash_path() -> Option<PathBuf> {
+    which("bash").ok()
 }
