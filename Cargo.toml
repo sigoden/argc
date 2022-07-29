@@ -21,6 +21,10 @@ which = "4.2"
 
 [dev-dependencies]
 insta = "1.15"
+assert_cmd = "2"
+assert_fs = "1"
+rstest = "0.15"
+predicates = "2"
 
 [profile.release]
 lto = true
