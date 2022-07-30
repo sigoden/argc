@@ -61,3 +61,32 @@ macro_rules! fatal {
         assert_eq!(err.to_string().as_str(), $err);
     };
 }
+
+#[macro_export]
+macro_rules! snapshot_compgen {
+    (
+        $source:expr,
+        $args:expr
+    ) => {
+        let cli = argc::Cli::new($source);
+        let (stdout, stderr) = match cli.compgen($args) {
+            Ok(stdout) => (stdout.join(" "), String::new()),
+            Err(stderr) => (String::new(), stderr.to_string()),
+        };
+
+        let args = $args.join(" ");
+        let output = format!(
+            r###"RUN
+{}
+
+STDOUT
+{}
+
+STDERR
+{}
+"###,
+            args, stdout, stderr
+        );
+        insta::assert_snapshot!(output);
+    };
+}

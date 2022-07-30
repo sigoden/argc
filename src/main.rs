@@ -1,5 +1,5 @@
 use anyhow::{anyhow, bail, Result};
-use clap::{arg, Arg, ArgAction, Command};
+use clap::{Arg, ArgAction, Command};
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -43,12 +43,18 @@ fn run() -> Result<i32> {
         .author(env!("CARGO_PKG_AUTHORS"))
         .global_setting(clap::AppSettings::DeriveDisplayOrder)
         .override_usage(
-            r#"argc --argc-eval SCRIPT [ARGS ...]
-    argc --argc-compgen SCRIPT [ARGS ...]
-    argc --argc-argcfile
-    argc --argc-help
-    argc --argc-version"#,
+            r#"
+    argc --argc-eval SCRIPT [ARGS ...]             Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
+    argc --argc-compgen SCRIPT [ARGS ...]          Print commands/options for generating completion
+    argc --argc-argcfile                           Print argcfile path
+    argc --argc-help                               Print help information
+    argc --argc-version                            Print version information"#,
         )
+        .help_template(r#"{bin} {version}
+{author}
+{about}
+
+USAGE:{usage}"#)
         .disable_help_flag(true)
         .disable_version_flag(true)
         .disable_help_subcommand(true)
@@ -57,23 +63,24 @@ fn run() -> Result<i32> {
             " - ",
             env!("CARGO_PKG_REPOSITORY")
         ))
-        .arg(
-            Arg::new("argc-eval")
-                .long("argc-eval")
-                .help(r#"Print code snippets for `eval $(argc --argc-eval "$0" "$@")`"#),
-        )
+        .arg(Arg::new("argc-eval").long("argc-eval"))
         .arg(
             Arg::new("argc-compgen")
-                .long("argc-compgen")
-                .help("Print commands and options for generating completion"),
-        )
+                .long("argc-compgen"))
         .arg(
             Arg::new("argc-argcfile")
                 .long("argc-argcfile")
-                .help("Print argcfile path"),
         )
-        .arg(arg!(--"argc-version" "Print version information").action(ArgAction::Version))
-        .arg(arg!(--"argc-help" "Print help information").action(ArgAction::Help))
+        .arg(
+            Arg::new("argc-version")
+                .long("argc-version")
+                .action(ArgAction::Version)
+        )
+        .arg(
+            Arg::new("argc-help")
+                .long("argc-help")
+                .action(ArgAction::Help)
+        )
         .try_get_matches_from(&args)?;
 
     if matches.is_present("argc-eval") {

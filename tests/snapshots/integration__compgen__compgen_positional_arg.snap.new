@@ -1,0 +1,14 @@
+---
+source: tests/compgen.rs
+assertion_line: 25
+expression: output
+---
+RUN
+prog cmd_positional_requires arg1
+
+STDOUT
+--help -h <ARG2>...
+
+STDERR
+
+
