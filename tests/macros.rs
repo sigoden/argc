@@ -61,18 +61,3 @@ macro_rules! fatal {
         assert_eq!(err.to_string().as_str(), $err);
     };
 }
-
-#[macro_export]
-macro_rules! complete {
-    (
-        $source:expr,
-        $name:expr,
-        $shell:expr
-    ) => {
-        let cli = argc::Cli::new($source);
-        let mut bufs: Vec<u8> = vec![];
-        cli.complete($shell, $name, &mut bufs).unwrap();
-        let output = std::str::from_utf8(&bufs).unwrap();
-        insta::assert_snapshot!(output);
-    };
-}

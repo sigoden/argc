@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Make beautiful bash cli with comments, also is a cross-platform bash command runner.
+Make beautiful bash cli with comments, also a command runner.
 
 ## Usage
 
@@ -38,7 +38,7 @@ The `@cmd`, `@arg`, `@option` is comment tag(fields marked with `@` in comments)
 
 See [docs/comment-tag.md](docs/comment-tag.md) for more details.
 
-### command runner
+### As a cross-platform command runner
 
 Argc will enter the command runner mode if you do not activate its other modes with the `--argc-*` option.
 
@@ -87,16 +87,20 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 ## CLI
 
 ```
-Bash cli utility - https://github.com/sigoden/argc
+Make beautiful bash cli, also a command runner. - https://github.com/sigoden/argc
 
 USAGE:
-    argc [OPTIONS]
+    argc --argc-eval SCRIPT [ARGS ...]
+    argc --argc-help
+    argc --argc-version
+
+ARGS:
+    <ARGS>...    
 
 OPTIONS:
-        --argc-complete <shell>    Print complete script [possible values: bash, zsh, powershell]
-        --argc-eval                Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
-        --argc-help                Print help information
-        --argc-version             Print version information
+        --argc-eval       Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
+        --argc-help       Print help information
+        --argc-version    Print version information
 ```
 
 ### Print argc help
