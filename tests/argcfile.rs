@@ -58,3 +58,21 @@ fn argcfile(tmpdir: TempDir) -> Result<(), Error> {
 
     Ok(())
 }
+
+
+#[rstest]
+fn argcfile_path(tmpdir: TempDir) -> Result<(), Error> {
+    Command::cargo_bin("argc")?
+        .arg("--argc-argcfile")
+        .current_dir(
+            tmpdir
+                .child("dir1")
+                .child("subdir1")
+                .child("subsubdir1")
+                .path(),
+        )
+        .assert()
+        .stdout(predicates::str::is_match("Argcfile$").unwrap())
+        .success();
+    Ok(())
+}
