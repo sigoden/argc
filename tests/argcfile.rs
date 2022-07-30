@@ -59,7 +59,6 @@ fn argcfile(tmpdir: TempDir) -> Result<(), Error> {
     Ok(())
 }
 
-
 #[rstest]
 fn argcfile_path(tmpdir: TempDir) -> Result<(), Error> {
     Command::cargo_bin("argc")?
