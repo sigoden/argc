@@ -58,7 +58,7 @@ You can also freely use GNU tools like `ls`, `rm`, `grep`, `find`, `sed`, `awk`,
 
 Argc provides `bash`, `zsh`, `powershell` completion scripts to prompt for commands and options in `argcfile`, See [completions](completions)
 
-![command runner](https://user-images.githubusercontent.com/4012553/181766750-c18e5aab-5308-4bd0-8c42-865d48519371.png)
+![command runner](https://user-images.githubusercontent.com/4012553/181918182-c2ee0661-5c26-427b-88f3-606d445e1028.png)
 
 See [docs/command-runner.md](docs/command-runner.md) for more details
 
