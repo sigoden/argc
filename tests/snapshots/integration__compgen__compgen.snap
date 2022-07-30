@@ -1,0 +1,14 @@
+---
+source: tests/compgen.rs
+assertion_line: 5
+expression: output
+---
+RUN
+prog
+
+STDOUT
+cmd_preferred cmd_omitted cmd_option_names cmd_option_formats cmd_option_quotes cmd_flag_formats cmd_positional_only cmd_positional_requires cmd_positional_with_choices cmd_positional_with_default cmd_positional_with_choices_and_default cmd_positional_with_choices_and_required cmd_without_any_arg cmd_alias a alias cmd_with_hyphens --help -h
+
+STDERR
+
+
