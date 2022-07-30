@@ -3,7 +3,7 @@ name = "argc"
 version = "0.9.2"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "Make beautiful bash cli"
+description = "Make beautiful bash cli, also a command runner."
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
@@ -14,7 +14,6 @@ keywords = ["command-line", "bash-script", "command-runner"]
 [dependencies]
 anyhow = "1"
 clap = { version = "3", default_features = false, features = ["std"] }
-clap_complete = "3.2"
 convert_case = "0.5"
 nom = "7.1"
 which = "4.2"

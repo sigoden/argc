@@ -1,7 +1,7 @@
 use anyhow::{anyhow, bail, Result};
 use clap::{arg, Arg, ArgAction, Command};
 use std::{
-    env, fs, io,
+    env, fs,
     path::{Path, PathBuf},
     process,
 };
@@ -46,6 +46,11 @@ fn run() -> Result<i32> {
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
+        .override_usage(
+            r#"argc --argc-eval SCRIPT [ARGS ...]
+    argc --argc-help
+    argc --argc-version"#,
+        )
         .disable_help_flag(true)
         .disable_version_flag(true)
         .disable_help_subcommand(true)
@@ -59,23 +64,12 @@ fn run() -> Result<i32> {
                 .long("argc-eval")
                 .help(r#"Print code snippets for `eval $(argc --argc-eval "$0" "$@")`"#),
         )
-        .arg(
-            Arg::new("argc-complete")
-                .long("argc-complete")
-                .value_name("shell")
-                .possible_values(["bash", "zsh", "powershell"])
-                .help("Print complete script"),
-        )
         .arg(arg!(--"argc-version" "Print version information").action(ArgAction::Version))
         .arg(arg!(--"argc-help" "Print help information").action(ArgAction::Help))
+        .arg(arg!([ARGS]...))
         .try_get_matches_from(&args)?;
 
-    if let Some(shell) = matches.value_of("argc-complete") {
-        let (source, cmd_args) = parse_script_args(&script_args)?;
-        let cli = argc::Cli::new(&source);
-        let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        cli.complete(shell, cmd_args[0], &mut io::stdout())?;
-    } else if matches.is_present("argc-eval") {
+    if matches.is_present("argc-eval") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cli = argc::Cli::new(&source);
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();

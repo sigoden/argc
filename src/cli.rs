@@ -4,10 +4,7 @@ use crate::utils::hyphens_to_underscores;
 use crate::Result;
 use anyhow::{anyhow, bail, Error};
 use clap::{ArgMatches, Command};
-use clap_complete::generate;
-use clap_complete::Shell;
 use std::collections::HashMap;
-use std::io::Write;
 
 const VARIABLE_PREFIX: &str = env!("CARGO_CRATE_NAME");
 
@@ -20,16 +17,6 @@ pub struct Cli<'a> {
 impl<'a> Cli<'a> {
     pub fn new(source: &'a str) -> Self {
         Self { source }
-    }
-
-    pub fn complete(&'a self, shell: &str, name: &'a str, buf: &mut dyn Write) -> Result<()> {
-        let events = parse(self.source)?;
-        let default_shell_positional = PositionalParam::default_shell_positional();
-        let cmd = Cmd::create(&events, &default_shell_positional)?;
-        let mut command = cmd.build(name)?;
-        let shell: Shell = shell.parse().map_err(|e| anyhow!("{}", e))?;
-        generate(shell, &mut command, name, buf);
-        Ok(())
     }
 
     pub fn run(&self, args: &[&'a str]) -> Result<std::result::Result<String, String>> {

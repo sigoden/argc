@@ -1,5 +1,4 @@
 use assert_cmd::prelude::*;
-use std::path::Path;
 use std::process::Command;
 
 #[test]
@@ -23,16 +22,4 @@ fn help() {
         .assert()
         .stderr(predicates::str::contains(env!("CARGO_PKG_DESCRIPTION")))
         .failure();
-}
-
-#[test]
-fn completion() {
-    Command::cargo_bin("argc")
-        .unwrap()
-        .arg("--argc-complete")
-        .arg("bash")
-        .arg(Path::new("tests").join("spec.sh"))
-        .assert()
-        .stdout(predicates::str::contains("_spec.sh() {"))
-        .success();
 }
