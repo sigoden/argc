@@ -415,13 +415,12 @@ impl CmdComp {
         let mut root_cmd = CmdComp::default();
         let mut maybe_subcommand: Option<CmdComp> = None;
         let mut is_root_scope = true;
+        let mut help_subcommand = true;
         for Event { data, .. } in events {
             match data {
                 EventData::Help(value) => {
-                    if *value != "false" {
-                        root_cmd
-                            .subcommands
-                            .insert("help".into(), CmdComp::default());
+                    if *value == "false" {
+                        help_subcommand = false;
                     }
                 }
                 EventData::Cmd(_) => {
@@ -505,6 +504,12 @@ impl CmdComp {
                 }
                 _ => {}
             }
+        }
+        if help_subcommand {
+            root_cmd.mappings.insert("help".to_string(), "help".to_string());
+            root_cmd
+                .subcommands
+                .insert("help".into(), CmdComp::default());
         }
         root_cmd.add_help();
         root_cmd
