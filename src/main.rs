@@ -32,11 +32,6 @@ fn run() -> Result<i32> {
             continue;
         }
         if script_args.is_empty() && arg.starts_with("--argc-") {
-            if matches!(arg.as_str(), "--argc-complete") {
-                is_arg = true;
-            } else {
-                is_arg = false;
-            }
             args.push(arg);
             continue;
         }
@@ -49,6 +44,7 @@ fn run() -> Result<i32> {
         .global_setting(clap::AppSettings::DeriveDisplayOrder)
         .override_usage(
             r#"argc --argc-eval SCRIPT [ARGS ...]
+    argc --argc-compgen SCRIPT [ARGS ...]
     argc --argc-argcfile
     argc --argc-help
     argc --argc-version"#,
@@ -65,6 +61,11 @@ fn run() -> Result<i32> {
             Arg::new("argc-eval")
                 .long("argc-eval")
                 .help(r#"Print code snippets for `eval $(argc --argc-eval "$0" "$@")`"#),
+        )
+        .arg(
+            Arg::new("argc-compgen")
+                .long("argc-compgen")
+                .help("Print commands and options for generating completion"),
         )
         .arg(
             Arg::new("argc-argcfile")
@@ -91,6 +92,11 @@ fn run() -> Result<i32> {
     } else if matches.is_present("argc-argcfile") {
         let (_, script_file) = get_script_path().ok_or_else(|| anyhow!("Not found script file"))?;
         print!("{}", script_file.display());
+    } else if matches.is_present("argc-compgen") {
+        let (source, cmd_args) = parse_script_args(&script_args)?;
+        let cli = argc::Cli::new(&source);
+        let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
+        print!("{}", cli.compgen(&cmd_args)?.join(" "))
     } else {
         if env::var("ARGC_MODE").is_ok() {
             bail!("Recognized an infinite loop, did you forget to add the `--argc-eval` option in eval");

@@ -45,9 +45,9 @@ impl<'a> ParamData<'a> {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FlagParam<'a> {
-    name: &'a str,
-    summary: &'a str,
-    short: Option<char>,
+    pub(crate) name: &'a str,
+    pub(crate) summary: &'a str,
+    pub(crate) short: Option<char>,
 }
 
 impl<'a> FlagParam<'a> {
@@ -102,15 +102,15 @@ impl<'a> Param<'a> for FlagParam<'a> {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct OptionParam<'a> {
-    name: &'a str,
-    summary: &'a str,
-    short: Option<char>,
-    value_name: Option<&'a str>,
-    choices: Option<Vec<&'a str>>,
-    multiple: bool,
-    required: bool,
-    default: Option<&'a str>,
-    arg_value_name: String,
+    pub(crate) name: &'a str,
+    pub(crate) summary: &'a str,
+    pub(crate) short: Option<char>,
+    pub(crate) value_name: Option<&'a str>,
+    pub(crate) choices: Option<Vec<&'a str>>,
+    pub(crate) multiple: bool,
+    pub(crate) required: bool,
+    pub(crate) default: Option<&'a str>,
+    pub(crate) arg_value_name: String,
 }
 
 impl<'a> OptionParam<'a> {
@@ -216,13 +216,13 @@ impl<'a> Param<'a> for OptionParam<'a> {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct PositionalParam<'a> {
-    name: &'a str,
-    summary: &'a str,
-    choices: Option<Vec<&'a str>>,
-    multiple: bool,
-    required: bool,
-    default: Option<&'a str>,
-    arg_value_name: String,
+    pub(crate) name: &'a str,
+    pub(crate) summary: &'a str,
+    pub(crate) choices: Option<Vec<&'a str>>,
+    pub(crate) multiple: bool,
+    pub(crate) required: bool,
+    pub(crate) default: Option<&'a str>,
+    pub(crate) arg_value_name: String,
 }
 
 impl<'a> PositionalParam<'a> {
@@ -237,9 +237,7 @@ impl<'a> PositionalParam<'a> {
             arg_value_name: to_cobol_case(arg.name),
         }
     }
-}
 
-impl<'a> PositionalParam<'a> {
     pub fn default_shell_positional() -> Self {
         PositionalParam {
             name: DEFAULT_SHELL_POSITIONAL_ARGS,
