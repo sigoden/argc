@@ -71,7 +71,14 @@ fn argcfile_path(tmpdir: TempDir) -> Result<(), Error> {
                 .path(),
         )
         .assert()
-        .stdout(predicates::str::is_match("Argcfile$").unwrap())
+        .stdout(predicates::str::contains(
+            tmpdir
+                .child("dir1")
+                .child("subdir1")
+                .join("Argcfile")
+                .display()
+                .to_string(),
+        ))
         .success();
     Ok(())
 }
