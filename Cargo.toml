@@ -15,6 +15,7 @@ keywords = ["command-line", "bash-script", "command-runner"]
 anyhow = "1"
 clap = { version = "3", default_features = false, features = ["std"] }
 convert_case = "0.5"
+indexmap = "1.9"
 nom = "7.1"
 which = "4.2"
 

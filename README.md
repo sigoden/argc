@@ -38,7 +38,7 @@ The `@cmd`, `@arg`, `@option` is comment tag(fields marked with `@` in comments)
 
 See [docs/comment-tag.md](docs/comment-tag.md) for more details.
 
-### As a cross-platform command runner
+### As a command runner
 
 Argc will enter the command runner mode if you do not activate its other modes with the `--argc-*` option.
 
@@ -56,10 +56,11 @@ Use the bash you are most familiar with, no need to learn another language or se
 
 You can also freely use GNU tools like `ls`, `rm`, `grep`, `find`, `sed`, `awk`, etc. Don't worry about windows incompatibility.
 
-![command runner](https://user-images.githubusercontent.com/4012553/181766750-c18e5aab-5308-4bd0-8c42-865d48519371.png)
+Argc provides `bash`, `zsh`, `powershell` completion scripts to prompt for commands and options in `argcfile`, See [completions](completions)
+
+![command runner](https://user-images.githubusercontent.com/4012553/181918182-c2ee0661-5c26-427b-88f3-606d445e1028.png)
 
 See [docs/command-runner.md](docs/command-runner.md) for more details
-
 
 ## Install
 
@@ -90,26 +91,11 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 Make beautiful bash cli, also a command runner. - https://github.com/sigoden/argc
 
 USAGE:
-    argc --argc-eval SCRIPT [ARGS ...]
-    argc --argc-help
-    argc --argc-version
-
-OPTIONS:
-        --argc-eval       Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
-        --argc-help       Print help information
-        --argc-version    Print version information
-```
-
-### Print argc help
-
-```
-argc --argc-help
-```
-
-### Generate bash completion for a script
-
-```
-argc --argc-completion demo.sh
+    argc --argc-eval SCRIPT [ARGS ...]             Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
+    argc --argc-compgen SCRIPT [ARGS ...]          Print commands/options for generating completion
+    argc --argc-argcfile                           Print argcfile path
+    argc --argc-help                               Print help information
+    argc --argc-version                            Print version information
 ```
 
 ## License

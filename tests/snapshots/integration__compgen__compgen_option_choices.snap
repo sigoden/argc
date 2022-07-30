@@ -1,0 +1,14 @@
+---
+source: tests/compgen.rs
+assertion_line: 15
+expression: output
+---
+RUN
+prog cmd_option_names --opt7
+
+STDOUT
+a b c
+
+STDERR
+
+
