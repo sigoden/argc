@@ -506,7 +506,9 @@ impl CmdComp {
             }
         }
         if help_subcommand {
-            root_cmd.mappings.insert("help".to_string(), "help".to_string());
+            root_cmd
+                .mappings
+                .insert("help".to_string(), "help".to_string());
             root_cmd
                 .subcommands
                 .insert("help".into(), CmdComp::default());
