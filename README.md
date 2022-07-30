@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Make beautiful bash cli with comments, also a command runner.
+Make beautiful bash cli with comments, also a command runner using bash.
 
 ## Usage
 
@@ -31,14 +31,11 @@ Argc will do the following for us:
 
 We can easily access the corresponding option or parameter through the variable `$argc_<name>`.
 
-Try [examples/demo.sh](examples/demo.sh) your self.
-
-
 The `@cmd`, `@arg`, `@option` is comment tag(fields marked with `@` in comments), argc generates parsing rules and help documentation based on comment tags .
 
 See [docs/comment-tag.md](docs/comment-tag.md) for more details.
 
-### As a command runner
+### As a command runner using bash
 
 Argc will enter the command runner mode if you do not activate its other modes with the `--argc-*` option.
 
