@@ -94,9 +94,6 @@ USAGE:
     argc --argc-help
     argc --argc-version
 
-ARGS:
-    <ARGS>...    
-
 OPTIONS:
         --argc-eval       Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
         --argc-help       Print help information

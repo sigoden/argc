@@ -46,8 +46,10 @@ fn run() -> Result<i32> {
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
+        .global_setting(clap::AppSettings::DeriveDisplayOrder)
         .override_usage(
             r#"argc --argc-eval SCRIPT [ARGS ...]
+    argc --argc-argcfile
     argc --argc-help
     argc --argc-version"#,
         )
@@ -64,9 +66,13 @@ fn run() -> Result<i32> {
                 .long("argc-eval")
                 .help(r#"Print code snippets for `eval $(argc --argc-eval "$0" "$@")`"#),
         )
+        .arg(
+            Arg::new("argc-argcfile")
+                .long("argc-argcfile")
+                .help("Print argcfile path"),
+        )
         .arg(arg!(--"argc-version" "Print version information").action(ArgAction::Version))
         .arg(arg!(--"argc-help" "Print help information").action(ArgAction::Help))
-        .arg(arg!([ARGS]...))
         .try_get_matches_from(&args)?;
 
     if matches.is_present("argc-eval") {
@@ -82,6 +88,9 @@ fn run() -> Result<i32> {
                 println!("exit 1");
             }
         }
+    } else if matches.is_present("argc-argcfile") {
+        let (_, script_file) = get_script_path().ok_or_else(|| anyhow!("Not found script file"))?;
+        print!("{}", script_file.display());
     } else {
         if env::var("ARGC_MODE").is_ok() {
             bail!("Recognized an infinite loop, did you forget to add the `--argc-eval` option in eval");
