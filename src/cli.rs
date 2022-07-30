@@ -4,7 +4,7 @@ use crate::utils::hyphens_to_underscores;
 use crate::Result;
 use anyhow::{anyhow, bail, Error};
 use clap::{ArgMatches, Command};
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
 use std::collections::{HashMap, HashSet};
 
 const VARIABLE_PREFIX: &str = env!("CARGO_CRATE_NAME");
@@ -106,6 +106,9 @@ impl<'a> Cli<'a> {
                     .into_iter()
                     .skip(positional_index),
             )
+        }
+        if output.len() == 2 && output[0] == "--help" && output[1] == "-h" {
+            output.clear();
         }
         Ok(output)
     }
@@ -399,7 +402,7 @@ fn unexpected_param(tag_name: &str, pos: Position) -> Error {
 
 #[derive(Debug, Default)]
 pub struct CmdComp {
-    aliases: HashSet<String>,
+    aliases: IndexSet<String>,
     mappings: IndexMap<String, String>,
     options: HashMap<String, (Option<String>, Vec<String>, bool)>,
     flags: HashMap<String, Option<String>>,
@@ -493,7 +496,7 @@ impl CmdComp {
                     let name = name.to_string();
                     if let Some(mut cmd) = maybe_subcommand.take() {
                         root_cmd.mappings.insert(name.clone(), name.clone());
-                        for alias in cmd.aliases.drain() {
+                        for alias in cmd.aliases.drain(..) {
                             root_cmd.mappings.insert(alias, name.clone());
                         }
                         cmd.add_help();
