@@ -7,7 +7,7 @@ _argc()
     if [[ $? -ne 0 ]]; then
         return 0
     fi
-    items=( $(argc --argc-compgen "$argcfile" ${words[@]:1}) )
+    items=( $(argc --argc-compgen "$argcfile" ${words[@]:1} 2>/dev/null) )
     compadd -d $items
     return 0
 }

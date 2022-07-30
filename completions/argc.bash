@@ -6,7 +6,7 @@ _argc() {
     if [ $? != 0 ]; then
         return 0
     fi
-    opts=$(argc --argc-compgen "$argcfile" ${COMP_WORDS[@]:1})
+    opts=$(argc --argc-compgen "$argcfile" ${COMP_WORDS[@]:1} 2>/dev/null)
     COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
     return 0
 }

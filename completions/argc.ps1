@@ -9,7 +9,7 @@ Register-ArgumentCompleter -Native -CommandName 'argc' -ScriptBlock {
     }
     $elms = $commandAst.CommandElements
     $cmdargs = $elms[1..($elms.length - 1)] -join " "
-    $completions = (argc --argc-compgen "$argcfile" "$cmdargs") -split " " | % {
+    $completions = (argc --argc-compgen "$argcfile" "$cmdargs" 2>$null) -split " " | % {
         $name = $_ -replace '^-+',''
         return [CompletionResult]::new($_, $name, [CompletionResultType]::ParameterName, '-')
     }
