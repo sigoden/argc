@@ -63,21 +63,10 @@ fn argcfile(tmpdir: TempDir) -> Result<(), Error> {
 fn argcfile_path(tmpdir: TempDir) -> Result<(), Error> {
     Command::cargo_bin("argc")?
         .arg("--argc-argcfile")
-        .current_dir(
-            tmpdir
-                .child("dir1")
-                .child("subdir1")
-                .child("subsubdir1")
-                .path(),
-        )
+        .current_dir(tmpdir.child("dir1").path())
         .assert()
         .stdout(predicates::str::contains(
-            tmpdir
-                .child("dir1")
-                .child("subdir1")
-                .join("Argcfile")
-                .display()
-                .to_string(),
+            tmpdir.child("dir1").join("argcfile").display().to_string(),
         ))
         .success();
     Ok(())
