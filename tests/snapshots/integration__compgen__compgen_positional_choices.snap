@@ -1,13 +1,13 @@
 ---
 source: tests/compgen.rs
-assertion_line: 25
+assertion_line: 44
 expression: output
 ---
 RUN
-prog cmd_positional_requires
+prog cmd_positional_with_choices
 
 STDOUT
-<ARG1>
+a b
 
 STDERR
 
