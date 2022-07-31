@@ -45,7 +45,7 @@ fn run() -> Result<i32> {
         .override_usage(
             r#"
     argc --argc-eval SCRIPT [ARGS ...]             Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
-    argc --argc-compgen SCRIPT [ARGS ...]          Print commands/options for generating completion
+    argc --argc-compgen SCRIPT [ARGS ...]          Print commands and options as completion candidates 
     argc --argc-argcfile                           Print argcfile path
     argc --argc-help                               Print help information
     argc --argc-version                            Print version information"#,

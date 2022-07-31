@@ -3,13 +3,13 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Make beautiful bash cli with comments, also a command runner using bash.
+A bash cli framework, also a task runner.
 
 ## Usage
 
-### Make beautiful cli with comments
+### Bash cli framework
 
-![cli](https://user-images.githubusercontent.com/4012553/181766283-8c91e672-30ff-40e5-b03a-a910e8923958.gif)
+![cli framework](https://user-images.githubusercontent.com/4012553/182018182-7a91f7b3-ab9e-41fd-89f8-a14e14391a7f.gif)
 
 To write a command-line program with Argc, we only need to do two things:
 
@@ -23,41 +23,39 @@ eval $(argc --argc-eval "$0" "$@")
 
 Argc will do the following for us:
 
-1. Extract parameter definitions from comments
+1. Extract flag/option/subcommand definitions from comments
 2. Parse command line arguments
-3. If the parameter is abnormal, output error text or help information
-4. If everything is normal, output the parsed parameter variable
-5. If there is a subcommand, call the subcommand function
+3. If arguments are invalid, output error message or help information
+4. If everything is ok, output parsed variables.
+5. If there is a subcommand, call the function related to the subcommand
 
-We can easily access the corresponding option or parameter through the variable `$argc_<name>`.
+We can easily access the corresponding flags/options/arguements through their associated variables.
 
-The `@cmd`, `@arg`, `@option` is comment tag(fields marked with `@` in comments), argc generates parsing rules and help documentation based on comment tags .
+The `@cmd`, `@arg`, `@option` are comment tags, see [docs/comment-tag](docs/comment-tag.md) for more details.
 
-See [docs/comment-tag.md](docs/comment-tag.md) for more details.
+### Task runner
 
-### As a command runner using bash
+![task runner](https://user-images.githubusercontent.com/4012553/182012460-8f4c6cea-1adc-43c9-9a2b-a8a1fff0879a.png)
 
-Argc will enter the command runner mode if you do not activate its other modes with the `--argc-*` option.
+Argc will enter the task runner mode if you do not activate its other modes with the `--argc-*` option.
 
-What argc does in command runner mode is: locate bash, search for `argcfile` in the current project and its parent directory, then run argcfile with bash.
+What argc does in task runner mode are: locate bash, search for `argcfile` in the current project and its parent directory, then run argcfile with bash.
 
-> `argcfile` is a plain shell script, you can run it through `bash argcfile`.
+> `argcfile` is a plain shell script, you can run it via `bash argcfile`.
 
-Argc is written in rust, It is cross-platform. It is a single executable file less than 1M without any dependencies. you just download it and put it into $PATH directory to install it.
+Argc is written in rust, is cross-platform, is a single executable file less than 1M without any dependencies.
 
 Bash is already builtin in macos/linux. On Windows, most developers already have git installed, argc uses the bash that ships with git.
 
-So argc/argcfile is a cross-platform command runner solution.  
+**Argc/argcfile is a cross-platform task runner solution.**
 
 Use the bash you are most familiar with, no need to learn another language or set of syntax.
 
-You can also freely use GNU tools like `ls`, `rm`, `grep`, `find`, `sed`, `awk`, etc. Don't worry about windows incompatibility.
+GNU tools( `ls`, `rm`, `grep`, `find`, `sed`, `awk` , etc..) are also avaiable, Don't worry about windows incompatibility.
 
-Argc provides `bash`, `zsh`, `powershell` completion scripts to prompt for commands and options in `argcfile`, See [completions](completions)
+Argc also provides `bash`, `zsh`, `powershell` completion scripts to prompt for tasks and options in `argcfile`, See [completions](completions)
 
-![command runner](https://user-images.githubusercontent.com/4012553/182012460-8f4c6cea-1adc-43c9-9a2b-a8a1fff0879a.png)
-
-See [docs/command-runner.md](docs/command-runner.md) for more details
+See [docs/task-runner](docs/task-runner.md) for more details.
 
 ## Install
 
@@ -85,11 +83,11 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 ## CLI
 
 ```
-Make beautiful bash cli, also a command runner. - https://github.com/sigoden/argc
+a bash cli framework, also a task runner. - https://github.com/sigoden/argc
 
 USAGE:
     argc --argc-eval SCRIPT [ARGS ...]             Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
-    argc --argc-compgen SCRIPT [ARGS ...]          Print commands/options for generating completion
+    argc --argc-compgen SCRIPT [ARGS ...]          Print commands and options as completion candidates 
     argc --argc-argcfile                           Print argcfile path
     argc --argc-help                               Print help information
     argc --argc-version                            Print version information

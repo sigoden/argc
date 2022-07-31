@@ -3,13 +3,13 @@ name = "argc"
 version = "0.9.2"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "Make beautiful bash cli, also a command runner."
+description = "a bash cli framework, also a task runner."
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
 autotests = false
 categories = ["command-line-utilities"]
-keywords = ["command-line", "bash-script", "command-runner"]
+keywords = ["command-line", "framework", "make", "task-runner"]
 
 [dependencies]
 anyhow = "1"

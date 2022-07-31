@@ -1,7 +1,7 @@
 
 # Comment Tag
 
-Argc generates parsing rules and help documentation based on comment tags (fields marked with `@` in comments).
+Argc generates subcommands/options/flags based on comment tags (fields marked with `@` in comments).
 
   - [@describe](#describe)
   - [@version](#version)

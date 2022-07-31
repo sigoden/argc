@@ -218,5 +218,5 @@ The `argcfile` can be named any of the following. Using a .sh suffix helps with 
 Use environment variable `ARGC_SCRIPT` to custom script file
 
 ```
-ARGC_SCRIPT=taskfile.sh
+ARGC_SCRIPT=taskfile
 ```
