@@ -260,11 +260,9 @@ impl<'a> Cmd<'a> {
                 cmd = cmd.subcommand_required(true).arg_required_else_help(true);
             }
             if let Some(help) = root_data.help {
-                if help == "false" {
-                    cmd = cmd.disable_help_subcommand(true);
-                } else {
-                    cmd = cmd.subcommand(Command::new("help").about(help))
-                }
+                cmd = cmd.subcommand(Command::new("help").about(help))
+            } else {
+                cmd = cmd.disable_help_subcommand(true);
             }
         }
         if !self.aliases.is_empty() {
@@ -410,13 +408,11 @@ impl CmdComp {
         let mut root_cmd = CmdComp::default();
         let mut maybe_subcommand: Option<CmdComp> = None;
         let mut is_root_scope = true;
-        let mut help_subcommand = true;
+        let mut help_subcommand = false;
         for Event { data, .. } in events {
             match data {
-                EventData::Help(value) => {
-                    if *value == "false" {
-                        help_subcommand = false;
-                    }
+                EventData::Help(_) => {
+                    help_subcommand = true;
                 }
                 EventData::Cmd(_) => {
                     is_root_scope = false;

@@ -49,15 +49,12 @@ Define author
 ## @help
 
 ```sh
-@help [false|string]
+@help string
 
-# @help false   
 # @help Print help information
 ```
-Customize help subcommand.
 
-1. disable help subcommand with `# @help false`
-2. custom help subcommand message with `# @help Print help information`
+Add help subcommand.
 
 ## @cmd
 

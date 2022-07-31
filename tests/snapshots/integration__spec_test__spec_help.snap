@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 3
+assertion_line: 5
 expression: output
 ---
 RUN
@@ -22,37 +22,20 @@ OPTIONS:
     -V, --version    Print version information
 
 SUBCOMMANDS:
-    cmd_alias
-            Command with alias [aliases: a, alias]
-    cmd_flag_formats
-            All kind of flags
-    cmd_omitted
-            Omitted
-    cmd_option_formats
-            Options all kind of formats
-    cmd_option_names
-            Options all kind of names
-    cmd_option_quotes
-            Option value quoted
-    cmd_positional_only
-            Positional one required
-    cmd_positional_requires
-            Positional all required
-    cmd_positional_with_choices
-            Positional with choices
-    cmd_positional_with_choices_and_default
-            Positional with choices and value
-    cmd_positional_with_choices_and_required
-            Positional with choices and required
-    cmd_positional_with_default
-            Positional with default value
-    cmd_preferred
-            Preferred
-    cmd_with_hyphens
-            Command with hyphens
-    cmd_without_any_arg
-            Command without any arg
-    help
-            Print this message or the help of the given subcommand(s)
+    cmd_alias                                   Command with alias [aliases: a, alias]
+    cmd_flag_formats                            All kind of flags
+    cmd_omitted                                 Omitted
+    cmd_option_formats                          Options all kind of formats
+    cmd_option_names                            Options all kind of names
+    cmd_option_quotes                           Option value quoted
+    cmd_positional_only                         Positional one required
+    cmd_positional_requires                     Positional all required
+    cmd_positional_with_choices                 Positional with choices
+    cmd_positional_with_choices_and_default     Positional with choices and value
+    cmd_positional_with_choices_and_required    Positional with choices and required
+    cmd_positional_with_default                 Positional with default value
+    cmd_preferred                               Preferred
+    cmd_with_hyphens                            Command with hyphens
+    cmd_without_any_arg                         Command without any arg
 
 

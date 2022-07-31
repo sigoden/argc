@@ -9,7 +9,7 @@ A bash cli framework, also a task runner.
 
 ### Bash cli framework
 
-![cli framework](https://user-images.githubusercontent.com/4012553/182018182-7a91f7b3-ab9e-41fd-89f8-a14e14391a7f.gif)
+![cli framework](https://user-images.githubusercontent.com/4012553/182050295-8f6f5fe1-b1b1-49ab-afb4-8d81dbb08ee2.gif)
 
 To write a command-line program with Argc, we only need to do two things:
 
@@ -35,7 +35,7 @@ The `@cmd`, `@arg`, `@option` are comment tags, see [docs/comment-tag](docs/comm
 
 ### Task runner
 
-![task runner](https://user-images.githubusercontent.com/4012553/182012460-8f4c6cea-1adc-43c9-9a2b-a8a1fff0879a.png)
+![task runner](https://user-images.githubusercontent.com/4012553/182050290-a1bc377c-6562-4097-b102-44dee55cf9a3.png)
 
 Argc will enter the task runner mode if you do not activate its other modes with the `--argc-*` option.
 

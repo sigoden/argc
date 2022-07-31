@@ -1,5 +1,15 @@
 use super::SPEC_SCRIPT;
 
+const HELP_TAG_SCRIPT: &str = r#"
+# @help Print help information
+
+# @cmd
+foo() { :; }
+
+# @cmd
+bar() { :; }
+"#;
+
 #[test]
 fn test_compgen() {
     snapshot_compgen!(SPEC_SCRIPT, &["prog"]);
@@ -41,4 +51,14 @@ fn test_compgen_positional_arg2() {
 #[test]
 fn test_compgen_positional_choices() {
     snapshot_compgen!(SPEC_SCRIPT, &["prog", "cmd_positional_with_choices"]);
+}
+
+#[test]
+fn test_compgen_help_tag() {
+    snapshot_compgen!(HELP_TAG_SCRIPT, &["prog"]);
+}
+
+#[test]
+fn test_compgen_help_tag2() {
+    snapshot_compgen!(HELP_TAG_SCRIPT, &["prog", "help"]);
 }
