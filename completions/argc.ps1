@@ -1,17 +1,18 @@
-using namespace System.Management.Automation
-using namespace System.Management.Automation.Language
-
-Register-ArgumentCompleter -Native -CommandName 'argc' -ScriptBlock {
+Register-ArgumentCompleter -Native -CommandName argc -ScriptBlock {
     param($wordToComplete, $commandAst, $cursorPosition)
     $argcfile = $(argc --argc-argcfile 2>$null)
     if (!$argcfile) {
         return;
     }
-    $elms = $commandAst.CommandElements
-    $cmdargs = $elms[1..($elms.length - 1)] -join " "
-    $completions = (argc --argc-compgen "$argcfile" "$cmdargs" 2>$null) -split " " | % {
-        $name = $_ -replace '^-+',''
-        return [CompletionResult]::new($_, $name, [CompletionResultType]::ParameterName, '-')
-    }
-    $completions.Where{ $_.CompletionText -like "$wordToComplete*" } | Sort-Object -Property ListItemText
+    $cmds = $commandAst.CommandElements[1..($commandAst.CommandElements.Count - 1)]
+    (argc --argc-compgen "$argcfile" $cmds 2>$null) -split " " | 
+        Where-Object { $_ -like "$wordToComplete*" } |
+        ForEach-Object { 
+            if ($_.StartsWith("-")) {
+                $t = [System.Management.Automation.CompletionResultType]::ParameterName
+            } else {
+                $t = [System.Management.Automation.CompletionResultType]::ParameterValue
+            }
+            [System.Management.Automation.CompletionResult]::new($_, $_, $t, '-')
+        }
 }

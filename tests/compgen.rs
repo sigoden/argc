@@ -32,8 +32,3 @@ fn test_compgen_positional_arg2() {
         &["prog", "cmd_positional_requires", "arg1", "arg2"]
     );
 }
-
-#[test]
-fn test_compgen_hide_help() {
-    snapshot_compgen!(SPEC_SCRIPT, &["prog", "a"]);
-}

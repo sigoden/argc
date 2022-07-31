@@ -107,9 +107,6 @@ impl<'a> Cli<'a> {
                     .skip(positional_index),
             )
         }
-        if output.len() == 2 && output[0] == "--help" && output[1] == "-h" {
-            output.clear();
-        }
         Ok(output)
     }
 }
@@ -519,8 +516,12 @@ impl CmdComp {
     fn add_help(&mut self) {
         self.mappings
             .insert("--help".to_string(), "--help".to_string());
-        self.mappings.insert("-h".to_string(), "--help".to_string());
-        self.flags
-            .insert("--help".to_string(), Some("-h".to_string()));
+        if self.mappings.contains_key("-h") {
+            self.flags.insert("--help".to_string(), None);
+        } else {
+            self.mappings.insert("-h".to_string(), "--help".to_string());
+            self.flags
+                .insert("--help".to_string(), Some("-h".to_string()));
+        }
     }
 }
