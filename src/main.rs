@@ -105,9 +105,6 @@ USAGE:{usage}"#)
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
         print!("{}", cli.compgen(&cmd_args)?.join(" "))
     } else {
-        if env::var("ARGC_MODE").is_ok() {
-            bail!("Recognized an infinite loop, did you forget to add the `--argc-eval` option in eval");
-        }
         let shell = get_shell_path().ok_or_else(|| anyhow!("Not found shell"))?;
         let (script_dir, script_file) =
             get_script_path().ok_or_else(|| anyhow!("Not found script file"))?;
@@ -115,7 +112,6 @@ USAGE:{usage}"#)
         command.arg(&script_file);
         command.args(&script_args);
         command.current_dir(script_dir);
-        command.env("ARGC_MODE", "true");
         let status = command
             .status()
             .map_err(|err| anyhow!("Run `{}` throw {}", script_file.display(), err))?;
