@@ -1,9 +1,9 @@
 [package]
 name = "argc"
-version = "0.9.2"
+version = "0.10.0"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "a bash cli framework, also a task runner."
+description = "A bash cli framework, also a task runner."
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
