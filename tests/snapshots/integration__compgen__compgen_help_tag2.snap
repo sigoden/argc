@@ -1,0 +1,14 @@
+---
+source: tests/compgen.rs
+assertion_line: 63
+expression: output
+---
+RUN
+prog help
+
+STDOUT
+foo bar
+
+STDERR
+
+
