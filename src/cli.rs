@@ -93,19 +93,17 @@ impl<'a> Cli<'a> {
             }
         }
         if positional_index >= cmd_comp.positionals.len() {
-            if let Some(name) = cmd_comp.positionals.last() {
+            if let Some((name, _)) = cmd_comp.positionals.last() {
                 if name.ends_with("...") {
                     output.push(name.to_string());
                 }
             }
-        } else {
-            output.extend(
-                cmd_comp
-                    .positionals
-                    .clone()
-                    .into_iter()
-                    .skip(positional_index),
-            )
+        } else if let Some((name, choices)) = cmd_comp.positionals.iter().nth(positional_index) {
+            if choices.is_empty() {
+                output.push(name.to_string())
+            } else {
+                output.extend(choices.to_vec());
+            }
         }
         Ok(output)
     }
@@ -403,8 +401,8 @@ pub struct CmdComp {
     mappings: IndexMap<String, String>,
     options: HashMap<String, (Option<String>, Vec<String>, bool)>,
     flags: HashMap<String, Option<String>>,
-    positionals: Vec<String>,
-    subcommands: HashMap<String, CmdComp>,
+    positionals: IndexMap<String, Vec<String>>,
+    subcommands: IndexMap<String, CmdComp>,
 }
 
 impl CmdComp {
@@ -480,11 +478,14 @@ impl CmdComp {
                     });
                     if let Some(cmd) = cmd {
                         let multiple = if positional_param.multiple { "..." } else { "" };
-                        cmd.positionals.push(format!(
-                            "<{}>{}",
-                            positional_param.name.to_uppercase(),
-                            multiple
-                        ))
+                        let choices = match &positional_param.choices {
+                            Some(choices) => choices.iter().map(|v| v.to_string()).collect(),
+                            None => vec![],
+                        };
+                        cmd.positionals.insert(
+                            format!("<{}>{}", positional_param.name.to_uppercase(), multiple),
+                            choices,
+                        );
                     }
                 }
                 EventData::Func(name) => {
@@ -502,12 +503,15 @@ impl CmdComp {
             }
         }
         if help_subcommand {
+            let mut cmd = CmdComp::default();
+            cmd.positionals.insert(
+                "<CMD>".to_string(),
+                root_cmd.subcommands.keys().map(|v| v.to_string()).collect(),
+            );
             root_cmd
                 .mappings
                 .insert("help".to_string(), "help".to_string());
-            root_cmd
-                .subcommands
-                .insert("help".into(), CmdComp::default());
+            root_cmd.subcommands.insert("help".into(), cmd);
         }
         root_cmd
     }

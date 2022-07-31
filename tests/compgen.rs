@@ -6,6 +6,11 @@ fn test_compgen() {
 }
 
 #[test]
+fn test_compgen_help() {
+    snapshot_compgen!(SPEC_SCRIPT, &["prog", "help"]);
+}
+
+#[test]
 fn test_compgen_subcommand() {
     snapshot_compgen!(SPEC_SCRIPT, &["prog", "cmd_option_names"]);
 }
@@ -31,4 +36,9 @@ fn test_compgen_positional_arg2() {
         SPEC_SCRIPT,
         &["prog", "cmd_positional_requires", "arg1", "arg2"]
     );
+}
+
+#[test]
+fn test_compgen_positional_choices() {
+    snapshot_compgen!(SPEC_SCRIPT, &["prog", "cmd_positional_with_choices"]);
 }
