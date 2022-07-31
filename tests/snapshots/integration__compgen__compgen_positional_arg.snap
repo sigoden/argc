@@ -7,7 +7,7 @@ RUN
 prog cmd_positional_requires arg1
 
 STDOUT
---help -h <ARG2>...
+<ARG2>...
 
 STDERR
 

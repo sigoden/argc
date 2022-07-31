@@ -495,7 +495,6 @@ impl CmdComp {
                         for alias in cmd.aliases.drain(..) {
                             root_cmd.mappings.insert(alias, name.clone());
                         }
-                        cmd.add_help();
                         root_cmd.subcommands.insert(name.clone(), cmd);
                     }
                 }
@@ -510,18 +509,6 @@ impl CmdComp {
                 .subcommands
                 .insert("help".into(), CmdComp::default());
         }
-        root_cmd.add_help();
         root_cmd
-    }
-    fn add_help(&mut self) {
-        self.mappings
-            .insert("--help".to_string(), "--help".to_string());
-        if self.mappings.contains_key("-h") {
-            self.flags.insert("--help".to_string(), None);
-        } else {
-            self.mappings.insert("-h".to_string(), "--help".to_string());
-            self.flags
-                .insert("--help".to_string(), Some("-h".to_string()));
-        }
     }
 }

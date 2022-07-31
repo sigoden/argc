@@ -7,7 +7,7 @@ RUN
 prog cmd_option_names
 
 STDOUT
---opt1 --opt2 --opt3 --opt4 --opt5 --opt6 --opt7 --opt8 --help -h
+--opt1 --opt2 --opt3 --opt4 --opt5 --opt6 --opt7 --opt8
 
 STDERR
 
