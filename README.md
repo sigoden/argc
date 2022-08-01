@@ -29,7 +29,7 @@ Argc will do the following for us:
 4. If everything is ok, output parsed variables.
 5. If there is a subcommand, call the function related to the subcommand
 
-We can easily access the corresponding flags/options/arguements through their associated variables.
+We can easily access the corresponding flags/options/arguments through their associated variables.
 
 The `@cmd`, `@arg`, `@option` are comment tags, see [docs/comment-tag](docs/comment-tag.md) for more details.
 
@@ -51,7 +51,7 @@ Bash is already builtin in macos/linux. On Windows, most developers already have
 
 Use the bash you are most familiar with, no need to learn another language or set of syntax.
 
-GNU tools( `ls`, `rm`, `grep`, `find`, `sed`, `awk` , etc..) are also avaiable, Don't worry about windows incompatibility.
+GNU tools( `ls`, `rm`, `grep`, `find`, `sed`, `awk` , etc..) are also available, Don't worry about windows incompatibility.
 
 Argc also provides `bash`, `zsh`, `powershell` completion scripts to prompt for tasks and options in `argcfile`, See [completions](completions)
 
