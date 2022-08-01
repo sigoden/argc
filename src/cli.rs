@@ -42,7 +42,7 @@ impl<'a> Cli<'a> {
         let cmd_comp = CmdComp::create(&events);
         let mut i = 1;
         let len = args.len();
-        let mut ommitted: HashSet<String> = HashSet::default();
+        let mut omitted: HashSet<String> = HashSet::default();
         let mut cmd_comp = &cmd_comp;
         let mut positional_index = 0;
         let mut unknown_arg = false;
@@ -62,20 +62,20 @@ impl<'a> Cli<'a> {
                             if !args[i + 1].starts_with('-') {
                                 i += 1;
                             }
-                            ommitted.insert(name.to_string());
+                            omitted.insert(name.to_string());
                             if let Some(short) = short {
-                                ommitted.insert(short.to_string());
+                                omitted.insert(short.to_string());
                             }
                         }
                     } else if let Some(short) = cmd_comp.flags.get(name) {
-                        ommitted.insert(name.to_string());
+                        omitted.insert(name.to_string());
                         if let Some(short) = short {
-                            ommitted.insert(short.to_string());
+                            omitted.insert(short.to_string());
                         }
                     }
                 } else if let Some(cmd) = cmd_comp.subcommands.get(name) {
                     cmd_comp = cmd;
-                    ommitted.clear();
+                    omitted.clear();
                     positional_index = 0;
                 }
             } else if arg.starts_with('-') {
@@ -88,7 +88,7 @@ impl<'a> Cli<'a> {
         }
         let mut output = vec![];
         for name in cmd_comp.mappings.keys() {
-            if !ommitted.contains(name) {
+            if !omitted.contains(name) {
                 output.push(name.to_string());
             }
         }

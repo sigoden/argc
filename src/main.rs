@@ -138,10 +138,10 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
 }
 
 fn get_script_path() -> Option<(PathBuf, PathBuf)> {
-    let candicates = candicate_script_names();
+    let candidates = candidate_script_names();
     let mut dir = env::current_dir().ok()?;
     loop {
-        for name in candicates.iter() {
+        for name in candidates.iter() {
             let path = dir.join(name);
             if path.exists() {
                 return Some((dir, path));
@@ -151,7 +151,7 @@ fn get_script_path() -> Option<(PathBuf, PathBuf)> {
     }
 }
 
-fn candicate_script_names() -> Vec<String> {
+fn candidate_script_names() -> Vec<String> {
     let mut names = vec![];
     if let Ok(name) = env::var("ARGC_SCRIPT") {
         names.push(name.clone());
