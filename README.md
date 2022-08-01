@@ -83,7 +83,7 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 ## CLI
 
 ```
-a bash cli framework, also a task runner. - https://github.com/sigoden/argc
+A bash cli framework, also a task runner - https://github.com/sigoden/argc
 
 USAGE:
     argc --argc-eval SCRIPT [ARGS ...]             Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
