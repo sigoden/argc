@@ -5,7 +5,7 @@ Argc will enter the command runner mode if you do not activate its other modes w
   - [Turn function to task](#turn-function-to-task)
   - [Task aliases](#task-aliases)
   - [Task dependencies](#task-dependencies)
-  - [Default action](#default-action)
+  - [Default task](#default-task)
   - [Semantic group](#semantic-group)
   - [Use positional variables](#use-positional-variables)
   - [Use argc variables](#use-argc-variables)
@@ -104,7 +104,7 @@ baz
 ```
 
 
-## Default action
+## Default task
 
 if run `argc` without specific command, the `main` function should be executed. if `main` function is not found, `argc` will print help message.
 
@@ -196,6 +196,10 @@ arg:  README.md
 ```
 
 ## Customize shell
+
+Argc needs `bash` to run `argcfile`.
+
+> In the Windows system, argc will automatically use the `bash` that comes with git. 
 
 Use environment variable `ARGC_SHELL` to custom shell
 

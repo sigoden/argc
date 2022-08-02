@@ -5,9 +5,7 @@
 
 A bash cli framework, also a task runner.
 
-## Usage
-
-### Bash cli framework
+## Bash cli framework
 
 ![cli framework](https://user-images.githubusercontent.com/4012553/182050295-8f6f5fe1-b1b1-49ab-afb4-8d81dbb08ee2.gif)
 
@@ -33,27 +31,21 @@ We can easily access the corresponding flags/options/arguments through their ass
 
 The `@cmd`, `@arg`, `@option` are comment tags, see [docs/comment-tag](docs/comment-tag.md) for more details.
 
-### Task runner
+## Task runner
 
 ![task runner](https://user-images.githubusercontent.com/4012553/182050290-a1bc377c-6562-4097-b102-44dee55cf9a3.png)
 
-Argc will enter the task runner mode if you do not activate its other modes with the `--argc-*` option.
+Write your task as subcommand, name your script file `argcfile`, `argc` uses `argcfile` like `make` uses `makefile`.
 
-What argc does in task runner mode are: locate bash, search for `argcfile` in the current project and its parent directory, then run argcfile with bash.
+The solution has the following advantages:
 
-> `argcfile` is a plain shell script, you can run it via `bash argcfile`.
-
-Argc is written in rust, is cross-platform, is a single executable file less than 1M without any dependencies.
-
-Bash is already builtin in macos/linux. On Windows, most developers already have git installed, argc uses the bash that ships with git.
-
-**Argc/argcfile is a cross-platform task runner solution.**
-
-Use the bash you are most familiar with, no need to learn another language or set of syntax.
-
-GNU tools( `ls`, `rm`, `grep`, `find`, `sed`, `awk` , etc..) are also available, Don't worry about windows incompatibility.
-
-Argc also provides `bash`, `zsh`, `powershell` completion scripts to prompt for tasks and options in `argcfile`, See [completions](completions)
+- use normal shell script, no need to learn another language/syntax.
+- cross-platform, works on macos/linux/windows.
+- GNU tools( `ls`, `rm`, `grep`, `find`, `sed`, `awk` , ..) are available.
+- informative tasks listings and beautiful help printings.
+- dynamic tasks completions for `bash`, `zsh`, `powershell`.
+- support passing options and positional parameters to task.
+- support task aliases.
 
 See [docs/task-runner](docs/task-runner.md) for more details.
 
