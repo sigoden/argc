@@ -8,7 +8,7 @@
   - [Default task](#default-task)
   - [Semantic group](#semantic-group)
   - [Customize shell](#customize-shell)
-  - [Customize script file](#customize-script-file)
+  - [Customize script name](#customize-script-name)
 
 ## Defining and running task functions 
 
@@ -23,11 +23,6 @@ build() {
 # @cmd
 test() {
   echo Test...
-}
-
-# @cmd
-lint() {
-  echo Lint...
 }
 
 eval $(argc --argc-eval "$0" "$@")
@@ -45,8 +40,7 @@ OPTIONS:
 
 SUBCOMMANDS:
     build    Build project
-    lint
-    test
+    test     
 
 $ argc build
 Build...
@@ -90,7 +84,7 @@ opt:  foo
 arg:  README.md
 ```
 
-Shell positional parameters also work.
+Shell positional parameters are available.
 
 ```sh
 # @cmd
@@ -112,19 +106,18 @@ Tasks can be aliases with comment tag `@alias`.
 # @cmd
 # @alias t,tst
 test() {
-  echo test
+  echo "Test..."
 }
 ```
 
 ```
-argc test
-argc t
-argc tst
+$ argc t
+Test...
 ```
 
 ## Task dependencies
 
-Tasks can depend on other tasks. Just call functions, nothing is special.
+Tasks can depend on other tasks. Dependencies are resolved by calling functions.
 
 ```sh
 # @cmd
@@ -152,7 +145,7 @@ baz
 
 ## Default task
 
-Define main function to run default task.
+The default task is implemented through the main function
 
 ```sh
 # @cmd
@@ -177,31 +170,34 @@ bar
 
 ## Semantic group
 
-Tasks can be grouped using `_`, `-`, `@`, `.`, `-`.
+Tasks can be grouped with `_`, `-`, `@`, `.`, `:`.
 
 ```sh
 # @cmd
-test() { :; }
+test@unit() {}
 # @cmd
-test.unit() { :; }
+test@bin() {}
+
 # @cmd
-test.bin() { :; }
+app.build() {}
+# @cmd
+app.test() {}
 ```
 
 ## Customize shell
 
 Argc needs `bash` to run `argcfile`.
 
-> In Windows OS, argc will automatically locate `bash` that comes with git. 
+Argc uses built-in bash in macos/linux, **uses git bash in windows**.
 
-Use environment variable `ARGC_SHELL` to custom shell
+You can use environment variable `ARGC_SHELL` to custom shell.
 
 ```
 ARGC_SHELL=/usr/bin/bash
 ARGC_SHELL="C:\\Program Files\\Git\\bin\\bash.exe"
 ```
 
-## Customize script file
+## Customize script name
 
 By default, argc searches for the `argcfile` file in the current project and its parent directory.
 
@@ -212,7 +208,7 @@ The `argcfile` can be named any of the following. Using a .sh suffix helps with 
 - Argcfile
 - Argcfile.sh
 
-Use environment variable `ARGC_SCRIPT` to custom script file
+You can use environment variable `ARGC_SCRIPT` to custom script name
 
 ```
 ARGC_SCRIPT=taskfile
