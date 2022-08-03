@@ -35,17 +35,19 @@ The `@cmd`, `@arg`, `@option` are comment tags, see [docs/comment-tag](docs/comm
 
 ![task runner](https://user-images.githubusercontent.com/4012553/182050290-a1bc377c-6562-4097-b102-44dee55cf9a3.png)
 
-Write your task as subcommand, name your script file `argcfile`, `argc` uses `argcfile` like `make` uses `makefile`.
+Write your task as subcommand, name your script file `argcfile`, `argc` runs `argcfile` like `make` runs `makefile`.
 
 The solution has the following advantages:
 
-- use normal shell script, no need to learn another language/syntax.
-- cross-platform, works on macos/linux/windows.
+- Use normal shell script, no need to learn another language/syntax.
+- Cross-platform, works on macos/linux/windows.
 - GNU tools( `ls`, `rm`, `grep`, `find`, `sed`, `awk` , ..) are available.
-- informative tasks listings and beautiful help printings.
-- dynamic tasks completions for `bash`, `zsh`, `powershell`.
-- support passing options and positional parameters to task.
-- support task aliases.
+- Informative tasks listings and beautiful help printings.
+- Tab completion for tasks in bash/zsh/powershell
+- Tasks can accept flags/options/positional arguments.
+- Tasks can have pre and post dependencies
+- Tasks can be aliased.
+- Tasks can be grouped.
 
 See [docs/task-runner](docs/task-runner.md) for more details.
 

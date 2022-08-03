@@ -1,20 +1,18 @@
 # Command Runner
 
-Argc will enter the command runner mode if you do not activate its other modes with the `--argc-*` option.
-
-  - [Turn function to task](#turn-function-to-task)
+- [Command Runner](#command-runner)
+  - [Defining and running task functions](#defining-and-running-task-functions)
+  - [Task arguments](#task-arguments)
   - [Task aliases](#task-aliases)
   - [Task dependencies](#task-dependencies)
   - [Default task](#default-task)
   - [Semantic group](#semantic-group)
-  - [Use positional variables](#use-positional-variables)
-  - [Use argc variables](#use-argc-variables)
   - [Customize shell](#customize-shell)
   - [Customize script file](#customize-script-file)
 
-## Turn function to task
+## Defining and running task functions 
 
-put comment `# @cmd` on function to turn it into task.
+Define a task by put put comment `# @cmd` above a function.
 
 ```sh
 # @cmd Build project
@@ -32,10 +30,6 @@ lint() {
   echo Lint...
 }
 
-helper() {
-  echo Not a task
-}
-
 eval $(argc --argc-eval "$0" "$@")
 ```
 
@@ -51,7 +45,6 @@ OPTIONS:
 
 SUBCOMMANDS:
     build    Build project
-    help     Print this message or the help of the given subcommand(s)
     lint
     test
 
@@ -59,107 +52,9 @@ $ argc build
 Build...
 ```
 
-## Task aliases
+## Task arguments
 
-```sh
-# @cmd
-# @alias t,tst
-test() {
-  echo test
-}
-```
-
-```
-argc test
-argc t
-argc ts
-```
-
-## Task dependencies
-
-tasks can depend on other tasks. Just call functions, nothing is special.
-
-```sh
-# @cmd
-bar() { foo;
-  echo bar
-baz; }
-
-# @cmd
-foo() {
-  echo foo
-}
-
-# @cmd
-baz() { 
-  echo baz
-}
-```
-
-```
-$ argc bar
-foo
-bar
-baz
-```
-
-
-## Default task
-
-if run `argc` without specific command, the `main` function should be executed. if `main` function is not found, `argc` will print help message.
-
-```sh
-# @cmd
-foo() {
-  echo foo
-}
-# @cmd
-bar() {
-  echo baz
-}
-main() {
-  foo
-  bar
-}
-```
-
-```
-$ argc
-foo
-bar
-```
-
-## Semantic group
-
-Tasks can be grouped using symbols, such as `foo:bar` `foo.bar` `foo@bar`.
-
-
-```sh
-# @cmd
-test() { :; }
-# @cmd
-test:unit() { :; }
-# @cmd
-test:bin() { :; }
-```
-
-## Use positional variables
-
-```sh
-# @cmd
-build() {
-  echo $1 $2
-  echo $@
-}
-```
-
-```
-$ argc build foo bar
-foo bar
-foo bar
-```
-
-## Use argc variables 
+Task can have flags, options and positional argument.
 
 ```sh
 # @cmd     A simple task
@@ -195,11 +90,109 @@ opt:  foo
 arg:  README.md
 ```
 
+Shell positional parameters also work.
+
+```sh
+# @cmd
+build() {
+  echo $1 $2
+}
+```
+
+```
+$ argc build foo bar
+foo bar
+```
+
+## Task aliases
+
+Tasks can be aliases with comment tag `@alias`.
+
+```sh
+# @cmd
+# @alias t,tst
+test() {
+  echo test
+}
+```
+
+```
+argc test
+argc t
+argc tst
+```
+
+## Task dependencies
+
+Tasks can depend on other tasks. Just call functions, nothing is special.
+
+```sh
+# @cmd
+bar() { foo;
+  echo bar
+baz; }
+
+# @cmd
+foo() {
+  echo foo
+}
+
+# @cmd
+baz() { 
+  echo baz
+}
+```
+
+```
+$ argc bar
+foo
+bar
+baz
+```
+
+## Default task
+
+Define main function to run default task.
+
+```sh
+# @cmd
+foo() {
+  echo foo
+}
+# @cmd
+bar() {
+  echo baz
+}
+main() {
+  foo
+  bar
+}
+```
+
+```
+$ argc
+foo
+bar
+```
+
+## Semantic group
+
+Tasks can be grouped using `_`, `-`, `@`, `.`, `-`.
+
+```sh
+# @cmd
+test() { :; }
+# @cmd
+test.unit() { :; }
+# @cmd
+test.bin() { :; }
+```
+
 ## Customize shell
 
 Argc needs `bash` to run `argcfile`.
 
-> In the Windows system, argc will automatically use the `bash` that comes with git. 
+> In Windows OS, argc will automatically locate `bash` that comes with git. 
 
 Use environment variable `ARGC_SHELL` to custom shell
 
