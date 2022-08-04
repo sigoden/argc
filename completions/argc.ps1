@@ -1,4 +1,4 @@
-Register-ArgumentCompleter -Native -CommandName argc -ScriptBlock {
+$_argc_completion = {
     param($wordToComplete, $commandAst, $cursorPosition)
     $argcfile = $(argc --argc-argcfile 2>$null)
     if (!$argcfile) {
@@ -16,3 +16,5 @@ Register-ArgumentCompleter -Native -CommandName argc -ScriptBlock {
             [System.Management.Automation.CompletionResult]::new($_, $_, $t, '-')
         }
 }
+
+Register-ArgumentCompleter -Native -CommandName argc -ScriptBlock $_argc_completion

@@ -1,5 +1,3 @@
-compdef _argc argc
-
 _argc()
 {
     local argcfile items
@@ -8,6 +6,8 @@ _argc()
         return 0
     fi
     items=( $(argc --argc-compgen "$argcfile" ${words[@]:1} 2>/dev/null) )
-    compadd -d $items
+    compadd $items[@]
     return 0
 }
+
+compdef _argc argc
