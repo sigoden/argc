@@ -1,3 +1,5 @@
+# Bash completion for argc
+
 _argc() {
     local argcfile cur opts
     cur="${COMP_WORDS[COMP_CWORD]}"
@@ -6,7 +8,7 @@ _argc() {
     if [ $? != 0 ]; then
         return 0
     fi
-    opts=$(argc --argc-compgen "$argcfile" ${COMP_WORDS[@]:1} 2>/dev/null)
+    opts=$(argc --argc-compgen "$argcfile" ${COMP_WORDS[@]:1:$((${#COMP_WORDS[@]} - 2))} 2>/dev/null)
     COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
     return 0
 }
