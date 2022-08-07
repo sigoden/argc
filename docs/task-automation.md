@@ -1,6 +1,6 @@
-# Command automation
+# Task automation
 
-- [Command automation](#command-automation)
+- [Task automation](#task-automation)
   - [Task is function](#task-is-function)
   - [Task arguments](#task-arguments)
   - [Task aliases](#task-aliases)
