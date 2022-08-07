@@ -1,5 +1,6 @@
-#!/bin/bash 
-set -eo pipefail
+#!/usr/bin/env bash
+
+set -e
 
 # @cmd Check outdated deps
 outdated() {
@@ -20,7 +21,7 @@ fmt() {
 
 # @cmd Run before commit
 # @alias pc
-pre:commit() {
+commit@pre() {
     fmt
     outdated --exit-code 1
     test

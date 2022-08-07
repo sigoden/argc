@@ -33,17 +33,18 @@ The `@cmd`, `@arg`, `@option` are comment tags, see [docs/comment-tag](docs/comm
 
 ## Task automation tool
 
-![task automation](https://user-images.githubusercontent.com/4012553/182050290-a1bc377c-6562-4097-b102-44dee55cf9a3.png)
+![task automation](https://user-images.githubusercontent.com/4012553/183274529-91cfe1ae-ddcf-490f-84d7-b5da01be1877.png)
 
 Write your task as subcommand, name your script file `argcfile`, `argc` runs `argcfile` like `make` runs `makefile`.
 
-The solution has the following advantages:
+Features:
 
 - Use normal shell script, no need to learn another language/syntax.
-- Cross-platform, works on macos/linux/windows.
+- Cross-platform, use built-in bash in macos/linux, git-bash in windows.
 - GNU tools( `ls`, `rm`, `grep`, `find`, `sed`, `awk` , ..) are available.
 - Informative tasks listings and beautiful help printings.
-- Tab completion for tasks in bash/zsh/powershell
+- Completion scripts are available for bash/zsh/powershell.
+- `argc` can be invoked from any subdirectory, not just the directory that contains the `argcfile`.
 - Tasks can accept flags/options/positional arguments.
 - Tasks can have pre and post dependencies.
 - Tasks can be aliased.
