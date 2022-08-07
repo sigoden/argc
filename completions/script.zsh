@@ -1,4 +1,5 @@
 # Zsh completion for scripts written with argc
+# All argc scripts share the same completion function, put your scripts to $PATH, replace `mycmd1,mycmd2` blow with your scripts' names
 
 _argc_script()
 {
@@ -12,4 +13,4 @@ _argc_script()
     return 0
 }
 
-compdef _argc_script mycmd1 mycmd2 # just replace mycmd1 mycmd2 with your scripts
+compdef _argc_script mycmd1 mycmd2

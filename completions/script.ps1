@@ -1,4 +1,5 @@
 # Powershell completion for scripts written with argc
+# All argc scripts share the same completion function, put your scripts to $PATH, replace `mycmd1,mycmd2` blow with your scripts' names
 
 $_argc_script_completion = {
     param($wordToComplete, $commandAst, $cursorPosition)
@@ -22,5 +23,3 @@ $_argc_script_completion = {
             [System.Management.Automation.CompletionResult]::new($_, $_, $t, '-')
         }
 }
-
-Register-ArgumentCompleter -Native -ScriptBlock $_argc_script_completion -CommandName mycmd1,mycmd2 # just replace mycmd1,mycmd2 with your scripts
