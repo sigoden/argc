@@ -1,18 +1,18 @@
-# Command Runner
+# Command automation
 
-- [Command Runner](#command-runner)
-  - [Defining and running task functions](#defining-and-running-task-functions)
+- [Command automation](#command-automation)
+  - [Task is function](#task-is-function)
   - [Task arguments](#task-arguments)
   - [Task aliases](#task-aliases)
   - [Task dependencies](#task-dependencies)
   - [Default task](#default-task)
   - [Semantic group](#semantic-group)
-  - [Customize shell](#customize-shell)
+  - [Customize shell path](#customize-shell-path)
   - [Customize script name](#customize-script-name)
 
-## Defining and running task functions 
+## Task is function
 
-Define a task by put put comment `# @cmd` above a function.
+Define a task by put put comment tag `@cmd` above a function.
 
 ```sh
 # @cmd Build project
@@ -184,13 +184,13 @@ app.build() {}
 app.test() {}
 ```
 
-## Customize shell
+## Customize shell path
 
 Argc needs `bash` to run `argcfile`.
 
 Argc uses built-in bash in macos/linux, **uses git bash in windows**.
 
-You can use environment variable `ARGC_SHELL` to custom shell.
+You can use environment variable `ARGC_SHELL` to custom shell path.
 
 ```
 ARGC_SHELL=/usr/bin/bash
@@ -208,7 +208,7 @@ The `argcfile` can be named any of the following. Using a .sh suffix helps with 
 - Argcfile
 - Argcfile.sh
 
-You can use environment variable `ARGC_SCRIPT` to custom script name
+You can use environment variable `ARGC_SCRIPT` to custom script name.
 
 ```
 ARGC_SCRIPT=taskfile

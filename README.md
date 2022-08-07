@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-A bash cli framework, also a task runner.
+A bash cli framework, also a task management & automation tool.
 
 ## Bash cli framework
 
@@ -31,9 +31,9 @@ We can easily access the corresponding flags/options/arguments through their ass
 
 The `@cmd`, `@arg`, `@option` are comment tags, see [docs/comment-tag](docs/comment-tag.md) for more details.
 
-## Task runner
+## Task automation tool
 
-![task runner](https://user-images.githubusercontent.com/4012553/182050290-a1bc377c-6562-4097-b102-44dee55cf9a3.png)
+![task automation](https://user-images.githubusercontent.com/4012553/182050290-a1bc377c-6562-4097-b102-44dee55cf9a3.png)
 
 Write your task as subcommand, name your script file `argcfile`, `argc` runs `argcfile` like `make` runs `makefile`.
 
@@ -45,11 +45,11 @@ The solution has the following advantages:
 - Informative tasks listings and beautiful help printings.
 - Tab completion for tasks in bash/zsh/powershell
 - Tasks can accept flags/options/positional arguments.
-- Tasks can have pre and post dependencies
+- Tasks can have pre and post dependencies.
 - Tasks can be aliased.
 - Tasks can be grouped.
 
-See [docs/task-runner](docs/task-runner.md) for more details.
+See [docs/task-automation](docs/task-automation.md) for more details.
 
 ## Install
 
@@ -77,7 +77,7 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 ## CLI
 
 ```
-A bash cli framework, also a task runner - https://github.com/sigoden/argc
+A bash cli framework, also a task management & automation tool - https://github.com/sigoden/argc
 
 USAGE:
     argc --argc-eval SCRIPT [ARGS ...]             Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
