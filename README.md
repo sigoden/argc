@@ -27,7 +27,7 @@ A bash cli framework, also a task management & automation tool.
     - [Task can be semantically grouped](#task-can-be-semantically-grouped)
     - [The default task](#the-default-task)
     - [Informative tasks listings and beautiful help printings](#informative-tasks-listings-and-beautiful-help-printings)
-    - [Customize shell path](#customize-shell-path)
+    - [Customize shell](#customize-shell)
     - [Customize script name](#customize-script-name)
   - [Argc CLI Usage](#argc-cli-usage)
   - [Shell Completion Scripts](#shell-completion-scripts)
@@ -60,10 +60,10 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 
 ![cli framework](https://user-images.githubusercontent.com/4012553/182050295-8f6f5fe1-b1b1-49ab-afb4-8d81dbb08ee2.gif)
 
-To write a command-line program with Argc, we only need to do two things:
+To write a command-line program with argc, we only need to do two things:
 
 1. Describe the options, parameters, and subcommands in comment.
-2. Call the following command to entrust Argc to process command line parameters for us
+2. Call the following command to entrust argc to process command line parameters for us
 
 ```sh
 eval $(argc --argc-eval "$0" "$@")
@@ -71,15 +71,15 @@ eval $(argc --argc-eval "$0" "$@")
 
 Argc will do the following for us:
 
-1. Extract flag/option/subcommand definitions from comments
-2. Parse command line arguments
-3. If arguments are invalid, output error message or help information
+1. Extract flag/option/subcommand definitions from comments.
+2. Parse command line arguments according to the definition.
+3. If arguments are invalid, output error message or help information.
 4. If everything is ok, output parsed variables.
-5. If there is a subcommand, call the function related to the subcommand
+5. If there is a subcommand, call the subcommand function.
 
-We can easily access the corresponding flags/options/arguments through their associated variables.
+We can directly use variables corresponding to flags/options/positional parameters.
 
-Comments matching `# @<name> [args...]` are comment tags. `argc` parses comment tags to get the definition of cli.
+`# @<name> [args...]` are comment tags. `argc` parses comment tags to get the definition of cli.
 
 ### @cmd
 
@@ -102,7 +102,7 @@ download() {
 Sets multiple aliases to the subcommand.
 
 ```sh
-@alias name(,name)+
+@alias <name...>
 
 # @cmd
 # @alias t,tst
@@ -112,7 +112,7 @@ test() {
 
 ### @option
 
-Add a option to command.
+Add a option.
 
 ```sh
  @option [short] <long>[modifier] [notation] [help string]
@@ -132,7 +132,7 @@ Add a option to command.
 
 ### @flag
 
-Adds a flag to command.
+Adds a flag.
 
 ```sh
 @flag [short] <long> [help string]
@@ -143,7 +143,7 @@ Adds a flag to command.
 
 ### @arg
 
-Adds a positional argument to command.
+Adds a positional argument.
 
 ```sh
 @arg <name>[modifier] [help string]
@@ -171,7 +171,7 @@ Generate help subcommand.
 
 - @describe: Sets the cli’s description. 
 - @version: Sets cli's version.
-- @author: Sets cli's author,
+- @author: Sets cli's author.
 
 ```sh
 # @describe A demo cli
@@ -183,9 +183,13 @@ Generate help subcommand.
 
 ![task automation](https://user-images.githubusercontent.com/4012553/183369248-a898021b-bf5b-414b-b353-786522d85f13.png)
 
-Write your tasks as subcommands, name your script file `argcfile`, then invoke `argc`.
+The argc script is often used for task automation. But using argc script for task automation has the following disadvantages:
 
-`argc` will search for the argcfile file in the current project and its parent directory and execute it with `bash`.
+- Not work in some shell such as powershell.
+- No shell completions.
+- Need to locate script file manually e.g. `../../script.sh`
+
+The new version of argc has been optimized for task automation. It will automatically search for the `argcfile` file in the current project or its parent directory, then run it with `bash`.
 
 `argc` runs `argcfile` like `make` runs `makefile`.
 
@@ -193,14 +197,13 @@ Write your tasks as subcommands, name your script file `argcfile`, then invoke `
 
 `argc` binaries are available in linux, macos, and windows.
 
-`argc` require `bash`. `bash` is already builtin in macos/linux.
-On windows, most developers already have git installed, `argc` use git bash by default.
+`argc` require `bash` which already builtin in macos/linux. In windows, most developers already have git installed, `argc` automatically locate and use git bash.
 
-GNU tools like `ls`, `rm`, `grep`, `find`, `sed`, `awk`... are also available, welcome to use them.
+GNU tools like `ls`, `rm`, `grep`, `find`, `sed`, `awk`... are also available, use them freely and confidently.
 
 ### Task is just function
 
-Define a task by put put comment tag `@cmd` above a function.
+Adds a task by putting `@cmd` above a function.
 
 ```sh
 # @cmd Build project
@@ -211,6 +214,10 @@ build() {
 # @cmd Run tests
 test() {
   echo Test...
+}
+
+helper() {
+  :;
 }
 
 eval $(argc --argc-eval "$0" "$@")
@@ -270,7 +277,7 @@ opt:  foo
 arg:  README.md
 ```
 
-Shell positional parameters are available.
+*Shell variables are also available.*
 
 ```sh
 # @cmd
@@ -345,7 +352,7 @@ app.test() {}
 
 ### The default task
 
-If you define a main function, invoke `argc` without any subcommand will call this function, otherwise `argc` will print help message then exit.
+If the `main` function exists, calling `argc` without any subcommands will call the function, otherwise print a help message and exit.
 
 ```sh
 # @cmd
@@ -370,20 +377,15 @@ bar
 
 ### Informative tasks listings and beautiful help printings
 
-See snippets above, `argc` prints beautiful help messages.
+See snippets above, `argc` prints a beautiful help message listing all tasks along with their descriptions and aliases.
 
-`argc` will list all tasks and they're description and aliases.
+You can also use `argc <task> -h` to print a help message containing the description of task flags, options and positional arguments.
 
-You can also use `argc <task> -h` to print task's flags, options and positional arguments.
+### Customize shell
 
+Argc uses built-in bash in macos/linux, uses git bash in windows.
 
-### Customize shell path
-
-Argc needs `shell` to run `argcfile`.
-
-Argc uses built-in bash in macos/linux, **uses git bash in windows**.
-
-You can use environment variable `ARGC_SHELL` to custom shell path.
+You can use environment variable `ARGC_SHELL` to customize shell.
 
 ```
 ARGC_SHELL=/usr/bin/bash
@@ -392,9 +394,7 @@ ARGC_SHELL="C:\\Program Files\\Git\\bin\\bash.exe"
 
 ### Customize script name
 
-By default, argc searches for the `argcfile` file in the current project and its parent directory.
-
-The `argcfile` can be named any of the following. Using a .sh suffix helps with editor syntax highlighting.
+By default, argc searches for `argcfile` of the following:
 
 - argcfile
 - argcfile.sh
@@ -423,8 +423,8 @@ argc --argc-version                            Print version information
 
 There are two types of completion scripts:
 
--  `argc.*` is for argc command, they will provide completions for tasks and task's options.
--  `script.*` is for scripts written with argc. 
+-  `argc.*` is for argc command, they will provide completions for tasks and task parameters.
+-  `script.*` is for scripts written with argc.
 
 Please refer to your shell's documentation for how to install them.
 
