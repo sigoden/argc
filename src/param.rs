@@ -5,7 +5,7 @@ use crate::utils::{
 };
 
 use anyhow::{bail, Result};
-use clap::{Arg, ArgMatches};
+use clap::{Arg, ArgAction, ArgMatches};
 use std::collections::HashMap;
 use std::fmt::Write;
 
@@ -173,7 +173,7 @@ impl<'a> Param<'a> for OptionParam<'a> {
             arg = arg
                 .multiple_values(true)
                 .use_value_delimiter(true)
-                .multiple_occurrences(true);
+                .action(ArgAction::Append)
         }
         if let Some(choices) = &self.choices {
             if choices.len() > 1 {
