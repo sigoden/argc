@@ -43,7 +43,7 @@ impl<'a> ParamData<'a> {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct FlagParam<'a> {
     pub(crate) name: &'a str,
     pub(crate) summary: &'a str,
@@ -100,7 +100,7 @@ impl<'a> Param<'a> for FlagParam<'a> {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct OptionParam<'a> {
     pub(crate) name: &'a str,
     pub(crate) summary: &'a str,
@@ -214,7 +214,7 @@ impl<'a> Param<'a> for OptionParam<'a> {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PositionalParam<'a> {
     pub(crate) name: &'a str,
     pub(crate) summary: &'a str,

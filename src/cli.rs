@@ -329,7 +329,7 @@ impl<'a> Cmd<'a> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum RetrieveValue<'a> {
     Single(&'a str, String),
     Multiple(&'a str, Vec<String>),
