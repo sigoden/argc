@@ -13,7 +13,7 @@ use nom::{
     multi::{many1, separated_list1},
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Event<'a> {
     pub data: EventData<'a>,
     pub position: Position,
@@ -21,7 +21,7 @@ pub struct Event<'a> {
 
 pub type Position = usize;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum EventData<'a> {
     /// Description
     Describe(&'a str),

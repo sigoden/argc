@@ -5,7 +5,7 @@ use crate::utils::{
 };
 
 use anyhow::{bail, Result};
-use clap::{Arg, ArgMatches};
+use clap::{Arg, ArgAction, ArgMatches};
 use std::collections::HashMap;
 use std::fmt::Write;
 
@@ -43,7 +43,7 @@ impl<'a> ParamData<'a> {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct FlagParam<'a> {
     pub(crate) name: &'a str,
     pub(crate) summary: &'a str,
@@ -100,7 +100,7 @@ impl<'a> Param<'a> for FlagParam<'a> {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct OptionParam<'a> {
     pub(crate) name: &'a str,
     pub(crate) summary: &'a str,
@@ -173,7 +173,7 @@ impl<'a> Param<'a> for OptionParam<'a> {
             arg = arg
                 .multiple_values(true)
                 .use_value_delimiter(true)
-                .multiple_occurrences(true);
+                .action(ArgAction::Append)
         }
         if let Some(choices) = &self.choices {
             if choices.len() > 1 {
@@ -214,7 +214,7 @@ impl<'a> Param<'a> for OptionParam<'a> {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PositionalParam<'a> {
     pub(crate) name: &'a str,
     pub(crate) summary: &'a str,
