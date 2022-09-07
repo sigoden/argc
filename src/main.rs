@@ -22,21 +22,21 @@ fn main() {
 }
 
 fn run() -> Result<i32> {
-    let mut args: Vec<String> = vec![];
+    let mut argc_args: Vec<String> = vec![];
     let mut script_args: Vec<String> = vec![];
-    let mut is_arg = true;
+    let mut next_argc_arg = true;
     for arg in std::env::args() {
-        if is_arg {
-            args.push(arg);
-            is_arg = false;
+        if next_argc_arg {
+            argc_args.push(arg);
+            next_argc_arg = false;
             continue;
         }
         if script_args.is_empty() && arg.starts_with("--argc-") {
-            args.push(arg);
+            argc_args.push(arg);
             continue;
         }
+        next_argc_arg = false;
         script_args.push(arg);
-        is_arg = false;
     }
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
@@ -44,7 +44,8 @@ fn run() -> Result<i32> {
         .global_setting(clap::AppSettings::DeriveDisplayOrder)
         .override_usage(
             r#"
-    argc --argc-eval SCRIPT [ARGS ...]             Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
+    argc --argc-eval SCRIPT [ARGS ...]             Parse arguments `eval $(argc --argc-eval "$0" "$@")`
+    argc --argc-create [TASKS ...]                 Create a boilerplate argcfile
     argc --argc-compgen SCRIPT [ARGS ...]          Print commands and options as completion candidates 
     argc --argc-argcfile                           Print argcfile path
     argc --argc-help                               Print help information
@@ -64,6 +65,7 @@ USAGE:{usage}"#)
             env!("CARGO_PKG_REPOSITORY")
         ))
         .arg(Arg::new("argc-eval").long("argc-eval"))
+        .arg(Arg::new("argc-create").long("argc-create"))
         .arg(
             Arg::new("argc-compgen")
                 .long("argc-compgen"))
@@ -81,7 +83,7 @@ USAGE:{usage}"#)
                 .long("argc-help")
                 .action(ArgAction::Help)
         )
-        .try_get_matches_from(&args)?;
+        .try_get_matches_from(&argc_args)?;
 
     if matches.is_present("argc-eval") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
@@ -96,8 +98,17 @@ USAGE:{usage}"#)
                 println!("exit 1");
             }
         }
+    } else if matches.is_present("argc-create") {
+        if let Some((_, script_file)) = get_script_path(false) {
+            bail!("Already exist {}", script_file.display());
+        }
+        let content = generate_boilerplate(&script_args);
+        let names = candidate_script_names();
+        fs::write(&names[0], content)
+            .map_err(|err| anyhow!("Failed to create argcfile.sh, {err}"))?;
     } else if matches.is_present("argc-argcfile") {
-        let (_, script_file) = get_script_path().ok_or_else(|| anyhow!("Not found script file"))?;
+        let (_, script_file) =
+            get_script_path(true).ok_or_else(|| anyhow!("Not found script file"))?;
         print!("{}", script_file.display());
     } else if matches.is_present("argc-compgen") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
@@ -107,7 +118,7 @@ USAGE:{usage}"#)
     } else {
         let shell = get_shell_path().ok_or_else(|| anyhow!("Not found shell"))?;
         let (script_dir, script_file) =
-            get_script_path().ok_or_else(|| anyhow!("Not found script file"))?;
+            get_script_path(true).ok_or_else(|| anyhow!("Not found script file"))?;
         let mut command = process::Command::new(&shell);
         command.arg(&script_file);
         command.args(&script_args);
@@ -137,7 +148,33 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     Ok((source, cmd_args))
 }
 
-fn get_script_path() -> Option<(PathBuf, PathBuf)> {
+fn generate_boilerplate(args: &[String]) -> String {
+    let tasks = args
+        .iter()
+        .map(|cmd| {
+            format!(
+                r#"
+# @cmd
+{cmd}() {{
+    echo Run {cmd}
+}}
+"#
+            )
+        })
+        .collect::<Vec<String>>()
+        .join("");
+
+    format!(
+        r#"#!/usr/bin/env bash
+
+set -e
+{tasks}
+eval $(argc --argc-eval "$0" "$@")
+"#
+    )
+}
+
+fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
     let candidates = candidate_script_names();
     let mut dir = env::current_dir().ok()?;
     loop {
@@ -146,6 +183,9 @@ fn get_script_path() -> Option<(PathBuf, PathBuf)> {
             if path.exists() {
                 return Some((dir, path));
             }
+        }
+        if !recursive {
+            return None;
         }
         dir = dir.parent()?.to_path_buf();
     }
@@ -159,10 +199,10 @@ fn candidate_script_names() -> Vec<String> {
             names.push(format!("{}.sh", name));
         }
     }
-    names.push("argcfile".into());
-    names.push("Argcfile".into());
     names.push("argcfile.sh".into());
     names.push("Argcfile.sh".into());
+    names.push("argcfile".into());
+    names.push("Argcfile".into());
     names
 }
 

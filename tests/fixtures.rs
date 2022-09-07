@@ -55,14 +55,20 @@ pub fn tmpdir() -> TempDir {
     tmpdir
 }
 
+#[fixture]
+#[allow(dead_code)]
+pub fn tmpdir2() -> TempDir {
+    assert_fs::TempDir::new().expect("Couldn't create a temp dir for tests")
+}
+
 pub fn get_path_env_var() -> String {
     let argc_path = cargo_bin("argc");
     let argc_dir = argc_path.parent().unwrap();
     let path_env_var = std::env::var("PATH").unwrap();
     if cfg!(windows) {
-        format!("{};{}", path_env_var, argc_dir.display())
+        format!("{};{}", argc_dir.display(), path_env_var)
     } else {
-        format!("{}:{}", path_env_var, argc_dir.display())
+        format!("{}:{}", argc_dir.display(), path_env_var)
     }
 }
 
