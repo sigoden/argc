@@ -7,6 +7,7 @@ mod macros;
 mod argcfile;
 mod cli;
 mod compgen;
+mod create;
 mod escape_test;
 mod fail_test;
 mod help_tag_test;
