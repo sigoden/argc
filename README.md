@@ -410,11 +410,15 @@ ARGC_SCRIPT=taskfile
 ## Argc CLI Usage
 
 ```
-argc --argc-eval SCRIPT [ARGS ...]             Print code snippets for `eval $(argc --argc-eval "$0" "$@")`
-argc --argc-compgen SCRIPT [ARGS ...]          Print commands and options as completion candidates 
-argc --argc-argcfile                           Print argcfile path
-argc --argc-help                               Print help information
-argc --argc-version                            Print version information
+A bash cli framework, also a task management & automation tool - https://github.com/sigoden/argc
+
+USAGE:
+    argc --argc-eval SCRIPT [ARGS ...]             Parse arguments `eval $(argc --argc-eval "$0" "$@")`
+    argc --argc-create [TASKS ...]                 Create a boilerplate argcfile
+    argc --argc-compgen SCRIPT [ARGS ...]          Print commands and options as completion candidates 
+    argc --argc-argcfile                           Print argcfile path
+    argc --argc-help                               Print help information
+    argc --argc-version                            Print version information
 ```
 
 ## Shell Completion Scripts
