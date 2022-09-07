@@ -245,7 +245,7 @@ impl<'a> Cmd<'a> {
     }
 
     fn build(&'a self, name: &'a str) -> Result<Command<'a>> {
-        let mut cmd = Command::new(name);
+        let mut cmd = Command::new(name).infer_long_args(true);
         if let Some(describe) = self.describe {
             cmd = cmd.about(describe);
         }
@@ -256,8 +256,11 @@ impl<'a> Cmd<'a> {
             if let Some(author) = root_data.author {
                 cmd = cmd.author(author);
             }
-            if !self.subcommands.is_empty() && !root_data.main {
-                cmd = cmd.subcommand_required(true).arg_required_else_help(true);
+            if !self.subcommands.is_empty() {
+                cmd = cmd.infer_subcommands(true);
+                if !root_data.main {
+                    cmd = cmd.subcommand_required(true).arg_required_else_help(true);
+                }
             }
             if let Some(help) = root_data.help {
                 cmd = cmd.subcommand(Command::new("help").about(help))
