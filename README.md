@@ -10,6 +10,7 @@ A bash cli framework, also a task management & automation tool.
     - [With cargo](#with-cargo)
     - [Binaries on macOS, Linux, Windows](#binaries-on-macos-linux-windows)
     - [GitHub Actions](#github-actions)
+  - [Argc CLI Usage](#argc-cli-usage)
   - [Bash cli framework](#bash-cli-framework)
     - [@cmd](#cmd)
     - [@alias](#alias)
@@ -29,7 +30,6 @@ A bash cli framework, also a task management & automation tool.
     - [Informative tasks listings and beautiful help printings](#informative-tasks-listings-and-beautiful-help-printings)
     - [Customize shell](#customize-shell)
     - [Customize script name](#customize-script-name)
-  - [Argc CLI Usage](#argc-cli-usage)
   - [Shell Completion Scripts](#shell-completion-scripts)
   - [License](#license)
 
@@ -54,6 +54,44 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
   with:
     owner: sigoden
     name: argc
+```
+
+## Argc CLI Usage
+
+```
+A bash cli framework, also a task management & automation tool - https://github.com/sigoden/argc
+
+USAGE:
+    argc --argc-help                               Print help information
+    argc --argc-eval SCRIPT [ARGS ...]             Parse arguments `eval $(argc --argc-eval "$0" "$@")`
+    argc --argc-create [TASKS ...]                 Create a boilerplate argcfile
+    argc --argc-compgen SCRIPT [ARGS ...]          Print commands and options as completion candidates 
+    argc --argc-argcfile                           Print argcfile path
+    argc --argc-version                            Print version information
+```
+
+All argc options are prefixed with `--argc` in order to distinguish with script options.
+
+`argc --help` display script help information, `argc --argc-help` display argc cli help information.
+
+`argc --argc-create foo bar` will generate boilerplate `argcfile.sh` as show bellow.
+
+```
+#!/usr/bin/env bash
+
+set -e
+
+# @cmd
+foo() {
+    echo Run foo
+}
+
+# @cmd
+bar() {
+    echo Run bar
+}
+
+eval $(argc --argc-eval "$0" "$@")
 ```
 
 ## Bash cli framework
@@ -405,20 +443,6 @@ You can use environment variable `ARGC_SCRIPT` to custom script name.
 
 ```
 ARGC_SCRIPT=taskfile
-```
-
-## Argc CLI Usage
-
-```
-A bash cli framework, also a task management & automation tool - https://github.com/sigoden/argc
-
-USAGE:
-    argc --argc-eval SCRIPT [ARGS ...]             Parse arguments `eval $(argc --argc-eval "$0" "$@")`
-    argc --argc-create [TASKS ...]                 Create a boilerplate argcfile
-    argc --argc-compgen SCRIPT [ARGS ...]          Print commands and options as completion candidates 
-    argc --argc-argcfile                           Print argcfile path
-    argc --argc-help                               Print help information
-    argc --argc-version                            Print version information
 ```
 
 ## Shell Completion Scripts

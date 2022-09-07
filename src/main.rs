@@ -44,11 +44,11 @@ fn run() -> Result<i32> {
         .global_setting(clap::AppSettings::DeriveDisplayOrder)
         .override_usage(
             r#"
+    argc --argc-help                               Print help information
     argc --argc-eval SCRIPT [ARGS ...]             Parse arguments `eval $(argc --argc-eval "$0" "$@")`
     argc --argc-create [TASKS ...]                 Create a boilerplate argcfile
     argc --argc-compgen SCRIPT [ARGS ...]          Print commands and options as completion candidates 
     argc --argc-argcfile                           Print argcfile path
-    argc --argc-help                               Print help information
     argc --argc-version                            Print version information"#,
         )
         .help_template(r#"{bin} {version}
