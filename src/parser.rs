@@ -14,37 +14,37 @@ use nom::{
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Event<'a> {
-    pub data: EventData<'a>,
+pub struct Event {
+    pub data: EventData,
     pub position: Position,
 }
 
 pub type Position = usize;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum EventData<'a> {
+pub enum EventData {
     /// Description
-    Describe(&'a str),
+    Describe(String),
     /// Version info
-    Version(&'a str),
+    Version(String),
     /// Author info
-    Author(&'a str),
+    Author(String),
     /// Help subcommand
-    Help(&'a str),
+    Help(String),
     /// Define a subcommand, e.g. `@cmd A sub command`
-    Cmd(&'a str),
+    Cmd(String),
     /// Define alias for a subcommand, e.g. `@alias t,tst`
-    Aliases(Vec<&'a str>),
+    Aliases(Vec<String>),
     /// Define a option parameter
-    Option(OptionParam<'a>),
+    Option(OptionParam),
     /// Define a positional parameter
-    Positional(PositionalParam<'a>),
+    Positional(PositionalParam),
     /// Define a flag
-    Flag(FlagParam<'a>),
+    Flag(FlagParam),
     /// A shell function. e.g `function cmd()` or `cmd()`
-    Func(&'a str),
+    Func(String),
     /// Placeholder for unknown or invalid tag
-    Unknown(&'a str),
+    Unknown(String),
 }
 
 /// Tokenize shell script
@@ -76,7 +76,7 @@ fn parse_line(line: &str) -> nom::IResult<&str, Option<Option<EventData>>> {
 
 fn parse_fn(input: &str) -> nom::IResult<&str, Option<EventData>> {
     map(alt((parse_fn_keyword, parse_fn_no_keyword)), |v| {
-        Some(EventData::Func(v))
+        Some(EventData::Func(v.to_string()))
     })(input)
 }
 
@@ -118,6 +118,7 @@ fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
             parse_tail,
         ),
         |(tag, text)| {
+            let text = text.to_string();
             Some(match tag {
                 "describe" => EventData::Describe(text),
                 "version" => EventData::Version(text),
@@ -154,7 +155,7 @@ fn parse_tag_alias(input: &str) -> nom::IResult<&str, Option<EventData>> {
         pair(tag("alias"), preceded(space1, parse_name_list)),
         |(tag, list)| {
             Some(match tag {
-                "alias" => EventData::Aliases(list),
+                "alias" => EventData::Aliases(list.iter().map(|v| v.to_string()).collect()),
                 _ => unreachable!(),
             })
         },
@@ -162,7 +163,7 @@ fn parse_tag_alias(input: &str) -> nom::IResult<&str, Option<EventData>> {
 }
 
 fn parse_tag_unknown(input: &str) -> nom::IResult<&str, Option<EventData>> {
-    map(parse_name, |v| Some(EventData::Unknown(v)))(input)
+    map(parse_name, |v| Some(EventData::Unknown(v.to_string())))(input)
 }
 
 // Parse `@option`
@@ -241,7 +242,7 @@ fn parse_param_assign(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         separated_pair(parse_param_name, char('='), parse_default_value),
         |(mut arg, value)| {
-            arg.default = Some(value);
+            arg.default = Some(value.to_string());
             arg
         },
     )(input)
@@ -255,8 +256,8 @@ fn parse_param_choices(input: &str) -> nom::IResult<&str, ParamData> {
             delimited(char('['), parse_choices, char(']')),
         ),
         |(mut arg, (choices, default))| {
-            arg.choices = Some(choices);
-            arg.default = default;
+            arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
+            arg.default = default.map(|v| v.to_string());
             arg
         },
     )(input)
@@ -270,8 +271,8 @@ fn parse_param_choices_default(input: &str) -> nom::IResult<&str, ParamData> {
             delimited(char('['), parse_choices_default, char(']')),
         ),
         |(mut arg, (choices, default))| {
-            arg.choices = Some(choices);
-            arg.default = default;
+            arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
+            arg.default = default.map(|v| v.to_string());
             arg
         },
     )(input)
@@ -285,9 +286,9 @@ fn parse_param_choices_required(input: &str) -> nom::IResult<&str, ParamData> {
             delimited(char('['), parse_choices, char(']')),
         ),
         |(mut arg, (choices, default))| {
-            arg.choices = Some(choices);
+            arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
             arg.required = true;
-            arg.default = default;
+            arg.default = default.map(|v| v.to_string());
             arg
         },
     )(input)
@@ -433,10 +434,18 @@ mod tests {
                 }
             );
         };
+        ($comment:literal, Aliases, $text:expr) => {
+            assert_eq!(
+                parse_line($comment).unwrap().1,
+                Some(Some(EventData::Aliases(
+                    $text.iter().map(|v| v.to_string()).collect()
+                )))
+            )
+        };
         ($comment:literal, $kind:ident, $text:expr) => {
             assert_eq!(
                 parse_line($comment).unwrap().1,
-                Some(Some(EventData::$kind($text)))
+                Some(Some(EventData::$kind($text.to_string())))
             )
         };
     }

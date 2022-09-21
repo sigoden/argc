@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 170
+assertion_line: 145
 expression: output
 ---
 RUN
@@ -10,16 +10,15 @@ STDOUT
 
 
 STDERR
-spec-cmd_positional_with_choices_and_required 
+spec-cmd_positional_with_choices_and_required
 Positional with choices and required
 
-USAGE:
-    spec cmd_positional_with_choices_and_required <ARG>
+USAGE: spec cmd_positional_with_choices_and_required <ARG>
 
 ARGS:
-    <ARG>    A arg with choices and required [possible values: a, b]
+  <ARG>  A arg with choices and required [possible values: a, b]
 
 OPTIONS:
-    -h, --help    Print help information
+  -h, --help  Print help information
 
 

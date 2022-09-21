@@ -1,4 +1,4 @@
-use crate::param::{Param, ParamNames, PositionalParam};
+use crate::param::{Param, ParamNames, PositionalParam, EXTRA_ARGS};
 use crate::parser::{parse, Event, EventData, Position};
 use crate::utils::hyphens_to_underscores;
 use crate::Result;
@@ -22,8 +22,7 @@ impl<'a> Cli<'a> {
 
     pub fn run(&self, args: &[&'a str]) -> Result<std::result::Result<String, String>> {
         let events = parse(self.source)?;
-        let default_shell_positional = PositionalParam::default_shell_positional();
-        let cmd = Cmd::create(&events, &default_shell_positional)?;
+        let cmd = Cmd::create(events)?;
         let name = args[0];
         let command = cmd.build(name)?;
         let res = command.try_get_matches_from(args);
@@ -110,33 +109,30 @@ impl<'a> Cli<'a> {
 }
 
 #[derive(Default)]
-struct Cmd<'a> {
-    name: Option<&'a str>,
-    describe: Option<&'a str>,
+struct Cmd {
+    name: Option<String>,
+    describe: Option<String>,
     positional_index: usize,
-    params: Vec<(&'a dyn Param<'a>, usize)>,
-    subcommands: Vec<Cmd<'a>>,
+    params: Vec<(Box<dyn Param>, usize)>,
+    subcommands: Vec<Cmd>,
     // for conflict detecting
-    names: ParamNames<'a>,
+    names: ParamNames,
     // root only props
-    root: Option<RootData<'a>>,
-    aliases: Vec<&'a str>,
+    root: Option<RootData>,
+    aliases: Vec<String>,
 }
 
 #[derive(Default)]
-struct RootData<'a> {
-    author: Option<&'a str>,
-    version: Option<&'a str>,
-    names: HashMap<&'a str, Position>,
-    help: Option<&'a str>,
+struct RootData {
+    author: Option<String>,
+    version: Option<String>,
+    names: HashMap<String, Position>,
+    help: Option<String>,
     main: bool,
 }
 
-impl<'a> Cmd<'a> {
-    fn create(
-        events: &'a [Event<'a>],
-        default_positional_param: &'a PositionalParam<'a>,
-    ) -> Result<Self> {
+impl Cmd {
+    fn create(events: Vec<Event>) -> Result<Self> {
         let mut root_cmd = Cmd::default();
         let mut root_data = RootData::default();
         let mut is_root_scope = true;
@@ -145,45 +141,45 @@ impl<'a> Cmd<'a> {
             match data {
                 EventData::Describe(value) => {
                     if is_root_scope {
-                        root_cmd.describe = Some(*value);
+                        root_cmd.describe = Some(value);
                     }
                 }
                 EventData::Version(value) => {
                     if is_root_scope {
-                        root_data.version = Some(*value);
+                        root_data.version = Some(value);
                     }
                 }
                 EventData::Author(value) => {
                     if is_root_scope {
-                        root_data.author = Some(*value);
+                        root_data.author = Some(value);
                     }
                 }
                 EventData::Help(value) => {
                     if is_root_scope {
-                        root_data.help = Some(*value);
+                        root_data.help = Some(value);
                     }
                 }
                 EventData::Cmd(value) => {
                     is_root_scope = false;
                     let mut cmd = Cmd::default();
                     if !value.is_empty() {
-                        cmd.describe = Some(*value);
+                        cmd.describe = Some(value);
                     }
                     maybe_subcommand = Some(cmd);
                 }
                 EventData::Aliases(values) => {
                     if let Some(cmd) = &mut maybe_subcommand {
+                        cmd.aliases = values.to_vec();
                         for name in values {
-                            if let Some(pos) = root_data.names.get(name) {
+                            if let Some(pos) = root_data.names.get(&name) {
                                 bail!(
                                     "@alias(line {}) is conflicted with cmd or alias at line {}",
                                     position,
                                     pos
                                 );
                             }
-                            root_data.names.insert(name, *position);
+                            root_data.names.insert(name.clone(), position);
                         }
-                        cmd.aliases = values.to_vec();
                     } else {
                         bail!("@alias(line {}) is unexpected", position)
                     }
@@ -194,8 +190,8 @@ impl<'a> Cmd<'a> {
                     } else {
                         None
                     });
-                    let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), *position))?;
-                    cmd.add_param(param, *position)?;
+                    let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), position))?;
+                    cmd.add_param(param, position)?;
                 }
                 EventData::Positional(param) => {
                     let cmd = maybe_subcommand.as_mut().or(if is_root_scope {
@@ -203,8 +199,8 @@ impl<'a> Cmd<'a> {
                     } else {
                         None
                     });
-                    let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), *position))?;
-                    cmd.add_param(param, *position)?;
+                    let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), position))?;
+                    cmd.add_param(param, position)?;
                 }
                 EventData::Flag(param) => {
                     let cmd = maybe_subcommand.as_mut().or(if is_root_scope {
@@ -212,13 +208,13 @@ impl<'a> Cmd<'a> {
                     } else {
                         None
                     });
-                    let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), *position))?;
-                    cmd.add_param(param, *position)?;
+                    let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), position))?;
+                    cmd.add_param(param, position)?;
                 }
                 EventData::Func(name) => {
                     is_root_scope = false;
                     if let Some(mut cmd) = maybe_subcommand.take() {
-                        if let Some(pos) = root_data.names.get(name) {
+                        if let Some(pos) = root_data.names.get(&name) {
                             bail!(
                                 "{}(line {}) is conflicted with cmd or alias at line {}",
                                 name,
@@ -226,11 +222,11 @@ impl<'a> Cmd<'a> {
                                 pos
                             )
                         }
-                        root_data.names.insert(name, *position);
-                        cmd.name = Some(name);
-                        cmd.maybe_add_default_positional(default_positional_param)?;
+                        root_data.names.insert(name.clone(), position);
+                        cmd.name = Some(name.to_string());
+                        cmd.maybe_extra_positional_args()?;
                         root_cmd.subcommands.push(cmd);
-                    } else if *name == ENTRYPOINT {
+                    } else if name == ENTRYPOINT {
                         root_data.main = true;
                     }
                 }
@@ -239,21 +235,21 @@ impl<'a> Cmd<'a> {
                 }
             }
         }
-        root_cmd.maybe_add_default_positional(default_positional_param)?;
+        root_cmd.maybe_extra_positional_args()?;
         root_cmd.root = Some(root_data);
         Ok(root_cmd)
     }
 
-    fn build(&'a self, name: &'a str) -> Result<Command<'a>> {
-        let mut cmd = Command::new(name).infer_long_args(true);
-        if let Some(describe) = self.describe {
+    fn build(&self, name: &str) -> Result<Command> {
+        let mut cmd = Command::new(name.to_string()).infer_long_args(true);
+        if let Some(describe) = self.describe.as_ref() {
             cmd = cmd.about(describe);
         }
         if let Some(root_data) = &self.root {
-            if let Some(version) = root_data.version {
+            if let Some(version) = root_data.version.as_ref() {
                 cmd = cmd.version(version);
             }
-            if let Some(author) = root_data.author {
+            if let Some(author) = root_data.author.as_ref() {
                 cmd = cmd.author(author);
             }
             if !self.subcommands.is_empty() {
@@ -262,8 +258,10 @@ impl<'a> Cmd<'a> {
                     cmd = cmd.subcommand_required(true).arg_required_else_help(true);
                 }
             }
-            if let Some(help) = root_data.help {
-                cmd = cmd.subcommand(Command::new("help").about(help))
+            if let Some(help) = root_data.help.as_ref() {
+                cmd = cmd
+                    .disable_help_subcommand(true)
+                    .subcommand(Command::new("help").about(help))
             } else {
                 cmd = cmd.disable_help_subcommand(true);
             }
@@ -278,10 +276,11 @@ impl<'a> Cmd<'a> {
             let subcommand = subcommand.build(subcommand.name.as_ref().unwrap())?;
             cmd = cmd.subcommand(subcommand);
         }
+        cmd = cmd.help_template(self.help_template());
         Ok(cmd)
     }
 
-    fn retrieve(&'a self, matches: &ArgMatches, cli: &Cli) -> Vec<RetrieveValue> {
+    fn retrieve(&self, matches: &ArgMatches, cli: &Cli) -> Vec<RetrieveValue> {
         let mut values = vec![];
         for (param, _) in &self.params {
             if let Some(value) = param.retrieve_value(matches) {
@@ -306,39 +305,77 @@ impl<'a> Cmd<'a> {
                 .and_then(|v| if v.main { Some("main") } else { None })
         });
         if let Some(fn_name) = call_fn {
-            values.push(RetrieveValue::FnName(fn_name));
+            values.push(RetrieveValue::FnName(fn_name.to_string()));
         }
         values
     }
 
-    fn add_param<T: 'a + Param<'a>>(&mut self, param: &'a T, pos: Position) -> Result<()> {
+    fn add_param<T: Param + 'static>(&mut self, param: T, pos: Position) -> Result<()> {
         param.detect_conflict(&mut self.names, pos)?;
         let index = self.positional_index;
         if param.is_positional() {
             self.positional_index += 1;
         }
-        self.params.push((param, index));
+        self.params.push((Box::new(param), index));
         Ok(())
     }
 
-    fn maybe_add_default_positional(
-        &mut self,
-        default_positional_param: &'a PositionalParam<'a>,
-    ) -> Result<()> {
+    fn maybe_extra_positional_args(&mut self) -> Result<()> {
         if self.positional_index == 0 {
-            self.add_param(default_positional_param, 0)?;
+            self.add_param(PositionalParam::extra(), 0)?;
         }
         Ok(())
+    }
+
+    fn help_template(&self) -> String {
+        let mut lines = vec![];
+        if let Some(root) = self.root.as_ref() {
+            if root.version.is_some() {
+                lines.push("{bin} {version}");
+            }
+            if root.author.is_some() {
+                lines.push("{author}");
+            }
+        } else {
+            lines.push("{bin}");
+        }
+        if self.describe.is_some() {
+            lines.push("{about}");
+            lines.push("");
+        }
+        lines.push("USAGE: {usage}");
+        lines.push("");
+        let has_subcommands = !self.subcommands.is_empty();
+        let has_arguments = self
+            .params
+            .iter()
+            .any(|(p, _)| p.is_positional() && p.name() != EXTRA_ARGS);
+        if has_arguments {
+            lines.push("ARGS:");
+            lines.push("{positionals}");
+            lines.push("");
+        }
+
+        lines.push("OPTIONS:");
+        lines.push("{options}");
+        lines.push("");
+
+        if has_subcommands {
+            lines.push("COMMANDS:");
+            lines.push("{subcommands}");
+            lines.push("");
+        }
+        lines.join("\n")
     }
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum RetrieveValue<'a> {
-    Single(&'a str, String),
-    Multiple(&'a str, Vec<String>),
-    PositionalSingle(&'a str, String),
-    PositionalMultiple(&'a str, Vec<String>),
-    FnName(&'a str),
+pub enum RetrieveValue {
+    Single(String, String),
+    Multiple(String, Vec<String>),
+    PositionalSingle(String, String),
+    PositionalMultiple(String, Vec<String>),
+    FnName(String),
 }
 
 fn to_string_retrieve_values(values: Vec<RetrieveValue>) -> String {
@@ -350,7 +387,7 @@ fn to_string_retrieve_values(values: Vec<RetrieveValue>) -> String {
                 variables.push(format!(
                     "{}_{}={}",
                     VARIABLE_PREFIX,
-                    hyphens_to_underscores(name),
+                    hyphens_to_underscores(&name),
                     value
                 ));
             }
@@ -366,7 +403,7 @@ fn to_string_retrieve_values(values: Vec<RetrieveValue>) -> String {
                 variables.push(format!(
                     "{}_{}={}",
                     VARIABLE_PREFIX,
-                    hyphens_to_underscores(name),
+                    hyphens_to_underscores(&name),
                     &value
                 ));
                 positional_args.push(value);
@@ -375,7 +412,7 @@ fn to_string_retrieve_values(values: Vec<RetrieveValue>) -> String {
                 variables.push(format!(
                     "{}_{}=( {} )",
                     VARIABLE_PREFIX,
-                    hyphens_to_underscores(name),
+                    hyphens_to_underscores(&name),
                     values.join(" ")
                 ));
                 positional_args.extend(values);

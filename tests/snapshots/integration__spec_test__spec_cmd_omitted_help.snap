@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 13
+assertion_line: 15
 expression: output
 ---
 RUN
@@ -10,18 +10,17 @@ STDOUT
 
 
 STDERR
-spec-cmd_omitted 
+spec-cmd_omitted
 Omitted
 
-USAGE:
-    spec cmd_omitted [OPTIONS] [ARG1]
+USAGE: spec cmd_omitted [OPTIONS] [ARG1]
 
 ARGS:
-    <ARG1>    
+  [ARG1]  
 
 OPTIONS:
-        --flag1          
-    -h, --help           Print help information
-        --opt1 <OPT1>    
+      --flag1        
+      --opt1 <OPT1>  
+  -h, --help         Print help information
 
 

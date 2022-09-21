@@ -10,16 +10,13 @@ STDOUT
 
 
 STDERR
-prog 
-
-USAGE:
-    prog [OPTIONS] <SUBCOMMAND>
+USAGE: prog [OPTIONS] <COMMAND>
 
 OPTIONS:
-        --foo     
-    -h, --help    Print help information
+      --foo   
+  -h, --help  Print help information
 
-SUBCOMMANDS:
-    cmd    
+COMMANDS:
+  cmd
 
 

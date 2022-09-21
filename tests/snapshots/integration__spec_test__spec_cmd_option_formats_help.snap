@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 23
+assertion_line: 25
 expression: output
 ---
 RUN
@@ -10,20 +10,19 @@ STDOUT
 
 
 STDERR
-spec-cmd_option_formats 
+spec-cmd_option_formats
 Options all kind of formats
 
-USAGE:
-    spec cmd_option_formats [OPTIONS]
+USAGE: spec cmd_option_formats [OPTIONS]
 
 OPTIONS:
-    -a, --opt2 <OPT2>    
-    -b, --opt5 <OPT5>    With description
-    -c, --opt6 <OPT>     
-    -h, --help           Print help information
-        --opt1 <OPT1>    
-        --opt3 <OPT>     
-        --opt4 <OPT4>    With description
-        --opt7 <OPT>     With description
+      --opt1 <OPT1>  
+  -a, --opt2 <OPT2>  
+      --opt3 <OPT>   
+      --opt4 <OPT4>  With description
+  -b, --opt5 <OPT5>  With description
+  -c, --opt6 <OPT>   
+      --opt7 <OPT>   With description
+  -h, --help         Print help information
 
 

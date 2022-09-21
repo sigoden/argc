@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 178
+assertion_line: 153
 expression: output
 ---
 RUN
@@ -11,11 +11,10 @@ STDOUT
 
 STDERR
 error: The following required arguments were not provided:
-    <ARG>
+  <ARG>
 
-USAGE:
-    spec cmd_positional_with_choices_and_required <ARG>
+Usage: spec cmd_positional_with_choices_and_required <ARG>
 
-For more information try --help
+For more information try '--help'
 
 

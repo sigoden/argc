@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 39
+assertion_line: 35
 expression: output
 ---
 RUN
@@ -10,17 +10,16 @@ STDOUT
 
 
 STDERR
-spec-cmd_flag_formats 
+spec-cmd_flag_formats
 All kind of flags
 
-USAGE:
-    spec cmd_flag_formats [OPTIONS]
+USAGE: spec cmd_flag_formats [OPTIONS]
 
 OPTIONS:
-    -a, --foo2    
-    -b, --foo4    With description
-        --foo1    
-        --foo3    With description
-    -h, --help    Print help information
+      --foo1  
+  -a, --foo2  
+      --foo3  With description
+  -b, --foo4  With description
+  -h, --help  Print help information
 
 

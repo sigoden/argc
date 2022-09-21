@@ -1,19 +1,18 @@
 ---
-source: tests/main_fn_test.rs
-assertion_line: 36
+source: tests/help_tag_test.rs
+assertion_line: 7
 expression: output
 ---
 RUN
-prog -h
+prog
 
 STDOUT
 
 
 STDERR
-USAGE: prog [OPTIONS] [COMMAND]
+USAGE: prog <COMMAND>
 
 OPTIONS:
-      --foo   
   -h, --help  Print help information
 
 COMMANDS:
