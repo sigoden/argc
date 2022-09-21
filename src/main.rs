@@ -41,7 +41,6 @@ fn run() -> Result<i32> {
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
-        .global_setting(clap::AppSettings::DeriveDisplayOrder)
         .override_usage(
             r#"
     argc --argc-help                               Print help information
@@ -64,14 +63,14 @@ USAGE:{usage}"#)
             " - ",
             env!("CARGO_PKG_REPOSITORY")
         ))
-        .arg(Arg::new("argc-eval").long("argc-eval"))
-        .arg(Arg::new("argc-create").long("argc-create"))
+        .arg(Arg::new("argc-eval").long("argc-eval").action(ArgAction::SetTrue))
+        .arg(Arg::new("argc-create").long("argc-create").action(ArgAction::SetTrue))
         .arg(
             Arg::new("argc-compgen")
-                .long("argc-compgen"))
+                .long("argc-compgen").action(ArgAction::SetTrue))
         .arg(
             Arg::new("argc-argcfile")
-                .long("argc-argcfile")
+                .long("argc-argcfile").action(ArgAction::SetTrue)
         )
         .arg(
             Arg::new("argc-version")
@@ -85,7 +84,7 @@ USAGE:{usage}"#)
         )
         .try_get_matches_from(&argc_args)?;
 
-    if matches.is_present("argc-eval") {
+    if matches.get_flag("argc-eval") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cli = argc::Cli::new(&source);
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
@@ -98,7 +97,7 @@ USAGE:{usage}"#)
                 println!("exit 1");
             }
         }
-    } else if matches.is_present("argc-create") {
+    } else if matches.get_flag("argc-create") {
         if let Some((_, script_file)) = get_script_path(false) {
             bail!("Already exist {}", script_file.display());
         }
@@ -106,11 +105,11 @@ USAGE:{usage}"#)
         let names = candidate_script_names();
         fs::write(&names[0], content)
             .map_err(|err| anyhow!("Failed to create argcfile.sh, {err}"))?;
-    } else if matches.is_present("argc-argcfile") {
+    } else if matches.get_flag("argc-argcfile") {
         let (_, script_file) =
             get_script_path(true).ok_or_else(|| anyhow!("Not found script file"))?;
         print!("{}", script_file.display());
-    } else if matches.is_present("argc-compgen") {
+    } else if matches.get_flag("argc-compgen") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cli = argc::Cli::new(&source);
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();

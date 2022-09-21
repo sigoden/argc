@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 44
+assertion_line: 40
 expression: output
 ---
 RUN
@@ -10,16 +10,15 @@ STDOUT
 
 
 STDERR
-spec-cmd_positional_only 
+spec-cmd_positional_only
 Positional one required
 
-USAGE:
-    spec cmd_positional_only <ARG1>
+USAGE: spec cmd_positional_only <ARG1>
 
 ARGS:
-    <ARG1>    A required arg
+  <ARG1>  A required arg
 
 OPTIONS:
-    -h, --help    Print help information
+  -h, --help  Print help information
 
 

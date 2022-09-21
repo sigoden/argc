@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 52
+assertion_line: 45
 expression: output
 ---
 RUN
@@ -10,17 +10,16 @@ STDOUT
 
 
 STDERR
-spec-cmd_positional_requires 
+spec-cmd_positional_requires
 Positional all required
 
-USAGE:
-    spec cmd_positional_requires <ARG1> <ARG2>...
+USAGE: spec cmd_positional_requires <ARG1> <ARG2>...
 
 ARGS:
-    <ARG1>       A required arg
-    <ARG2>...    A required arg, multiple
+  <ARG1>     A required arg
+  <ARG2>...  A required arg, multiple
 
 OPTIONS:
-    -h, --help    Print help information
+  -h, --help  Print help information
 
 

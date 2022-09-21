@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 146
+assertion_line: 124
 expression: output
 ---
 RUN
@@ -10,9 +10,9 @@ STDOUT
 
 
 STDERR
-error: "x" isn't a valid value for '<ARG>'
-	[possible values: a, b]
+error: "x" isn't a valid value for '[ARG]'
+  [possible values: a, b]
 
-For more information try --help
+For more information try '--help'
 
 

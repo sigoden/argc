@@ -5,36 +5,38 @@ use crate::utils::{
 };
 
 use anyhow::{bail, Result};
+use clap::builder::PossibleValuesParser;
 use clap::{Arg, ArgAction, ArgMatches};
 use std::collections::HashMap;
 use std::fmt::Write;
 
-pub const DEFAULT_SHELL_POSITIONAL_ARGS: &str = "_args";
+pub const EXTRA_ARGS: &str = "_args";
 
-pub type ParamNames<'a> = (HashMap<&'a str, Position>, HashMap<char, Position>);
+pub type ParamNames = (HashMap<String, Position>, HashMap<char, Position>);
 
-pub trait Param<'a> {
-    fn tag_name(&'a self) -> &'static str;
-    fn render(&'a self) -> String;
-    fn build_arg(&'a self, index: usize) -> Result<Arg<'a>>;
-    fn retrieve_value(&'a self, matches: &ArgMatches) -> Option<RetrieveValue<'a>>;
-    fn detect_conflict(&'a self, names: &mut ParamNames<'a>, pos: Position) -> Result<()>;
-    fn is_positional(&'a self) -> bool;
+pub trait Param {
+    fn name(&self) -> &str;
+    fn tag_name(&self) -> &str;
+    fn render(&self) -> String;
+    fn build_arg(&self, index: usize) -> Result<Arg>;
+    fn retrieve_value(&self, matches: &ArgMatches) -> Option<RetrieveValue>;
+    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()>;
+    fn is_positional(&self) -> bool;
 }
 
 #[derive(Debug, Clone)]
-pub struct ParamData<'a> {
-    pub name: &'a str,
-    pub choices: Option<Vec<&'a str>>,
+pub struct ParamData {
+    pub name: String,
+    pub choices: Option<Vec<String>>,
     pub multiple: bool,
     pub required: bool,
-    pub default: Option<&'a str>,
+    pub default: Option<String>,
 }
 
-impl<'a> ParamData<'a> {
-    pub fn new(name: &'a str) -> Self {
+impl ParamData {
+    pub fn new(name: &str) -> Self {
         Self {
-            name,
+            name: name.to_string(),
             choices: None,
             multiple: false,
             required: false,
@@ -44,278 +46,292 @@ impl<'a> ParamData<'a> {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct FlagParam<'a> {
-    pub(crate) name: &'a str,
-    pub(crate) summary: &'a str,
+pub struct FlagParam {
+    pub(crate) name: String,
+    pub(crate) summary: String,
     pub(crate) short: Option<char>,
 }
 
-impl<'a> FlagParam<'a> {
-    pub fn new(arg: ParamData<'a>, summary: &'a str, short: Option<char>) -> Self {
+impl FlagParam {
+    pub fn new(arg: ParamData, summary: &str, short: Option<char>) -> Self {
         FlagParam {
             name: arg.name,
             short,
-            summary,
+            summary: summary.to_string(),
         }
     }
 }
 
-impl<'a> Param<'a> for FlagParam<'a> {
-    fn tag_name(&'a self) -> &'static str {
+impl Param for FlagParam {
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn tag_name(&self) -> &str {
         "@flag"
     }
 
-    fn render(&'a self) -> String {
+    fn render(&self) -> String {
         let mut output = vec![];
         render_short(&mut output, &self.short);
         output.push(format!("--{}", self.name));
-        render_summary(&mut output, self.summary);
+        render_summary(&mut output, &self.summary);
         output.join(" ")
     }
 
-    fn build_arg(&'a self, _index: usize) -> Result<Arg<'a>> {
-        let mut arg = new_arg(self.name, self.summary);
-        arg = arg.long(self.name);
+    fn build_arg(&self, _index: usize) -> Result<Arg> {
+        let mut arg = new_arg(&self.name, &self.summary);
+        arg = arg.long(self.name.to_string()).action(ArgAction::SetTrue);
         if let Some(s) = self.short {
             arg = arg.short(s);
         }
         Ok(arg)
     }
 
-    fn retrieve_value(&'a self, matches: &ArgMatches) -> Option<RetrieveValue<'a>> {
-        if !matches.is_present(self.name) {
-            return None;
+    fn retrieve_value(&self, matches: &ArgMatches) -> Option<RetrieveValue> {
+        if matches.get_flag(&self.name) {
+            Some(RetrieveValue::Single(self.name.clone(), "1".to_string()))
+        } else {
+            None
         }
-        Some(RetrieveValue::Single(self.name, "1".to_string()))
     }
 
-    fn detect_conflict(&self, names: &mut ParamNames<'a>, pos: Position) -> Result<()> {
+    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()> {
         let tag_name = self.tag_name();
-        detect_name_conflict(self.name, false, tag_name, names, pos)?;
+        detect_name_conflict(&self.name, false, tag_name, names, pos)?;
         detect_short_name_conflict(&self.short, tag_name, names, pos)
     }
 
-    fn is_positional(&'a self) -> bool {
+    fn is_positional(&self) -> bool {
         false
     }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct OptionParam<'a> {
-    pub(crate) name: &'a str,
-    pub(crate) summary: &'a str,
+pub struct OptionParam {
+    pub(crate) name: String,
+    pub(crate) summary: String,
     pub(crate) short: Option<char>,
-    pub(crate) value_name: Option<&'a str>,
-    pub(crate) choices: Option<Vec<&'a str>>,
+    pub(crate) value_name: Option<String>,
+    pub(crate) choices: Option<Vec<String>>,
     pub(crate) multiple: bool,
     pub(crate) required: bool,
-    pub(crate) default: Option<&'a str>,
+    pub(crate) default: Option<String>,
     pub(crate) arg_value_name: String,
 }
 
-impl<'a> OptionParam<'a> {
+impl OptionParam {
     pub fn new(
-        arg: ParamData<'a>,
-        summary: &'a str,
+        arg: ParamData,
+        summary: &str,
         short: Option<char>,
-        value_name: Option<&'a str>,
+        value_name: Option<&str>,
     ) -> Self {
+        let arg_name = arg.name.clone();
         OptionParam {
             name: arg.name,
-            summary,
+            summary: summary.to_string(),
             choices: arg.choices,
             multiple: arg.multiple,
             required: arg.required,
             default: arg.default,
             short,
-            value_name,
+            value_name: value_name.map(|v| v.to_string()),
             arg_value_name: value_name
-                .or(Some(arg.name))
+                .or(Some(&arg_name))
                 .map(to_cobol_case)
                 .unwrap_or_default(),
         }
     }
 }
 
-impl<'a> Param<'a> for OptionParam<'a> {
-    fn tag_name(&'a self) -> &'static str {
+impl Param for OptionParam {
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn tag_name(&self) -> &str {
         "@option"
     }
 
-    fn render(&'a self) -> String {
+    fn render(&self) -> String {
         let mut output = vec![];
         render_short(&mut output, &self.short);
         let name = render_name(
-            self.name,
+            &self.name,
             &self.choices,
             self.multiple,
             self.required,
             &self.default,
         );
         output.push(format!("--{}", name));
-        if let Some(value_name) = self.value_name {
+        if let Some(value_name) = self.value_name.as_ref() {
             output.push(format!("<{}>", value_name));
         }
-        render_summary(&mut output, self.summary);
+        render_summary(&mut output, &self.summary);
         output.join(" ")
     }
 
-    fn build_arg(&'a self, _index: usize) -> Result<Arg<'a>> {
-        let mut arg = new_arg(self.name, self.summary);
+    fn build_arg(&self, _index: usize) -> Result<Arg> {
+        let mut arg = new_arg(&self.name, &self.summary);
         arg = arg
-            .long(self.name)
+            .long(self.name.to_string())
             .required(self.required)
             .value_name(&self.arg_value_name);
         if let Some(s) = self.short {
             arg = arg.short(s);
         }
         if self.multiple {
+            let num = if self.required { 1 } else { 0 };
             arg = arg
-                .multiple_values(true)
-                .use_value_delimiter(true)
+                .value_delimiter(',')
                 .action(ArgAction::Append)
+                .num_args(num..)
         }
         if let Some(choices) = &self.choices {
             if choices.len() > 1 {
-                arg = arg.possible_values(choices);
+                arg = arg.value_parser(PossibleValuesParser::new(choices));
             }
         }
-        if let Some(default) = self.default {
+        if let Some(default) = self.default.as_ref() {
             arg = arg.default_value(default);
         }
         Ok(arg)
     }
 
-    fn retrieve_value(&'a self, matches: &ArgMatches) -> Option<RetrieveValue<'a>> {
-        if !matches.is_present(self.name) {
+    fn retrieve_value(&self, matches: &ArgMatches) -> Option<RetrieveValue> {
+        if !matches.contains_id(&self.name) {
             return None;
         }
         if self.multiple {
             let values = matches
-                .values_of(self.name)
-                .unwrap()
-                .map(escape_shell_words)
-                .collect();
-            Some(RetrieveValue::Multiple(self.name, values))
+                .get_many::<String>(&self.name)
+                .map(|vals| vals.map(|v| escape_shell_words(v)).collect::<Vec<_>>())
+                .unwrap_or_default();
+            Some(RetrieveValue::Multiple(self.name.clone(), values))
         } else {
-            let value = escape_shell_words(matches.value_of(self.name).unwrap());
-            Some(RetrieveValue::Single(self.name, value))
+            let value = escape_shell_words(matches.get_one::<String>(&self.name).unwrap());
+            Some(RetrieveValue::Single(self.name.clone(), value))
         }
     }
 
-    fn detect_conflict(&self, names: &mut ParamNames<'a>, pos: Position) -> Result<()> {
+    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()> {
         let tag_name = self.tag_name();
-        detect_name_conflict(self.name, false, tag_name, names, pos)?;
+        detect_name_conflict(&self.name, false, tag_name, names, pos)?;
         detect_short_name_conflict(&self.short, tag_name, names, pos)
     }
 
-    fn is_positional(&'a self) -> bool {
+    fn is_positional(&self) -> bool {
         false
     }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct PositionalParam<'a> {
-    pub(crate) name: &'a str,
-    pub(crate) summary: &'a str,
-    pub(crate) choices: Option<Vec<&'a str>>,
+pub struct PositionalParam {
+    pub(crate) name: String,
+    pub(crate) summary: String,
+    pub(crate) choices: Option<Vec<String>>,
     pub(crate) multiple: bool,
     pub(crate) required: bool,
-    pub(crate) default: Option<&'a str>,
+    pub(crate) default: Option<String>,
     pub(crate) arg_value_name: String,
 }
 
-impl<'a> PositionalParam<'a> {
-    pub fn new(arg: ParamData<'a>, summary: &'a str) -> Self {
+impl PositionalParam {
+    pub fn new(arg: ParamData, summary: &str) -> Self {
+        let arg_value_name = to_cobol_case(&arg.name);
         PositionalParam {
             name: arg.name,
-            summary,
+            summary: summary.to_string(),
             choices: arg.choices,
             multiple: arg.multiple,
             required: arg.required,
             default: arg.default,
-            arg_value_name: to_cobol_case(arg.name),
+            arg_value_name,
         }
     }
 
-    pub fn default_shell_positional() -> Self {
+    pub fn extra() -> Self {
         PositionalParam {
-            name: DEFAULT_SHELL_POSITIONAL_ARGS,
-            summary: "",
+            name: EXTRA_ARGS.to_string(),
+            summary: "".to_string(),
             choices: None,
             multiple: true,
             required: false,
             default: None,
-            arg_value_name: DEFAULT_SHELL_POSITIONAL_ARGS.to_string(),
+            arg_value_name: EXTRA_ARGS.to_string(),
         }
     }
 }
 
-impl<'a> Param<'a> for PositionalParam<'a> {
-    fn tag_name(&'a self) -> &'static str {
+impl Param for PositionalParam {
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn tag_name(&self) -> &str {
         "@arg"
     }
 
-    fn render(&'a self) -> String {
+    fn render(&self) -> String {
         let mut output = vec![];
         let name = render_name(
-            self.name,
+            &self.name,
             &self.choices,
             self.multiple,
             self.required,
             &self.default,
         );
         output.push(name);
-        render_summary(&mut output, self.summary);
+        render_summary(&mut output, &self.summary);
         output.join(" ")
     }
 
-    fn build_arg(&'a self, index: usize) -> Result<Arg<'a>> {
-        let mut arg = new_arg(self.name, self.summary);
+    fn build_arg(&self, index: usize) -> Result<Arg> {
+        let mut arg = new_arg(&self.name, &self.summary);
         arg = arg
             .index(index + 1)
             .required(self.required)
             .value_name(&self.arg_value_name);
-        if self.name == DEFAULT_SHELL_POSITIONAL_ARGS {
+        if self.name == EXTRA_ARGS {
             arg = arg.hide(true);
         }
         if let Some(choices) = &self.choices {
             if choices.len() > 1 {
-                arg = arg.possible_values(choices);
+                arg = arg.value_parser(PossibleValuesParser::new(choices));
             }
         }
         if self.multiple {
-            arg = arg.multiple_values(true)
+            arg = arg.action(ArgAction::Append)
         }
-        if let Some(default) = self.default {
+        if let Some(default) = self.default.as_ref() {
             arg = arg.default_value(default);
         }
         Ok(arg)
     }
 
-    fn retrieve_value(&'a self, matches: &ArgMatches) -> Option<RetrieveValue<'a>> {
-        if !matches.is_present(self.name) {
+    fn retrieve_value(&self, matches: &ArgMatches) -> Option<RetrieveValue> {
+        if !matches.contains_id(&self.name) {
             return None;
         }
         if self.multiple {
             let values = matches
-                .values_of(self.name)
-                .unwrap()
-                .map(escape_shell_words)
-                .collect();
-            Some(RetrieveValue::PositionalMultiple(self.name, values))
+                .get_many::<String>(&self.name)
+                .map(|vals| vals.map(|v| escape_shell_words(v)).collect::<Vec<_>>())
+                .unwrap_or_default();
+            Some(RetrieveValue::PositionalMultiple(self.name.clone(), values))
         } else {
-            let value = escape_shell_words(matches.value_of(self.name).unwrap());
-            Some(RetrieveValue::PositionalSingle(self.name, value))
+            let value = escape_shell_words(matches.get_one::<String>(&self.name).unwrap());
+            Some(RetrieveValue::PositionalSingle(self.name.clone(), value))
         }
     }
 
-    fn detect_conflict(&self, names: &mut ParamNames<'a>, pos: Position) -> Result<()> {
+    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()> {
         let tag_name = self.tag_name();
-        detect_name_conflict(self.name, true, tag_name, names, pos)
+        detect_name_conflict(&self.name, true, tag_name, names, pos)
     }
 
-    fn is_positional(&'a self) -> bool {
+    fn is_positional(&self) -> bool {
         true
     }
 }
@@ -334,10 +350,10 @@ fn render_summary(output: &mut Vec<String>, summary: &str) {
 
 fn render_name<'a>(
     name: &'a str,
-    choices: &Option<Vec<&'a str>>,
+    choices: &Option<Vec<String>>,
     multiple: bool,
     required: bool,
-    default: &Option<&'a str>,
+    default: &Option<String>,
 ) -> String {
     let mut name = name.to_string();
     if let Some(choices) = choices {
@@ -378,20 +394,20 @@ fn render_name<'a>(
     name
 }
 
-fn new_arg<'a>(name: &'a str, summary: &'a str) -> Arg<'a> {
-    let mut arg = Arg::new(name);
+fn new_arg(name: &str, summary: &str) -> Arg {
+    let mut arg = Arg::new(name.to_string());
     let title = summary.trim();
     if !title.is_empty() {
-        arg = arg.help(title);
+        arg = arg.help(title.to_string());
     }
     arg
 }
 
-fn detect_name_conflict<'a>(
-    name: &'a str,
+fn detect_name_conflict(
+    name: &str,
     is_positional: bool,
     tag_name: &str,
-    names: &mut ParamNames<'a>,
+    names: &mut ParamNames,
     pos: Position,
 ) -> Result<()> {
     let name_desc = if is_positional {
@@ -408,15 +424,15 @@ fn detect_name_conflict<'a>(
             exist_pos,
         );
     } else {
-        names.0.insert(name, pos);
+        names.0.insert(name.to_string(), pos);
     }
     Ok(())
 }
 
-fn detect_short_name_conflict<'a>(
+fn detect_short_name_conflict(
     short: &Option<char>,
     tag_name: &str,
-    names: &mut ParamNames<'a>,
+    names: &mut ParamNames,
     pos: Position,
 ) -> Result<()> {
     if let Some(ch) = short {

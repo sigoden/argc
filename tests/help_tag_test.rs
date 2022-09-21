@@ -4,17 +4,7 @@ fn test_no_help_subcommand() {
 # @cmd
 cmd() { :; }
     "###;
-    plain!(script, &["prog"], stderr: r#"prog 
-
-USAGE:
-    prog <SUBCOMMAND>
-
-OPTIONS:
-    -h, --help    Print help information
-
-SUBCOMMANDS:
-    cmd    
-"#,);
+    snapshot!(script, &["prog"],);
 }
 
 #[test]
@@ -24,16 +14,5 @@ fn test_add_help_subcommand() {
 # @cmd
 cmd() { :; }
     "###;
-    plain!(script, &["prog"], stderr: r#"prog 
-
-USAGE:
-    prog <SUBCOMMAND>
-
-OPTIONS:
-    -h, --help    Print help information
-
-SUBCOMMANDS:
-    cmd     
-    help    Print help information
-"#,);
+    snapshot!(script, &["prog"],);
 }

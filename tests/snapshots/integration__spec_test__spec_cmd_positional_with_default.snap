@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 114
+assertion_line: 104
 expression: output
 ---
 RUN
@@ -10,16 +10,15 @@ STDOUT
 
 
 STDERR
-spec-cmd_positional_with_default 
+spec-cmd_positional_with_default
 Positional with default value
 
-USAGE:
-    spec cmd_positional_with_default [ARG]
+USAGE: spec cmd_positional_with_default [ARG]
 
 ARGS:
-    <ARG>    A arg with default value [default: a]
+  [ARG]  A arg with default value [default: a]
 
 OPTIONS:
-    -h, --help    Print help information
+  -h, --help  Print help information
 
 

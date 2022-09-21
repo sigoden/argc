@@ -14,28 +14,27 @@ spec 0.10
 nobody <nobody@example.com>
 Test all aspects
 
-USAGE:
-    spec <SUBCOMMAND>
+USAGE: spec <COMMAND>
 
 OPTIONS:
-    -h, --help       Print help information
-    -V, --version    Print version information
+  -h, --help     Print help information
+  -V, --version  Print version information
 
-SUBCOMMANDS:
-    cmd_alias                                   Command with alias [aliases: a, alias]
-    cmd_flag_formats                            All kind of flags
-    cmd_omitted                                 Omitted
-    cmd_option_formats                          Options all kind of formats
-    cmd_option_names                            Options all kind of names
-    cmd_option_quotes                           Option value quoted
-    cmd_positional_only                         Positional one required
-    cmd_positional_requires                     Positional all required
-    cmd_positional_with_choices                 Positional with choices
-    cmd_positional_with_choices_and_default     Positional with choices and value
-    cmd_positional_with_choices_and_required    Positional with choices and required
-    cmd_positional_with_default                 Positional with default value
-    cmd_preferred                               Preferred
-    cmd_with_hyphens                            Command with hyphens
-    cmd_without_any_arg                         Command without any arg
+COMMANDS:
+  cmd_preferred                             Preferred
+  cmd_omitted                               Omitted
+  cmd_option_names                          Options all kind of names
+  cmd_option_formats                        Options all kind of formats
+  cmd_option_quotes                         Option value quoted
+  cmd_flag_formats                          All kind of flags
+  cmd_positional_only                       Positional one required
+  cmd_positional_requires                   Positional all required
+  cmd_positional_with_choices               Positional with choices
+  cmd_positional_with_default               Positional with default value
+  cmd_positional_with_choices_and_default   Positional with choices and value
+  cmd_positional_with_choices_and_required  Positional with choices and required
+  cmd_without_any_arg                       Command without any arg
+  cmd_alias                                 Command with alias [aliases: a, alias]
+  cmd_with_hyphens                          Command with hyphens
 
 
