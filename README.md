@@ -19,7 +19,6 @@ A handy way to handle sh/bash cli parameters.
     - [@arg](#arg)
     - [@help](#help)
     - [Meta Tag](#meta-tag)
-  - [Completion Scripts](#completion-scripts)
   - [License](#license)
 
 ## Install
@@ -181,12 +180,6 @@ Define help subcommand.
 # @version 2.17.1 
 # @author nobody <nobody@example.com>
 ```
-
-## Completion Scripts
-
-[shell completion scripts](completions) are available for most popular shells.
-
-Please refer to your shell's documentation for how to install them.
 
 ## License
 
