@@ -4,8 +4,7 @@ macro_rules! snapshot {
         $source:expr,
         $args:expr,
     ) => {
-        let cli = argc::Cli::new($source);
-        let (stdout, stderr) = match cli.run($args).unwrap() {
+        let (stdout, stderr) = match argc::run($source, $args).unwrap() {
             either::Either::Left(stdout) => (stdout, String::new()),
             either::Either::Right(stderr) => (String::new(), stderr),
         };
@@ -35,8 +34,7 @@ macro_rules! plain {
         $(stdout: $stdout:expr,)?
         $(stderr: $stderr:expr,)?
     ) => {
-        let cli = argc::Cli::new($source);
-        let result = match cli.run($args).unwrap()  {
+        let result = match argc::run($source, $args).unwrap()  {
             either::Either::Left(stdout) => (stdout, String::new()),
             either::Either::Right(stderr) => (String::new(), stderr),
         };
@@ -56,8 +54,7 @@ macro_rules! fatal {
         $args:expr,
         $err:expr
     ) => {
-        let cli = argc::Cli::new($source);
-        let err = cli.run($args).unwrap_err();
+        let err = argc::run($source, $args).unwrap_err();
         assert_eq!(err.to_string().as_str(), $err);
     };
 }
@@ -68,8 +65,7 @@ macro_rules! snapshot_compgen {
         $source:expr,
         $args:expr
     ) => {
-        let cli = argc::Cli::new($source);
-        let (stdout, stderr) = match cli.compgen($args) {
+        let (stdout, stderr) = match argc::compgen($source, $args) {
             Ok(stdout) => (stdout.join(" "), String::new()),
             Err(stderr) => (String::new(), stderr.to_string()),
         };

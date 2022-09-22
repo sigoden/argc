@@ -1,6 +1,6 @@
 use crate::param::{Param, ParamNames, PositionalParam, EXTRA_ARGS};
 use crate::parser::{parse, Event, EventData, Position};
-use crate::utils::hyphens_to_underscores;
+use crate::value::ArgValue;
 use crate::Result;
 use anyhow::{anyhow, bail, Error};
 use clap::{ArgMatches, Command};
@@ -8,56 +8,44 @@ use either::Either;
 use indexmap::{IndexMap, IndexSet};
 use std::collections::{HashMap, HashSet};
 
-const VARIABLE_PREFIX: &str = env!("CARGO_CRATE_NAME");
-
 const ENTRYPOINT: &str = "main";
 
-pub struct Cli<'a> {
-    source: &'a str,
+pub fn run(source: &str, args: &[&str]) -> Result<Either<String, String>> {
+    let events = parse(source)?;
+    let cmd = Cmd::new_from_events(&events)?;
+    match cmd.run(args)? {
+        Either::Left(values) => Ok(Either::Left(ArgValue::to_shell(values))),
+        Either::Right(error) => Ok(Either::Right(error.to_string())),
+    }
 }
 
-impl<'a> Cli<'a> {
-    pub fn new(source: &'a str) -> Self {
-        Self { source }
-    }
-
-    pub fn run(&self, args: &[&'a str]) -> Result<Either<String, String>> {
-        let events = parse(self.source)?;
-        let cmd = Cmd::new_from_events(&events)?;
-        match cmd.parse(args)? {
-            Either::Left(values) => Ok(Either::Left(ArgValue::to_shell(values))),
-            Either::Right(error) => Ok(Either::Right(error.to_string())),
-        }
-    }
-
-    pub fn compgen(&self, args: &[&'a str]) -> Result<Vec<String>> {
-        let events = parse(self.source)?;
-        let cmd_comp = CmdComp::new_from_events(&events);
-        cmd_comp.generate(args)
-    }
+pub fn compgen(source: &str, args: &[&str]) -> Result<Vec<String>> {
+    let events = parse(source)?;
+    let cmd_comp = CmdComp::new_from_events(&events);
+    cmd_comp.generate(args)
 }
 
 #[derive(Default)]
 pub struct Cmd {
-    name: Option<String>,
-    describe: Option<String>,
-    positional_index: usize,
-    params: Vec<(Box<dyn Param>, usize)>,
-    subcommands: Vec<Cmd>,
+    pub name: Option<String>,
+    pub describe: Option<String>,
+    pub positional_index: usize,
+    pub params: Vec<(Box<dyn Param>, usize)>,
+    pub subcommands: Vec<Cmd>,
     // for conflict detecting
-    names: ParamNames,
+    pub names: ParamNames,
     // root only props
-    root: Option<RootData>,
-    aliases: Vec<String>,
+    pub root: Option<RootData>,
+    pub aliases: Vec<String>,
 }
 
 #[derive(Default)]
-struct RootData {
-    author: Option<String>,
-    version: Option<String>,
-    names: HashMap<String, Position>,
-    help: Option<String>,
-    main: bool,
+pub struct RootData {
+    pub author: Option<String>,
+    pub version: Option<String>,
+    pub names: HashMap<String, Position>,
+    pub help: Option<String>,
+    pub main: bool,
 }
 
 impl Cmd {
@@ -210,7 +198,7 @@ impl Cmd {
         Ok(cmd)
     }
 
-    pub fn parse(&self, args: &[&str]) -> Result<Either<Vec<ArgValue>, clap::Error>> {
+    pub fn run(&self, args: &[&str]) -> Result<Either<Vec<ArgValue>, clap::Error>> {
         let name = args[0];
         let command = self.build_command(name)?;
         let res = command.try_get_matches_from(args);
@@ -312,67 +300,6 @@ impl Cmd {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub enum ArgValue {
-    Single(String, String),
-    Multiple(String, Vec<String>),
-    PositionalSingle(String, String),
-    PositionalMultiple(String, Vec<String>),
-    FnName(String),
-}
-
-impl ArgValue {
-    pub fn to_shell(values: Vec<Self>) -> String {
-        let mut variables = vec![];
-        let mut positional_args = vec![];
-        for value in values {
-            match value {
-                ArgValue::Single(name, value) => {
-                    variables.push(format!(
-                        "{}_{}={}",
-                        VARIABLE_PREFIX,
-                        hyphens_to_underscores(&name),
-                        value
-                    ));
-                }
-                ArgValue::Multiple(name, values) => {
-                    variables.push(format!(
-                        "{}_{}=( {} )",
-                        VARIABLE_PREFIX,
-                        name,
-                        values.join(" ")
-                    ));
-                }
-                ArgValue::PositionalSingle(name, value) => {
-                    variables.push(format!(
-                        "{}_{}={}",
-                        VARIABLE_PREFIX,
-                        hyphens_to_underscores(&name),
-                        &value
-                    ));
-                    positional_args.push(value.to_string());
-                }
-                ArgValue::PositionalMultiple(name, values) => {
-                    variables.push(format!(
-                        "{}_{}=( {} )",
-                        VARIABLE_PREFIX,
-                        hyphens_to_underscores(&name),
-                        values.join(" ")
-                    ));
-                    positional_args.extend(values);
-                }
-                ArgValue::FnName(name) => {
-                    if positional_args.is_empty() {
-                        variables.push(name.to_string());
-                    } else {
-                        variables.push(format!("{} {}", name, positional_args.join(" ")));
-                    }
-                }
-            }
-        }
-        variables.join("\n")
-    }
-}
 
 fn unexpected_param(tag_name: &str, pos: Position) -> Error {
     anyhow!("{}(line {}) is unexpected, maybe miss @cmd?", tag_name, pos,)
