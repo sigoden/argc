@@ -6,8 +6,8 @@ macro_rules! snapshot {
     ) => {
         let cli = argc::Cli::new($source);
         let (stdout, stderr) = match cli.run($args).unwrap() {
-            Ok(stdout) => (stdout, String::new()),
-            Err(stderr) => (String::new(), stderr),
+            either::Either::Left(stdout) => (stdout, String::new()),
+            either::Either::Right(stderr) => (String::new(), stderr),
         };
 
         let args = $args.join(" ");
@@ -37,8 +37,8 @@ macro_rules! plain {
     ) => {
         let cli = argc::Cli::new($source);
         let result = match cli.run($args).unwrap()  {
-            Ok(stdout) => (stdout, String::new()),
-            Err(stderr) => (String::new(), stderr),
+            either::Either::Left(stdout) => (stdout, String::new()),
+            either::Either::Right(stderr) => (String::new(), stderr),
         };
         $({
             assert_eq!(result.0.as_str(), $stdout);

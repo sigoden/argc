@@ -1,4 +1,4 @@
-use crate::cli::RetrieveValue;
+use crate::cli::ArgValue;
 use crate::parser::Position;
 use crate::utils::{
     escape_shell_words, is_choice_value_terminate, is_default_value_terminate, to_cobol_case,
@@ -19,7 +19,7 @@ pub trait Param {
     fn tag_name(&self) -> &str;
     fn render(&self) -> String;
     fn build_arg(&self, index: usize) -> Result<Arg>;
-    fn retrieve_value(&self, matches: &ArgMatches) -> Option<RetrieveValue>;
+    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgValue>;
     fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()>;
     fn is_positional(&self) -> bool;
 }
@@ -88,9 +88,9 @@ impl Param for FlagParam {
         Ok(arg)
     }
 
-    fn retrieve_value(&self, matches: &ArgMatches) -> Option<RetrieveValue> {
+    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgValue> {
         if matches.get_flag(&self.name) {
-            Some(RetrieveValue::Single(self.name.clone(), "1".to_string()))
+            Some(ArgValue::Single(self.name.clone(), "1".to_string()))
         } else {
             None
         }
@@ -199,7 +199,7 @@ impl Param for OptionParam {
         Ok(arg)
     }
 
-    fn retrieve_value(&self, matches: &ArgMatches) -> Option<RetrieveValue> {
+    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgValue> {
         if !matches.contains_id(&self.name) {
             return None;
         }
@@ -208,10 +208,10 @@ impl Param for OptionParam {
                 .get_many::<String>(&self.name)
                 .map(|vals| vals.map(|v| escape_shell_words(v)).collect::<Vec<_>>())
                 .unwrap_or_default();
-            Some(RetrieveValue::Multiple(self.name.clone(), values))
+            Some(ArgValue::Multiple(self.name.clone(), values))
         } else {
             let value = escape_shell_words(matches.get_one::<String>(&self.name).unwrap());
-            Some(RetrieveValue::Single(self.name.clone(), value))
+            Some(ArgValue::Single(self.name.clone(), value))
         }
     }
 
@@ -310,7 +310,7 @@ impl Param for PositionalParam {
         Ok(arg)
     }
 
-    fn retrieve_value(&self, matches: &ArgMatches) -> Option<RetrieveValue> {
+    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgValue> {
         if !matches.contains_id(&self.name) {
             return None;
         }
@@ -319,10 +319,10 @@ impl Param for PositionalParam {
                 .get_many::<String>(&self.name)
                 .map(|vals| vals.map(|v| escape_shell_words(v)).collect::<Vec<_>>())
                 .unwrap_or_default();
-            Some(RetrieveValue::PositionalMultiple(self.name.clone(), values))
+            Some(ArgValue::PositionalMultiple(self.name.clone(), values))
         } else {
             let value = escape_shell_words(matches.get_one::<String>(&self.name).unwrap());
-            Some(RetrieveValue::PositionalSingle(self.name.clone(), value))
+            Some(ArgValue::PositionalSingle(self.name.clone(), value))
         }
     }
 

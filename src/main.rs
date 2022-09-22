@@ -1,5 +1,6 @@
 use anyhow::{anyhow, bail, Result};
 use clap::{Arg, ArgAction, Command};
+use either::Either;
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -89,10 +90,10 @@ USAGE:{usage}"#)
         let cli = argc::Cli::new(&source);
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
         match cli.run(&cmd_args)? {
-            Ok(stdout) => {
+            Either::Left(stdout) => {
                 println!("{}", stdout)
             }
-            Err(stderr) => {
+            Either::Right(stderr) => {
                 eprintln!("{}", stderr);
                 println!("exit 1");
             }
