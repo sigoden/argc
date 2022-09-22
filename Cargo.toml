@@ -17,6 +17,7 @@ convert_case = "0.5"
 indexmap = "1.9"
 nom = "7.1"
 which = "4.2"
+either = "1.8"
 
 [dependencies.clap]
 version = "4.0.0-rc.1"

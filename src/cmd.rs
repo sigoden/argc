@@ -1,143 +1,61 @@
 use crate::param::{Param, ParamNames, PositionalParam, EXTRA_ARGS};
 use crate::parser::{parse, Event, EventData, Position};
-use crate::utils::hyphens_to_underscores;
+use crate::value::ArgValue;
 use crate::Result;
 use anyhow::{anyhow, bail, Error};
 use clap::{ArgMatches, Command};
+use either::Either;
 use indexmap::{IndexMap, IndexSet};
 use std::collections::{HashMap, HashSet};
 
-const VARIABLE_PREFIX: &str = env!("CARGO_CRATE_NAME");
-
 const ENTRYPOINT: &str = "main";
 
-pub struct Cli<'a> {
-    source: &'a str,
+pub fn run(source: &str, args: &[&str]) -> Result<Either<String, String>> {
+    let events = parse(source)?;
+    let cmd = Cmd::new_from_events(&events)?;
+    match cmd.run(args)? {
+        Either::Left(values) => Ok(Either::Left(ArgValue::to_shell(values))),
+        Either::Right(error) => Ok(Either::Right(error.to_string())),
+    }
 }
 
-impl<'a> Cli<'a> {
-    pub fn new(source: &'a str) -> Self {
-        Self { source }
-    }
-
-    pub fn run(&self, args: &[&'a str]) -> Result<std::result::Result<String, String>> {
-        let events = parse(self.source)?;
-        let cmd = Cmd::create(events)?;
-        let name = args[0];
-        let command = cmd.build(name)?;
-        let res = command.try_get_matches_from(args);
-        match res {
-            Ok(matches) => {
-                let values = cmd.retrieve(&matches, self);
-                let output = to_string_retrieve_values(values);
-                Ok(Ok(output))
-            }
-            Err(err) => Ok(Err(err.to_string())),
-        }
-    }
-
-    pub fn compgen(&self, args: &[&'a str]) -> Result<Vec<String>> {
-        let events = parse(self.source)?;
-        let cmd_comp = CmdComp::create(&events);
-        let mut i = 1;
-        let len = args.len();
-        let mut omitted: HashSet<String> = HashSet::default();
-        let mut cmd_comp = &cmd_comp;
-        let mut positional_index = 0;
-        let mut unknown_arg = false;
-        while i < len {
-            let arg = args[i];
-            if let Some(name) = cmd_comp.mappings.get(arg) {
-                if arg.starts_with('-') {
-                    if let Some((short, choices, multiple)) = cmd_comp.options.get(name) {
-                        if i == len - 1 {
-                            return Ok(choices.clone());
-                        }
-                        if *multiple {
-                            while i + 1 < len && !args[i + 1].starts_with('-') {
-                                i += 1;
-                            }
-                        } else {
-                            if !args[i + 1].starts_with('-') {
-                                i += 1;
-                            }
-                            omitted.insert(name.to_string());
-                            if let Some(short) = short {
-                                omitted.insert(short.to_string());
-                            }
-                        }
-                    } else if let Some(short) = cmd_comp.flags.get(name) {
-                        omitted.insert(name.to_string());
-                        if let Some(short) = short {
-                            omitted.insert(short.to_string());
-                        }
-                    }
-                } else if let Some(cmd) = cmd_comp.subcommands.get(name) {
-                    cmd_comp = cmd;
-                    omitted.clear();
-                    positional_index = 0;
-                }
-            } else if arg.starts_with('-') {
-                unknown_arg = true;
-                positional_index = 0;
-            } else if !unknown_arg {
-                positional_index += 1;
-            }
-            i += 1;
-        }
-        let mut output = vec![];
-        for name in cmd_comp.mappings.keys() {
-            if !omitted.contains(name) {
-                output.push(name.to_string());
-            }
-        }
-        if positional_index >= cmd_comp.positionals.len() {
-            if let Some((name, _)) = cmd_comp.positionals.last() {
-                if name.ends_with("...") {
-                    output.push(name.to_string());
-                }
-            }
-        } else if let Some((name, choices)) = cmd_comp.positionals.iter().nth(positional_index) {
-            if choices.is_empty() {
-                output.push(name.to_string())
-            } else {
-                output.extend(choices.to_vec());
-            }
-        }
-        Ok(output)
-    }
+pub fn compgen(source: &str, args: &[&str]) -> Result<Vec<String>> {
+    let events = parse(source)?;
+    let cmd_comp = CmdComp::new_from_events(&events);
+    cmd_comp.generate(args)
 }
 
 #[derive(Default)]
-struct Cmd {
-    name: Option<String>,
-    describe: Option<String>,
-    positional_index: usize,
-    params: Vec<(Box<dyn Param>, usize)>,
-    subcommands: Vec<Cmd>,
+pub struct Cmd {
+    pub name: Option<String>,
+    pub describe: Option<String>,
+    pub positional_index: usize,
+    pub params: Vec<(Box<dyn Param>, usize)>,
+    pub subcommands: Vec<Cmd>,
     // for conflict detecting
-    names: ParamNames,
+    pub names: ParamNames,
     // root only props
-    root: Option<RootData>,
-    aliases: Vec<String>,
+    pub root: Option<RootData>,
+    pub aliases: Vec<String>,
 }
 
 #[derive(Default)]
-struct RootData {
-    author: Option<String>,
-    version: Option<String>,
-    names: HashMap<String, Position>,
-    help: Option<String>,
-    main: bool,
+pub struct RootData {
+    pub author: Option<String>,
+    pub version: Option<String>,
+    pub names: HashMap<String, Position>,
+    pub help: Option<String>,
+    pub main: bool,
 }
 
 impl Cmd {
-    fn create(events: Vec<Event>) -> Result<Self> {
+    pub fn new_from_events(events: &[Event]) -> Result<Self> {
         let mut root_cmd = Cmd::default();
         let mut root_data = RootData::default();
         let mut is_root_scope = true;
         let mut maybe_subcommand: Option<Cmd> = None;
-        for Event { data, position } in events {
+        for event in events {
+            let Event { data, position } = event.clone();
             match data {
                 EventData::Describe(value) => {
                     if is_root_scope {
@@ -224,7 +142,7 @@ impl Cmd {
                         }
                         root_data.names.insert(name.clone(), position);
                         cmd.name = Some(name.to_string());
-                        cmd.maybe_extra_positional_args()?;
+                        cmd.extra_args()?;
                         root_cmd.subcommands.push(cmd);
                     } else if name == ENTRYPOINT {
                         root_data.main = true;
@@ -235,12 +153,12 @@ impl Cmd {
                 }
             }
         }
-        root_cmd.maybe_extra_positional_args()?;
+        root_cmd.extra_args()?;
         root_cmd.root = Some(root_data);
         Ok(root_cmd)
     }
 
-    fn build(&self, name: &str) -> Result<Command> {
+    pub fn build_command(&self, name: &str) -> Result<Command> {
         let mut cmd = Command::new(name.to_string()).infer_long_args(true);
         if let Some(describe) = self.describe.as_ref() {
             cmd = cmd.about(describe);
@@ -273,17 +191,30 @@ impl Cmd {
             cmd = cmd.arg(param.build_arg(*index)?);
         }
         for subcommand in &self.subcommands {
-            let subcommand = subcommand.build(subcommand.name.as_ref().unwrap())?;
+            let subcommand = subcommand.build_command(subcommand.name.as_ref().unwrap())?;
             cmd = cmd.subcommand(subcommand);
         }
         cmd = cmd.help_template(self.help_template());
         Ok(cmd)
     }
 
-    fn retrieve(&self, matches: &ArgMatches, cli: &Cli) -> Vec<RetrieveValue> {
+    pub fn run(&self, args: &[&str]) -> Result<Either<Vec<ArgValue>, clap::Error>> {
+        let name = args[0];
+        let command = self.build_command(name)?;
+        let res = command.try_get_matches_from(args);
+        match res {
+            Ok(matches) => {
+                let values = self.get_args(&matches);
+                Ok(Either::Left(values))
+            }
+            Err(err) => Ok(Either::Right(err)),
+        }
+    }
+
+    pub fn get_args(&self, matches: &ArgMatches) -> Vec<ArgValue> {
         let mut values = vec![];
         for (param, _) in &self.params {
-            if let Some(value) = param.retrieve_value(matches) {
+            if let Some(value) = param.get_arg_value(matches) {
                 values.push(value);
             }
         }
@@ -292,7 +223,7 @@ impl Cmd {
             if let Some(fn_name) = &subcommand.name {
                 if let Some((match_name, subcommand_matches)) = matches.subcommand() {
                     if *fn_name == match_name {
-                        let subcommand_values = subcommand.retrieve(subcommand_matches, cli);
+                        let subcommand_values = subcommand.get_args(subcommand_matches);
                         values.extend(subcommand_values);
                         call_fn = Some(fn_name);
                     }
@@ -305,7 +236,7 @@ impl Cmd {
                 .and_then(|v| if v.main { Some("main") } else { None })
         });
         if let Some(fn_name) = call_fn {
-            values.push(RetrieveValue::FnName(fn_name.to_string()));
+            values.push(ArgValue::FnName(fn_name.to_string()));
         }
         values
     }
@@ -320,7 +251,7 @@ impl Cmd {
         Ok(())
     }
 
-    fn maybe_extra_positional_args(&mut self) -> Result<()> {
+    fn extra_args(&mut self) -> Result<()> {
         if self.positional_index == 0 {
             self.add_param(PositionalParam::extra(), 0)?;
         }
@@ -369,66 +300,6 @@ impl Cmd {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub enum RetrieveValue {
-    Single(String, String),
-    Multiple(String, Vec<String>),
-    PositionalSingle(String, String),
-    PositionalMultiple(String, Vec<String>),
-    FnName(String),
-}
-
-fn to_string_retrieve_values(values: Vec<RetrieveValue>) -> String {
-    let mut variables = vec![];
-    let mut positional_args = vec![];
-    for value in values {
-        match value {
-            RetrieveValue::Single(name, value) => {
-                variables.push(format!(
-                    "{}_{}={}",
-                    VARIABLE_PREFIX,
-                    hyphens_to_underscores(&name),
-                    value
-                ));
-            }
-            RetrieveValue::Multiple(name, values) => {
-                variables.push(format!(
-                    "{}_{}=( {} )",
-                    VARIABLE_PREFIX,
-                    name,
-                    values.join(" ")
-                ));
-            }
-            RetrieveValue::PositionalSingle(name, value) => {
-                variables.push(format!(
-                    "{}_{}={}",
-                    VARIABLE_PREFIX,
-                    hyphens_to_underscores(&name),
-                    &value
-                ));
-                positional_args.push(value);
-            }
-            RetrieveValue::PositionalMultiple(name, values) => {
-                variables.push(format!(
-                    "{}_{}=( {} )",
-                    VARIABLE_PREFIX,
-                    hyphens_to_underscores(&name),
-                    values.join(" ")
-                ));
-                positional_args.extend(values);
-            }
-            RetrieveValue::FnName(name) => {
-                if positional_args.is_empty() {
-                    variables.push(name.to_string());
-                } else {
-                    variables.push(format!("{} {}", name, positional_args.join(" ")));
-                }
-            }
-        }
-    }
-    variables.join("\n")
-}
-
 fn unexpected_param(tag_name: &str, pos: Position) -> Error {
     anyhow!("{}(line {}) is unexpected, maybe miss @cmd?", tag_name, pos,)
 }
@@ -444,7 +315,7 @@ pub struct CmdComp {
 }
 
 impl CmdComp {
-    fn create(events: &[Event]) -> Self {
+    pub fn new_from_events(events: &[Event]) -> Self {
         let mut root_cmd = CmdComp::default();
         let mut maybe_subcommand: Option<CmdComp> = None;
         let mut is_root_scope = true;
@@ -550,5 +421,74 @@ impl CmdComp {
             root_cmd.subcommands.insert("help".into(), cmd);
         }
         root_cmd
+    }
+
+    pub fn generate(&self, args: &[&str]) -> Result<Vec<String>> {
+        let mut i = 1;
+        let len = args.len();
+        let mut omitted: HashSet<String> = HashSet::default();
+        let mut cmd_comp = self;
+        let mut positional_index = 0;
+        let mut unknown_arg = false;
+        while i < len {
+            let arg = args[i];
+            if let Some(name) = cmd_comp.mappings.get(arg) {
+                if arg.starts_with('-') {
+                    if let Some((short, choices, multiple)) = cmd_comp.options.get(name) {
+                        if i == len - 1 {
+                            return Ok(choices.clone());
+                        }
+                        if *multiple {
+                            while i + 1 < len && !args[i + 1].starts_with('-') {
+                                i += 1;
+                            }
+                        } else {
+                            if !args[i + 1].starts_with('-') {
+                                i += 1;
+                            }
+                            omitted.insert(name.to_string());
+                            if let Some(short) = short {
+                                omitted.insert(short.to_string());
+                            }
+                        }
+                    } else if let Some(short) = cmd_comp.flags.get(name) {
+                        omitted.insert(name.to_string());
+                        if let Some(short) = short {
+                            omitted.insert(short.to_string());
+                        }
+                    }
+                } else if let Some(cmd) = cmd_comp.subcommands.get(name) {
+                    cmd_comp = cmd;
+                    omitted.clear();
+                    positional_index = 0;
+                }
+            } else if arg.starts_with('-') {
+                unknown_arg = true;
+                positional_index = 0;
+            } else if !unknown_arg {
+                positional_index += 1;
+            }
+            i += 1;
+        }
+        let mut output = vec![];
+        for name in cmd_comp.mappings.keys() {
+            if !omitted.contains(name) {
+                output.push(name.to_string());
+            }
+        }
+        if positional_index >= cmd_comp.positionals.len() {
+            if let Some((name, _)) = cmd_comp.positionals.last() {
+                if name.ends_with("...") {
+                    output.push(name.to_string());
+                }
+            }
+        } else if let Some((name, choices)) = cmd_comp.positionals.iter().nth(positional_index) {
+            if choices.is_empty() {
+                output.push(name.to_string())
+            } else {
+                output.extend(choices.to_vec());
+            }
+        }
+        Ok(output)
     }
 }

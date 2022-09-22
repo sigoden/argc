@@ -1,5 +1,6 @@
 use anyhow::{anyhow, bail, Result};
 use clap::{Arg, ArgAction, Command};
+use either::Either;
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -86,13 +87,12 @@ USAGE:{usage}"#)
 
     if matches.get_flag("argc-eval") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
-        let cli = argc::Cli::new(&source);
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        match cli.run(&cmd_args)? {
-            Ok(stdout) => {
+        match argc::run(&source, &cmd_args)? {
+            Either::Left(stdout) => {
                 println!("{}", stdout)
             }
-            Err(stderr) => {
+            Either::Right(stderr) => {
                 eprintln!("{}", stderr);
                 println!("exit 1");
             }
@@ -111,9 +111,8 @@ USAGE:{usage}"#)
         print!("{}", script_file.display());
     } else if matches.get_flag("argc-compgen") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
-        let cli = argc::Cli::new(&source);
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        print!("{}", cli.compgen(&cmd_args)?.join(" "))
+        print!("{}", argc::compgen(&source, &cmd_args)?.join(" "))
     } else {
         let shell = get_shell_path().ok_or_else(|| anyhow!("Not found shell"))?;
         let (script_dir, script_file) =
