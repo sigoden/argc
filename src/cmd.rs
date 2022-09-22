@@ -300,7 +300,6 @@ impl Cmd {
     }
 }
 
-
 fn unexpected_param(tag_name: &str, pos: Position) -> Error {
     anyhow!("{}(line {}) is unexpected, maybe miss @cmd?", tag_name, pos,)
 }
