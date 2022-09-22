@@ -3,24 +3,23 @@ name = "argc"
 version = "0.10.1"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "A bash cli framework, also a task management & automation tool"
+description = "A handy way to handle sh/bash cli parameters"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
 autotests = false
 categories = ["command-line-utilities"]
-keywords = ["command-line", "framework", "make", "task-runner"]
+keywords = ["command-line", "shell-script", "argument-parser"]
 
 [dependencies]
 anyhow = "1"
 convert_case = "0.5"
 indexmap = "1.9"
 nom = "7.1"
-which = "4.2"
 either = "1.8"
 
 [dependencies.clap]
-version = "4.0.0-rc.1"
+version = "4.0.0-rc.2"
 default_features = false
 features = ["std", "suggestions", "string", "help", "usage", "error-context"]
 
@@ -28,7 +27,6 @@ features = ["std", "suggestions", "string", "help", "usage", "error-context"]
 insta = "1.15"
 assert_cmd = "2"
 assert_fs = "1"
-rstest = "0.15"
 predicates = "2"
 
 [profile.release]

@@ -12,7 +12,7 @@ $_argc_script_completion = {
     } else {
         $cmds = $commandAst.CommandElements[1..($commandAst.CommandElements.Count - 1)]
     }
-    (argc --argc-compgen "$argcfile" $cmds 2>$null) -split " " | 
+    (argc --compgen "$argcfile" $cmds 2>$null) -split " " | 
         Where-Object { $_ -like "$wordToComplete*" } |
         ForEach-Object { 
             if ($_.StartsWith("-")) {

@@ -1,6 +1,6 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 196
+assertion_line: 171
 expression: output
 ---
 RUN

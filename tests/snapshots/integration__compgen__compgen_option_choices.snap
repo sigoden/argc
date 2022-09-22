@@ -1,6 +1,6 @@
 ---
 source: tests/compgen.rs
-assertion_line: 15
+assertion_line: 30
 expression: output
 ---
 RUN
