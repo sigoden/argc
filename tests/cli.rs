@@ -5,7 +5,7 @@ use std::process::Command;
 fn version() {
     Command::cargo_bin("argc")
         .unwrap()
-        .arg("--argc-version")
+        .arg("--version")
         .assert()
         .stderr(predicates::str::contains(format!(
             "argc {}",
@@ -18,7 +18,7 @@ fn version() {
 fn help() {
     Command::cargo_bin("argc")
         .unwrap()
-        .arg("--argc-help")
+        .arg("--help")
         .assert()
         .stderr(predicates::str::contains(env!("CARGO_PKG_DESCRIPTION")))
         .failure();
