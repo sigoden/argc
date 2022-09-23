@@ -10,7 +10,6 @@ STDOUT
 
 
 STDERR
-spec-cmd_positional_with_default
 Positional with default value
 
 USAGE: spec cmd_positional_with_default [ARG]

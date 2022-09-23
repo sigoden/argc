@@ -10,7 +10,6 @@ STDOUT
 
 
 STDERR
-spec-cmd_option_names
 Options all kind of names
 
 USAGE: spec cmd_option_names [OPTIONS] --opt2 <OPT2> --opt4 <OPT4>... --opt8 <OPT8>

@@ -10,7 +10,6 @@ STDOUT
 
 
 STDERR
-spec-cmd_omitted
 Omitted
 
 USAGE: spec cmd_omitted [OPTIONS] [ARG1]
