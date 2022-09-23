@@ -1,9 +1,9 @@
 use crate::utils::hyphens_to_underscores;
 
-const VARIABLE_PREFIX: &str = env!("CARGO_CRATE_NAME");
+pub const VARIABLE_PREFIX: &str = "argc";
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum ArgValue {
+pub enum ArgcValue {
     Single(String, String),
     Multiple(String, Vec<String>),
     PositionalSingle(String, String),
@@ -11,13 +11,13 @@ pub enum ArgValue {
     FnName(String),
 }
 
-impl ArgValue {
+impl ArgcValue {
     pub fn to_shell(values: Vec<Self>) -> String {
         let mut variables = vec![];
         let mut positional_args = vec![];
         for value in values {
             match value {
-                ArgValue::Single(name, value) => {
+                ArgcValue::Single(name, value) => {
                     variables.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
@@ -25,7 +25,7 @@ impl ArgValue {
                         value
                     ));
                 }
-                ArgValue::Multiple(name, values) => {
+                ArgcValue::Multiple(name, values) => {
                     variables.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
@@ -33,7 +33,7 @@ impl ArgValue {
                         values.join(" ")
                     ));
                 }
-                ArgValue::PositionalSingle(name, value) => {
+                ArgcValue::PositionalSingle(name, value) => {
                     variables.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
@@ -42,7 +42,7 @@ impl ArgValue {
                     ));
                     positional_args.push(value.to_string());
                 }
-                ArgValue::PositionalMultiple(name, values) => {
+                ArgcValue::PositionalMultiple(name, values) => {
                     variables.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
@@ -51,7 +51,7 @@ impl ArgValue {
                     ));
                     positional_args.extend(values);
                 }
-                ArgValue::FnName(name) => {
+                ArgcValue::FnName(name) => {
                     if positional_args.is_empty() {
                         variables.push(name.to_string());
                     } else {

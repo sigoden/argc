@@ -1,8 +1,8 @@
+use crate::argc_value::ArgcValue;
 use crate::parser::Position;
 use crate::utils::{
     escape_shell_words, is_choice_value_terminate, is_default_value_terminate, to_cobol_case,
 };
-use crate::value::ArgValue;
 
 use anyhow::{bail, Result};
 use clap::builder::PossibleValuesParser;
@@ -13,16 +13,6 @@ use std::fmt::Write;
 pub const EXTRA_ARGS: &str = "_args";
 
 pub type ParamNames = (HashMap<String, Position>, HashMap<char, Position>);
-
-pub trait Param {
-    fn name(&self) -> &str;
-    fn tag_name(&self) -> &str;
-    fn render(&self) -> String;
-    fn build_arg(&self, index: usize) -> Result<Arg>;
-    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgValue>;
-    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()>;
-    fn is_positional(&self) -> bool;
-}
 
 #[derive(Debug, Clone)]
 pub struct ParamData {
@@ -43,6 +33,16 @@ impl ParamData {
             default: None,
         }
     }
+}
+
+pub trait Param {
+    fn name(&self) -> &str;
+    fn tag_name(&self) -> &str;
+    fn render(&self) -> String;
+    fn build_arg(&self, index: usize) -> Result<Arg>;
+    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue>;
+    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()>;
+    fn is_positional(&self) -> bool;
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -88,9 +88,9 @@ impl Param for FlagParam {
         Ok(arg)
     }
 
-    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgValue> {
+    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
         if matches.get_flag(&self.name) {
-            Some(ArgValue::Single(self.name.clone(), "1".to_string()))
+            Some(ArgcValue::Single(self.name.clone(), "1".to_string()))
         } else {
             None
         }
@@ -199,7 +199,7 @@ impl Param for OptionParam {
         Ok(arg)
     }
 
-    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgValue> {
+    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
         if !matches.contains_id(&self.name) {
             return None;
         }
@@ -208,10 +208,10 @@ impl Param for OptionParam {
                 .get_many::<String>(&self.name)
                 .map(|vals| vals.map(|v| escape_shell_words(v)).collect::<Vec<_>>())
                 .unwrap_or_default();
-            Some(ArgValue::Multiple(self.name.clone(), values))
+            Some(ArgcValue::Multiple(self.name.clone(), values))
         } else {
             let value = escape_shell_words(matches.get_one::<String>(&self.name).unwrap());
-            Some(ArgValue::Single(self.name.clone(), value))
+            Some(ArgcValue::Single(self.name.clone(), value))
         }
     }
 
@@ -310,7 +310,7 @@ impl Param for PositionalParam {
         Ok(arg)
     }
 
-    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgValue> {
+    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
         if !matches.contains_id(&self.name) {
             return None;
         }
@@ -319,10 +319,10 @@ impl Param for PositionalParam {
                 .get_many::<String>(&self.name)
                 .map(|vals| vals.map(|v| escape_shell_words(v)).collect::<Vec<_>>())
                 .unwrap_or_default();
-            Some(ArgValue::PositionalMultiple(self.name.clone(), values))
+            Some(ArgcValue::PositionalMultiple(self.name.clone(), values))
         } else {
             let value = escape_shell_words(matches.get_one::<String>(&self.name).unwrap());
-            Some(ArgValue::PositionalSingle(self.name.clone(), value))
+            Some(ArgcValue::PositionalSingle(self.name.clone(), value))
         }
     }
 
