@@ -10,7 +10,6 @@ STDOUT
 
 
 STDERR
-spec-cmd_positional_only
 Positional one required
 
 USAGE: spec cmd_positional_only <ARG1>

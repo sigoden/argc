@@ -260,8 +260,6 @@ impl Cli {
             if root.author.is_some() {
                 lines.push("{author}");
             }
-        } else {
-            lines.push("{bin}");
         }
         if self.describe.is_some() {
             lines.push("{about}");

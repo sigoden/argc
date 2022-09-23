@@ -10,7 +10,6 @@ STDOUT
 
 
 STDERR
-spec-cmd_positional_requires
 Positional all required
 
 USAGE: spec cmd_positional_requires <ARG1> <ARG2>...

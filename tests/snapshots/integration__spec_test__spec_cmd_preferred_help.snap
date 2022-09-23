@@ -10,7 +10,6 @@ STDOUT
 
 
 STDERR
-spec-cmd_preferred
 Preferred
 
 USAGE: spec cmd_preferred [OPTIONS] [ARG1]...

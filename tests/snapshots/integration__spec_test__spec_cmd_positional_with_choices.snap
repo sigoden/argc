@@ -10,7 +10,6 @@ STDOUT
 
 
 STDERR
-spec-cmd_positional_with_choices
 Positional with choices
 
 USAGE: spec cmd_positional_with_choices [ARG]
