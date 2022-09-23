@@ -47,7 +47,7 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 
 ## Usage
 
-![cli framework](https://user-images.githubusercontent.com/4012553/182050295-8f6f5fe1-b1b1-49ab-afb4-8d81dbb08ee2.gif)
+![demo](https://user-images.githubusercontent.com/4012553/191886396-3b25eb74-75ab-4df2-a920-4c5ce030058c.gif)
 
 To write a command-line program with argc, we only need to do two things:
 
@@ -186,11 +186,7 @@ Define help subcommand.
 
 [completion scripts](completions) are available for bash/zsh/powershell.
 
-All argc scripts share the same completion function. 
-
-To add completion for a script, you just need:
-1. put your scripts to $PATH
-2. add your script name to ARGC_SCRIPTS
+All argc scripts share the same completion function. To add completion to a argc script, simply add the script name to $ARGC_SCRIPTS.
 
 ## License
 

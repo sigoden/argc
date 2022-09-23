@@ -1,9 +1,7 @@
 # Zsh completion for scripts written with argc
 #
 # All argc scripts share the same completion function.
-# To add completion for a  argc script, you just need:
-# 1. put your scripts to $PATH
-# 2. add your script name to $ARGC_SCRIPTS
+# To add completion to a argc script, simply add the script name to $ARGC_SCRIPTS.
 
 ARGC_SCRIPTS=( mycmd1 mycmd2 )
 
