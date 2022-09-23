@@ -19,6 +19,7 @@ A handy way to handle sh/bash cli parameters.
     - [@arg](#arg)
     - [@help](#help)
     - [Meta Tag](#meta-tag)
+  - [Shell Completion](#shell-completion)
   - [License](#license)
 
 ## Install
@@ -180,6 +181,16 @@ Define help subcommand.
 # @version 2.17.1 
 # @author nobody <nobody@example.com>
 ```
+
+## Shell Completion
+
+[completion scripts](completions) are available for bash/zsh/powershell.
+
+All argc scripts share the same completion function. 
+
+To add completion for a script, you just need:
+1. put your scripts to $PATH
+2. add your script name to ARGC_SCRIPTS
 
 ## License
 

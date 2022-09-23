@@ -1,7 +1,13 @@
 # Bash completion for scripts written with argc
-# All argc scripts share the same completion function, put your scripts to $PATH, replace `mycmd1 mycmd2` blow with your scripts' names
+#
+# All argc scripts share the same completion function.
+# To add completion for a  argc script, you just need:
+# 1. put your scripts to $PATH
+# 2. add your script name to ARGC_SCRIPTS
 
-_argc_script() {
+ARGC_SCRIPTS=( mycmd1 mycmd2 )
+
+_argc_completion() {
     local argcfile cur opts
     cur="${COMP_WORDS[COMP_CWORD]}"
     COMPREPLY=()
@@ -14,4 +20,4 @@ _argc_script() {
     return 0
 }
 
-complete -F _argc_script -o bashdefault -o default mycmd1 mycmd2
+complete -F _argc_completion -o bashdefault -o default ${ARGC_SCRIPTS[@]}

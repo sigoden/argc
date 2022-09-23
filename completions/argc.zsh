@@ -1,0 +1,22 @@
+# Zsh completion for scripts written with argc
+#
+# All argc scripts share the same completion function.
+# To add completion for a  argc script, you just need:
+# 1. put your scripts to $PATH
+# 2. add your script name to $ARGC_SCRIPTS
+
+ARGC_SCRIPTS=( mycmd1 mycmd2 )
+
+_argc_completion()
+{
+    local argcfile values
+    argcfile=$(which $words[1])
+    if [[ $? -ne 0 ]]; then
+        return 0
+    fi
+    values=( $(argc --compgen "$argcfile" $words[2,-2] 2>/dev/null) )
+    compadd -- $values[@]
+    return 0
+}
+
+compdef _argc_completion ${ARGC_SCRIPTS[@]}
