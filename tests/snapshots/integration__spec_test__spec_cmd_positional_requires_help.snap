@@ -18,7 +18,4 @@ ARGS:
   <ARG1>     A required arg
   <ARG2>...  A required arg, multiple
 
-OPTIONS:
-  -h, --help  Print help information
-
 

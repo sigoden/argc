@@ -16,10 +16,6 @@ Test all aspects
 
 USAGE: spec <COMMAND>
 
-OPTIONS:
-  -h, --help     Print help information
-  -V, --version  Print version information
-
 COMMANDS:
   cmd_preferred                             Preferred
   cmd_omitted                               Omitted

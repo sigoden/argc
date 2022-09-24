@@ -12,9 +12,6 @@ STDOUT
 STDERR
 USAGE: prog <COMMAND>
 
-OPTIONS:
-  -h, --help  Print help information
-
 COMMANDS:
   cmd
 
