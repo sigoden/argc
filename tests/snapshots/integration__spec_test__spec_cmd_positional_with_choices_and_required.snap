@@ -17,7 +17,4 @@ USAGE: spec cmd_positional_with_choices_and_required <ARG>
 ARGS:
   <ARG>  A arg with choices and required [possible values: a, b]
 
-OPTIONS:
-  -h, --help  Print help information
-
 

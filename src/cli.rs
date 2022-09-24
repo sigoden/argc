@@ -272,15 +272,18 @@ impl Cli {
             .params
             .iter()
             .any(|(p, _)| p.is_positional() && p.name() != EXTRA_ARGS);
+        let has_options = self.params.iter().any(|(p, _)| !p.is_positional());
         if has_arguments {
             lines.push("ARGS:");
             lines.push("{positionals}");
             lines.push("");
         }
 
-        lines.push("OPTIONS:");
-        lines.push("{options}");
-        lines.push("");
+        if has_options {
+            lines.push("OPTIONS:");
+            lines.push("{options}");
+            lines.push("");
+        }
 
         if has_subcommands {
             lines.push("COMMANDS:");
