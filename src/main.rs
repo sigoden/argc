@@ -72,7 +72,7 @@ USAGE:{usage}"#,
     } else {
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        match argc::run(&source, &cmd_args)? {
+        match argc::eval(&source, &cmd_args)? {
             Either::Left(stdout) => {
                 println!("{}", stdout)
             }

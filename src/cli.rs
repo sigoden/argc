@@ -9,10 +9,10 @@ use std::collections::HashMap;
 
 const ENTRYPOINT: &str = "main";
 
-pub fn run(source: &str, args: &[&str]) -> Result<Either<String, String>> {
+pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, String>> {
     let events = parse(source)?;
     let cmd = Cli::new_from_events(&events)?;
-    match cmd.run(args)? {
+    match cmd.eval(args)? {
         Either::Left(values) => Ok(Either::Left(ArgcValue::to_shell(values))),
         Either::Right(error) => Ok(Either::Right(error.to_string())),
     }
@@ -151,7 +151,7 @@ impl Cli {
         Ok(root_cmd)
     }
 
-    pub fn build_clap_command(&self, name: &str) -> Result<Command> {
+    pub fn build_command(&self, name: &str) -> Result<Command> {
         let mut cmd = Command::new(name.to_string()).infer_long_args(true);
         if let Some(describe) = self.describe.as_ref() {
             cmd = cmd.about(describe);
@@ -184,16 +184,16 @@ impl Cli {
             cmd = cmd.arg(param.build_arg(*index)?);
         }
         for subcommand in &self.subcommands {
-            let subcommand = subcommand.build_clap_command(subcommand.name.as_ref().unwrap())?;
+            let subcommand = subcommand.build_command(subcommand.name.as_ref().unwrap())?;
             cmd = cmd.subcommand(subcommand);
         }
         cmd = cmd.help_template(self.help_template());
         Ok(cmd)
     }
 
-    pub fn run(&self, args: &[&str]) -> Result<Either<Vec<ArgcValue>, clap::Error>> {
+    pub fn eval(&self, args: &[&str]) -> Result<Either<Vec<ArgcValue>, clap::Error>> {
         let name = args[0];
-        let command = self.build_clap_command(name)?;
+        let command = self.build_command(name)?;
         let res = command.try_get_matches_from(args);
         match res {
             Ok(matches) => {

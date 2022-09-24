@@ -4,7 +4,7 @@ macro_rules! snapshot {
         $source:expr,
         $args:expr,
     ) => {
-        let (stdout, stderr) = match argc::run($source, $args).unwrap() {
+        let (stdout, stderr) = match argc::eval($source, $args).unwrap() {
             either::Either::Left(stdout) => (stdout, String::new()),
             either::Either::Right(stderr) => (String::new(), stderr),
         };
@@ -34,7 +34,7 @@ macro_rules! plain {
         $(stdout: $stdout:expr,)?
         $(stderr: $stderr:expr,)?
     ) => {
-        let result = match argc::run($source, $args).unwrap()  {
+        let result = match argc::eval($source, $args).unwrap()  {
             either::Either::Left(stdout) => (stdout, String::new()),
             either::Either::Right(stderr) => (String::new(), stderr),
         };
@@ -54,7 +54,7 @@ macro_rules! fatal {
         $args:expr,
         $err:expr
     ) => {
-        let err = argc::run($source, $args).unwrap_err();
+        let err = argc::eval($source, $args).unwrap_err();
         assert_eq!(err.to_string().as_str(), $err);
     };
 }
