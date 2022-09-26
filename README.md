@@ -36,7 +36,7 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 
 ### GitHub Actions
 
-[extractions/setup-crate](https://github.com/marketplace/actions/setup-just) can be used to install just in a GitHub Actions workflow.
+[extractions/setup-crate](https://github.com/marketplace/actions/setup-crate) can be used to install just in a GitHub Actions workflow.
 
 ```yaml
 - uses: extractions/setup-crate@v1
