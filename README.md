@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-A handy way to handle sh/bash cli parameters.
+Easily parse cli arguments in bash.
 
 - [Argc](#argc)
   - [Install](#install)
@@ -47,12 +47,12 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 
 ## Usage
 
-![demo](https://user-images.githubusercontent.com/4012553/191886396-3b25eb74-75ab-4df2-a920-4c5ce030058c.gif)
+![demo](https://user-images.githubusercontent.com/4012553/192987706-2b07a356-640f-454b-aebe-88ba8fc07016.gif)
 
 To write a command-line program with argc, we only need to do two things:
 
-1. Describe the options, parameters, and subcommands in comment.
-2. Call the following command to entrust argc to process command line parameters for us
+1. Describe the options, parameters, and subcommands in comments.
+2. Call the following command to entrust argc to process command line arguments for us
 
 ```sh
 eval $(argc "$0" "$@")
@@ -70,7 +70,7 @@ We can directly use variables corresponding to flags/options/positional paramete
 
 ## Comment Tags
 
-`argc` loads cli definition from comment tags.
+`argc` parses cli definition from comment tags.
 
 ### @cmd
 
