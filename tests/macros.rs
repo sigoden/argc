@@ -6,7 +6,7 @@ macro_rules! snapshot {
     ) => {
         let (stdout, stderr) = match argc::eval($source, $args).unwrap() {
             either::Either::Left(stdout) => (stdout, String::new()),
-            either::Either::Right(stderr) => (String::new(), stderr),
+            either::Either::Right(stderr) => (String::new(), stderr.to_string()),
         };
 
         let args = $args.join(" ");
@@ -36,7 +36,7 @@ macro_rules! plain {
     ) => {
         let result = match argc::eval($source, $args).unwrap()  {
             either::Either::Left(stdout) => (stdout, String::new()),
-            either::Either::Right(stderr) => (String::new(), stderr),
+            either::Either::Right(stderr) => (String::new(), stderr.to_string()),
         };
         $({
             assert_eq!(result.0.as_str(), $stdout);

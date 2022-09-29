@@ -9,12 +9,12 @@ use std::collections::HashMap;
 
 const ENTRYPOINT: &str = "main";
 
-pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, String>> {
+pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, clap::Error>> {
     let events = parse(source)?;
     let cmd = Cli::new_from_events(&events)?;
     match cmd.eval(args)? {
         Either::Left(values) => Ok(Either::Left(ArgcValue::to_shell(values))),
-        Either::Right(error) => Ok(Either::Right(error.to_string())),
+        Either::Right(error) => Ok(Either::Right(error)),
     }
 }
 
