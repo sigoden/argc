@@ -73,12 +73,20 @@ USAGE:{usage}"#,
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
         match argc::eval(&source, &cmd_args)? {
-            Either::Left(stdout) => {
-                println!("{}", stdout)
+            Either::Left(output) => {
+                println!("{}", output)
             }
-            Either::Right(stderr) => {
-                eprintln!("{}", stderr);
-                println!("exit 1");
+            Either::Right(error) => {
+                if env::var_os("NO_COLOR").is_some() {
+                    eprintln!("{}", error);
+                } else {
+                    eprintln!("{}", error.render().ansi());
+                }
+                if error.use_stderr() {
+                    println!("exit 1");
+                } else {
+                    println!("exit 0");
+                }
             }
         }
     }

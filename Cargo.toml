@@ -13,15 +13,11 @@ keywords = ["command-line", "shell-script", "argument-parser"]
 
 [dependencies]
 anyhow = "1"
+clap = { version = "4.0", features = ["string"]}
 convert_case = "0.5"
 indexmap = "1.9"
 nom = "7.1"
 either = "1.8"
-
-[dependencies.clap]
-version = "4.0.0-rc.2"
-default_features = false
-features = ["std", "suggestions", "string", "help", "usage", "error-context"]
 
 [dev-dependencies]
 insta = "1.15"
