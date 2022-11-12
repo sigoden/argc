@@ -13,9 +13,9 @@ Easily parse cli arguments in bash.
   - [Usage](#usage)
   - [Comment Tags](#comment-tags)
     - [@cmd](#cmd)
+    - [@arg](#arg)
     - [@option](#option)
     - [@flag](#flag)
-    - [@arg](#arg)
     - [@alias](#alias)
     - [@help](#help)
     - [Meta](#meta)
@@ -101,13 +101,47 @@ COMMANDS:
   download  Download a file
 ```
 
+### @arg
+
+```
+@arg <name>[modifier] [help string]
+```
+
+Define a positional argument.
+
+```sh
+# @arg arg1            A positional argument
+# @arg arg2!           A required positional argument
+# @arg arg3*           A positional argument support multiple values
+# @arg arg4+           A required positional argument support multiple values
+# @arg arg5=a          A positional argument with default value
+# @arg arg6[a|b]       A positional argument with choices
+# @arg arg7[=a|b]      A positional argument with choices and default value
+# @arg arg8![a|b]      A required positional argument with choices
+```
+
+```
+USAGE: test.sh [ARG1] <ARG2> [ARG3]... <ARG4>... [ARG5] [ARG6] [ARG7] <ARG8>
+
+ARGS:
+  [ARG1]     A positional argument
+  <ARG2>     A required positional argument
+  [ARG3]...  A positional argument support multiple values
+  <ARG4>...  A required positional argument support multiple values
+  [ARG5]     A positional argument with default value [default: a]
+  [ARG6]     A positional argument with choices [possible values: a, b]
+  [ARG7]     A positional argument with choices and default value [default: a] [possible values: a, b]
+  <ARG8>     A required positional argument with choices [possible values: a, b]
+```
+
+
 ### @option
 
 ```
 @option [short] <long>[modifier] [notation] [help string]
 ```
 
-Add a option.
+Define a option.
 
 ```sh
 # @option    --opt1                 A option
@@ -146,9 +180,7 @@ OPTIONS:
 @flag [short] <long> [help string]
 ```
 
-Adds a flag. 
-
-> A flag is a type of option, an option of boolean type, and is always false by default (e.g. --verbose, --quiet, --all, --long, etc).
+Define a flag. A flag is an option of boolean type, and is always false by default (e.g. --verbose, --quiet, --all, --long, etc).
 
 
 ```sh
@@ -162,39 +194,6 @@ USAGE: test.sh [OPTIONS]
 OPTIONS:
       --flag1  A flag
   -f, --flag2  A flag with short alias
-```
-
-### @arg
-
-```
-@arg <name>[modifier] [help string]
-```
-
-Adds a positional argument.
-
-```sh
-# @arg arg1            A positional argument
-# @arg arg2!           A required positional argument
-# @arg arg3*           A positional argument support multiple values
-# @arg arg4+           A required positional argument support multiple values
-# @arg arg5=a          A positional argument with default value
-# @arg arg6[a|b]       A positional argument with choices
-# @arg arg7[=a|b]      A positional argument with choices and default value
-# @arg arg8![a|b]      A required positional argument with choices
-```
-
-```
-USAGE: test.sh [ARG1] <ARG2> [ARG3]... <ARG4>... [ARG5] [ARG6] [ARG7] <ARG8>
-
-ARGS:
-  [ARG1]     A positional argument
-  <ARG2>     A required positional argument
-  [ARG3]...  A positional argument support multiple values
-  <ARG4>...  A required positional argument support multiple values
-  [ARG5]     A positional argument with default value [default: a]
-  [ARG6]     A positional argument with choices [possible values: a, b]
-  [ARG7]     A positional argument with choices and default value [default: a] [possible values: a, b]
-  <ARG8>     A required positional argument with choices [possible values: a, b]
 ```
 
 ### @alias
