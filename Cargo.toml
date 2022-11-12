@@ -14,7 +14,7 @@ keywords = ["command-line", "shell-script", "argument-parser"]
 [dependencies]
 anyhow = "1"
 clap = { version = "4.0", features = ["string"]}
-convert_case = "0.5"
+convert_case = "0.6"
 indexmap = "1.9"
 nom = "7.1"
 either = "1.8"

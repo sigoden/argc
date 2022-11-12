@@ -10,7 +10,7 @@ STDOUT
 
 
 STDERR
-error: "x" isn't a valid value for '[ARG]'
+error: 'x' isn't a valid value for '[ARG]'
   [possible values: a, b]
 
 For more information try '--help'
