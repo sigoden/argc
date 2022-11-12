@@ -13,13 +13,14 @@ Easily parse cli arguments in bash.
   - [Usage](#usage)
   - [Comment Tags](#comment-tags)
     - [@cmd](#cmd)
-    - [@alias](#alias)
     - [@option](#option)
     - [@flag](#flag)
     - [@arg](#arg)
+    - [@alias](#alias)
     - [@help](#help)
-    - [Meta Tag](#meta-tag)
+    - [Meta](#meta)
   - [Shell Completion](#shell-completion)
+  - [Related Projects](#related-projects)
   - [License](#license)
 
 ## Install
@@ -83,26 +84,21 @@ Define a subcommand
 ```sh
 # @cmd Upload a file
 upload() {
+  echo Run upload
 }
 
 # @cmd Download a file
 download() {
+  echo Run download
 }
 ```
 
-### @alias
-
 ```
-@alias <name...>
-```
+USAGE: test.sh <COMMAND>
 
-Add aliases
-
-```sh
-# @cmd
-# @alias t,tst
-test() {
-}
+COMMANDS:
+  upload    Upload a file
+  download  Download a file
 ```
 
 ### @option
@@ -114,17 +110,34 @@ test() {
 Add a option.
 
 ```sh
- # @option    --foo                A option
- # @option -f --foo                A option with short alias
- # @option    --foo <PATH>         A option with notation
- # @option    --foo!               A required option
- # @option    --foo*               A option with multiple values
- # @option    --foo+               A required option with multiple values
- # @option    --foo=a              A option with default value
- # @option    --foo[a|b]           A option with choices
- # @option    --foo[=a|b]          A option with choices and default value
- # @option    --foo![a|b]          A required option with choices
- # @option -f --foo <PATH>         A option with short alias and notation
+# @option    --opt1                 A option
+# @option -a --opt2                 A option with short alias
+# @option    --opt3 <PATH>          A option with notation
+# @option    --opt4!                A required option
+# @option    --opt5*                A option with multiple values
+# @option    --opt6+                A required option with multiple values
+# @option    --opt7=a               A option with default value
+# @option    --opt8[a|b]            A option with choices
+# @option    --opt9[=a|b]           A option with choices and default value
+# @option    --opt10![a|b]          A required option with choices
+# @option -b --opt11 <PATH>         A option with short alias and notation
+```
+
+```
+USAGE: test.sh [OPTIONS] --opt4 <OPT4> --opt6 <OPT6>... --opt10 <OPT10>
+
+OPTIONS:
+      --opt1 <OPT1>       A option
+  -a, --opt2 <OPT2>       A option with short alias
+      --opt3 <PATH>       A option with notation
+      --opt4 <OPT4>       A required option
+      --opt5 [<OPT5>...]  A option with multiple values
+      --opt6 <OPT6>...    A required option with multiple values
+      --opt7 <OPT7>       A option with default value [default: a]
+      --opt8 <OPT8>       A option with choices [possible values: a, b]
+      --opt9 <OPT9>       A option with choices and default value [default: a] [possible values: a, b]
+      --opt10 <OPT10>     A required option with choices [possible values: a, b]
+  -b, --opt11 <PATH>      A option with short alias and notation
 ```
 
 ### @flag
@@ -133,11 +146,22 @@ Add a option.
 @flag [short] <long> [help string]
 ```
 
-Adds a flag.
+Adds a flag. 
+
+> A flag is a type of option, an option of boolean type, and is always false by default (e.g. --verbose, --quiet, --all, --long, etc).
+
 
 ```sh
-# @flag     --foo       A flag
-# @flag  -f --foo       A flag with short alias
+# @flag     --flag1       A flag
+# @flag  -f --flag2       A flag with short alias
+```
+
+```
+USAGE: test.sh [OPTIONS]
+
+OPTIONS:
+      --flag1  A flag
+  -f, --flag2  A flag with short alias
 ```
 
 ### @arg
@@ -149,14 +173,51 @@ Adds a flag.
 Adds a positional argument.
 
 ```sh
-# @arg value            A positional argument
-# @arg value!           A required positional argument
-# @arg value*           A positional argument support multiple values
-# @arg value+           A required positional argument support multiple values
-# @arg value=a          A positional argument with default value
-# @arg value[a|b]       A positional argument with choices
-# @arg value[=a|b]      A positional argument with choices and default value
-# @arg value![a|b]      A required positional argument with choices
+# @arg arg1            A positional argument
+# @arg arg2!           A required positional argument
+# @arg arg3*           A positional argument support multiple values
+# @arg arg4+           A required positional argument support multiple values
+# @arg arg5=a          A positional argument with default value
+# @arg arg6[a|b]       A positional argument with choices
+# @arg arg7[=a|b]      A positional argument with choices and default value
+# @arg arg8![a|b]      A required positional argument with choices
+```
+
+```
+USAGE: test.sh [ARG1] <ARG2> [ARG3]... <ARG4>... [ARG5] [ARG6] [ARG7] <ARG8>
+
+ARGS:
+  [ARG1]     A positional argument
+  <ARG2>     A required positional argument
+  [ARG3]...  A positional argument support multiple values
+  <ARG4>...  A required positional argument support multiple values
+  [ARG5]     A positional argument with default value [default: a]
+  [ARG6]     A positional argument with choices [possible values: a, b]
+  [ARG7]     A positional argument with choices and default value [default: a] [possible values: a, b]
+  <ARG8>     A required positional argument with choices [possible values: a, b]
+```
+
+### @alias
+
+```
+@alias <name...>
+```
+
+Add aliases
+
+```sh
+# @cmd Run tests
+# @alias t,tst
+test() {
+  echo Run test
+}
+```
+
+```
+USAGE: test.sh <COMMAND>
+
+COMMANDS:
+  test  Run tests [aliases: t, tst]
 ```
 
 ### @help
@@ -165,12 +226,25 @@ Adds a positional argument.
 @help string
 ```
 
-Define help subcommand.
+Enable help subcommand.
 
 ```sh
-# @help Print help information
+# @help Show help
+
+# @cmd Run test
+test() {
+  echo Run test
+}
 ```
-### Meta Tag
+
+```
+USAGE: test.sh <COMMAND>
+
+COMMANDS:
+  help  Show help
+  foo   Run test
+```
+### Meta
 
 - @describe: Sets the cli’s description. 
 - @version: Sets cli's version.
@@ -180,6 +254,22 @@ Define help subcommand.
 # @describe A demo cli
 # @version 2.17.1 
 # @author nobody <nobody@example.com>
+
+# @cmd Run test
+test() {
+  echo Run test
+}
+```
+
+```
+test.sh 2.17.1
+nobody <nobody@example.com>
+A demo cli
+
+USAGE: test.sh <COMMAND>
+
+COMMANDS:
+  test  Run test
 ```
 
 ## Shell Completion
@@ -187,6 +277,10 @@ Define help subcommand.
 [completion scripts](completions) are available for bash/zsh/powershell.
 
 All argc scripts share the same completion function. To add completion to a argc script, simply add the script name to $ARGC_SCRIPTS.
+
+## Related Projects
+
+- [runme](https://github.com/sigoden/runme): A task runner using argc.
 
 ## License
 
