@@ -182,7 +182,7 @@ impl Param for OptionParam {
             arg = arg.short(s);
         }
         if self.multiple {
-            let num = if self.required { 1 } else { 0 };
+            let num = usize::from(self.required);
             arg = arg
                 .value_delimiter(',')
                 .action(ArgAction::Append)
