@@ -3,25 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Easily parse cli arguments in bash.
-
-- [Argc](#argc)
-  - [Install](#install)
-    - [With cargo](#with-cargo)
-    - [Binaries on macOS, Linux, Windows](#binaries-on-macos-linux-windows)
-    - [GitHub Actions](#github-actions)
-  - [Usage](#usage)
-  - [Comment Tags](#comment-tags)
-    - [@cmd](#cmd)
-    - [@arg](#arg)
-    - [@option](#option)
-    - [@flag](#flag)
-    - [@alias](#alias)
-    - [@help](#help)
-    - [Meta](#meta)
-  - [Shell Completion](#shell-completion)
-  - [Related Projects](#related-projects)
-  - [License](#license)
+parse command line arguments in bash.
 
 ## Install
 
@@ -120,21 +102,6 @@ Define a positional argument.
 # @arg arg8![a|b]      A required positional argument with choices
 ```
 
-```
-USAGE: test.sh [ARG1] <ARG2> [ARG3]... <ARG4>... [ARG5] [ARG6] [ARG7] <ARG8>
-
-ARGS:
-  [ARG1]     A positional argument
-  <ARG2>     A required positional argument
-  [ARG3]...  A positional argument support multiple values
-  <ARG4>...  A required positional argument support multiple values
-  [ARG5]     A positional argument with default value [default: a]
-  [ARG6]     A positional argument with choices [possible values: a, b]
-  [ARG7]     A positional argument with choices and default value [default: a] [possible values: a, b]
-  <ARG8>     A required positional argument with choices [possible values: a, b]
-```
-
-
 ### @option
 
 ```
@@ -157,23 +124,6 @@ Define a option.
 # @option -b --opt11 <PATH>         A option with short alias and notation
 ```
 
-```
-USAGE: test.sh [OPTIONS] --opt4 <OPT4> --opt6 <OPT6>... --opt10 <OPT10>
-
-OPTIONS:
-      --opt1 <OPT1>       A option
-  -a, --opt2 <OPT2>       A option with short alias
-      --opt3 <PATH>       A option with notation
-      --opt4 <OPT4>       A required option
-      --opt5 [<OPT5>...]  A option with multiple values
-      --opt6 <OPT6>...    A required option with multiple values
-      --opt7 <OPT7>       A option with default value [default: a]
-      --opt8 <OPT8>       A option with choices [possible values: a, b]
-      --opt9 <OPT9>       A option with choices and default value [default: a] [possible values: a, b]
-      --opt10 <OPT10>     A required option with choices [possible values: a, b]
-  -b, --opt11 <PATH>      A option with short alias and notation
-```
-
 ### @flag
 
 ```
@@ -188,21 +138,13 @@ Define a flag. A flag is an option of boolean type, and is always false by defau
 # @flag  -f --flag2       A flag with short alias
 ```
 
-```
-USAGE: test.sh [OPTIONS]
-
-OPTIONS:
-      --flag1  A flag
-  -f, --flag2  A flag with short alias
-```
-
 ### @alias
 
 ```
 @alias <name...>
 ```
 
-Add aliases
+Add aliases for subcommand.
 
 ```sh
 # @cmd Run tests
