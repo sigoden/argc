@@ -3,7 +3,9 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Parse command line arguments in bash.
+Easily parse command line arguments in bash.
+
+![demo](https://user-images.githubusercontent.com/4012553/192987706-2b07a356-640f-454b-aebe-88ba8fc07016.gif)
 
 ## Install
 
@@ -30,26 +32,43 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 
 ## Usage
 
-![demo](https://user-images.githubusercontent.com/4012553/192987706-2b07a356-640f-454b-aebe-88ba8fc07016.gif)
-
 To write a command-line program with argc, we only need to do two things:
 
-1. Describe the options, parameters, and subcommands in comments.
-2. Call the following command to entrust argc to process command line arguments for us
+1. Describe options, flags, positional parameters and subcommands in comments.
+2. Insert `eval $(argc "$0" "$@")` into script to let argc to parse command line arguments.
+
+Write `example.sh`
 
 ```sh
+# @flag   --foo   A flag
+# @option --bar   A option
+# @option --baz*  A option with multiple values 
+
 eval $(argc "$0" "$@")
+echo foo: $argc_foo
+echo bar: $argc_bar
+echo baz: ${argc_baz[@]}
 ```
 
-Argc will do the following for us:
+Run `./example.sh --foo --bar=value --baz a b c`, you can see argc successfully parses arguments and generate variables with `argc_` prefix.
 
-1. Extract flag/option/subcommand definitions from comments.
-2. Parse command line arguments according to the definition.
-3. If arguments are invalid, output error message or help information.
-4. If everything is ok, output parsed variables.
-5. If there is a subcommand, call the subcommand function.
+```
+foo: 1
+bar: value
+baz: a b c
+```
 
-We can directly use variables corresponding to flags/options/positional parameters.
+Run `example.sh -h`, argc wll print help information for you.
+
+```
+USAGE: example.sh [OPTIONS]
+
+OPTIONS:
+      --foo             A flag
+      --bar <BAR>       A option
+      --baz [<BAZ>...]  A option with multiple values
+  -h, --help            Print help information
+```
 
 ## Comment Tags
 
