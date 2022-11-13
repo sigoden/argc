@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-parse command line arguments in bash.
+Parse command line arguments in bash.
 
 ## Install
 
@@ -218,10 +218,6 @@ COMMANDS:
 [completion scripts](completions) are available for bash/zsh/powershell.
 
 All argc scripts share the same completion function. To add completion to a argc script, simply add the script name to $ARGC_SCRIPTS.
-
-## Related Projects
-
-- [runme](https://github.com/sigoden/runme): A task runner using argc.
 
 ## License
 
