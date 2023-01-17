@@ -12,7 +12,7 @@ _argc_completion()
     if [[ $? -ne 0 ]]; then
         return 0
     fi
-    values=( $(argc --compgen "$argcfile" $words[2,-2] 2>/dev/null) )
+    values=( $(argc --argc-compgen "$argcfile" $words[2,-2] 2>/dev/null) )
     compadd -- $values[@]
     return 0
 }
