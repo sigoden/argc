@@ -348,8 +348,8 @@ fn render_summary(output: &mut Vec<String>, summary: &str) {
     }
 }
 
-fn render_name<'a>(
-    name: &'a str,
+fn render_name(
+    name: &str,
     choices: &Option<Vec<String>>,
     multiple: bool,
     required: bool,
