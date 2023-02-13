@@ -42,7 +42,7 @@ fn run() -> Result<i32> {
         .author(env!("CARGO_PKG_AUTHORS"))
         .override_usage(
             r#"
-    argc SCRIPT [ARGS...]               Parse arguments `eval $(argc "$0" "$@")`
+    argc SCRIPT [ARGS...]               Parse arguments `eval "$(argc "$0" "$@")"`
     argc --help                         Print help information
     argc --version                      Print version information"#,
         )

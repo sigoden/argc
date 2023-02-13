@@ -35,7 +35,7 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 To write a command-line program with argc, we only need to do two things:
 
 1. Describe options, flags, positional parameters and subcommands in comments.
-2. Insert `eval $(argc "$0" "$@")` into script to let argc to parse command line arguments.
+2. Insert `eval "$(argc "$0" "$@")"` into script to let argc to parse command line arguments.
 
 Write `example.sh`
 
@@ -44,7 +44,7 @@ Write `example.sh`
 # @option --bar   A option
 # @option --baz*  A option with multiple values 
 
-eval $(argc "$0" "$@")
+eval "$(argc "$0" "$@")"
 echo foo: $argc_foo
 echo bar: $argc_bar
 echo baz: ${argc_baz[@]}
