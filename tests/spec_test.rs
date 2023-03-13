@@ -72,6 +72,8 @@ fn test_spec_cmd_option_names_exec() {
             "a",
             "--opt8",
             "a",
+            "--op11",
+            "a1"
         ],
     );
 }
@@ -95,6 +97,8 @@ fn test_spec_cmd_option_names_exec_eval() {
             "a",
             "--opt8",
             "a",
+            "--op11",
+            "a1"
         ],
     );
 }

@@ -1,6 +1,5 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 20
 expression: output
 ---
 RUN
@@ -12,7 +11,7 @@ STDOUT
 STDERR
 Options all kind of names
 
-USAGE: spec cmd_option_names [OPTIONS] --opt2 <OPT2> --opt4 <OPT4>... --opt8 <OPT8>
+USAGE: spec cmd_option_names [OPTIONS] --opt2 <OPT2> --opt4 <OPT4>... --opt8 <OPT8> --op11 <OP11>
 
 OPTIONS:
       --opt1 <OPT1>       optional
@@ -23,6 +22,9 @@ OPTIONS:
       --opt6 <OPT6>       choices [possible values: a, b, c]
       --opt7 <OPT7>       choices, default [default: a] [possible values: a, b, c]
       --opt8 <OPT8>       required, choices [possible values: a, b, c]
+      --opt9 <OPT9>       optional, default from fn
+      --op10 <OP10>       choices from fn
+      --op11 <OP11>       required, choices from fn
   -h, --help              Print help information
 
 

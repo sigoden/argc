@@ -14,7 +14,11 @@ _argc_completion() {
         return 0
     fi
     opts=$(argc --compgen "$argcfile" ${COMP_WORDS[@]:1:$((${#COMP_WORDS[@]} - 2))} 2>/dev/null)
-    COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+    if [[ "$opts" = __argc_compgen_cmd:* ]]; then
+        COMPREPLY=( $(compgen -W "$(bash "$argcfile" ${opts#__argc_compgen_cmd:})" -- "${cur}") )
+    else
+        COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+    fi
     return 0
 }
 

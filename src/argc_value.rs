@@ -5,8 +5,10 @@ pub const VARIABLE_PREFIX: &str = "argc";
 #[derive(Debug, PartialEq, Eq)]
 pub enum ArgcValue {
     Single(String, String),
+    SingleFn(String, String),
     Multiple(String, Vec<String>),
     PositionalSingle(String, String),
+    PositionalSingleFn(String, String),
     PositionalMultiple(String, Vec<String>),
     FnName(String),
 }
@@ -25,6 +27,14 @@ impl ArgcValue {
                         value
                     ));
                 }
+                ArgcValue::SingleFn(name, fn_name) => {
+                    variables.push(format!(
+                        "{}_{}=`{}`",
+                        VARIABLE_PREFIX,
+                        hyphens_to_underscores(&name),
+                        fn_name,
+                    ));
+                }
                 ArgcValue::Multiple(name, values) => {
                     variables.push(format!(
                         "{}_{}=( {} )",
@@ -41,6 +51,15 @@ impl ArgcValue {
                         &value
                     ));
                     positional_args.push(value.to_string());
+                }
+                ArgcValue::PositionalSingleFn(name, fn_name) => {
+                    variables.push(format!(
+                        "{}_{}=`{}`",
+                        VARIABLE_PREFIX,
+                        hyphens_to_underscores(&name),
+                        &fn_name
+                    ));
+                    positional_args.push(format!("`{}`", fn_name));
                 }
                 ArgcValue::PositionalMultiple(name, values) => {
                     variables.push(format!(

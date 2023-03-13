@@ -119,6 +119,9 @@ Define a positional argument.
 # @arg arg6[a|b]       A positional argument with choices
 # @arg arg7[=a|b]      A positional argument with choices and default value
 # @arg arg8![a|b]      A required positional argument with choices
+# @arg arg9=`_fn`      A positional argument with defaulf value from fn
+# @arg arg10[`_fn`]    A positional argument with choices from fn
+# @arg arg11![`_fn`]   A required positional argument with choices from fn
 ```
 
 ### @option
@@ -141,6 +144,9 @@ Define a option.
 # @option    --opt9[=a|b]           A option with choices and default value
 # @option    --opt10![a|b]          A required option with choices
 # @option -b --opt11 <PATH>         A option with short alias and notation
+# @option    --opt12=`_fn`          A option with default value from fn
+# @option    --opt13[`_fn`]         A option with choices from fn
+# @option    --opt14![`_fn`]        A required option with choices from fn
 ```
 
 ### @flag

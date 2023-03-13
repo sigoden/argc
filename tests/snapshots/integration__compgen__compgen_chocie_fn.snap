@@ -1,0 +1,13 @@
+---
+source: tests/compgen.rs
+expression: output
+---
+RUN
+prog cmd_option_names --op11
+
+STDOUT
+__argc_compgen_cmd:_fn_bars
+
+STDERR
+
+

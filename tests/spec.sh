@@ -18,14 +18,17 @@ cmd_omitted() {
 }
 
 # @cmd Options all kind of names
-# @option      --opt1           optional
-# @option      --opt2!          required
-# @option      --opt3*          optional, multiple
-# @option      --opt4+          required, multiple
-# @option      --opt5=a         optional, default
-# @option      --opt6[a|b|c]    choices
-# @option      --opt7[=a|b|c]   choices, default
-# @option      --opt8![a|b|c]   required, choices
+# @option      --opt1                optional
+# @option      --opt2!               required
+# @option      --opt3*               optional, multiple
+# @option      --opt4+               required, multiple
+# @option      --opt5=a              optional, default
+# @option      --opt6[a|b|c]         choices
+# @option      --opt7[=a|b|c]        choices, default
+# @option      --opt8![a|b|c]        required, choices
+# @option      --opt9=`_fn_foo`      optional, default from fn
+# @option      --op10[`_fn_bars`]    choices from fn
+# @option      --op11![`_fn_bars`]   required, choices from fn
 cmd_option_names() {
     print_argc_vars
 }
@@ -86,15 +89,33 @@ cmd_positional_with_default() {
     print_argc_vars
 }
 
+# @cmd  Positional with default value
+# @arg   arg=`_fn_foo`  A arg with default fn
+cmd_positional_with_default_fn() {
+    print_argc_vars
+}
+
 # @cmd  Positional with choices and value
 # @arg   arg[=a|b]   A arg with choices and default value
 cmd_positional_with_choices_and_default() {
     print_argc_vars
 }
 
+# @cmd  Positional with choices and value
+# @arg   arg[`_fn_bars`]  A arg with choices fn
+cmd_positional_with_choices_fn() {
+    print_argc_vars
+}
+
 # @cmd  Positional with choices and required
 # @arg   arg![a|b]   A arg with choices and required
 cmd_positional_with_choices_and_required() {
+    print_argc_vars
+}
+
+# @cmd  Positional with choices and value
+# @arg   arg![`_fn_bars`]  A arg with choices fn and required
+cmd_positional_with_choices_fn_and_required() {
     print_argc_vars
 }
 
@@ -119,6 +140,14 @@ cmd_with_hyphens() {
 
 print_argc_vars() {
     ( set -o posix ; set ) | grep argc_
+}
+
+_fn_foo() {
+    echo "foo"
+}
+
+_fn_bars() {
+    echo " a1 a2 a3 "
 }
 
 eval "$(argc "$0" "$@")"

@@ -1,5 +1,6 @@
 use crate::parser::{parse, Event, EventData};
 use crate::Result;
+use either::Either;
 use indexmap::{IndexMap, IndexSet};
 use std::collections::{HashMap, HashSet};
 
@@ -9,13 +10,15 @@ pub fn compgen(source: &str, args: &[&str]) -> Result<Vec<String>> {
     cmd_comp.generate(args)
 }
 
+pub type ChoicesType = Either<Vec<String>, String>;
+
 #[derive(Debug, Default)]
 pub struct Completion {
     aliases: IndexSet<String>,
     mappings: IndexMap<String, String>,
-    options: HashMap<String, (Option<String>, Vec<String>, bool)>,
+    options: HashMap<String, (Option<String>, ChoicesType, bool)>,
     flags: HashMap<String, Option<String>>,
-    positionals: IndexMap<String, Vec<String>>,
+    positionals: IndexMap<String, ChoicesType>,
     subcommands: IndexMap<String, Completion>,
 }
 
@@ -54,10 +57,8 @@ impl Completion {
                         } else {
                             None
                         };
-                        let choices = match &option_param.choices {
-                            Some(choices) => choices.iter().map(|v| v.to_string()).collect(),
-                            None => vec![],
-                        };
+                        let choices =
+                            parse_choices_or_fn(&option_param.choices, &option_param.choices_fn);
                         cmd.mappings.insert(name.clone(), name.clone());
                         cmd.options
                             .insert(name.clone(), (short, choices, option_param.multiple));
@@ -90,10 +91,10 @@ impl Completion {
                     });
                     if let Some(cmd) = cmd {
                         let multiple = if positional_param.multiple { "..." } else { "" };
-                        let choices = match &positional_param.choices {
-                            Some(choices) => choices.iter().map(|v| v.to_string()).collect(),
-                            None => vec![],
-                        };
+                        let choices = parse_choices_or_fn(
+                            &positional_param.choices,
+                            &positional_param.choices_fn,
+                        );
                         cmd.positionals.insert(
                             format!("<{}>{}", positional_param.name.to_uppercase(), multiple),
                             choices,
@@ -118,7 +119,7 @@ impl Completion {
             let mut cmd = Completion::default();
             cmd.positionals.insert(
                 "<CMD>".to_string(),
-                root_cmd.subcommands.keys().map(|v| v.to_string()).collect(),
+                Either::Left(root_cmd.subcommands.keys().map(|v| v.to_string()).collect()),
             );
             root_cmd
                 .mappings
@@ -141,7 +142,12 @@ impl Completion {
                 if arg.starts_with('-') {
                     if let Some((short, choices, multiple)) = cmd_comp.options.get(name) {
                         if i == len - 1 {
-                            return Ok(choices.clone());
+                            match choices {
+                                Either::Left(choices) => return Ok(choices.clone()),
+                                Either::Right(choices_fn) => {
+                                    return Ok(vec![choices_fn.to_string()])
+                                }
+                            }
                         }
                         if *multiple {
                             while i + 1 < len && !args[i + 1].starts_with('-') {
@@ -188,12 +194,29 @@ impl Completion {
                 }
             }
         } else if let Some((name, choices)) = cmd_comp.positionals.iter().nth(positional_index) {
-            if choices.is_empty() {
-                output.push(name.to_string())
-            } else {
-                output.extend(choices.to_vec());
+            match choices {
+                Either::Left(choices) => {
+                    if choices.is_empty() {
+                        output.push(name.to_string())
+                    } else {
+                        output.extend(choices.to_vec());
+                    }
+                }
+                Either::Right(choices_fn) => output.push(choices_fn.to_string()),
             }
         }
         Ok(output)
+    }
+}
+
+fn parse_choices_or_fn(choices: &Option<Vec<String>>, choices_fn: &Option<String>) -> ChoicesType {
+    if let Some(choices_fn) = choices_fn {
+        Either::Right(format!("__argc_compgen_cmd:{}", choices_fn))
+    } else {
+        let choices = match &choices {
+            Some(choices) => choices.iter().map(|v| v.to_string()).collect(),
+            None => vec![],
+        };
+        Either::Left(choices)
     }
 }
