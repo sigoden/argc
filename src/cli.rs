@@ -219,38 +219,45 @@ impl Cli {
                 values.push(value);
             }
         }
-        let mut call_fn: Option<String> = None;
+        let mut param_fn: Option<String> = None;
         if let Some(root_data) = self.root.as_ref() {
             for fn_name in root_data.param_cmd_fns() {
                 if let Some((match_name, _)) = matches.subcommand() {
                     if fn_name.as_str() == match_name {
-                        call_fn = Some(fn_name);
+                        param_fn = Some(fn_name);
                     }
                 }
             }
         }
-        for subcommand in &self.subcommands {
-            if let Some(fn_name) = &subcommand.name {
-                if let Some((match_name, subcommand_matches)) = matches.subcommand() {
-                    if *fn_name == match_name {
-                        let subcommand_values = subcommand.get_args(subcommand_matches);
-                        values.extend(subcommand_values);
-                        call_fn = Some(fn_name.to_string());
+
+        let mut call_fn: Option<String> = None;
+        if param_fn.is_none() {
+            for subcommand in &self.subcommands {
+                if let Some(fn_name) = &subcommand.name {
+                    if let Some((match_name, subcommand_matches)) = matches.subcommand() {
+                        if *fn_name == match_name {
+                            let subcommand_values = subcommand.get_args(subcommand_matches);
+                            values.extend(subcommand_values);
+                            call_fn = Some(fn_name.to_string());
+                        }
                     }
                 }
             }
+            call_fn = call_fn.or_else(|| {
+                self.root.as_ref().and_then(|v| {
+                    if v.main {
+                        Some("main".to_string())
+                    } else {
+                        None
+                    }
+                })
+            });
         }
-        call_fn = call_fn.or_else(|| {
-            self.root.as_ref().and_then(|v| {
-                if v.main {
-                    Some("main".to_string())
-                } else {
-                    None
-                }
-            })
-        });
-        if let Some(fn_name) = call_fn {
-            values.push(ArgcValue::FnName(fn_name));
+
+        if let Some(fn_name) = param_fn {
+            values.push(ArgcValue::ParamFnName(fn_name))
+        } else if let Some(fn_name) = call_fn {
+            values.push(ArgcValue::CmdFnName(fn_name));
         }
         values
     }

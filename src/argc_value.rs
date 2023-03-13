@@ -10,7 +10,8 @@ pub enum ArgcValue {
     PositionalSingle(String, String),
     PositionalSingleFn(String, String),
     PositionalMultiple(String, Vec<String>),
-    FnName(String),
+    CmdFnName(String),
+    ParamFnName(String),
 }
 
 impl ArgcValue {
@@ -70,12 +71,15 @@ impl ArgcValue {
                     ));
                     positional_args.extend(values);
                 }
-                ArgcValue::FnName(name) => {
+                ArgcValue::CmdFnName(name) => {
                     if positional_args.is_empty() {
                         variables.push(name.to_string());
                     } else {
                         variables.push(format!("{} {}", name, positional_args.join(" ")));
                     }
+                }
+                ArgcValue::ParamFnName(name) => {
+                    variables.push(format!("{name};exit;"));
                 }
             }
         }

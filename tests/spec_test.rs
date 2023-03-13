@@ -194,3 +194,8 @@ fn test_spec_cmd_with_hyphens() {
         ],
     );
 }
+
+#[test]
+fn test_spec_fn_bars() {
+    snapshot!(SPEC_SCRIPT, &["spec", "_fn_bars",],);
+}
