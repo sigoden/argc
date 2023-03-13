@@ -18,9 +18,11 @@ pub type ParamNames = (HashMap<String, Position>, HashMap<char, Position>);
 pub struct ParamData {
     pub name: String,
     pub choices: Option<Vec<String>>,
+    pub choices_fn: Option<String>,
     pub multiple: bool,
     pub required: bool,
     pub default: Option<String>,
+    pub default_fn: Option<String>,
 }
 
 impl ParamData {
@@ -28,9 +30,11 @@ impl ParamData {
         Self {
             name: name.to_string(),
             choices: None,
+            choices_fn: None,
             multiple: false,
             required: false,
             default: None,
+            default_fn: None,
         }
     }
 }
@@ -114,9 +118,11 @@ pub struct OptionParam {
     pub(crate) short: Option<char>,
     pub(crate) value_name: Option<String>,
     pub(crate) choices: Option<Vec<String>>,
+    pub(crate) choices_fn: Option<String>,
     pub(crate) multiple: bool,
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
+    pub(crate) default_fn: Option<String>,
     pub(crate) arg_value_name: String,
 }
 
@@ -132,9 +138,11 @@ impl OptionParam {
             name: arg.name,
             summary: summary.to_string(),
             choices: arg.choices,
+            choices_fn: arg.choices_fn,
             multiple: arg.multiple,
             required: arg.required,
             default: arg.default,
+            default_fn: arg.default_fn,
             short,
             value_name: value_name.map(|v| v.to_string()),
             arg_value_name: value_name
@@ -160,9 +168,11 @@ impl Param for OptionParam {
         let name = render_name(
             &self.name,
             &self.choices,
+            &self.choices_fn,
             self.multiple,
             self.required,
             &self.default,
+            &self.default_fn,
         );
         output.push(format!("--{}", name));
         if let Some(value_name) = self.value_name.as_ref() {
@@ -201,6 +211,12 @@ impl Param for OptionParam {
 
     fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
         if !matches.contains_id(&self.name) {
+            if let Some(default_fn) = self.default_fn.as_ref() {
+                return Some(ArgcValue::SingleFn(
+                    self.name.clone(),
+                    default_fn.to_string(),
+                ));
+            }
             return None;
         }
         if self.multiple {
@@ -231,9 +247,11 @@ pub struct PositionalParam {
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) choices: Option<Vec<String>>,
+    pub(crate) choices_fn: Option<String>,
     pub(crate) multiple: bool,
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
+    pub(crate) default_fn: Option<String>,
     pub(crate) arg_value_name: String,
 }
 
@@ -244,9 +262,11 @@ impl PositionalParam {
             name: arg.name,
             summary: summary.to_string(),
             choices: arg.choices,
+            choices_fn: arg.choices_fn,
             multiple: arg.multiple,
             required: arg.required,
             default: arg.default,
+            default_fn: arg.default_fn,
             arg_value_name,
         }
     }
@@ -256,9 +276,11 @@ impl PositionalParam {
             name: EXTRA_ARGS.to_string(),
             summary: "".to_string(),
             choices: None,
+            choices_fn: None,
             multiple: true,
             required: false,
             default: None,
+            default_fn: None,
             arg_value_name: EXTRA_ARGS.to_string(),
         }
     }
@@ -278,9 +300,11 @@ impl Param for PositionalParam {
         let name = render_name(
             &self.name,
             &self.choices,
+            &self.choices_fn,
             self.multiple,
             self.required,
             &self.default,
+            &self.default_fn,
         );
         output.push(name);
         render_summary(&mut output, &self.summary);
@@ -312,6 +336,12 @@ impl Param for PositionalParam {
 
     fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
         if !matches.contains_id(&self.name) {
+            if let Some(default_fn) = self.default_fn.as_ref() {
+                return Some(ArgcValue::PositionalSingleFn(
+                    self.name.clone(),
+                    default_fn.to_string(),
+                ));
+            }
             return None;
         }
         if self.multiple {
@@ -351,9 +381,11 @@ fn render_summary(output: &mut Vec<String>, summary: &str) {
 fn render_name(
     name: &str,
     choices: &Option<Vec<String>>,
+    choices_fn: &Option<String>,
     multiple: bool,
     required: bool,
     default: &Option<String>,
+    default_fn: &Option<String>,
 ) -> String {
     let mut name = name.to_string();
     if let Some(choices) = choices {
@@ -376,6 +408,11 @@ fn render_name(
             .collect();
         let choices_value = format!("[{}{}]", prefix, values.join("|"));
         name.push_str(&choices_value);
+    } else if let Some(choices_fn) = choices_fn {
+        if required {
+            name.push('!')
+        }
+        let _ = write!(name, "[`{}`]", choices_fn);
     } else if let Some(default) = default {
         let value = if default.chars().any(is_default_value_terminate) {
             format!("\"{}\"", default)
@@ -383,6 +420,8 @@ fn render_name(
             default.to_string()
         };
         let _ = write!(name, "={}", value);
+    } else if let Some(default_fn) = default_fn {
+        let _ = write!(name, "=`{}`", default_fn);
     } else if let Some(ch) = match (required, multiple) {
         (true, true) => Some('+'),
         (true, false) => Some('!'),

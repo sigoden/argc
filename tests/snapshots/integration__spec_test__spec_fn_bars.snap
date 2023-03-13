@@ -1,0 +1,13 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec _fn_bars
+
+STDOUT
+_fn_bars;exit;
+
+STDERR
+
+

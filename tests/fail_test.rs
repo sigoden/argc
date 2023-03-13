@@ -135,3 +135,35 @@ try() {
         "@alias(line 7) is conflicted with cmd or alias at line 3"
     );
 }
+
+#[test]
+fn test_option_miss_default_fn() {
+    let script = r###"
+# @option --foo=`_fn`
+    "###;
+    fatal!(script, &["prog"], "_fn(line 2) is missing");
+}
+
+#[test]
+fn test_option_miss_choice_fn() {
+    let script = r###"
+# @option --foo[`_fn`]
+    "###;
+    fatal!(script, &["prog"], "_fn(line 2) is missing");
+}
+
+#[test]
+fn test_arg_miss_default_fn() {
+    let script = r###"
+# @arg foo=`_fn`
+    "###;
+    fatal!(script, &["prog"], "_fn(line 2) is missing");
+}
+
+#[test]
+fn test_arg_miss_choice_fn() {
+    let script = r###"
+# @arg foo[`_fn`]
+    "###;
+    fatal!(script, &["prog"], "_fn(line 2) is missing");
+}

@@ -13,6 +13,9 @@ _argc_completion()
         return 0
     fi
     values=( $(argc --compgen "$argcfile" $words[2,-2] 2>/dev/null) )
+    if [[ "$values" = __argc_compgen_cmd:* ]]; then
+        values=( $(bash "$argcfile" ${values#__argc_compgen_cmd:} 2>/dev/null) )
+    fi
     compadd -- $values[@]
     return 0
 }

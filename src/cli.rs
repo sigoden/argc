@@ -5,7 +5,7 @@ use crate::Result;
 use anyhow::{anyhow, bail, Error};
 use clap::{ArgMatches, Command};
 use either::Either;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 const ENTRYPOINT: &str = "main";
 
@@ -36,9 +36,10 @@ pub struct Cli {
 pub struct CliRoot {
     pub author: Option<String>,
     pub version: Option<String>,
-    pub names: HashMap<String, Position>,
+    pub fn_names: HashMap<String, Position>,
     pub help: Option<String>,
     pub main: bool,
+    pub param_fns: Vec<(String, usize, bool)>,
 }
 
 impl Cli {
@@ -82,14 +83,14 @@ impl Cli {
                     if let Some(cmd) = &mut maybe_subcommand {
                         cmd.aliases = values.to_vec();
                         for name in values {
-                            if let Some(pos) = root_data.names.get(&name) {
+                            if let Some(pos) = root_data.fn_names.get(&name) {
                                 bail!(
                                     "@alias(line {}) is conflicted with cmd or alias at line {}",
                                     position,
                                     pos
                                 );
                             }
-                            root_data.names.insert(name.clone(), position);
+                            root_data.fn_names.insert(name.clone(), position);
                         }
                     } else {
                         bail!("@alias(line {}) is unexpected", position)
@@ -102,6 +103,7 @@ impl Cli {
                         None
                     });
                     let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), position))?;
+                    root_data.collect_fns(position, &param.default_fn, &param.choices_fn);
                     cmd.add_param(param, position)?;
                 }
                 EventData::Positional(param) => {
@@ -111,6 +113,7 @@ impl Cli {
                         None
                     });
                     let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), position))?;
+                    root_data.collect_fns(position, &param.default_fn, &param.choices_fn);
                     cmd.add_param(param, position)?;
                 }
                 EventData::Flag(param) => {
@@ -124,16 +127,17 @@ impl Cli {
                 }
                 EventData::Func(name) => {
                     is_root_scope = false;
+
+                    if let Some(pos) = root_data.fn_names.get(&name) {
+                        bail!(
+                            "{}(line {}) is conflicted with cmd or alias at line {}",
+                            name,
+                            position,
+                            pos
+                        )
+                    }
+                    root_data.fn_names.insert(name.clone(), position);
                     if let Some(mut cmd) = maybe_subcommand.take() {
-                        if let Some(pos) = root_data.names.get(&name) {
-                            bail!(
-                                "{}(line {}) is conflicted with cmd or alias at line {}",
-                                name,
-                                position,
-                                pos
-                            )
-                        }
-                        root_data.names.insert(name.clone(), position);
                         cmd.name = Some(name.to_string());
                         cmd.extra_args()?;
                         root_cmd.subcommands.push(cmd);
@@ -146,6 +150,7 @@ impl Cli {
                 }
             }
         }
+        root_data.check_param_fns()?;
         root_cmd.extra_args()?;
         root_cmd.root = Some(root_data);
         Ok(root_cmd)
@@ -175,6 +180,9 @@ impl Cli {
                     .subcommand(Command::new("help").about(help))
             } else {
                 cmd = cmd.disable_help_subcommand(true);
+            }
+            for name in root_data.param_cmd_fns() {
+                cmd = cmd.subcommand(Command::new(name).hide(true));
             }
         }
         if !self.aliases.is_empty() {
@@ -211,25 +219,45 @@ impl Cli {
                 values.push(value);
             }
         }
-        let mut call_fn: Option<&str> = None;
-        for subcommand in &self.subcommands {
-            if let Some(fn_name) = &subcommand.name {
-                if let Some((match_name, subcommand_matches)) = matches.subcommand() {
-                    if *fn_name == match_name {
-                        let subcommand_values = subcommand.get_args(subcommand_matches);
-                        values.extend(subcommand_values);
-                        call_fn = Some(fn_name);
+        let mut param_fn: Option<String> = None;
+        if let Some(root_data) = self.root.as_ref() {
+            for fn_name in root_data.param_cmd_fns() {
+                if let Some((match_name, _)) = matches.subcommand() {
+                    if fn_name.as_str() == match_name {
+                        param_fn = Some(fn_name);
                     }
                 }
             }
         }
-        call_fn = call_fn.or_else(|| {
-            self.root
-                .as_ref()
-                .and_then(|v| if v.main { Some("main") } else { None })
-        });
-        if let Some(fn_name) = call_fn {
-            values.push(ArgcValue::FnName(fn_name.to_string()));
+
+        let mut call_fn: Option<String> = None;
+        if param_fn.is_none() {
+            for subcommand in &self.subcommands {
+                if let Some(fn_name) = &subcommand.name {
+                    if let Some((match_name, subcommand_matches)) = matches.subcommand() {
+                        if *fn_name == match_name {
+                            let subcommand_values = subcommand.get_args(subcommand_matches);
+                            values.extend(subcommand_values);
+                            call_fn = Some(fn_name.to_string());
+                        }
+                    }
+                }
+            }
+            call_fn = call_fn.or_else(|| {
+                self.root.as_ref().and_then(|v| {
+                    if v.main {
+                        Some("main".to_string())
+                    } else {
+                        None
+                    }
+                })
+            });
+        }
+
+        if let Some(fn_name) = param_fn {
+            values.push(ArgcValue::ParamFnName(fn_name))
+        } else if let Some(fn_name) = call_fn {
+            values.push(ArgcValue::CmdFnName(fn_name));
         }
         values
     }
@@ -291,6 +319,41 @@ impl Cli {
             lines.push("");
         }
         lines.join("\n")
+    }
+}
+
+impl CliRoot {
+    pub fn collect_fns(
+        &mut self,
+        position: usize,
+        default_fn: &Option<String>,
+        choices_fn: &Option<String>,
+    ) {
+        if let Some(default_fn) = default_fn.as_ref() {
+            self.param_fns
+                .push((default_fn.to_string(), position, false));
+        }
+        if let Some(choices_fn) = choices_fn.as_ref() {
+            self.param_fns
+                .push((choices_fn.to_string(), position, true));
+        }
+    }
+
+    fn check_param_fns(&self) -> Result<()> {
+        for (name, pos, _) in &self.param_fns {
+            if !self.fn_names.contains_key(name) {
+                bail!("{}(line {}) is missing", name, pos,)
+            }
+        }
+        Ok(())
+    }
+
+    fn param_cmd_fns(&self) -> HashSet<String> {
+        self.param_fns
+            .iter()
+            .filter(|(_, _, is_choices_fn)| *is_choices_fn)
+            .map(|(name, _, _)| name.to_string())
+            .collect()
     }
 }
 

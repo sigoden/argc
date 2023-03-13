@@ -1,10 +1,9 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 81
 expression: output
 ---
 RUN
-spec cmd_option_names --opt2 value2 --opt3 value3_0,value3_1 --opt4 value4_0 --opt4 value4_1 --opt6 a --opt8 a
+spec cmd_option_names --opt2 value2 --opt3 value3_0,value3_1 --opt4 value4_0 --opt4 value4_1 --opt6 a --opt8 a --op11 a1
 
 STDOUT
 argc_opt2=value2
@@ -14,6 +13,8 @@ argc_opt5=a
 argc_opt6=a
 argc_opt7=a
 argc_opt8=a
+argc_opt9=`_fn_foo`
+argc_op11=a1
 cmd_option_names
 
 STDERR

@@ -174,9 +174,12 @@ fn parse_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
             preceded(
                 pair(space0, tag("--")),
                 alt((
+                    parse_param_choices_fn_required,
+                    parse_param_choices_fn,
                     parse_param_choices_default,
                     parse_param_choices_required,
                     parse_param_choices,
+                    parse_param_assign_fn,
                     parse_param_assign,
                     parse_param_mark,
                 )),
@@ -193,9 +196,12 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
     map(
         pair(
             alt((
+                parse_param_choices_fn_required,
+                parse_param_choices_fn,
                 parse_param_choices_default,
                 parse_param_choices_required,
                 parse_param_choices,
+                parse_param_assign_fn,
                 parse_param_assign,
                 parse_param_mark,
             )),
@@ -248,6 +254,17 @@ fn parse_param_assign(input: &str) -> nom::IResult<&str, ParamData> {
     )(input)
 }
 
+// Parse str=`value`
+fn parse_param_assign_fn(input: &str) -> nom::IResult<&str, ParamData> {
+    map(
+        separated_pair(parse_param_name, char('='), parse_value_fn),
+        |(mut arg, value)| {
+            arg.default_fn = Some(value.to_string());
+            arg
+        },
+    )(input)
+}
+
 // Parse `str[a|b|c]`
 fn parse_param_choices(input: &str) -> nom::IResult<&str, ParamData> {
     map(
@@ -255,9 +272,22 @@ fn parse_param_choices(input: &str) -> nom::IResult<&str, ParamData> {
             parse_param_name,
             delimited(char('['), parse_choices, char(']')),
         ),
-        |(mut arg, (choices, default))| {
+        |(mut arg, choices)| {
             arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
-            arg.default = default.map(|v| v.to_string());
+            arg
+        },
+    )(input)
+}
+
+// Parse str[`fn`]
+fn parse_param_choices_fn(input: &str) -> nom::IResult<&str, ParamData> {
+    map(
+        pair(
+            parse_param_name,
+            delimited(char('['), parse_value_fn, char(']')),
+        ),
+        |(mut arg, choices_fn)| {
+            arg.choices_fn = Some(choices_fn.into());
             arg
         },
     )(input)
@@ -285,10 +315,24 @@ fn parse_param_choices_required(input: &str) -> nom::IResult<&str, ParamData> {
             terminated(parse_param_name, char('!')),
             delimited(char('['), parse_choices, char(']')),
         ),
-        |(mut arg, (choices, default))| {
+        |(mut arg, choices)| {
             arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
             arg.required = true;
-            arg.default = default.map(|v| v.to_string());
+            arg
+        },
+    )(input)
+}
+
+// Parse str![`fn`]
+fn parse_param_choices_fn_required(input: &str) -> nom::IResult<&str, ParamData> {
+    map(
+        pair(
+            terminated(parse_param_name, char('!')),
+            delimited(char('['), parse_value_fn, char(']')),
+        ),
+        |(mut arg, choices_fn)| {
+            arg.choices_fn = Some(choices_fn.into());
+            arg.required = true;
             arg
         },
     )(input)
@@ -320,9 +364,9 @@ fn parse_value_notation(input: &str) -> nom::IResult<&str, Option<&str>> {
 }
 
 // Parse `a|b|c`
-fn parse_choices(input: &str) -> nom::IResult<&str, (Vec<&str>, Option<&str>)> {
+fn parse_choices(input: &str) -> nom::IResult<&str, Vec<&str>> {
     map(separated_list1(char('|'), parse_choice_value), |choices| {
-        (choices, None)
+        choices
     })(input)
 }
 
@@ -365,8 +409,12 @@ fn parse_default_value(input: &str) -> nom::IResult<&str, &str> {
     alt((parse_quoted_string, take_till(is_default_value_terminate)))(input)
 }
 
+fn parse_value_fn(input: &str) -> nom::IResult<&str, &str> {
+    delimited(char('`'), parse_fn_name, char('`'))(input)
+}
+
 fn parse_choice_value(input: &str) -> nom::IResult<&str, &str> {
-    if input.starts_with('=') {
+    if input.starts_with('=') || input.starts_with('`') {
         return fail(input);
     }
     alt((parse_quoted_string, take_till(is_choice_value_terminate)))(input)
@@ -497,13 +545,16 @@ mod tests {
         assert_parse_option_arg!("--foo*");
         assert_parse_option_arg!("--foo!");
         assert_parse_option_arg!("--foo=a");
+        assert_parse_option_arg!("--foo=`_foo`");
         assert_parse_option_arg!("--foo[a|b]");
         assert_parse_option_arg!("--foo[=a|b]");
+        assert_parse_option_arg!("--foo[`_foo`]");
         assert_parse_option_arg!("--foo <FOO>");
         assert_parse_option_arg!("--foo-abc <FOO>");
         assert_parse_option_arg!("--foo=\"a b\"");
         assert_parse_option_arg!("--foo[\"a|b\"|\"c]d\"]");
         assert_parse_option_arg!("--foo![a|b]");
+        assert_parse_option_arg!("--foo![`_foo`]");
     }
 
     #[test]
@@ -521,9 +572,12 @@ mod tests {
         assert_parse_positional_arg!("foo+");
         assert_parse_positional_arg!("foo*");
         assert_parse_positional_arg!("foo=a");
+        assert_parse_positional_arg!("foo=`_foo`");
         assert_parse_positional_arg!("foo[a|b]");
+        assert_parse_positional_arg!("foo[`_foo`]");
         assert_parse_positional_arg!("foo[=a|b]");
         assert_parse_positional_arg!("foo![a|b]");
+        assert_parse_positional_arg!("foo![`_foo`]");
     }
 
     #[test]
