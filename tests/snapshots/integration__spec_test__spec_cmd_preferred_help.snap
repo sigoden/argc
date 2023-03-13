@@ -1,6 +1,5 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 10
 expression: output
 ---
 RUN
@@ -20,6 +19,6 @@ ARGS:
 OPTIONS:
   -f, --flag1        A flag
   -o, --opt1 <OPT1>  A option
-  -h, --help         Print help information
+  -h, --help         Print help
 
 

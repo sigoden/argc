@@ -25,6 +25,6 @@ OPTIONS:
       --opt9 <OPT9>       optional, default from fn
       --op10 <OP10>       choices from fn
       --op11 <OP11>       required, choices from fn
-  -h, --help              Print help information
+  -h, --help              Print help
 
 

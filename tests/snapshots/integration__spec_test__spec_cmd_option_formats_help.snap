@@ -1,6 +1,5 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 25
 expression: output
 ---
 RUN
@@ -22,6 +21,6 @@ OPTIONS:
   -b, --opt5 <OPT5>  With description
   -c, --opt6 <OPT>   
       --opt7 <OPT>   With description
-  -h, --help         Print help information
+  -h, --help         Print help
 
 

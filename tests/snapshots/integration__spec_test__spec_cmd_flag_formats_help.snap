@@ -1,6 +1,5 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 35
 expression: output
 ---
 RUN
@@ -19,6 +18,6 @@ OPTIONS:
   -a, --foo2  
       --foo3  With description
   -b, --foo4  With description
-  -h, --help  Print help information
+  -h, --help  Print help
 
 

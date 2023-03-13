@@ -1,6 +1,5 @@
 ---
 source: tests/main_fn_test.rs
-assertion_line: 51
 expression: output
 ---
 RUN
@@ -14,9 +13,9 @@ USAGE: prog [OPTIONS] <COMMAND>
 
 OPTIONS:
       --foo   
-  -h, --help  Print help information
+  -h, --help  Print help
 
 COMMANDS:
-  cmd
+  cmd  
 
 
