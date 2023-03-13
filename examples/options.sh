@@ -4,9 +4,19 @@
 # @option      -c --opt3*          A option with multiple values
 # @option      -d --opt4+          A required option with multiple values
 # @option      -e --opt5=a         A option with default value
-# @option      -x --opt6[x|y|z]    A option with choices
-# @option      -y --opt7[=x|y|z]   A option with choices and default value
-# @option      -z --opt8![x|y|z]   A required option with choices
+# @option      -f --opt6=`_fn`     A option with default value from fn
+# @option      -x --opt7[x|y|z]    A option with choices
+# @option      -y --opt8[=x|y|z]   A option with choices and default value
+# @option      -z --opt9![x|y|z]   A required option with choices
+# @option         --opt10[`_fn2`]  A option with choices from fn 
+
+_fn() {
+    echo abc
+}
+
+_fn2() {
+    echo "x y z"
+}
 
 eval "$(argc "$0" "$@")"
 

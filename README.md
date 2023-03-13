@@ -116,11 +116,11 @@ Define a positional argument.
 # @arg arg3*           A positional argument support multiple values
 # @arg arg4+           A required positional argument support multiple values
 # @arg arg5=a          A positional argument with default value
-# @arg arg6[a|b]       A positional argument with choices
-# @arg arg7[=a|b]      A positional argument with choices and default value
-# @arg arg8![a|b]      A required positional argument with choices
-# @arg arg9=`_fn`      A positional argument with defaulf value from fn
-# @arg arg10[`_fn`]    A positional argument with choices from fn
+# @arg arg6=`_fn`      A positional argument with default value from fn
+# @arg arg7[a|b]       A positional argument with choices
+# @arg arg8[`_fn`]     A positional argument with choices from fn
+# @arg arg9[=a|b]      A positional argument with choices and default value
+# @arg arg10![a|b]     A required positional argument with choices
 # @arg arg11![`_fn`]   A required positional argument with choices from fn
 ```
 
@@ -140,13 +140,13 @@ Define a option.
 # @option    --opt5*                A option with multiple values
 # @option    --opt6+                A required option with multiple values
 # @option    --opt7=a               A option with default value
-# @option    --opt8[a|b]            A option with choices
-# @option    --opt9[=a|b]           A option with choices and default value
-# @option    --opt10![a|b]          A required option with choices
-# @option -b --opt11 <PATH>         A option with short alias and notation
-# @option    --opt12=`_fn`          A option with default value from fn
-# @option    --opt13[`_fn`]         A option with choices from fn
-# @option    --opt14![`_fn`]        A required option with choices from fn
+# @option    --opt8=`_fn`           A option with default value from fn
+# @option    --opt9[a|b]            A option with choices
+# @option    --opt10[`_fn`]         A option with choices from fn
+# @option    --opt11[=a|b]          A option with choices and default value
+# @option    --opt12![a|b]          A required option with choices
+# @option    --opt13![`_fn`]        A required option with choices from fn
+# @option -b --opt14 <PATH>         A option with short alias and notation
 ```
 
 ### @flag
