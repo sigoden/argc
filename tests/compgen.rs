@@ -64,6 +64,6 @@ fn test_compgen_help_tag2() {
 }
 
 #[test]
-fn test_compgen_chocie_fn() {
+fn test_compgen_choice_fn() {
     snapshot_compgen!(SPEC_SCRIPT, &["prog", "cmd_option_names", "--op11"]);
 }
