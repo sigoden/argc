@@ -194,7 +194,7 @@ fn parse_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
 // Parse `@option`, positional only
 fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
     map(
-        pair(
+        tuple((
             alt((
                 parse_param_choices_fn_required,
                 parse_param_choices_fn,
@@ -205,9 +205,10 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
                 parse_param_assign,
                 parse_param_mark,
             )),
+            parse_value_notation,
             parse_tail,
-        ),
-        |(arg, summary)| PositionalParam::new(arg, summary),
+        )),
+        |(arg, value_name, summary)| PositionalParam::new(arg, summary, value_name),
     )(input)
 }
 
@@ -357,7 +358,7 @@ fn parse_short(input: &str) -> nom::IResult<&str, Option<char>> {
 fn parse_value_notation(input: &str) -> nom::IResult<&str, Option<&str>> {
     let main = delimited(
         char('<'),
-        take_while1(|c: char| c.is_ascii_uppercase() || c == '-'),
+        take_while1(|c: char| !(c.is_whitespace() || c == '>')),
         char('>'),
     );
     opt(preceded(space0, main))(input)
@@ -566,11 +567,12 @@ mod tests {
 
     #[test]
     fn test_parse_positional_arg() {
-        assert_parse_positional_arg!("foo A foo arg");
+        assert_parse_positional_arg!("foo <FOO> A foo arg");
         assert_parse_positional_arg!("foo");
         assert_parse_positional_arg!("foo!");
         assert_parse_positional_arg!("foo+");
         assert_parse_positional_arg!("foo*");
+        assert_parse_positional_arg!("foo <FOO>");
         assert_parse_positional_arg!("foo=a");
         assert_parse_positional_arg!("foo=`_foo`");
         assert_parse_positional_arg!("foo[a|b]");

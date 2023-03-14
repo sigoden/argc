@@ -133,9 +133,8 @@ impl OptionParam {
         short: Option<char>,
         value_name: Option<&str>,
     ) -> Self {
-        let arg_name = arg.name.clone();
         OptionParam {
-            name: arg.name,
+            name: arg.name.clone(),
             summary: summary.to_string(),
             choices: arg.choices,
             choices_fn: arg.choices_fn,
@@ -146,7 +145,7 @@ impl OptionParam {
             short,
             value_name: value_name.map(|v| v.to_string()),
             arg_value_name: value_name
-                .or(Some(&arg_name))
+                .or(Some(&arg.name))
                 .map(to_cobol_case)
                 .unwrap_or_default(),
         }
@@ -245,6 +244,7 @@ impl Param for OptionParam {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PositionalParam {
     pub(crate) name: String,
+    pub(crate) value_name: Option<String>,
     pub(crate) summary: String,
     pub(crate) choices: Option<Vec<String>>,
     pub(crate) choices_fn: Option<String>,
@@ -256,10 +256,9 @@ pub struct PositionalParam {
 }
 
 impl PositionalParam {
-    pub fn new(arg: ParamData, summary: &str) -> Self {
-        let arg_value_name = to_cobol_case(&arg.name);
+    pub fn new(arg: ParamData, summary: &str, value_name: Option<&str>) -> Self {
         PositionalParam {
-            name: arg.name,
+            name: arg.name.clone(),
             summary: summary.to_string(),
             choices: arg.choices,
             choices_fn: arg.choices_fn,
@@ -267,7 +266,11 @@ impl PositionalParam {
             required: arg.required,
             default: arg.default,
             default_fn: arg.default_fn,
-            arg_value_name,
+            value_name: value_name.map(|v| v.to_string()),
+            arg_value_name: value_name
+                .or(Some(&arg.name))
+                .map(to_cobol_case)
+                .unwrap_or_default(),
         }
     }
 
@@ -281,6 +284,7 @@ impl PositionalParam {
             required: false,
             default: None,
             default_fn: None,
+            value_name: None,
             arg_value_name: EXTRA_ARGS.to_string(),
         }
     }
@@ -307,6 +311,9 @@ impl Param for PositionalParam {
             &self.default_fn,
         );
         output.push(name);
+        if let Some(value_name) = self.value_name.as_ref() {
+            output.push(format!("<{}>", value_name));
+        }
         render_summary(&mut output, &self.summary);
         output.join(" ")
     }

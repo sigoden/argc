@@ -105,7 +105,7 @@ COMMANDS:
 ### @arg
 
 ```
-@arg <name>[modifier] [help string]
+@arg <name>[modifier] [notation] [help string]
 ```
 
 Define a positional argument.
@@ -113,15 +113,16 @@ Define a positional argument.
 ```sh
 # @arg arg1            A positional argument
 # @arg arg2!           A required positional argument
-# @arg arg3*           A positional argument support multiple values
-# @arg arg4+           A required positional argument support multiple values
-# @arg arg5=a          A positional argument with default value
-# @arg arg6=`_fn`      A positional argument with default value from fn
-# @arg arg7[a|b]       A positional argument with choices
-# @arg arg8[`_fn`]     A positional argument with choices from fn
-# @arg arg9[=a|b]      A positional argument with choices and default value
-# @arg arg10![a|b]     A required positional argument with choices
-# @arg arg11![`_fn`]   A required positional argument with choices from fn
+# @arg arg3 <PATH>     A positional argument with notation
+# @arg arg4*           A positional argument support multiple values
+# @arg arg5+           A required positional argument support multiple values
+# @arg arg6=a          A positional argument with default value
+# @arg arg7=`_fn`      A positional argument with default value from fn
+# @arg arg8[a|b]       A positional argument with choices
+# @arg arg9[`_fn`]     A positional argument with choices from fn
+# @arg arg10[=a|b]     A positional argument with choices and default value
+# @arg arg11![a|b]     A required positional argument with choices
+# @arg arg12![`_fn`]   A required positional argument with choices from fn
 ```
 
 ### @option
