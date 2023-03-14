@@ -1,25 +1,30 @@
 use crate::parser::{parse, Event, EventData};
+use crate::utils::split_shell_words;
 use crate::Result;
+use anyhow::anyhow;
 use either::Either;
 use indexmap::{IndexMap, IndexSet};
 use std::collections::{HashMap, HashSet};
 
-pub fn compgen(source: &str, args: &[&str]) -> Result<Vec<String>> {
+pub fn compgen(source: &str, line: &str) -> Result<Vec<String>> {
     let events = parse(source)?;
-    let cmd_comp = Completion::new_from_events(&events);
-    cmd_comp.generate(args)
+    let comp = Completion::new_from_events(&events);
+    comp.generate(line)
 }
 
-pub type ChoicesType = Either<Vec<String>, String>;
+type ChoicesType = Either<Vec<String>, String>;
+type OptionMapType = (Option<String>, String, Option<ChoicesType>, bool);
+type PositionalItemType = (String, Option<ChoicesType>, bool);
 
 #[derive(Debug, Default)]
 pub struct Completion {
     aliases: IndexSet<String>,
-    mappings: IndexMap<String, String>,
-    options: HashMap<String, (Option<String>, ChoicesType, bool)>,
+    options: HashMap<String, OptionMapType>,
     flags: HashMap<String, Option<String>>,
-    positionals: IndexMap<String, ChoicesType>,
-    subcommands: IndexMap<String, Completion>,
+    flag_option_mappings: IndexMap<String, String>,
+    positionals: Vec<PositionalItemType>,
+    command_mappings: IndexMap<String, String>,
+    commands: IndexMap<String, Completion>,
 }
 
 impl Completion {
@@ -50,18 +55,25 @@ impl Completion {
                     });
                     if let Some(cmd) = cmd {
                         let name = format!("--{}", option_param.name);
+                        cmd.flag_option_mappings.insert(name.clone(), name.clone());
                         let short = if let Some(short) = option_param.short.as_ref() {
                             let short = format!("-{}", short);
-                            cmd.mappings.insert(short.clone(), name.clone());
+                            cmd.flag_option_mappings.insert(short.clone(), name.clone());
                             Some(short)
                         } else {
                             None
                         };
                         let choices =
                             parse_choices_or_fn(&option_param.choices, &option_param.choices_fn);
-                        cmd.mappings.insert(name.clone(), name.clone());
-                        cmd.options
-                            .insert(name.clone(), (short, choices, option_param.multiple));
+                        cmd.options.insert(
+                            name.clone(),
+                            (
+                                short,
+                                option_param.arg_value_name.clone(),
+                                choices,
+                                option_param.multiple,
+                            ),
+                        );
                     }
                 }
                 EventData::Flag(flag_param) => {
@@ -72,14 +84,14 @@ impl Completion {
                     });
                     if let Some(cmd) = cmd {
                         let name = format!("--{}", flag_param.name);
+                        cmd.flag_option_mappings.insert(name.clone(), name.clone());
                         let short = if let Some(short) = flag_param.short.as_ref() {
                             let short = format!("-{}", short);
-                            cmd.mappings.insert(short.clone(), name.clone());
+                            cmd.flag_option_mappings.insert(short.clone(), name.clone());
                             Some(short)
                         } else {
                             None
                         };
-                        cmd.mappings.insert(name.clone(), name.clone());
                         cmd.flags.insert(name, short);
                     }
                 }
@@ -90,26 +102,28 @@ impl Completion {
                         None
                     });
                     if let Some(cmd) = cmd {
-                        let multiple = if positional_param.multiple { "..." } else { "" };
                         let choices = parse_choices_or_fn(
                             &positional_param.choices,
                             &positional_param.choices_fn,
                         );
-                        cmd.positionals.insert(
-                            format!("<{}>{}", positional_param.name.to_uppercase(), multiple),
+                        cmd.positionals.push((
+                            positional_param.arg_value_name.to_string(),
                             choices,
-                        );
+                            positional_param.multiple,
+                        ));
                     }
                 }
                 EventData::Func(name) => {
                     is_root_scope = false;
                     let name = name.to_string();
-                    if let Some(mut cmd) = maybe_subcommand.take() {
-                        root_cmd.mappings.insert(name.clone(), name.clone());
-                        for alias in cmd.aliases.drain(..) {
-                            root_cmd.mappings.insert(alias, name.clone());
+                    if let Some(cmd) = maybe_subcommand.take() {
+                        root_cmd.command_mappings.insert(name.clone(), name.clone());
+                        for alias in cmd.aliases.iter() {
+                            root_cmd
+                                .command_mappings
+                                .insert(alias.to_string(), name.clone());
                         }
-                        root_cmd.subcommands.insert(name.clone(), cmd);
+                        root_cmd.commands.insert(name.clone(), cmd);
                     }
                 }
                 _ => {}
@@ -117,106 +131,214 @@ impl Completion {
         }
         if help_subcommand {
             let mut cmd = Completion::default();
-            cmd.positionals.insert(
+            cmd.positionals.push((
                 "<CMD>".to_string(),
-                Either::Left(root_cmd.subcommands.keys().map(|v| v.to_string()).collect()),
-            );
+                Some(Either::Left(
+                    root_cmd.commands.keys().map(|v| v.to_string()).collect(),
+                )),
+                false,
+            ));
             root_cmd
-                .mappings
+                .command_mappings
                 .insert("help".to_string(), "help".to_string());
-            root_cmd.subcommands.insert("help".into(), cmd);
+            root_cmd.commands.insert("help".into(), cmd);
         }
         root_cmd
     }
 
-    pub fn generate(&self, args: &[&str]) -> Result<Vec<String>> {
-        let mut i = 1;
-        let len = args.len();
-        let mut omitted: HashSet<String> = HashSet::default();
-        let mut cmd_comp = self;
+    pub fn generate(&self, line: &str) -> Result<Vec<String>> {
+        let args = split_shell_words(line).map_err(|_| anyhow!("Invalid args"))?;
+        let mut comp_type = get_comp_type(line, &args);
+        let mut force_positional = false;
+        let mut option_complete_values = None;
+        let mut index = 0;
+        let mut skipped: HashSet<String> = HashSet::default();
+        let root_comp = self;
+        let mut comp = self;
         let mut positional_index = 0;
-        let mut unknown_arg = false;
-        while i < len {
-            let arg = args[i];
-            if let Some(name) = cmd_comp.mappings.get(arg) {
-                if arg.starts_with('-') {
-                    if let Some((short, choices, multiple)) = cmd_comp.options.get(name) {
-                        if i == len - 1 {
-                            match choices {
-                                Either::Left(choices) => return Ok(choices.clone()),
-                                Either::Right(choices_fn) => {
-                                    return Ok(vec![choices_fn.to_string()])
-                                }
-                            }
-                        }
-                        if *multiple {
-                            while i + 1 < len && !args[i + 1].starts_with('-') {
-                                i += 1;
-                            }
-                        } else {
-                            if !args[i + 1].starts_with('-') {
-                                i += 1;
-                            }
-                            omitted.insert(name.to_string());
+        let mut has_subcommand = false;
+        let len = args.len();
+        while index < len {
+            let arg = args[index].as_str();
+            if arg == "--" {
+                force_positional = true;
+            } else if arg.starts_with('-') && !force_positional {
+                let (arg, arg_has_value) = match arg.split_once('=') {
+                    Some((v, _)) => (v, true),
+                    None => (arg, false),
+                };
+                if let Some(name) = comp.flag_option_mappings.get(arg) {
+                    if let Some((short, value_name, choices, multiple)) = comp.options.get(name) {
+                        if !multiple {
+                            skipped.insert(name.to_string());
                             if let Some(short) = short {
-                                omitted.insert(short.to_string());
+                                skipped.insert(short.to_string());
                             }
                         }
-                    } else if let Some(short) = cmd_comp.flags.get(name) {
-                        omitted.insert(name.to_string());
+                        if index == len - 1 {
+                            if !arg_has_value && comp_type == CompType::Any {
+                                comp_type = CompType::OptionValue;
+                                option_complete_values =
+                                    Some(generate_by_choices_or_name(value_name, choices))
+                            }
+                            break;
+                        }
+                        if !arg_has_value && !args[index + 1].starts_with('-') {
+                            index += 1;
+                            if index == len - 1 && comp_type == CompType::CommandOrPositional {
+                                comp_type = CompType::OptionValue;
+                                option_complete_values =
+                                    Some(generate_by_choices_or_name(value_name, choices));
+                                break;
+                            }
+                        }
+                    } else if let Some(short) = comp.flags.get(name) {
+                        skipped.insert(name.to_string());
                         if let Some(short) = short {
-                            omitted.insert(short.to_string());
+                            skipped.insert(short.to_string());
                         }
                     }
-                } else if let Some(cmd) = cmd_comp.subcommands.get(name) {
-                    cmd_comp = cmd;
-                    omitted.clear();
-                    positional_index = 0;
                 }
-            } else if arg.starts_with('-') {
-                unknown_arg = true;
-                positional_index = 0;
-            } else if !unknown_arg {
+            } else if !arg.starts_with('-') {
+                let mut matched = false;
+                if positional_index == 0 {
+                    if let Some(name) = comp.command_mappings.get(arg) {
+                        if let Some(cmd) = comp.commands.get(name) {
+                            skipped.clear();
+                            has_subcommand = true;
+                            comp = cmd;
+                            matched = true;
+                            skipped.insert(name.to_string());
+                            skipped.extend(cmd.aliases.iter().cloned());
+                        }
+                    }
+                }
+                if !matched {
+                    positional_index += 1;
+                }
+            } else {
                 positional_index += 1;
             }
-            i += 1;
+            index += 1;
         }
         let mut output = vec![];
-        for name in cmd_comp.mappings.keys() {
-            if !omitted.contains(name) {
-                output.push(name.to_string());
+        match comp_type {
+            CompType::FlagOrOption => {
+                add_mapping_to_output(&mut output, &skipped, &comp.flag_option_mappings);
             }
-        }
-        if positional_index >= cmd_comp.positionals.len() {
-            if let Some((name, _)) = cmd_comp.positionals.last() {
-                if name.ends_with("...") {
-                    output.push(name.to_string());
-                }
-            }
-        } else if let Some((name, choices)) = cmd_comp.positionals.iter().nth(positional_index) {
-            match choices {
-                Either::Left(choices) => {
-                    if choices.is_empty() {
-                        output.push(name.to_string())
+            CompType::CommandOrPositional => {
+                if has_subcommand {
+                    if positional_index == 0 {
+                        add_mapping_to_output(&mut output, &skipped, &root_comp.command_mappings);
                     } else {
-                        output.extend(choices.to_vec());
+                        add_positional_to_output(
+                            &mut output,
+                            positional_index - 1,
+                            &comp.positionals,
+                        );
                     }
+                } else {
+                    add_mapping_to_output(&mut output, &skipped, &root_comp.command_mappings);
+                    add_positional_to_output(
+                        &mut output,
+                        positional_index.saturating_sub(1),
+                        &comp.positionals,
+                    );
                 }
-                Either::Right(choices_fn) => output.push(choices_fn.to_string()),
+            }
+            CompType::OptionValue => {
+                if let Some(values) = option_complete_values {
+                    output.extend(values)
+                }
+            }
+            CompType::Any => {
+                add_mapping_to_output(&mut output, &skipped, &comp.flag_option_mappings);
+                if positional_index == 0 {
+                    add_mapping_to_output(&mut output, &skipped, &comp.command_mappings);
+                }
+                add_positional_to_output(&mut output, positional_index, &comp.positionals);
             }
         }
         Ok(output)
     }
 }
 
-fn parse_choices_or_fn(choices: &Option<Vec<String>>, choices_fn: &Option<String>) -> ChoicesType {
-    if let Some(choices_fn) = choices_fn {
-        Either::Right(format!("__argc_compgen_cmd:{}", choices_fn))
+fn add_positional_to_output(
+    output: &mut Vec<String>,
+    positional_index: usize,
+    positionals: &[PositionalItemType],
+) {
+    let positional_len = positionals.len();
+    if positional_index >= positional_len {
+        if let Some((name, choices, multiple)) = positionals.last() {
+            if *multiple {
+                output.extend(generate_by_choices_or_name(name, choices));
+            }
+        }
+    } else if let Some((name, choices, _)) = positionals.get(positional_index) {
+        output.extend(generate_by_choices_or_name(name, choices));
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CompType {
+    FlagOrOption,
+    CommandOrPositional,
+    OptionValue,
+    Any,
+}
+
+fn get_comp_type(line: &str, args: &[String]) -> CompType {
+    if line
+        .chars()
+        .last()
+        .map(|v| v.is_ascii_whitespace())
+        .unwrap_or(true)
+    {
+        CompType::Any
+    } else if let Some(arg) = args.last() {
+        if arg.starts_with('-') {
+            CompType::FlagOrOption
+        } else {
+            CompType::CommandOrPositional
+        }
     } else {
-        let choices = match &choices {
-            Some(choices) => choices.iter().map(|v| v.to_string()).collect(),
-            None => vec![],
-        };
-        Either::Left(choices)
+        CompType::Any
+    }
+}
+
+fn parse_choices_or_fn(
+    choices: &Option<Vec<String>>,
+    choices_fn: &Option<String>,
+) -> Option<ChoicesType> {
+    if let Some(choices_fn) = choices_fn {
+        Some(Either::Right(format!("`{}`", choices_fn)))
+    } else {
+        choices
+            .as_ref()
+            .map(|choices| Either::Left(choices.iter().map(|v| v.to_string()).collect()))
+    }
+}
+
+fn generate_by_choices_or_name(value_name: &str, choices: &Option<ChoicesType>) -> Vec<String> {
+    if let Some(choices) = choices {
+        match choices {
+            Either::Left(choices) => choices.to_vec(),
+            Either::Right(choices_fn) => vec![choices_fn.to_string()],
+        }
+    } else {
+        vec![format!("<{}>", value_name)]
+    }
+}
+
+fn add_mapping_to_output(
+    output: &mut Vec<String>,
+    skipped: &HashSet<String>,
+    mapping: &IndexMap<String, String>,
+) {
+    for name in mapping.keys() {
+        if !skipped.contains(name) {
+            output.push(name.to_string());
+        }
     }
 }

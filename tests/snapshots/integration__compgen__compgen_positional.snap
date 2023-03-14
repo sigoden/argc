@@ -1,10 +1,9 @@
 ---
 source: tests/compgen.rs
-assertion_line: 35
 expression: output
 ---
 RUN
-prog cmd_positional_requires
+cmd_positional_requires 
 
 STDOUT
 <ARG1>

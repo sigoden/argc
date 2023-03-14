@@ -68,7 +68,9 @@ USAGE:{usage}"#,
     if matches.get_flag("compgen") {
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        print!("{}", argc::compgen(&source, &cmd_args)?.join(" "))
+        let line = if cmd_args.len() == 1 { "" } else { cmd_args[1] };
+        let candicates = argc::compgen(&source, line)?;
+        candicates.into_iter().for_each(|v| println!("{v}"));
     } else {
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();

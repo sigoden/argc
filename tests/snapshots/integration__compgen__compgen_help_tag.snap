@@ -1,10 +1,9 @@
 ---
 source: tests/compgen.rs
-assertion_line: 58
 expression: output
 ---
 RUN
-prog
+
 
 STDOUT
 foo bar help

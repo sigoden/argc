@@ -70,7 +70,6 @@ macro_rules! snapshot_compgen {
             Err(stderr) => (String::new(), stderr.to_string()),
         };
 
-        let args = $args.join(" ");
         let output = format!(
             r###"RUN
 {}
@@ -81,7 +80,7 @@ STDOUT
 STDERR
 {}
 "###,
-            args, stdout, stderr
+            $args, stdout, stderr
         );
         insta::assert_snapshot!(output);
     };
