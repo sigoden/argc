@@ -65,7 +65,7 @@ cmd_flag_formats() {
 }
 
 # @cmd  Positional one required
-# @arg   arg1!     A required arg
+# @arg   arg1! <ARG>  A required arg
 cmd_positional_only() {
     print_argc_vars
 }
