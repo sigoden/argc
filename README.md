@@ -240,9 +240,9 @@ COMMANDS:
 
 ## Shell Completion
 
-[completion scripts](completions) are available for bash/zsh/powershell.
+[completion scripts](completions) are available for bash/zsh/fish/powershell.
 
-All argc scripts share the same completion function. To add completion to a argc script, simply add the script name to $ARGC_SCRIPTS.
+All argc scripts share the same completion function. To add completion to a argc script, simply add the script name to `$ARGC_SCRIPTS`.
 
 ## License
 
