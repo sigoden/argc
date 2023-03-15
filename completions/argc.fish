@@ -20,6 +20,12 @@ function __fish_complete_argc
         if string match -qr '^`[^` ]+`' -- "$opts[1]"
             set -l name (string sub $opts[1] -s 2 -e -1)
             set opts (bash "$argcfile" $name 2>/dev/null)
+        else if test "$opts[1]" = "<FILE>" || test "$opts[1]" = "<PATH>" || test "$opts[1]" = "<FILE>..." || test "$opts[1]" = "<PATH>..."
+            set opts ()
+            __fish_complete_path
+        else if test "$opts[1]" = "<DIR>" || test "$opts[1]" = "<DIR>..."
+            set opts ()
+            __fish_complete_directories 
         end
     end
     for item in $opts

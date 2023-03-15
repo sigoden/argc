@@ -20,10 +20,18 @@ _argc_completion()
     elif [[ ${#opts[@]} == 1 ]]; then
         if [[ "${opts[1]}" == \`*\` ]]; then
             opts=( $(bash "$argcfile" "${opts:1:-1}" 2>/dev/null) )
+        elif [[ "${opts[1]}" == "<FILE>" ]] || [[ "${opts[1]}" == "<PATH>" ]] || [[ "${opts[1]}" == "<FILE>..." ]] || [[ "${opts[1]}" == "<PATH>..." ]]; then
+            opts=()
+            _path_files
+        elif [[ "${opts[1]}" == "<DIR>" ]] || [[ "${opts[1]}" == "<DIR>..." ]]; then
+            opts=()
+            _path_files -/
         fi
     fi
-    compadd -- $opts[@]
-    return 0
+    
+    if [[ ${#opts[@]} -gt 0 ]]; then
+        compadd -- $opts[@]
+    fi
 }
 
 compdef _argc_completion ${ARGC_SCRIPTS[@]}

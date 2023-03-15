@@ -6,7 +6,7 @@ RUN
 cmd_positional_requires arg1 arg2 
 
 STDOUT
-<ARG2>
+<ARG2>...
 
 STDERR
 

@@ -21,11 +21,19 @@ _argc_completion() {
     elif [[ ${#opts[@]} == 1 ]]; then
         if [[ "$opts" == \`*\` ]]; then
             opts=($(bash "$argcfile" "${opts:1:-1}" 2>/dev/null))
+        elif [[ "$opts" == "<FILE>" ]] || [[ "$opts" == "<PATH>" ]] || [[ "$opts" == "<FILE>..." ]] || [[ "$opts" == "<PATH>..." ]]; then
+            opts=()
+            compopt +o filenames 
+        elif [[ "$opts" == "<DIR>" ]] || [[ "$opts" == "<DIR>..." ]]; then
+            opts=()
+            compopt +o dirnames
         fi
     fi
-    CANDIDATES=($(compgen -W "${opts[*]}" -- "${cur}"))
-    if [ ${#CANDIDATES[*]} -gt 0 ]; then
-        COMPREPLY=($(printf '%q\n' "${CANDIDATES[@]}"))
+    if [[ ${#opts[@]} -gt 0 ]]; then
+        CANDIDATES=($(compgen -W "${opts[*]}" -- "${cur}"))
+        if [ ${#CANDIDATES[*]} -gt 0 ]; then
+            COMPREPLY=($(printf '%q\n' "${CANDIDATES[@]}"))
+        fi
     fi
 }
 

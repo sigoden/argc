@@ -178,8 +178,9 @@ impl Completion {
                         if index == len - 1 {
                             if !arg_has_value && comp_type == CompType::Any {
                                 comp_type = CompType::OptionValue;
-                                option_complete_values =
-                                    Some(generate_by_choices_or_name(value_name, choices))
+                                option_complete_values = Some(generate_by_choices_or_name(
+                                    value_name, choices, *multiple,
+                                ))
                             }
                             break;
                         }
@@ -187,8 +188,9 @@ impl Completion {
                             index += 1;
                             if index == len - 1 && comp_type == CompType::CommandOrPositional {
                                 comp_type = CompType::OptionValue;
-                                option_complete_values =
-                                    Some(generate_by_choices_or_name(value_name, choices));
+                                option_complete_values = Some(generate_by_choices_or_name(
+                                    value_name, choices, *multiple,
+                                ));
                                 break;
                             }
                         }
@@ -272,11 +274,11 @@ fn add_positional_to_output(
     if positional_index >= positional_len {
         if let Some((name, choices, multiple)) = positionals.last() {
             if *multiple {
-                output.extend(generate_by_choices_or_name(name, choices));
+                output.extend(generate_by_choices_or_name(name, choices, *multiple));
             }
         }
-    } else if let Some((name, choices, _)) = positionals.get(positional_index) {
-        output.extend(generate_by_choices_or_name(name, choices));
+    } else if let Some((name, choices, multiple)) = positionals.get(positional_index) {
+        output.extend(generate_by_choices_or_name(name, choices, *multiple));
     }
 }
 
@@ -320,14 +322,23 @@ fn parse_choices_or_fn(
     }
 }
 
-fn generate_by_choices_or_name(value_name: &str, choices: &Option<ChoicesType>) -> Vec<String> {
+fn generate_by_choices_or_name(
+    value_name: &str,
+    choices: &Option<ChoicesType>,
+    multiple: bool,
+) -> Vec<String> {
     if let Some(choices) = choices {
         match choices {
             Either::Left(choices) => choices.to_vec(),
             Either::Right(choices_fn) => vec![choices_fn.to_string()],
         }
     } else {
-        vec![format!("<{}>", value_name)]
+        let value = if multiple {
+            format!("<{}>...", value_name)
+        } else {
+            format!("<{}>", value_name)
+        };
+        vec![value]
     }
 }
 

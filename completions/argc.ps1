@@ -27,6 +27,10 @@ $_argc_completion = {
     $comps = (argc --compgen "$argcfile" "$cmds" 2>$null)
     if ($comps -match '^`[^` ]+`$') {
         $comps = (& "$argcfile" $comps.Substring(1, $comps.Length - 2) 2>$null)
+    } elseif ($comps -eq "<FILE>" -or $comps -eq "<PATH>" -or $comps -eq "<FILE>..." -or $comps -eq "<PATH>...") {
+        $comps = ("")
+    } elseif ($comps -eq "<DIR>" -or $comps -eq "<DIR>...") {
+        $comps = ("")
     }
     $comps -split "`n" | 
         Where-Object { $_ -like "$wordToComplete*" } |

@@ -105,7 +105,7 @@ COMMANDS:
 ### @arg
 
 ```
-@arg <name>[modifier] [notation] [help string]
+@arg <name>[modifier] [value notation] [help string]
 ```
 
 Define a positional argument.
@@ -113,7 +113,7 @@ Define a positional argument.
 ```sh
 # @arg arg1            A positional argument
 # @arg arg2!           A required positional argument
-# @arg arg3 <PATH>     A positional argument with notation
+# @arg arg3 <PATH>     A positional argument with value notation
 # @arg arg4*           A positional argument support multiple values
 # @arg arg5+           A required positional argument support multiple values
 # @arg arg6=a          A positional argument with default value
@@ -128,7 +128,7 @@ Define a positional argument.
 ### @option
 
 ```
-@option [short] <long>[modifier] [notation] [help string]
+@option [short] <long>[modifier] [value notation] [help string]
 ```
 
 Define a option.
@@ -136,7 +136,7 @@ Define a option.
 ```sh
 # @option    --opt1                 A option
 # @option -a --opt2                 A option with short alias
-# @option    --opt3 <PATH>          A option with notation
+# @option    --opt3 <PATH>          A option with value notation
 # @option    --opt4!                A required option
 # @option    --opt5*                A option with multiple values
 # @option    --opt6+                A required option with multiple values
@@ -147,7 +147,7 @@ Define a option.
 # @option    --opt11[=a|b]          A option with choices and default value
 # @option    --opt12![a|b]          A required option with choices
 # @option    --opt13![`_fn`]        A required option with choices from fn
-# @option -b --opt14 <PATH>         A option with short alias and notation
+# @option -b --opt14 <PATH>         A option with short alias and value notation
 ```
 
 ### @flag
@@ -238,6 +238,21 @@ USAGE: test.sh <COMMAND>
 COMMANDS:
   test  Run test
 ```
+
+### Value Notation
+
+Value notation is used to describe value type of options and positional parameters.
+
+```
+# @option --target <FILE>
+# @arg target <FILE>
+```
+
+Here are some value notation that will affect the shell completion.
+
+- `<FILE>`: complete files in current directory
+- `<DIR>`: complete directories in current directory
+- `<PATH>`: complete files and directories in current directory
 
 ## Shell Completion
 
