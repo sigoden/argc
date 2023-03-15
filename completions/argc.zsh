@@ -7,7 +7,7 @@ ARGC_SCRIPTS=( mycmd1 mycmd2 )
 
 _argc_completion()
 {
-    local argcfile line opts
+    local argcfile line opts opts2
     argcfile=$(which $words[1])
     line="${words[2,-1]}"
     if [[ $? -ne 0 ]]; then
@@ -20,17 +20,21 @@ _argc_completion()
     elif [[ ${#opts[@]} == 1 ]]; then
         if [[ "${opts[1]}" == \`*\` ]]; then
             opts=( $(bash "$argcfile" "${opts:1:-1}" 2>/dev/null) )
-        elif [[ "${opts[1]}" == "<FILE>" ]] || [[ "${opts[1]}" == "<PATH>" ]] || [[ "${opts[1]}" == "<FILE>..." ]] || [[ "${opts[1]}" == "<PATH>..." ]]; then
-            opts=()
-            _path_files
-        elif [[ "${opts[1]}" == "<DIR>" ]] || [[ "${opts[1]}" == "<DIR>..." ]]; then
-            opts=()
-            _path_files -/
         fi
     fi
-    
-    if [[ ${#opts[@]} -gt 0 ]]; then
-        compadd -- $opts[@]
+    opts2=()
+    for item in "${opts[@]}"; do
+        if [[ "$item" == "<FILE>" ]] || [[ "$item" == "<PATH>" ]] || [[ "$item" == "<FILE>..." ]] || [[ "$item" == "<PATH>..." ]]; then
+            _path_files
+        elif [[ "$item" == "<DIR>" ]] || [[ "$item" == "<DIR>..." ]]; then
+            _path_files -/
+        else
+            opts2+=("$item")
+        fi
+    done
+
+    if [[ ${#opts2[@]} -gt 0 ]]; then
+        compadd -- $opts2[@]
     fi
 }
 
