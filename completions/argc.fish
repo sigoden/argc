@@ -6,7 +6,6 @@
 set ARGC_SCRIPTS mycmd1 mycmd2
 
 function __fish_complete_argc
-    echo BEGIN > /tmp/file1
     set -l tokens (commandline -c | string trim -l | string split " " --)
     set -l argcfile (which $tokens[1])
     if test -z $argcfile
