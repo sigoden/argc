@@ -17,7 +17,7 @@ function __fish_complete_argc
     if [ (count $opts) = 0 ]
         return 0
     else if [ (count $opts) = 1 ]
-        if string match -qr '`\w+`' -- "$opts[1]"
+        if string match -qr '^`[^` ]+`' -- "$opts[1]"
             set -l name (string sub $opts[1] -s 2 -e -1)
             set opts (bash "$argcfile" $name 2>/dev/null)
         end

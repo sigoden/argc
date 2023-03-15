@@ -14,19 +14,21 @@ $_argc_completion = {
             return;
         }
     }
-    if ($wordToComplete) {
-        $cmds = $commandAst.CommandElements[1..($commandAst.CommandElements.Count - 2)]
+    if ($wordToComplete.ToString() -eq "") {
+        $tail = " "
     } else {
-        $cmds = $commandAst.CommandElements[1..($commandAst.CommandElements.Count - 1)]
+        $tail = ""
     }
-    $comps = (argc --compgen "$argcfile" $cmds 2>$null)
-    $__argc_compgen_cmd="__argc_compgen_cmd:"
-    if ($comps.StartsWith($__argc_compgen_cmd)) {
-        $comps = $comps.Substring($__argc_compgen_cmd.Length)
-        $comps = (& "$argcfile" $comps 2>$null)
-        $comps = $comps.Trim()
+    if ($commandAst.CommandElements.Count -gt 1) {
+        $cmds = ($commandAst.CommandElements[1..($commandAst.CommandElements.Count - 1)] -join " ") + $tail
+    } else {
+        $cmds = $tail
     }
-    $comps -split " " | 
+    $comps = (argc --compgen "$argcfile" "$cmds" 2>$null)
+    if ($comps -match '^`[^` ]+`$') {
+        $comps = (& "$argcfile" $comps.Substring(1, $comps.Length - 2) 2>$null)
+    }
+    $comps -split "`n" | 
         Where-Object { $_ -like "$wordToComplete*" } |
         ForEach-Object { 
             if ($_.StartsWith("-")) {
