@@ -3,10 +3,10 @@ source: tests/compgen.rs
 expression: output
 ---
 RUN
-cmd_option_names --op11 
+cmd_option_names --opt7 a
 
 STDOUT
-`_fn_bars`
+a b c
 
 STDERR
 

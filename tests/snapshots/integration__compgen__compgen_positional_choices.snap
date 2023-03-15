@@ -1,10 +1,9 @@
 ---
 source: tests/compgen.rs
-assertion_line: 53
 expression: output
 ---
 RUN
-prog cmd_positional_with_choices
+cmd_positional_with_choices 
 
 STDOUT
 a b
