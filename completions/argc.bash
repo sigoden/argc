@@ -19,7 +19,7 @@ _argc_completion() {
     opts2=()
     for opt in ${opts[@]}; do
         if [[ "$opt" == \`*\` ]]; then
-            local choices=($(bash "$argcfile" "${opts:1:-1}" 2>/dev/null))
+            local choices=($(bash "$argcfile" "${opt:1:-1}" 2>/dev/null))
             opts2=( "${opts2[@]}" "${choices[@]}" )
         elif [[ "$opt" == "<FILE>" ]] || [[ "$opt" == "<PATH>" ]] || [[ "$opt" == "<FILE>..." ]] || [[ "$opt" == "<PATH>..." ]]; then
             comp_file=1
