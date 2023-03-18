@@ -15,7 +15,6 @@ _argc_completion()
     fi
     IFS=$'\n'
     opts=( $(argc --compgen "$argcfile" "$line" 2>/dev/null) )
-    echo argc --compgen "$argcfile" "$line" > /tmp/file1
     opts2=()
     for opt in ${opts[@]}; do
         if [[ "$opt" == \`*\` ]]; then
