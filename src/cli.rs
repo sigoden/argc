@@ -23,6 +23,9 @@ pub struct Cli {
     pub positional_index: usize,
     pub params: Vec<(Box<dyn Param>, usize)>,
     pub subcommands: Vec<Cli>,
+    pub help: Option<String>,
+    pub author: Option<String>,
+    pub version: Option<String>,
     // for conflict detecting
     pub names: ParamNames,
     // root only props
@@ -32,12 +35,9 @@ pub struct Cli {
 
 #[derive(Default)]
 pub struct CliRoot {
-    pub author: Option<String>,
-    pub version: Option<String>,
     pub fns: HashMap<String, Position>,
-    pub default_fns: HashMap<String, Position>,
-    pub choices_fns: HashMap<String, Position>,
-    pub help: Option<String>,
+    pub default_fns: Vec<(String, Position)>,
+    pub choices_fns: Vec<(String, Position)>,
 }
 
 impl Cli {
@@ -50,24 +50,16 @@ impl Cli {
             let Event { data, position } = event.clone();
             match data {
                 EventData::Describe(value) => {
-                    if is_root_scope {
-                        root_cmd.describe = Some(value);
-                    }
+                    root_cmd.describe = Some(value);
                 }
                 EventData::Version(value) => {
-                    if is_root_scope {
-                        root_data.version = Some(value);
-                    }
+                    root_cmd.version = Some(value);
                 }
                 EventData::Author(value) => {
-                    if is_root_scope {
-                        root_data.author = Some(value);
-                    }
+                    root_cmd.author = Some(value);
                 }
                 EventData::Help(value) => {
-                    if is_root_scope {
-                        root_data.help = Some(value);
-                    }
+                    root_cmd.help = Some(value);
                 }
                 EventData::Cmd(value) => {
                     is_root_scope = false;
@@ -165,25 +157,25 @@ impl Cli {
         if let Some(describe) = self.describe.as_ref() {
             cmd = cmd.about(describe);
         }
+        if let Some(version) = self.version.as_ref() {
+            cmd = cmd.version(version);
+        }
+        if let Some(author) = self.author.as_ref() {
+            cmd = cmd.author(author);
+        }
+        if let Some(help) = self.help.as_ref() {
+            cmd = cmd
+                .disable_help_subcommand(true)
+                .subcommand(Command::new("help").about(help))
+        } else {
+            cmd = cmd.disable_help_subcommand(true);
+        }
         if let Some(root_data) = &self.root {
-            if let Some(version) = root_data.version.as_ref() {
-                cmd = cmd.version(version);
-            }
-            if let Some(author) = root_data.author.as_ref() {
-                cmd = cmd.author(author);
-            }
             if !self.subcommands.is_empty() {
                 cmd = cmd.infer_subcommands(true);
                 if !root_data.exist_main_fn() {
                     cmd = cmd.subcommand_required(true).arg_required_else_help(true);
                 }
-            }
-            if let Some(help) = root_data.help.as_ref() {
-                cmd = cmd
-                    .disable_help_subcommand(true)
-                    .subcommand(Command::new("help").about(help))
-            } else {
-                cmd = cmd.disable_help_subcommand(true);
             }
             for name in root_data.choices_fn_cmds() {
                 cmd = cmd.subcommand(Command::new(name).hide(true));
@@ -285,13 +277,11 @@ impl Cli {
 
     fn help_template(&self) -> String {
         let mut lines = vec![];
-        if let Some(root) = self.root.as_ref() {
-            if root.version.is_some() {
-                lines.push("{bin} {version}");
-            }
-            if root.author.is_some() {
-                lines.push("{author}");
-            }
+        if self.version.is_some() {
+            lines.push("{bin} {version}");
+        }
+        if self.author.is_some() {
+            lines.push("{author}");
         }
         if self.describe.is_some() {
             lines.push("{about}");
@@ -334,10 +324,10 @@ impl CliRoot {
         choices_fn: &Option<String>,
     ) {
         if let Some(default_fn) = default_fn.as_ref() {
-            self.default_fns.insert(default_fn.to_string(), position);
+            self.default_fns.push((default_fn.to_string(), position));
         }
         if let Some(choices_fn) = choices_fn.as_ref() {
-            self.choices_fns.insert(choices_fn.to_string(), position);
+            self.choices_fns.push((choices_fn.to_string(), position));
         }
     }
 
@@ -361,7 +351,7 @@ impl CliRoot {
 
     fn choices_fn_cmds(&self) -> HashSet<String> {
         let mut result = HashSet::new();
-        result.extend(self.choices_fns.keys().cloned());
+        result.extend(self.choices_fns.iter().map(|(name, _)| name.to_string()));
         result
     }
 }
