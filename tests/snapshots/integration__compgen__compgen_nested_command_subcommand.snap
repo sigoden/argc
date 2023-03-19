@@ -1,0 +1,13 @@
+---
+source: tests/compgen.rs
+expression: output
+---
+RUN
+cmd_nested_command foo 
+
+STDOUT
+--opt1 --opt2
+
+STDERR
+
+

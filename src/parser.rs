@@ -47,6 +47,19 @@ pub enum EventData {
     Unknown(String),
 }
 
+#[derive(PartialEq, Eq)]
+pub enum EventScope {
+    Root,
+    CmdStart,
+    FnEnd,
+}
+
+impl Default for EventScope {
+    fn default() -> Self {
+        Self::Root
+    }
+}
+
 /// Tokenize shell script
 pub fn parse(source: &str) -> Result<Vec<Event>> {
     let mut result = vec![];
