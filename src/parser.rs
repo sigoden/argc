@@ -217,11 +217,22 @@ fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
     map(
         tuple((
             parse_short,
-            preceded(pair(space0, tag("--")), parse_param_name),
+            preceded(pair(space0, tag("--")), parse_param_multiple),
             parse_tail,
         )),
         |(short, arg, summary)| FlagParam::new(arg, summary, short),
     )(input)
+}
+
+// Parse `str*` `str`
+fn parse_param_multiple(input: &str) -> nom::IResult<&str, ParamData> {
+    alt((
+        map(terminated(parse_param_name, tag("*")), |mut arg| {
+            arg.multiple = true;
+            arg
+        }),
+        parse_param_name,
+    ))(input)
 }
 
 // Parse `str!` `str*` `str+` `str`

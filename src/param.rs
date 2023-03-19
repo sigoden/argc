@@ -54,6 +54,7 @@ pub struct FlagParam {
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) short: Option<char>,
+    pub(crate) multiple: bool,
 }
 
 impl FlagParam {
@@ -61,6 +62,7 @@ impl FlagParam {
         FlagParam {
             name: arg.name,
             short,
+            multiple: arg.multiple,
             summary: summary.to_string(),
         }
     }
@@ -85,7 +87,12 @@ impl Param for FlagParam {
 
     fn build_arg(&self, _index: usize) -> Result<Arg> {
         let mut arg = new_arg(&self.name, &self.summary);
-        arg = arg.long(self.name.to_string()).action(ArgAction::SetTrue);
+        arg = arg.long(self.name.to_string());
+        if self.multiple {
+            arg = arg.action(ArgAction::Count);
+        } else {
+            arg = arg.action(ArgAction::SetTrue);
+        }
         if let Some(s) = self.short {
             arg = arg.short(s);
         }
@@ -93,7 +100,10 @@ impl Param for FlagParam {
     }
 
     fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
-        if matches.get_flag(&self.name) {
+        if self.multiple {
+            let count = matches.get_count(&self.name);
+            Some(ArgcValue::Single(self.name.clone(), count.to_string()))
+        } else if matches.get_flag(&self.name) {
             Some(ArgcValue::Single(self.name.clone(), "1".to_string()))
         } else {
             None

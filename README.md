@@ -162,6 +162,7 @@ Define a flag. A flag is an option of boolean type, and is always false by defau
 ```sh
 # @flag     --flag1       A flag
 # @flag  -f --flag2       A flag with short alias
+# @flag  -f --flag3*      A flag can occure multiple times
 ```
 
 ### @alias

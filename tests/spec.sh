@@ -60,6 +60,7 @@ cmd_option_quotes() {
 # @flag   -a --foo2    
 # @flag      --foo3     With description
 # @flag   -b --foo4     With description
+# @flag   -c --foo5*    Can occure multiple times
 cmd_flag_formats() {
     print_argc_vars
 }
