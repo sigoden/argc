@@ -36,6 +36,14 @@ fn test_spec_cmd_flag_formats_help() {
 }
 
 #[test]
+fn test_spec_cmd_flag_formats_count() {
+    snapshot!(
+        SPEC_SCRIPT,
+        &["spec", "cmd_flag_formats", "--foo5", "--foo5", "--foo5"],
+    );
+}
+
+#[test]
 fn test_spec_cmd_positional_only_help() {
     snapshot!(SPEC_SCRIPT, &["spec", "cmd_positional_only", "-h"],);
 }
