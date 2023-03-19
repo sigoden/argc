@@ -1,5 +1,5 @@
 # @describe Test all aspects
-# @version    0.10
+# @version    0.10.0
 # @author     nobody <nobody@example.com>
 # @cmd Preferred
 # @arg        arg1*            A positional arg
@@ -136,6 +136,38 @@ cmd_alias() {
 # @flag     --hyphen-flag
 # @option   --hyphen-option
 cmd_with_hyphens() {
+    print_argc_vars
+}
+
+# @cmd Nested command
+# @version 0.1.0
+# @option --opt1
+cmd_nested_command() {
+    print_argc_vars
+}
+
+# @cmd Subcommand of nested command
+# @option --opt1
+# @option --opt2
+cmd_nested_command::foo() {
+    print_argc_vars
+}
+
+# @cmd Nested command2
+# @version 0.1.0
+# @option --opt1
+cmd_nested_command2() {
+}
+
+# @cmd Subcommand of nested command2
+# @option --opt1
+# @option --opt2
+cmd_nested_command2::foo() {
+    print_argc_vars
+}
+
+
+cmd_nested_command2::main() {
     print_argc_vars
 }
 

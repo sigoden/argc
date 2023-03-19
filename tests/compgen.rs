@@ -74,3 +74,13 @@ fn test_compgen_help_tag2() {
 fn test_compgen_choice_fn() {
     snapshot_compgen!(SPEC_SCRIPT, "cmd_option_names --op11 ");
 }
+
+#[test]
+fn test_compgen_nested_command() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_nested_command ");
+}
+
+#[test]
+fn test_compgen_nested_command_subcommand() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_nested_command foo ");
+}

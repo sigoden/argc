@@ -1,11 +1,13 @@
 use crate::argc_value::ArgcValue;
 use crate::param::{Param, ParamNames, PositionalParam, EXTRA_ARGS};
-use crate::parser::{parse, Event, EventData, Position};
+use crate::parser::{parse, Event, EventData, EventScope, Position};
 use crate::Result;
-use anyhow::{anyhow, bail, Error};
+use anyhow::bail;
 use clap::{ArgMatches, Command};
 use either::Either;
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 
 pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, clap::Error>> {
     let events = parse(source)?;
@@ -18,82 +20,68 @@ pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, clap::Error>> 
 
 #[derive(Default)]
 pub struct Cli {
-    pub name: Option<String>,
-    pub describe: Option<String>,
-    pub positional_index: usize,
-    pub params: Vec<(Box<dyn Param>, usize)>,
-    pub subcommands: Vec<Cli>,
-    pub help: Option<String>,
-    pub author: Option<String>,
-    pub version: Option<String>,
+    name: Option<String>,
+    fn_name: Option<String>,
+    describe: Option<String>,
+    positional_index: usize,
+    params: Vec<(Box<dyn Param>, usize)>,
+    subcommands: Vec<Cli>,
+    help: Option<String>,
+    author: Option<String>,
+    version: Option<String>,
     // for conflict detecting
-    pub names: ParamNames,
-    // root only props
-    pub root: Option<CliRoot>,
-    pub aliases: Vec<String>,
-}
-
-#[derive(Default)]
-pub struct CliRoot {
-    pub fns: HashMap<String, Position>,
-    pub default_fns: Vec<(String, Position)>,
-    pub choices_fns: Vec<(String, Position)>,
+    names: ParamNames,
+    root: Arc<RefCell<RootData>>,
+    aliases: Vec<String>,
 }
 
 impl Cli {
     pub fn new_from_events(events: &[Event]) -> Result<Self> {
         let mut root_cmd = Cli::default();
-        let mut root_data = CliRoot::default();
-        let mut is_root_scope = true;
-        let mut maybe_subcommand: Option<Cli> = None;
+        let root_data = root_cmd.root.clone();
         for event in events {
             let Event { data, position } = event.clone();
             match data {
                 EventData::Describe(value) => {
-                    root_cmd.describe = Some(value);
+                    let cmd = Self::get_cmd(&mut root_cmd, "@describe", position)?;
+                    cmd.describe = Some(value);
                 }
                 EventData::Version(value) => {
-                    root_cmd.version = Some(value);
+                    let cmd = Self::get_cmd(&mut root_cmd, "@version", position)?;
+                    cmd.version = Some(value);
                 }
                 EventData::Author(value) => {
-                    root_cmd.author = Some(value);
+                    let cmd = Self::get_cmd(&mut root_cmd, "@author", position)?;
+                    cmd.author = Some(value);
                 }
                 EventData::Help(value) => {
-                    root_cmd.help = Some(value);
+                    let cmd = Self::get_cmd(&mut root_cmd, "@help", position)?;
+                    cmd.help = Some(value);
                 }
                 EventData::Cmd(value) => {
-                    is_root_scope = false;
-                    let mut cmd = Cli::default();
+                    root_data.borrow_mut().scope = EventScope::CmdStart;
+                    let mut subcmd = root_cmd.create_subcommand();
                     if !value.is_empty() {
-                        cmd.describe = Some(value);
+                        subcmd.describe = Some(value.clone());
                     }
-                    maybe_subcommand = Some(cmd);
                 }
                 EventData::Aliases(values) => {
-                    if let Some(cmd) = &mut maybe_subcommand {
-                        cmd.aliases = values.to_vec();
-                        for name in values {
-                            if let Some(pos) = root_data.fns.get(&name) {
-                                bail!(
-                                    "@alias(line {}) is conflicted with cmd or alias at line {}",
-                                    position,
-                                    pos
-                                );
-                            }
-                            root_data.fns.insert(name.clone(), position);
+                    let cmd = Self::get_cmd(&mut root_cmd, "@help", position)?;
+                    cmd.aliases = values.to_vec();
+                    for name in values {
+                        if let Some(pos) = root_data.borrow().fns.get(&name) {
+                            bail!(
+                                "@alias(line {}) is conflicted with cmd or alias at line {}",
+                                position,
+                                pos
+                            );
                         }
-                    } else {
-                        bail!("@alias(line {}) is unexpected", position)
+                        root_data.borrow_mut().fns.insert(name.clone(), position);
                     }
                 }
                 EventData::Option(param) => {
-                    let cmd = maybe_subcommand.as_mut().or(if is_root_scope {
-                        Some(&mut root_cmd)
-                    } else {
-                        None
-                    });
-                    let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), position))?;
-                    root_data.add_default_choices_fn(
+                    let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
+                    root_data.borrow_mut().add_default_choices_fn(
                         position,
                         &param.default_fn,
                         &param.choices_fn,
@@ -101,13 +89,8 @@ impl Cli {
                     cmd.add_param(param, position)?;
                 }
                 EventData::Positional(param) => {
-                    let cmd = maybe_subcommand.as_mut().or(if is_root_scope {
-                        Some(&mut root_cmd)
-                    } else {
-                        None
-                    });
-                    let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), position))?;
-                    root_data.add_default_choices_fn(
+                    let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
+                    root_data.borrow_mut().add_default_choices_fn(
                         position,
                         &param.default_fn,
                         &param.choices_fn,
@@ -115,18 +98,11 @@ impl Cli {
                     cmd.add_param(param, position)?;
                 }
                 EventData::Flag(param) => {
-                    let cmd = maybe_subcommand.as_mut().or(if is_root_scope {
-                        Some(&mut root_cmd)
-                    } else {
-                        None
-                    });
-                    let cmd = cmd.ok_or_else(|| unexpected_param(param.tag_name(), position))?;
+                    let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
                     cmd.add_param(param, position)?;
                 }
                 EventData::Func(name) => {
-                    is_root_scope = false;
-
-                    if let Some(pos) = root_data.fns.get(&name) {
+                    if let Some(pos) = root_data.borrow_mut().fns.get(&name) {
                         bail!(
                             "{}(line {}) is conflicted with cmd or alias at line {}",
                             name,
@@ -134,21 +110,53 @@ impl Cli {
                             pos
                         )
                     }
-                    root_data.fns.insert(name.clone(), position);
-                    if let Some(mut cmd) = maybe_subcommand.take() {
-                        cmd.name = Some(name.to_string());
-                        cmd.extra_args()?;
-                        root_cmd.subcommands.push(cmd);
+                    root_data.borrow_mut().fns.insert(name.clone(), position);
+                    if root_data.borrow().scope == EventScope::CmdStart {
+                        let (parent, child) = match name.split_once("::") {
+                            None => (name.as_str(), None),
+                            Some((parent, child)) => {
+                                if child.is_empty() {
+                                    bail!("{}(line {}) is invalid", name, position);
+                                }
+                                (parent, Some(child))
+                            }
+                        };
+                        match child {
+                            None => {
+                                let cmd = root_cmd.subcommands.last_mut().unwrap();
+                                cmd.name = Some(parent.to_string());
+                                cmd.fn_name = Some(name.to_string());
+                                cmd.extra_args()?;
+                            }
+                            Some(child) => {
+                                let mut cmd = root_cmd.subcommands.pop().unwrap();
+                                cmd.name = Some(child.to_string());
+                                cmd.fn_name = Some(name.to_string());
+                                cmd.extra_args()?;
+                                match root_cmd
+                                    .subcommands
+                                    .iter_mut()
+                                    .find(|v| v.name == Some(parent.into()))
+                                {
+                                    Some(parent_cmd) => {
+                                        parent_cmd.subcommands.push(cmd);
+                                    }
+                                    None => {
+                                        bail!("{}(line {}) has no parent", name, position);
+                                    }
+                                }
+                            }
+                        }
                     }
+                    root_data.borrow_mut().scope = EventScope::FnEnd;
                 }
                 EventData::Unknown(name) => {
                     bail!("@{}(line {}) is unknown", name, position);
                 }
             }
         }
-        root_data.check_default_choices_fn()?;
+        root_cmd.root.borrow().check_default_choices_fn()?;
         root_cmd.extra_args()?;
-        root_cmd.root = Some(root_data);
         Ok(root_cmd)
     }
 
@@ -170,16 +178,14 @@ impl Cli {
         } else {
             cmd = cmd.disable_help_subcommand(true);
         }
-        if let Some(root_data) = &self.root {
-            if !self.subcommands.is_empty() {
-                cmd = cmd.infer_subcommands(true);
-                if !root_data.exist_main_fn() {
-                    cmd = cmd.subcommand_required(true).arg_required_else_help(true);
-                }
+        if !self.subcommands.is_empty() {
+            cmd = cmd.infer_subcommands(true);
+            if !self.exist_main_fn() {
+                cmd = cmd.subcommand_required(true).arg_required_else_help(true);
             }
-            for name in root_data.choices_fn_cmds() {
-                cmd = cmd.subcommand(Command::new(name).hide(true));
-            }
+        }
+        for name in self.root.borrow().choices_fn_cmds() {
+            cmd = cmd.subcommand(Command::new(name).hide(true));
         }
         if !self.aliases.is_empty() {
             cmd = cmd.visible_aliases(&self.aliases);
@@ -215,47 +221,48 @@ impl Cli {
                 values.push(value);
             }
         }
-        let mut param_fn: Option<String> = None;
-        if let Some(root_data) = self.root.as_ref() {
-            for fn_name in root_data.choices_fn_cmds() {
-                if let Some((match_name, _)) = matches.subcommand() {
-                    if fn_name.as_str() == match_name {
-                        param_fn = Some(fn_name);
-                    }
+        for fn_name in self.root.borrow().choices_fn_cmds() {
+            if let Some((match_name, _)) = matches.subcommand() {
+                if fn_name.as_str() == match_name {
+                    values.push(ArgcValue::ParamFn(fn_name));
+                    return values;
                 }
             }
         }
 
-        let mut call_fn: Option<String> = None;
-        if param_fn.is_none() {
-            for subcommand in &self.subcommands {
-                if let Some(fn_name) = &subcommand.name {
-                    if let Some((match_name, subcommand_matches)) = matches.subcommand() {
-                        if *fn_name == match_name {
-                            let subcommand_values = subcommand.get_args(subcommand_matches);
-                            values.extend(subcommand_values);
-                            call_fn = Some(fn_name.to_string());
+        for subcommand in &self.subcommands {
+            if let Some(fn_name) = &subcommand.name {
+                if let Some((match_name, subcommand_matches)) = matches.subcommand() {
+                    if *fn_name == match_name {
+                        let subcommand_values = subcommand.get_args(subcommand_matches);
+                        let exist_cmd_fn = subcommand_values.iter().any(|v| v.is_cmd_fn());
+                        values.extend(subcommand_values);
+                        if !exist_cmd_fn {
+                            values.push(ArgcValue::CmdFn(subcommand.fn_name.clone().unwrap()));
                         }
+                        return values;
                     }
                 }
             }
-            call_fn = call_fn.or_else(|| {
-                self.root.as_ref().and_then(|v| {
-                    if v.exist_main_fn() {
-                        Some("main".to_string())
-                    } else {
-                        None
-                    }
-                })
-            });
         }
 
-        if let Some(fn_name) = param_fn {
-            values.push(ArgcValue::ParamFnName(fn_name))
-        } else if let Some(fn_name) = call_fn {
-            values.push(ArgcValue::CmdFnName(fn_name));
+        if self.exist_main_fn() {
+            values.push(ArgcValue::CmdFn(self.get_main_fn()));
         }
         values
+    }
+
+    pub fn exist_main_fn(&self) -> bool {
+        self.root.borrow().fns.contains_key(&self.get_main_fn())
+    }
+
+    fn get_main_fn(&self) -> String {
+        match &self.name {
+            Some(name) => {
+                format!("{}::main", name)
+            }
+            None => "main".into(),
+        }
     }
 
     fn add_param<T: Param + 'static>(&mut self, param: T, pos: Position) -> Result<()> {
@@ -314,9 +321,41 @@ impl Cli {
         }
         lines.join("\n")
     }
+
+    fn get_cmd<'a>(cmd: &'a mut Self, tag_name: &str, position: usize) -> Result<&'a mut Self> {
+        if cmd.root.borrow().scope == EventScope::FnEnd {
+            bail!(
+                "{}(line {}) is unexpected, maybe miss @cmd?",
+                tag_name,
+                position
+            )
+        }
+        if cmd.subcommands.last().is_some() {
+            Ok(cmd.subcommands.last_mut().unwrap())
+        } else {
+            Ok(cmd)
+        }
+    }
+
+    fn create_subcommand(&mut self) -> &mut Self {
+        let cmd = Cli {
+            root: self.root.clone(),
+            ..Default::default()
+        };
+        self.subcommands.push(cmd);
+        self.subcommands.last_mut().unwrap()
+    }
 }
 
-impl CliRoot {
+#[derive(Default)]
+struct RootData {
+    scope: EventScope,
+    fns: HashMap<String, Position>,
+    default_fns: Vec<(String, Position)>,
+    choices_fns: Vec<(String, Position)>,
+}
+
+impl RootData {
     fn add_default_choices_fn(
         &mut self,
         position: usize,
@@ -329,10 +368,6 @@ impl CliRoot {
         if let Some(choices_fn) = choices_fn.as_ref() {
             self.choices_fns.push((choices_fn.to_string(), position));
         }
-    }
-
-    fn exist_main_fn(&self) -> bool {
-        self.fns.contains_key("main")
     }
 
     fn check_default_choices_fn(&self) -> Result<()> {
@@ -354,8 +389,4 @@ impl CliRoot {
         result.extend(self.choices_fns.iter().map(|(name, _)| name.to_string()));
         result
     }
-}
-
-fn unexpected_param(tag_name: &str, pos: Position) -> Error {
-    anyhow!("{}(line {}) is unexpected, maybe miss @cmd?", tag_name, pos,)
 }

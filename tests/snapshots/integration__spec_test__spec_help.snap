@@ -9,7 +9,7 @@ STDOUT
 
 
 STDERR
-spec 0.10
+spec 0.10.0
 nobody <nobody@example.com>
 Test all aspects
 
@@ -34,5 +34,7 @@ COMMANDS:
   cmd_without_any_arg                          Command without any arg
   cmd_alias                                    Command with alias [aliases: a, alias]
   cmd_with_hyphens                             Command with hyphens
+  cmd_nested_command                           Nested command
+  cmd_nested_command2                          Nested command2
 
 

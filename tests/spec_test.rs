@@ -207,3 +207,21 @@ fn test_spec_cmd_with_hyphens() {
 fn test_spec_fn_bars() {
     snapshot!(SPEC_SCRIPT, &["spec", "_fn_bars",],);
 }
+
+#[test]
+fn test_spec_nested_command() {
+    snapshot!(SPEC_SCRIPT, &["spec", "cmd_nested_command",],);
+}
+
+#[test]
+fn test_spec_nested_command_exec() {
+    snapshot!(
+        SPEC_SCRIPT,
+        &["spec", "cmd_nested_command", "foo", "--opt1", "abc"],
+    );
+}
+
+#[test]
+fn test_spec_nested_command2() {
+    snapshot!(SPEC_SCRIPT, &["spec", "cmd_nested_command2",],);
+}
