@@ -157,6 +157,7 @@ cmd_nested_command::foo() {
 # @version 0.1.0
 # @option --opt1
 cmd_nested_command2() {
+    :;
 }
 
 # @cmd Subcommand of nested command2
