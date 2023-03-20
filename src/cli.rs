@@ -6,7 +6,7 @@ use anyhow::bail;
 use clap::{ArgMatches, Command};
 use either::Either;
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::Arc;
 
 pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, clap::Error>> {
@@ -184,9 +184,6 @@ impl Cli {
                 cmd = cmd.subcommand_required(true).arg_required_else_help(true);
             }
         }
-        for name in self.root.borrow().choices_fn_cmds() {
-            cmd = cmd.subcommand(Command::new(name).hide(true));
-        }
         if !self.aliases.is_empty() {
             cmd = cmd.visible_aliases(&self.aliases);
         }
@@ -203,6 +200,9 @@ impl Cli {
 
     pub fn eval(&self, args: &[&str]) -> Result<Either<Vec<ArgcValue>, clap::Error>> {
         let name = args[0];
+        if args.len() == 2 && self.root.borrow().exist_param_fn(args[1]) {
+            return Ok(Either::Left(vec![ArgcValue::ParamFn(args[1].into())]));
+        }
         let command = self.build_command(name)?;
         let res = command.try_get_matches_from(args);
         match res {
@@ -219,14 +219,6 @@ impl Cli {
         for (param, _) in &self.params {
             if let Some(value) = param.get_arg_value(matches) {
                 values.push(value);
-            }
-        }
-        for fn_name in self.root.borrow().choices_fn_cmds() {
-            if let Some((match_name, _)) = matches.subcommand() {
-                if fn_name.as_str() == match_name {
-                    values.push(ArgcValue::ParamFn(fn_name));
-                    return values;
-                }
             }
         }
 
@@ -384,9 +376,7 @@ impl RootData {
         Ok(())
     }
 
-    fn choices_fn_cmds(&self) -> HashSet<String> {
-        let mut result = HashSet::new();
-        result.extend(self.choices_fns.iter().map(|(name, _)| name.to_string()));
-        result
+    fn exist_param_fn(&self, name: &str) -> bool {
+        self.choices_fns.iter().any(|(v, _)| v == name)
     }
 }
