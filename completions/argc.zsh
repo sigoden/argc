@@ -20,9 +20,9 @@ _argc_completion()
         if [[ "$opt" == \`*\` ]]; then
             local choices=( $(bash "$argcfile" "${opt:1:-1}" 2>/dev/null) )
             opts2=( "${opts2[@]}" "${choices[@]}" )
-        elif [[ "$opt" == "<FILE>" ]] || [[ "$opt" == "<PATH>" ]] || [[ "$opt" == "<FILE>..." ]] || [[ "$opt" == "<PATH>..." ]]; then
+        elif echo "$opt" | grep -qi '\(file\|path\)>\(\.\.\.\)\?'; then
             comp_file=1
-        elif [[ "$opt" == "<DIR>" ]] || [[ "$opt" == "<DIR>..." ]]; then
+        elif echo "$opt" | grep -qi 'dir>\(\.\.\.\)\?'; then
             comp_dir=1
         else
             opts2+=( "$opt" )

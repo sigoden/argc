@@ -30,14 +30,16 @@ $_argc_completion = {
         if ($opt -match '^`[^` ]+`$') {
             $choices = (& "$argcfile" $opt.Substring(1, $opt.Length - 2) 2>$null).Split("`n")
             $opts2 += $choices
-        } elseif ($opt -eq "<FILE>" -or $opt -eq "<PATH>" -or $opt -eq "<FILE>..." -or $opt -eq "<PATH>...") {
-        } elseif ($opt -eq "<DIR>" -or $opt -eq "<DIR>...") {
+        } elseif ($opt -imatch "file|path>(\.\.\.)?") {
+            $comp_file = True
+        } elseif ($opt -imatch "dir>(\.\.\.)?") {
+            $comp_dir = True;
         } else {
             $opts2 += $opt
         }
     }
 
-    $opts2 | 
+    $result = ($opts2 | 
         Where-Object { $_ -like "$wordToComplete*" } |
         ForEach-Object { 
             if ($_.StartsWith("-")) {
@@ -46,7 +48,20 @@ $_argc_completion = {
                 $t = [System.Management.Automation.CompletionResultType]::ParameterValue
             }
             [System.Management.Automation.CompletionResult]::new($_, $_, $t, '-')
-        }
+        })
+
+    $paths = @()
+    if ($comp_file) {
+        $paths = (Get-ChildItem -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
+    } elseif ($comp_dir) {
+        $paths = (Get-ChildItem -Attributes Directory -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
+    }
+    foreach ($path in $paths) {
+        $t = [System.Management.Automation.CompletionResultType]::ParameterValue
+        $result.Add([System.Management.Automation.CompletionResult]::new($path, $path, $t, '-'))
+    }
+
+    return $result
 }
 
 Register-ArgumentCompleter -Native -ScriptBlock $_argc_completion -CommandName $ARGC_SCRIPTS
