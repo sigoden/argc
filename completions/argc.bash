@@ -4,53 +4,66 @@
 # To add completion to a argc script, simply add the script name to $ARGC_SCRIPTS.
 
 ARGC_SCRIPTS=( mycmd1 mycmd2 )
+ARGC_BASH=${ARGC_BASH:-bash}
 
 _argc_completion() {
-    local argcfile opts opts2 line index IFS comp_file comp_dir
     cur="${COMP_WORDS[COMP_CWORD]}"
     COMPREPLY=()
-    argcfile=$(which ${COMP_WORDS[0]})
-    if [[ ! -f "$argcfile" ]]; then
+    local scriptfile=$(which ${COMP_WORDS[0]})
+    if [[ ! -f "$scriptfile" ]]; then
         return 0
     fi
-    line=${COMP_LINE:${#COMP_WORDS[0]}}
-    IFS=$'\n'
-    opts=($(argc --compgen "$argcfile" "$line" 2>/dev/null))
-    opts2=()
-    for opt in ${opts[@]}; do
-        if [[ "$opt" == '-'* ]]; then
-            if [[ "$cur" == '-'* ]]; then
-                opts2+=( "$opt" )
-            fi
-        elif [[ "$opt" == \`*\` ]]; then
-            local choices=($(bash "$argcfile" "${opt:1:-1}" 2>/dev/null))
-            opts2=( "${opts2[@]}" "${choices[@]}" )
-        elif [[ "$opt" == '<'* ]]; then
-            if echo "$opt" | grep -qi '\(file\|path\)>\(\.\.\.\)\?'; then
-                comp_file=1
-            elif echo "$opt" | grep -qi 'dir>\(\.\.\.\)\?'; then
-                comp_dir=1
+    local line=${COMP_LINE:${#COMP_WORDS[0]}}
+    local IFS=$'\n'
+    local compgen_values=($(argc --compgen "$scriptfile" "$line" 2>/dev/null))
+    local option_values=()
+    local value_kind=0
+    local candicates=()
+    for item in ${compgen_values[@]}; do
+        if [[ "$item" == '-'* ]]; then
+            option_values+=( "$item" )
+        elif [[ "$item" == \`*\` ]]; then
+            local choices=($("$ARGC_BASH" "$scriptfile" "${item:1:-1}" 2>/dev/null))
+            candicates=( "${candicates[@]}" "${choices[@]}" )
+        elif [[ "$item" == '<'* ]]; then
+            if echo "$item" | grep -qi '<args>...'; then
+                value_kind=1
+            elif echo "$item" | grep -qi '\(file\|path\)>\(\.\.\.\)\?'; then
+                value_kind=2
+            elif echo "$item" | grep -qi 'dir>\(\.\.\.\)\?'; then
+                value_kind=3
             else
-                opts2+=( "$opt" )
+                value_kind=9
             fi
         else
-            opts2+=( "$opt" )
+            candicates+=( "$item" )
         fi
     done
-    if [[ "$comp_file" == 1 ]]; then
+    if [[ "$value_kind" == 0 ]]; then
+        if [[ "${#candicates[@]}" -eq 0 ]]; then
+            candicates=( "${option_values[@]}" )
+        fi
+    elif [[ "$value_kind" == 1 ]]; then
+        if [[ "${#candicates[@]}" -eq 0 ]]; then
+            candicates=( "${option_values[@]}" )
+        fi
+        if [[ "${#candicates[@]}" -eq 0 ]]; then
+            _filedir
+        fi
+    elif [[ "$value_kind" == 2 ]]; then
         _filedir
-    elif [[ "$comp_dir" == 1 ]]; then
+    elif [[ "$value_kind" == 3 ]]; then
         _filedir -d
     fi
-    if [[ ${#opts2[@]} -gt 0 ]]; then
-        CANDIDATES=($(compgen -W "${opts2[*]}" -- "${cur}"))
-        if [ ${#CANDIDATES[*]} -gt 0 ]; then
-            COMPREPLY=($(printf '%q\n' "${CANDIDATES[@]}"))
+    if [[ ${#candicates[@]} -gt 0 ]]; then
+        candicates=($(compgen -W "${candicates[*]}" -- "${cur}"))
+        if [ ${#candicates[@]} -gt 0 ]; then
+            COMPREPLY=( "${COMPREPLY[@]}" $(printf '%q\n' "${candicates[@]}"))
         fi
     fi
 }
 
-complete -F _argc_completion -o bashdefault -o default ${ARGC_SCRIPTS[@]}
+complete -F _argc_completion ${ARGC_SCRIPTS[@]}
 
 # Perform tilde (~) completion
 # @return  True (0) if completion needs further processing,

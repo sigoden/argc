@@ -4,45 +4,58 @@
 # To add completion to a argc script, simply add the script name to $ARGC_SCRIPTS.
 
 ARGC_SCRIPTS=( mycmd1 mycmd2 )
+ARGC_BASH=${ARGC_BASH:-bash}
 
 _argc_completion()
 {
-    local argcfile line opts opts2 comp_file comp_dir
-    argcfile=$(which $words[1])
-    if [[ ! -f "$argcfile" ]]; then
+    local scriptfile=$(which $words[1])
+    if [[ ! -f "$scriptfile" ]]; then
         return 0
     fi
-    line="${words[2,-1]}"
-    IFS=$'\n'
-    opts=( $(argc --compgen "$argcfile" "$line" 2>/dev/null) )
-    opts2=()
-    for opt in ${opts[@]}; do
-        if [[ "$opt" == '-'* ]]; then
-            if [[ "$words[-1]" == '-'* ]]; then
-                opts2+=( "$opt" )
-            fi
-        elif [[ "$opt" == \`*\` ]]; then
-            local choices=( $(bash "$argcfile" "${opt:1:-1}" 2>/dev/null) )
-            opts2=( "${opts2[@]}" "${choices[@]}" )
-        elif [[ "$opt" == '<'* ]]; then
-            if echo "$opt" | grep -qi '\(file\|path\)>\(\.\.\.\)\?'; then
-                comp_file=1
-            elif echo "$opt" | grep -qi 'dir>\(\.\.\.\)\?'; then
-                comp_dir=1
+    local line="${words[2,-1]}"
+    local IFS=$'\n'
+    local compgen_values=( $(argc --compgen "$scriptfile" "$line" 2>/dev/null) )
+    local candicates=()
+    local option_values=()
+    local value_kind=0
+    for item in ${compgen_values[@]}; do
+        if [[ "$item" == '-'* ]]; then
+            option_values+=( "$item" )
+        elif [[ "$item" == \`*\` ]]; then
+            local choices=( $("$ARGC_BASH" "$scriptfile" "${item:1:-1}" 2>/dev/null) )
+            candicates=( "${candicates[@]}" "${choices[@]}" )
+        elif [[ "$item" == '<'* ]]; then
+            if echo "$item" | grep -qi '<args>...'; then
+                value_kind=1
+            elif echo "$item" | grep -qi '\(file\|path\)>\(\.\.\.\)\?'; then
+                value_kind=2
+            elif echo "$item" | grep -qi 'dir>\(\.\.\.\)\?'; then
+                value_kind=3
             else
-                opts2+=( "$opt" )
+                value_kind=9
             fi
         else
-            opts2+=( "$opt" )
+            candicates+=( "$item" )
         fi
     done
-    if [[ "$comp_file" == 1 ]]; then
+    if [[ "$value_kind" == 0 ]]; then
+        if [[ "${#candicates[@]}" -eq 0 ]]; then
+            candicates=( "${option_values[@]}" )
+        fi
+    elif [[ "$value_kind" == 1 ]]; then
+        if [[ "${#candicates[@]}" -eq 0 ]]; then
+            candicates=( "${option_values[@]}" )
+        fi
+        if [[ "${#candicates[@]}" -eq 0 ]]; then
+            _path_files
+        fi
+    elif [[ "$value_kind" == 2 ]]; then
         _path_files
-    elif [[ "$comp_dir" == 1 ]]; then
+    elif [[ "$value_kind" == 3 ]]; then
         _path_files -/
     fi
-    if [[ ${#opts2[@]} -gt 0 ]]; then
-        compadd -- $opts2[@]
+    if [[ ${#candicates[@]} -gt 0 ]]; then
+        compadd -- $candicates[@]
     fi
 }
 
