@@ -9,16 +9,18 @@ _argc_completion()
 {
     local argcfile line opts opts2 comp_file comp_dir
     argcfile=$(which $words[1])
-    line="${words[2,-1]}"
-    if [[ $? -ne 0 ]]; then
+    if [[ ! -f "$argcfile" ]]; then
         return 0
     fi
+    line="${words[2,-1]}"
     IFS=$'\n'
     opts=( $(argc --compgen "$argcfile" "$line" 2>/dev/null) )
     opts2=()
     for opt in ${opts[@]}; do
         if [[ "$opt" == '-'* ]]; then
-            opts2+=( "$opt" )
+            if [[ "$words[-1]" == '-'* ]]; then
+                opts2+=( "$opt" )
+            fi
         elif [[ "$opt" == \`*\` ]]; then
             local choices=( $(bash "$argcfile" "${opt:1:-1}" 2>/dev/null) )
             opts2=( "${opts2[@]}" "${choices[@]}" )

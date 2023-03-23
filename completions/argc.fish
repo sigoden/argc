@@ -8,16 +8,19 @@ set ARGC_SCRIPTS mycmd1 mycmd2
 function __fish_complete_argc
     set -l tokens (commandline -c | string trim -l | string split " " --)
     set -l argcfile (which $tokens[1])
-    if test -z $argcfile
+    if not test -f $argcfile
         return 0
     end
+    set -l line "$tokens[2..]"
     set -l IFS '\n'
-    set -l opts (argc --compgen "$argcfile" "$tokens[2..]" 2>/dev/null)
+    set -l opts (argc --compgen "$argcfile" $line 2>/dev/null)
     set comp_file 0
     set comp_dir 0
     for opt in $opts
-        if string match -q -- '^-' "$opt"
-            echo $opt
+        if string match -qr -- '^-' "$opt"
+            if string match -qr -- '^-' "$tokens[-1]"
+                echo $opt
+            end
         else if string match -qr '^`[^` ]+`' -- "$opt"
             set -l name (string sub "$opt" -s 2 -e -1)
             bash "$argcfile" $name 2>/dev/null
