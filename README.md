@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Easily create a feature-rich command-line application in Bash.
+An elegant command-line options, arguments and sub-commands parser for bash.
 
 ![demo](https://user-images.githubusercontent.com/4012553/224695852-28eaa0a2-5823-4159-8648-c2384f5183db.gif)
 
