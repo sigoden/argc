@@ -15,16 +15,22 @@ function __fish_complete_argc
     set -l opts (argc --compgen "$argcfile" "$tokens[2..]" 2>/dev/null)
     set comp_file 0
     set comp_dir 0
-    for item in $opts
-        if string match -qr '^`[^` ]+`' -- "$item"
-            set -l name (string sub "$item" -s 2 -e -1)
+    for opt in $opts
+        if string match -q -- '^-' "$opt"
+            echo $opt
+        else if string match -qr '^`[^` ]+`' -- "$opt"
+            set -l name (string sub "$opt" -s 2 -e -1)
             bash "$argcfile" $name 2>/dev/null
-        else if string match -qir '(file|path)>(\.\.\.)?' -- "$item"
-            set comp_file 1
-        else if string match -qir 'dir>(\.\.\.)?' -- "$item"
-            set comp_dir 1
+        else if string match -q -- '<*' "$opt"
+            if string match -qir -- '(file|path)>(\.\.\.)?' "$opt"
+                set comp_file 1
+            else if string match -qir -- 'dir>(\.\.\.)?' "$opt"
+                set comp_dir 1
+            else
+                echo $opt
+            end
         else
-            echo $item
+            echo $opt
         end
     end
     if [ $comp_file -eq 1 ]

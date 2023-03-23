@@ -27,13 +27,19 @@ $_argc_completion = {
     $opts = (argc --compgen "$argcfile" "$cmds" 2>$null).Split("`n")
     $opts2 = @()
     foreach ($opt in $opts) {
-        if ($opt -match '^`[^` ]+`$') {
+        if ($opt -match '^-') {
+            $opts2 += $opt
+        } elseif ($opt -match '^`[^` ]+`$') {
             $choices = (& "$argcfile" $opt.Substring(1, $opt.Length - 2) 2>$null).Split("`n")
             $opts2 += $choices
-        } elseif ($opt -imatch "file|path>(\.\.\.)?") {
-            $comp_file = True
-        } elseif ($opt -imatch "dir>(\.\.\.)?") {
-            $comp_dir = True;
+        } elseif ($opt -match '^<') {
+            if ($opt -imatch "file|path>(\.\.\.)?") {
+                $comp_file = True
+            } elseif ($opt -imatch "dir>(\.\.\.)?") {
+                $comp_dir = True;
+            } else {
+                $opts2 += $opt
+            }
         } else {
             $opts2 += $opt
         }
