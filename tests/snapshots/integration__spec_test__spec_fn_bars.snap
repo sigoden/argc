@@ -8,7 +8,6 @@ spec _fn_bars
 STDOUT
 argc__line=
 argc__words=(  )
-argc__cur=
 _fn_bars;exit;
 
 STDERR

@@ -210,20 +210,16 @@ impl Cli {
             if let Some(line) = args.get(2) {
                 values.push(ArgcValue::Single("_line".into(), escape_shell_words(line)));
                 if let Ok(words) = split_shell_words(line) {
-                    let mut cur = String::new();
                     let mut escape_words: Vec<String> =
                         words.iter().map(|v| escape_shell_words(v)).collect();
                     if let Some(word) = words.last() {
-                        if line.ends_with(word) {
-                            cur = word.into();
-                        } else {
-                            escape_words.push(" ".into());
+                        if !line.ends_with(word) {
+                            escape_words.push(escape_shell_words(" "));
                         }
                     } else if !line.is_empty() {
-                        escape_words.push(" ".into());
+                        escape_words.push(escape_shell_words(" "));
                     }
                     values.push(ArgcValue::Multiple("_words".into(), escape_words));
-                    values.push(ArgcValue::Single("_cur".into(), cur));
                     let (args, argv) = argmap::parse(words.into_iter());
                     for (k, v) in argv {
                         let v_len = v.len();
@@ -241,7 +237,6 @@ impl Cli {
             } else {
                 values.push(ArgcValue::Single("_line".into(), String::new()));
                 values.push(ArgcValue::Multiple("_words".into(), vec![]));
-                values.push(ArgcValue::Single("_cur".into(), String::new()));
             }
             values.push(ArgcValue::ParamFn(args[1].into(), positional_args));
             return Ok(Either::Left(values));
