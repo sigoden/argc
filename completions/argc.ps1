@@ -33,14 +33,14 @@ $_argc_completion = {
         if ($item -match '^-') {
             $option_values += $item
         } elseif ($item -match '^`[^` ]+`$') {
-            $choices = (& $ARGC_BASH "$scriptfile" $item.Substring(1, $item.Length - 2) 2>$null).Split("`n")
+            $choices = (& $ARGC_BASH "$scriptfile" $item.Substring(1, $item.Length - 2) "$line" 2>$null).Split("`n")
             $candicates += $choices
         } elseif ($item -match '^<') {
             if ($item -imatch "<args>...") {
                 $value_kind = 1
-            } elseif ($item -imatch "file|path>(\.\.\.)?") {
+            } elseif ($item -imatch "file|path") {
                 $value_kind = 2
-            } elseif ($item -imatch "dir>(\.\.\.)?") {
+            } elseif ($item -imatch "dir") {
                 $value_kind = 3
             } else {
                 $value_kind = 9
