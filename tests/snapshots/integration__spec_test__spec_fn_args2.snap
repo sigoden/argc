@@ -3,12 +3,12 @@ source: tests/spec_test.rs
 expression: output
 ---
 RUN
-spec _fn_bars
+spec _fn_args  
 
 STDOUT
-argc__line=
-argc__words=(  )
-_fn_bars;exit;
+argc__line=\ 
+argc__words=( \  )
+_fn_args;exit;
 
 STDERR
 

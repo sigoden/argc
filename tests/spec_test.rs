@@ -214,6 +214,11 @@ fn test_spec_fn_args() {
 }
 
 #[test]
+fn test_spec_fn_args2() {
+    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args", " "],);
+}
+
+#[test]
 fn test_spec_nested_command() {
     snapshot!(SPEC_SCRIPT, &["spec", "cmd_nested_command",],);
 }
