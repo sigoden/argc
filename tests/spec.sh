@@ -17,6 +17,22 @@ cmd_omitted() {
     print_argc_vars
 }
 
+# @cmd Flags all kind of names
+# @flag --flag1
+# @flag --flag2       This is a flag
+# @flag --flag3*
+# @flag -f --flag4    This is a flag
+cmd_flag_names() {
+    print_argc_vars
+}
+
+# @cmd Flags without long name
+# @flag -a    This is a flag
+# @flag -b*
+cmd_no_long_flags() {
+    print_argc_vars
+}
+
 # @cmd Options all kind of names
 # @option      --opt1                optional
 # @option      --opt2!               required
@@ -30,6 +46,23 @@ cmd_omitted() {
 # @option      --op10[`_fn_bars`]    choices from fn
 # @option      --op11![`_fn_bars`]   required, choices from fn
 cmd_option_names() {
+    print_argc_vars
+}
+
+# @cmd Options without long name
+# @option      -a                optional
+# @option      -b!               required
+# @option      -c*               optional, multiple
+# @option      -d+               required, multiple
+# @option      -e=a              optional, default
+# @option      -f[a|b|c]         choices
+# @option      -g[=a|b|c]        choices, default
+# @option      -i![a|b|c]        required, choices
+# @option      -j[`_fn_foo`]     optional, default from fn
+# @option      -k[`_fn_bars`]    choices from fn
+# @option      -l![`_fn_bars`]   required, choices from fn
+# @option      -m <VALUE>        optional, default
+cmd_no_long_options() {
     print_argc_vars
 }
 

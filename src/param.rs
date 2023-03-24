@@ -54,14 +54,16 @@ pub struct FlagParam {
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) short: Option<char>,
+    pub(crate) no_long: bool,
     pub(crate) multiple: bool,
 }
 
 impl FlagParam {
-    pub fn new(arg: ParamData, summary: &str, short: Option<char>) -> Self {
+    pub fn new(arg: ParamData, summary: &str, short: Option<char>, no_long: bool) -> Self {
         FlagParam {
             name: arg.name,
             short,
+            no_long,
             multiple: arg.multiple,
             summary: summary.to_string(),
         }
@@ -79,15 +81,26 @@ impl Param for FlagParam {
 
     fn render(&self) -> String {
         let mut output = vec![];
-        render_short(&mut output, &self.short);
-        output.push(format!("--{}", self.name));
+        let multiple = if self.multiple { "*" } else { "" };
+        if self.no_long {
+            if let Some(ch) = self.short {
+                output.push(format!("-{}{}", ch, multiple));
+            }
+        } else {
+            if let Some(ch) = self.short {
+                output.push(format!("-{}", ch));
+            }
+            output.push(format!("--{}{}", self.name, multiple));
+        }
         render_summary(&mut output, &self.summary);
         output.join(" ")
     }
 
     fn build_arg(&self, _index: usize) -> Result<Arg> {
         let mut arg = new_arg(&self.name, &self.summary);
-        arg = arg.long(self.name.to_string());
+        if !self.no_long {
+            arg = arg.long(self.name.to_string());
+        }
         if self.multiple {
             arg = arg.action(ArgAction::Count);
         } else {
@@ -126,6 +139,7 @@ pub struct OptionParam {
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) short: Option<char>,
+    pub(crate) no_long: bool,
     pub(crate) value_name: Option<String>,
     pub(crate) choices: Option<Vec<String>>,
     pub(crate) choices_fn: Option<String>,
@@ -141,18 +155,20 @@ impl OptionParam {
         arg: ParamData,
         summary: &str,
         short: Option<char>,
+        no_long: bool,
         value_name: Option<&str>,
     ) -> Self {
         OptionParam {
             name: arg.name.clone(),
             summary: summary.to_string(),
+            short,
+            no_long,
             choices: arg.choices,
             choices_fn: arg.choices_fn,
             multiple: arg.multiple,
             required: arg.required,
             default: arg.default,
             default_fn: arg.default_fn,
-            short,
             value_name: value_name.map(|v| v.to_string()),
             arg_value_name: value_name
                 .or(Some(&arg.name))
@@ -173,17 +189,32 @@ impl Param for OptionParam {
 
     fn render(&self) -> String {
         let mut output = vec![];
-        render_short(&mut output, &self.short);
-        let name = render_name(
-            &self.name,
-            &self.choices,
-            &self.choices_fn,
-            self.multiple,
-            self.required,
-            &self.default,
-            &self.default_fn,
-        );
-        output.push(format!("--{}", name));
+        if self.no_long {
+            let name = render_name(
+                &self.name,
+                &self.choices,
+                &self.choices_fn,
+                self.multiple,
+                self.required,
+                &self.default,
+                &self.default_fn,
+            );
+            output.push(format!("-{}", name));
+        } else {
+            if let Some(ch) = self.short {
+                output.push(format!("-{}", ch));
+            };
+            let name = render_name(
+                &self.name,
+                &self.choices,
+                &self.choices_fn,
+                self.multiple,
+                self.required,
+                &self.default,
+                &self.default_fn,
+            );
+            output.push(format!("--{}", name));
+        }
         if let Some(value_name) = self.value_name.as_ref() {
             output.push(format!("<{}>", value_name));
         }
@@ -193,13 +224,13 @@ impl Param for OptionParam {
 
     fn build_arg(&self, _index: usize) -> Result<Arg> {
         let mut arg = new_arg(&self.name, &self.summary);
-        arg = arg
-            .long(self.name.to_string())
-            .required(self.required)
-            .value_name(&self.arg_value_name);
+        if !self.no_long {
+            arg = arg.long(self.name.to_string())
+        }
         if let Some(s) = self.short {
             arg = arg.short(s);
         }
+        arg = arg.required(self.required).value_name(&self.arg_value_name);
         if self.multiple {
             let num = usize::from(self.required);
             arg = arg
@@ -380,12 +411,6 @@ impl Param for PositionalParam {
 
     fn is_positional(&self) -> bool {
         true
-    }
-}
-
-fn render_short(output: &mut Vec<String>, short: &Option<char>) {
-    if let Some(ch) = short {
-        output.push(format!("-{}", ch));
     }
 }
 

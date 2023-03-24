@@ -230,3 +230,13 @@ fn test_spec_nested_command_exec() {
 fn test_spec_nested_command2() {
     snapshot!(SPEC_SCRIPT, &["spec", "cmd_nested_command2",],);
 }
+
+#[test]
+fn test_no_long_flags() {
+    snapshot!(SPEC_SCRIPT, &["spec", "cmd_no_long_flags", "-h"],);
+}
+
+#[test]
+fn test_no_long_options() {
+    snapshot!(SPEC_SCRIPT, &["spec", "cmd_no_long_options", "-h"],);
+}

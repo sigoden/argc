@@ -8,7 +8,7 @@
 # @option      -x --opt7[x|y|z]    A option with choices
 # @option      -y --opt8[=x|y|z]   A option with choices and default value
 # @option      -z --opt9![x|y|z]   A required option with choices
-# @option         --opt10[`_fn2`]  A option with choices from fn 
+# @option      -w  --opt10[`_fn2`]  A option with choices from fn 
 
 _fn() {
     echo abc
