@@ -6,6 +6,8 @@ RUN
 spec _fn_args -z 5 -y=6 -y8 --msg cool -7 --here=there -xvf file.tgz -qrs=1234 -n -555 one two three -abc+5 -c-6 -- four -z 0
 
 STDOUT
+argc__line=-z\ 5\ -y\=6\ -y8\ --msg\ cool\ -7\ --here\=there\ -xvf\ file.tgz\ -qrs\=1234\ -n\ -555\ one\ two\ three\ -abc\+5\ -c-6\ --\ four\ -z\ 0
+argc__count=22
 argc_z=5
 argc_y=( 6 8 )
 argc_msg=cool

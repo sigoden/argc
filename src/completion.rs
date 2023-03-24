@@ -1,10 +1,12 @@
-use crate::parser::{parse, Event, EventData};
+use crate::parser::{parse, Event, EventData, EventScope};
 use crate::utils::split_shell_words;
 use crate::Result;
 use anyhow::anyhow;
 use either::Either;
 use indexmap::{IndexMap, IndexSet};
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 
 pub fn compgen(source: &str, line: &str) -> Result<Vec<String>> {
     let events = parse(source)?;
@@ -16,7 +18,9 @@ type ChoicesType = Either<Vec<String>, String>;
 type OptionMapType = (Option<String>, String, Option<ChoicesType>, bool);
 type PositionalItemType = (String, Option<ChoicesType>, bool);
 
-#[derive(Debug, Default)]
+pub(crate) const DYNAMIC_COMPGEN_FN: &str = "_compgen";
+
+#[derive(Default)]
 pub struct Completion {
     name: Option<String>,
     help: bool,
@@ -27,12 +31,13 @@ pub struct Completion {
     subcommands: Vec<Completion>,
     subcommand_mappings: IndexMap<String, String>,
     flag_option_mappings: IndexMap<String, String>,
+    root: Arc<RefCell<RootData>>,
 }
 
 impl Completion {
     pub fn new_from_events(events: &[Event]) -> Self {
         let mut root_comp = Completion::default();
-        let mut cmd_start = false;
+        let root_data = root_comp.root.clone();
         for Event { data, .. } in events {
             match data {
                 EventData::Help(_) => {
@@ -40,8 +45,8 @@ impl Completion {
                     cmd.help = true;
                 }
                 EventData::Cmd(_) => {
+                    root_data.borrow_mut().scope = EventScope::CmdStart;
                     root_comp.create_subcommand();
-                    cmd_start = true;
                 }
                 EventData::Aliases(aliases) => {
                     let cmd = Self::get_cmd(&mut root_comp);
@@ -96,7 +101,7 @@ impl Completion {
                     ));
                 }
                 EventData::Func(name) => {
-                    if cmd_start {
+                    if root_data.borrow().scope == EventScope::CmdStart {
                         let (parent, child) = match name.split_once("::") {
                             None => (name.as_str(), None),
                             Some((parent, child)) => (parent, Some(child)),
@@ -134,7 +139,9 @@ impl Completion {
                                 }
                             }
                         }
-                        cmd_start = false;
+                        root_data.borrow_mut().scope = EventScope::FnEnd;
+                    } else if name == DYNAMIC_COMPGEN_FN {
+                        root_data.borrow_mut().dynamic_compgen = true;
                     }
                 }
                 _ => {}
@@ -268,6 +275,9 @@ impl Completion {
                 add_positional_to_output(&mut output, positional_index, &comp.positionals);
             }
         }
+        if self.root.borrow().dynamic_compgen {
+            output.push(format!("`{}`", DYNAMIC_COMPGEN_FN));
+        }
         Ok(output)
     }
 
@@ -324,6 +334,12 @@ fn add_positional_to_output(
     } else if let Some((name, choices, multiple)) = positionals.get(positional_index) {
         output.extend(generate_by_choices_or_name(name, choices, *multiple));
     }
+}
+
+#[derive(Default)]
+struct RootData {
+    scope: EventScope,
+    dynamic_compgen: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
