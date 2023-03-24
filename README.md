@@ -105,7 +105,7 @@ COMMANDS:
 ### @arg
 
 ```
-@arg <name>[modifier] [value notation] [help string]
+@arg <name>[modifier|default|modifer+choices] [value notation] [help string]
 ```
 
 Define a positional argument.
@@ -114,21 +114,20 @@ Define a positional argument.
 # @arg arg1            A positional argument
 # @arg arg2!           A required positional argument
 # @arg arg3 <PATH>     A positional argument with value notation
-# @arg arg4*           A positional argument support multiple values
-# @arg arg5+           A required positional argument support multiple values
+# @arg arg4*           A positional argument with multiple values
+# @arg arg5+           A required positional argument with multiple values
 # @arg arg6=a          A positional argument with default value
 # @arg arg7=`_fn`      A positional argument with default value from fn
 # @arg arg8[a|b]       A positional argument with choices
 # @arg arg9[`_fn`]     A positional argument with choices from fn
 # @arg arg10[=a|b]     A positional argument with choices and default value
-# @arg arg11![a|b]     A required positional argument with choices
-# @arg arg12![`_fn`]   A required positional argument with choices from fn
+# @arg arg11*[a|b]     A positional argument with choices and multiple values
 ```
 
 ### @option
 
 ```
-@option [short] <long>[modifier] [value notation] [help string]
+@option [short] <long>[modifier|default|modifier+choices] [value notation] [help string]
 ```
 
 Define a option.
@@ -145,15 +144,13 @@ Define a option.
 # @option    --opt9[a|b]            A option with choices
 # @option    --opt10[`_fn`]         A option with choices from fn
 # @option    --opt11[=a|b]          A option with choices and default value
-# @option    --opt12![a|b]          A required option with choices
-# @option    --opt13![`_fn`]        A required option with choices from fn
-# @option -b --opt14 <PATH>         A option with short alias and value notation
+# @option    --opt12*[a|b]          A option with choices and multiple values
 ```
 
 ### @flag
 
 ```
-@flag [short] <long> [help string]
+@flag [short] <long>[*] [help string]
 ```
 
 Define a flag. A flag is an option of boolean type, and is always false by default (e.g. --verbose, --quiet, --all, --long, etc).
