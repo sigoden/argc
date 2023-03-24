@@ -192,11 +192,9 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> 
             preceded(
                 pair(space0, tag("--")),
                 alt((
-                    parse_param_choices_fn_required,
-                    parse_param_choices_fn,
-                    parse_param_choices_default,
-                    parse_param_choices_required,
-                    parse_param_choices,
+                    parse_param_mark_choices_default,
+                    parse_param_mark_choices_fn,
+                    parse_param_mark_choices,
                     parse_param_assign_fn,
                     parse_param_assign,
                     parse_param_mark,
@@ -220,11 +218,9 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
                 preceded(
                     verify_single_char,
                     alt((
-                        parse_param_choices_fn_required,
-                        parse_param_choices_fn,
-                        parse_param_choices_default,
-                        parse_param_choices_required,
-                        parse_param_choices,
+                        parse_param_mark_choices_default,
+                        parse_param_mark_choices_fn,
+                        parse_param_mark_choices,
                         parse_param_assign_fn,
                         parse_param_assign,
                         parse_param_mark,
@@ -246,11 +242,9 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
     map(
         tuple((
             alt((
-                parse_param_choices_fn_required,
-                parse_param_choices_fn,
-                parse_param_choices_default,
-                parse_param_choices_required,
-                parse_param_choices,
+                parse_param_mark_choices_default,
+                parse_param_mark_choices_fn,
+                parse_param_mark_choices,
                 parse_param_assign_fn,
                 parse_param_assign,
                 parse_param_mark,
@@ -348,74 +342,42 @@ fn parse_param_assign_fn(input: &str) -> nom::IResult<&str, ParamData> {
     )(input)
 }
 
-// Parse `str[a|b|c]`
-fn parse_param_choices(input: &str) -> nom::IResult<&str, ParamData> {
+fn parse_param_mark_choices_default(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         pair(
-            parse_param_name,
-            delimited(char('['), parse_choices, char(']')),
-        ),
-        |(mut arg, choices)| {
-            arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
-            arg
-        },
-    )(input)
-}
-
-// Parse str[`fn`]
-fn parse_param_choices_fn(input: &str) -> nom::IResult<&str, ParamData> {
-    map(
-        pair(
-            parse_param_name,
-            delimited(char('['), parse_value_fn, char(']')),
-        ),
-        |(mut arg, choices_fn)| {
-            arg.choices_fn = Some(choices_fn.into());
-            arg
-        },
-    )(input)
-}
-
-// Parse `str[=a|b|c]`
-fn parse_param_choices_default(input: &str) -> nom::IResult<&str, ParamData> {
-    map(
-        pair(
-            parse_param_name,
+            parse_param_mark,
             delimited(char('['), parse_choices_default, char(']')),
         ),
         |(mut arg, (choices, default))| {
             arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
+            arg.required = false;
             arg.default = default.map(|v| v.to_string());
             arg
         },
     )(input)
 }
 
-// Parse `str![a|b|c]`
-fn parse_param_choices_required(input: &str) -> nom::IResult<&str, ParamData> {
+fn parse_param_mark_choices(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         pair(
-            terminated(parse_param_name, char('!')),
+            parse_param_mark,
             delimited(char('['), parse_choices, char(']')),
         ),
         |(mut arg, choices)| {
             arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
-            arg.required = true;
             arg
         },
     )(input)
 }
 
-// Parse str![`fn`]
-fn parse_param_choices_fn_required(input: &str) -> nom::IResult<&str, ParamData> {
+fn parse_param_mark_choices_fn(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         pair(
-            terminated(parse_param_name, char('!')),
+            parse_param_mark,
             delimited(char('['), parse_value_fn, char(']')),
         ),
         |(mut arg, choices_fn)| {
             arg.choices_fn = Some(choices_fn.into());
-            arg.required = true;
             arg
         },
     )(input)
@@ -597,7 +559,7 @@ mod tests {
     }
 
     macro_rules! assert_parse_option_arg {
-        ($data:literal, &expect:literal) => {
+        ($data:literal, $expect:literal) => {
             assert_eq!(
                 parse_option_param($data).unwrap().1.render().as_str(),
                 $expect
@@ -612,7 +574,7 @@ mod tests {
     }
 
     macro_rules! assert_parse_flag_arg {
-        ($data:literal, &expect:literal) => {
+        ($data:literal, $expect:literal) => {
             assert_eq!(parse_flag_arg($data).unwrap().1.render().as_str(), $expect);
         };
         ($data:literal) => {
@@ -621,7 +583,7 @@ mod tests {
     }
 
     macro_rules! assert_parse_positional_arg {
-        ($data:literal, &expect:literal) => {
+        ($data:literal, $expect:literal) => {
             assert_eq!(
                 parse_positional_param($data).unwrap().1.render().as_str(),
                 $expect
@@ -647,31 +609,33 @@ mod tests {
         assert_parse_option_arg!("--foo[a|b]");
         assert_parse_option_arg!("--foo[=a|b]");
         assert_parse_option_arg!("--foo[`_foo`]");
+        assert_parse_option_arg!("--foo![a|b]");
+        assert_parse_option_arg!("--foo![`_foo`]");
+        assert_parse_option_arg!("--foo![=a|b]", "--foo[=a|b]");
+        assert_parse_option_arg!("--foo+[a|b]");
+        assert_parse_option_arg!("--foo+[`_foo`]");
+        assert_parse_option_arg!("--foo+[=a|b]", "--foo*[=a|b]");
+        assert_parse_option_arg!("--foo*[a|b]");
+        assert_parse_option_arg!("--foo*[=a|b]");
+        assert_parse_option_arg!("--foo*[`_foo`]");
         assert_parse_option_arg!("--foo <FOO>");
         assert_parse_option_arg!("--foo-abc <FOO>");
         assert_parse_option_arg!("--foo=\"a b\"");
         assert_parse_option_arg!("--foo[\"a|b\"|\"c]d\"]");
-        assert_parse_option_arg!("--foo![a|b]");
-        assert_parse_option_arg!("--foo![`_foo`]");
     }
 
     #[test]
     fn test_parse_no_long_option_arg() {
-        assert_parse_option_arg!("-f!");
-        assert_parse_option_arg!("-f+");
-        assert_parse_option_arg!("-f*");
+        assert_parse_option_arg!("-f");
         assert_parse_option_arg!("-f!");
         assert_parse_option_arg!("-f=a");
         assert_parse_option_arg!("-f=`_foo`");
         assert_parse_option_arg!("-f[a|b]");
         assert_parse_option_arg!("-f[=a|b]");
         assert_parse_option_arg!("-f[`_foo`]");
-        assert_parse_option_arg!("-f <FOO>");
-        assert_parse_option_arg!("-f-abc <FOO>");
-        assert_parse_option_arg!("-f=\"a b\"");
-        assert_parse_option_arg!("-f[\"a|b\"|\"c]d\"]");
         assert_parse_option_arg!("-f![a|b]");
         assert_parse_option_arg!("-f![`_foo`]");
+        assert_parse_option_arg!("-f![=a|b]", "-f[=a|b]");
     }
 
     #[test]
@@ -704,6 +668,13 @@ mod tests {
         assert_parse_positional_arg!("foo[=a|b]");
         assert_parse_positional_arg!("foo![a|b]");
         assert_parse_positional_arg!("foo![`_foo`]");
+        assert_parse_positional_arg!("foo![=a|b]", "foo[=a|b]");
+        assert_parse_positional_arg!("foo+[a|b]");
+        assert_parse_positional_arg!("foo+[`_foo`]");
+        assert_parse_positional_arg!("foo+[=a|b]", "foo*[=a|b]");
+        assert_parse_positional_arg!("foo*[a|b]");
+        assert_parse_positional_arg!("foo*[`_foo`]");
+        assert_parse_positional_arg!("foo*[=a|b]");
     }
 
     #[test]
@@ -739,6 +710,5 @@ mod tests {
         assert_token!("#!/bin/bash", Ignore);
         assert_token!("# @flag -foo", Error);
         assert_token!("# @option -foo![=a|b]", Error);
-        assert_token!("# @arg foo![=a|b]", Error);
     }
 }
