@@ -1,3 +1,5 @@
+pub mod argmap;
+
 use convert_case::{Boundary, Converter, Pattern};
 use std::{fmt, mem};
 
@@ -52,7 +54,6 @@ impl fmt::Display for ParseError {
     }
 }
 
-#[cfg(feature = "std")]
 impl std::error::Error for ParseError {}
 
 pub enum State {
