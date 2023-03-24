@@ -431,7 +431,7 @@ fn render_name(
 ) -> String {
     let mut name = name.to_string();
     if let Some(choices) = choices {
-        if let Some(ch) = get_mark(required, multiple) {
+        if let Some(ch) = get_modifer(required, multiple) {
             name.push(ch)
         }
         let mut prefix = String::new();
@@ -451,7 +451,7 @@ fn render_name(
         let choices_value = format!("[{}{}]", prefix, values.join("|"));
         name.push_str(&choices_value);
     } else if let Some(choices_fn) = choices_fn {
-        if let Some(ch) = get_mark(required, multiple) {
+        if let Some(ch) = get_modifer(required, multiple) {
             name.push(ch)
         }
         let _ = write!(name, "[`{}`]", choices_fn);
@@ -464,13 +464,13 @@ fn render_name(
         let _ = write!(name, "={}", value);
     } else if let Some(default_fn) = default_fn {
         let _ = write!(name, "=`{}`", default_fn);
-    } else if let Some(ch) = get_mark(required, multiple) {
+    } else if let Some(ch) = get_modifer(required, multiple) {
         name.push(ch)
     }
     name
 }
 
-fn get_mark(required: bool, multiple: bool) -> Option<char> {
+fn get_modifer(required: bool, multiple: bool) -> Option<char> {
     match (required, multiple) {
         (true, true) => Some('+'),
         (true, false) => Some('!'),
