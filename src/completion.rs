@@ -275,7 +275,7 @@ impl Completion {
                 add_positional_to_output(&mut output, positional_index, &comp.positionals);
             }
         }
-        if self.root.borrow().dynamic_compgen {
+        if self.root.borrow().dynamic_compgen && output.iter().all(|v| !v.starts_with('`')) {
             output.push(format!("`{}`", DYNAMIC_COMPGEN_FN));
         }
         Ok(output)
