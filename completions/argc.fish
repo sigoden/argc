@@ -14,7 +14,7 @@ function __fish_complete_argc
     end
     set -l line "$tokens[2..]"
     set -l IFS '\n'
-    set -l compgen_values (argc --compgen "$scriptfile" $line 2>/dev/null)
+    set -l compgen_values (argc --compgen "$scriptfile" "$line" 2>/dev/null)
     set -l candicates
     set -l option_values
     set -l value_kind 0
@@ -23,7 +23,7 @@ function __fish_complete_argc
             set -a option_values $item
         else if string match -qr '^`[^` ]+`' -- "$item"
             set -l name (string sub "$item" -s 2 -e -1)
-            set -a candicates ("$ARGC_BASH" "$scriptfile" $name 2>/dev/null)
+            set -a candicates ("$ARGC_BASH" "$scriptfile" $name "$line" 2>/dev/null)
         else if string match -q -- '<*' "$item"
             if string match -qi -- '<args>...' "$item"
                 set value_kind 1

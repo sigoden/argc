@@ -22,7 +22,7 @@ _argc_completion()
         if [[ "$item" == '-'* ]]; then
             option_values+=( "$item" )
         elif [[ "$item" == \`*\` ]]; then
-            local choices=( $("$ARGC_BASH" "$scriptfile" "${item:1:-1}" 2>/dev/null) )
+            local choices=( $("$ARGC_BASH" "$scriptfile" "${item:1:-1}" "$line" 2>/dev/null) )
             candicates=( "${candicates[@]}" "${choices[@]}" )
         elif [[ "$item" == '<'* ]]; then
             if echo "$item" | grep -qi '<args>...'; then

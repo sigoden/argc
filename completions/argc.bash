@@ -16,14 +16,14 @@ _argc_completion() {
     local line=${COMP_LINE:${#COMP_WORDS[0]}}
     local IFS=$'\n'
     local compgen_values=($(argc --compgen "$scriptfile" "$line" 2>/dev/null))
+    local candicates=()
     local option_values=()
     local value_kind=0
-    local candicates=()
     for item in ${compgen_values[@]}; do
         if [[ "$item" == '-'* ]]; then
             option_values+=( "$item" )
         elif [[ "$item" == \`*\` ]]; then
-            local choices=($("$ARGC_BASH" "$scriptfile" "${item:1:-1}" 2>/dev/null))
+            local choices=($("$ARGC_BASH" "$scriptfile" "${item:1:-1}" "$line" 2>/dev/null))
             candicates=( "${candicates[@]}" "${choices[@]}" )
         elif [[ "$item" == '<'* ]]; then
             if echo "$item" | grep -qi '<args>...'; then
