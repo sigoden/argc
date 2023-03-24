@@ -416,6 +416,7 @@ impl RootData {
     }
 
     fn exist_param_fn(&self, name: &str) -> bool {
-        self.dynamic_compgen || self.choices_fns.iter().any(|(v, _)| v == name)
+        (self.dynamic_compgen && name == DYNAMIC_COMPGEN_FN)
+            || self.choices_fns.iter().any(|(v, _)| v == name)
     }
 }
