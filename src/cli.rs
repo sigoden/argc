@@ -210,7 +210,20 @@ impl Cli {
             if let Some(line) = args.get(2) {
                 values.push(ArgcValue::Single("_line".into(), escape_shell_words(line)));
                 if let Ok(words) = split_shell_words(line) {
-                    values.push(ArgcValue::Single("_count".into(), words.len().to_string()));
+                    let mut cur = String::new();
+                    let mut escape_words: Vec<String> =
+                        words.iter().map(|v| escape_shell_words(v)).collect();
+                    if let Some(word) = words.last() {
+                        if line.ends_with(word) {
+                            cur = word.into();
+                        } else {
+                            escape_words.push("\"\"".into());
+                        }
+                    } else if !line.is_empty() {
+                        escape_words.push("\"\"".into());
+                    }
+                    values.push(ArgcValue::Multiple("_words".into(), escape_words));
+                    values.push(ArgcValue::Single("_cur".into(), cur));
                     let (args, argv) = argmap::parse(words.into_iter());
                     for (k, v) in argv {
                         let v_len = v.len();
@@ -225,6 +238,10 @@ impl Cli {
                     }
                     positional_args = args.iter().map(|v| escape_shell_words(v)).collect();
                 }
+            } else {
+                values.push(ArgcValue::Single("_line".into(), String::new()));
+                values.push(ArgcValue::Multiple("_words".into(), vec![]));
+                values.push(ArgcValue::Single("_cur".into(), String::new()));
             }
             values.push(ArgcValue::ParamFn(args[1].into(), positional_args));
             return Ok(Either::Left(values));

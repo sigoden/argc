@@ -9,6 +9,7 @@ ARGC_BASH=${ARGC_BASH:-bash}
 _argc_completion() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     COMPREPLY=()
+    ( set -o posix ; set ) | grep COMP_ > /tmp/file1
     local scriptfile=$(which ${COMP_WORDS[0]})
     if [[ ! -f "$scriptfile" ]]; then
         return 0

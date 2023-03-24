@@ -205,5 +205,7 @@ mod tests {
             split_shell_words("abc 'def ghi'").unwrap(),
             vec!["abc".to_string(), "def ghi".to_string()]
         );
+        assert_eq!(split_shell_words("abc ").unwrap(), vec!["abc".to_string()]);
+        assert_eq!(split_shell_words("abc\t").unwrap(), vec!["abc".to_string()]);
     }
 }
