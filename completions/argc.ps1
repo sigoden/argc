@@ -33,8 +33,10 @@ $_argc_completion = {
         if ($item -match '^-') {
             $option_values += $item
         } elseif ($item -match '^`[^` ]+`$') {
-            $choices = (& $ARGC_BASH "$scriptfile" $item.Substring(1, $item.Length - 2) "$line" 2>$null).Split("`n")
-            $candicates += $choices
+            $choices = (& $ARGC_BASH "$scriptfile" $item.Substring(1, $item.Length - 2) "$line" 2>$null)
+            if ($choices) {
+                $candicates += $choices.Split("`n")
+            }
         } elseif ($item -match '^<') {
             if ($item -imatch "<args>...") {
                 $value_kind = 1
