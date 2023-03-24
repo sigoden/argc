@@ -1,7 +1,7 @@
 #[test]
 fn test_syntax_error() {
     let script = r###"
-# @flag -f
+# @option -foo
     "###;
     fatal!(script, &["prog"], "syntax error at line 2");
 }

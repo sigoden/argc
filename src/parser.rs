@@ -181,6 +181,11 @@ fn parse_tag_unknown(input: &str) -> nom::IResult<&str, Option<EventData>> {
 
 // Parse `@option`
 fn parse_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
+    alt((parse_with_long_option_param, parse_no_long_option_param))(input)
+}
+
+// Parse `@option` with long name
+fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
     map(
         tuple((
             parse_short,
@@ -200,7 +205,39 @@ fn parse_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
             parse_value_notation,
             parse_tail,
         )),
-        |(short, arg, value_name, summary)| OptionParam::new(arg, summary, short, value_name),
+        |(short, arg, value_name, summary)| {
+            OptionParam::new(arg, summary, short, false, value_name)
+        },
+    )(input)
+}
+
+// Parse `@option` without long name
+fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
+    map(
+        tuple((
+            preceded(
+                pair(space0, tag("-")),
+                preceded(
+                    verify_single_char,
+                    alt((
+                        parse_param_choices_fn_required,
+                        parse_param_choices_fn,
+                        parse_param_choices_default,
+                        parse_param_choices_required,
+                        parse_param_choices,
+                        parse_param_assign_fn,
+                        parse_param_assign,
+                        parse_param_mark,
+                    )),
+                ),
+            ),
+            parse_value_notation,
+            parse_tail,
+        )),
+        |(arg, value_name, summary)| {
+            let short = arg.name.chars().next();
+            OptionParam::new(arg, summary, short, true, value_name)
+        },
     )(input)
 }
 
@@ -227,13 +264,34 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
 
 // Parse `@flag`
 fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
+    alt((parse_with_long_flag_param, parse_no_long_flag_param))(input)
+}
+// Parse `@flag`
+fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
     map(
         tuple((
             parse_short,
             preceded(pair(space0, tag("--")), parse_param_multiple),
             parse_tail,
         )),
-        |(short, arg, summary)| FlagParam::new(arg, summary, short),
+        |(short, arg, summary)| FlagParam::new(arg, summary, short, false),
+    )(input)
+}
+
+// Parse `@flag` without long name
+fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
+    map(
+        tuple((
+            preceded(
+                pair(space0, tag("-")),
+                preceded(verify_single_char, parse_param_multiple),
+            ),
+            parse_tail,
+        )),
+        |(arg, summary)| {
+            let short = arg.name.chars().next();
+            FlagParam::new(arg, summary, short, true)
+        },
     )(input)
 }
 
@@ -459,6 +517,21 @@ fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
     alt((single, double))(input)
 }
 
+fn verify_single_char(input: &str) -> nom::IResult<&str, &str> {
+    if input
+        .chars()
+        .take_while(|v| v.is_ascii_alphanumeric())
+        .count()
+        > 1
+    {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Verify,
+        )));
+    }
+    Ok((input, ""))
+}
+
 fn is_not_fn_name_char(c: char) -> bool {
     !matches!(
         c,
@@ -563,7 +636,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_option_arg() {
+    fn test_parse_with_long_option_arg() {
         assert_parse_option_arg!("-f --foo=a <FOO> A foo option");
         assert_parse_option_arg!("--foo!");
         assert_parse_option_arg!("--foo+");
@@ -583,10 +656,37 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_flag_arg() {
+    fn test_parse_no_long_option_arg() {
+        assert_parse_option_arg!("-f!");
+        assert_parse_option_arg!("-f+");
+        assert_parse_option_arg!("-f*");
+        assert_parse_option_arg!("-f!");
+        assert_parse_option_arg!("-f=a");
+        assert_parse_option_arg!("-f=`_foo`");
+        assert_parse_option_arg!("-f[a|b]");
+        assert_parse_option_arg!("-f[=a|b]");
+        assert_parse_option_arg!("-f[`_foo`]");
+        assert_parse_option_arg!("-f <FOO>");
+        assert_parse_option_arg!("-f-abc <FOO>");
+        assert_parse_option_arg!("-f=\"a b\"");
+        assert_parse_option_arg!("-f[\"a|b\"|\"c]d\"]");
+        assert_parse_option_arg!("-f![a|b]");
+        assert_parse_option_arg!("-f![`_foo`]");
+    }
+
+    #[test]
+    fn test_parse_with_long_flag_arg() {
         assert_parse_flag_arg!("-f --foo A foo flag");
         assert_parse_flag_arg!("--foo A foo flag");
         assert_parse_flag_arg!("--foo");
+        assert_parse_flag_arg!("--foo*");
+    }
+
+    #[test]
+    fn test_parse_no_long_flag_arg() {
+        assert_parse_flag_arg!("-f A foo flag");
+        assert_parse_flag_arg!("-f");
+        assert_parse_flag_arg!("-f*");
     }
 
     #[test]
@@ -637,7 +737,7 @@ mod tests {
         assert_token!("function foo@bar", Func, "foo@bar");
         assert_token!("foo=bar", Ignore);
         assert_token!("#!/bin/bash", Ignore);
-        assert_token!("# @flag -f", Error);
+        assert_token!("# @flag -foo", Error);
         assert_token!("# @option -foo![=a|b]", Error);
         assert_token!("# @arg foo![=a|b]", Error);
     }

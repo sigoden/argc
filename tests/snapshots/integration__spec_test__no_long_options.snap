@@ -1,0 +1,31 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec cmd_no_long_options -h
+
+STDOUT
+
+
+STDERR
+Options without long name
+
+USAGE: spec cmd_no_long_options [OPTIONS] -b <B> -d <D>... -i <I> -l <L>
+
+OPTIONS:
+  -a <A>           optional
+  -b <B>           required
+  -c [<C>...]      optional, multiple
+  -d <D>...        required, multiple
+  -e <E>           optional, default [default: a]
+  -f <F>           choices [possible values: a, b, c]
+  -g <G>           choices, default [default: a] [possible values: a, b, c]
+  -i <I>           required, choices [possible values: a, b, c]
+  -j <J>           optional, default from fn
+  -k <K>           choices from fn
+  -l <L>           required, choices from fn
+  -m <VALUE>       optional, default
+  -h, --help       Print help
+
+

@@ -1,0 +1,21 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec cmd_no_long_flags -h
+
+STDOUT
+
+
+STDERR
+Flags without long name
+
+USAGE: spec cmd_no_long_flags [OPTIONS]
+
+OPTIONS:
+  -a          This is a flag
+  -b...       
+  -h, --help  Print help
+
+
