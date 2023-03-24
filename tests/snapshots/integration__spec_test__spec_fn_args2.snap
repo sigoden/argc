@@ -7,7 +7,7 @@ spec _fn_args
 
 STDOUT
 argc__line=\ 
-argc__words=( "" )
+argc__words=(   )
 argc__cur=
 _fn_args;exit;
 

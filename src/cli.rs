@@ -217,10 +217,10 @@ impl Cli {
                         if line.ends_with(word) {
                             cur = word.into();
                         } else {
-                            escape_words.push("\"\"".into());
+                            escape_words.push(" ".into());
                         }
                     } else if !line.is_empty() {
-                        escape_words.push("\"\"".into());
+                        escape_words.push(" ".into());
                     }
                     values.push(ArgcValue::Multiple("_words".into(), escape_words));
                     values.push(ArgcValue::Single("_cur".into(), cur));
