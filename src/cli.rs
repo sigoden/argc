@@ -1,6 +1,7 @@
 use crate::argc_value::ArgcValue;
 use crate::param::{Param, ParamNames, PositionalParam, EXTRA_ARGS};
 use crate::parser::{parse, Event, EventData, EventScope, Position};
+use crate::utils::{argmap, escape_shell_words, split_shell_words};
 use crate::Result;
 use anyhow::bail;
 use clap::{ArgMatches, Command};
@@ -200,8 +201,28 @@ impl Cli {
 
     pub fn eval(&self, args: &[&str]) -> Result<Either<Vec<ArgcValue>, clap::Error>> {
         let name = args[0];
-        if args.len() == 2 && self.root.borrow().exist_param_fn(args[1]) {
-            return Ok(Either::Left(vec![ArgcValue::ParamFn(args[1].into())]));
+        if args.len() >= 2 && self.root.borrow().exist_param_fn(args[1]) {
+            let mut values = vec![];
+            let mut positional_args = vec![];
+            if let Some(line) = args.get(2) {
+                if let Ok(words) = split_shell_words(line) {
+                    let (args, argv) = argmap::parse(words.into_iter());
+                    for (k, v) in argv {
+                        let v_len = v.len();
+                        match v_len {
+                            0 => values.push(ArgcValue::Single(k, "1".to_string())),
+                            1 => values.push(ArgcValue::Single(k, escape_shell_words(&v[0]))),
+                            _ => values.push(ArgcValue::Multiple(
+                                k,
+                                v.iter().map(|v| escape_shell_words(v)).collect(),
+                            )),
+                        }
+                    }
+                    positional_args = args.iter().map(|v| escape_shell_words(v)).collect();
+                }
+            }
+            values.push(ArgcValue::ParamFn(args[1].into(), positional_args));
+            return Ok(Either::Left(values));
         }
         let command = self.build_command(name)?;
         let res = command.try_get_matches_from(args);

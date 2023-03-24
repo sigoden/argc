@@ -209,6 +209,11 @@ fn test_spec_fn_bars() {
 }
 
 #[test]
+fn test_spec_fn_args() {
+    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args","-z 5 -y=6 -y8 --msg cool -7 --here=there -xvf file.tgz -qrs=1234 -n -555 one two three -abc+5 -c-6 -- four -z 0"],);
+}
+
+#[test]
 fn test_spec_nested_command() {
     snapshot!(SPEC_SCRIPT, &["spec", "cmd_nested_command",],);
 }

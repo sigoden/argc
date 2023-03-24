@@ -11,7 +11,7 @@ pub enum ArgcValue {
     PositionalSingleFn(String, String),
     PositionalMultiple(String, Vec<String>),
     CmdFn(String),
-    ParamFn(String),
+    ParamFn(String, Vec<String>),
 }
 
 impl ArgcValue {
@@ -78,8 +78,12 @@ impl ArgcValue {
                         variables.push(format!("{} {}", name, positional_args.join(" ")));
                     }
                 }
-                ArgcValue::ParamFn(name) => {
-                    variables.push(format!("{name};exit;"));
+                ArgcValue::ParamFn(name, positional_args) => {
+                    if positional_args.is_empty() {
+                        variables.push(format!("{name};exit;"));
+                    } else {
+                        variables.push(format!("{} {};exit;", name, positional_args.join(" ")));
+                    }
                 }
             }
         }

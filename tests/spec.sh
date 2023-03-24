@@ -155,7 +155,7 @@ cmd_nested_command::foo() {
 
 # @cmd Nested command2
 # @version 0.1.0
-# @option --opt1
+# @option --opt1[`_fn_args`]
 cmd_nested_command2() {
     :;
 }
@@ -182,6 +182,11 @@ _fn_foo() {
 
 _fn_bars() {
     echo " a1 a2 a3 "
+}
+
+_fn_args() {
+    echo $@
+    ( set -o posix ; set ) | grep argc_
 }
 
 eval "$(argc "$0" "$@")"
