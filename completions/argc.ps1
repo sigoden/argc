@@ -38,9 +38,9 @@ $_argc_completion = {
         } elseif ($item -match '^<') {
             if ($item -imatch "<args>...") {
                 $value_kind = 1
-            } elseif ($item -imatch "file|path>(\.\.\.)?") {
+            } elseif ($item -imatch "file|path") {
                 $value_kind = 2
-            } elseif ($item -imatch "dir>(\.\.\.)?") {
+            } elseif ($item -imatch "dir") {
                 $value_kind = 3
             } else {
                 $value_kind = 9

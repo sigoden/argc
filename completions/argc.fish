@@ -27,9 +27,9 @@ function __fish_complete_argc
         else if string match -q -- '<*' "$item"
             if string match -qi -- '<args>...' "$item"
                 set value_kind 1
-            else if string match -qir -- '(file|path)>(\.\.\.)?' "$item"
+            else if string match -qir -- '(file|path)' "$item"
                 set value_kind 2
-            else if string match -qir -- 'dir>(\.\.\.)?' "$item"
+            else if string match -qir -- 'dir' "$item"
                 set value_kind 3
             else
                 set value_kind 9
