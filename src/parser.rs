@@ -518,7 +518,7 @@ fn is_not_fn_name_char(c: char) -> bool {
 }
 
 fn is_name_char(c: char) -> bool {
-    c.is_ascii_alphanumeric() || c == '_' || c == '-'
+    c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.')
 }
 
 #[cfg(test)]
@@ -641,6 +641,8 @@ mod tests {
     #[test]
     fn test_parse_with_long_flag_arg() {
         assert_parse_flag_arg!("-f --foo A foo flag");
+        assert_parse_flag_arg!("-. --hidden");
+        assert_parse_flag_arg!("--http1.1");
         assert_parse_flag_arg!("--foo A foo flag");
         assert_parse_flag_arg!("--foo");
         assert_parse_flag_arg!("--foo*");
@@ -656,6 +658,7 @@ mod tests {
     #[test]
     fn test_parse_positional_arg() {
         assert_parse_positional_arg!("foo <FOO> A foo arg");
+        assert_parse_positional_arg!("a.b");
         assert_parse_positional_arg!("foo");
         assert_parse_positional_arg!("foo!");
         assert_parse_positional_arg!("foo+");
