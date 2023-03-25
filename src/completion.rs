@@ -258,9 +258,6 @@ impl Completion {
             }
             index += 1;
         }
-        if positional_index == 1 && comp_type == CompType::Any {
-            positional_index = 0
-        }
         let mut output = vec![];
         match comp_type {
             CompType::FlagOrOption => {
@@ -275,6 +272,9 @@ impl Completion {
                             &parent_comp.subcommand_mappings,
                         );
                     } else {
+                        if positional_index == 1 {
+                            add_mapping_to_output(&mut output, &skipped, &comp.subcommand_mappings);
+                        }
                         add_positional_to_output(
                             &mut output,
                             positional_index - 1,
@@ -296,6 +296,9 @@ impl Completion {
                 }
             }
             CompType::Any => {
+                if positional_index == 1 {
+                    positional_index = 0
+                }
                 add_mapping_to_output(&mut output, &skipped, &comp.flag_option_mappings);
                 if positional_index == 0 {
                     add_mapping_to_output(&mut output, &skipped, &comp.subcommand_mappings);

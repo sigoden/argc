@@ -91,6 +91,11 @@ fn test_compgen_nested_command_subcommand() {
 }
 
 #[test]
+fn test_compgen_nested_command_subcommand2() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_nested_command fo");
+}
+
+#[test]
 fn test_dynamic_compgen() {
     snapshot_compgen!(DYNAMIC_COMPGEN_SCRIPT, "");
 }
