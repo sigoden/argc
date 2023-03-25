@@ -112,6 +112,13 @@ cmd_positional_only() {
 }
 
 # @cmd  Positional all required
+# @arg   arg1     A optional arg
+# @arg   arg2     A optional arg
+cmd_positional_many() {
+    print_argc_vars
+}
+
+# @cmd  Positional all required
 # @arg   arg1!     A required arg
 # @arg   arg2+     A required arg, multiple
 cmd_positional_requires() {
