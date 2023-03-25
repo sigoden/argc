@@ -292,9 +292,7 @@ impl Completion {
                 }
             }
             CompType::Any => {
-                if positional_index == 1 {
-                    positional_index = 0
-                }
+                positional_index = positional_index.saturating_sub(1);
                 add_mapping_to_output(&mut output, &skipped, &comp.flag_option_mappings);
                 if positional_index == 0 {
                     add_mapping_to_output(&mut output, &skipped, &comp.subcommand_mappings);

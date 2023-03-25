@@ -124,3 +124,8 @@ fn test_compgen_unknown_option() {
 fn test_compgen_unknown_option2() {
     snapshot_compgen!(SPEC_SCRIPT, "cmd_omitted --unknown foo ");
 }
+
+#[test]
+fn test_compgen_many_positionals() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_positional_many foo ");
+}

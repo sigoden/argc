@@ -27,6 +27,7 @@ COMMANDS:
   cmd_option_notations                         Option with value notations
   cmd_flag_formats                             All kind of flags
   cmd_positional_only                          Positional one required
+  cmd_positional_many                          Positional all required
   cmd_positional_requires                      Positional all required
   cmd_positional_with_choices                  Positional with choices
   cmd_positional_with_default                  Positional with default value

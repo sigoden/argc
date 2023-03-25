@@ -1,0 +1,13 @@
+---
+source: tests/compgen.rs
+expression: output
+---
+RUN
+cmd_positional_many foo 
+
+STDOUT
+<ARG2>
+
+STDERR
+
+
