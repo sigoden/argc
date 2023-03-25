@@ -237,11 +237,36 @@ fn test_spec_nested_command2() {
 }
 
 #[test]
-fn test_no_long_flags() {
+fn test_spec_cmd_no_long_flags() {
     snapshot!(SPEC_SCRIPT, &["spec", "cmd_no_long_flags", "-h"],);
 }
 
 #[test]
-fn test_no_long_options() {
+fn test_spec_cmd_no_long_options() {
     snapshot!(SPEC_SCRIPT, &["spec", "cmd_no_long_options", "-h"],);
+}
+
+#[test]
+fn test_spec_cmd_option_notations_help() {
+    snapshot!(SPEC_SCRIPT, &["spec", "cmd_option_notations", "-h"],);
+}
+
+#[test]
+fn test_spec_cmd_option_notations() {
+    snapshot!(SPEC_SCRIPT, &["spec", "cmd_option_notations", "--opt2"],);
+}
+#[test]
+fn test_spec_cmd_option_notations1() {
+    snapshot!(
+        SPEC_SCRIPT,
+        &["spec", "cmd_option_notations", "--opt2", "foo"],
+    );
+}
+
+#[test]
+fn test_spec_cmd_option_notations2() {
+    snapshot!(
+        SPEC_SCRIPT,
+        &["spec", "cmd_option_notations", "--opt2", "foo", "bar"],
+    );
 }

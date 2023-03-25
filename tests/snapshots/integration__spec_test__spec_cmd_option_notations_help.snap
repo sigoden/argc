@@ -1,0 +1,21 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec cmd_option_notations -h
+
+STDOUT
+
+
+STDERR
+Option with value notations
+
+USAGE: spec cmd_option_notations [OPTIONS]
+
+OPTIONS:
+      --opt1 <FOO1>         
+      --opt2 <FOO1> <FOO2>  
+  -h, --help                Print help
+
+

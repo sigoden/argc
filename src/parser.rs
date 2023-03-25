@@ -10,7 +10,7 @@ use nom::{
         streaming::none_of,
     },
     combinator::{eof, fail, map, opt, peek, rest, success},
-    multi::{many1, separated_list1},
+    multi::{many0, many1, separated_list1},
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -200,11 +200,11 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> 
                     parse_param_modifer,
                 )),
             ),
-            parse_value_notation,
+            parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |(short, arg, value_name, summary)| {
-            OptionParam::new(arg, summary, short, false, value_name)
+        |(short, arg, value_names, summary)| {
+            OptionParam::new(arg, summary, short, false, &value_names)
         },
     )(input)
 }
@@ -227,12 +227,12 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
                     )),
                 ),
             ),
-            parse_value_notation,
+            parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |(arg, value_name, summary)| {
+        |(arg, value_names, summary)| {
             let short = arg.name.chars().next();
-            OptionParam::new(arg, summary, short, true, value_name)
+            OptionParam::new(arg, summary, short, true, &value_names)
         },
     )(input)
 }
@@ -249,7 +249,7 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
                 parse_param_assign,
                 parse_param_modifer,
             )),
-            parse_value_notation,
+            parse_zero_or_one_value_notation,
             parse_tail,
         )),
         |(arg, value_name, summary)| PositionalParam::new(arg, summary, value_name),
@@ -398,14 +398,26 @@ fn parse_short(input: &str) -> nom::IResult<&str, Option<char>> {
     opt(short)(input)
 }
 
+// Zero or many '<FOO>'
+fn parse_zero_or_many_value_notations(input: &str) -> nom::IResult<&str, Vec<&str>> {
+    many0(parse_value_notation)(input)
+}
+
+// Zero or one '<FOO>'
+fn parse_zero_or_one_value_notation(input: &str) -> nom::IResult<&str, Option<&str>> {
+    opt(parse_value_notation)(input)
+}
+
 // Parse '<FOO>'
-fn parse_value_notation(input: &str) -> nom::IResult<&str, Option<&str>> {
-    let main = delimited(
-        char('<'),
-        take_while1(|c: char| !(c.is_whitespace() || c == '>')),
-        char('>'),
-    );
-    opt(preceded(space0, main))(input)
+fn parse_value_notation(input: &str) -> nom::IResult<&str, &str> {
+    preceded(
+        space0,
+        delimited(
+            char('<'),
+            take_while1(|c: char| !(c.is_ascii_whitespace() || c == '>')),
+            char('>'),
+        ),
+    )(input)
 }
 
 // Parse `a|b|c`
@@ -622,6 +634,8 @@ mod tests {
         assert_parse_option_arg!("--foo-abc <FOO>");
         assert_parse_option_arg!("--foo=\"a b\"");
         assert_parse_option_arg!("--foo[\"a|b\"|\"c]d\"]");
+        assert_parse_option_arg!("--foo <abc>");
+        assert_parse_option_arg!("--foo <abc> <def>");
     }
 
     #[test]

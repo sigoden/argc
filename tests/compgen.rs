@@ -94,3 +94,38 @@ fn test_compgen_nested_command_subcommand() {
 fn test_dynamic_compgen() {
     snapshot_compgen!(DYNAMIC_COMPGEN_SCRIPT, "");
 }
+
+#[test]
+fn test_compgen_multiple_notation() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_option_notations --opt2");
+}
+
+#[test]
+fn test_compgen_multiple_notation2() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_option_notations --opt2 foo");
+}
+
+#[test]
+fn test_compgen_multiple_notation3() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_option_notations --opt2 foo ");
+}
+
+#[test]
+fn test_compgen_multiple_notation4() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_option_notations --opt2 foo bar");
+}
+
+#[test]
+fn test_compgen_multiple_notation5() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_option_notations --opt2 foo bar ");
+}
+
+#[test]
+fn test_compgen_unknown_option() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_omitted --unknown foo --flag1 ");
+}
+
+#[test]
+fn test_compgen_unknown_option2() {
+    snapshot_compgen!(SPEC_SCRIPT, "cmd_omitted --unknown foo ");
+}

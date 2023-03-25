@@ -15,7 +15,7 @@ pub fn compgen(source: &str, line: &str) -> Result<Vec<String>> {
 }
 
 type ChoicesType = Either<Vec<String>, String>;
-type OptionMapType = (Option<String>, String, Option<ChoicesType>, bool);
+type OptionMapType = (Option<String>, Vec<String>, Option<ChoicesType>, bool);
 type PositionalItemType = (String, Option<ChoicesType>, bool);
 
 pub(crate) const DYNAMIC_COMPGEN_FN: &str = "_compgen";
@@ -69,7 +69,7 @@ impl Completion {
                         name.clone(),
                         (
                             short,
-                            option_param.arg_value_name.clone(),
+                            option_param.arg_value_names.clone(),
                             choices,
                             option_param.multiple,
                         ),
@@ -152,10 +152,18 @@ impl Completion {
     }
 
     pub fn generate(&self, line: &str) -> Result<Vec<String>> {
-        let args = split_shell_words(line).map_err(|_| anyhow!("Invalid args"))?;
-        let mut comp_type = get_comp_type(line, &args);
+        let mut args = split_shell_words(line).map_err(|_| anyhow!("Invalid args"))?;
+        if line
+            .chars()
+            .last()
+            .map(|v| v.is_ascii_whitespace())
+            .unwrap_or(false)
+        {
+            args.push(" ".into());
+        }
+        let mut comp_type = get_comp_type(&args);
         let mut force_positional = false;
-        let mut option_complete_values = None;
+        let mut option_complete_values: Option<Vec<String>> = None;
         let mut index = 0;
         let mut skipped: HashSet<String> = HashSet::default();
         let mut parent_comp = self;
@@ -164,39 +172,51 @@ impl Completion {
         let mut has_subcommand = false;
         let len = args.len();
         while index < len {
-            let arg = args[index].as_str();
-            if arg == "--" {
+            let current_arg = args[index].as_str();
+            if current_arg == "--" {
                 force_positional = true;
-            } else if arg.starts_with('-') && !force_positional {
-                let (arg, arg_has_value) = match arg.split_once('=') {
+            } else if current_arg.starts_with('-') && !force_positional {
+                let (arg_name, arg_has_value) = match current_arg.split_once('=') {
                     Some((v, _)) => (v, true),
-                    None => (arg, false),
+                    None => (current_arg, false),
                 };
-                if let Some(name) = comp.flag_option_mappings.get(arg) {
-                    if let Some((short, value_name, choices, multiple)) = comp.options.get(name) {
+                if let Some(name) = comp.flag_option_mappings.get(arg_name) {
+                    if let Some((short, value_names, choices, multiple)) = comp.options.get(name) {
                         if !multiple {
                             skipped.insert(name.to_string());
                             if let Some(short) = short {
                                 skipped.insert(short.to_string());
                             }
                         }
-                        if index == len - 1 {
-                            if !arg_has_value && comp_type == CompType::Any {
+                        if !arg_has_value {
+                            let mut value_name = None;
+                            let mut i = 0;
+                            loop {
+                                match (value_names.get(i), args.get(index + 1 + i)) {
+                                    (Some(_), Some(arg)) => {
+                                        if is_flag_or_option(arg) {
+                                            index += i;
+                                            break;
+                                        }
+                                    }
+                                    (None, Some(_)) => {
+                                        index += i;
+                                        break;
+                                    }
+                                    (_, None) => {
+                                        if i > 0 {
+                                            value_name = value_names.get(i - 1);
+                                        }
+                                        break;
+                                    }
+                                }
+                                i += 1;
+                            }
+                            if let Some(value_name) = value_name {
                                 comp_type = CompType::OptionValue;
                                 option_complete_values = Some(generate_by_choices_or_name(
                                     value_name, choices, *multiple,
                                 ))
-                            }
-                            break;
-                        }
-                        if !arg_has_value && !args[index + 1].starts_with('-') {
-                            index += 1;
-                            if index == len - 1 && comp_type == CompType::CommandOrPositional {
-                                comp_type = CompType::OptionValue;
-                                option_complete_values = Some(generate_by_choices_or_name(
-                                    value_name, choices, *multiple,
-                                ));
-                                break;
                             }
                         }
                     } else if let Some(short) = comp.flags.get(name) {
@@ -205,11 +225,16 @@ impl Completion {
                             skipped.insert(short.to_string());
                         }
                     }
+                } else if let (Some(next), Some(next2)) = (args.get(index + 1), args.get(index + 2))
+                {
+                    if !is_flag_or_option(next) && is_flag_or_option(next2) {
+                        index += 1;
+                    }
                 }
-            } else if !arg.starts_with('-') {
+            } else if !current_arg.starts_with('-') {
                 let mut matched = false;
                 if positional_index == 0 {
-                    if let Some(name) = comp.subcommand_mappings.get(arg) {
+                    if let Some(name) = comp.subcommand_mappings.get(current_arg) {
                         if let Some(subcmd_comp) = comp
                             .subcommands
                             .iter()
@@ -232,6 +257,9 @@ impl Completion {
                 positional_index += 1;
             }
             index += 1;
+        }
+        if positional_index == 1 && comp_type == CompType::Any {
+            positional_index = 0
         }
         let mut output = vec![];
         match comp_type {
@@ -350,17 +378,12 @@ enum CompType {
     Any,
 }
 
-fn get_comp_type(line: &str, args: &[String]) -> CompType {
-    if line
-        .chars()
-        .last()
-        .map(|v| v.is_ascii_whitespace())
-        .unwrap_or(true)
-    {
-        CompType::Any
-    } else if let Some(arg) = args.last() {
+fn get_comp_type(args: &[String]) -> CompType {
+    if let Some(arg) = args.last() {
         if arg.starts_with('-') {
             CompType::FlagOrOption
+        } else if arg.as_str() == " " {
+            CompType::Any
         } else {
             CompType::CommandOrPositional
         }
@@ -412,4 +435,8 @@ fn add_mapping_to_output(
             output.push(name.to_string());
         }
     }
+}
+
+fn is_flag_or_option(arg: &str) -> bool {
+    arg != "--" && arg.starts_with('-')
 }
