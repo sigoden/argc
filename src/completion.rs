@@ -18,8 +18,6 @@ type ChoicesType = Either<Vec<String>, String>;
 type OptionMapType = (Option<String>, Vec<String>, Option<ChoicesType>, bool);
 type PositionalItemType = (String, Option<ChoicesType>, bool);
 
-pub(crate) const DYNAMIC_COMPGEN_FN: &str = "_compgen";
-
 #[derive(Default)]
 pub struct Completion {
     name: Option<String>,
@@ -140,8 +138,6 @@ impl Completion {
                             }
                         }
                         root_data.borrow_mut().scope = EventScope::FnEnd;
-                    } else if name == DYNAMIC_COMPGEN_FN {
-                        root_data.borrow_mut().dynamic_compgen = true;
                     }
                 }
                 _ => {}
@@ -306,9 +302,6 @@ impl Completion {
                 add_positional_to_output(&mut output, positional_index, &comp.positionals);
             }
         }
-        if self.root.borrow().dynamic_compgen && output.iter().all(|v| !v.starts_with('`')) {
-            output.push(format!("`{}`", DYNAMIC_COMPGEN_FN));
-        }
         Ok(output)
     }
 
@@ -370,7 +363,6 @@ fn add_positional_to_output(
 #[derive(Default)]
 struct RootData {
     scope: EventScope,
-    dynamic_compgen: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
