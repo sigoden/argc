@@ -1,5 +1,4 @@
 use crate::argc_value::ArgcValue;
-use crate::completion::DYNAMIC_COMPGEN_FN;
 use crate::param::{Param, ParamNames, PositionalParam, EXTRA_ARGS};
 use crate::parser::{parse, Event, EventData, EventScope, Position};
 use crate::utils::{argmap, escape_shell_words, split_shell_words};
@@ -149,8 +148,6 @@ impl Cli {
                                 }
                             }
                         }
-                    } else if name == DYNAMIC_COMPGEN_FN {
-                        root_data.borrow_mut().dynamic_compgen = true;
                     }
                     root_data.borrow_mut().scope = EventScope::FnEnd;
                 }
@@ -381,7 +378,6 @@ impl Cli {
 struct RootData {
     scope: EventScope,
     fns: HashMap<String, Position>,
-    dynamic_compgen: bool,
     default_fns: Vec<(String, Position)>,
     choices_fns: Vec<(String, Position)>,
 }
@@ -416,7 +412,6 @@ impl RootData {
     }
 
     fn exist_param_fn(&self, name: &str) -> bool {
-        (self.dynamic_compgen && name == DYNAMIC_COMPGEN_FN)
-            || self.choices_fns.iter().any(|(v, _)| v == name)
+        self.choices_fns.iter().any(|(v, _)| v == name)
     }
 }
