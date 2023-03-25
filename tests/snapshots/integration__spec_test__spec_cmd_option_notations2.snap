@@ -1,0 +1,14 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec cmd_option_notations --opt2 foo bar
+
+STDOUT
+argc_opt2=( foo bar )
+cmd_option_notations
+
+STDERR
+
+

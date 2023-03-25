@@ -140,14 +140,14 @@ pub struct OptionParam {
     pub(crate) summary: String,
     pub(crate) short: Option<char>,
     pub(crate) no_long: bool,
-    pub(crate) value_name: Option<String>,
     pub(crate) choices: Option<Vec<String>>,
     pub(crate) choices_fn: Option<String>,
     pub(crate) multiple: bool,
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
-    pub(crate) arg_value_name: String,
+    pub(crate) value_names: Vec<String>,
+    pub(crate) arg_value_names: Vec<String>,
 }
 
 impl OptionParam {
@@ -156,8 +156,14 @@ impl OptionParam {
         summary: &str,
         short: Option<char>,
         no_long: bool,
-        value_name: Option<&str>,
+        value_names: &[&str],
     ) -> Self {
+        let value_names: Vec<String> = value_names.iter().map(|v| v.to_string()).collect();
+        let arg_value_names = if value_names.is_empty() {
+            vec![to_cobol_case(&arg.name)]
+        } else {
+            value_names.iter().map(|v| to_cobol_case(v)).collect()
+        };
         OptionParam {
             name: arg.name.clone(),
             summary: summary.to_string(),
@@ -169,11 +175,8 @@ impl OptionParam {
             required: arg.required,
             default: arg.default,
             default_fn: arg.default_fn,
-            value_name: value_name.map(|v| v.to_string()),
-            arg_value_name: value_name
-                .or(Some(&arg.name))
-                .map(to_cobol_case)
-                .unwrap_or_default(),
+            value_names,
+            arg_value_names,
         }
     }
 }
@@ -215,7 +218,7 @@ impl Param for OptionParam {
             );
             output.push(format!("--{}", name));
         }
-        if let Some(value_name) = self.value_name.as_ref() {
+        for value_name in &self.value_names {
             output.push(format!("<{}>", value_name));
         }
         render_summary(&mut output, &self.summary);
@@ -230,7 +233,12 @@ impl Param for OptionParam {
         if let Some(s) = self.short {
             arg = arg.short(s);
         }
-        arg = arg.required(self.required).value_name(&self.arg_value_name);
+        arg = arg.required(self.required);
+        if self.arg_value_names.len() == 1 {
+            arg = arg.value_name(&self.arg_value_names[0]);
+        } else {
+            arg = arg.value_names(&self.arg_value_names);
+        }
         if self.multiple {
             let num = usize::from(self.required);
             arg = arg
@@ -259,7 +267,7 @@ impl Param for OptionParam {
             }
             return None;
         }
-        if self.multiple {
+        if self.multiple || self.arg_value_names.len() > 1 {
             let values = matches
                 .get_many::<String>(&self.name)
                 .map(|vals| vals.map(|v| escape_shell_words(v)).collect::<Vec<_>>())
@@ -285,7 +293,6 @@ impl Param for OptionParam {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PositionalParam {
     pub(crate) name: String,
-    pub(crate) value_name: Option<String>,
     pub(crate) summary: String,
     pub(crate) choices: Option<Vec<String>>,
     pub(crate) choices_fn: Option<String>,
@@ -293,6 +300,7 @@ pub struct PositionalParam {
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
+    pub(crate) value_name: Option<String>,
     pub(crate) arg_value_name: String,
 }
 

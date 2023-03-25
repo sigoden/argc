@@ -88,6 +88,13 @@ cmd_option_quotes() {
     print_argc_vars
 }
 
+# @cmd Option with value notations
+# @option   --opt1 <FOO1>
+# @option   --opt2 <FOO1> <FOO2>
+cmd_option_notations() {
+    print_argc_vars
+}
+
 # @cmd All kind of flags
 # @flag      --foo1
 # @flag   -a --foo2    

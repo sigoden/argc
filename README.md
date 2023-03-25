@@ -105,7 +105,7 @@ COMMANDS:
 ### @arg
 
 ```
-@arg <name>[modifier|default|modifer+choices] [value notation] [help string]
+@arg <name>[modifier|default|modifer+choices] [zero-or-one value notation] [help-string]
 ```
 
 Define a positional argument.
@@ -127,7 +127,7 @@ Define a positional argument.
 ### @option
 
 ```
-@option [short] <long>[modifier|default|modifier+choices] [value notation] [help string]
+@option [short] <long>[modifier|default|modifier+choices] [zero-or-many value-notation] [help-string]
 ```
 
 Define a option.
@@ -145,6 +145,7 @@ Define a option.
 # @option    --opt10[`_fn`]         A option with choices from fn
 # @option    --opt11[=a|b]          A option with choices and default value
 # @option    --opt12*[a|b]          A option with choices and multiple values
+# @option    --opt13 <FILE> <FILE>  A option with value notation
 ```
 
 ### @flag

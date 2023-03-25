@@ -1,0 +1,18 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec cmd_option_notations --opt2 foo
+
+STDOUT
+
+
+STDERR
+error: 2 values required for '--opt2 <FOO1> <FOO2>' but 1 was provided
+
+Usage: spec cmd_option_notations [OPTIONS]
+
+For more information, try '--help'.
+
+
