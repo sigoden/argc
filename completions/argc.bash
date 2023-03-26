@@ -28,7 +28,7 @@ _argc_completion() {
         elif [[ "$item" == '<'* ]]; then
             if echo "$item" | grep -qi '<args>...'; then
                 value_kind=1
-            elif echo "$item" | grep -qi '\(file\|path\)>'; then
+            elif echo "$item" | grep -qi '\(file\|path\)'; then
                 value_kind=2
             elif echo "$item" | grep -qi 'dir'; then
                 value_kind=3
