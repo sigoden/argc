@@ -43,6 +43,8 @@ fn run() -> Result<i32> {
         .override_usage(
             r#"
     argc SCRIPT [ARGS...]               Parse arguments `eval "$(argc "$0" "$@")"`
+	argc --compgen SCRIPT LINE          Generate words for completion
+	argc --export SCRIPT                Export cli definition to json
     argc --help                         Print help information
     argc --version                      Print version information"#,
         )
@@ -63,6 +65,7 @@ USAGE:{usage}"#,
                 .long("compgen")
                 .action(ArgAction::SetTrue),
         )
+        .arg(Arg::new("export").long("export").action(ArgAction::SetTrue))
         .try_get_matches_from(&argc_args)?;
 
     if matches.get_flag("compgen") {
@@ -71,6 +74,10 @@ USAGE:{usage}"#,
         let line = if cmd_args.len() == 1 { "" } else { cmd_args[1] };
         let candicates = argc::compgen(&source, line)?;
         candicates.into_iter().for_each(|v| println!("{v}"));
+    } else if matches.get_flag("export") {
+        let (source, _) = parse_script_args(&script_args)?;
+        let json = argc::export(&source)?;
+        println!("{}", serde_json::to_string_pretty(&json)?);
     } else {
         let (source, cmd_args) = parse_script_args(&script_args)?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
