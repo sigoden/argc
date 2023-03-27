@@ -3,11 +3,12 @@ use crate::param::{Param, ParamNames, PositionalParam, EXTRA_ARGS};
 use crate::parser::{parse, Event, EventData, EventScope, Position};
 use crate::utils::{argmap, escape_shell_words, split_shell_words};
 use crate::Result;
-use anyhow::bail;
+use anyhow::{bail, Context};
 use clap::{ArgMatches, Command};
 use either::Either;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::result::Result as StdResult;
 use std::sync::Arc;
 
 pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, clap::Error>> {
@@ -17,6 +18,12 @@ pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, clap::Error>> 
         Either::Left(values) => Ok(Either::Left(ArgcValue::to_shell(values))),
         Either::Right(error) => Ok(Either::Right(error)),
     }
+}
+
+pub fn export(source: &str) -> Result<serde_json::Value> {
+    let events = parse(source)?;
+    let cmd = Cli::new_from_events(&events)?;
+    cmd.to_json().with_context(|| "Failed to export json")
 }
 
 #[derive(Default)]
@@ -247,6 +254,27 @@ impl Cli {
             }
             Err(err) => Ok(Either::Right(err)),
         }
+    }
+
+    pub fn to_json(&self) -> StdResult<serde_json::Value, serde_json::Error> {
+        let subcommands: StdResult<Vec<serde_json::Value>, _> =
+            self.subcommands.iter().map(|v| v.to_json()).collect();
+        let params: StdResult<Vec<serde_json::Value>, _> = self
+            .params
+            .iter()
+            .filter(|(v, _)| v.name() != EXTRA_ARGS)
+            .map(|(v, _)| v.to_json())
+            .collect();
+        let value = serde_json::json!({
+            "describe": self.describe,
+            "name": self.name,
+            "help": self.help,
+            "author": self.author,
+            "version": self.version,
+            "params": params?,
+            "subcommands": subcommands?,
+        });
+        Ok(value)
     }
 
     pub fn get_args(&self, matches: &ArgMatches) -> Vec<ArgcValue> {

@@ -7,6 +7,7 @@ use crate::utils::{
 use anyhow::{bail, Result};
 use clap::builder::PossibleValuesParser;
 use clap::{Arg, ArgAction, ArgMatches};
+use serde::Serialize;
 use std::collections::HashMap;
 use std::fmt::Write;
 
@@ -47,9 +48,10 @@ pub trait Param {
     fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue>;
     fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()>;
     fn is_positional(&self) -> bool;
+    fn to_json(&self) -> std::result::Result<serde_json::Value, serde_json::Error>;
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct FlagParam {
     pub(crate) name: String,
     pub(crate) summary: String,
@@ -132,9 +134,13 @@ impl Param for FlagParam {
     fn is_positional(&self) -> bool {
         false
     }
+
+    fn to_json(&self) -> std::result::Result<serde_json::Value, serde_json::Error> {
+        serde_json::to_value(self)
+    }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct OptionParam {
     pub(crate) name: String,
     pub(crate) summary: String,
@@ -147,6 +153,7 @@ pub struct OptionParam {
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
     pub(crate) value_names: Vec<String>,
+    #[serde(skip_serializing)]
     pub(crate) arg_value_names: Vec<String>,
 }
 
@@ -288,9 +295,13 @@ impl Param for OptionParam {
     fn is_positional(&self) -> bool {
         false
     }
+
+    fn to_json(&self) -> std::result::Result<serde_json::Value, serde_json::Error> {
+        serde_json::to_value(self)
+    }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct PositionalParam {
     pub(crate) name: String,
     pub(crate) summary: String,
@@ -301,6 +312,7 @@ pub struct PositionalParam {
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
     pub(crate) value_name: Option<String>,
+    #[serde(skip_serializing)]
     pub(crate) arg_value_name: String,
 }
 
@@ -419,6 +431,10 @@ impl Param for PositionalParam {
 
     fn is_positional(&self) -> bool {
         true
+    }
+
+    fn to_json(&self) -> std::result::Result<serde_json::Value, serde_json::Error> {
+        serde_json::to_value(self)
     }
 }
 

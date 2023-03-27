@@ -6,7 +6,7 @@ pub mod parser;
 pub mod utils;
 
 use anyhow::Error;
-pub use cli::eval;
+pub use cli::{eval, export};
 pub use completion::compgen;
 
 pub type Result<T> = std::result::Result<T, Error>;
