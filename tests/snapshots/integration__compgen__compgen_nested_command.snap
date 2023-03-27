@@ -6,7 +6,7 @@ RUN
 cmd_nested_command 
 
 STDOUT
---opt1 foo
+foo
 
 STDERR
 
