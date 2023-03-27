@@ -1235,7 +1235,9 @@ expression: output
               "value_names": []
             }
           ],
-          "aliases": [],
+          "aliases": [
+            "a"
+          ],
           "subcommands": []
         }
       ]

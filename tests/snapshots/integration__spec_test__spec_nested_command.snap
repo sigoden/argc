@@ -20,6 +20,6 @@ OPTIONS:
   -V, --version      Print version
 
 COMMANDS:
-  foo  Subcommand of nested command
+  foo  Subcommand of nested command [aliases: a]
 
 
