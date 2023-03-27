@@ -265,7 +265,7 @@ fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
     map(
         tuple((
             parse_short,
-            preceded(pair(space0, tag("--")), parse_param_multiple),
+            preceded(pair(space0, tag("--")), parse_long_flag_and_asterisk),
             parse_tail,
         )),
         |(short, arg, summary)| FlagParam::new(arg, summary, short, false),
@@ -276,10 +276,7 @@ fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
 fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
     map(
         tuple((
-            preceded(
-                pair(space0, tag("-")),
-                preceded(verify_single_char, parse_param_multiple),
-            ),
+            preceded(pair(space0, tag("-")), parse_short_flag_and_asterisk),
             parse_tail,
         )),
         |(arg, summary)| {
@@ -290,7 +287,7 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
 }
 
 // Parse `str*` `str`
-fn parse_param_multiple(input: &str) -> nom::IResult<&str, ParamData> {
+fn parse_long_flag_and_asterisk(input: &str) -> nom::IResult<&str, ParamData> {
     alt((
         map(terminated(parse_param_name, tag("*")), |mut arg| {
             arg.multiple = true;
@@ -298,6 +295,19 @@ fn parse_param_multiple(input: &str) -> nom::IResult<&str, ParamData> {
         }),
         parse_param_name,
     ))(input)
+}
+
+// Parse ':' or '#' or '0'
+fn parse_short_flag_and_asterisk(input: &str) -> nom::IResult<&str, ParamData> {
+    fn parser(input: &str) -> nom::IResult<&str, ParamData> {
+        map(satisfy(is_short_char), |ch| {
+            ParamData::new(&format!("{}", ch))
+        })(input)
+    }
+    map(pair(parser, opt(tag("*"))), |(mut arg, multiple)| {
+        arg.multiple = multiple.is_some();
+        arg
+    })(input)
 }
 
 // Parse `str!` `str*` `str+` `str`
@@ -390,11 +400,7 @@ fn parse_param_name(input: &str) -> nom::IResult<&str, ParamData> {
 
 // Parse `-s`
 fn parse_short(input: &str) -> nom::IResult<&str, Option<char>> {
-    let short = delimited(
-        char('-'),
-        satisfy(|c| c.is_ascii_alphabetic()),
-        peek(space1),
-    );
+    let short = delimited(char('-'), satisfy(is_short_char), peek(space1));
     opt(short)(input)
 }
 
@@ -533,6 +539,10 @@ fn is_name_char(c: char) -> bool {
     c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.')
 }
 
+fn is_short_char(c: char) -> bool {
+    c.is_ascii() && is_not_fn_name_char(c) && !matches!(c, '-')
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -666,6 +676,10 @@ mod tests {
     fn test_parse_no_long_flag_arg() {
         assert_parse_flag_arg!("-f A foo flag");
         assert_parse_flag_arg!("-f");
+        assert_parse_flag_arg!("-.");
+        assert_parse_flag_arg!("-0");
+        assert_parse_flag_arg!("-#");
+        assert_parse_flag_arg!("-:");
         assert_parse_flag_arg!("-f*");
     }
 
