@@ -40,7 +40,15 @@ impl ParamData {
     }
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+pub enum ParmaKind {
+    Flag,
+    Option,
+    Arg,
+}
+
 pub trait Param {
+    fn kind(&self) -> ParmaKind;
     fn name(&self) -> &str;
     fn tag_name(&self) -> &str;
     fn render(&self) -> String;
@@ -53,6 +61,7 @@ pub trait Param {
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct FlagParam {
+    pub(crate) kind: ParmaKind,
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) short: Option<char>,
@@ -63,6 +72,7 @@ pub struct FlagParam {
 impl FlagParam {
     pub fn new(arg: ParamData, summary: &str, short: Option<char>, no_long: bool) -> Self {
         FlagParam {
+            kind: ParmaKind::Flag,
             name: arg.name,
             short,
             no_long,
@@ -73,6 +83,10 @@ impl FlagParam {
 }
 
 impl Param for FlagParam {
+    fn kind(&self) -> ParmaKind {
+        self.kind.clone()
+    }
+
     fn name(&self) -> &str {
         &self.name
     }
@@ -142,6 +156,7 @@ impl Param for FlagParam {
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct OptionParam {
+    pub(crate) kind: ParmaKind,
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) short: Option<char>,
@@ -172,6 +187,7 @@ impl OptionParam {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
         OptionParam {
+            kind: ParmaKind::Option,
             name: arg.name.clone(),
             summary: summary.to_string(),
             short,
@@ -189,6 +205,10 @@ impl OptionParam {
 }
 
 impl Param for OptionParam {
+    fn kind(&self) -> ParmaKind {
+        self.kind.clone()
+    }
+
     fn name(&self) -> &str {
         &self.name
     }
@@ -303,6 +323,7 @@ impl Param for OptionParam {
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct PositionalParam {
+    pub(crate) kind: ParmaKind,
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) choices: Option<Vec<String>>,
@@ -319,6 +340,7 @@ pub struct PositionalParam {
 impl PositionalParam {
     pub fn new(arg: ParamData, summary: &str, value_name: Option<&str>) -> Self {
         PositionalParam {
+            kind: ParmaKind::Arg,
             name: arg.name.clone(),
             summary: summary.to_string(),
             choices: arg.choices,
@@ -337,6 +359,7 @@ impl PositionalParam {
 
     pub fn extra() -> Self {
         PositionalParam {
+            kind: ParmaKind::Arg,
             name: EXTRA_ARGS.to_string(),
             summary: "".to_string(),
             choices: None,
@@ -352,6 +375,10 @@ impl PositionalParam {
 }
 
 impl Param for PositionalParam {
+    fn kind(&self) -> ParmaKind {
+        self.kind.clone()
+    }
+
     fn name(&self) -> &str {
         &self.name
     }

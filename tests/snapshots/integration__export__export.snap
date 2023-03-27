@@ -1,0 +1,1278 @@
+---
+source: tests/export.rs
+expression: output
+---
+{
+  "describe": "Test all aspects",
+  "name": null,
+  "help": null,
+  "author": "nobody <nobody@example.com>",
+  "version": "0.10.0",
+  "params": [],
+  "subcommands": [
+    {
+      "describe": "Preferred",
+      "name": "cmd_preferred",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg1",
+          "summary": "A positional arg",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        },
+        {
+          "kind": "Flag",
+          "name": "flag1",
+          "summary": "A flag",
+          "short": "f",
+          "no_long": false,
+          "multiple": false
+        },
+        {
+          "kind": "Option",
+          "name": "opt1",
+          "summary": "A option",
+          "short": "o",
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Omitted",
+      "name": "cmd_omitted",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg1",
+          "summary": "",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        },
+        {
+          "kind": "Flag",
+          "name": "flag1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "multiple": false
+        },
+        {
+          "kind": "Option",
+          "name": "opt1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Flags all kind of names",
+      "name": "cmd_flag_names",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Flag",
+          "name": "flag1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "multiple": false
+        },
+        {
+          "kind": "Flag",
+          "name": "flag2",
+          "summary": "This is a flag",
+          "short": null,
+          "no_long": false,
+          "multiple": false
+        },
+        {
+          "kind": "Flag",
+          "name": "flag3",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "multiple": true
+        },
+        {
+          "kind": "Flag",
+          "name": "flag4",
+          "summary": "This is a flag",
+          "short": "f",
+          "no_long": false,
+          "multiple": false
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Flags without long name",
+      "name": "cmd_no_long_flags",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Flag",
+          "name": "a",
+          "summary": "This is a flag",
+          "short": "a",
+          "no_long": true,
+          "multiple": false
+        },
+        {
+          "kind": "Flag",
+          "name": "b",
+          "summary": "",
+          "short": "b",
+          "no_long": true,
+          "multiple": true
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Options all kind of names",
+      "name": "cmd_option_names",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Option",
+          "name": "opt1",
+          "summary": "optional",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt2",
+          "summary": "required",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt3",
+          "summary": "optional, multiple",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt4",
+          "summary": "required, multiple",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt5",
+          "summary": "optional, default",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a",
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt6",
+          "summary": "choices",
+          "short": null,
+          "no_long": false,
+          "choices": [
+            "a",
+            "b",
+            "c"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt7",
+          "summary": "choices, default",
+          "short": null,
+          "no_long": false,
+          "choices": [
+            "a",
+            "b",
+            "c"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a",
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt8",
+          "summary": "required, choices",
+          "short": null,
+          "no_long": false,
+          "choices": [
+            "a",
+            "b",
+            "c"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt9",
+          "summary": "optional, default from fn",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": "_fn_foo",
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "op10",
+          "summary": "choices from fn",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": "_fn_bars",
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "op11",
+          "summary": "required, choices from fn",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": "_fn_bars",
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Options without long name",
+      "name": "cmd_no_long_options",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Option",
+          "name": "a",
+          "summary": "optional",
+          "short": "a",
+          "no_long": true,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "b",
+          "summary": "required",
+          "short": "b",
+          "no_long": true,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "c",
+          "summary": "optional, multiple",
+          "short": "c",
+          "no_long": true,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "d",
+          "summary": "required, multiple",
+          "short": "d",
+          "no_long": true,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "e",
+          "summary": "optional, default",
+          "short": "e",
+          "no_long": true,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a",
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "f",
+          "summary": "choices",
+          "short": "f",
+          "no_long": true,
+          "choices": [
+            "a",
+            "b",
+            "c"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "g",
+          "summary": "choices, default",
+          "short": "g",
+          "no_long": true,
+          "choices": [
+            "a",
+            "b",
+            "c"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a",
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "i",
+          "summary": "required, choices",
+          "short": "i",
+          "no_long": true,
+          "choices": [
+            "a",
+            "b",
+            "c"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "j",
+          "summary": "optional, default from fn",
+          "short": "j",
+          "no_long": true,
+          "choices": null,
+          "choices_fn": "_fn_foo",
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "k",
+          "summary": "choices from fn",
+          "short": "k",
+          "no_long": true,
+          "choices": null,
+          "choices_fn": "_fn_bars",
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "l",
+          "summary": "required, choices from fn",
+          "short": "l",
+          "no_long": true,
+          "choices": null,
+          "choices_fn": "_fn_bars",
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "m",
+          "summary": "optional, default",
+          "short": "m",
+          "no_long": true,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "VALUE"
+          ]
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Options all kind of formats",
+      "name": "cmd_option_formats",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Option",
+          "name": "opt1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt2",
+          "summary": "",
+          "short": "a",
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt3",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "OPT"
+          ]
+        },
+        {
+          "kind": "Option",
+          "name": "opt4",
+          "summary": "With description",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt5",
+          "summary": "With description",
+          "short": "b",
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt6",
+          "summary": "",
+          "short": "c",
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "OPT"
+          ]
+        },
+        {
+          "kind": "Option",
+          "name": "opt7",
+          "summary": "With description",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "OPT"
+          ]
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Option value quoted",
+      "name": "cmd_option_quotes",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Option",
+          "name": "opt1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a",
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt2",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a b",
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt3",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": [
+            "a 3",
+            "b",
+            "c"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt4",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": [
+            "a b",
+            "c d",
+            "e f"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a b",
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "kind": "Option",
+          "name": "opt5",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": [
+            "a|b",
+            "c]d",
+            "ef"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a|b",
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Option with value notations",
+      "name": "cmd_option_notations",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Option",
+          "name": "opt1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "FOO1"
+          ]
+        },
+        {
+          "kind": "Option",
+          "name": "opt2",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "FOO1",
+            "FOO2"
+          ]
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "All kind of flags",
+      "name": "cmd_flag_formats",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Flag",
+          "name": "foo1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "multiple": false
+        },
+        {
+          "kind": "Flag",
+          "name": "foo2",
+          "summary": "",
+          "short": "a",
+          "no_long": false,
+          "multiple": false
+        },
+        {
+          "kind": "Flag",
+          "name": "foo3",
+          "summary": "With description",
+          "short": null,
+          "no_long": false,
+          "multiple": false
+        },
+        {
+          "kind": "Flag",
+          "name": "foo4",
+          "summary": "With description",
+          "short": "b",
+          "no_long": false,
+          "multiple": false
+        },
+        {
+          "kind": "Flag",
+          "name": "foo5",
+          "summary": "Can occure multiple times",
+          "short": "c",
+          "no_long": false,
+          "multiple": true
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional one required",
+      "name": "cmd_positional_only",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg1",
+          "summary": "A required arg",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_name": "ARG"
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional all required",
+      "name": "cmd_positional_many",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg1",
+          "summary": "A optional arg",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        },
+        {
+          "kind": "Arg",
+          "name": "arg2",
+          "summary": "A optional arg",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional all required",
+      "name": "cmd_positional_requires",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg1",
+          "summary": "A required arg",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        },
+        {
+          "kind": "Arg",
+          "name": "arg2",
+          "summary": "A required arg, multiple",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional with choices",
+      "name": "cmd_positional_with_choices",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg",
+          "summary": "A arg with choices",
+          "choices": [
+            "a",
+            "b"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional with default value",
+      "name": "cmd_positional_with_default",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg",
+          "summary": "A arg with default value",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a",
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional with default value",
+      "name": "cmd_positional_with_default_fn",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg",
+          "summary": "A arg with default fn",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": "_fn_foo",
+          "value_name": null
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional with choices and value",
+      "name": "cmd_positional_with_choices_and_default",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg",
+          "summary": "A arg with choices and default value",
+          "choices": [
+            "a",
+            "b"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": "a",
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional with choices and value",
+      "name": "cmd_positional_with_choices_fn",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg",
+          "summary": "A arg with choices fn",
+          "choices": null,
+          "choices_fn": "_fn_bars",
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional with choices and required",
+      "name": "cmd_positional_with_choices_and_required",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg",
+          "summary": "A arg with choices and required",
+          "choices": [
+            "a",
+            "b"
+          ],
+          "choices_fn": null,
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional with choices and value",
+      "name": "cmd_positional_with_choices_fn_and_required",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "arg",
+          "summary": "A arg with choices fn and required",
+          "choices": null,
+          "choices_fn": "_fn_bars",
+          "multiple": false,
+          "required": true,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Command without any arg",
+      "name": "cmd_without_any_arg",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [],
+      "subcommands": []
+    },
+    {
+      "describe": "Command with alias",
+      "name": "cmd_alias",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [],
+      "subcommands": []
+    },
+    {
+      "describe": "Command with hyphens",
+      "name": "cmd_with_hyphens",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Arg",
+          "name": "hyphen-positional",
+          "summary": "",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        },
+        {
+          "kind": "Flag",
+          "name": "hyphen-flag",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "multiple": false
+        },
+        {
+          "kind": "Option",
+          "name": "hyphen-option",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "subcommands": []
+    },
+    {
+      "describe": "Nested command",
+      "name": "cmd_nested_command",
+      "help": null,
+      "author": null,
+      "version": "0.1.0",
+      "params": [
+        {
+          "kind": "Option",
+          "name": "opt1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "subcommands": [
+        {
+          "describe": "Subcommand of nested command",
+          "name": "foo",
+          "help": null,
+          "author": null,
+          "version": null,
+          "params": [
+            {
+              "kind": "Option",
+              "name": "opt1",
+              "summary": "",
+              "short": null,
+              "no_long": false,
+              "choices": null,
+              "choices_fn": null,
+              "multiple": false,
+              "required": false,
+              "default": null,
+              "default_fn": null,
+              "value_names": []
+            },
+            {
+              "kind": "Option",
+              "name": "opt2",
+              "summary": "",
+              "short": null,
+              "no_long": false,
+              "choices": null,
+              "choices_fn": null,
+              "multiple": false,
+              "required": false,
+              "default": null,
+              "default_fn": null,
+              "value_names": []
+            }
+          ],
+          "subcommands": []
+        }
+      ]
+    },
+    {
+      "describe": "Nested command2",
+      "name": "cmd_nested_command2",
+      "help": null,
+      "author": null,
+      "version": "0.1.0",
+      "params": [
+        {
+          "kind": "Option",
+          "name": "opt1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": "_fn_args",
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "subcommands": [
+        {
+          "describe": "Subcommand of nested command2",
+          "name": "foo",
+          "help": null,
+          "author": null,
+          "version": null,
+          "params": [
+            {
+              "kind": "Option",
+              "name": "opt1",
+              "summary": "",
+              "short": null,
+              "no_long": false,
+              "choices": null,
+              "choices_fn": null,
+              "multiple": false,
+              "required": false,
+              "default": null,
+              "default_fn": null,
+              "value_names": []
+            },
+            {
+              "kind": "Option",
+              "name": "opt2",
+              "summary": "",
+              "short": null,
+              "no_long": false,
+              "choices": null,
+              "choices_fn": null,
+              "multiple": false,
+              "required": false,
+              "default": null,
+              "default_fn": null,
+              "value_names": []
+            }
+          ],
+          "subcommands": []
+        }
+      ]
+    }
+  ]
+}
