@@ -67,6 +67,9 @@ impl Cli {
                     cmd.help = Some(value);
                 }
                 EventData::Cmd(value) => {
+                    if root_cmd.root.borrow().scope == EventScope::CmdStart {
+                        bail!("@cmd(line {}) is unexpected, miss function?", position)
+                    }
                     root_data.borrow_mut().scope = EventScope::CmdStart;
                     let mut subcmd = root_cmd.create_subcommand();
                     if !value.is_empty() {
