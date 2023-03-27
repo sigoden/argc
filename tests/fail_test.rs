@@ -167,3 +167,16 @@ fn test_arg_miss_choice_fn() {
     "###;
     fatal!(script, &["prog"], "_fn(line 2) is missing");
 }
+
+#[test]
+fn test_cmd_miss_fn() {
+    let script = r###"
+# @cmd
+# @cmd
+    "###;
+    fatal!(
+        script,
+        &["prog"],
+        "@cmd(line 3) is unexpected, miss function?"
+    );
+}
