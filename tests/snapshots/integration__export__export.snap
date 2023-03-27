@@ -9,6 +9,7 @@ expression: output
   "author": "nobody <nobody@example.com>",
   "version": "0.10.0",
   "params": [],
+  "aliases": [],
   "subcommands": [
     {
       "describe": "Preferred",
@@ -52,6 +53,7 @@ expression: output
           "value_names": []
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -96,6 +98,7 @@ expression: output
           "value_names": []
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -138,6 +141,7 @@ expression: output
           "multiple": false
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -164,6 +168,7 @@ expression: output
           "multiple": true
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -340,6 +345,7 @@ expression: output
           "value_names": []
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -532,6 +538,7 @@ expression: output
           ]
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -646,6 +653,7 @@ expression: output
           ]
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -738,6 +746,7 @@ expression: output
           "value_names": []
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -781,6 +790,7 @@ expression: output
           ]
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -831,6 +841,7 @@ expression: output
           "multiple": true
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -853,6 +864,7 @@ expression: output
           "value_name": "ARG"
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -887,6 +899,7 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -921,6 +934,7 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -946,6 +960,7 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -968,6 +983,7 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -990,6 +1006,7 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -1015,6 +1032,7 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -1037,6 +1055,7 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -1062,6 +1081,7 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -1084,6 +1104,7 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -1093,6 +1114,7 @@ expression: output
       "author": null,
       "version": null,
       "params": [],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -1102,6 +1124,10 @@ expression: output
       "author": null,
       "version": null,
       "params": [],
+      "aliases": [
+        "a",
+        "alias"
+      ],
       "subcommands": []
     },
     {
@@ -1146,6 +1172,7 @@ expression: output
           "value_names": []
         }
       ],
+      "aliases": [],
       "subcommands": []
     },
     {
@@ -1170,6 +1197,7 @@ expression: output
           "value_names": []
         }
       ],
+      "aliases": [],
       "subcommands": [
         {
           "describe": "Subcommand of nested command",
@@ -1207,6 +1235,7 @@ expression: output
               "value_names": []
             }
           ],
+          "aliases": [],
           "subcommands": []
         }
       ]
@@ -1233,6 +1262,7 @@ expression: output
           "value_names": []
         }
       ],
+      "aliases": [],
       "subcommands": [
         {
           "describe": "Subcommand of nested command2",
@@ -1270,6 +1300,7 @@ expression: output
               "value_names": []
             }
           ],
+          "aliases": [],
           "subcommands": []
         }
       ]

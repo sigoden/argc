@@ -272,6 +272,7 @@ impl Cli {
             "author": self.author,
             "version": self.version,
             "params": params?,
+            "aliases": self.aliases,
             "subcommands": subcommands?,
         });
         Ok(value)
