@@ -156,7 +156,7 @@ impl Cli {
                                     .find(|v| v.name == Some(parent.into()))
                                 {
                                     Some(parent_cmd) => {
-                                        parent_cmd.fns.insert(name.clone(), position);
+                                        parent_cmd.fns.insert(child.to_string(), position);
                                         for name in &cmd.aliases {
                                             if let Some(pos) = parent_cmd.fns.get(name) {
                                                 bail!(
