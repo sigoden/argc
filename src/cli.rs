@@ -37,6 +37,8 @@ pub struct Cli {
     help: Option<String>,
     author: Option<String>,
     version: Option<String>,
+    fns: HashMap<String, Position>,
+    alias_pos: usize,
     // for conflict detecting
     names: ParamNames,
     root: Arc<RefCell<RootData>>,
@@ -77,18 +79,9 @@ impl Cli {
                     }
                 }
                 EventData::Aliases(values) => {
-                    let cmd = Self::get_cmd(&mut root_cmd, "@help", position)?;
+                    let cmd = Self::get_cmd(&mut root_cmd, "@alias", position)?;
+                    cmd.alias_pos = position;
                     cmd.aliases = values.to_vec();
-                    for name in values {
-                        if let Some(pos) = root_data.borrow().fns.get(&name) {
-                            bail!(
-                                "@alias(line {}) is conflicted with cmd or alias at line {}",
-                                position,
-                                pos
-                            );
-                        }
-                        root_data.borrow_mut().fns.insert(name.clone(), position);
-                    }
                 }
                 EventData::Option(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
@@ -138,6 +131,19 @@ impl Cli {
                                 cmd.name = Some(parent.to_string());
                                 cmd.fn_name = Some(name.to_string());
                                 cmd.extra_args()?;
+                                for name in &cmd.aliases {
+                                    if let Some(pos) = root_data.borrow().fns.get(name) {
+                                        bail!(
+											"@alias(line {}) is conflicted with cmd or alias at line {}",
+											cmd.alias_pos,
+											pos
+										);
+                                    }
+                                    root_data
+                                        .borrow_mut()
+                                        .fns
+                                        .insert(name.clone(), cmd.alias_pos);
+                                }
                             }
                             Some(child) => {
                                 let mut cmd = root_cmd.subcommands.pop().unwrap();
@@ -150,6 +156,17 @@ impl Cli {
                                     .find(|v| v.name == Some(parent.into()))
                                 {
                                     Some(parent_cmd) => {
+                                        parent_cmd.fns.insert(name.clone(), position);
+                                        for name in &cmd.aliases {
+                                            if let Some(pos) = parent_cmd.fns.get(name) {
+                                                bail!(
+													"@alias(line {}) is conflicted with cmd or alias at line {}",
+													cmd.alias_pos,
+													pos
+												);
+                                            }
+                                            parent_cmd.fns.insert(name.clone(), cmd.alias_pos);
+                                        }
                                         parent_cmd.subcommands.push(cmd);
                                     }
                                     None => {

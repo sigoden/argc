@@ -194,6 +194,7 @@ cmd_nested_command() {
 }
 
 # @cmd Subcommand of nested command
+# @alias a
 # @option --opt1
 # @option --opt2
 cmd_nested_command::foo() {
