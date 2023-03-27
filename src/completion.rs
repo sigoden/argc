@@ -16,7 +16,7 @@ pub fn compgen(source: &str, line: &str) -> Result<Vec<String>> {
 
 type ChoicesType = Either<Vec<String>, String>;
 type OptionMapType = (Option<String>, Vec<String>, Option<ChoicesType>, bool);
-type PositionalItemType = (String, Option<ChoicesType>, bool);
+type PositionalItemType = (String, Option<ChoicesType>, bool, bool);
 
 #[derive(Default)]
 pub struct Completion {
@@ -96,6 +96,7 @@ impl Completion {
                         positional_param.arg_value_name.to_string(),
                         choices,
                         positional_param.multiple,
+                        positional_param.required,
                     ));
                 }
                 EventData::Func(name) => {
@@ -148,24 +149,16 @@ impl Completion {
     }
 
     pub fn generate(&self, line: &str) -> Result<Vec<String>> {
-        let mut args = split_shell_words(line).map_err(|_| anyhow!("Invalid args"))?;
-        if line
-            .chars()
-            .last()
-            .map(|v| v.is_ascii_whitespace())
-            .unwrap_or(false)
-        {
-            args.push(" ".into());
-        }
-        let mut comp_type = get_comp_type(&args);
+        let args = split_shell_words(line).map_err(|_| anyhow!("Invalid args"))?;
+        let mut comp_type = get_comp_type(line, &args);
         let mut force_positional = false;
         let mut option_complete_values: Option<Vec<String>> = None;
         let mut index = 0;
         let mut skipped: HashSet<String> = HashSet::default();
         let mut parent_comp = self;
         let mut comp = self;
-        let mut positional_index = 0;
-        let mut has_subcommand = false;
+        let mut positional_index: usize = 0;
+        let mut match_subcommand = false;
         let len = args.len();
         while index < len {
             let current_arg = args[index].as_str();
@@ -199,10 +192,16 @@ impl Completion {
                                         index += i;
                                         break;
                                     }
-                                    (_, None) => {
-                                        if i > 0 {
+                                    (maybe_value_name, None) => {
+                                        if comp_type == CompType::Any && maybe_value_name.is_some()
+                                        {
+                                            value_name = value_names.get(i);
+                                        } else if comp_type == CompType::CommandOrPositional
+                                            && i > 0
+                                        {
                                             value_name = value_names.get(i - 1);
                                         }
+                                        index += i;
                                         break;
                                     }
                                 }
@@ -211,7 +210,7 @@ impl Completion {
                             if let Some(value_name) = value_name {
                                 comp_type = CompType::OptionValue;
                                 option_complete_values = Some(generate_by_choices_or_name(
-                                    value_name, choices, *multiple,
+                                    value_name, choices, *multiple, true,
                                 ))
                             }
                         }
@@ -237,7 +236,7 @@ impl Completion {
                             .find(|v| v.name == Some(name.into()))
                         {
                             skipped.clear();
-                            has_subcommand = true;
+                            match_subcommand = true;
                             parent_comp = comp;
                             comp = subcmd_comp;
                             matched = true;
@@ -260,25 +259,13 @@ impl Completion {
                 add_mapping_to_output(&mut output, &skipped, &comp.flag_option_mappings);
             }
             CompType::CommandOrPositional => {
-                if has_subcommand {
-                    if positional_index == 0 {
-                        add_mapping_to_output(
-                            &mut output,
-                            &skipped,
-                            &parent_comp.subcommand_mappings,
-                        );
-                    } else {
-                        if positional_index == 1 {
-                            add_mapping_to_output(&mut output, &skipped, &comp.subcommand_mappings);
-                        }
-                        add_positional_to_output(
-                            &mut output,
-                            positional_index - 1,
-                            &comp.positionals,
-                        );
-                    }
-                } else {
+                if match_subcommand && positional_index == 0 {
                     add_mapping_to_output(&mut output, &skipped, &parent_comp.subcommand_mappings);
+                    add_positional_to_output(&mut output, 0, &parent_comp.positionals);
+                } else {
+                    if positional_index == 1 {
+                        add_mapping_to_output(&mut output, &skipped, &comp.subcommand_mappings);
+                    }
                     add_positional_to_output(
                         &mut output,
                         positional_index.saturating_sub(1),
@@ -292,12 +279,20 @@ impl Completion {
                 }
             }
             CompType::Any => {
-                positional_index = positional_index.saturating_sub(1);
-                add_mapping_to_output(&mut output, &skipped, &comp.flag_option_mappings);
                 if positional_index == 0 {
                     add_mapping_to_output(&mut output, &skipped, &comp.subcommand_mappings);
                 }
                 add_positional_to_output(&mut output, positional_index, &comp.positionals);
+                let mut has_flags_and_options = !force_positional;
+                if output.len() > 1 || (output.len() == 1 && !output[0].starts_with('[')) {
+                    has_flags_and_options = false;
+                }
+                let mut options = vec![];
+                if has_flags_and_options {
+                    add_mapping_to_output(&mut options, &skipped, &comp.flag_option_mappings);
+                }
+                options.extend(output);
+                output = options;
             }
         }
         Ok(output)
@@ -333,6 +328,7 @@ impl Completion {
                 "<CMD>".to_string(),
                 Some(Either::Left(help_choices)),
                 false,
+                false,
             ));
             self.subcommand_mappings
                 .insert("help".to_string(), "help".to_string());
@@ -348,13 +344,17 @@ fn add_positional_to_output(
 ) {
     let positional_len = positionals.len();
     if positional_index >= positional_len {
-        if let Some((name, choices, multiple)) = positionals.last() {
+        if let Some((name, choices, multiple, required)) = positionals.last() {
             if *multiple {
-                output.extend(generate_by_choices_or_name(name, choices, *multiple));
+                output.extend(generate_by_choices_or_name(
+                    name, choices, *multiple, *required,
+                ));
             }
         }
-    } else if let Some((name, choices, multiple)) = positionals.get(positional_index) {
-        output.extend(generate_by_choices_or_name(name, choices, *multiple));
+    } else if let Some((name, choices, multiple, required)) = positionals.get(positional_index) {
+        output.extend(generate_by_choices_or_name(
+            name, choices, *multiple, *required,
+        ));
     }
 }
 
@@ -371,18 +371,20 @@ enum CompType {
     Any,
 }
 
-fn get_comp_type(args: &[String]) -> CompType {
-    if let Some(arg) = args.last() {
-        if arg.starts_with('-') {
-            CompType::FlagOrOption
-        } else if arg.as_str() == " " {
-            CompType::Any
-        } else {
-            CompType::CommandOrPositional
+fn get_comp_type(line: &str, args: &[String]) -> CompType {
+    if line.is_empty() {}
+    if let Some(ch) = line.chars().last() {
+        if ch.is_ascii_whitespace() {
+            return CompType::Any;
         }
-    } else {
-        CompType::Any
+        if let Some(arg) = args.last() {
+            if arg.starts_with('-') {
+                return CompType::FlagOrOption;
+            }
+            return CompType::CommandOrPositional;
+        }
     }
+    CompType::Any
 }
 
 fn parse_choices_or_fn(
@@ -390,7 +392,7 @@ fn parse_choices_or_fn(
     choices_fn: &Option<String>,
 ) -> Option<ChoicesType> {
     if let Some(choices_fn) = choices_fn {
-        Some(Either::Right(format!("`{}`", choices_fn)))
+        Some(Either::Right(choices_fn.to_string()))
     } else {
         choices
             .as_ref()
@@ -402,17 +404,19 @@ fn generate_by_choices_or_name(
     value_name: &str,
     choices: &Option<ChoicesType>,
     multiple: bool,
+    required: bool,
 ) -> Vec<String> {
     if let Some(choices) = choices {
         match choices {
             Either::Left(choices) => choices.to_vec(),
-            Either::Right(choices_fn) => vec![choices_fn.to_string()],
+            Either::Right(choices_fn) => vec![format!("`{}`", choices_fn)],
         }
     } else {
-        let value = if multiple {
-            format!("<{}>...", value_name)
-        } else {
-            format!("<{}>", value_name)
+        let value = match (multiple, required) {
+            (true, true) => format!("<{}>...", value_name),
+            (true, false) => format!("[{}]...", value_name),
+            (false, true) => format!("<{}>", value_name),
+            (false, false) => format!("[{}]", value_name),
         };
         vec![value]
     }

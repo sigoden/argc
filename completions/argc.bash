@@ -7,58 +7,42 @@ ARGC_SCRIPTS=( mycmd1 mycmd2 )
 ARGC_BASH=${ARGC_BASH:-bash}
 
 _argc_completion() {
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    COMPREPLY=()
     local scriptfile=$(which ${COMP_WORDS[0]})
     if [[ ! -f "$scriptfile" ]]; then
         return 0
     fi
+    cur="${COMP_WORDS[COMP_CWORD]}"
     local line=${COMP_LINE:${#COMP_WORDS[0]}}
     local IFS=$'\n'
     local compgen_values=($(argc --compgen "$scriptfile" "$line" 2>/dev/null))
     local candicates=()
-    local option_values=()
-    local value_kind=0
+    local arg_value=""
     for item in ${compgen_values[@]}; do
         if [[ "$item" == '-'* ]]; then
-            option_values+=( "$item" )
+            candicates+=( "$item" )
         elif [[ "$item" == \`*\` ]]; then
             local choices=($("$ARGC_BASH" "$scriptfile" "${item:1:-1}" "$line" 2>/dev/null))
             candicates=( "${candicates[@]}" "${choices[@]}" )
-        elif [[ "$item" == '<'* ]]; then
-            if echo "$item" | grep -qi '<args>...'; then
-                value_kind=1
-            elif echo "$item" | grep -qi '\(file\|path\)'; then
-                value_kind=2
-            elif echo "$item" | grep -qi 'dir'; then
-                value_kind=3
-            else
-                value_kind=9
-            fi
+        elif [[ "$item" == '<'* ]] || [[ "$item" == '['* ]]; then
+            arg_value="$item"
         else
             candicates+=( "$item" )
         fi
     done
-    if [[ "$value_kind" == 0 ]]; then
-        if [[ "${#candicates[@]}" -eq 0 ]]; then
-            candicates=( "${option_values[@]}" )
-        fi
-    elif [[ "$value_kind" == 1 ]]; then
-        if [[ "${#candicates[@]}" -eq 0 ]]; then
-            candicates=( "${option_values[@]}" )
-        fi
-        if [[ "${#candicates[@]}" -eq 0 ]]; then
+    COMPREPLY=()
+    if [[ ${#candicates[@]} -eq 0 ]]; then
+        if echo "$arg_value" | grep -qi '\(file\|path\)'; then
             _filedir
+        elif echo "$arg_value" | grep -qi 'dir'; then
+            _filedir -d
         fi
-    elif [[ "$value_kind" == 2 ]]; then
-        _filedir
-    elif [[ "$value_kind" == 3 ]]; then
-        _filedir -d
+    elif [[ -n "$arg_value" ]]; then
+        candicates+=( "$arg_value" )
     fi
     if [[ ${#candicates[@]} -gt 0 ]]; then
         candicates=($(compgen -W "${candicates[*]}" -- "${cur}"))
         if [ ${#candicates[@]} -gt 0 ]; then
-            COMPREPLY=( "${COMPREPLY[@]}" $(printf '%q\n' "${candicates[@]}"))
+            COMPREPLY=( "${COMPREPLY[@]}" $(printf '%q\n' "${candicates[@]}") )
         fi
     fi
 }

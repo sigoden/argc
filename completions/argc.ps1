@@ -27,48 +27,31 @@ $_argc_completion = {
     }
     $compgen_values = (argc --compgen "$scriptfile" "$line" 2>$null).Split("`n")
     $candicates = @()
-    $option_values = @()
-    $value_kind = 0
+    $arg_value = ""
     foreach ($item in $compgen_values) {
         if ($item -match '^-') {
-            $option_values += $item
+            $candicates += $item
         } elseif ($item -match '^`[^` ]+`$') {
             $choices = (& $ARGC_BASH "$scriptfile" $item.Substring(1, $item.Length - 2) "$line" 2>$null)
             if ($choices) {
                 $candicates += $choices.Split("`n")
             }
-        } elseif ($item -match '^<') {
-            if ($item -imatch "<args>...") {
-                $value_kind = 1
-            } elseif ($item -imatch "file|path") {
-                $value_kind = 2
-            } elseif ($item -imatch "dir") {
-                $value_kind = 3
-            } else {
-                $value_kind = 9
-            }
+        } elseif ($item -match '^[<|\[]') {
+            $arg_value = $item
         } else {
             $candicates += $item
         }
     }
     $paths = @()
-    if ($value_kind -eq 0) {
-        if ($candicates.Count -eq 0) {
-            $candicates = $option_values
-        }
-    } elseif ($value_kind -eq 1) {
-        if ($candicates.Count -eq 0) {
-            $candicates = $option_values
-        }
-        if ($candicates.Count -eq 0) {
+    if ($candicates.Count -eq 0) {
+        if ($arg_value -imatch "file|path") {
             $paths = (Get-ChildItem -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
+        } elseif ($arg_value -imatch "dir") {
+            $paths = (Get-ChildItem -Attributes Directory -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
         }
-    } elseif ($value_kind -eq 2) {
-        $paths = (Get-ChildItem -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
-    } elseif ($value_kind -eq 3) {
-        $paths = (Get-ChildItem -Attributes Directory -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
+    } elseif ($arg_value) {
+        $candicates += $arg_value
     }
-
     $param_value = [System.Management.Automation.CompletionResultType]::ParameterValue
     $param_name = [System.Management.Automation.CompletionResultType]::ParameterName
     $result = ($candicates | 
