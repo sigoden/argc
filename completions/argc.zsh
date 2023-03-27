@@ -22,7 +22,16 @@ _argc_completion()
             candicates+=( "$item" )
         elif [[ "$item" == \`*\` ]]; then
             local choices=( $("$ARGC_BASH" "$scriptfile" "${item:1:-1}" "$line" 2>/dev/null) )
-            candicates=( "${candicates[@]}" "${choices[@]}" )
+            if [[ ${#choices[@]} -eq 1 ]]; then
+                local value=${choices[1]}
+                if [[ "$value" == '<'* ]] || [[ "$value" == '['* ]]; then
+                    arg_value="$value"
+                else
+                    candicates+=( "$value" )
+                fi
+            else
+                candicates=( "${candicates[@]}" "${choices[@]}" )
+            fi
         elif [[ "$item" == '<'* ]] || [[ "$item" == '['* ]]; then
             arg_value="$item"
         else
@@ -30,9 +39,9 @@ _argc_completion()
         fi
     done
     if [[ ${#candicates[@]} -eq 0 ]]; then
-        if echo "$item" | grep -qi '\(file\|path\)'; then
+        if echo "$arg_value" | grep -qi '\(file\|path\)'; then
             _path_files
-        elif echo "$item" | grep -qi 'dir'; then
+        elif echo "$arg_value" | grep -qi 'dir'; then
             _path_files -/
         fi
     elif [[ -n "$arg_value" ]]; then

@@ -34,7 +34,17 @@ $_argc_completion = {
         } elseif ($item -match '^`[^` ]+`$') {
             $choices = (& $ARGC_BASH "$scriptfile" $item.Substring(1, $item.Length - 2) "$line" 2>$null)
             if ($choices) {
-                $candicates += $choices.Split("`n")
+                $choices = $choices.Split("`n")
+                if ($choices.Count -eq 1) {
+                    $value = $choices[0]
+                    if ($value -match '^[<|\[]') {
+                        $arg_value="$value"
+                    } else {
+                        $candicates += $value
+                    }
+                } else {
+                    $candicates += $choices
+                }
             }
         } elseif ($item -match '^[<|\[]') {
             $arg_value = $item
@@ -42,34 +52,27 @@ $_argc_completion = {
             $candicates += $item
         }
     }
+
     $paths = @()
     if ($candicates.Count -eq 0) {
         if ($arg_value -imatch "file|path") {
-            $paths = (Get-ChildItem -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
+            $candicates += (Get-ChildItem -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
         } elseif ($arg_value -imatch "dir") {
-            $paths = (Get-ChildItem -Attributes Directory -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
+            $candicates += (Get-ChildItem -Attributes Directory -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
         }
     } elseif ($arg_value) {
         $candicates += $arg_value
     }
-    $param_value = [System.Management.Automation.CompletionResultType]::ParameterValue
-    $param_name = [System.Management.Automation.CompletionResultType]::ParameterName
-    $result = ($candicates | 
+    $candicates | 
         Where-Object { $_ -like "$wordToComplete*" } |
         ForEach-Object { 
             if ($_.StartsWith("-")) {
-                $t = $param_name
+                $t = [System.Management.Automation.CompletionResultType]::ParameterName
             } else {
-                $t = $param_value
+                $t = [System.Management.Automation.CompletionResultType]::ParameterValue
             }
             [System.Management.Automation.CompletionResult]::new($_, $_, $t, '-')
-        })
-
-    foreach ($path in $paths) {
-        $result.Add([System.Management.Automation.CompletionResult]::new($path, $path, $param_value, '-'))
-    }
-
-    return $result
+        }
 }
 
 Register-ArgumentCompleter -Native -ScriptBlock $_argc_completion -CommandName $ARGC_SCRIPTS

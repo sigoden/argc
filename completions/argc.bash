@@ -22,7 +22,16 @@ _argc_completion() {
             candicates+=( "$item" )
         elif [[ "$item" == \`*\` ]]; then
             local choices=($("$ARGC_BASH" "$scriptfile" "${item:1:-1}" "$line" 2>/dev/null))
-            candicates=( "${candicates[@]}" "${choices[@]}" )
+            if [[ ${#choices[@]} -eq 1 ]]; then
+                local value=${choices[0]}
+                if [[ "$value" == '<'* ]] || [[ "$value" == '['* ]]; then
+                    arg_value="$value"
+                else
+                    candicates+=( "$value" )
+                fi
+            else
+                candicates=( "${candicates[@]}" "${choices[@]}" )
+            fi
         elif [[ "$item" == '<'* ]] || [[ "$item" == '['* ]]; then
             arg_value="$item"
         else

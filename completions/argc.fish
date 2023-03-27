@@ -22,17 +22,27 @@ function __fish_complete_argc
             set -a candicates "$item"
         else if string match -qr '^`[^` ]+`' -- "$item"
             set -l name (string sub "$item" -s 2 -e -1)
-            set -a candicates ("$ARGC_BASH" "$scriptfile" $name "$line" 2>/dev/null)
-        else if string match -q -- '<*' "$item" || string match -q -- '[*'
+            set -l choices ("$ARGC_BASH" "$scriptfile" $name "$line" 2>/dev/null)
+            if test (count $choices) -eq 1
+                set -l value "$choices[1]"
+                if string match -q -- '<*' "$value" || string match -q -- '[*' "$value"
+                    set arg_value "$value"
+                else
+                    set -a candicates "$value" 
+                end
+            else
+                set -a candicates $choices 
+            end
+        else if string match -q -- '<*' "$item" || string match -q -- '[*' "$item"
             set arg_value "$item"
         else
             set -a candicates "$item"
         end
     end
     if test -z "$candicates"
-        if string match -qir -- '(file|path)' "$item"
+        if string match -qir -- '(file|path)' "$arg_value"
             __fish_complete_path
-        else if string match -qir -- 'dir' "$item"
+        else if string match -qir -- 'dir' "$arg_value"
             __fish_complete_directories 
         end
     else if test -n "$arg_value"
