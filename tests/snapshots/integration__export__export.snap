@@ -1306,6 +1306,97 @@ expression: output
           "subcommands": []
         }
       ]
+    },
+    {
+      "describe": "Notation values",
+      "name": "cmd_notation_values",
+      "help": null,
+      "author": null,
+      "version": null,
+      "params": [
+        {
+          "kind": "Option",
+          "name": "opt1",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            ""
+          ]
+        },
+        {
+          "kind": "Option",
+          "name": "opt2",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "ABC"
+          ]
+        },
+        {
+          "kind": "Option",
+          "name": "opt3",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "ABC DEF"
+          ]
+        },
+        {
+          "kind": "Option",
+          "name": "opt4",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "[ABC DEF]"
+          ]
+        },
+        {
+          "kind": "Option",
+          "name": "opt5",
+          "summary": "",
+          "short": null,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": [
+            "<ABC DEF>"
+          ]
+        }
+      ],
+      "aliases": [],
+      "subcommands": []
     }
   ]
 }

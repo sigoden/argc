@@ -270,3 +270,8 @@ fn test_spec_cmd_option_notations2() {
         &["spec", "cmd_option_notations", "--opt2", "foo", "bar"],
     );
 }
+
+#[test]
+fn test_spec_cmd_notation_values() {
+    snapshot!(SPEC_SCRIPT, &["spec", "cmd_notation_values", "-h"],);
+}

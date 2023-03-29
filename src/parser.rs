@@ -6,7 +6,7 @@ use nom::{
     branch::alt,
     bytes::complete::{escaped, tag, take_till, take_while1},
     character::{
-        complete::{char, satisfy, space0, space1},
+        complete::{anychar, char, satisfy, space0, space1},
         streaming::none_of,
     },
     combinator::{eof, fail, map, opt, peek, rest, success},
@@ -416,14 +416,7 @@ fn parse_zero_or_one_value_notation(input: &str) -> nom::IResult<&str, Option<&s
 
 // Parse '<FOO>'
 fn parse_value_notation(input: &str) -> nom::IResult<&str, &str> {
-    preceded(
-        space0,
-        delimited(
-            char('<'),
-            take_while1(|c: char| !(c.is_ascii_whitespace() || c == '>')),
-            char('>'),
-        ),
-    )(input)
+    preceded(space0, delimited(char('<'), parse_notation_text, char('>')))(input)
 }
 
 // Parse `a|b|c`
@@ -495,6 +488,30 @@ fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
         char('"'),
     );
     alt((single, double))(input)
+}
+
+fn parse_notation_text(input: &str) -> nom::IResult<&str, &str> {
+    let (_, size) = notation_text(input, 1)?;
+    Ok((&input[size - 1..], &input[0..size - 1]))
+}
+
+fn notation_text(input: &str, balances: usize) -> nom::IResult<&str, usize> {
+    let (i1, c1) = anychar(input)?;
+    match c1 {
+        '<' => {
+            let (i2, count) = notation_text(i1, balances + 1)?;
+            Ok((i2, count + 1))
+        }
+        '>' => {
+            if balances == 1 {
+                Ok((i1, 1))
+            } else {
+                let (i2, count) = notation_text(i1, balances - 1)?;
+                Ok((i2, count + 1))
+            }
+        }
+        _ => notation_text(i1, balances).map(|(i3, v)| (i3, 1 + v)),
+    }
 }
 
 fn verify_single_char(input: &str) -> nom::IResult<&str, &str> {
@@ -646,6 +663,9 @@ mod tests {
         assert_parse_option_arg!("--foo[\"a|b\"|\"c]d\"]");
         assert_parse_option_arg!("--foo <abc>");
         assert_parse_option_arg!("--foo <abc> <def>");
+        assert_parse_option_arg!("--foo <>");
+        assert_parse_option_arg!("--foo <abc def>");
+        assert_parse_option_arg!("--foo <<abc def>>");
     }
 
     #[test]
