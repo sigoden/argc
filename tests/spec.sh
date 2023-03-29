@@ -215,8 +215,17 @@ cmd_nested_command2::foo() {
     print_argc_vars
 }
 
-
 cmd_nested_command2::main() {
+    print_argc_vars
+}
+
+# @cmd Notation values
+# @option --opt1 <>
+# @option --opt2 <ABC>
+# @option --opt3 <ABC DEF>
+# @option --opt4 <[ABC DEF]>
+# @option --opt5 <<ABC DEF>>
+cmd_notation_values() {
     print_argc_vars
 }
 
