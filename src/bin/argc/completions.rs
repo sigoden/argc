@@ -100,7 +100,7 @@ const POWERSHELL_SCRIPT: &str = r###"
 $_argc_completion = {
     param($wordToComplete, $commandAst, $cursorPosition)
     $cmd = $commandAst.CommandElements[0]
-    if ($cmd == "argc") {
+    if ($cmd -eq "argc") {
         $scriptfile = (argc --argc-script-path 2>$null)
     } else {
         $scriptfile = (Get-Command $cmd  -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)

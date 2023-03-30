@@ -50,7 +50,7 @@ fn run() -> Result<i32> {
         .author(env!("CARGO_PKG_AUTHORS"))
         .override_usage(
             r#"
-    argc --argc-eval SCRIPT [ARGS...]           Parse arguments `eval --argc-eval "$(argc --argc-eval "$0" "$@")"`
+    argc --argc-eval SCRIPT [ARGS...]           Parse arguments `eval "$(argc --argc-eval "$0" "$@")"`
     argc --argc-compgen SCRIPT LINE             Generate words for completion
     argc --argc-create [TASKS...]               Create a boilerplate argcfile
     argc --argc-export SCRIPT                   Export command definitions as json
@@ -129,7 +129,7 @@ USAGE:{usage}"#,
     } else {
         let shell = get_shell_path().ok_or_else(|| anyhow!("Not found shell"))?;
         let (script_dir, script_file) = get_script_path(true)
-            .ok_or_else(|| anyhow!("Not found argcscript , try `argc --argc-help` to get help."))?;
+            .ok_or_else(|| anyhow!("Not found argcscript, try `argc --argc-help` to get help."))?;
         let interrupt = Arc::new(AtomicBool::new(false));
         let interrupt_me = interrupt.clone();
         ctrlc::set_handler(move || interrupt_me.store(true, Ordering::Relaxed))
