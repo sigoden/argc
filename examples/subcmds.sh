@@ -55,6 +55,6 @@ cmd9() {
 }
 
 
-eval "$(argc "$0" "$@")"
+eval "$(argc --argc-eval "$0" "$@")"
 
 ( set -o posix ; set ) | grep argc_ # print variables with argc_ prefix

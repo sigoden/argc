@@ -18,7 +18,7 @@ _fn2() {
     echo "x y z"
 }
 
-eval "$(argc "$0" "$@")"
+eval "$(argc --argc-eval "$0" "$@")"
 
 
 ( set -o posix ; set ) | grep argc_ # print variables with argc_ prefix

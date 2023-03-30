@@ -44,7 +44,7 @@ Write `example.sh`
 # @option --bar   A option
 # @option --baz*  A option with multiple values 
 
-eval "$(argc "$0" "$@")"
+eval "$(argc --argc-eval "$0" "$@")"
 echo foo: $argc_foo
 echo bar: $argc_bar
 echo baz: ${argc_baz[@]}

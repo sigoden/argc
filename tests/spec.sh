@@ -246,4 +246,4 @@ _fn_args() {
     ( set -o posix ; set ) | grep argc_
 }
 
-eval "$(argc "$0" "$@")"
+eval "$(argc --argc-eval "$0" "$@")"
