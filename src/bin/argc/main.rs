@@ -208,6 +208,8 @@ fn expand_candicates(values: Vec<String>, script_file: &str) -> Result<Vec<Strin
                 output[0] = "__argc_comp:file".into();
             } else if candicate.contains("DIR") || candicate.contains("FOLDER") {
                 output[0] = "__argc_comp:dir".into();
+            } else {
+                output.clear();
             }
         }
     }
