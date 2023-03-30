@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 
 const BASH_SCRIPT: &str = r###"
-_argc_completion() {
+_argc_complete() {
     local cmd=${COMP_WORDS[0]}
     local scriptfile
     if [[ "$cmd" == "argc" ]]; then
@@ -35,7 +35,7 @@ _argc_completion() {
 "###;
 
 const FISH_SCRIPT: &str = r###"
-function __fish_complete_argc
+function _argc_complete
     set -l tokens (commandline -c | string trim -l | string split " " --)
     set -l cmd "$tokens[1]"
     set -l scriptfile
@@ -66,7 +66,7 @@ end
 "###;
 
 const ZSH_SCRIPT: &str = r###"
-_argc_completion()
+_argc_complete()
 {
     local cmd=$words[1]
     local scriptfile
@@ -97,7 +97,7 @@ _argc_completion()
 "###;
 
 const POWERSHELL_SCRIPT: &str = r###"
-$_argc_completion = {
+$_argc_complete = {
     param($wordToComplete, $commandAst, $cursorPosition)
     $cmd = $commandAst.CommandElements[0]
     if ($cmd -eq "argc") {
@@ -149,23 +149,23 @@ pub(crate) fn generate(args: &[String]) -> Result<String> {
     cmds.extend(args[1..].iter().map(|v| v.as_str()));
     let output = match shell.as_str() {
         "bash" => {
-            let registers = format!("complete -F _argc_completion {}", cmds.join(" "));
+            let registers = format!("complete -F _argc_complete {}", cmds.join(" "));
             format!("{BASH_SCRIPT}\n{registers}\n",)
         }
         "fish" => {
             let lines: Vec<String> = cmds
                 .iter()
-                .map(|v| format!(r#"complete -x -c {v}  -n 'true' -a "(__fish_complete_argc)""#))
+                .map(|v| format!(r#"complete -x -c {v}  -n 'true' -a "(_argc_complete)""#))
                 .collect();
             let registers = lines.join("\n");
             format!("{FISH_SCRIPT}\n{registers}\n",)
         }
         "zsh" => {
-            let registers = format!("compdef _argc_completion {}", cmds.join(" "));
+            let registers = format!("compdef _argc_complete {}", cmds.join(" "));
             format!("{ZSH_SCRIPT}\n{registers}\n",)
         }
         "powershell" => {
-            let lines: Vec<String> = cmds.iter().map(|v| format!("Register-ArgumentCompleter -Native -ScriptBlock $_argc_completion -CommandName {v} ")).collect();
+            let lines: Vec<String> = cmds.iter().map(|v| format!("Register-ArgumentCompleter -Native -ScriptBlock $_argc_complete -CommandName {v} ")).collect();
             let registers = lines.join("\n");
             format!("{POWERSHELL_SCRIPT}\n{registers}\n",)
         }
