@@ -1,6 +1,6 @@
 mod completions;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use clap::{Arg, ArgAction, Command};
 use either::Either;
 use std::{
@@ -107,7 +107,8 @@ USAGE:{usage}"#,
         }
         let content = generate_boilerplate(&args[2..]);
         let names = candidate_script_names();
-        fs::write(&names[0], content).map_err(|err| anyhow!("Failed to create argc.sh, {err}"))?;
+        fs::write(&names[0], content).with_context(|| format!("Failed to create {}", &names[0]))?;
+        println!("{} has been successfully created.", &names[0]);
     } else if matches.get_flag("argc-export") {
         let (source, _) = parse_script_args(&args[2..])?;
         let json = argc::export(&source)?;
@@ -133,14 +134,14 @@ USAGE:{usage}"#,
         let interrupt = Arc::new(AtomicBool::new(false));
         let interrupt_me = interrupt.clone();
         ctrlc::set_handler(move || interrupt_me.store(true, Ordering::Relaxed))
-            .map_err(|err| anyhow!("Failed to set CTRL-C handler: {}", err))?;
+            .with_context(|| "Failed to set CTRL-C handler")?;
         let mut command = process::Command::new(shell);
         command.arg(&script_file);
         command.args(&args[1..]);
         command.current_dir(script_dir);
         let status = command
             .status()
-            .map_err(|err| anyhow!("Run `{}` throw {}", script_file.display(), err))?;
+            .with_context(|| format!("Failed to run `{}`", script_file.display()))?;
         if interrupt.load(Ordering::Relaxed) {
             return Ok(130);
         }
@@ -157,7 +158,7 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     let script_file = args[0].as_str();
     let args: Vec<String> = args[1..].to_vec();
     let source = fs::read_to_string(script_file)
-        .map_err(|e| anyhow!("Failed to load '{}', {}", script_file, e))?;
+        .with_context(|| format!("Failed to load '{}'", script_file))?;
     let name = Path::new(script_file)
         .file_name()
         .and_then(|v| v.to_str())

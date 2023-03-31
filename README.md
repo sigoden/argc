@@ -72,13 +72,11 @@ OPTIONS:
 
 ### ⚠️ Special attension ⚠️
 
-If you encounter the following error while running a script:
+If you encounter an error message like this when running the script:
 ```
 Not found argcscript, try `argc --argc-help` to get help.
 ```
-You may need to perform the following replacement operation:
-
-Replace `eval "$(argc "$0" "$@")"` with `eval "$(argc --argc-eval "$0" "$@")"`
+Simply replace `eval "$(argc "$0" "$@")"` with `eval "$(argc --argc-eval "$0" "$@")"` in your script to resolve the issue.
 
 ## Comment Tags
 
@@ -294,6 +292,8 @@ what is the benefit?
 - Can be invoked in arbitrarily subdirectory, no need to locate script file each time.
 - As a centralized entrypoint for executing the project's bash scripts.
 - serves as a script for a task runner similar to how Makefile acts as make.
+
+You can use `argc --argc-create` to quickly create boilerplate Argcscripts.
 
 ## License
 
