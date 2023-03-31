@@ -5,7 +5,7 @@
 
 An elegant command-line options, arguments and sub-commands parser for bash.
 
-![demo](https://user-images.githubusercontent.com/4012553/224695852-28eaa0a2-5823-4159-8648-c2384f5183db.gif)
+![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
 
 ## Install
 
@@ -35,7 +35,7 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 To write a command-line program with argc, we only need to do two things:
 
 1. Describe options, flags, positional parameters and subcommands in comments.
-2. Insert `eval "$(argc "$0" "$@")"` into script to let argc to parse command line arguments.
+2. Insert `eval "$(argc --argc-eval "$0" "$@")"` into script to let argc to parse command line arguments.
 
 Write `example.sh`
 
@@ -58,7 +58,7 @@ bar: value
 baz: a b c
 ```
 
-Run `example.sh -h`, argc wll print help information for you.
+Run `./example.sh -h`, argc wll print help information for you.
 
 ```
 USAGE: example.sh [OPTIONS]
@@ -69,6 +69,16 @@ OPTIONS:
       --baz [<BAZ>...]  A option with multiple values
   -h, --help            Print help information
 ```
+
+### ⚠️ Special attension ⚠️
+
+If you encounter the following error while running a script:
+```
+Not found argcscript, try `argc --argc-help` to get help.
+```
+You may need to perform the following replacement operation:
+
+Replace `eval "$(argc "$0" "$@")"` with `eval "$(argc --argc-eval "$0" "$@")"`
 
 ## Comment Tags
 
@@ -117,9 +127,9 @@ Define a positional argument.
 # @arg arg4*           A positional argument with multiple values
 # @arg arg5+           A required positional argument with multiple values
 # @arg arg6=a          A positional argument with default value
-# @arg arg7=`_fn`      A positional argument with default value from fn
+# @arg arg7=`_fn`      A positional argument with default value fn
 # @arg arg8[a|b]       A positional argument with choices
-# @arg arg9[`_fn`]     A positional argument with choices from fn
+# @arg arg9[`_fn`]     A positional argument with choices fn
 # @arg arg10[=a|b]     A positional argument with choices and default value
 # @arg arg11*[a|b]     A positional argument with choices and multiple values
 ```
@@ -127,7 +137,7 @@ Define a positional argument.
 ### @option
 
 ```
-@option [short] <long>[modifier|default|modifier+choices] [zero-or-many value-notation] [help-string]
+@option [short] <long>[modifier|default|modifier+choices] [value-notation]... [help-string]
 ```
 
 Define a option.
@@ -140,9 +150,9 @@ Define a option.
 # @option    --opt5*                A option with multiple values
 # @option    --opt6+                A required option with multiple values
 # @option    --opt7=a               A option with default value
-# @option    --opt8=`_fn`           A option with default value from fn
+# @option    --opt8=`_fn`           A option with default value fn
 # @option    --opt9[a|b]            A option with choices
-# @option    --opt10[`_fn`]         A option with choices from fn
+# @option    --opt10[`_fn`]         A option with choices fn
 # @option    --opt11[=a|b]          A option with choices and default value
 # @option    --opt12*[a|b]          A option with choices and multiple values
 # @option    --opt13 <FILE> <FILE>  A option with value notation
@@ -255,9 +265,35 @@ Here are some value notation that will affect the shell completion.
 
 ## Shell Completion
 
-[completion scripts](completions) are available for bash/zsh/fish/powershell.
+Ensure `argc` is added to [$PATH](https://en.wikipedia.org/wiki/PATH_(variable)). Then register the completion
 
-All argc scripts share the same completion function. To add completion to a argc script, simply add the script name to `$ARGC_SCRIPTS`.
+```
+# bash (~/.bashrc)
+source <(argc --argc-completions bash mycmd1 mycmd2)
+
+# fish (~/.config/fish/config.fish)
+argc --argc-completions fish mycmd1 mycmd2 | source
+
+# powershell ($env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1)
+argc --argc-completions powershell mycmd1 mycmd2 | Out-String | Invoke-Expression
+
+# zsh (~/.zshrc)
+source <(argc --argc-completions zsh mycmd1 mycmd2)
+```
+
+**Replace `mycmd1 mycmd2` with your argc script names**.
+
+
+## Argcscript
+
+We can create a script called `Argcscript.sh`. If argc is run without the `--argc-*` options, argc will locate the file and run it.  
+
+what is the benefit?
+
+- Can enjoy a handy shell completion.
+- Can be invoked in arbitrarily subdirectory, no need to locate script file each time.
+- As a centralized entrypoint for executing the project's bash scripts.
+- serves as a script for a task runner similar to how Makefile acts as make.
 
 ## License
 
