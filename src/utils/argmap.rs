@@ -41,24 +41,24 @@ impl ArgMap {
         }
         self
     }
-    /// Parse an iterator of string arguments into a 2-tuple of positional arguments and a
-    /// HashMap mapping String keys to Vec<String> values.
-    pub fn parse<T>(&mut self, input: impl Iterator<Item = T>) -> (List, Map)
+    /// Parse an iterator of string arguments into a 3-tuple of positional arguments and a
+    /// HashMap mapping String keys to Vec<String> values and dashdash position.
+    pub fn parse<T>(&mut self, input: impl Iterator<Item = T>) -> (List, Map, Option<usize>)
     where
         T: ToString,
     {
         let mut args: List = vec![];
         let mut argv: Map = IndexMap::new();
         let mut key: Option<String> = None;
-        let mut dashdash = false;
+        let mut dashdash = None;
         for x in input {
             let s = x.to_string();
-            if dashdash {
+            if dashdash.is_some() {
                 args.push(s);
                 continue;
             }
             if s == "--" {
-                dashdash = true;
+                dashdash = Some(args.len());
             } else if s == "-" {
                 args.push(s);
             } else if let Some(k) = s.strip_prefix("--") {
@@ -141,13 +141,13 @@ impl ArgMap {
         if let Some(k) = key {
             set_bool(&mut argv, &k);
         }
-        (args, argv)
+        (args, argv, dashdash)
     }
 }
 
-/// Parse an iterator of string arguments into a 2-tuple of positional arguments and a
-/// HashMap mapping String keys to Vec<String> values.
-pub fn parse<T>(input: impl Iterator<Item = T>) -> (List, Map)
+/// Parse an iterator of string arguments into a 3-tuple of positional arguments and a
+/// HashMap mapping String keys to Vec<String> values and dashdash position.
+pub fn parse<T>(input: impl Iterator<Item = T>) -> (List, Map, Option<usize>)
 where
     T: ToString,
 {
@@ -186,7 +186,7 @@ mod tests {
 
     #[test]
     fn parse_junk0() {
-        let (args, argv) = parse(
+        let (args, argv, pos) = parse(
             [
                 "--long",
                 "5",
@@ -223,11 +223,12 @@ mod tests {
                 .iter()
             )
         ];
+        assert_eq!(pos, Some(2));
     }
 
     #[test]
     fn parse_junk1() {
-        let (args, argv) = parse(
+        let (args, argv, pos) = parse(
             [
                 "--hey=what",
                 "-x",
@@ -274,52 +275,58 @@ mod tests {
                 .iter()
             )
         ];
+        assert_eq!(pos, Some(3));
     }
 
     #[test]
     fn parse_empty() {
         let empty: Vec<String> = vec![];
-        let (args, argv) = parse(empty.iter());
+        let (args, argv, pos) = parse(empty.iter());
         assert_eq![args, empty];
         assert_eq![argv, hash([].iter())];
+        assert_eq![pos, None];
     }
 
     #[test]
     fn parse_one_long_bool() {
         let empty: Vec<String> = vec![];
-        let (args, argv) = parse(["--one"].iter());
+        let (args, argv, pos) = parse(["--one"].iter());
         assert_eq![args, empty];
         assert_eq![argv, hash([("one", vec![]),].iter())];
+        assert_eq![pos, None];
     }
 
     #[test]
     fn parse_one_short_bool() {
         let empty: Vec<String> = vec![];
-        let (args, argv) = parse(["-z"].iter());
+        let (args, argv, pos) = parse(["-z"].iter());
         assert_eq![args, empty];
         assert_eq![argv, hash([("z", vec![]),].iter())];
+        assert_eq![pos, None];
     }
 
     #[test]
     fn parse_bool_at_dashdash() {
         let empty: Vec<String> = vec![];
-        let (args, argv) = parse(["--q", "--"].iter());
+        let (args, argv, pos) = parse(["--q", "--"].iter());
         assert_eq![args, empty];
         assert_eq![argv, hash([("q", vec![]),].iter())];
+        assert_eq![pos, Some(0)];
     }
 
     #[test]
     fn parse_negative_number_value() {
         let empty: Vec<String> = vec![];
-        let (args, argv) = parse(["--n", "-555"].iter());
+        let (args, argv, pos) = parse(["--n", "-555"].iter());
         assert_eq![args, empty];
         assert_eq![argv, hash([("n", vec!["-555"]),].iter())];
+        assert_eq![pos, None];
     }
 
     #[test]
     fn parse_cluster_number() {
         let empty: Vec<String> = vec![];
-        let (args, argv) = parse(["-abcdef123456"].iter());
+        let (args, argv, pos) = parse(["-abcdef123456"].iter());
         assert_eq![args, empty];
         assert_eq![
             argv,
@@ -335,11 +342,12 @@ mod tests {
                 .iter()
             )
         ];
+        assert_eq![pos, None];
     }
 
     #[test]
     fn parse_single_boolean() {
-        let (args, argv) = ArgMap::default()
+        let (args, argv, pos) = ArgMap::default()
             .boolean("q")
             .parse(["-x", "5", "-q", "1234", "--z=789"].iter());
         assert_eq![args, vec!["1234"]];
@@ -347,12 +355,13 @@ mod tests {
             argv,
             hash([("x", vec!["5"]), ("q", vec![]), ("z", vec!["789"]),].iter())
         ];
+        assert_eq![pos, None];
     }
 
     #[test]
     fn parse_boolean_nonalpha_break() {
         let empty: Vec<String> = vec![];
-        let (args, argv) = ArgMap::default()
+        let (args, argv, pos) = ArgMap::default()
             .boolean("q")
             .parse(["-w-5", "-qrs@4"].iter());
         assert_eq![args, empty];
@@ -368,24 +377,28 @@ mod tests {
                 .iter()
             )
         ];
+
+        assert_eq![pos, None];
     }
 
     #[test]
     fn parse_booleans_slice() {
-        let (args, argv) = ArgMap::default()
+        let (args, argv, pos) = ArgMap::default()
             .booleans(&["q", "z"])
             .parse(["-q", "x", "-z", "y"].iter());
         assert_eq![args, vec!["x", "y"]];
         assert_eq![argv, hash([("q", vec![]), ("z", vec![]),].iter())];
+        assert_eq![pos, None];
     }
 
     #[test]
     fn parse_boolean_vec_ref() {
-        let (args, argv) = ArgMap::default()
+        let (args, argv, pos) = ArgMap::default()
             .booleans(&["q", "z"])
             .parse(["-q", "x", "-z", "y"].iter());
         assert_eq![args, vec!["x", "y"]];
         assert_eq![argv, hash([("q", vec![]), ("z", vec![]),].iter())];
+        assert_eq![pos, None];
     }
 
     fn hash<'a>(
