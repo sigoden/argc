@@ -118,7 +118,7 @@ USAGE:{usage}"#,
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
         let line = if cmd_args.len() == 1 { "" } else { cmd_args[1] };
         let candicates = argc::compgen(&source, line)?;
-        let candicates = expand_candicates(candicates, &args[2])?;
+        let candicates = expand_candicates(candicates, &args[2], line)?;
         candicates.into_iter().for_each(|v| println!("{v}"));
     } else if matches.get_flag("argc-completions") {
         let script = crate::completions::generate(&args[2..])?;
@@ -168,7 +168,7 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     Ok((source, cmd_args))
 }
 
-fn expand_candicates(values: Vec<String>, script_file: &str) -> Result<Vec<String>> {
+fn expand_candicates(values: Vec<String>, script_file: &str, line: &str) -> Result<Vec<String>> {
     let mut output = vec![];
     let mut param_fns = vec![];
     for value in values {
@@ -185,6 +185,7 @@ fn expand_candicates(values: Vec<String>, script_file: &str) -> Result<Vec<Strin
                 if let Ok(fn_output) = process::Command::new(&shell)
                     .arg(script_file)
                     .arg(&param_fn)
+                    .arg(line)
                     .output()
                 {
                     let fn_output = String::from_utf8_lossy(&fn_output.stdout);

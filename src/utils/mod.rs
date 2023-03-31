@@ -1,5 +1,3 @@
-pub mod argmap;
-
 use convert_case::{Boundary, Converter, Pattern};
 use std::{fmt, mem};
 
