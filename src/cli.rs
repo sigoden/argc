@@ -253,7 +253,10 @@ impl Cli {
                         escape_words.push(escape_shell_words(" "));
                     }
                     values.push(ArgcValue::Multiple("_words".into(), escape_words));
-                    let (args, argv) = argmap::parse(words.into_iter());
+                    let (args, argv, pos) = argmap::parse(words.into_iter());
+                    if let Some(pos) = pos {
+                        values.push(ArgcValue::Single("_dashdash".into(), pos.to_string()));
+                    }
                     for (k, v) in argv {
                         let v_len = v.len();
                         match v_len {
