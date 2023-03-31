@@ -70,14 +70,6 @@ OPTIONS:
   -h, --help            Print help information
 ```
 
-### ⚠️ Special attension ⚠️
-
-If you encounter an error message like this when running the script:
-```
-Not found argcscript, try `argc --argc-help` to get help.
-```
-Simply replace `eval "$(argc "$0" "$@")"` with `eval "$(argc --argc-eval "$0" "$@")"` in your script to resolve the issue.
-
 ## Comment Tags
 
 `argc` parses cli definition from comment tags.
@@ -281,6 +273,7 @@ source <(argc --argc-completions zsh mycmd1 mycmd2)
 
 **Replace `mycmd1 mycmd2` with your argc script names**.
 
+Argc can be used as multiple shell completion engine. see [argc-compteltions](https://github.com/sigoden/argc-completions)
 
 ## Argcscript
 
@@ -294,6 +287,29 @@ what is the benefit?
 - serves as a script for a task runner similar to how Makefile acts as make.
 
 You can use `argc --argc-create` to quickly create boilerplate Argcscripts.
+
+## Migrate
+
+To migrate from v0 to v1, the only thing you need to do is:
+
+Replace `eval "$(argc "$0" "$@")"` with `eval "$(argc --argc-eval "$0" "$@")"` in your script.
+
+Otherwise you may encounter an error message like this when running the script:
+```
+Not found argcscript, try `argc --argc-help` to get help.
+```
+
+## Windows Only
+
+Argc requires bash to run scripts. [git](https://git-scm.com/)'s built-in bash is good enough for argc.
+
+If you want to use another bash, please specify it via `ARGC_SHELL` environment variable.
+
+If you want to run the bash script directly, you can add the following configuration to Windows Registry.
+
+```
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\command' -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
+```
 
 ## License
 
