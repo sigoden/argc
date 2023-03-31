@@ -174,9 +174,5 @@ fn test_cmd_miss_fn() {
 # @cmd
 # @cmd
     "###;
-    fatal!(
-        script,
-        &["prog"],
-        "@cmd(line 3) is unexpected, miss function?"
-    );
+    fatal!(script, &["prog"], "@cmd(line 2) miss function?");
 }
