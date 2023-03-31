@@ -37,7 +37,7 @@ pub struct Cli {
     help: Option<String>,
     author: Option<String>,
     version: Option<String>,
-    fns: HashMap<String, Position>,
+    subcommand_fns: HashMap<String, Position>,
     alias_pos: usize,
     // for conflict detecting
     names: ParamNames,
@@ -69,9 +69,10 @@ impl Cli {
                     cmd.help = Some(value);
                 }
                 EventData::Cmd(value) => {
-                    if root_cmd.root.borrow().scope == EventScope::CmdStart {
-                        bail!("@cmd(line {}) is unexpected, miss function?", position)
+                    if root_data.borrow().scope == EventScope::CmdStart {
+                        bail!("@cmd(line {}) miss function?", root_data.borrow().cmd_pos)
                     }
+                    root_data.borrow_mut().cmd_pos = position;
                     root_data.borrow_mut().scope = EventScope::CmdStart;
                     let mut subcmd = root_cmd.create_subcommand();
                     if !value.is_empty() {
@@ -106,7 +107,7 @@ impl Cli {
                     cmd.add_param(param, position)?;
                 }
                 EventData::Func(name) => {
-                    if let Some(pos) = root_data.borrow_mut().fns.get(&name) {
+                    if let Some(pos) = root_data.borrow_mut().cmd_fns.get(&name) {
                         bail!(
                             "{}(line {}) is conflicted with cmd or alias at line {}",
                             name,
@@ -116,6 +117,10 @@ impl Cli {
                     }
                     root_data.borrow_mut().fns.insert(name.clone(), position);
                     if root_data.borrow().scope == EventScope::CmdStart {
+                        root_data
+                            .borrow_mut()
+                            .cmd_fns
+                            .insert(name.clone(), position);
                         let (parent, child) = match name.split_once("::") {
                             None => (name.as_str(), None),
                             Some((parent, child)) => {
@@ -132,7 +137,7 @@ impl Cli {
                                 cmd.fn_name = Some(name.to_string());
                                 cmd.extra_args()?;
                                 for name in &cmd.aliases {
-                                    if let Some(pos) = root_data.borrow().fns.get(name) {
+                                    if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
                                         bail!(
 											"@alias(line {}) is conflicted with cmd or alias at line {}",
 											cmd.alias_pos,
@@ -141,7 +146,7 @@ impl Cli {
                                     }
                                     root_data
                                         .borrow_mut()
-                                        .fns
+                                        .cmd_fns
                                         .insert(name.clone(), cmd.alias_pos);
                                 }
                             }
@@ -156,16 +161,20 @@ impl Cli {
                                     .find(|v| v.name == Some(parent.into()))
                                 {
                                     Some(parent_cmd) => {
-                                        parent_cmd.fns.insert(child.to_string(), position);
+                                        parent_cmd
+                                            .subcommand_fns
+                                            .insert(child.to_string(), position);
                                         for name in &cmd.aliases {
-                                            if let Some(pos) = parent_cmd.fns.get(name) {
+                                            if let Some(pos) = parent_cmd.subcommand_fns.get(name) {
                                                 bail!(
 													"@alias(line {}) is conflicted with cmd or alias at line {}",
 													cmd.alias_pos,
 													pos
 												);
                                             }
-                                            parent_cmd.fns.insert(name.clone(), cmd.alias_pos);
+                                            parent_cmd
+                                                .subcommand_fns
+                                                .insert(name.clone(), cmd.alias_pos);
                                         }
                                         parent_cmd.subcommands.push(cmd);
                                     }
@@ -427,6 +436,8 @@ impl Cli {
 struct RootData {
     scope: EventScope,
     fns: HashMap<String, Position>,
+    cmd_fns: HashMap<String, Position>,
+    cmd_pos: usize,
     default_fns: Vec<(String, Position)>,
     choices_fns: Vec<(String, Position)>,
 }

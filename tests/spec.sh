@@ -246,4 +246,20 @@ _fn_args() {
     ( set -o posix ; set ) | grep argc_
 }
 
+_fn_dup() {
+    case $(basename ${SHELL}) in
+        zsh)
+            _local_func() {
+                echo "do this"
+            }
+            ;;
+
+        bash)
+            _local_func() {
+                echo "do that instead"
+            }
+            ;;
+    esac
+}
+
 eval "$(argc --argc-eval "$0" "$@")"
