@@ -203,7 +203,7 @@ cmd_nested_command::foo() {
 
 # @cmd Nested command2
 # @version 0.1.0
-# @option --opt1[`_fn_args`]
+# @option --opt1
 cmd_nested_command2() {
     :;
 }
@@ -226,6 +226,12 @@ cmd_nested_command2::main() {
 # @option --opt4 <[ABC DEF]>
 # @option --opt5 <<ABC DEF>>
 cmd_notation_values() {
+    print_argc_vars
+}
+
+# @cmd Dynamic compgen
+# @arg args*[`_fn_args`]
+cmd_dynamic_compgen() {
     print_argc_vars
 }
 

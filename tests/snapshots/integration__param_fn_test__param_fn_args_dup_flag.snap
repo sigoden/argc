@@ -1,0 +1,17 @@
+---
+source: tests/param_fn_test.rs
+expression: output
+---
+RUN
+spec _fn_args cmd_preferred -f -o 4 -f
+
+STDOUT
+argc__line=cmd_preferred\ -f\ -o\ 4\ -f
+argc__words=( cmd_preferred -f -o 4 -f )
+argc_opt1=4
+argc__args=(  )
+_fn_args;exit;
+
+STDERR
+
+

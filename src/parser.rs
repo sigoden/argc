@@ -563,7 +563,6 @@ fn is_short_char(c: char) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::param::Param;
 
     macro_rules! assert_token {
         ($comment:literal, Ignore) => {

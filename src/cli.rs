@@ -1,7 +1,7 @@
 use crate::argc_value::ArgcValue;
-use crate::param::{Param, ParamNames, PositionalParam, EXTRA_ARGS};
+use crate::param::{FlagParam, OptionParam, ParamNames, PositionalParam};
 use crate::parser::{parse, Event, EventData, EventScope, Position};
-use crate::utils::{argmap, escape_shell_words, split_shell_words};
+use crate::utils::{escape_shell_words, split_shell_words};
 use crate::Result;
 use anyhow::{bail, Context};
 use clap::{ArgMatches, Command};
@@ -32,7 +32,9 @@ pub struct Cli {
     fn_name: Option<String>,
     describe: Option<String>,
     positional_index: usize,
-    params: Vec<(Box<dyn Param>, usize)>,
+    flag_params: Vec<FlagParam>,
+    option_params: Vec<OptionParam>,
+    positional_params: Vec<(PositionalParam, usize)>,
     subcommands: Vec<Cli>,
     help: Option<String>,
     author: Option<String>,
@@ -84,6 +86,11 @@ impl Cli {
                     cmd.alias_pos = position;
                     cmd.aliases = values.to_vec();
                 }
+                EventData::Flag(param) => {
+                    let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
+                    param.detect_conflict(&mut cmd.names, position)?;
+                    cmd.flag_params.push(param);
+                }
                 EventData::Option(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
                     root_data.borrow_mut().add_default_choices_fn(
@@ -91,7 +98,8 @@ impl Cli {
                         &param.default_fn,
                         &param.choices_fn,
                     );
-                    cmd.add_param(param, position)?;
+                    param.detect_conflict(&mut cmd.names, position)?;
+                    cmd.option_params.push(param);
                 }
                 EventData::Positional(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
@@ -100,11 +108,7 @@ impl Cli {
                         &param.default_fn,
                         &param.choices_fn,
                     );
-                    cmd.add_param(param, position)?;
-                }
-                EventData::Flag(param) => {
-                    let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
-                    cmd.add_param(param, position)?;
+                    cmd.add_positional_param(param, position)?;
                 }
                 EventData::Func(name) => {
                     if let Some(pos) = root_data.borrow_mut().cmd_fns.get(&name) {
@@ -135,7 +139,6 @@ impl Cli {
                                 let cmd = root_cmd.subcommands.last_mut().unwrap();
                                 cmd.name = Some(parent.to_string());
                                 cmd.fn_name = Some(name.to_string());
-                                cmd.extra_args()?;
                                 for name in &cmd.aliases {
                                     if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
                                         bail!(
@@ -154,7 +157,6 @@ impl Cli {
                                 let mut cmd = root_cmd.subcommands.pop().unwrap();
                                 cmd.name = Some(child.to_string());
                                 cmd.fn_name = Some(name.to_string());
-                                cmd.extra_args()?;
                                 match root_cmd
                                     .subcommands
                                     .iter_mut()
@@ -193,7 +195,6 @@ impl Cli {
             }
         }
         root_cmd.root.borrow().check_default_choices_fn()?;
-        root_cmd.extra_args()?;
         Ok(root_cmd)
     }
 
@@ -224,8 +225,20 @@ impl Cli {
         if !self.aliases.is_empty() {
             cmd = cmd.visible_aliases(&self.aliases);
         }
-        for (param, index) in &self.params {
-            cmd = cmd.arg(param.build_arg(*index)?);
+        for param in &self.flag_params {
+            cmd = cmd.arg(param.build_arg()?);
+        }
+        for param in &self.option_params {
+            cmd = cmd.arg(param.build_arg()?);
+        }
+        if self.positional_params.is_empty() {
+            let mut arg = PositionalParam::extra().build_arg(0)?;
+            arg = arg.allow_hyphen_values(true).trailing_var_arg(true);
+            cmd = cmd.arg(arg);
+        } else {
+            for (param, index) in &self.positional_params {
+                cmd = cmd.arg(param.build_arg(*index)?);
+            }
         }
         for subcommand in &self.subcommands {
             let subcommand = subcommand.build_command(subcommand.name.as_ref().unwrap())?;
@@ -236,48 +249,10 @@ impl Cli {
     }
 
     pub fn eval(&self, args: &[&str]) -> Result<Either<Vec<ArgcValue>, clap::Error>> {
-        let name = args[0];
         if args.len() >= 2 && self.root.borrow().exist_param_fn(args[1]) {
-            let mut values = vec![];
-            let mut positional_args = vec![];
-            if let Some(line) = args.get(2) {
-                values.push(ArgcValue::Single("_line".into(), escape_shell_words(line)));
-                if let Ok(words) = split_shell_words(line) {
-                    let mut escape_words: Vec<String> =
-                        words.iter().map(|v| escape_shell_words(v)).collect();
-                    if let Some(word) = words.last() {
-                        if !line.ends_with(word) {
-                            escape_words.push(escape_shell_words(" "));
-                        }
-                    } else if !line.is_empty() {
-                        escape_words.push(escape_shell_words(" "));
-                    }
-                    values.push(ArgcValue::Multiple("_words".into(), escape_words));
-                    let (args, argv, pos) = argmap::parse(words.into_iter());
-                    if let Some(pos) = pos {
-                        values.push(ArgcValue::Single("_dashdash".into(), pos.to_string()));
-                    }
-                    for (k, v) in argv {
-                        let v_len = v.len();
-                        match v_len {
-                            0 => values.push(ArgcValue::Single(k, "1".to_string())),
-                            1 => values.push(ArgcValue::Single(k, escape_shell_words(&v[0]))),
-                            _ => values.push(ArgcValue::Multiple(
-                                k,
-                                v.iter().map(|v| escape_shell_words(v)).collect(),
-                            )),
-                        }
-                    }
-                    positional_args = args.iter().map(|v| escape_shell_words(v)).collect();
-                }
-            } else {
-                values.push(ArgcValue::Single("_line".into(), String::new()));
-                values.push(ArgcValue::Multiple("_words".into(), vec![]));
-            }
-            values.push(ArgcValue::ParamFn(args[1].into(), positional_args));
-            return Ok(Either::Left(values));
+            return self.eval_param_fn(args);
         }
-        let command = self.build_command(name)?;
+        let command = self.build_command(args[0])?;
         let res = command.try_get_matches_from(args);
         match res {
             Ok(matches) => {
@@ -291,11 +266,17 @@ impl Cli {
     pub fn to_json(&self) -> StdResult<serde_json::Value, serde_json::Error> {
         let subcommands: StdResult<Vec<serde_json::Value>, _> =
             self.subcommands.iter().map(|v| v.to_json()).collect();
-        let params: StdResult<Vec<serde_json::Value>, _> = self
-            .params
+        let flag_params: StdResult<Vec<serde_json::Value>, _> =
+            self.flag_params.iter().map(serde_json::to_value).collect();
+        let option_params: StdResult<Vec<serde_json::Value>, _> = self
+            .option_params
             .iter()
-            .filter(|(v, _)| v.name() != EXTRA_ARGS)
-            .map(|(v, _)| v.to_json())
+            .map(serde_json::to_value)
+            .collect();
+        let positional_params: StdResult<Vec<serde_json::Value>, _> = self
+            .positional_params
+            .iter()
+            .map(|(v, _)| serde_json::to_value(v))
             .collect();
         let value = serde_json::json!({
             "describe": self.describe,
@@ -303,18 +284,125 @@ impl Cli {
             "help": self.help,
             "author": self.author,
             "version": self.version,
-            "params": params?,
+            "flag_params": flag_params?,
+            "option_params": option_params?,
+            "positional_params": positional_params?,
             "aliases": self.aliases,
             "subcommands": subcommands?,
         });
         Ok(value)
     }
 
-    pub fn get_args(&self, matches: &ArgMatches) -> Vec<ArgcValue> {
+    fn eval_param_fn(&self, args: &[&str]) -> Result<Either<Vec<ArgcValue>, clap::Error>> {
         let mut values = vec![];
-        for (param, _) in &self.params {
+        if let Some(line) = args.get(2) {
+            values.push(ArgcValue::Single("_line".into(), escape_shell_words(line)));
+            if let Ok(words) = split_shell_words(line) {
+                let mut escape_words: Vec<String> =
+                    words.iter().map(|v| escape_shell_words(v)).collect();
+                if let Some(word) = words.last() {
+                    if !line.ends_with(word) {
+                        escape_words.push(escape_shell_words(" "));
+                    }
+                } else if !line.is_empty() {
+                    escape_words.push(escape_shell_words(" "));
+                }
+                values.push(ArgcValue::Multiple("_words".into(), escape_words));
+                if !words.is_empty()
+                    && (words[0].starts_with('-') || self.exist_subcommand(&words[0]))
+                {
+                    let (left, right) = if let Some(index) = words.iter().position(|s| s == "--") {
+                        words.split_at(index)
+                    } else {
+                        words.split_at(words.len())
+                    };
+                    if let Ok(command) = self.build_command_loose(args[0]) {
+                        let mut positional_args = vec![];
+                        let mut mathc_args = left.to_vec();
+                        mathc_args.insert(0, mathc_args[0].to_string());
+                        if let Ok(matches) = command.try_get_matches_from(&mathc_args) {
+                            for value in self.get_args(&matches) {
+                                if value.is_cmd_fn() {
+                                    continue;
+                                }
+                                if let ArgcValue::PositionalMultiple(_, args) = value {
+                                    positional_args = args;
+                                    continue;
+                                }
+                                values.push(value);
+                            }
+                        }
+                        if !right.is_empty() {
+                            values.push(ArgcValue::Single(
+                                "_dashdash".into(),
+                                positional_args.len().to_string(),
+                            ));
+                            positional_args.extend(right[1..].iter().map(|v| v.to_string()));
+                        }
+                        values.push(ArgcValue::PositionalMultiple(
+                            "_args".into(),
+                            positional_args,
+                        ));
+                    }
+                }
+            }
+        } else {
+            values.push(ArgcValue::Single("_line".into(), String::new()));
+            values.push(ArgcValue::Multiple("_words".into(), vec![]));
+        }
+        values.push(ArgcValue::ParamFn(args[1].into()));
+        Ok(Either::Left(values))
+    }
+
+    fn build_command_loose(&self, name: &str) -> Result<Command> {
+        let mut cmd = Command::new(name.to_string());
+        cmd = cmd.ignore_errors(true);
+        if let Some(help) = self.help.as_ref() {
+            cmd = cmd
+                .disable_help_subcommand(true)
+                .subcommand(Command::new("help").about(help))
+        } else {
+            cmd = cmd.disable_help_subcommand(true);
+        }
+        if !self.aliases.is_empty() {
+            cmd = cmd.visible_aliases(&self.aliases);
+        }
+        for param in &self.flag_params {
+            cmd = cmd.arg(param.build_arg()?);
+        }
+        for param in &self.option_params {
+            cmd = cmd.arg(param.build_arg_loose()?);
+        }
+        cmd = cmd.arg(PositionalParam::extra().build_arg(0)?);
+        for subcommand in &self.subcommands {
+            let subcommand = subcommand.build_command(subcommand.name.as_ref().unwrap())?;
+            cmd = cmd.subcommand(subcommand);
+        }
+        Ok(cmd)
+    }
+
+    fn get_args(&self, matches: &ArgMatches) -> Vec<ArgcValue> {
+        let mut values = vec![];
+        for param in &self.flag_params {
             if let Some(value) = param.get_arg_value(matches) {
                 values.push(value);
+            }
+        }
+        for param in &self.option_params {
+            if let Some(value) = param.get_arg_value(matches) {
+                values.push(value);
+            }
+        }
+
+        if self.positional_params.is_empty() {
+            if let Some(value) = PositionalParam::extra().get_arg_value(matches) {
+                values.push(value);
+            }
+        } else {
+            for (param, _) in &self.positional_params {
+                if let Some(value) = param.get_arg_value(matches) {
+                    values.push(value);
+                }
             }
         }
 
@@ -340,7 +428,7 @@ impl Cli {
         values
     }
 
-    pub fn exist_main_fn(&self) -> bool {
+    fn exist_main_fn(&self) -> bool {
         self.root.borrow().fns.contains_key(&self.get_main_fn())
     }
 
@@ -353,20 +441,26 @@ impl Cli {
         }
     }
 
-    fn add_param<T: Param + 'static>(&mut self, param: T, pos: Position) -> Result<()> {
-        param.detect_conflict(&mut self.names, pos)?;
-        let index = self.positional_index;
-        if param.is_positional() {
-            self.positional_index += 1;
-        }
-        self.params.push((Box::new(param), index));
-        Ok(())
+    fn has_flag_or_option(&self) -> bool {
+        !self.flag_params.is_empty() || !self.option_params.is_empty()
     }
 
-    fn extra_args(&mut self) -> Result<()> {
-        if self.positional_index == 0 {
-            self.add_param(PositionalParam::extra(), 0)?;
-        }
+    fn exist_subcommand(&self, name: &str) -> bool {
+        self.subcommands.iter().any(|subcmd| {
+            if let Some(subcmd_name) = &subcmd.name {
+                if subcmd_name == name {
+                    return true;
+                }
+            }
+            return subcmd.aliases.iter().any(|v| v == name);
+        })
+    }
+
+    fn add_positional_param(&mut self, param: PositionalParam, pos: Position) -> Result<()> {
+        param.detect_conflict(&mut self.names, pos)?;
+        let index = self.positional_index;
+        self.positional_index += 1;
+        self.positional_params.push((param, index));
         Ok(())
     }
 
@@ -385,11 +479,8 @@ impl Cli {
         lines.push("USAGE: {usage}");
         lines.push("");
         let has_subcommands = !self.subcommands.is_empty();
-        let has_arguments = self
-            .params
-            .iter()
-            .any(|(p, _)| p.is_positional() && p.name() != EXTRA_ARGS);
-        let has_options = self.params.iter().any(|(p, _)| !p.is_positional());
+        let has_arguments = !self.positional_params.is_empty();
+        let has_options = self.has_flag_or_option();
         if has_arguments {
             lines.push("ARGS:");
             lines.push("{positionals}");

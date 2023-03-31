@@ -1,5 +1,5 @@
 ---
-source: tests/spec_test.rs
+source: tests/param_fn_test.rs
 expression: output
 ---
 RUN

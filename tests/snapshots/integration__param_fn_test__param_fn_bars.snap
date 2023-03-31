@@ -1,0 +1,15 @@
+---
+source: tests/param_fn_test.rs
+expression: output
+---
+RUN
+spec _fn_bars
+
+STDOUT
+argc__line=
+argc__words=(  )
+_fn_bars;exit;
+
+STDERR
+
+

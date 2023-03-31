@@ -179,6 +179,14 @@ fn test_spec_cmd_without_any_arg() {
 }
 
 #[test]
+fn test_spec_cmd_without_any_arg2() {
+    snapshot!(
+        SPEC_SCRIPT,
+        &["spec", "cmd_without_any_arg", "--opt2", "foo", "bar"],
+    );
+}
+
+#[test]
 fn test_spec_cmd_without_any_arg_exec() {
     snapshot!(SPEC_SCRIPT, &["spec", "cmd_without_any_arg", "foo", "bar"],);
 }
@@ -201,21 +209,6 @@ fn test_spec_cmd_with_hyphens() {
             "bar"
         ],
     );
-}
-
-#[test]
-fn test_spec_fn_bars() {
-    snapshot!(SPEC_SCRIPT, &["spec", "_fn_bars",],);
-}
-
-#[test]
-fn test_spec_fn_args() {
-    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args","-z 5 -y=6 -y8 --msg cool -7 --here=there -xvf file.tgz -qrs=1234 -n -555 one two three -abc+5 -c-6 -- four -z 0"],);
-}
-
-#[test]
-fn test_spec_fn_args2() {
-    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args", " "],);
 }
 
 #[test]
