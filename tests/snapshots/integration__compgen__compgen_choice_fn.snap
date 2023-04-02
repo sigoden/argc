@@ -6,7 +6,7 @@ RUN
 cmd_option_names --op11 
 
 STDOUT
-`_fn_bars`
+__argc_fn:_fn_bars
 
 STDERR
 

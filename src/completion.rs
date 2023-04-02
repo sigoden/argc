@@ -8,27 +8,49 @@ use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-pub fn compgen(source: &str, line: &str) -> Result<Vec<String>> {
+pub fn compgen(source: &str, line: &str) -> Result<Vec<(String, String)>> {
     let events = parse(source)?;
     let comp = Completion::new_from_events(&events);
     comp.generate(line)
 }
 
-type ChoicesType = Either<Vec<String>, String>;
-type OptionMapType = (Option<String>, Vec<String>, Option<ChoicesType>, bool);
-type PositionalItemType = (String, Option<ChoicesType>, bool, bool);
+type ChoicesValue = Either<Vec<String>, String>;
+
+struct OptionValue {
+    summary: String,
+    short: Option<String>,
+    value_names: Vec<String>,
+    multiple: bool,
+    choices: Option<ChoicesValue>,
+}
+
+struct FlagValue {
+    summary: String,
+    short: Option<String>,
+    multiple: bool,
+}
+
+struct PositionalValue {
+    summary: String,
+    value_name: String,
+    choices: Option<ChoicesValue>,
+    multiple: bool,
+    required: bool,
+}
 
 #[derive(Default)]
 pub struct Completion {
     name: Option<String>,
     help: bool,
+    describe: String,
     aliases: IndexSet<String>,
-    options: HashMap<String, OptionMapType>,
-    flags: HashMap<String, Option<String>>,
-    positionals: Vec<PositionalItemType>,
+    options: HashMap<String, OptionValue>,
+    option_mappings: IndexMap<String, String>,
+    flags: HashMap<String, FlagValue>,
+    flag_mappings: IndexMap<String, String>,
+    positionals: Vec<PositionalValue>,
     subcommands: Vec<Completion>,
     subcommand_mappings: IndexMap<String, String>,
-    flag_option_mappings: IndexMap<String, String>,
     root: Arc<RefCell<RootData>>,
 }
 
@@ -42,9 +64,10 @@ impl Completion {
                     let cmd = Self::get_cmd(&mut root_comp);
                     cmd.help = true;
                 }
-                EventData::Cmd(_) => {
+                EventData::Cmd(value) => {
                     root_data.borrow_mut().scope = EventScope::CmdStart;
-                    root_comp.create_subcommand();
+                    let cmd = root_comp.create_subcommand();
+                    cmd.describe = value.to_string();
                 }
                 EventData::Aliases(aliases) => {
                     let cmd = Self::get_cmd(&mut root_comp);
@@ -53,10 +76,10 @@ impl Completion {
                 EventData::Option(option_param) => {
                     let cmd = Self::get_cmd(&mut root_comp);
                     let name = format!("--{}", option_param.name);
-                    cmd.flag_option_mappings.insert(name.clone(), name.clone());
+                    cmd.option_mappings.insert(name.clone(), name.clone());
                     let short = if let Some(short) = option_param.short.as_ref() {
                         let short = format!("-{}", short);
-                        cmd.flag_option_mappings.insert(short.clone(), name.clone());
+                        cmd.option_mappings.insert(short.clone(), name.clone());
                         Some(short)
                     } else {
                         None
@@ -65,26 +88,34 @@ impl Completion {
                         parse_choices_or_fn(&option_param.choices, &option_param.choices_fn);
                     cmd.options.insert(
                         name.clone(),
-                        (
+                        OptionValue {
                             short,
-                            option_param.arg_value_names.clone(),
+                            summary: option_param.summary.clone(),
+                            value_names: option_param.arg_value_names.clone(),
                             choices,
-                            option_param.multiple,
-                        ),
+                            multiple: option_param.multiple,
+                        },
                     );
                 }
                 EventData::Flag(flag_param) => {
                     let cmd = Self::get_cmd(&mut root_comp);
                     let name = format!("--{}", flag_param.name);
-                    cmd.flag_option_mappings.insert(name.clone(), name.clone());
+                    cmd.flag_mappings.insert(name.clone(), name.clone());
                     let short = if let Some(short) = flag_param.short.as_ref() {
                         let short = format!("-{}", short);
-                        cmd.flag_option_mappings.insert(short.clone(), name.clone());
+                        cmd.flag_mappings.insert(short.clone(), name.clone());
                         Some(short)
                     } else {
                         None
                     };
-                    cmd.flags.insert(name, short);
+                    cmd.flags.insert(
+                        name,
+                        FlagValue {
+                            summary: flag_param.summary.clone(),
+                            short,
+                            multiple: flag_param.multiple,
+                        },
+                    );
                 }
                 EventData::Positional(positional_param) => {
                     let cmd = Self::get_cmd(&mut root_comp);
@@ -92,12 +123,13 @@ impl Completion {
                         &positional_param.choices,
                         &positional_param.choices_fn,
                     );
-                    cmd.positionals.push((
-                        positional_param.arg_value_name.to_string(),
+                    cmd.positionals.push(PositionalValue {
+                        summary: positional_param.summary.clone(),
+                        value_name: positional_param.arg_value_name.to_string(),
                         choices,
-                        positional_param.multiple,
-                        positional_param.required,
-                    ));
+                        multiple: positional_param.multiple,
+                        required: positional_param.required,
+                    });
                 }
                 EventData::Func(name) => {
                     if root_data.borrow().scope == EventScope::CmdStart {
@@ -148,17 +180,17 @@ impl Completion {
         root_comp
     }
 
-    pub fn generate(&self, line: &str) -> Result<Vec<String>> {
+    pub fn generate(&self, line: &str) -> Result<Vec<(String, String)>> {
         let args = split_shell_words(line).map_err(|_| anyhow!("Invalid args"))?;
         let mut comp_type = get_comp_type(line, &args);
         let mut force_positional = false;
-        let mut option_complete_values: Option<Vec<String>> = None;
+        let mut option_complete_values: Option<Vec<(String, String)>> = None;
         let mut index = 0;
-        let mut skipped: HashSet<String> = HashSet::default();
+        let mut skipped_flags_options: HashSet<String> = HashSet::default();
         let mut parent_comp = self;
         let mut comp = self;
         let mut positional_index: usize = 0;
-        let mut match_subcommand = false;
+        let mut subcommand_name = None;
         let len = args.len();
         while index < len {
             let current_arg = args[index].as_str();
@@ -169,19 +201,19 @@ impl Completion {
                     Some((v, _)) => (v, true),
                     None => (current_arg, false),
                 };
-                if let Some(name) = comp.flag_option_mappings.get(arg_name) {
-                    if let Some((short, value_names, choices, multiple)) = comp.options.get(name) {
-                        if !multiple {
-                            skipped.insert(name.to_string());
-                            if let Some(short) = short {
-                                skipped.insert(short.to_string());
+                if let Some(name) = comp.option_mappings.get(arg_name) {
+                    if let Some(option) = comp.options.get(name) {
+                        if !option.multiple {
+                            skipped_flags_options.insert(name.to_string());
+                            if let Some(short) = &option.short {
+                                skipped_flags_options.insert(short.to_string());
                             }
                         }
                         if !arg_has_value {
                             let mut value_name = None;
                             let mut i = 0;
                             loop {
-                                match (value_names.get(i), args.get(index + 1 + i)) {
+                                match (option.value_names.get(i), args.get(index + 1 + i)) {
                                     (Some(_), Some(arg)) => {
                                         if is_flag_or_option(arg) {
                                             index += i;
@@ -195,11 +227,11 @@ impl Completion {
                                     (maybe_value_name, None) => {
                                         if comp_type == CompType::Any && maybe_value_name.is_some()
                                         {
-                                            value_name = value_names.get(i);
+                                            value_name = option.value_names.get(i);
                                         } else if comp_type == CompType::CommandOrPositional
                                             && i > 0
                                         {
-                                            value_name = value_names.get(i - 1);
+                                            value_name = option.value_names.get(i - 1);
                                         }
                                         index += i;
                                         break;
@@ -210,14 +242,22 @@ impl Completion {
                             if let Some(value_name) = value_name {
                                 comp_type = CompType::OptionValue;
                                 option_complete_values = Some(generate_by_choices_or_name(
-                                    value_name, choices, *multiple, true,
+                                    &option.summary,
+                                    value_name,
+                                    &option.choices,
+                                    option.multiple,
+                                    true,
                                 ))
                             }
                         }
-                    } else if let Some(short) = comp.flags.get(name) {
-                        skipped.insert(name.to_string());
-                        if let Some(short) = short {
-                            skipped.insert(short.to_string());
+                    }
+                } else if let Some(name) = comp.flag_mappings.get(arg_name) {
+                    if let Some(flag) = comp.flags.get(name) {
+                        if !flag.multiple {
+                            skipped_flags_options.insert(name.to_string());
+                            if let Some(short) = &flag.short {
+                                skipped_flags_options.insert(short.to_string());
+                            }
                         }
                     }
                 } else if let (Some(next), Some(next2)) = (args.get(index + 1), args.get(index + 2))
@@ -235,13 +275,11 @@ impl Completion {
                             .iter()
                             .find(|v| v.name == Some(name.into()))
                         {
-                            skipped.clear();
-                            match_subcommand = true;
+                            skipped_flags_options.clear();
+                            subcommand_name = Some(name.to_string());
                             parent_comp = comp;
                             comp = subcmd_comp;
                             matched = true;
-                            skipped.insert(name.to_string());
-                            skipped.extend(subcmd_comp.aliases.iter().cloned());
                         }
                     }
                 }
@@ -256,17 +294,17 @@ impl Completion {
         let mut output = vec![];
         match comp_type {
             CompType::FlagOrOption => {
-                add_mapping_to_output(&mut output, &skipped, &comp.flag_option_mappings);
+                comp.output_flags_and_options(&mut output, &skipped_flags_options);
             }
             CompType::CommandOrPositional => {
-                if match_subcommand && positional_index == 0 {
-                    add_mapping_to_output(&mut output, &skipped, &parent_comp.subcommand_mappings);
-                    add_positional_to_output(&mut output, 0, &parent_comp.positionals);
+                if subcommand_name.is_some() && positional_index == 0 {
+                    parent_comp.output_subcommands(&mut output);
+                    output_positionals(&mut output, 0, &parent_comp.positionals);
                 } else {
                     if positional_index == 1 {
-                        add_mapping_to_output(&mut output, &skipped, &comp.subcommand_mappings);
+                        comp.output_subcommands(&mut output);
                     }
-                    add_positional_to_output(
+                    output_positionals(
                         &mut output,
                         positional_index.saturating_sub(1),
                         &comp.positionals,
@@ -280,16 +318,20 @@ impl Completion {
             }
             CompType::Any => {
                 if positional_index == 0 {
-                    add_mapping_to_output(&mut output, &skipped, &comp.subcommand_mappings);
+                    comp.output_subcommands(&mut output);
                 }
-                add_positional_to_output(&mut output, positional_index, &comp.positionals);
+                output_positionals(&mut output, positional_index, &comp.positionals);
                 let mut has_flags_and_options = !force_positional;
-                if output.len() > 1 || (output.len() == 1 && !output[0].starts_with('[')) {
+                if output.len() > 1
+                    || (output.len() == 1
+                        && !(output[0].0.starts_with("__argc_value*")
+                            || output[0].0.starts_with("__argc_value:")))
+                {
                     has_flags_and_options = false;
                 }
                 let mut options = vec![];
                 if has_flags_and_options {
-                    add_mapping_to_output(&mut options, &skipped, &comp.flag_option_mappings);
+                    comp.output_flags_and_options(&mut output, &skipped_flags_options);
                 }
                 options.extend(output);
                 output = options;
@@ -306,9 +348,10 @@ impl Completion {
         }
     }
 
-    fn create_subcommand(&mut self) {
+    fn create_subcommand(&mut self) -> &mut Self {
         let comp = Completion::default();
         self.subcommands.push(comp);
+        self.subcommands.last_mut().unwrap()
     }
 
     fn add_help_subcommand(&mut self) {
@@ -324,36 +367,84 @@ impl Completion {
                     help_choices.push(name.to_string());
                 }
             }
-            help_comp.positionals.push((
-                "<CMD>".to_string(),
-                Some(Either::Left(help_choices)),
-                false,
-                false,
-            ));
+            help_comp.positionals.push(PositionalValue {
+                summary: "".into(),
+                value_name: "<CMD>".to_string(),
+                choices: Some(Either::Left(help_choices)),
+                required: false,
+                multiple: false,
+            });
             self.subcommand_mappings
                 .insert("help".to_string(), "help".to_string());
             self.subcommands.push(help_comp);
         }
     }
+
+    fn output_flags_and_options(
+        &self,
+        output: &mut Vec<(String, String)>,
+        skipped: &HashSet<String>,
+    ) {
+        for (name, flag_name) in &self.flag_mappings {
+            if !skipped.contains(name) {
+                let summary = self
+                    .flags
+                    .get(flag_name)
+                    .map(|v| v.summary.clone())
+                    .unwrap_or_default();
+                output.push((name.into(), summary));
+            }
+        }
+        for (name, option_name) in &self.option_mappings {
+            if !skipped.contains(name) {
+                let summary = self
+                    .flags
+                    .get(option_name)
+                    .map(|v| v.summary.clone())
+                    .unwrap_or_default();
+                output.push((name.into(), summary));
+            }
+        }
+    }
+
+    fn output_subcommands(&self, output: &mut Vec<(String, String)>) {
+        for (name, cmd_name) in &self.subcommand_mappings {
+            let summary = self
+                .subcommands
+                .iter()
+                .find(|v| v.name.as_ref() == Some(cmd_name))
+                .map(|v| v.describe.clone())
+                .unwrap_or_default();
+            output.push((name.into(), summary));
+        }
+    }
 }
 
-fn add_positional_to_output(
-    output: &mut Vec<String>,
+fn output_positionals(
+    output: &mut Vec<(String, String)>,
     positional_index: usize,
-    positionals: &[PositionalItemType],
+    positionals: &[PositionalValue],
 ) {
     let positional_len = positionals.len();
     if positional_index >= positional_len {
-        if let Some((name, choices, multiple, required)) = positionals.last() {
-            if *multiple {
+        if let Some(positional) = positionals.last() {
+            if positional.multiple {
                 output.extend(generate_by_choices_or_name(
-                    name, choices, *multiple, *required,
+                    &positional.summary,
+                    &positional.value_name,
+                    &positional.choices,
+                    positional.multiple,
+                    positional.required,
                 ));
             }
         }
-    } else if let Some((name, choices, multiple, required)) = positionals.get(positional_index) {
+    } else if let Some(positional) = positionals.get(positional_index) {
         output.extend(generate_by_choices_or_name(
-            name, choices, *multiple, *required,
+            &positional.summary,
+            &positional.value_name,
+            &positional.choices,
+            positional.multiple,
+            positional.required,
         ));
     }
 }
@@ -390,7 +481,7 @@ fn get_comp_type(line: &str, args: &[String]) -> CompType {
 fn parse_choices_or_fn(
     choices: &Option<Vec<String>>,
     choices_fn: &Option<String>,
-) -> Option<ChoicesType> {
+) -> Option<ChoicesValue> {
     if let Some(choices_fn) = choices_fn {
         Some(Either::Right(choices_fn.to_string()))
     } else {
@@ -401,36 +492,28 @@ fn parse_choices_or_fn(
 }
 
 fn generate_by_choices_or_name(
+    summary: &str,
     value_name: &str,
-    choices: &Option<ChoicesType>,
+    choices: &Option<ChoicesValue>,
     multiple: bool,
     required: bool,
-) -> Vec<String> {
+) -> Vec<(String, String)> {
     if let Some(choices) = choices {
         match choices {
-            Either::Left(choices) => choices.to_vec(),
-            Either::Right(choices_fn) => vec![format!("`{}`", choices_fn)],
+            Either::Left(choices) => choices
+                .iter()
+                .map(|v| (v.to_string(), String::new()))
+                .collect(),
+            Either::Right(choices_fn) => vec![(format!("__argc_fn:{}", choices_fn), String::new())],
         }
     } else {
         let value = match (multiple, required) {
-            (true, true) => format!("<{}>...", value_name),
-            (true, false) => format!("[{}]...", value_name),
-            (false, true) => format!("<{}>", value_name),
-            (false, false) => format!("[{}]", value_name),
+            (true, true) => format!("__argc_value+{}", value_name),
+            (true, false) => format!("__argc_value*{}", value_name),
+            (false, true) => format!("__argc_value!{}", value_name),
+            (false, false) => format!("__argc_value:{}", value_name),
         };
-        vec![value]
-    }
-}
-
-fn add_mapping_to_output(
-    output: &mut Vec<String>,
-    skipped: &HashSet<String>,
-    mapping: &IndexMap<String, String>,
-) {
-    for name in mapping.keys() {
-        if !skipped.contains(name) {
-            output.push(name.to_string());
-        }
+        vec![(value, summary.into())]
     }
 }
 

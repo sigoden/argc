@@ -6,7 +6,9 @@ RUN
 cmd_option_names --opt7 a
 
 STDOUT
-a b c
+a
+b
+c
 
 STDERR
 

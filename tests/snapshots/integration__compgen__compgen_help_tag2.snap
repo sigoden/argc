@@ -6,7 +6,9 @@ RUN
 help
 
 STDOUT
-foo bar
+foo
+bar
+help
 
 STDERR
 

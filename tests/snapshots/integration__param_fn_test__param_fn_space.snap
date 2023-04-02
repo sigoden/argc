@@ -6,8 +6,8 @@ RUN
 spec _fn_args  
 
 STDOUT
-argc__line=\ 
-argc__words=( \  )
+argc__line=' '
+argc__words=( ' ' )
 _fn_args;exit;
 
 STDERR

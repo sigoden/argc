@@ -66,7 +66,14 @@ macro_rules! snapshot_compgen {
         $args:expr
     ) => {
         let (stdout, stderr) = match argc::compgen($source, $args) {
-            Ok(stdout) => (stdout.join(" "), String::new()),
+            Ok(stdout) => (
+                stdout
+                    .into_iter()
+                    .map(|(v, d)| if d.is_empty() { v } else { format!("{v}\t{d}") })
+                    .collect::<Vec<String>>()
+                    .join("\n"),
+                String::new(),
+            ),
             Err(stderr) => (String::new(), stderr.to_string()),
         };
 

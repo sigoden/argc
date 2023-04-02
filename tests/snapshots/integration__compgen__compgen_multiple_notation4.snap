@@ -6,7 +6,7 @@ RUN
 cmd_option_notations --opt2 foo bar
 
 STDOUT
-<FOO2>
+__argc_value!FOO2
 
 STDERR
 

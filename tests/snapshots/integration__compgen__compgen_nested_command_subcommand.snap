@@ -6,7 +6,8 @@ RUN
 cmd_nested_command foo 
 
 STDOUT
---opt1 --opt2
+--opt1
+--opt2
 
 STDERR
 

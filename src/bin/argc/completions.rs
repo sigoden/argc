@@ -1,4 +1,6 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
+
+use crate::compgen::Shell;
 
 const BASH_SCRIPT: &str = r###"
 _argc_complete() {
@@ -15,20 +17,31 @@ _argc_complete() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     local line=${COMP_LINE:${#COMP_WORDS[0]}}
     local IFS=$'\n'
-    local candicates=($(argc --argc-compgen "$scriptfile" "$line" 2>/dev/null))
+    local candicates=($(argc --argc-compgen bash "$scriptfile" "$line" 2>/dev/null))
     if [[ ${#candicates[@]} -eq 1 ]]; then
         if [[ "${candicates[0]}" == "__argc_comp:file" ]]; then
             candicates=()
-            COMPREPLY=($(compgen -f -- "${cur}"))
+            _argc_complete_path
         elif [[ "${candicates[0]}" == "__argc_comp:dir" ]]; then
             candicates=()
-            COMPREPLY=($(compgen -d -- "${cur}"))
+            _argc_complete_path -d
         fi
     fi
     if [[ ${#candicates[@]} -gt 0 ]]; then
-        candicates=($(compgen -W "${candicates[*]}" -- "${cur}"))
-        if [ ${#candicates[@]} -gt 0 ]; then
-            COMPREPLY=( "${COMPREPLY[@]}" $(printf '%q\n' "${candicates[@]}") )
+        COMPREPLY=(${COMPREPLY[@]} ${candicates[@]})
+    fi
+}
+
+_argc_complete_path() {
+    if type _filedir >/dev/null 2>&1; then
+        _filedir ${1-}
+    else
+        if [[ ${1-} == "-d" ]]; then
+            compopt -o nospace -o plusdirs > /dev/null 2>&1
+            COMPREPLY=($(compgen -d -- "${cur}"))
+        else
+            compopt -o nospace -o plusdirs > /dev/null 2>&1
+            COMPREPLY=($(compgen -f -- "${cur}"))
         fi
     fi
 }
@@ -49,7 +62,7 @@ function _argc_complete
     end
     set -l line "$tokens[2..]"
     set -l IFS '\n'
-    set -l candicates (argc --argc-compgen "$scriptfile" "$line" 2>/dev/null)
+    set -l candicates (argc --argc-compgen fish "$scriptfile" "$line" 2>/dev/null)
     if test (count $candicates) -eq 1
         if [ "$candicates[1]" = "__argc_comp:file" ]
             set candicates
@@ -60,7 +73,7 @@ function _argc_complete
         end
     end
     for item in $candicates
-        echo $item
+        echo "$item"
     end
 end
 "###;
@@ -80,7 +93,7 @@ _argc_complete()
     fi
     local line="${words[2,-1]}"
     local IFS=$'\n'
-    local candicates=( $(argc --argc-compgen "$scriptfile" "$line" 2>/dev/null) )
+    local candicates=( $(argc --argc-compgen zsh "$scriptfile" "$line" 2>/dev/null) )
     if [[ ${#candicates[@]} -eq 1 ]]; then
         if [[ "$candicates[1]" == "__argc_comp:file" ]]; then
             candicates=()
@@ -91,7 +104,7 @@ _argc_complete()
         fi
     fi
     if [[ ${#candicates[@]} -gt 0 ]]; then
-        compadd -- $candicates[@]
+        _describe '' candicates
     fi
 }
 "###;
@@ -117,60 +130,50 @@ $_argc_complete = {
     } else {
         $line = $tail
     }
-    $candicates = (argc --argc-compgen "$scriptfile" "$line" 2>$null).Split("`n")
+    $candicates = (argc --argc-compgen powershell "$scriptfile" "$line" 2>$null).Split("`n")
     if ($candicates.Count -eq 1) {
         if ($candicates[0] -eq "__argc_comp:file") {
-            $candicates = (Get-ChildItem -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
+            return (Get-ChildItem -Path "$wordToComplete*" | Select-Object -ExpandProperty Name) | 
+                ForEach-Object { 
+                    [CompletionResult]::new($_, $_, [CompletionResultType]::ParameterValue, '-')
+                }
         } elseif ($candicates[0] -eq "__argc_comp:dir") {
-            $candicates = (Get-ChildItem -Attributes Directory -Path "$wordToComplete*" | Select-Object -ExpandProperty Name)
+            return (Get-ChildItem -Attributes Directory -Path "$wordToComplete*" | Select-Object -ExpandProperty Name) |
+                ForEach-Object { 
+                    [CompletionResult]::new($_, $_, [CompletionResultType]::ParameterValue, '-')
+                }
         }
     }
-    $candicates | 
-        Where-Object { $_ -like "$wordToComplete*" } |
-        ForEach-Object { 
-            if ($_.StartsWith("-")) {
-                $t = [System.Management.Automation.CompletionResultType]::ParameterName
-            } else {
-                $t = [System.Management.Automation.CompletionResultType]::ParameterValue
-            }
-            [System.Management.Automation.CompletionResult]::new($_, $_, $t, '-')
-        }
+    $candicates | ForEach-Object { 
+        [CompletionResult]::new($_, $_, [CompletionResultType]::ParameterValue, " ")
+    }
 }
 "###;
 
-pub(crate) fn generate(args: &[String]) -> Result<String> {
-    let shell = match args.get(0) {
-        Some(v) => v,
-        None => {
-            bail!("No shell specified, Please specify the one of bash,zsh,fish,powershell")
-        }
-    };
+pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
     let mut cmds = vec!["argc"];
-    cmds.extend(args[1..].iter().map(|v| v.as_str()));
-    let output = match shell.as_str() {
-        "bash" => {
+    cmds.extend(args.iter().map(|v| v.as_str()));
+    let output = match shell {
+        Shell::Bash => {
             let registers = format!("complete -F _argc_complete {}", cmds.join(" "));
             format!("{BASH_SCRIPT}\n{registers}\n",)
         }
-        "fish" => {
+        Shell::Fish => {
             let lines: Vec<String> = cmds
                 .iter()
-                .map(|v| format!(r#"complete -x -c {v}  -n 'true' -a "(_argc_complete)""#))
+                .map(|v| format!(r#"complete -x -c {v} -a "(_argc_complete)""#))
                 .collect();
             let registers = lines.join("\n");
             format!("{FISH_SCRIPT}\n{registers}\n",)
         }
-        "zsh" => {
+        Shell::Zsh => {
             let registers = format!("compdef _argc_complete {}", cmds.join(" "));
             format!("{ZSH_SCRIPT}\n{registers}\n",)
         }
-        "powershell" => {
+        Shell::Powershell => {
             let lines: Vec<String> = cmds.iter().map(|v| format!("Register-ArgumentCompleter -Native -ScriptBlock $_argc_complete -CommandName {v} ")).collect();
             let registers = lines.join("\n");
             format!("{POWERSHELL_SCRIPT}\n{registers}\n",)
-        }
-        _ => {
-            bail!("Invalid shell value, shell must be one of bash,zsh,fish,powershell")
         }
     };
     Ok(output)
