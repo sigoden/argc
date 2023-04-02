@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::compgen::Shell;
+use argc::Shell;
 
 const BASH_SCRIPT: &str = r###"
 _argc_complete() {

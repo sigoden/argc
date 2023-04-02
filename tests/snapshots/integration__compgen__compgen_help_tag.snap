@@ -3,12 +3,11 @@ source: tests/compgen.rs
 expression: output
 ---
 RUN
-
+cmd_nested_command
 
 STDOUT
-foo
-bar
-help
+cmd_nested_command	Nested command
+cmd_nested_command2	Nested command2
 
 STDERR
 

@@ -6,7 +6,7 @@ RUN
 cmd_positional_many foo 
 
 STDOUT
-__argc_value:ARG2	A optional arg
+__argc_comp:dir	A optional arg 2
 
 STDERR
 

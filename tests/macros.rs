@@ -62,20 +62,14 @@ macro_rules! fatal {
 #[macro_export]
 macro_rules! snapshot_compgen {
     (
-        $source:expr,
-        $args:expr
+        $line:expr
     ) => {
-        let (stdout, stderr) = match argc::compgen($source, $args) {
-            Ok(stdout) => (
-                stdout
-                    .into_iter()
-                    .map(|(v, d)| if d.is_empty() { v } else { format!("{v}\t{d}") })
-                    .collect::<Vec<String>>()
-                    .join("\n"),
-                String::new(),
-            ),
-            Err(stderr) => (String::new(), stderr.to_string()),
-        };
+        let (script_file, script_content) = $crate::fixtures::get_spec();
+        let (stdout, stderr) =
+            match argc::compgen(argc::Shell::Fish, &script_file, &script_content, $line) {
+                Ok(stdout) => (stdout, String::new()),
+                Err(stderr) => (String::new(), stderr.to_string()),
+            };
 
         let output = format!(
             r###"RUN
@@ -87,7 +81,7 @@ STDOUT
 STDERR
 {}
 "###,
-            $args, stdout, stderr
+            $line, stdout, stderr
         );
         insta::assert_snapshot!(output);
     };

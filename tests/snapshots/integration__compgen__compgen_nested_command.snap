@@ -8,6 +8,7 @@ cmd_nested_command
 STDOUT
 foo	Subcommand of nested command
 a	Subcommand of nested command
+help
 
 STDERR
 

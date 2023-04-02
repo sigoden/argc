@@ -35,6 +35,7 @@ cmd_nested_command	Nested command
 cmd_nested_command2	Nested command2
 cmd_notation_values	Notation values
 cmd_dynamic_compgen	Dynamic compgen
+help
 
 STDERR
 

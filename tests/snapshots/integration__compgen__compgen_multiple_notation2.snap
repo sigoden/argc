@@ -3,10 +3,10 @@ source: tests/compgen.rs
 expression: output
 ---
 RUN
-cmd_option_notations --opt2 foo
+cmd_option_notations --opt2 foo 
 
 STDOUT
-__argc_value!FOO1
+__argc_comp:file
 
 STDERR
 

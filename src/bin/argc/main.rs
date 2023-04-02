@@ -1,10 +1,8 @@
-mod compgen;
 mod completions;
 mod utils;
 
-use crate::compgen::Shell;
-
 use anyhow::{anyhow, bail, Context, Result};
+use argc::{utils::get_shell_path, Shell};
 use clap::{Arg, ArgAction, Command};
 use either::Either;
 use std::{
@@ -116,7 +114,8 @@ USAGE:{usage}"#,
         };
         let (source, cmd_args) = parse_script_args(&args[3..])?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        let output = crate::compgen::generate(shell, &args[3], &source, &cmd_args)?;
+        let line = cmd_args.get(1).copied().unwrap_or_default();
+        let output = argc::compgen(shell, &args[3], &source, line)?;
         println!("{output}");
     } else if matches.get_flag("argc-completions") {
         let shell: Shell = match args.get(2) {

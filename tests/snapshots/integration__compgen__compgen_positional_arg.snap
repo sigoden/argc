@@ -6,7 +6,7 @@ RUN
 cmd_positional_requires arg1 
 
 STDOUT
-__argc_value+ARG2	A required arg, multiple
+__argc_comp:dir	A required arg 2, multiple
 
 STDERR
 

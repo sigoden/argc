@@ -89,8 +89,8 @@ cmd_option_quotes() {
 }
 
 # @cmd Option with value notations
-# @option   --opt1 <FOO1>
-# @option   --opt2 <FOO1> <FOO2>
+# @option   --opt1 <DIR>
+# @option   --opt2 <DIR> <FILE>
 cmd_option_notations() {
     print_argc_vars
 }
@@ -106,21 +106,21 @@ cmd_flag_formats() {
 }
 
 # @cmd  Positional one required
-# @arg   arg1! <ARG>  A required arg
+# @arg   arg1! <DIR>  A required arg1
 cmd_positional_only() {
     print_argc_vars
 }
 
 # @cmd  Positional all required
-# @arg   arg1     A optional arg
-# @arg   arg2     A optional arg
+# @arg   dir1     A optional arg 1
+# @arg   dir2     A optional arg 2
 cmd_positional_many() {
     print_argc_vars
 }
 
 # @cmd  Positional all required
-# @arg   arg1!     A required arg
-# @arg   arg2+     A required arg, multiple
+# @arg   dir1!     A required arg
+# @arg   dir2+     A required arg 2, multiple
 cmd_positional_requires() {
     print_argc_vars
 }
@@ -187,6 +187,7 @@ cmd_with_hyphens() {
 }
 
 # @cmd Nested command
+# @help A nested command
 # @version 0.1.0
 # @option --opt1
 cmd_nested_command() {
@@ -240,11 +241,13 @@ print_argc_vars() {
 }
 
 _fn_foo() {
-    echo "foo"
+    echo foo
 }
 
 _fn_bars() {
-    echo " a1 a2 a3 "
+    echo a1
+    echo a2
+    echo a3
 }
 
 _fn_args() {
