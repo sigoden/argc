@@ -87,14 +87,14 @@ fn expand_candicates(
     values: Vec<(String, String)>,
     script_file: &str,
     line: &str,
-    last_word: &str,
+    filter: &str,
 ) -> Result<Vec<(String, String)>> {
     let mut output = vec![];
     let mut param_fns = vec![];
     for (value, describe) in values {
         if let Some(param_fn) = value.strip_prefix("__argc_fn:") {
             param_fns.push(param_fn.to_string());
-        } else if value.starts_with("__argc_") || value.starts_with(last_word) {
+        } else if value.starts_with("__argc_") || value.starts_with(filter) {
             output.push((value, describe));
         }
     }
@@ -112,7 +112,7 @@ fn expand_candicates(
                         let output_line = fn_output_line.trim();
                         if !output_line.is_empty()
                             && (output_line.starts_with("__argc_")
-                                || output_line.starts_with(last_word))
+                                || output_line.starts_with(filter))
                         {
                             if let Some((x, y)) = output_line.split_once('\t') {
                                 output.push((x.to_string(), y.to_string()));
@@ -183,11 +183,11 @@ fn get_last_word(line: &str) -> (String, Option<char>) {
     }
     if balances.is_empty() {
         if word[0] == '\'' || word[0] == '\"' {
-            return (word[1..word.len() - 1].into_iter().collect(), None);
+            return (word[1..word.len() - 1].iter().collect(), None);
         }
         return (word.into_iter().collect(), None);
     }
-    (word[1..].into_iter().collect(), Some(word[0]))
+    (word[1..].iter().collect(), Some(word[0]))
 }
 
 fn zsh_escape(value: &str) -> String {
