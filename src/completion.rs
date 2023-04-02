@@ -80,7 +80,11 @@ impl Shell {
 
     pub fn convert_value(&self, value: &str) -> String {
         if value.starts_with("__argc_") {
-            return value.to_string();
+            if value.starts_with("__argc_value") {
+                return convert_arg_value(value);
+            } else {
+                return value.to_string();
+            }
         }
         match self {
             Shell::Bash => bash_escape(value),
@@ -657,19 +661,6 @@ fn expand_candicates(
                 output.clear();
             };
         }
-    } else {
-        output.iter_mut().for_each(|(name, _)| {
-            if let Some(value_name) = name.strip_prefix("__argc_value") {
-                let (mark, value) = value_name.split_at(1);
-                *name = match mark {
-                    "+" => format!("<{value}>..."),
-                    "*" => format!("[{value}]..."),
-                    "!" => format!("<{value}>"),
-                    ":" => format!("[{value}]"),
-                    _ => name.to_string(),
-                };
-            }
-        })
     }
     Ok(output)
 }
@@ -750,6 +741,21 @@ fn compgen_no_description() -> bool {
     match env::var("ARGC_COMPGEN_NO_DESCRIPTION") {
         Ok(v) => v == "true" || v == "1",
         Err(_) => false,
+    }
+}
+
+fn convert_arg_value(name: &str) -> String {
+    if let Some(value_name) = name.strip_prefix("__argc_value") {
+        let (mark, value) = value_name.split_at(1);
+        match mark {
+            "+" => format!("<{value}>..."),
+            "*" => format!("[{value}]..."),
+            "!" => format!("<{value}>"),
+            ":" => format!("[{value}]"),
+            _ => name.to_string(),
+        }
+    } else {
+        name.to_string()
     }
 }
 
