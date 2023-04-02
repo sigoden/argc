@@ -144,10 +144,12 @@ $_argc_complete = {
                 ForEach-Object { 
                     [CompletionResult]::new($_)
                 }
+        } elseif ($candicates[0] -eq "") {
+            return ""
         }
     }
     $candicates | ForEach-Object { 
-        $value = ($_ -split " \(")[0]
+        $value = ($_ -split "\(")[0]
         [CompletionResult]::new($value, $_, [CompletionResultType]::ParameterValue, " ")
     }
 }
