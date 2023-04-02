@@ -17,6 +17,16 @@ pub const SCRIPT_PATHS: [&str; 8] = [
     "dir6/ARGCFILE",
 ];
 
+pub fn get_spec() -> (String, String) {
+    let mut spec_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    spec_path.push("tests");
+    spec_path.push("spec.sh");
+    (
+        spec_path.display().to_string(),
+        std::fs::read_to_string(spec_path).unwrap(),
+    )
+}
+
 /// Test fixture which creates a temporary directory with a few files and directories inside.
 /// The directories also contain files.
 #[fixture]

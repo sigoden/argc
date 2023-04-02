@@ -6,7 +6,7 @@ RUN
 cmd_nested_command fo
 
 STDOUT
-foo a
+foo
 
 STDERR
 

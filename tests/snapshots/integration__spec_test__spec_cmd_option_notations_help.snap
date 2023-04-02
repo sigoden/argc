@@ -14,8 +14,8 @@ Option with value notations
 USAGE: spec cmd_option_notations [OPTIONS]
 
 OPTIONS:
-      --opt1 <FOO1>         
-      --opt2 <FOO1> <FOO2>  
-  -h, --help                Print help
+      --opt1 <DIR>         
+      --opt2 <DIR> <FILE>  
+  -h, --help               Print help
 
 

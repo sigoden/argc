@@ -744,7 +744,7 @@ expression: output
           "default": null,
           "default_fn": null,
           "value_names": [
-            "FOO1"
+            "DIR"
           ]
         },
         {
@@ -759,8 +759,8 @@ expression: output
           "default": null,
           "default_fn": null,
           "value_names": [
-            "FOO1",
-            "FOO2"
+            "DIR",
+            "FILE"
           ]
         }
       ],
@@ -827,14 +827,14 @@ expression: output
       "positional_params": [
         {
           "name": "arg1",
-          "summary": "A required arg",
+          "summary": "A required arg1",
           "choices": null,
           "choices_fn": null,
           "multiple": false,
           "required": true,
           "default": null,
           "default_fn": null,
-          "value_name": "ARG"
+          "value_name": "DIR"
         }
       ],
       "aliases": [],
@@ -850,8 +850,8 @@ expression: output
       "option_params": [],
       "positional_params": [
         {
-          "name": "arg1",
-          "summary": "A optional arg",
+          "name": "dir1",
+          "summary": "A optional arg 1",
           "choices": null,
           "choices_fn": null,
           "multiple": false,
@@ -861,8 +861,8 @@ expression: output
           "value_name": null
         },
         {
-          "name": "arg2",
-          "summary": "A optional arg",
+          "name": "dir2",
+          "summary": "A optional arg 2",
           "choices": null,
           "choices_fn": null,
           "multiple": false,
@@ -885,7 +885,7 @@ expression: output
       "option_params": [],
       "positional_params": [
         {
-          "name": "arg1",
+          "name": "dir1",
           "summary": "A required arg",
           "choices": null,
           "choices_fn": null,
@@ -896,8 +896,8 @@ expression: output
           "value_name": null
         },
         {
-          "name": "arg2",
-          "summary": "A required arg, multiple",
+          "name": "file2",
+          "summary": "A required arg 2, multiple",
           "choices": null,
           "choices_fn": null,
           "multiple": true,
@@ -1163,7 +1163,7 @@ expression: output
     {
       "describe": "Nested command",
       "name": "cmd_nested_command",
-      "help": null,
+      "help": "A nested command",
       "author": null,
       "version": "0.1.0",
       "flag_params": [],

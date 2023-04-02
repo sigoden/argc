@@ -11,9 +11,9 @@ STDOUT
 STDERR
 Positional one required
 
-USAGE: spec cmd_positional_only <ARG>
+USAGE: spec cmd_positional_only <DIR>
 
 ARGS:
-  <ARG>  A required arg
+  <DIR>  A required arg1
 
 

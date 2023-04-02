@@ -3,10 +3,10 @@ source: tests/compgen.rs
 expression: output
 ---
 RUN
-help
+cmd_nested_command help
 
 STDOUT
-foo bar
+help
 
 STDERR
 

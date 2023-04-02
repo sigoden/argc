@@ -9,7 +9,7 @@ STDOUT
 
 
 STDERR
-error: a value is required for '--opt2 <FOO1> <FOO2>' but none was supplied
+error: a value is required for '--opt2 <DIR> <FILE>' but none was supplied
 
 For more information, try '--help'.
 
