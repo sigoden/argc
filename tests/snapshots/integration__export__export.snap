@@ -896,7 +896,7 @@ expression: output
           "value_name": null
         },
         {
-          "name": "dir2",
+          "name": "file2",
           "summary": "A required arg 2, multiple",
           "choices": null,
           "choices_fn": null,

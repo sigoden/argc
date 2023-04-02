@@ -58,43 +58,42 @@ impl Shell {
     pub fn list() -> &'static str {
         "bash,zsh,powershell,fish"
     }
-    pub fn convert(&self, values: &[(String, String)]) -> Result<String> {
-        let output = match self {
-            Shell::Bash => values
-                .iter()
-                .map(|(value, _)| bash_escape(value))
-                .collect::<Vec<String>>()
-                .join("\n"),
-            Shell::Zsh => values
-                .iter()
-                .map(|(value, describe)| {
-                    let value = zsh_escape(value);
-                    if describe.is_empty() {
-                        value
-                    } else {
-                        format!("{}:{}", value, describe)
-                    }
-                })
-                .collect::<Vec<String>>()
-                .join("\n"),
-            Shell::Powershell => values
-                .iter()
-                .map(|(value, _)| powershell_escape(value))
-                .collect::<Vec<String>>()
-                .join("\n"),
-            Shell::Fish => values
-                .iter()
-                .map(|(value, describe)| {
-                    if describe.is_empty() {
-                        value.into()
-                    } else {
-                        format!("{}\t{}", value, describe)
-                    }
-                })
-                .collect::<Vec<String>>()
-                .join("\n"),
-        };
+    pub fn convert(&self, candicates: &[(String, String)]) -> Result<String> {
+        if candicates.len() == 1 {
+            return Ok(self.convert_value(&candicates[0].0));
+        }
+        let output = candicates
+            .iter()
+            .map(|(value, description)| self.convert_candiate(value, description))
+            .collect::<Vec<String>>()
+            .join("\n");
         Ok(output)
+    }
+
+    pub fn convert_value(&self, value: &str) -> String {
+        if value.starts_with("__argc_") {
+            return value.to_string();
+        }
+        match self {
+            Shell::Bash => bash_escape(value),
+            Shell::Zsh => zsh_escape(value),
+            Shell::Powershell => format!("{} ", powershell_escape(value)),
+            Shell::Fish => value.to_string(),
+        }
+    }
+
+    pub fn convert_candiate(&self, value: &str, description: &str) -> String {
+        let value = self.convert_value(value);
+        if description.is_empty() {
+            value
+        } else {
+            match self {
+                Shell::Bash => format!("{} ({})", value, description),
+                Shell::Zsh => format!("{}:{}", value, description),
+                Shell::Powershell => format!("{} ({})", value, description),
+                Shell::Fish => format!("{}\t{}", value, description),
+            }
+        }
     }
 }
 
@@ -126,7 +125,7 @@ struct PositionalValue {
 struct Completion {
     name: Option<String>,
     help: bool,
-    describe: String,
+    description: String,
     aliases: IndexSet<String>,
     options: HashMap<String, OptionValue>,
     option_mappings: IndexMap<String, String>,
@@ -151,7 +150,7 @@ impl Completion {
                 EventData::Cmd(value) => {
                     root_data.borrow_mut().scope = EventScope::CmdStart;
                     let cmd = root_comp.create_subcommand();
-                    cmd.describe = value.to_string();
+                    cmd.description = value.to_string();
                 }
                 EventData::Aliases(aliases) => {
                     let cmd = Self::get_cmd(&mut root_comp);
@@ -489,7 +488,7 @@ impl Completion {
                 .subcommands
                 .iter()
                 .find(|v| v.name.as_ref() == Some(cmd_name))
-                .map(|v| v.describe.clone())
+                .map(|v| v.description.clone())
                 .unwrap_or_default();
             output.push((name.into(), summary));
         }
@@ -643,9 +642,9 @@ fn expand_candicates(
         let value = &output[0].0;
         if let Some(value_name) = value.strip_prefix("__argc_value") {
             if value_name.contains("PATH") || value_name.contains("FILE") {
-                output[0].0 = "__argc_comp:file".into()
+                output[0] = ("__argc_comp:file".into(), String::new());
             } else if value_name.contains("DIR") || value_name.contains("FOLDER") {
-                output[0].0 = "__argc_comp:dir".into()
+                output[0] = ("__argc_comp:dir".into(), String::new());
             } else {
                 output.clear();
             };

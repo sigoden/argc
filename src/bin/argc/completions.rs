@@ -28,7 +28,7 @@ _argc_complete() {
         fi
     fi
     if [[ ${#candicates[@]} -gt 0 ]]; then
-        COMPREPLY=(${COMPREPLY[@]} ${candicates[@]})
+        COMPREPLY=(${candicates[@]})
     fi
 }
 
@@ -137,17 +137,18 @@ $_argc_complete = {
         if ($candicates[0] -eq "__argc_comp:file") {
             return (Get-ChildItem -Path "$wordToComplete*" | Select-Object -ExpandProperty Name) | 
                 ForEach-Object { 
-                    [CompletionResult]::new($_, $_, [CompletionResultType]::ParameterValue, '-')
+                    [CompletionResult]::new($_)
                 }
         } elseif ($candicates[0] -eq "__argc_comp:dir") {
             return (Get-ChildItem -Attributes Directory -Path "$wordToComplete*" | Select-Object -ExpandProperty Name) |
                 ForEach-Object { 
-                    [CompletionResult]::new($_, $_, [CompletionResultType]::ParameterValue, '-')
+                    [CompletionResult]::new($_)
                 }
         }
     }
     $candicates | ForEach-Object { 
-        [CompletionResult]::new($_, $_, [CompletionResultType]::ParameterValue, " ")
+        $value = ($_ -split " \(")[0]
+        [CompletionResult]::new($value, $_, [CompletionResultType]::ParameterValue, " ")
     }
 }
 "###;

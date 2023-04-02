@@ -120,7 +120,7 @@ cmd_positional_many() {
 
 # @cmd  Positional all required
 # @arg   dir1!     A required arg
-# @arg   dir2+     A required arg 2, multiple
+# @arg   file2+     A required arg 2, multiple
 cmd_positional_requires() {
     print_argc_vars
 }
