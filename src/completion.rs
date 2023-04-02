@@ -6,6 +6,7 @@ use either::Either;
 use indexmap::{IndexMap, IndexSet};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
+use std::env;
 use std::sync::Arc;
 use std::{process, str::FromStr};
 
@@ -59,12 +60,19 @@ impl Shell {
         "bash,zsh,powershell,fish"
     }
     pub fn convert(&self, candicates: &[(String, String)]) -> Result<String> {
+        let no_description = compgen_no_description();
         if candicates.len() == 1 {
             return Ok(self.convert_value(&candicates[0].0));
         }
         let output = candicates
             .iter()
-            .map(|(value, description)| self.convert_candiate(value, description))
+            .map(|(value, description)| {
+                if no_description {
+                    self.convert_candiate(value, "")
+                } else {
+                    self.convert_candiate(value, description)
+                }
+            })
             .collect::<Vec<String>>()
             .join("\n");
         Ok(output)
@@ -736,6 +744,13 @@ fn bash_escape(value: &str) -> String {
 
 fn powershell_escape(value: &str) -> String {
     escape_shell_words(value)
+}
+
+fn compgen_no_description() -> bool {
+    match env::var("ARGC_COMPGEN_NO_DESCRIPTION") {
+        Ok(v) => v == "true" || v == "1",
+        Err(_) => false,
+    }
 }
 
 #[cfg(test)]
