@@ -110,6 +110,8 @@ _argc_complete()
 "###;
 
 const POWERSHELL_SCRIPT: &str = r###"
+using namespace System.Management.Automation
+
 $_argc_complete = {
     param($wordToComplete, $commandAst, $cursorPosition)
     $cmd = $commandAst.CommandElements[0]

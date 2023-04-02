@@ -116,11 +116,3 @@ pub fn get_bash_path() -> Option<PathBuf> {
 pub fn get_bash_path() -> Option<PathBuf> {
     which("bash").ok()
 }
-
-pub fn get_last_word(line: &str) -> &str {
-    if let Some((_, y)) = line.rsplit_once(|c: char| c.is_ascii_whitespace()) {
-        y
-    } else {
-        line
-    }
-}
