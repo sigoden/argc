@@ -101,8 +101,8 @@ USAGE:{usage}"#,
         fs::write(&names[0], content).with_context(|| format!("Failed to create {}", &names[0]))?;
         println!("{} has been successfully created.", &names[0]);
     } else if matches.get_flag("argc-export") {
-        let (source, _) = parse_script_args(&args[2..])?;
-        let json = argc::export(&source)?;
+        let (source, cmd_args) = parse_script_args(&args[2..])?;
+        let json = argc::export(&source, &cmd_args[0])?;
         println!("{}", serde_json::to_string_pretty(&json)?);
     } else if matches.get_flag("argc-compgen") {
         let shell: Shell = match args.get(2) {

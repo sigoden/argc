@@ -89,8 +89,8 @@ STDERR
 
 #[macro_export]
 macro_rules! snapshot_export {
-    ($source:expr) => {
-        let json = argc::export($source).unwrap();
+    ($source:expr, $name:literal) => {
+        let json = argc::export($source, $name).unwrap();
         let output = serde_json::to_string_pretty(&json).unwrap();
         insta::assert_snapshot!(output);
     };
