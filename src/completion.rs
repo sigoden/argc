@@ -109,9 +109,9 @@ impl Shell {
             value
         } else {
             match self {
-                Shell::Bash => format!("{} ({})", value, description),
+                Shell::Bash => value,
                 Shell::Zsh => format!("{}:{}", value, description),
-                Shell::Powershell => format!("{} ({})", value, description),
+                Shell::Powershell => format!("{}\t{}", value, description),
                 Shell::Fish => format!("{}\t{}", value, description),
             }
         }

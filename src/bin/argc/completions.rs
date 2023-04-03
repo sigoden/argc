@@ -149,8 +149,10 @@ $_argc_complete = {
         }
     }
     $candicates | ForEach-Object { 
-        $value = ($_ -split "\(")[0]
-        [CompletionResult]::new($value, $_, [CompletionResultType]::ParameterValue, " ")
+        $parts=($_ -split "`t")
+        $value = $parts[0]
+        $description = if ($parts[1]) { $parts[1] } else { " " }
+        [CompletionResult]::new($parts[0], $parts[0], [CompletionResultType]::ParameterValue, $description)
     }
 }
 "###;
