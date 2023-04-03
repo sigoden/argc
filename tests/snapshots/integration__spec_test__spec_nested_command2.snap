@@ -5,9 +5,6 @@ expression: output
 RUN
 spec cmd_nested_command2
 
-STDOUT
+OUTPUT
 cmd_nested_command2::main
-
-STDERR
-
 

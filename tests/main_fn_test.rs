@@ -3,7 +3,7 @@ fn test_no_main_no_subcommands() {
     let script = r###"
 # @flag --foo
     "###;
-    plain!(script, &["prog"], stdout: "",);
+    plain!(script, &["prog"], "");
 }
 
 #[test]
@@ -15,7 +15,7 @@ main() {
 
 }
     "###;
-    plain!(script, &["prog"], stdout: "main",);
+    plain!(script, &["prog"], "main");
 }
 
 #[test]
@@ -32,8 +32,8 @@ main() {
 
 }
     "###;
-    plain!(script, &["prog", "cmd"], stdout: "cmd",);
-    snapshot!(script, &["prog", "-h"],);
+    plain!(script, &["prog", "cmd"], "cmd");
+    snapshot!(script, &["prog", "-h"]);
 }
 
 #[test]
@@ -47,8 +47,8 @@ cmd() {
 }
 
     "###;
-    plain!(script, &["prog", "cmd"], stdout: "cmd",);
-    snapshot!(script, &["prog"],);
+    plain!(script, &["prog", "cmd"], "cmd");
+    snapshot!(script, &["prog"]);
 }
 
 #[test]
@@ -62,5 +62,5 @@ cmd() {
 }
 
     "###;
-    snapshot!(script, &["prog", "-h"],);
+    snapshot!(script, &["prog", "-h"]);
 }

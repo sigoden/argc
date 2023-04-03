@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_positional_only -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Positional one required
 
 USAGE: spec cmd_positional_only <DIR>
@@ -16,4 +14,6 @@ USAGE: spec cmd_positional_only <DIR>
 ARGS:
   <DIR>  A required arg1
 
+EOF
+exit 0
 

@@ -5,10 +5,8 @@ expression: output
 RUN
 prog -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 USAGE: prog [OPTIONS] <COMMAND>
 
 OPTIONS:
@@ -18,4 +16,6 @@ OPTIONS:
 COMMANDS:
   cmd  
 
+EOF
+exit 0
 

@@ -2,9 +2,11 @@ mod completions;
 mod utils;
 
 use anyhow::{anyhow, bail, Context, Result};
-use argc::{utils::get_shell_path, Shell};
+use argc::{
+    utils::{get_shell_path, no_color},
+    Shell,
+};
 use clap::{Arg, ArgAction, Command};
-use either::Either;
 use std::{
     env, fs, process,
     sync::{
@@ -75,23 +77,8 @@ USAGE:{usage}"#,
     if matches.get_flag("argc-eval") {
         let (source, cmd_args) = parse_script_args(&args[2..])?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        match argc::eval(&source, &cmd_args)? {
-            Either::Left(output) => {
-                println!("{}", output)
-            }
-            Either::Right(error) => {
-                if env::var_os("NO_COLOR").is_some() {
-                    eprintln!("{}", error);
-                } else {
-                    eprintln!("{}", error.render().ansi());
-                }
-                if error.use_stderr() {
-                    println!("exit 1");
-                } else {
-                    println!("exit 0");
-                }
-            }
-        }
+        let values = argc::eval(&source, &cmd_args)?;
+        println!("{}", argc::ArgcValue::to_shell(values, no_color()))
     } else if matches.get_flag("argc-create") {
         if let Some((_, script_file)) = get_script_path(false) {
             bail!("Already exist {}", script_file.display());

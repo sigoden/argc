@@ -136,7 +136,6 @@ struct PositionalValue {
 #[derive(Default)]
 struct Completion {
     name: Option<String>,
-    help: bool,
     description: String,
     aliases: IndexSet<String>,
     options: HashMap<String, OptionValue>,
@@ -155,10 +154,6 @@ impl Completion {
         let root_data = root_comp.root.clone();
         for Event { data, .. } in events {
             match data {
-                EventData::Help(_) => {
-                    let cmd = Self::get_cmd(&mut root_comp);
-                    cmd.help = true;
-                }
                 EventData::Cmd(value) => {
                     root_data.borrow_mut().scope = EventScope::CmdStart;
                     let cmd = root_comp.create_subcommand();
@@ -391,6 +386,9 @@ impl Completion {
             CompType::FlagOrOption => {
                 comp.output_flags_and_options(&mut output, &skipped_flags_options);
             }
+            CompType::CommandOrPositional if subcommand_name == Some("help".into()) => {
+                parent_comp.output_subcommands(&mut output);
+            }
             CompType::CommandOrPositional => {
                 if subcommand_name.is_some() && positional_index == 0 {
                     parent_comp.output_subcommands(&mut output);
@@ -411,10 +409,10 @@ impl Completion {
                     output.extend(values)
                 }
             }
+            CompType::Any if subcommand_name == Some("help".into()) => {
+                parent_comp.output_subcommands(&mut output);
+            }
             CompType::Any => {
-                if subcommand_name == Some("help".into()) {
-                    parent_comp.output_subcommands(&mut output);
-                }
                 if positional_index == 0 {
                     comp.output_subcommands(&mut output);
                 }
@@ -460,10 +458,10 @@ impl Completion {
             };
             self.subcommand_mappings
                 .insert("help".to_string(), "help".to_string());
-            self.subcommands.push(help_comp);
             for subcmd in self.subcommands.iter_mut() {
                 subcmd.add_help_subcommand();
             }
+            self.subcommands.push(help_comp);
         }
     }
 

@@ -5,11 +5,8 @@ expression: output
 RUN
 spec _fn_args  
 
-STDOUT
+OUTPUT
 argc__line=' '
 argc__words=( ' ' )
 _fn_args;exit;
-
-STDERR
-
 

@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_flag_formats -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 All kind of flags
 
 USAGE: spec cmd_flag_formats [OPTIONS]
@@ -21,4 +19,6 @@ OPTIONS:
   -c, --foo5...  Can occure multiple times
   -h, --help     Print help
 
+EOF
+exit 0
 

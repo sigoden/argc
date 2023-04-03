@@ -5,19 +5,15 @@ use crate::utils::{escape_shell_words, split_shell_words};
 use crate::Result;
 use anyhow::{bail, Context};
 use clap::{ArgMatches, Command};
-use either::Either;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::result::Result as StdResult;
 use std::sync::Arc;
 
-pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, clap::Error>> {
+pub fn eval(source: &str, args: &[&str]) -> Result<Vec<ArgcValue>> {
     let events = parse(source)?;
     let cmd = Cli::new_from_events(&events)?;
-    match cmd.eval(args)? {
-        Either::Left(values) => Ok(Either::Left(ArgcValue::to_shell(values))),
-        Either::Right(error) => Ok(Either::Right(error)),
-    }
+    cmd.eval(args)
 }
 
 pub fn export(source: &str, name: &str) -> Result<serde_json::Value> {
@@ -35,7 +31,6 @@ pub struct Cli {
     params: Vec<Param>,
     positional_pos: Vec<Position>,
     subcommands: Vec<Cli>,
-    help: Option<String>,
     author: Option<String>,
     version: Option<String>,
     subcommand_fns: HashMap<String, Position>,
@@ -64,10 +59,6 @@ impl Cli {
                 EventData::Author(value) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@author", position)?;
                     cmd.author = Some(value);
-                }
-                EventData::Help(value) => {
-                    let cmd = Self::get_cmd(&mut root_cmd, "@help", position)?;
-                    cmd.help = Some(value);
                 }
                 EventData::Cmd(value) => {
                     if root_data.borrow().scope == EventScope::CmdStart {
@@ -208,26 +199,23 @@ impl Cli {
         if let Some(author) = self.author.as_ref() {
             cmd = cmd.author(author);
         }
-        if let Some(help) = self.help.as_ref() {
-            cmd = cmd
-                .disable_help_subcommand(true)
-                .subcommand(Command::new("help").about(help))
-        } else {
-            cmd = cmd.disable_help_subcommand(true);
-        }
-        if !self.subcommands.is_empty() {
-            cmd = cmd.infer_subcommands(true);
-            if !self.exist_main_fn() {
-                cmd = cmd.subcommand_required(true).arg_required_else_help(true);
-            }
-        }
         if !self.aliases.is_empty() {
             cmd = cmd.visible_aliases(&self.aliases);
         }
         let mut positional_params = vec![];
+        let mut exist_help_flag = false;
+        let mut exist_version_flag = false;
         for param in &self.params {
             let arg = match param {
-                Param::Flag(param) => param.build_arg()?,
+                Param::Flag(param) => {
+                    if param.name == "help" {
+                        exist_help_flag = true
+                    }
+                    if param.name == "version" {
+                        exist_version_flag = true
+                    }
+                    param.build_arg()?
+                }
                 Param::Option(param) => param.build_arg()?,
                 Param::Positional(param) => {
                     positional_params.push(param);
@@ -235,6 +223,12 @@ impl Cli {
                 }
             };
             cmd = cmd.arg(arg);
+        }
+        if exist_help_flag {
+            cmd = cmd.disable_help_flag(true)
+        }
+        if exist_version_flag {
+            cmd = cmd.disable_version_flag(true)
         }
         if positional_params.is_empty() {
             let mut arg = PositionalParam::extra().build_arg(0)?;
@@ -249,22 +243,32 @@ impl Cli {
             let subcommand = subcommand.build_command(subcommand.name.as_ref().unwrap())?;
             cmd = cmd.subcommand(subcommand);
         }
+        if !self.subcommands.is_empty() {
+            cmd = cmd.infer_subcommands(true);
+            if !self.exist_main_fn() {
+                cmd = cmd.subcommand_required(true).arg_required_else_help(true);
+            }
+            cmd = cmd.disable_help_subcommand(true);
+        }
         cmd = cmd.help_template(self.help_template());
         Ok(cmd)
     }
 
-    pub fn eval(&self, args: &[&str]) -> Result<Either<Vec<ArgcValue>, clap::Error>> {
+    pub fn eval(&self, args: &[&str]) -> Result<Vec<ArgcValue>> {
         if args.len() >= 2 && self.root.borrow().exist_param_fn(args[1]) {
             return self.eval_param_fn(args);
+        }
+        if let Some(value) = self.eval_help(args) {
+            return value;
         }
         let command = self.build_command(args[0])?;
         let res = command.try_get_matches_from(args);
         match res {
-            Ok(matches) => {
-                let values = self.get_args(&matches);
-                Ok(Either::Left(values))
-            }
-            Err(err) => Ok(Either::Right(err)),
+            Ok(matches) => Ok(self.get_args(&matches)),
+            Err(err) => Ok(vec![ArgcValue::ClapError((
+                err.render(),
+                err.use_stderr() as i32,
+            ))]),
         }
     }
 
@@ -276,7 +280,6 @@ impl Cli {
         let value = serde_json::json!({
             "describe": self.describe,
             "name": self.name,
-            "help": self.help,
             "author": self.author,
             "version": self.version,
             "params": params?,
@@ -286,7 +289,7 @@ impl Cli {
         Ok(value)
     }
 
-    fn eval_param_fn(&self, args: &[&str]) -> Result<Either<Vec<ArgcValue>, clap::Error>> {
+    fn eval_param_fn(&self, args: &[&str]) -> Result<Vec<ArgcValue>> {
         let mut values = vec![];
         if let Some(line) = args.get(2) {
             values.push(ArgcValue::Single("_line".into(), escape_shell_words(line)));
@@ -302,7 +305,7 @@ impl Cli {
                 }
                 values.push(ArgcValue::Multiple("_words".into(), escape_words));
                 if !words.is_empty()
-                    && (words[0].starts_with('-') || self.exist_subcommand(&words[0]))
+                    && (words[0].starts_with('-') || self.find_subcommand(&words[0]).is_some())
                 {
                     let (left, right) = if let Some(index) = words.iter().position(|s| s == "--") {
                         words.split_at(index)
@@ -344,19 +347,47 @@ impl Cli {
             values.push(ArgcValue::Multiple("_words".into(), vec![]));
         }
         values.push(ArgcValue::ParamFn(args[1].into()));
-        Ok(Either::Left(values))
+        Ok(values)
+    }
+
+    fn eval_help(&self, args: &[&str]) -> Option<Result<Vec<ArgcValue>>> {
+        let len = args.len();
+        let mut name = args[0].to_string();
+        if let Some(idx) = args.iter().position(|v| *v == "help") {
+            if idx == len - 1 || idx == len - 2 {
+                let mut cli = self;
+                if idx > 1 {
+                    for arg in &args[1..idx] {
+                        if let Some(v) = cli.find_subcommand(arg) {
+                            cli = v;
+                            name = arg.to_string();
+                        } else {
+                            return None;
+                        }
+                    }
+                }
+                if idx == len - 2 {
+                    name = args[len - 1].to_string();
+                    if let Some(v) = cli.find_subcommand(&name) {
+                        cli = v
+                    } else {
+                        return Some(Ok(vec![ArgcValue::Erorr(format!(
+                            "error: no such command: `{}`",
+                            name
+                        ))]));
+                    }
+                }
+                if let Ok(mut command) = cli.build_command(&name) {
+                    return Some(Ok(vec![ArgcValue::ClapError((command.render_help(), 0))]));
+                }
+            }
+        }
+        None
     }
 
     fn build_command_loose(&self, name: &str) -> Result<Command> {
         let mut cmd = Command::new(name.to_string());
         cmd = cmd.ignore_errors(true);
-        if let Some(help) = self.help.as_ref() {
-            cmd = cmd
-                .disable_help_subcommand(true)
-                .subcommand(Command::new("help").about(help))
-        } else {
-            cmd = cmd.disable_help_subcommand(true);
-        }
         if !self.aliases.is_empty() {
             cmd = cmd.visible_aliases(&self.aliases);
         }
@@ -442,8 +473,8 @@ impl Cli {
         }
     }
 
-    fn exist_subcommand(&self, name: &str) -> bool {
-        self.subcommands.iter().any(|subcmd| {
+    fn find_subcommand(&self, name: &str) -> Option<&Self> {
+        self.subcommands.iter().find(|subcmd| {
             if let Some(subcmd_name) = &subcmd.name {
                 if subcmd_name == name {
                     return true;

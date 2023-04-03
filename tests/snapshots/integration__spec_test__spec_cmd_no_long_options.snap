@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_no_long_options -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Options without long name
 
 USAGE: spec cmd_no_long_options [OPTIONS] -b <B> -d <D>... -i <I> -l <L>
@@ -28,4 +26,6 @@ OPTIONS:
   -m <VALUE>       optional, default
   -h, --help       Print help
 
+EOF
+exit 0
 

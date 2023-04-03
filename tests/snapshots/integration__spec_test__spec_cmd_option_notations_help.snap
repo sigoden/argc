@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_option_notations -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Option with value notations
 
 USAGE: spec cmd_option_notations [OPTIONS]
@@ -18,4 +16,6 @@ OPTIONS:
       --opt2 <DIR> <FILE>  
   -h, --help               Print help
 
+EOF
+exit 0
 

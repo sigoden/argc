@@ -1,15 +1,12 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 145
 expression: output
 ---
 RUN
 spec cmd_positional_with_choices_and_required -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Positional with choices and required
 
 USAGE: spec cmd_positional_with_choices_and_required <ARG>
@@ -17,4 +14,6 @@ USAGE: spec cmd_positional_with_choices_and_required <ARG>
 ARGS:
   <ARG>  A arg with choices and required [possible values: a, b]
 
+EOF
+exit 0
 

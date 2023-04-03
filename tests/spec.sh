@@ -187,7 +187,6 @@ cmd_with_hyphens() {
 }
 
 # @cmd Nested command
-# @help A nested command
 # @version 0.1.0
 # @option --opt1
 cmd_nested_command() {

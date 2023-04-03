@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_option_formats -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Options all kind of formats
 
 USAGE: spec cmd_option_formats [OPTIONS]
@@ -23,4 +21,6 @@ OPTIONS:
       --opt7 <OPT>   With description
   -h, --help         Print help
 
+EOF
+exit 0
 

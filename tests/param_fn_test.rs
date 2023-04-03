@@ -2,19 +2,19 @@ use super::SPEC_SCRIPT;
 
 #[test]
 fn test_param_fn_empty() {
-    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args"],);
+    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args"]);
 }
 
 #[test]
 fn test_param_fn_space() {
-    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args", " "],);
+    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args", " "]);
 }
 
 #[test]
 fn test_param_fn_args() {
     snapshot!(
         SPEC_SCRIPT,
-        &["spec", "_fn_args", "cmd_preferred -f -o 4 abc"],
+        &["spec", "_fn_args", "cmd_preferred -f -o 4 abc"]
     );
 }
 
@@ -22,7 +22,7 @@ fn test_param_fn_args() {
 fn test_param_fn_args_dup_flag() {
     snapshot!(
         SPEC_SCRIPT,
-        &["spec", "_fn_args", "cmd_preferred -f -o 4 -f"],
+        &["spec", "_fn_args", "cmd_preferred -f -o 4 -f"]
     );
 }
 
@@ -30,7 +30,7 @@ fn test_param_fn_args_dup_flag() {
 fn test_param_fn_args_dup_option() {
     snapshot!(
         SPEC_SCRIPT,
-        &["spec", "_fn_args", "cmd_preferred -f -o 4 -o 5"],
+        &["spec", "_fn_args", "cmd_preferred -f -o 4 -o 5"]
     );
 }
 
@@ -38,7 +38,7 @@ fn test_param_fn_args_dup_option() {
 fn test_param_fn_args_dup_dashdash1() {
     snapshot!(
         SPEC_SCRIPT,
-        &["spec", "_fn_args", "cmd_preferred -f -o 4 -- abc"],
+        &["spec", "_fn_args", "cmd_preferred -f -o 4 -- abc"]
     );
 }
 
@@ -46,7 +46,7 @@ fn test_param_fn_args_dup_dashdash1() {
 fn test_param_fn_args_dup_dashdash2() {
     snapshot!(
         SPEC_SCRIPT,
-        &["spec", "_fn_args", "cmd_preferred -f -o 4 abc --"],
+        &["spec", "_fn_args", "cmd_preferred -f -o 4 abc --"]
     );
 }
 
@@ -54,29 +54,29 @@ fn test_param_fn_args_dup_dashdash2() {
 fn test_param_fn_args_dup_dashdash3() {
     snapshot!(
         SPEC_SCRIPT,
-        &["spec", "_fn_args", "cmd_preferred -f -o 4 abc -- def"],
+        &["spec", "_fn_args", "cmd_preferred -f -o 4 abc -- def"]
     );
 }
 
 #[test]
 fn test_param_fn_args_incomplete_option() {
-    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args", "cmd_preferred -f -o"],);
+    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args", "cmd_preferred -f -o"]);
 }
 
 #[test]
 fn test_param_fn_args_nontmatch_subcommand() {
-    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args", "cmd_prefer"],);
+    snapshot!(SPEC_SCRIPT, &["spec", "_fn_args", "cmd_prefer"]);
 }
 
 #[test]
 fn test_param_fn_args_unknown_option() {
     snapshot!(
         SPEC_SCRIPT,
-        &["spec", "_fn_args", "cmd_preferred -f -o 4 -x"],
+        &["spec", "_fn_args", "cmd_preferred -f -o 4 -x"]
     );
 }
 
 #[test]
 fn test_param_fn_bars() {
-    snapshot!(SPEC_SCRIPT, &["spec", "_fn_bars",],);
+    snapshot!(SPEC_SCRIPT, &["spec", "_fn_bars",]);
 }

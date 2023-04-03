@@ -11,7 +11,6 @@ mod create;
 mod escape_test;
 mod export;
 mod fail_test;
-mod help_tag_test;
 #[cfg(unix)]
 mod interrupt;
 mod main_fn_test;
