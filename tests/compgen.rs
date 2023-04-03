@@ -58,11 +58,6 @@ fn test_compgen_help_tag2() {
     snapshot_compgen!("cmd_nested_command help");
 }
 
-// #[test]
-// fn test_compgen_choice_fn() {
-//     snapshot_compgen!("cmd_option_names --op11 ");
-// }
-
 #[test]
 fn test_compgen_nested_command() {
     snapshot_compgen!("cmd_nested_command ");
