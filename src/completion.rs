@@ -483,7 +483,7 @@ impl Completion {
         for (name, option_name) in &self.option_mappings {
             if !skipped.contains(name) {
                 let summary = self
-                    .flags
+                    .options
                     .get(option_name)
                     .map(|v| v.summary.clone())
                     .unwrap_or_default();
