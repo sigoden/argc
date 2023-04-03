@@ -24,7 +24,7 @@ pub fn compgen(
     };
     let candicates = generate_candiates(script_content, &line)?;
     let candicates = expand_candicates(candicates, script_path, &line, &last_word)?;
-    shell.convert(&candicates)
+    shell.convert(&candicates, &last_word)
 }
 
 fn generate_candiates(source: &str, line: &str) -> Result<Vec<(String, String)>> {
@@ -59,18 +59,18 @@ impl Shell {
     pub fn list() -> &'static str {
         "bash,zsh,powershell,fish"
     }
-    pub fn convert(&self, candicates: &[(String, String)]) -> Result<String> {
+    pub fn convert(&self, candicates: &[(String, String)], last_word: &str) -> Result<String> {
         let no_description = compgen_no_description();
         if candicates.len() == 1 {
-            return Ok(self.convert_value(&candicates[0].0));
+            return Ok(self.convert_value(&candicates[0].0, last_word));
         }
         let output = candicates
             .iter()
             .map(|(value, description)| {
                 if no_description {
-                    self.convert_candiate(value, "")
+                    self.convert_candiate(value, last_word, "")
                 } else {
-                    self.convert_candiate(value, description)
+                    self.convert_candiate(value, last_word, description)
                 }
             })
             .collect::<Vec<String>>()
@@ -78,7 +78,7 @@ impl Shell {
         Ok(output)
     }
 
-    pub fn convert_value(&self, value: &str) -> String {
+    pub fn convert_value(&self, value: &str, last_word: &str) -> String {
         if value.starts_with("__argc_") {
             if value.starts_with("__argc_value") {
                 return convert_arg_value(value);
@@ -87,15 +87,24 @@ impl Shell {
             }
         }
         match self {
-            Shell::Bash => bash_escape(value),
+            Shell::Bash => {
+                if last_word.contains(':') {
+                    if let Some((prefix, _)) = last_word.rsplit_once(':') {
+                        if let Some(value) = value.strip_prefix(&last_word[0..prefix.len() + 1]) {
+                            return value.to_string();
+                        }
+                    }
+                }
+                bash_escape(value)
+            }
             Shell::Zsh => zsh_escape(value),
             Shell::Powershell => format!("{} ", powershell_escape(value)),
             Shell::Fish => value.to_string(),
         }
     }
 
-    pub fn convert_candiate(&self, value: &str, description: &str) -> String {
-        let value = self.convert_value(value);
+    pub fn convert_candiate(&self, value: &str, last_word: &str, description: &str) -> String {
+        let value = self.convert_value(value, last_word);
         if description.is_empty() {
             value
         } else {
@@ -722,7 +731,27 @@ fn bash_escape(value: &str) -> String {
     value
         .chars()
         .map(|v| {
-            if v.is_ascii() && !(v.is_ascii_alphanumeric() || matches!(v, '_' | '-' | '/')) {
+            if matches!(
+                v,
+                ' ' | '!'
+                    | '"'
+                    | '$'
+                    | '&'
+                    | '\''
+                    | '<'
+                    | '>'
+                    | '`'
+                    | '|'
+                    | '{'
+                    | '}'
+                    | '['
+                    | ']'
+                    | '^'
+                    | '~'
+                    | '#'
+                    | '*'
+                    | '?'
+            ) {
                 format!("\\{v}")
             } else {
                 v.to_string()
