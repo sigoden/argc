@@ -50,7 +50,7 @@ impl FromStr for Shell {
             "zsh" => Ok(Self::Zsh),
             "powershell" => Ok(Self::Powershell),
             "fish" => Ok(Self::Fish),
-            _ => bail!("Invalid shell value, must be one of {}", Shell::list()),
+            _ => bail!("Invalid shell, must be one of {}", Shell::list()),
         }
     }
 }

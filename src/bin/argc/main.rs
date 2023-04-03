@@ -43,14 +43,14 @@ fn run() -> Result<i32> {
         .author(env!("CARGO_PKG_AUTHORS"))
         .override_usage(
             r#"
-    argc --argc-eval SCRIPT [ARGS...]           Parse arguments `eval "$(argc --argc-eval "$0" "$@")"`
-    argc --argc-compgen SHELL SCRIPT LINE       Generate possible completions for the shell
-    argc --argc-create [TASKS...]               Create a boilerplate argcfile
-    argc --argc-export SCRIPT                   Export command definitions as json
-    argc --argc-script-path                     Print current argcscript file path
-    argc --argc-completions SHELL [CMDS...]     Generate completion scripts for bash,zsh,fish,powershell
-    argc --argc-help                            Print help information
-    argc --argc-version                         Print version information"#,
+    argc --argc-eval <SCRIPT> [ARGS...]           Use `eval "$(argc --argc-eval "$0" "$@")"`
+    argc --argc-create [TASKS...]                 Create a boilerplate argcfile
+    argc --argc-completions <SHELL> [CMDS...]     Generate completion scripts for bash,zsh,fish,powershell
+    argc --argc-compgen <SHELL> <SCRIPT> <LINE>   Generate dynamic completion word
+    argc --argc-export <SCRIPT>                   Export command line definitions as json
+    argc --argc-script-path                       Print current argcfile path
+    argc --argc-help                              Print help information
+    argc --argc-version                           Print version information"#,
         )
         .help_template(
             r#"{bin} {version}
@@ -94,10 +94,7 @@ USAGE:{usage}"#,
     } else if matches.get_flag("argc-compgen") {
         let shell: Shell = match args.get(2) {
             Some(v) => v.parse()?,
-            None => bail!(
-                "No shell specified, Please specify the one of {}",
-                Shell::list()
-            ),
+            None => bail!("Usage: argc --argc-compgen <SHELL> <SCRIPT> <LINE>"),
         };
         let (source, cmd_args) = parse_script_args(&args[3..])?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
@@ -107,21 +104,18 @@ USAGE:{usage}"#,
     } else if matches.get_flag("argc-completions") {
         let shell: Shell = match args.get(2) {
             Some(v) => v.parse()?,
-            None => bail!(
-                "No shell specified, Please specify the one of {}",
-                Shell::list()
-            ),
+            None => bail!("Usage: argc --argc-completions <SHELL> [CMDS...]"),
         };
         let script = crate::completions::generate(shell, &args[3..])?;
         println!("{}", script);
     } else if matches.get_flag("argc-script-path") {
         let (_, script_file) =
-            get_script_path(true).ok_or_else(|| anyhow!("Not found argcfile"))?;
+            get_script_path(true).ok_or_else(|| anyhow!("Argcfile not found."))?;
         print!("{}", script_file.display());
     } else {
-        let shell = get_shell_path().ok_or_else(|| anyhow!("Not found shell"))?;
+        let shell = get_shell_path().ok_or_else(|| anyhow!("Shell not found"))?;
         let (script_dir, script_file) = get_script_path(true)
-            .ok_or_else(|| anyhow!("Not found argcscript, try `argc --argc-help` to get help."))?;
+            .ok_or_else(|| anyhow!("argcfile not found, try `argc --argc-help` for help."))?;
         let interrupt = Arc::new(AtomicBool::new(false));
         let interrupt_me = interrupt.clone();
         ctrlc::set_handler(move || interrupt_me.store(true, Ordering::Relaxed))

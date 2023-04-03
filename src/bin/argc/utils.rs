@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{bail, Context, Result};
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -15,16 +15,16 @@ pub const ARGC_SCRIPT_NAMES: [&str; 6] = [
 
 pub fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     if args.is_empty() {
-        bail!("No script file");
+        bail!("No script provided");
     }
     let script_file = args[0].as_str();
     let args: Vec<String> = args[1..].to_vec();
     let source = fs::read_to_string(script_file)
-        .with_context(|| format!("Failed to load '{}'", script_file))?;
+        .with_context(|| format!("Failed to read '{}'", script_file))?;
     let name = Path::new(script_file)
         .file_name()
         .and_then(|v| v.to_str())
-        .ok_or_else(|| anyhow!("Failed to get script name"))?;
+        .unwrap();
     let name = if let Some(v) = name.strip_suffix(".sh") {
         v
     } else {
