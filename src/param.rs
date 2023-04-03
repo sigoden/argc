@@ -41,6 +41,14 @@ impl ParamData {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[serde(tag = "type")]
+pub enum Param {
+    Flag(FlagParam),
+    Option(OptionParam),
+    Positional(PositionalParam),
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct FlagParam {
     pub(crate) name: String,
     pub(crate) summary: String,

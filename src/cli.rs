@@ -1,5 +1,5 @@
 use crate::argc_value::ArgcValue;
-use crate::param::{FlagParam, OptionParam, ParamNames, PositionalParam};
+use crate::param::{Param, ParamNames, PositionalParam};
 use crate::parser::{parse, Event, EventData, EventScope, Position};
 use crate::utils::{escape_shell_words, split_shell_words};
 use crate::Result;
@@ -20,9 +20,10 @@ pub fn eval(source: &str, args: &[&str]) -> Result<Either<String, clap::Error>> 
     }
 }
 
-pub fn export(source: &str) -> Result<serde_json::Value> {
+pub fn export(source: &str, name: &str) -> Result<serde_json::Value> {
     let events = parse(source)?;
-    let cmd = Cli::new_from_events(&events)?;
+    let mut cmd = Cli::new_from_events(&events)?;
+    cmd.name = Some(name.to_string());
     cmd.to_json().with_context(|| "Failed to export json")
 }
 
@@ -31,10 +32,8 @@ pub struct Cli {
     name: Option<String>,
     fn_name: Option<String>,
     describe: Option<String>,
-    positional_index: usize,
-    flag_params: Vec<FlagParam>,
-    option_params: Vec<OptionParam>,
-    positional_params: Vec<(PositionalParam, usize)>,
+    params: Vec<Param>,
+    positional_pos: Vec<Position>,
     subcommands: Vec<Cli>,
     help: Option<String>,
     author: Option<String>,
@@ -89,7 +88,7 @@ impl Cli {
                 EventData::Flag(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
                     param.detect_conflict(&mut cmd.names, position)?;
-                    cmd.flag_params.push(param);
+                    cmd.params.push(Param::Flag(param));
                 }
                 EventData::Option(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
@@ -99,7 +98,7 @@ impl Cli {
                         &param.choices_fn,
                     );
                     param.detect_conflict(&mut cmd.names, position)?;
-                    cmd.option_params.push(param);
+                    cmd.params.push(Param::Option(param));
                 }
                 EventData::Positional(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
@@ -225,19 +224,25 @@ impl Cli {
         if !self.aliases.is_empty() {
             cmd = cmd.visible_aliases(&self.aliases);
         }
-        for param in &self.flag_params {
-            cmd = cmd.arg(param.build_arg()?);
+        let mut positional_params = vec![];
+        for param in &self.params {
+            let arg = match param {
+                Param::Flag(param) => param.build_arg()?,
+                Param::Option(param) => param.build_arg()?,
+                Param::Positional(param) => {
+                    positional_params.push(param);
+                    continue;
+                }
+            };
+            cmd = cmd.arg(arg);
         }
-        for param in &self.option_params {
-            cmd = cmd.arg(param.build_arg()?);
-        }
-        if self.positional_params.is_empty() {
+        if positional_params.is_empty() {
             let mut arg = PositionalParam::extra().build_arg(0)?;
             arg = arg.allow_hyphen_values(true).trailing_var_arg(true);
             cmd = cmd.arg(arg);
         } else {
-            for (param, index) in &self.positional_params {
-                cmd = cmd.arg(param.build_arg(*index)?);
+            for (index, param) in positional_params.iter().enumerate() {
+                cmd = cmd.arg(param.build_arg(index)?);
             }
         }
         for subcommand in &self.subcommands {
@@ -266,27 +271,15 @@ impl Cli {
     pub fn to_json(&self) -> StdResult<serde_json::Value, serde_json::Error> {
         let subcommands: StdResult<Vec<serde_json::Value>, _> =
             self.subcommands.iter().map(|v| v.to_json()).collect();
-        let flag_params: StdResult<Vec<serde_json::Value>, _> =
-            self.flag_params.iter().map(serde_json::to_value).collect();
-        let option_params: StdResult<Vec<serde_json::Value>, _> = self
-            .option_params
-            .iter()
-            .map(serde_json::to_value)
-            .collect();
-        let positional_params: StdResult<Vec<serde_json::Value>, _> = self
-            .positional_params
-            .iter()
-            .map(|(v, _)| serde_json::to_value(v))
-            .collect();
+        let params: StdResult<Vec<serde_json::Value>, _> =
+            self.params.iter().map(serde_json::to_value).collect();
         let value = serde_json::json!({
             "describe": self.describe,
             "name": self.name,
             "help": self.help,
             "author": self.author,
             "version": self.version,
-            "flag_params": flag_params?,
-            "option_params": option_params?,
-            "positional_params": positional_params?,
+            "params": params?,
             "aliases": self.aliases,
             "subcommands": subcommands?,
         });
@@ -367,11 +360,15 @@ impl Cli {
         if !self.aliases.is_empty() {
             cmd = cmd.visible_aliases(&self.aliases);
         }
-        for param in &self.flag_params {
-            cmd = cmd.arg(param.build_arg()?);
-        }
-        for param in &self.option_params {
-            cmd = cmd.arg(param.build_arg_loose()?);
+        for param in &self.params {
+            let arg = match param {
+                Param::Flag(param) => param.build_arg()?,
+                Param::Option(param) => param.build_arg_loose()?,
+                Param::Positional(_) => {
+                    continue;
+                }
+            };
+            cmd = cmd.arg(arg);
         }
         cmd = cmd.arg(PositionalParam::extra().build_arg(0)?);
         for subcommand in &self.subcommands {
@@ -383,26 +380,30 @@ impl Cli {
 
     fn get_args(&self, matches: &ArgMatches) -> Vec<ArgcValue> {
         let mut values = vec![];
-        for param in &self.flag_params {
-            if let Some(value) = param.get_arg_value(matches) {
-                values.push(value);
+        let mut no_positional_param = true;
+        for param in &self.params {
+            match param {
+                Param::Flag(param) => {
+                    if let Some(value) = param.get_arg_value(matches) {
+                        values.push(value);
+                    }
+                }
+                Param::Option(param) => {
+                    if let Some(value) = param.get_arg_value(matches) {
+                        values.push(value);
+                    }
+                }
+                Param::Positional(param) => {
+                    if let Some(value) = param.get_arg_value(matches) {
+                        values.push(value);
+                    }
+                    no_positional_param = false;
+                }
             }
         }
-        for param in &self.option_params {
-            if let Some(value) = param.get_arg_value(matches) {
-                values.push(value);
-            }
-        }
-
-        if self.positional_params.is_empty() {
+        if no_positional_param {
             if let Some(value) = PositionalParam::extra().get_arg_value(matches) {
                 values.push(value);
-            }
-        } else {
-            for (param, _) in &self.positional_params {
-                if let Some(value) = param.get_arg_value(matches) {
-                    values.push(value);
-                }
             }
         }
 
@@ -441,10 +442,6 @@ impl Cli {
         }
     }
 
-    fn has_flag_or_option(&self) -> bool {
-        !self.flag_params.is_empty() || !self.option_params.is_empty()
-    }
-
     fn exist_subcommand(&self, name: &str) -> bool {
         self.subcommands.iter().any(|subcmd| {
             if let Some(subcmd_name) = &subcmd.name {
@@ -458,9 +455,8 @@ impl Cli {
 
     fn add_positional_param(&mut self, param: PositionalParam, pos: Position) -> Result<()> {
         param.detect_conflict(&mut self.names, pos)?;
-        let index = self.positional_index;
-        self.positional_index += 1;
-        self.positional_params.push((param, index));
+        self.params.push(Param::Positional(param));
+        self.positional_pos.push(pos);
         Ok(())
     }
 
@@ -479,8 +475,14 @@ impl Cli {
         lines.push("USAGE: {usage}");
         lines.push("");
         let has_subcommands = !self.subcommands.is_empty();
-        let has_arguments = !self.positional_params.is_empty();
-        let has_options = self.has_flag_or_option();
+        let has_arguments = self
+            .params
+            .iter()
+            .any(|v| matches!(v, Param::Positional(_)));
+        let has_options = self
+            .params
+            .iter()
+            .any(|v| matches!(v, Param::Flag(_) | Param::Option(_)));
         if has_arguments {
             lines.push("ARGS:");
             lines.push("{positionals}");
