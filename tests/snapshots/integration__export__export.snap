@@ -5,7 +5,6 @@ expression: output
 {
   "describe": "Test all aspects",
   "name": "spec",
-  "help": null,
   "author": "nobody <nobody@example.com>",
   "version": "0.10.0",
   "params": [],
@@ -14,7 +13,6 @@ expression: output
     {
       "describe": "Preferred",
       "name": "cmd_preferred",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -59,7 +57,6 @@ expression: output
     {
       "describe": "Omitted",
       "name": "cmd_omitted",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -104,7 +101,6 @@ expression: output
     {
       "describe": "Flags all kind of names",
       "name": "cmd_flag_names",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -147,7 +143,6 @@ expression: output
     {
       "describe": "Flags without long name",
       "name": "cmd_no_long_flags",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -174,7 +169,6 @@ expression: output
     {
       "describe": "Options all kind of names",
       "name": "cmd_option_names",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -351,7 +345,6 @@ expression: output
     {
       "describe": "Options without long name",
       "name": "cmd_no_long_options",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -544,7 +537,6 @@ expression: output
     {
       "describe": "Options all kind of formats",
       "name": "cmd_option_formats",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -659,7 +651,6 @@ expression: output
     {
       "describe": "Option value quoted",
       "name": "cmd_option_quotes",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -752,7 +743,6 @@ expression: output
     {
       "describe": "Option with value notations",
       "name": "cmd_option_notations",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -796,7 +786,6 @@ expression: output
     {
       "describe": "All kind of flags",
       "name": "cmd_flag_formats",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -847,7 +836,6 @@ expression: output
     {
       "describe": "Positional one required",
       "name": "cmd_positional_only",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -870,7 +858,6 @@ expression: output
     {
       "describe": "Positional all required",
       "name": "cmd_positional_many",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -905,7 +892,6 @@ expression: output
     {
       "describe": "Positional all required",
       "name": "cmd_positional_requires",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -940,7 +926,6 @@ expression: output
     {
       "describe": "Positional with choices",
       "name": "cmd_positional_with_choices",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -966,7 +951,6 @@ expression: output
     {
       "describe": "Positional with default value",
       "name": "cmd_positional_with_default",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -989,7 +973,6 @@ expression: output
     {
       "describe": "Positional with default value",
       "name": "cmd_positional_with_default_fn",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -1012,7 +995,6 @@ expression: output
     {
       "describe": "Positional with choices and value",
       "name": "cmd_positional_with_choices_and_default",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -1038,7 +1020,6 @@ expression: output
     {
       "describe": "Positional with choices and value",
       "name": "cmd_positional_with_choices_fn",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -1061,7 +1042,6 @@ expression: output
     {
       "describe": "Positional with choices and required",
       "name": "cmd_positional_with_choices_and_required",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -1087,7 +1067,6 @@ expression: output
     {
       "describe": "Positional with choices and value",
       "name": "cmd_positional_with_choices_fn_and_required",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -1110,7 +1089,6 @@ expression: output
     {
       "describe": "Command without any arg",
       "name": "cmd_without_any_arg",
-      "help": null,
       "author": null,
       "version": null,
       "params": [],
@@ -1120,7 +1098,6 @@ expression: output
     {
       "describe": "Command with alias",
       "name": "cmd_alias",
-      "help": null,
       "author": null,
       "version": null,
       "params": [],
@@ -1133,7 +1110,6 @@ expression: output
     {
       "describe": "Command with hyphens",
       "name": "cmd_with_hyphens",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -1178,7 +1154,6 @@ expression: output
     {
       "describe": "Nested command",
       "name": "cmd_nested_command",
-      "help": "A nested command",
       "author": null,
       "version": "0.1.0",
       "params": [
@@ -1202,7 +1177,6 @@ expression: output
         {
           "describe": "Subcommand of nested command",
           "name": "foo",
-          "help": null,
           "author": null,
           "version": null,
           "params": [
@@ -1245,7 +1219,6 @@ expression: output
     {
       "describe": "Nested command2",
       "name": "cmd_nested_command2",
-      "help": null,
       "author": null,
       "version": "0.1.0",
       "params": [
@@ -1269,7 +1242,6 @@ expression: output
         {
           "describe": "Subcommand of nested command2",
           "name": "foo",
-          "help": null,
           "author": null,
           "version": null,
           "params": [
@@ -1310,7 +1282,6 @@ expression: output
     {
       "describe": "Notation values",
       "name": "cmd_notation_values",
-      "help": null,
       "author": null,
       "version": null,
       "params": [
@@ -1401,7 +1372,6 @@ expression: output
     {
       "describe": "Dynamic compgen",
       "name": "cmd_dynamic_compgen",
-      "help": null,
       "author": null,
       "version": null,
       "params": [

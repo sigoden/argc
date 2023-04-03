@@ -1,15 +1,11 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 119
 expression: output
 ---
 RUN
 spec cmd_positional_with_choices a
 
-STDOUT
+OUTPUT
 argc_arg=a
 cmd_positional_with_choices a
-
-STDERR
-
 

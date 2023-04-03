@@ -5,13 +5,10 @@ expression: output
 RUN
 spec _fn_args cmd_preferred -f -o 4 -o 5
 
-STDOUT
+OUTPUT
 argc__line='cmd_preferred -f -o 4 -o 5'
 argc__words=( cmd_preferred -f -o 4 -o 5 )
 argc_flag1=1
 argc__args=(  )
 _fn_args;exit;
-
-STDERR
-
 

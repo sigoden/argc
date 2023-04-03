@@ -5,10 +5,7 @@ expression: output
 RUN
 spec cmd_nested_command foo --opt1 abc
 
-STDOUT
+OUTPUT
 argc_opt1=abc
 cmd_nested_command::foo
-
-STDERR
-
 

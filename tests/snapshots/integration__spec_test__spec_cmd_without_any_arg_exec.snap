@@ -1,15 +1,11 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 171
 expression: output
 ---
 RUN
 spec cmd_without_any_arg foo bar
 
-STDOUT
+OUTPUT
 argc__args=( foo bar )
 cmd_without_any_arg foo bar
-
-STDERR
-
 

@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_no_long_flags -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Flags without long name
 
 USAGE: spec cmd_no_long_flags [OPTIONS]
@@ -18,4 +16,6 @@ OPTIONS:
   -b...       
   -h, --help  Print help
 
+EOF
+exit 0
 

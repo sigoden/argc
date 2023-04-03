@@ -186,30 +186,6 @@ COMMANDS:
   test  Run tests [aliases: t, tst]
 ```
 
-### @help
-
-```
-@help string
-```
-
-Enable help subcommand.
-
-```sh
-# @help Show help
-
-# @cmd Run test
-test() {
-  echo Run test
-}
-```
-
-```
-USAGE: test.sh <COMMAND>
-
-COMMANDS:
-  help  Show help
-  foo   Run test
-```
 ### Meta
 
 - @describe: Sets the cli’s description. 

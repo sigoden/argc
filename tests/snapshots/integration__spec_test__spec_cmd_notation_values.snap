@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_notation_values -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Notation values
 
 USAGE: spec cmd_notation_values [OPTIONS]
@@ -21,4 +19,6 @@ OPTIONS:
       --opt5 <<ABC DEF>>  
   -h, --help              Print help
 
+EOF
+exit 0
 

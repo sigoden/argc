@@ -98,13 +98,17 @@ impl FlagParam {
         if !self.no_long {
             arg = arg.long(self.name.to_string());
         }
-        if self.multiple {
+        if let Some(s) = self.short {
+            arg = arg.short(s);
+        }
+        if self.name == "help" {
+            arg = arg.action(ArgAction::Help)
+        } else if self.name == "version" {
+            arg = arg.action(ArgAction::Version)
+        } else if self.multiple {
             arg = arg.action(ArgAction::Count);
         } else {
             arg = arg.action(ArgAction::SetTrue);
-        }
-        if let Some(s) = self.short {
-            arg = arg.short(s);
         }
         Ok(arg)
     }

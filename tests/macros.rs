@@ -2,25 +2,19 @@
 macro_rules! snapshot {
     (
         $source:expr,
-        $args:expr,
+        $args:expr
     ) => {
-        let (stdout, stderr) = match argc::eval($source, $args).unwrap() {
-            either::Either::Left(stdout) => (stdout, String::new()),
-            either::Either::Right(stderr) => (String::new(), stderr.to_string()),
-        };
-
+        let values = argc::eval($source, $args).unwrap();
+        let output = argc::ArgcValue::to_shell(values, true);
         let args = $args.join(" ");
         let output = format!(
             r###"RUN
 {}
 
-STDOUT
-{}
-
-STDERR
+OUTPUT
 {}
 "###,
-            args, stdout, stderr
+            args, output,
         );
         insta::assert_snapshot!(output);
     };
@@ -31,19 +25,11 @@ macro_rules! plain {
     (
         $source:expr,
         $args:expr,
-        $(stdout: $stdout:expr,)?
-        $(stderr: $stderr:expr,)?
+		$output:expr
     ) => {
-        let result = match argc::eval($source, $args).unwrap()  {
-            either::Either::Left(stdout) => (stdout, String::new()),
-            either::Either::Right(stderr) => (String::new(), stderr.to_string()),
-        };
-        $({
-            assert_eq!(result.0.as_str(), $stdout);
-        })?
-        $({
-            assert_eq!(result.1.as_str(), $stderr);
-        })?
+        let values = argc::eval($source, $args).unwrap();
+        let output = argc::ArgcValue::to_shell(values, true);
+        assert_eq!(output, $output);
     };
 }
 

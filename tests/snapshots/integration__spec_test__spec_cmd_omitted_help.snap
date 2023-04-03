@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_omitted -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Omitted
 
 USAGE: spec cmd_omitted [OPTIONS] [ARG1]
@@ -21,4 +19,6 @@ OPTIONS:
       --opt1 <OPT1>  
   -h, --help         Print help
 
+EOF
+exit 0
 

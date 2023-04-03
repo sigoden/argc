@@ -5,10 +5,7 @@ expression: output
 RUN
 spec cmd_without_any_arg --opt2 foo bar
 
-STDOUT
+OUTPUT
 argc__args=( --opt2 foo bar )
 cmd_without_any_arg --opt2 foo bar
-
-STDERR
-
 

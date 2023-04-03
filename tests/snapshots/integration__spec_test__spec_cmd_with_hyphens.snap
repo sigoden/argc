@@ -5,12 +5,9 @@ expression: output
 RUN
 spec cmd_with_hyphens foo --hyphen-flag --hyphen-option bar
 
-STDOUT
+OUTPUT
 argc_hyphen_positional=foo
 argc_hyphen_flag=1
 argc_hyphen_option=bar
 cmd_with_hyphens foo
-
-STDERR
-
 

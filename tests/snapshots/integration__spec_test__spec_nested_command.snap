@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_nested_command
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 spec-cmd_nested_command 0.1.0
 Nested command
 
@@ -20,7 +18,8 @@ OPTIONS:
   -V, --version      Print version
 
 COMMANDS:
-  help  A nested command
-  foo   Subcommand of nested command [aliases: a]
+  foo  Subcommand of nested command [aliases: a]
 
+EOF
+exit 1
 

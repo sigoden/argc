@@ -3,13 +3,13 @@ source: tests/spec_test.rs
 expression: output
 ---
 RUN
-spec cmd_preferred -h
+spec help cmd_preferred
 
 OUTPUT
 cat >&2 <<-'EOF' 
 Preferred
 
-USAGE: spec cmd_preferred [OPTIONS] [ARG1]...
+USAGE: cmd_preferred [OPTIONS] [ARG1]...
 
 ARGS:
   [ARG1]...  A positional arg

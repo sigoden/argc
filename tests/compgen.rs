@@ -9,6 +9,11 @@ fn test_compgen_help() {
 }
 
 #[test]
+fn test_compgen_help2() {
+    snapshot_compgen!("help cmd");
+}
+
+#[test]
 fn test_compgen_subcommand() {
     snapshot_compgen!("cmd_option_names ");
 }

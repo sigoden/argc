@@ -3,7 +3,7 @@ source: tests/spec_test.rs
 expression: output
 ---
 RUN
-spec -h
+spec help
 
 OUTPUT
 cat >&2 <<-'EOF' 
