@@ -278,3 +278,8 @@ fn test_spec_help_command() {
 fn test_spec_help_command2() {
     snapshot!(SPEC_SCRIPT, &["spec", "help", "cmd_preferred"]);
 }
+
+#[test]
+fn test_spec_help_command3() {
+    snapshot!(SPEC_SCRIPT, &["spec", "help", "cmd_prefered"]);
+}

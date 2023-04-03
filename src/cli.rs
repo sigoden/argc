@@ -4,7 +4,7 @@ use crate::parser::{parse, Event, EventData, EventScope, Position};
 use crate::utils::{escape_shell_words, split_shell_words};
 use crate::Result;
 use anyhow::{bail, Context};
-use clap::{ArgMatches, Command};
+use clap::{builder::PossibleValuesParser, Arg, ArgMatches, Command};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::result::Result as StdResult;
@@ -360,21 +360,36 @@ impl Cli {
                     for arg in &args[1..idx] {
                         if let Some(v) = cli.find_subcommand(arg) {
                             cli = v;
-                            name = arg.to_string();
+                            name = v.name.clone().unwrap_or(arg.to_string());
                         } else {
                             return None;
                         }
                     }
                 }
                 if idx == len - 2 {
-                    name = args[len - 1].to_string();
-                    if let Some(v) = cli.find_subcommand(&name) {
-                        cli = v
+                    let arg = args[len - 1];
+                    if let Some(v) = cli.find_subcommand(arg) {
+                        cli = v;
+                        name = v.name.clone().unwrap_or(arg.to_string());
                     } else {
-                        return Some(Ok(vec![ArgcValue::Erorr(format!(
-                            "error: no such command: `{}`",
-                            name
-                        ))]));
+                        let mut names = vec![];
+                        for command in cli.subcommands.iter() {
+                            if let Some(name) = command.name.clone() {
+                                names.push(name);
+                            }
+                            names.extend(command.aliases.clone())
+                        }
+                        let command = Command::new(&name).arg(
+                            Arg::new("command")
+                                .value_parser(PossibleValuesParser::new(names))
+                                .required(true),
+                        );
+                        if let Err(err) = command.try_get_matches_from([name.as_str(), arg]) {
+                            return Some(Ok(vec![ArgcValue::ClapError((
+                                err.render(),
+                                err.use_stderr() as i32,
+                            ))]));
+                        }
                     }
                 }
                 if let Ok(mut command) = cli.build_command(&name) {
