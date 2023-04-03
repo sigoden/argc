@@ -15,7 +15,6 @@ pub enum ArgcValue {
     CmdFn(String),
     ParamFn(String),
     ClapError((StyledStr, i32)),
-    Erorr(String),
 }
 
 impl ArgcValue {
@@ -97,10 +96,6 @@ impl ArgcValue {
                         error.ansi().to_string()
                     };
                     variables.push(format!("cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit));
-                }
-                ArgcValue::Erorr(error) => {
-                    variables.clear();
-                    variables.push(format!("cat >&2 <<-'EOF' \n{}\nEOF\nexit 1", error));
                 }
             }
         }
