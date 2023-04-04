@@ -6,7 +6,9 @@ RUN
 cmd_nested_command 
 
 STDOUT
-foo a
+foo	Subcommand of nested command
+a	Subcommand of nested command
+help
 
 STDERR
 

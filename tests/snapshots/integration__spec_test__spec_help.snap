@@ -5,10 +5,8 @@ expression: output
 RUN
 spec -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 spec 0.10.0
 nobody <nobody@example.com>
 Test all aspects
@@ -42,5 +40,8 @@ COMMANDS:
   cmd_nested_command                           Nested command
   cmd_nested_command2                          Nested command2
   cmd_notation_values                          Notation values
+  cmd_dynamic_compgen                          Dynamic compgen
 
+EOF
+exit 0
 

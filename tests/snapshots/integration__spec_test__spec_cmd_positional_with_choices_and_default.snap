@@ -1,15 +1,12 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 129
 expression: output
 ---
 RUN
 spec cmd_positional_with_choices_and_default -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Positional with choices and value
 
 USAGE: spec cmd_positional_with_choices_and_default [ARG]
@@ -17,4 +14,6 @@ USAGE: spec cmd_positional_with_choices_and_default [ARG]
 ARGS:
   [ARG]  A arg with choices and default value [default: a] [possible values: a, b]
 
+EOF
+exit 0
 

@@ -5,10 +5,7 @@ expression: output
 RUN
 spec cmd_flag_formats --foo5 --foo5 --foo5
 
-STDOUT
+OUTPUT
 argc_foo5=3
 cmd_flag_formats
-
-STDERR
-
 

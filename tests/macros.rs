@@ -2,25 +2,19 @@
 macro_rules! snapshot {
     (
         $source:expr,
-        $args:expr,
+        $args:expr
     ) => {
-        let (stdout, stderr) = match argc::eval($source, $args).unwrap() {
-            either::Either::Left(stdout) => (stdout, String::new()),
-            either::Either::Right(stderr) => (String::new(), stderr.to_string()),
-        };
-
+        let values = argc::eval($source, $args).unwrap();
+        let output = argc::ArgcValue::to_shell(values, true);
         let args = $args.join(" ");
         let output = format!(
             r###"RUN
 {}
 
-STDOUT
-{}
-
-STDERR
+OUTPUT
 {}
 "###,
-            args, stdout, stderr
+            args, output,
         );
         insta::assert_snapshot!(output);
     };
@@ -31,19 +25,11 @@ macro_rules! plain {
     (
         $source:expr,
         $args:expr,
-        $(stdout: $stdout:expr,)?
-        $(stderr: $stderr:expr,)?
+		$output:expr
     ) => {
-        let result = match argc::eval($source, $args).unwrap()  {
-            either::Either::Left(stdout) => (stdout, String::new()),
-            either::Either::Right(stderr) => (String::new(), stderr.to_string()),
-        };
-        $({
-            assert_eq!(result.0.as_str(), $stdout);
-        })?
-        $({
-            assert_eq!(result.1.as_str(), $stderr);
-        })?
+        let values = argc::eval($source, $args).unwrap();
+        let output = argc::ArgcValue::to_shell(values, true);
+        assert_eq!(output, $output);
     };
 }
 
@@ -62,13 +48,14 @@ macro_rules! fatal {
 #[macro_export]
 macro_rules! snapshot_compgen {
     (
-        $source:expr,
-        $args:expr
+        $line:expr
     ) => {
-        let (stdout, stderr) = match argc::compgen($source, $args) {
-            Ok(stdout) => (stdout.join(" "), String::new()),
-            Err(stderr) => (String::new(), stderr.to_string()),
-        };
+        let (script_file, script_content) = $crate::fixtures::get_spec();
+        let (stdout, stderr) =
+            match argc::compgen(argc::Shell::Fish, &script_file, &script_content, $line) {
+                Ok(stdout) => (stdout, String::new()),
+                Err(stderr) => (String::new(), stderr.to_string()),
+            };
 
         let output = format!(
             r###"RUN
@@ -80,7 +67,7 @@ STDOUT
 STDERR
 {}
 "###,
-            $args, stdout, stderr
+            $line, stdout, stderr
         );
         insta::assert_snapshot!(output);
     };
@@ -88,8 +75,8 @@ STDERR
 
 #[macro_export]
 macro_rules! snapshot_export {
-    ($source:expr) => {
-        let json = argc::export($source).unwrap();
+    ($source:expr, $name:literal) => {
+        let json = argc::export($source, $name).unwrap();
         let output = serde_json::to_string_pretty(&json).unwrap();
         insta::assert_snapshot!(output);
     };

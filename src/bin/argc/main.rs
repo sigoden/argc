@@ -1,27 +1,20 @@
 mod completions;
+mod utils;
 
 use anyhow::{anyhow, bail, Context, Result};
+use argc::{
+    utils::{get_shell_path, no_color},
+    Shell,
+};
 use clap::{Arg, ArgAction, Command};
-use either::Either;
 use std::{
-    env, fs,
-    path::{Path, PathBuf},
-    process,
+    env, fs, process,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc,
     },
 };
-use which::which;
-
-const ARGC_SCRIPT_NAMES: [&str; 6] = [
-    "Argcfile.sh",
-    "Argcfile",
-    "argcfile.sh",
-    "argcfile",
-    "ARGCFILE.sh",
-    "ARGCFILE",
-];
+use utils::*;
 
 fn main() {
     match run() {
@@ -50,14 +43,14 @@ fn run() -> Result<i32> {
         .author(env!("CARGO_PKG_AUTHORS"))
         .override_usage(
             r#"
-    argc --argc-eval SCRIPT [ARGS...]           Parse arguments `eval "$(argc --argc-eval "$0" "$@")"`
-    argc --argc-compgen SCRIPT LINE             Generate words for completion
-    argc --argc-create [TASKS...]               Create a boilerplate argcfile
-    argc --argc-export SCRIPT                   Export command definitions as json
-    argc --argc-script-path                     Print current argcscript file path
-    argc --argc-completions SHELL [CMDS...]     Generate completion scripts for bash,zsh,fish,powershell
-    argc --argc-help                            Print help information
-    argc --argc-version                         Print version information"#,
+    argc --argc-eval <SCRIPT> [ARGS...]           Use `eval "$(argc --argc-eval "$0" "$@")"`
+    argc --argc-create [TASKS...]                 Create a boilerplate argcfile
+    argc --argc-completions <SHELL> [CMDS...]     Generate completion scripts for bash,zsh,fish,powershell
+    argc --argc-compgen <SHELL> <SCRIPT> <LINE>   Generate dynamic completion word
+    argc --argc-export <SCRIPT>                   Export command line definitions as json
+    argc --argc-script-path                       Print current argcfile path
+    argc --argc-help                              Print help information
+    argc --argc-version                           Print version information"#,
         )
         .help_template(
             r#"{bin} {version}
@@ -84,23 +77,8 @@ USAGE:{usage}"#,
     if matches.get_flag("argc-eval") {
         let (source, cmd_args) = parse_script_args(&args[2..])?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        match argc::eval(&source, &cmd_args)? {
-            Either::Left(output) => {
-                println!("{}", output)
-            }
-            Either::Right(error) => {
-                if env::var_os("NO_COLOR").is_some() {
-                    eprintln!("{}", error);
-                } else {
-                    eprintln!("{}", error.render().ansi());
-                }
-                if error.use_stderr() {
-                    println!("exit 1");
-                } else {
-                    println!("exit 0");
-                }
-            }
-        }
+        let values = argc::eval(&source, &cmd_args)?;
+        println!("{}", argc::ArgcValue::to_shell(values, no_color()))
     } else if matches.get_flag("argc-create") {
         if let Some((_, script_file)) = get_script_path(false) {
             bail!("Already exist {}", script_file.display());
@@ -110,27 +88,34 @@ USAGE:{usage}"#,
         fs::write(&names[0], content).with_context(|| format!("Failed to create {}", &names[0]))?;
         println!("{} has been successfully created.", &names[0]);
     } else if matches.get_flag("argc-export") {
-        let (source, _) = parse_script_args(&args[2..])?;
-        let json = argc::export(&source)?;
+        let (source, cmd_args) = parse_script_args(&args[2..])?;
+        let json = argc::export(&source, &cmd_args[0])?;
         println!("{}", serde_json::to_string_pretty(&json)?);
     } else if matches.get_flag("argc-compgen") {
-        let (source, cmd_args) = parse_script_args(&args[2..])?;
+        let shell: Shell = match args.get(2) {
+            Some(v) => v.parse()?,
+            None => bail!("Usage: argc --argc-compgen <SHELL> <SCRIPT> <LINE>"),
+        };
+        let (source, cmd_args) = parse_script_args(&args[3..])?;
         let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        let line = if cmd_args.len() == 1 { "" } else { cmd_args[1] };
-        let candicates = argc::compgen(&source, line)?;
-        let candicates = expand_candicates(candicates, &args[2])?;
-        candicates.into_iter().for_each(|v| println!("{v}"));
+        let line = cmd_args.get(1).copied().unwrap_or_default();
+        let output = argc::compgen(shell, &args[3], &source, line)?;
+        println!("{output}");
     } else if matches.get_flag("argc-completions") {
-        let script = crate::completions::generate(&args[2..])?;
+        let shell: Shell = match args.get(2) {
+            Some(v) => v.parse()?,
+            None => bail!("Usage: argc --argc-completions <SHELL> [CMDS...]"),
+        };
+        let script = crate::completions::generate(shell, &args[3..])?;
         println!("{}", script);
     } else if matches.get_flag("argc-script-path") {
         let (_, script_file) =
-            get_script_path(true).ok_or_else(|| anyhow!("Not found argcfile"))?;
+            get_script_path(true).ok_or_else(|| anyhow!("Argcfile not found."))?;
         print!("{}", script_file.display());
     } else {
-        let shell = get_shell_path().ok_or_else(|| anyhow!("Not found shell"))?;
+        let shell = get_shell_path().ok_or_else(|| anyhow!("Shell not found"))?;
         let (script_dir, script_file) = get_script_path(true)
-            .ok_or_else(|| anyhow!("Not found argcscript, try `argc --argc-help` to get help."))?;
+            .ok_or_else(|| anyhow!("argcfile not found, try `argc --argc-help` for help."))?;
         let interrupt = Arc::new(AtomicBool::new(false));
         let interrupt_me = interrupt.clone();
         ctrlc::set_handler(move || interrupt_me.store(true, Ordering::Relaxed))
@@ -149,156 +134,4 @@ USAGE:{usage}"#,
     }
 
     Ok(0)
-}
-
-fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
-    if args.is_empty() {
-        bail!("No script file");
-    }
-    let script_file = args[0].as_str();
-    let args: Vec<String> = args[1..].to_vec();
-    let source = fs::read_to_string(script_file)
-        .with_context(|| format!("Failed to load '{}'", script_file))?;
-    let name = Path::new(script_file)
-        .file_name()
-        .and_then(|v| v.to_str())
-        .ok_or_else(|| anyhow!("Failed to get script name"))?;
-    let mut cmd_args = vec![name.to_string()];
-    cmd_args.extend(args);
-    Ok((source, cmd_args))
-}
-
-fn expand_candicates(values: Vec<String>, script_file: &str) -> Result<Vec<String>> {
-    let mut output = vec![];
-    let mut param_fns = vec![];
-    for value in values {
-        let value_len = value.len();
-        if value_len > 2 && value.starts_with('`') && value.ends_with('`') {
-            param_fns.push(value.as_str()[1..value_len - 1].to_string());
-        } else {
-            output.push(value);
-        }
-    }
-    if !param_fns.is_empty() {
-        if let Some(shell) = get_shell_path() {
-            for param_fn in param_fns {
-                if let Ok(fn_output) = process::Command::new(&shell)
-                    .arg(script_file)
-                    .arg(&param_fn)
-                    .output()
-                {
-                    let fn_output = String::from_utf8_lossy(&fn_output.stdout);
-                    for line in fn_output.split('\n') {
-                        let line = line.trim();
-                        if !line.is_empty() {
-                            output.push(line.to_string());
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if output.len() == 1 {
-        let candicate = output[0].to_ascii_uppercase();
-        let is_arg_value = (candicate.starts_with('<')
-            && (candicate.ends_with('>') || candicate.ends_with(">...")))
-            || (candicate.starts_with('[')
-                && (candicate.ends_with(']') || candicate.ends_with("]...")));
-        if is_arg_value {
-            if candicate.contains("PATH") || candicate.contains("FILE") {
-                output[0] = "__argc_comp:file".into();
-            } else if candicate.contains("DIR") || candicate.contains("FOLDER") {
-                output[0] = "__argc_comp:dir".into();
-            } else {
-                output.clear();
-            }
-        }
-    }
-    Ok(output)
-}
-
-fn generate_boilerplate(args: &[String]) -> String {
-    let tasks = args
-        .iter()
-        .map(|cmd| {
-            format!(
-                r#"
-# @cmd
-{cmd}() {{
-    echo To implement command: {cmd}
-}}
-"#
-            )
-        })
-        .collect::<Vec<String>>()
-        .join("");
-
-    format!(
-        r#"#!/usr/bin/env bash
-
-set -e
-{tasks}
-eval "$(argc --argc-eval "$0" "$@")"
-"#
-    )
-}
-
-fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
-    let candidates = candidate_script_names();
-    let mut dir = env::current_dir().ok()?;
-    loop {
-        for name in candidates.iter() {
-            let path = dir.join(name);
-            if path.exists() {
-                return Some((dir, path));
-            }
-        }
-        if !recursive {
-            return None;
-        }
-        dir = dir.parent()?.to_path_buf();
-    }
-}
-
-fn candidate_script_names() -> Vec<String> {
-    let mut names = vec![];
-    if let Ok(name) = env::var("ARGC_SCRIPT_NAME") {
-        names.push(name.clone());
-        if !name.ends_with(".sh") {
-            names.push(format!("{name}.sh"));
-        }
-    }
-    names.extend(ARGC_SCRIPT_NAMES.into_iter().map(|v| v.to_string()));
-    names
-}
-
-fn get_shell_path() -> Option<PathBuf> {
-    let shell = match env::var("ARGC_SHELL") {
-        Ok(v) => Path::new(&v).to_path_buf(),
-        Err(_) => get_bash_path()?,
-    };
-    if !shell.exists() {
-        return None;
-    }
-    Some(shell)
-}
-
-#[cfg(windows)]
-fn get_bash_path() -> Option<PathBuf> {
-    let git_bash_path = PathBuf::from("C:\\Program Files\\Git\\bin\\bash.exe");
-    if git_bash_path.exists() {
-        return Some(git_bash_path);
-    }
-    if let Ok(bash) = which("bash") {
-        if bash.display().to_string().to_lowercase() != "c:\\windows\\system32\\bash.exe" {
-            return Some(bash);
-        }
-    }
-    let git = which("git").ok()?;
-    Some(git.parent()?.parent()?.join("bin").join("bash.exe"))
-}
-
-#[cfg(not(windows))]
-fn get_bash_path() -> Option<PathBuf> {
-    which("bash").ok()
 }

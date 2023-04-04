@@ -41,27 +41,15 @@ impl ParamData {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
-pub enum ParmaKind {
-    Flag,
-    Option,
-    Arg,
-}
-
-pub trait Param {
-    fn kind(&self) -> ParmaKind;
-    fn name(&self) -> &str;
-    fn tag_name(&self) -> &str;
-    fn render(&self) -> String;
-    fn build_arg(&self, index: usize) -> Result<Arg>;
-    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue>;
-    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()>;
-    fn is_positional(&self) -> bool;
-    fn to_json(&self) -> std::result::Result<serde_json::Value, serde_json::Error>;
+#[serde(tag = "type")]
+pub enum Param {
+    Flag(FlagParam),
+    Option(OptionParam),
+    Positional(PositionalParam),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct FlagParam {
-    pub(crate) kind: ParmaKind,
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) short: Option<char>,
@@ -72,7 +60,6 @@ pub struct FlagParam {
 impl FlagParam {
     pub fn new(arg: ParamData, summary: &str, short: Option<char>, no_long: bool) -> Self {
         FlagParam {
-            kind: ParmaKind::Flag,
             name: arg.name,
             short,
             no_long,
@@ -80,22 +67,16 @@ impl FlagParam {
             summary: summary.to_string(),
         }
     }
-}
 
-impl Param for FlagParam {
-    fn kind(&self) -> ParmaKind {
-        self.kind.clone()
-    }
-
-    fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         &self.name
     }
 
-    fn tag_name(&self) -> &str {
+    pub fn tag_name(&self) -> &str {
         "@flag"
     }
 
-    fn render(&self) -> String {
+    pub fn render(&self) -> String {
         let mut output = vec![];
         let multiple = if self.multiple { "*" } else { "" };
         if self.no_long {
@@ -112,51 +93,46 @@ impl Param for FlagParam {
         output.join(" ")
     }
 
-    fn build_arg(&self, _index: usize) -> Result<Arg> {
+    pub fn build_arg(&self) -> Result<Arg> {
         let mut arg = new_arg(&self.name, &self.summary);
         if !self.no_long {
             arg = arg.long(self.name.to_string());
         }
-        if self.multiple {
+        if let Some(s) = self.short {
+            arg = arg.short(s);
+        }
+        if self.name == "help" {
+            arg = arg.action(ArgAction::Help)
+        } else if self.name == "version" {
+            arg = arg.action(ArgAction::Version)
+        } else if self.multiple {
             arg = arg.action(ArgAction::Count);
         } else {
             arg = arg.action(ArgAction::SetTrue);
         }
-        if let Some(s) = self.short {
-            arg = arg.short(s);
-        }
         Ok(arg)
     }
 
-    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
+    pub fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
         if self.multiple {
             let count = matches.get_count(&self.name);
-            Some(ArgcValue::Single(self.name.clone(), count.to_string()))
-        } else if matches.get_flag(&self.name) {
-            Some(ArgcValue::Single(self.name.clone(), "1".to_string()))
-        } else {
-            None
+            return Some(ArgcValue::Single(self.name.clone(), count.to_string()));
         }
+        if let Ok(Some(&true)) = matches.try_get_one::<bool>(&self.name) {
+            return Some(ArgcValue::Single(self.name.clone(), "1".into()));
+        };
+        None
     }
 
-    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()> {
+    pub fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()> {
         let tag_name = self.tag_name();
         detect_name_conflict(&self.name, false, tag_name, names, pos)?;
         detect_short_name_conflict(&self.short, tag_name, names, pos)
-    }
-
-    fn is_positional(&self) -> bool {
-        false
-    }
-
-    fn to_json(&self) -> std::result::Result<serde_json::Value, serde_json::Error> {
-        serde_json::to_value(self)
     }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct OptionParam {
-    pub(crate) kind: ParmaKind,
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) short: Option<char>,
@@ -187,7 +163,6 @@ impl OptionParam {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
         OptionParam {
-            kind: ParmaKind::Option,
             name: arg.name.clone(),
             summary: summary.to_string(),
             short,
@@ -202,22 +177,16 @@ impl OptionParam {
             arg_value_names,
         }
     }
-}
 
-impl Param for OptionParam {
-    fn kind(&self) -> ParmaKind {
-        self.kind.clone()
-    }
-
-    fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         &self.name
     }
 
-    fn tag_name(&self) -> &str {
+    pub fn tag_name(&self) -> &str {
         "@option"
     }
 
-    fn render(&self) -> String {
+    pub fn render(&self) -> String {
         let mut output = vec![];
         if self.no_long {
             let name = render_name(
@@ -252,7 +221,7 @@ impl Param for OptionParam {
         output.join(" ")
     }
 
-    fn build_arg(&self, _index: usize) -> Result<Arg> {
+    pub fn build_arg(&self) -> Result<Arg> {
         let mut arg = new_arg(&self.name, &self.summary);
         if !self.no_long {
             arg = arg.long(self.name.to_string())
@@ -284,7 +253,24 @@ impl Param for OptionParam {
         Ok(arg)
     }
 
-    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
+    pub fn build_arg_loose(&self) -> Result<Arg> {
+        let mut arg = new_arg(&self.name, &self.summary);
+        if !self.no_long {
+            arg = arg.long(self.name.to_string())
+        }
+        if let Some(s) = self.short {
+            arg = arg.short(s);
+        }
+        if self.multiple {
+            arg = arg.value_delimiter(',').action(ArgAction::Append)
+        }
+        if let Some(default) = self.default.as_ref() {
+            arg = arg.default_value(default);
+        }
+        Ok(arg)
+    }
+
+    pub fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
         if !matches.contains_id(&self.name) {
             if let Some(default_fn) = self.default_fn.as_ref() {
                 return Some(ArgcValue::SingleFn(
@@ -301,29 +287,23 @@ impl Param for OptionParam {
                 .unwrap_or_default();
             Some(ArgcValue::Multiple(self.name.clone(), values))
         } else {
-            let value = escape_shell_words(matches.get_one::<String>(&self.name).unwrap());
+            let value = matches
+                .get_one::<String>(&self.name)
+                .map(|v| escape_shell_words(v))
+                .unwrap_or_default();
             Some(ArgcValue::Single(self.name.clone(), value))
         }
     }
 
-    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()> {
+    pub fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()> {
         let tag_name = self.tag_name();
         detect_name_conflict(&self.name, false, tag_name, names, pos)?;
         detect_short_name_conflict(&self.short, tag_name, names, pos)
-    }
-
-    fn is_positional(&self) -> bool {
-        false
-    }
-
-    fn to_json(&self) -> std::result::Result<serde_json::Value, serde_json::Error> {
-        serde_json::to_value(self)
     }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct PositionalParam {
-    pub(crate) kind: ParmaKind,
     pub(crate) name: String,
     pub(crate) summary: String,
     pub(crate) choices: Option<Vec<String>>,
@@ -340,7 +320,6 @@ pub struct PositionalParam {
 impl PositionalParam {
     pub fn new(arg: ParamData, summary: &str, value_name: Option<&str>) -> Self {
         PositionalParam {
-            kind: ParmaKind::Arg,
             name: arg.name.clone(),
             summary: summary.to_string(),
             choices: arg.choices,
@@ -359,7 +338,6 @@ impl PositionalParam {
 
     pub fn extra() -> Self {
         PositionalParam {
-            kind: ParmaKind::Arg,
             name: EXTRA_ARGS.to_string(),
             summary: "".to_string(),
             choices: None,
@@ -372,22 +350,16 @@ impl PositionalParam {
             arg_value_name: EXTRA_ARGS.to_string(),
         }
     }
-}
 
-impl Param for PositionalParam {
-    fn kind(&self) -> ParmaKind {
-        self.kind.clone()
-    }
-
-    fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         &self.name
     }
 
-    fn tag_name(&self) -> &str {
+    pub fn tag_name(&self) -> &str {
         "@arg"
     }
 
-    fn render(&self) -> String {
+    pub fn render(&self) -> String {
         let mut output = vec![];
         let name = render_name(
             &self.name,
@@ -406,7 +378,7 @@ impl Param for PositionalParam {
         output.join(" ")
     }
 
-    fn build_arg(&self, index: usize) -> Result<Arg> {
+    pub fn build_arg(&self, index: usize) -> Result<Arg> {
         let mut arg = new_arg(&self.name, &self.summary);
         arg = arg
             .index(index + 1)
@@ -429,7 +401,7 @@ impl Param for PositionalParam {
         Ok(arg)
     }
 
-    fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
+    pub fn get_arg_value(&self, matches: &ArgMatches) -> Option<ArgcValue> {
         if !matches.contains_id(&self.name) {
             if let Some(default_fn) = self.default_fn.as_ref() {
                 return Some(ArgcValue::PositionalSingleFn(
@@ -451,17 +423,9 @@ impl Param for PositionalParam {
         }
     }
 
-    fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()> {
+    pub fn detect_conflict(&self, names: &mut ParamNames, pos: Position) -> Result<()> {
         let tag_name = self.tag_name();
         detect_name_conflict(&self.name, true, tag_name, names, pos)
-    }
-
-    fn is_positional(&self) -> bool {
-        true
-    }
-
-    fn to_json(&self) -> std::result::Result<serde_json::Value, serde_json::Error> {
-        serde_json::to_value(self)
     }
 }
 

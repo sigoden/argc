@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_option_names -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Options all kind of names
 
 USAGE: spec cmd_option_names [OPTIONS] --opt2 <OPT2> --opt4 <OPT4>... --opt8 <OPT8> --op11 <OP11>
@@ -27,4 +25,6 @@ OPTIONS:
       --op11 <OP11>       required, choices from fn
   -h, --help              Print help
 
+EOF
+exit 0
 

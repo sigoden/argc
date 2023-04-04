@@ -5,10 +5,8 @@ expression: output
 RUN
 spec cmd_option_quotes -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Option value quoted
 
 USAGE: spec cmd_option_quotes [OPTIONS]
@@ -21,4 +19,6 @@ OPTIONS:
       --opt5 <OPT5>  [default: a|b] [possible values: a|b, c]d, ef]
   -h, --help         Print help
 
+EOF
+exit 0
 

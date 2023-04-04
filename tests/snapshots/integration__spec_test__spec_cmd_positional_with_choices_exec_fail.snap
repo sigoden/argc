@@ -5,13 +5,13 @@ expression: output
 RUN
 spec cmd_positional_with_choices x
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 error: invalid value 'x' for '[ARG]'
   [possible values: a, b]
 
 For more information, try '--help'.
 
+EOF
+exit 1
 

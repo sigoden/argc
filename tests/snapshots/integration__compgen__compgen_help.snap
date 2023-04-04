@@ -3,10 +3,39 @@ source: tests/compgen.rs
 expression: output
 ---
 RUN
-help
+help 
 
 STDOUT
-cmd_preferred cmd_omitted cmd_flag_names cmd_no_long_flags cmd_option_names cmd_no_long_options cmd_option_formats cmd_option_quotes cmd_option_notations cmd_flag_formats cmd_positional_only cmd_positional_many cmd_positional_requires cmd_positional_with_choices cmd_positional_with_default cmd_positional_with_default_fn cmd_positional_with_choices_and_default cmd_positional_with_choices_fn cmd_positional_with_choices_and_required cmd_positional_with_choices_fn_and_required cmd_without_any_arg cmd_alias a alias cmd_with_hyphens cmd_nested_command cmd_nested_command2 cmd_notation_values
+cmd_preferred	Preferred
+cmd_omitted	Omitted
+cmd_flag_names	Flags all kind of names
+cmd_no_long_flags	Flags without long name
+cmd_option_names	Options all kind of names
+cmd_no_long_options	Options without long name
+cmd_option_formats	Options all kind of formats
+cmd_option_quotes	Option value quoted
+cmd_option_notations	Option with value notations
+cmd_flag_formats	All kind of flags
+cmd_positional_only	Positional one required
+cmd_positional_many	Positional all required
+cmd_positional_requires	Positional all required
+cmd_positional_with_choices	Positional with choices
+cmd_positional_with_default	Positional with default value
+cmd_positional_with_default_fn	Positional with default value
+cmd_positional_with_choices_and_default	Positional with choices and value
+cmd_positional_with_choices_fn	Positional with choices and value
+cmd_positional_with_choices_and_required	Positional with choices and required
+cmd_positional_with_choices_fn_and_required	Positional with choices and value
+cmd_without_any_arg	Command without any arg
+cmd_alias	Command with alias
+a	Command with alias
+alias	Command with alias
+cmd_with_hyphens	Command with hyphens
+cmd_nested_command	Nested command
+cmd_nested_command2	Nested command2
+cmd_notation_values	Notation values
+cmd_dynamic_compgen	Dynamic compgen
+help
 
 STDERR
 

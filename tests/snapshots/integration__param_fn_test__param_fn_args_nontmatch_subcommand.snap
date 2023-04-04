@@ -1,0 +1,12 @@
+---
+source: tests/param_fn_test.rs
+expression: output
+---
+RUN
+spec _fn_args cmd_prefer
+
+OUTPUT
+argc__line=cmd_prefer
+argc__words=( cmd_prefer )
+_fn_args;exit;
+

@@ -5,12 +5,12 @@ expression: output
 RUN
 spec cmd_option_notations --opt2
 
-STDOUT
-
-
-STDERR
-error: a value is required for '--opt2 <FOO1> <FOO2>' but none was supplied
+OUTPUT
+cat >&2 <<-'EOF' 
+error: a value is required for '--opt2 <DIR> <FILE>' but none was supplied
 
 For more information, try '--help'.
 
+EOF
+exit 1
 

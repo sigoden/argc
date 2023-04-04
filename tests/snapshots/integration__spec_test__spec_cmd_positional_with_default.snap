@@ -1,15 +1,12 @@
 ---
 source: tests/spec_test.rs
-assertion_line: 104
 expression: output
 ---
 RUN
 spec cmd_positional_with_default -h
 
-STDOUT
-
-
-STDERR
+OUTPUT
+cat >&2 <<-'EOF' 
 Positional with default value
 
 USAGE: spec cmd_positional_with_default [ARG]
@@ -17,4 +14,6 @@ USAGE: spec cmd_positional_with_default [ARG]
 ARGS:
   [ARG]  A arg with default value [default: a]
 
+EOF
+exit 0
 

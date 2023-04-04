@@ -29,8 +29,6 @@ pub enum EventData {
     Version(String),
     /// Author info
     Author(String),
-    /// Help subcommand
-    Help(String),
     /// Define a subcommand, e.g. `@cmd A sub command`
     Cmd(String),
     /// Define alias for a subcommand, e.g. `@alias t,tst`
@@ -121,13 +119,7 @@ fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
 fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
     map(
         pair(
-            alt((
-                tag("describe"),
-                tag("version"),
-                tag("author"),
-                tag("cmd"),
-                tag("help"),
-            )),
+            alt((tag("describe"), tag("version"), tag("author"), tag("cmd"))),
             parse_tail,
         ),
         |(tag, text)| {
@@ -135,7 +127,6 @@ fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
             Some(match tag {
                 "describe" => EventData::Describe(text),
                 "version" => EventData::Version(text),
-                "help" => EventData::Help(text),
                 "author" => EventData::Author(text),
                 "cmd" => EventData::Cmd(text),
                 _ => unreachable!(),
@@ -563,7 +554,6 @@ fn is_short_char(c: char) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::param::Param;
 
     macro_rules! assert_token {
         ($comment:literal, Ignore) => {

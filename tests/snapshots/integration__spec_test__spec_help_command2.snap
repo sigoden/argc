@@ -1,0 +1,24 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec help cmd_preferred
+
+OUTPUT
+cat >&2 <<-'EOF' 
+Preferred
+
+USAGE: cmd_preferred [OPTIONS] [ARG1]...
+
+ARGS:
+  [ARG1]...  A positional arg
+
+OPTIONS:
+  -f, --flag1        A flag
+  -o, --opt1 <OPT1>  A option
+  -h, --help         Print help
+
+EOF
+exit 0
+
