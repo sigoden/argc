@@ -115,7 +115,7 @@ USAGE:{usage}"#,
     } else {
         let shell = get_shell_path().ok_or_else(|| anyhow!("Shell not found"))?;
         let (script_dir, script_file) = get_script_path(true)
-            .ok_or_else(|| anyhow!("argcfile not found, try `argc --argc-help` for help."))?;
+            .ok_or_else(|| anyhow!("Argcfile not found, try `argc --argc-help` for help."))?;
         let interrupt = Arc::new(AtomicBool::new(false));
         let interrupt_me = interrupt.clone();
         ctrlc::set_handler(move || interrupt_me.store(true, Ordering::Relaxed))

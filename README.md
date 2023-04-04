@@ -284,7 +284,8 @@ If you want to use another bash, please specify it via `ARGC_SHELL` environment 
 If you want to run the bash script directly, you can add the following configuration to Windows Registry.
 
 ```
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\command' -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\command' `
+  -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
 ```
 
 ## License
