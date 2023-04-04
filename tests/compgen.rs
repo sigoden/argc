@@ -102,3 +102,8 @@ fn test_compgen_unknown_option2() {
 fn test_compgen_many_positionals() {
     snapshot_compgen!("cmd_positional_many foo ");
 }
+
+#[test]
+fn test_compgen_cmd_no_args() {
+    snapshot_compgen!("cmd_without_any_arg ");
+}
