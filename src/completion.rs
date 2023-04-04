@@ -6,7 +6,6 @@ use either::Either;
 use indexmap::{IndexMap, IndexSet};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::env;
 use std::sync::Arc;
 use std::{process, str::FromStr};
 
@@ -27,12 +26,6 @@ pub fn compgen(
     shell.convert(&candicates, &last_word)
 }
 
-fn generate_candiates(source: &str, line: &str) -> Result<Vec<(String, String)>> {
-    let events = parse(source)?;
-    let comp = Completion::new_from_events(&events);
-    comp.generate(line)
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Shell {
     Bash,
@@ -50,7 +43,10 @@ impl FromStr for Shell {
             "zsh" => Ok(Self::Zsh),
             "powershell" => Ok(Self::Powershell),
             "fish" => Ok(Self::Fish),
-            _ => bail!("Invalid shell, must be one of {}", Shell::list()),
+            _ => bail!(
+                "The provided shell is either invalid or missing, must be one of {}",
+                Shell::list()
+            ),
         }
     }
 }
@@ -60,19 +56,12 @@ impl Shell {
         "bash,zsh,powershell,fish"
     }
     pub fn convert(&self, candicates: &[(String, String)], last_word: &str) -> Result<String> {
-        let no_description = compgen_no_description();
         if candicates.len() == 1 {
             return Ok(self.convert_value(&candicates[0].0, last_word));
         }
         let output = candicates
             .iter()
-            .map(|(value, description)| {
-                if no_description {
-                    self.convert_candiate(value, last_word, "")
-                } else {
-                    self.convert_candiate(value, last_word, description)
-                }
-            })
+            .map(|(value, description)| self.convert_candiate(value, last_word, description))
             .collect::<Vec<String>>()
             .join("\n");
         Ok(output)
@@ -434,12 +423,12 @@ impl Completion {
                 {
                     has_flags_and_options = false;
                 }
-                let mut options = vec![];
                 if has_flags_and_options {
                     comp.output_flags_and_options(&mut output, &skipped_flags_options);
                 }
-                options.extend(output);
-                output = options;
+                if output.is_empty() {
+                    output.push(("__argc_value:file".into(), String::new()))
+                }
             }
         }
         Ok(output)
@@ -615,6 +604,12 @@ fn is_flag_or_option(arg: &str) -> bool {
     arg != "--" && arg.starts_with('-')
 }
 
+fn generate_candiates(source: &str, line: &str) -> Result<Vec<(String, String)>> {
+    let events = parse(source)?;
+    let comp = Completion::new_from_events(&events);
+    comp.generate(line)
+}
+
 fn expand_candicates(
     values: Vec<(String, String)>,
     script_file: &str,
@@ -660,9 +655,10 @@ fn expand_candicates(
     if output.len() == 1 {
         let value = &output[0].0;
         if let Some(value_name) = value.strip_prefix("__argc_value") {
-            if value_name.contains("PATH") || value_name.contains("FILE") {
+            let value_name = value_name.to_ascii_lowercase();
+            if value_name.contains("path") || value_name.contains("file") {
                 output[0] = ("__argc_comp:file".into(), String::new());
-            } else if value_name.contains("DIR") || value_name.contains("FOLDER") {
+            } else if value_name.contains("dir") || value_name.contains("folder") {
                 output[0] = ("__argc_comp:dir".into(), String::new());
             } else {
                 output.clear();
@@ -762,13 +758,6 @@ fn bash_escape(value: &str) -> String {
 
 fn powershell_escape(value: &str) -> String {
     escape_shell_words(value)
-}
-
-fn compgen_no_description() -> bool {
-    match env::var("ARGC_COMPGEN_NO_DESCRIPTION") {
-        Ok(v) => v == "true" || v == "1",
-        Err(_) => false,
-    }
 }
 
 fn convert_arg_value(name: &str) -> String {
