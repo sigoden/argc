@@ -55,13 +55,44 @@ impl Shell {
     pub fn list() -> &'static str {
         "bash,zsh,powershell,fish"
     }
+
     pub fn convert(&self, candicates: &[(String, String)], last_word: &str) -> Result<String> {
         if candicates.len() == 1 {
             return Ok(self.convert_value(&candicates[0].0, last_word));
         }
-        let output = candicates
+        let with_description = self.with_description();
+        let mut max_width = 0;
+        let values: Vec<String> = candicates
             .iter()
-            .map(|(value, description)| self.convert_candiate(value, last_word, description))
+            .map(|(v, _)| {
+                let value = self.convert_value(v, last_word);
+                max_width = max_width.max(value.len());
+                value
+            })
+            .collect();
+        let value_width = 95 - max_width;
+        let output = values
+            .into_iter()
+            .enumerate()
+            .map(|(i, value)| {
+                let description = &candicates[i].1;
+                if !with_description || description.is_empty() {
+                    return value;
+                }
+                match self {
+                    Shell::Bash => {
+                        let description = if description.len() >= value_width {
+                            format!("{}...", &description[..value_width])
+                        } else {
+                            description.clone()
+                        };
+                        format!("{:<width$}({})", value, description, width = max_width + 2)
+                    }
+                    Shell::Zsh => format!("{}:{}", value, description),
+                    Shell::Powershell => format!("{}\t{}", value, description),
+                    Shell::Fish => format!("{}\t{}", value, description),
+                }
+            })
             .collect::<Vec<String>>()
             .join("\n");
         Ok(output)
@@ -92,18 +123,18 @@ impl Shell {
         }
     }
 
-    pub fn convert_candiate(&self, value: &str, last_word: &str, description: &str) -> String {
-        let value = self.convert_value(value, last_word);
-        if description.is_empty() {
-            value
-        } else {
-            match self {
-                Shell::Bash => value,
-                Shell::Zsh => format!("{}:{}", value, description),
-                Shell::Powershell => format!("{}\t{}", value, description),
-                Shell::Fish => format!("{}\t{}", value, description),
+    pub fn with_description(&self) -> bool {
+        if let Ok(v) = std::env::var("ARGC_COMPLETION_DESCRIPTION") {
+            if v == "true" || v == "1" {
+                return true;
+            } else if v == "false" || v == "0" {
+                return false;
             }
         }
+        if self == &Shell::Bash {
+            return false;
+        }
+        true
     }
 }
 
