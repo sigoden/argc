@@ -20,7 +20,7 @@ pub fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     let script_file = args[0].as_str();
     let args: Vec<String> = args[1..].to_vec();
     let source = fs::read_to_string(script_file)
-        .with_context(|| format!("Failed to read '{}'", script_file))?;
+        .with_context(|| format!("Failed to load script at '{}'", script_file))?;
     let name = Path::new(script_file)
         .file_name()
         .and_then(|v| v.to_str())
