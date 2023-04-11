@@ -4,7 +4,6 @@ use argc::Shell;
 
 const BASH_SCRIPT: &str = r###"
 _argc_complete() {
-	export COMP_WORDBREAKS
     local cmd=${COMP_WORDS[0]}
     local scriptfile
     if [[ "$cmd" == "argc" ]]; then
@@ -18,6 +17,7 @@ _argc_complete() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     local line=${COMP_LINE:${#COMP_WORDS[0]}}
     local IFS=$'\n'
+    export COMP_WORDBREAKS
     local candicates=($(argc --argc-compgen bash "$scriptfile" "$line" 2>/dev/null))
     if [[ ${#candicates[@]} -eq 1 ]]; then
         if [[ "${candicates[0]}" == "__argc_comp:file" ]]; then
@@ -28,6 +28,9 @@ _argc_complete() {
             _argc_complete_path -d
         fi
     fi
+
+    _argc_complete_nospace "${candicates[@]}"
+
     if [[ ${#candicates[@]} -gt 0 ]]; then
         COMPREPLY=(${candicates[@]})
     fi
@@ -44,6 +47,24 @@ _argc_complete_path() {
             compopt -o nospace -o plusdirs > /dev/null 2>&1
             COMPREPLY=($(compgen -f -- "${cur}"))
         fi
+    fi
+}
+
+_argc_complete_nospace() {
+    if [[ $# -eq 0 ]]; then
+        return
+    fi
+    local nospace=1
+    local value last_char
+    for value in ${@}; do
+        last_char="${value: -1}"
+        if [[ ! "$COMP_WORDBREAKS" == *"$last_char"* ]]; then
+            nospace=0
+            break
+        fi
+    done
+    if [[ "$nospace" == "1" ]]; then
+        compopt -o nospace > /dev/null 2>&1
     fi
 }
 "###;
