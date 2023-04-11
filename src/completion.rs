@@ -108,11 +108,11 @@ impl Shell {
         }
         match self {
             Shell::Bash => {
-                if last_word.contains(':') {
-                    if let Some((prefix, _)) = last_word.rsplit_once(':') {
-                        if let Some(value) = value.strip_prefix(&last_word[0..prefix.len() + 1]) {
-                            return value.to_string();
-                        }
+                if let Some((prefix, _)) =
+                    last_word.rsplit_once(|c| self.word_breaks().contains(&c))
+                {
+                    if let Some(value) = value.strip_prefix(&last_word[0..prefix.len() + 1]) {
+                        return value.to_string();
                     }
                 }
                 bash_escape(value)
@@ -120,6 +120,16 @@ impl Shell {
             Shell::Zsh => zsh_escape(value),
             Shell::Powershell => format!("{} ", powershell_escape(value)),
             Shell::Fish => value.to_string(),
+        }
+    }
+
+    pub fn word_breaks(&self) -> Vec<char> {
+        match self {
+            Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
+                Ok(v) => v.chars().collect(),
+                Err(_) => vec!['=', ':', '|'],
+            },
+            _ => vec![],
         }
     }
 

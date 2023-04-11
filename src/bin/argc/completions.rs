@@ -4,6 +4,7 @@ use argc::Shell;
 
 const BASH_SCRIPT: &str = r###"
 _argc_complete() {
+	export COMP_WORDBREAKS
     local cmd=${COMP_WORDS[0]}
     local scriptfile
     if [[ "$cmd" == "argc" ]]; then
