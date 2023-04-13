@@ -68,10 +68,6 @@ impl FlagParam {
         }
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
     pub fn tag_name(&self) -> &str {
         "@flag"
     }
@@ -176,10 +172,6 @@ impl OptionParam {
             value_names,
             arg_value_names,
         }
-    }
-
-    pub fn name(&self) -> &str {
-        &self.name
     }
 
     pub fn tag_name(&self) -> &str {
@@ -349,10 +341,6 @@ impl PositionalParam {
             value_name: None,
             arg_value_name: EXTRA_ARGS.to_string(),
         }
-    }
-
-    pub fn name(&self) -> &str {
-        &self.name
     }
 
     pub fn tag_name(&self) -> &str {
