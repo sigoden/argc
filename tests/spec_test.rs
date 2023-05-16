@@ -287,3 +287,8 @@ fn test_spec_help_command2() {
 fn test_spec_help_command3() {
     snapshot!(SPEC_SCRIPT, &["spec", "help", "cmd_prefered"]);
 }
+
+#[test]
+fn test_spec_combine_shorts() {
+    snapshot!(SPEC_SCRIPT, &["spec", "cmd_combine_shorts", "-ac", "yes"]);
+}

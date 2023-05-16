@@ -1,0 +1,12 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec cmd_combine_shorts -ac yes
+
+OUTPUT
+argc_a=1
+argc_c=yes
+cmd_combine_shorts
+

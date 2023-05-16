@@ -1,6 +1,5 @@
 ---
 source: tests/export.rs
-assertion_line: 3
 expression: output
 ---
 {
@@ -1490,6 +1489,59 @@ expression: output
           "value_name": null
         }
       ],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "Combine shorts",
+      "name": "cmd_combine_shorts",
+      "author": null,
+      "version": null,
+      "options": [
+        {
+          "name": "a",
+          "describe": "",
+          "short": "a",
+          "flag": true,
+          "no_long": true,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "name": "b",
+          "describe": "",
+          "short": "b",
+          "flag": true,
+          "no_long": true,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "name": "c",
+          "describe": "",
+          "short": "c",
+          "flag": false,
+          "no_long": true,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     }
