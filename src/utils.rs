@@ -46,13 +46,6 @@ pub fn get_shell_path() -> Option<PathBuf> {
     Some(shell)
 }
 
-pub fn no_color() -> bool {
-    if let Ok(v) = env::var("NO_COLOR") {
-        return v == "true" || v == "1";
-    }
-    false
-}
-
 #[cfg(windows)]
 pub fn get_bash_path() -> Option<PathBuf> {
     let git_bash_path = PathBuf::from("C:\\Program Files\\Git\\bin\\bash.exe");

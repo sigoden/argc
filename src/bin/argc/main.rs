@@ -2,11 +2,7 @@ mod completions;
 mod utils;
 
 use anyhow::{anyhow, bail, Context, Result};
-use argc::{
-    utils::{get_shell_path, no_color},
-    Shell,
-};
-use clap::{Arg, ArgAction, Command};
+use argc::{utils::get_shell_path, Shell};
 use std::{
     env, fs, process,
     sync::{
@@ -32,86 +28,69 @@ fn main() {
 
 fn run() -> Result<i32> {
     let args: Vec<String> = std::env::args().collect();
-    let mut argc_args = vec![args[0].clone()];
+    let mut argc_cmd = None;
     if let Some(arg) = args.get(1) {
         if arg.starts_with("--argc-") {
-            argc_args.push(args[1].clone());
+            argc_cmd = Some(arg.as_str());
         }
-    }
-    let matches = Command::new(env!("CARGO_CRATE_NAME"))
-        .version(env!("CARGO_PKG_VERSION"))
-        .author(env!("CARGO_PKG_AUTHORS"))
-        .override_usage(
-            r#"
-    argc --argc-eval <SCRIPT> [ARGS...]           Use `eval "$(argc --argc-eval "$0" "$@")"`
-    argc --argc-create [TASKS...]                 Create a boilerplate argcfile
-    argc --argc-completions <SHELL> [CMDS...]     Generate completion scripts for bash,zsh,fish,powershell
-    argc --argc-compgen <SHELL> <SCRIPT> <LINE>   Generate dynamic completion word
-    argc --argc-export <SCRIPT>                   Export command line definitions as json
-    argc --argc-script-path                       Print current argcfile path
-    argc --argc-help                              Print help information
-    argc --argc-version                           Print version information"#,
-        )
-        .help_template(
-            r#"{bin} {version}
-{author}
-{about}
+    };
 
-USAGE:{usage}"#,
-        )
-        .about(concat!(
-            env!("CARGO_PKG_DESCRIPTION"),
-            " - ",
-            env!("CARGO_PKG_REPOSITORY")
-        ))
-        .arg(Arg::new("argc-eval").long("argc-eval").action(ArgAction::SetTrue))
-        .arg(Arg::new("argc-create").long("argc-create").action(ArgAction::SetTrue))
-        .arg(Arg::new("argc-export").long("argc-export").action(ArgAction::SetTrue))
-        .arg(Arg::new("argc-compgen").long("argc-compgen").action(ArgAction::SetTrue))
-        .arg(Arg::new("argc-completions").long("argc-completions").action(ArgAction::SetTrue))
-        .arg(Arg::new("argc-script-path").long("argc-script-path").action(ArgAction::SetTrue))
-        .arg(Arg::new("argc-help").long("argc-help").action(ArgAction::Help))
-        .arg(Arg::new("argc-version").long("argc-version").action(ArgAction::Version))
-        .try_get_matches_from(&argc_args)?;
-
-    if matches.get_flag("argc-eval") {
-        let (source, cmd_args) = parse_script_args(&args[2..])?;
-        let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        let values = argc::eval(&source, &cmd_args)?;
-        println!("{}", argc::ArgcValue::to_shell(values, no_color()))
-    } else if matches.get_flag("argc-create") {
-        if let Some((_, script_file)) = get_script_path(false) {
-            bail!("Already exist {}", script_file.display());
+    if let Some(argc_cmd) = argc_cmd {
+        match argc_cmd {
+            "--argc-eval" => {
+                let (source, cmd_args) = parse_script_args(&args[2..])?;
+                let values = argc::eval(&source, &cmd_args)?;
+                println!("{}", argc::ArgcValue::to_shell(values))
+            }
+            "--argc-create" => {
+                if let Some((_, script_file)) = get_script_path(false) {
+                    bail!("Already exist {}", script_file.display());
+                }
+                let content = generate_boilerplate(&args[2..]);
+                let names = candidate_script_names();
+                fs::write(&names[0], content)
+                    .with_context(|| format!("Failed to create {}", &names[0]))?;
+                println!("{} has been successfully created.", &names[0]);
+            }
+            "--argc=export" => {
+                let (source, cmd_args) = parse_script_args(&args[2..])?;
+                let json = argc::export(&source, &cmd_args[0])?;
+                println!("{}", serde_json::to_string_pretty(&json)?);
+            }
+            "--argc-compgen" => {
+                let shell: Shell = match args.get(2) {
+                    Some(v) => v.parse()?,
+                    None => bail!("Usage: argc --argc-compgen <SHELL> <SCRIPT> <LINE>"),
+                };
+                let (source, cmd_args) = parse_script_args(&args[3..])?;
+                let line = cmd_args.get(1).cloned().unwrap_or_default();
+                let output = argc::compgen(shell, &args[3], &source, &cmd_args[0], &line)?;
+                println!("{output}");
+            }
+            "--argc-completions" => {
+                let shell: Shell = match args.get(2) {
+                    Some(v) => v.parse()?,
+                    None => bail!("Usage: argc --argc-completions <SHELL> [CMDS...]"),
+                };
+                let script = crate::completions::generate(shell, &args[3..])?;
+                println!("{}", script);
+            }
+            "--argc-script-path" => {
+                let (_, script_file) =
+                    get_script_path(true).ok_or_else(|| anyhow!("Argcfile not found."))?;
+                print!("{}", script_file.display());
+            }
+            "--argc-help" => {
+                println!("{}", get_argc_help())
+            }
+            "--argc-version" => {
+                println!("{}", get_argc_version())
+            }
+            _ => {
+                bail!("Invalid option `{argc_cmd}`")
+            }
         }
-        let content = generate_boilerplate(&args[2..]);
-        let names = candidate_script_names();
-        fs::write(&names[0], content).with_context(|| format!("Failed to create {}", &names[0]))?;
-        println!("{} has been successfully created.", &names[0]);
-    } else if matches.get_flag("argc-export") {
-        let (source, cmd_args) = parse_script_args(&args[2..])?;
-        let json = argc::export(&source, &cmd_args[0])?;
-        println!("{}", serde_json::to_string_pretty(&json)?);
-    } else if matches.get_flag("argc-compgen") {
-        let shell: Shell = match args.get(2) {
-            Some(v) => v.parse()?,
-            None => bail!("Usage: argc --argc-compgen <SHELL> <SCRIPT> <LINE>"),
-        };
-        let (source, cmd_args) = parse_script_args(&args[3..])?;
-        let cmd_args: Vec<&str> = cmd_args.iter().map(|v| v.as_str()).collect();
-        let line = cmd_args.get(1).copied().unwrap_or_default();
-        let output = argc::compgen(shell, &args[3], &source, line)?;
-        println!("{output}");
-    } else if matches.get_flag("argc-completions") {
-        let shell: Shell = match args.get(2) {
-            Some(v) => v.parse()?,
-            None => bail!("Usage: argc --argc-completions <SHELL> [CMDS...]"),
-        };
-        let script = crate::completions::generate(shell, &args[3..])?;
-        println!("{}", script);
-    } else if matches.get_flag("argc-script-path") {
-        let (_, script_file) =
-            get_script_path(true).ok_or_else(|| anyhow!("Argcfile not found."))?;
-        print!("{}", script_file.display());
+        Ok(0)
     } else {
         let shell = get_shell_path().ok_or_else(|| anyhow!("Shell not found"))?;
         let (script_dir, script_file) = get_script_path(true)
@@ -128,10 +107,41 @@ USAGE:{usage}"#,
             .status()
             .with_context(|| format!("Failed to run `{}`", script_file.display()))?;
         if interrupt.load(Ordering::Relaxed) {
-            return Ok(130);
+            Ok(130)
+        } else {
+            Ok(status.code().unwrap_or_default())
         }
-        return Ok(status.code().unwrap_or_default());
     }
+}
 
-    Ok(0)
+fn get_argc_help() -> String {
+    let name = env!("CARGO_CRATE_NAME");
+    let version = env!("CARGO_PKG_VERSION");
+    let about = concat!(
+        env!("CARGO_PKG_DESCRIPTION"),
+        " - ",
+        env!("CARGO_PKG_REPOSITORY")
+    );
+    format!(
+        r###"
+{name} {version}
+{about}
+
+USAGE:
+    argc --argc-eval <SCRIPT> [ARGS...]           Use `eval "$(argc --argc-eval "$0" "$@")"`
+    argc --argc-create [TASKS...]                 Create a boilerplate argcfile
+    argc --argc-completions <SHELL> [CMDS...]     Generate completion scripts for bash,zsh,fish,powershell
+    argc --argc-compgen <SHELL> <SCRIPT> <LINE>   Generate dynamic completion word
+    argc --argc-export <SCRIPT>                   Export command line definitions as json
+    argc --argc-script-path                       Print current argcfile path
+    argc --argc-help                              Print help information
+    argc --argc-version                           Print version information
+"###
+    )
+}
+
+fn get_argc_version() -> String {
+    let name = env!("CARGO_CRATE_NAME");
+    let version = env!("CARGO_PKG_VERSION");
+    format!("{name} {version}\n")
 }

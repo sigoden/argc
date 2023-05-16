@@ -12,12 +12,12 @@ Options all kind of formats
 USAGE: spec cmd_option_formats [OPTIONS]
 
 OPTIONS:
-      --opt1 <OPT1>  
-  -a, --opt2 <OPT2>  
-      --opt3 <OPT>   
+      --opt1 <OPT1>
+  -a, --opt2 <OPT2>
+      --opt3 <OPT>
       --opt4 <OPT4>  With description
   -b, --opt5 <OPT5>  With description
-  -c, --opt6 <OPT>   
+  -c, --opt6 <OPT>
       --opt7 <OPT>   With description
   -h, --help         Print help
 

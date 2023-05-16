@@ -12,9 +12,9 @@ Option with value notations
 USAGE: spec cmd_option_notations [OPTIONS]
 
 OPTIONS:
-      --opt1 <DIR>         
-      --opt2 <DIR> <FILE>  
-  -h, --help               Print help
+      --opt1 <DIR>
+      --opt2 <DIR> <FILE>
+  -h, --help
 
 EOF
 exit 0

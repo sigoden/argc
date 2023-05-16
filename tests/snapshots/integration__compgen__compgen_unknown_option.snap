@@ -6,7 +6,6 @@ RUN
 cmd_omitted --unknown foo --flag1 
 
 STDOUT
-[ARG1]
 --opt1
 
 STDERR

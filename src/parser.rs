@@ -1,4 +1,4 @@
-use crate::param::{FlagParam, OptionParam, ParamData, PositionalParam};
+use crate::param::{FlagOptionParam, ParamData, PositionalParam};
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
 use anyhow::bail;
@@ -33,12 +33,10 @@ pub enum EventData {
     Cmd(String),
     /// Define alias for a subcommand, e.g. `@alias t,tst`
     Aliases(Vec<String>),
-    /// Define a option parameter
-    Option(OptionParam),
+    /// Define a flag or option parameter
+    FlagOption(FlagOptionParam),
     /// Define a positional parameter
     Positional(PositionalParam),
-    /// Define a flag
-    Flag(FlagParam),
     /// A shell function. e.g `function cmd()` or `cmd()`
     Func(String),
     /// Placeholder for unknown or invalid tag
@@ -140,11 +138,11 @@ fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
     let arg = alt((
         map(
             preceded(pair(tag("flag"), space1), parse_flag_param),
-            |param| Some(EventData::Flag(param)),
+            |param| Some(EventData::FlagOption(param)),
         ),
         map(
             preceded(pair(tag("option"), space1), parse_option_param),
-            |param| Some(EventData::Option(param)),
+            |param| Some(EventData::FlagOption(param)),
         ),
         map(
             preceded(pair(tag("arg"), space1), parse_positional_param),
@@ -171,12 +169,12 @@ fn parse_tag_unknown(input: &str) -> nom::IResult<&str, Option<EventData>> {
 }
 
 // Parse `@option`
-fn parse_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
+fn parse_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     alt((parse_with_long_option_param, parse_no_long_option_param))(input)
 }
 
 // Parse `@option` with long name
-fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
+fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
         tuple((
             parse_short,
@@ -194,14 +192,14 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> 
             parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |(short, arg, value_names, summary)| {
-            OptionParam::new(arg, summary, short, false, &value_names)
+        |(short, arg, value_names, describe)| {
+            FlagOptionParam::new(arg, describe, short, false, false, &value_names)
         },
     )(input)
 }
 
 // Parse `@option` without long name
-fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
+fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
         tuple((
             preceded(
@@ -221,9 +219,9 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, OptionParam> {
             parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |(arg, value_names, summary)| {
+        |(arg, value_names, describe)| {
             let short = arg.name.chars().next();
-            OptionParam::new(arg, summary, short, true, &value_names)
+            FlagOptionParam::new(arg, describe, short, false, true, &value_names)
         },
     )(input)
 }
@@ -243,36 +241,36 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
             parse_zero_or_one_value_notation,
             parse_tail,
         )),
-        |(arg, value_name, summary)| PositionalParam::new(arg, summary, value_name),
+        |(arg, value_name, describe)| PositionalParam::new(arg, describe, value_name),
     )(input)
 }
 
 // Parse `@flag`
-fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
+fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     alt((parse_with_long_flag_param, parse_no_long_flag_param))(input)
 }
 // Parse `@flag`
-fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
+fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
         tuple((
             parse_short,
             preceded(pair(space0, tag("--")), parse_long_flag_and_asterisk),
             parse_tail,
         )),
-        |(short, arg, summary)| FlagParam::new(arg, summary, short, false),
+        |(short, arg, describe)| FlagOptionParam::new(arg, describe, short, true, false, &[]),
     )(input)
 }
 
 // Parse `@flag` without long name
-fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagParam> {
+fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
         tuple((
             preceded(pair(space0, tag("-")), parse_short_flag_and_asterisk),
             parse_tail,
         )),
-        |(arg, summary)| {
+        |(arg, describe)| {
             let short = arg.name.chars().next();
-            FlagParam::new(arg, summary, short, true)
+            FlagOptionParam::new(arg, describe, short, true, true, &[])
         },
     )(input)
 }
@@ -726,8 +724,8 @@ mod tests {
         assert_token!("# @cmd A subcommand", Cmd, "A subcommand");
         assert_token!("# @alias tst", Aliases, vec!["tst"]);
         assert_token!("# @alias t,tst", Aliases, vec!["t", "tst"]);
-        assert_token!("# @flag -f --foo", Flag);
-        assert_token!("# @option -f --foo", Option);
+        assert_token!("# @flag -f --foo", FlagOption);
+        assert_token!("# @option -f --foo", FlagOption);
         assert_token!("# @arg foo", Positional);
         assert_token!("foo()", Func, "foo");
         assert_token!("foo ()", Func, "foo");

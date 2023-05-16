@@ -10,12 +10,12 @@ cat >&2 <<-'EOF'
 USAGE: prog [OPTIONS] <COMMAND>
 
 OPTIONS:
-      --foo   
-  -h, --help  Print help
+      --foo
+  -h, --help
 
 COMMANDS:
-  cmd  
+  cmd
 
 EOF
-exit 1
+exit 0
 

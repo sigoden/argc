@@ -7,7 +7,9 @@ spec cmd_option_notations --opt2
 
 OUTPUT
 cat >&2 <<-'EOF' 
-error: a value is required for '--opt2 <DIR> <FILE>' but none was supplied
+error: invalid values for '--opt2 <DIR> <FILE>'
+
+USAGE: spec cmd_option_notations [OPTIONS]
 
 For more information, try '--help'.
 

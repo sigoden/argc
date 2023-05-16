@@ -6,8 +6,8 @@ RUN
 spec cmd_preferred -f -o A AB C D
 
 OUTPUT
-argc_arg1=( AB 'C D' )
 argc_flag1=1
 argc_opt1=A
+argc_arg1=( AB 'C D' )
 cmd_preferred AB 'C D'
 

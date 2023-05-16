@@ -1,6 +1,6 @@
-use crate::completion::Completion;
-use crate::parser::parse;
-use crate::utils::{escape_shell_words, get_shell_path};
+use crate::command::Command;
+use crate::matcher::Matcher;
+use crate::utils::{escape_shell_words, get_shell_path, split_shell_words};
 use crate::Result;
 use anyhow::bail;
 use std::{process, str::FromStr};
@@ -9,6 +9,7 @@ pub fn compgen(
     shell: Shell,
     script_path: &str,
     script_content: &str,
+    bin_name: &str,
     line: &str,
 ) -> Result<String> {
     let (last_word, unbalance_char) = get_last_word(line);
@@ -17,9 +18,14 @@ pub fn compgen(
     } else {
         line.to_string()
     };
-    let events = parse(script_content)?;
-    let comp = Completion::new_from_events(&events);
-    let candicates = comp.generate(&line)?;
+    let mut args = split_shell_words(&line)?;
+    args.insert(0, bin_name.to_string());
+    if line.trim_end() != line {
+        args.push("".into());
+    }
+    let cmd = Command::new(script_content)?;
+    let matcher = Matcher::new(&cmd, &args);
+    let candicates = matcher.to_comp_words();
     let candicates = expand_candicates(candicates, script_path, &line, &last_word)?;
     shell.convert(&candicates, &last_word)
 }

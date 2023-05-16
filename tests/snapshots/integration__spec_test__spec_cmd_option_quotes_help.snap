@@ -13,10 +13,10 @@ USAGE: spec cmd_option_quotes [OPTIONS]
 
 OPTIONS:
       --opt1 <OPT1>  [default: a]
-      --opt2 <OPT2>  [default: "a b"]
-      --opt3 <OPT3>  [possible values: "a 3", b, c]
-      --opt4 <OPT4>  [default: "a b"] [possible values: "a b", "c d", "e f"]
-      --opt5 <OPT5>  [default: a|b] [possible values: a|b, c]d, ef]
+      --opt2 <OPT2>  [default: 'a b']
+      --opt3 <OPT3>  [possible values: 'a 3', b, c]
+      --opt4 <OPT4>  [default: 'a b'] [possible values: 'a b', 'c d', 'e f']
+      --opt5 <OPT5>  [default: 'a|b'] [possible values: 'a|b', c]d, ef]
   -h, --help         Print help
 
 EOF

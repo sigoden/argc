@@ -1,14 +1,14 @@
 mod argc_value;
-mod cli;
+mod command;
 mod compgen;
-mod completion;
-pub mod param;
-pub mod parser;
+mod matcher;
+mod param;
+mod parser;
 pub mod utils;
 
 use anyhow::Error;
 pub use argc_value::ArgcValue;
-pub use cli::{eval, export};
+pub use command::{eval, export};
 pub use compgen::{compgen, Shell};
 
 pub type Result<T> = std::result::Result<T, Error>;

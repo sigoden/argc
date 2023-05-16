@@ -1,5 +1,6 @@
 ---
 source: tests/export.rs
+assertion_line: 3
 expression: output
 ---
 {
@@ -7,7 +8,8 @@ expression: output
   "name": "spec",
   "author": "nobody <nobody@example.com>",
   "version": "0.10.0",
-  "params": [],
+  "options": [],
+  "positionals": [],
   "aliases": [],
   "subcommands": [
     {
@@ -15,32 +17,12 @@ expression: output
       "name": "cmd_preferred",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Positional",
-          "name": "arg1",
-          "summary": "A positional arg",
-          "choices": null,
-          "choices_fn": null,
-          "multiple": true,
-          "required": false,
-          "default": null,
-          "default_fn": null,
-          "value_name": null
-        },
-        {
-          "type": "Flag",
           "name": "flag1",
-          "summary": "A flag",
+          "describe": "A flag",
           "short": "f",
-          "no_long": false,
-          "multiple": false
-        },
-        {
-          "type": "Option",
-          "name": "opt1",
-          "summary": "A option",
-          "short": "o",
+          "flag": true,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -49,6 +31,33 @@ expression: output
           "default": null,
           "default_fn": null,
           "value_names": []
+        },
+        {
+          "name": "opt1",
+          "describe": "A option",
+          "short": "o",
+          "flag": false,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "positionals": [
+        {
+          "name": "arg1",
+          "describe": "A positional arg",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
         }
       ],
       "aliases": [],
@@ -59,32 +68,12 @@ expression: output
       "name": "cmd_omitted",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Positional",
-          "name": "arg1",
-          "summary": "",
-          "choices": null,
-          "choices_fn": null,
-          "multiple": false,
-          "required": false,
-          "default": null,
-          "default_fn": null,
-          "value_name": null
-        },
-        {
-          "type": "Flag",
           "name": "flag1",
-          "summary": "",
+          "describe": "",
           "short": null,
-          "no_long": false,
-          "multiple": false
-        },
-        {
-          "type": "Option",
-          "name": "opt1",
-          "summary": "",
-          "short": null,
+          "flag": true,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -93,6 +82,33 @@ expression: output
           "default": null,
           "default_fn": null,
           "value_names": []
+        },
+        {
+          "name": "opt1",
+          "describe": "",
+          "short": null,
+          "flag": false,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "positionals": [
+        {
+          "name": "arg1",
+          "describe": "",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
         }
       ],
       "aliases": [],
@@ -103,40 +119,65 @@ expression: output
       "name": "cmd_flag_names",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Flag",
           "name": "flag1",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": true,
           "no_long": false,
-          "multiple": false
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         },
         {
-          "type": "Flag",
           "name": "flag2",
-          "summary": "This is a flag",
+          "describe": "This is a flag",
           "short": null,
+          "flag": true,
           "no_long": false,
-          "multiple": false
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         },
         {
-          "type": "Flag",
           "name": "flag3",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": true,
           "no_long": false,
-          "multiple": true
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         },
         {
-          "type": "Flag",
           "name": "flag4",
-          "summary": "This is a flag",
+          "describe": "This is a flag",
           "short": "f",
+          "flag": true,
           "no_long": false,
-          "multiple": false
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -145,24 +186,37 @@ expression: output
       "name": "cmd_no_long_flags",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Flag",
           "name": "a",
-          "summary": "This is a flag",
+          "describe": "This is a flag",
           "short": "a",
+          "flag": true,
           "no_long": true,
-          "multiple": false
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         },
         {
-          "type": "Flag",
           "name": "b",
-          "summary": "",
+          "describe": "",
           "short": "b",
+          "flag": true,
           "no_long": true,
-          "multiple": true
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -171,12 +225,12 @@ expression: output
       "name": "cmd_option_names",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Option",
           "name": "opt1",
-          "summary": "optional",
+          "describe": "optional",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -187,10 +241,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt2",
-          "summary": "required",
+          "describe": "required",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -201,10 +255,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt3",
-          "summary": "optional, multiple",
+          "describe": "optional, multiple",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -215,10 +269,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt4",
-          "summary": "required, multiple",
+          "describe": "required, multiple",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -229,10 +283,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt5",
-          "summary": "optional, default",
+          "describe": "optional, default",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -243,10 +297,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt6",
-          "summary": "choices",
+          "describe": "choices",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": [
             "a",
@@ -261,10 +315,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt7",
-          "summary": "choices, default",
+          "describe": "choices, default",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": [
             "a",
@@ -279,10 +333,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt8",
-          "summary": "required, choices",
+          "describe": "required, choices",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": [
             "a",
@@ -297,10 +351,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt9",
-          "summary": "optional, default from fn",
+          "describe": "optional, default from fn",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -311,10 +365,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "op10",
-          "summary": "choices from fn",
+          "describe": "choices from fn",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": "_fn_bars",
@@ -325,10 +379,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "op11",
-          "summary": "required, choices from fn",
+          "describe": "required, choices from fn",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": "_fn_bars",
@@ -339,6 +393,7 @@ expression: output
           "value_names": []
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -347,12 +402,12 @@ expression: output
       "name": "cmd_no_long_options",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Option",
           "name": "a",
-          "summary": "optional",
+          "describe": "optional",
           "short": "a",
+          "flag": false,
           "no_long": true,
           "choices": null,
           "choices_fn": null,
@@ -363,10 +418,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "b",
-          "summary": "required",
+          "describe": "required",
           "short": "b",
+          "flag": false,
           "no_long": true,
           "choices": null,
           "choices_fn": null,
@@ -377,10 +432,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "c",
-          "summary": "optional, multiple",
+          "describe": "optional, multiple",
           "short": "c",
+          "flag": false,
           "no_long": true,
           "choices": null,
           "choices_fn": null,
@@ -391,10 +446,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "d",
-          "summary": "required, multiple",
+          "describe": "required, multiple",
           "short": "d",
+          "flag": false,
           "no_long": true,
           "choices": null,
           "choices_fn": null,
@@ -405,10 +460,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "e",
-          "summary": "optional, default",
+          "describe": "optional, default",
           "short": "e",
+          "flag": false,
           "no_long": true,
           "choices": null,
           "choices_fn": null,
@@ -419,10 +474,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "f",
-          "summary": "choices",
+          "describe": "choices",
           "short": "f",
+          "flag": false,
           "no_long": true,
           "choices": [
             "a",
@@ -437,10 +492,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "g",
-          "summary": "choices, default",
+          "describe": "choices, default",
           "short": "g",
+          "flag": false,
           "no_long": true,
           "choices": [
             "a",
@@ -455,10 +510,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "i",
-          "summary": "required, choices",
+          "describe": "required, choices",
           "short": "i",
+          "flag": false,
           "no_long": true,
           "choices": [
             "a",
@@ -473,10 +528,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "j",
-          "summary": "optional, default from fn",
+          "describe": "optional, default from fn",
           "short": "j",
+          "flag": false,
           "no_long": true,
           "choices": null,
           "choices_fn": "_fn_foo",
@@ -487,10 +542,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "k",
-          "summary": "choices from fn",
+          "describe": "choices from fn",
           "short": "k",
+          "flag": false,
           "no_long": true,
           "choices": null,
           "choices_fn": "_fn_bars",
@@ -501,10 +556,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "l",
-          "summary": "required, choices from fn",
+          "describe": "required, choices from fn",
           "short": "l",
+          "flag": false,
           "no_long": true,
           "choices": null,
           "choices_fn": "_fn_bars",
@@ -515,10 +570,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "m",
-          "summary": "optional, default",
+          "describe": "optional, default",
           "short": "m",
+          "flag": false,
           "no_long": true,
           "choices": null,
           "choices_fn": null,
@@ -531,6 +586,7 @@ expression: output
           ]
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -539,12 +595,12 @@ expression: output
       "name": "cmd_option_formats",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Option",
           "name": "opt1",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -555,10 +611,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt2",
-          "summary": "",
+          "describe": "",
           "short": "a",
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -569,10 +625,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt3",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -585,10 +641,10 @@ expression: output
           ]
         },
         {
-          "type": "Option",
           "name": "opt4",
-          "summary": "With description",
+          "describe": "With description",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -599,10 +655,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt5",
-          "summary": "With description",
+          "describe": "With description",
           "short": "b",
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -613,10 +669,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt6",
-          "summary": "",
+          "describe": "",
           "short": "c",
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -629,10 +685,10 @@ expression: output
           ]
         },
         {
-          "type": "Option",
           "name": "opt7",
-          "summary": "With description",
+          "describe": "With description",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -645,6 +701,7 @@ expression: output
           ]
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -653,12 +710,12 @@ expression: output
       "name": "cmd_option_quotes",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Option",
           "name": "opt1",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -669,10 +726,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt2",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -683,10 +740,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt3",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": [
             "a 3",
@@ -701,10 +758,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt4",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": [
             "a b",
@@ -719,10 +776,10 @@ expression: output
           "value_names": []
         },
         {
-          "type": "Option",
           "name": "opt5",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": [
             "a|b",
@@ -737,6 +794,7 @@ expression: output
           "value_names": []
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -745,12 +803,12 @@ expression: output
       "name": "cmd_option_notations",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Option",
           "name": "opt1",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -763,10 +821,10 @@ expression: output
           ]
         },
         {
-          "type": "Option",
           "name": "opt2",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -780,6 +838,7 @@ expression: output
           ]
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -788,48 +847,79 @@ expression: output
       "name": "cmd_flag_formats",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Flag",
           "name": "foo1",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": true,
           "no_long": false,
-          "multiple": false
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         },
         {
-          "type": "Flag",
           "name": "foo2",
-          "summary": "",
+          "describe": "",
           "short": "a",
+          "flag": true,
           "no_long": false,
-          "multiple": false
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         },
         {
-          "type": "Flag",
           "name": "foo3",
-          "summary": "With description",
+          "describe": "With description",
           "short": null,
+          "flag": true,
           "no_long": false,
-          "multiple": false
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         },
         {
-          "type": "Flag",
           "name": "foo4",
-          "summary": "With description",
+          "describe": "With description",
           "short": "b",
+          "flag": true,
           "no_long": false,
-          "multiple": false
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         },
         {
-          "type": "Flag",
           "name": "foo5",
-          "summary": "Can occure multiple times",
+          "describe": "Can occure multiple times",
           "short": "c",
+          "flag": true,
           "no_long": false,
-          "multiple": true
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -838,11 +928,11 @@ expression: output
       "name": "cmd_positional_only",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "arg1",
-          "summary": "A required arg1",
+          "describe": "A required arg1",
           "choices": null,
           "choices_fn": null,
           "multiple": false,
@@ -860,11 +950,11 @@ expression: output
       "name": "cmd_positional_many",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "dir1",
-          "summary": "A optional arg 1",
+          "describe": "A optional arg 1",
           "choices": null,
           "choices_fn": null,
           "multiple": false,
@@ -874,9 +964,8 @@ expression: output
           "value_name": null
         },
         {
-          "type": "Positional",
           "name": "dir2",
-          "summary": "A optional arg 2",
+          "describe": "A optional arg 2",
           "choices": null,
           "choices_fn": null,
           "multiple": false,
@@ -894,11 +983,11 @@ expression: output
       "name": "cmd_positional_requires",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "dir1",
-          "summary": "A required arg",
+          "describe": "A required arg",
           "choices": null,
           "choices_fn": null,
           "multiple": false,
@@ -908,9 +997,8 @@ expression: output
           "value_name": null
         },
         {
-          "type": "Positional",
           "name": "file2",
-          "summary": "A required arg 2, multiple",
+          "describe": "A required arg 2, multiple",
           "choices": null,
           "choices_fn": null,
           "multiple": true,
@@ -928,11 +1016,11 @@ expression: output
       "name": "cmd_positional_with_choices",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "arg",
-          "summary": "A arg with choices",
+          "describe": "A arg with choices",
           "choices": [
             "a",
             "b"
@@ -953,11 +1041,11 @@ expression: output
       "name": "cmd_positional_with_default",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "arg",
-          "summary": "A arg with default value",
+          "describe": "A arg with default value",
           "choices": null,
           "choices_fn": null,
           "multiple": false,
@@ -975,11 +1063,11 @@ expression: output
       "name": "cmd_positional_with_default_fn",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "arg",
-          "summary": "A arg with default fn",
+          "describe": "A arg with default fn",
           "choices": null,
           "choices_fn": null,
           "multiple": false,
@@ -997,11 +1085,11 @@ expression: output
       "name": "cmd_positional_with_choices_and_default",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "arg",
-          "summary": "A arg with choices and default value",
+          "describe": "A arg with choices and default value",
           "choices": [
             "a",
             "b"
@@ -1022,11 +1110,11 @@ expression: output
       "name": "cmd_positional_with_choices_fn",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "arg",
-          "summary": "A arg with choices fn",
+          "describe": "A arg with choices fn",
           "choices": null,
           "choices_fn": "_fn_bars",
           "multiple": false,
@@ -1044,11 +1132,11 @@ expression: output
       "name": "cmd_positional_with_choices_and_required",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "arg",
-          "summary": "A arg with choices and required",
+          "describe": "A arg with choices and required",
           "choices": [
             "a",
             "b"
@@ -1069,11 +1157,11 @@ expression: output
       "name": "cmd_positional_with_choices_fn_and_required",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "arg",
-          "summary": "A arg with choices fn and required",
+          "describe": "A arg with choices fn and required",
           "choices": null,
           "choices_fn": "_fn_bars",
           "multiple": false,
@@ -1091,7 +1179,8 @@ expression: output
       "name": "cmd_without_any_arg",
       "author": null,
       "version": null,
-      "params": [],
+      "options": [],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -1100,7 +1189,8 @@ expression: output
       "name": "cmd_alias",
       "author": null,
       "version": null,
-      "params": [],
+      "options": [],
+      "positionals": [],
       "aliases": [
         "a",
         "alias"
@@ -1112,32 +1202,12 @@ expression: output
       "name": "cmd_with_hyphens",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Positional",
-          "name": "hyphen-positional",
-          "summary": "",
-          "choices": null,
-          "choices_fn": null,
-          "multiple": false,
-          "required": false,
-          "default": null,
-          "default_fn": null,
-          "value_name": null
-        },
-        {
-          "type": "Flag",
           "name": "hyphen-flag",
-          "summary": "",
+          "describe": "",
           "short": null,
-          "no_long": false,
-          "multiple": false
-        },
-        {
-          "type": "Option",
-          "name": "hyphen-option",
-          "summary": "",
-          "short": null,
+          "flag": true,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -1146,6 +1216,33 @@ expression: output
           "default": null,
           "default_fn": null,
           "value_names": []
+        },
+        {
+          "name": "hyphen-option",
+          "describe": "",
+          "short": null,
+          "flag": false,
+          "no_long": false,
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "positionals": [
+        {
+          "name": "hyphen-positional",
+          "describe": "",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
         }
       ],
       "aliases": [],
@@ -1156,12 +1253,12 @@ expression: output
       "name": "cmd_nested_command",
       "author": null,
       "version": "0.1.0",
-      "params": [
+      "options": [
         {
-          "type": "Option",
           "name": "opt1",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -1172,6 +1269,7 @@ expression: output
           "value_names": []
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": [
         {
@@ -1179,12 +1277,12 @@ expression: output
           "name": "foo",
           "author": null,
           "version": null,
-          "params": [
+          "options": [
             {
-              "type": "Option",
               "name": "opt1",
-              "summary": "",
+              "describe": "",
               "short": null,
+              "flag": false,
               "no_long": false,
               "choices": null,
               "choices_fn": null,
@@ -1195,10 +1293,10 @@ expression: output
               "value_names": []
             },
             {
-              "type": "Option",
               "name": "opt2",
-              "summary": "",
+              "describe": "",
               "short": null,
+              "flag": false,
               "no_long": false,
               "choices": null,
               "choices_fn": null,
@@ -1209,6 +1307,7 @@ expression: output
               "value_names": []
             }
           ],
+          "positionals": [],
           "aliases": [
             "a"
           ],
@@ -1221,12 +1320,12 @@ expression: output
       "name": "cmd_nested_command2",
       "author": null,
       "version": "0.1.0",
-      "params": [
+      "options": [
         {
-          "type": "Option",
           "name": "opt1",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -1237,6 +1336,7 @@ expression: output
           "value_names": []
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": [
         {
@@ -1244,12 +1344,12 @@ expression: output
           "name": "foo",
           "author": null,
           "version": null,
-          "params": [
+          "options": [
             {
-              "type": "Option",
               "name": "opt1",
-              "summary": "",
+              "describe": "",
               "short": null,
+              "flag": false,
               "no_long": false,
               "choices": null,
               "choices_fn": null,
@@ -1260,10 +1360,10 @@ expression: output
               "value_names": []
             },
             {
-              "type": "Option",
               "name": "opt2",
-              "summary": "",
+              "describe": "",
               "short": null,
+              "flag": false,
               "no_long": false,
               "choices": null,
               "choices_fn": null,
@@ -1274,6 +1374,7 @@ expression: output
               "value_names": []
             }
           ],
+          "positionals": [],
           "aliases": [],
           "subcommands": []
         }
@@ -1284,12 +1385,12 @@ expression: output
       "name": "cmd_notation_values",
       "author": null,
       "version": null,
-      "params": [
+      "options": [
         {
-          "type": "Option",
           "name": "opt1",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -1302,10 +1403,10 @@ expression: output
           ]
         },
         {
-          "type": "Option",
           "name": "opt2",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -1318,10 +1419,10 @@ expression: output
           ]
         },
         {
-          "type": "Option",
           "name": "opt3",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -1334,10 +1435,10 @@ expression: output
           ]
         },
         {
-          "type": "Option",
           "name": "opt4",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -1350,10 +1451,10 @@ expression: output
           ]
         },
         {
-          "type": "Option",
           "name": "opt5",
-          "summary": "",
+          "describe": "",
           "short": null,
+          "flag": false,
           "no_long": false,
           "choices": null,
           "choices_fn": null,
@@ -1366,6 +1467,7 @@ expression: output
           ]
         }
       ],
+      "positionals": [],
       "aliases": [],
       "subcommands": []
     },
@@ -1374,11 +1476,11 @@ expression: output
       "name": "cmd_dynamic_compgen",
       "author": null,
       "version": null,
-      "params": [
+      "options": [],
+      "positionals": [
         {
-          "type": "Positional",
           "name": "args",
-          "summary": "",
+          "describe": "",
           "choices": null,
           "choices_fn": "_fn_args",
           "multiple": true,

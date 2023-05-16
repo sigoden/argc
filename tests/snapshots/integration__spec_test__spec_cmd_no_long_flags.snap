@@ -13,7 +13,7 @@ USAGE: spec cmd_no_long_flags [OPTIONS]
 
 OPTIONS:
   -a          This is a flag
-  -b...       
+  -b...
   -h, --help  Print help
 
 EOF
