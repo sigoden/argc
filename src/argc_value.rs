@@ -1,6 +1,4 @@
-use clap::builder::StyledStr;
-
-use crate::utils::hyphens_to_underscores;
+use crate::utils::{escape_shell_words, hyphens_to_underscores};
 
 pub const VARIABLE_PREFIX: &str = "argc";
 
@@ -14,11 +12,11 @@ pub enum ArgcValue {
     PositionalMultiple(String, Vec<String>),
     CmdFn(String),
     ParamFn(String),
-    ClapError((StyledStr, i32)),
+    Error((String, i32)),
 }
 
 impl ArgcValue {
-    pub fn to_shell(values: Vec<Self>, no_color: bool) -> String {
+    pub fn to_shell(values: Vec<Self>) -> String {
         let mut variables = vec![];
         let mut positional_args = vec![];
         for value in values {
@@ -28,7 +26,7 @@ impl ArgcValue {
                         "{}_{}={}",
                         VARIABLE_PREFIX,
                         hyphens_to_underscores(&name),
-                        value
+                        escape_shell_words(&value)
                     ));
                 }
                 ArgcValue::SingleFn(name, fn_name) => {
@@ -44,17 +42,22 @@ impl ArgcValue {
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
                         name,
-                        values.join(" ")
+                        values
+                            .iter()
+                            .map(|v| escape_shell_words(v))
+                            .collect::<Vec<String>>()
+                            .join(" ")
                     ));
                 }
                 ArgcValue::PositionalSingle(name, value) => {
+                    let value = escape_shell_words(&value);
                     variables.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
                         hyphens_to_underscores(&name),
                         &value
                     ));
-                    positional_args.push(value.to_string());
+                    positional_args.push(value);
                 }
                 ArgcValue::PositionalSingleFn(name, fn_name) => {
                     variables.push(format!(
@@ -66,6 +69,10 @@ impl ArgcValue {
                     positional_args.push(format!("`{}`", fn_name));
                 }
                 ArgcValue::PositionalMultiple(name, values) => {
+                    let values = values
+                        .iter()
+                        .map(|v| escape_shell_words(v))
+                        .collect::<Vec<String>>();
                     variables.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
@@ -88,13 +95,8 @@ impl ArgcValue {
                         variables.push(format!("{} {};exit;", name, positional_args.join(" ")));
                     }
                 }
-                ArgcValue::ClapError((error, exit)) => {
+                ArgcValue::Error((error, exit)) => {
                     variables.clear();
-                    let error = if no_color {
-                        error.to_string()
-                    } else {
-                        error.ansi().to_string()
-                    };
                     variables.push(format!("cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit));
                 }
             }

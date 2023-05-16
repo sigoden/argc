@@ -235,6 +235,14 @@ cmd_dynamic_compgen() {
     print_argc_vars
 }
 
+# @cmd Combine shorts
+# @flag -a
+# @flag -b
+# @option -c
+cmd_combine_shorts() {
+    print_argc_vars
+}
+
 print_argc_vars() {
     ( set -o posix ; set ) | grep argc_
 }

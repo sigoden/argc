@@ -61,7 +61,7 @@ fn test_conflict_short_option() {
     fatal!(
         script,
         &["prog"],
-        "@option(line 3) has -f already exists at line 2"
+        "@option(line 3) has '-f' already exists at line 2"
     );
 }
 
@@ -74,7 +74,7 @@ fn test_conflict_long_option() {
     fatal!(
         script,
         &["prog"],
-        "@option(line 3) has --foo already exists at line 2"
+        "@option(line 3) has '--foo' already exists at line 2"
     );
 }
 
@@ -87,7 +87,7 @@ fn test_conflict_short_flag() {
     fatal!(
         script,
         &["prog"],
-        "@flag(line 3) has -f already exists at line 2"
+        "@flag(line 3) has '-f' already exists at line 2"
     );
 }
 
@@ -100,7 +100,7 @@ fn test_conflict_long_flag() {
     fatal!(
         script,
         &["prog"],
-        "@flag(line 3) has --foo already exists at line 2"
+        "@flag(line 3) has '--foo' already exists at line 2"
     );
 }
 
@@ -113,7 +113,7 @@ fn test_conflict_positional() {
     fatal!(
         script,
         &["prog"],
-        "@arg(line 3) has `foo` already exists at line 2"
+        "@arg(line 3) has 'foo' already exists at line 2"
     );
 }
 

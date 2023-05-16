@@ -107,3 +107,18 @@ fn test_compgen_many_positionals() {
 fn test_compgen_cmd_no_args() {
     snapshot_compgen!("cmd_without_any_arg ");
 }
+
+#[test]
+fn test_compgen_combine_shorts() {
+    snapshot_compgen!("cmd_combine_shorts -a");
+}
+
+#[test]
+fn test_compgen_combine_shorts1() {
+    snapshot_compgen!("cmd_combine_shorts -ab");
+}
+
+#[test]
+fn test_compgen_combine_shorts3() {
+    snapshot_compgen!("cmd_combine_shorts -ac");
+}

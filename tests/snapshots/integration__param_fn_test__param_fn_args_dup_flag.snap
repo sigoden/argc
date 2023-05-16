@@ -6,9 +6,10 @@ RUN
 spec _fn_args cmd_preferred -f -o 4 -f
 
 OUTPUT
-argc__line='cmd_preferred -f -o 4 -f'
-argc__words=( cmd_preferred -f -o 4 -f )
+argc_flag1=2
 argc_opt1=4
 argc__args=(  )
+argc__line='cmd_preferred -f -o 4 -f'
+argc__words=( spec cmd_preferred -f -o 4 -f )
 _fn_args;exit;
 

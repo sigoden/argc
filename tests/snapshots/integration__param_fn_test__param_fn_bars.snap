@@ -6,7 +6,7 @@ RUN
 spec _fn_bars
 
 OUTPUT
-argc__line=
+argc__line=''
 argc__words=(  )
 _fn_bars;exit;
 

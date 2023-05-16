@@ -6,7 +6,8 @@ RUN
 spec _fn_args  
 
 OUTPUT
+argc__args=(  )
 argc__line=' '
-argc__words=( ' ' )
+argc__words=( spec ' ' )
 _fn_args;exit;
 

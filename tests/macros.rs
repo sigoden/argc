@@ -4,8 +4,9 @@ macro_rules! snapshot {
         $source:expr,
         $args:expr
     ) => {
-        let values = argc::eval($source, $args).unwrap();
-        let output = argc::ArgcValue::to_shell(values, true);
+        let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
+        let values = argc::eval($source, &args).unwrap();
+        let output = argc::ArgcValue::to_shell(values);
         let args = $args.join(" ");
         let output = format!(
             r###"RUN
@@ -27,8 +28,9 @@ macro_rules! plain {
         $args:expr,
 		$output:expr
     ) => {
-        let values = argc::eval($source, $args).unwrap();
-        let output = argc::ArgcValue::to_shell(values, true);
+        let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
+        let values = argc::eval($source, &args).unwrap();
+        let output = argc::ArgcValue::to_shell(values);
         assert_eq!(output, $output);
     };
 }
@@ -40,7 +42,8 @@ macro_rules! fatal {
         $args:expr,
         $err:expr
     ) => {
-        let err = argc::eval($source, $args).unwrap_err();
+        let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
+        let err = argc::eval($source, &args).unwrap_err();
         assert_eq!(err.to_string().as_str(), $err);
     };
 }
@@ -51,11 +54,16 @@ macro_rules! snapshot_compgen {
         $line:expr
     ) => {
         let (script_file, script_content) = $crate::fixtures::get_spec();
-        let (stdout, stderr) =
-            match argc::compgen(argc::Shell::Fish, &script_file, &script_content, $line) {
-                Ok(stdout) => (stdout, String::new()),
-                Err(stderr) => (String::new(), stderr.to_string()),
-            };
+        let (stdout, stderr) = match argc::compgen(
+            argc::Shell::Fish,
+            &script_file,
+            &script_content,
+            "test",
+            $line,
+        ) {
+            Ok(stdout) => (stdout, String::new()),
+            Err(stderr) => (String::new(), stderr.to_string()),
+        };
 
         let output = format!(
             r###"RUN

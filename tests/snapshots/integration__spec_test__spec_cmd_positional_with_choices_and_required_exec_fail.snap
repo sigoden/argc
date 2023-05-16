@@ -10,7 +10,7 @@ cat >&2 <<-'EOF'
 error: the following required arguments were not provided:
   <ARG>
 
-Usage: spec cmd_positional_with_choices_and_required <ARG>
+USAGE: spec cmd_positional_with_choices_and_required <ARG>
 
 For more information, try '--help'.
 

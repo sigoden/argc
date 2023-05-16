@@ -12,8 +12,8 @@ All kind of flags
 USAGE: spec cmd_flag_formats [OPTIONS]
 
 OPTIONS:
-      --foo1     
-  -a, --foo2     
+      --foo1
+  -a, --foo2
       --foo3     With description
   -b, --foo4     With description
   -c, --foo5...  Can occure multiple times

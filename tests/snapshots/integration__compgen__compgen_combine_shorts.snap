@@ -3,10 +3,11 @@ source: tests/compgen.rs
 expression: output
 ---
 RUN
-cmd_omitted --unknown foo --flag1 
+cmd_combine_shorts -a
 
 STDOUT
---opt1
+-ab
+-ac
 
 STDERR
 

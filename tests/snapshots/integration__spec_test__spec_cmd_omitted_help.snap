@@ -12,12 +12,12 @@ Omitted
 USAGE: spec cmd_omitted [OPTIONS] [ARG1]
 
 ARGS:
-  [ARG1]  
+  [ARG1]
 
 OPTIONS:
-      --flag1        
-      --opt1 <OPT1>  
-  -h, --help         Print help
+      --flag1
+      --opt1 <OPT1>
+  -h, --help
 
 EOF
 exit 0
