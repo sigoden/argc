@@ -1,6 +1,7 @@
 # @describe Test all aspects
 # @version    0.10.0
 # @author     nobody <nobody@example.com>
+
 # @cmd Preferred
 # @arg        arg1*            A positional arg
 # @flag       -f --flag1       A flag
@@ -240,6 +241,14 @@ cmd_dynamic_compgen() {
 # @flag -b
 # @option -c
 cmd_combine_shorts() {
+    print_argc_vars
+}
+
+# @cmd Single dashe options
+# @arg        arg1*           A positional arg
+# @flag       -f -flag1       A flag
+# @option     -o -opt1        A option
+cmd_single_dash() {
     print_argc_vars
 }
 

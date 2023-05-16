@@ -109,16 +109,26 @@ fn test_compgen_cmd_no_args() {
 }
 
 #[test]
-fn test_compgen_combine_shorts() {
+fn test_compgen_cmd_combine_shorts() {
     snapshot_compgen!("cmd_combine_shorts -a");
 }
 
 #[test]
-fn test_compgen_combine_shorts1() {
+fn test_compgen_cmd_combine_shorts2() {
     snapshot_compgen!("cmd_combine_shorts -ab");
 }
 
 #[test]
-fn test_compgen_combine_shorts3() {
+fn test_compgen_cmd_combine_shorts3() {
     snapshot_compgen!("cmd_combine_shorts -ac");
+}
+
+#[test]
+fn test_compgen_cmd_single_dash() {
+    snapshot_compgen!("cmd_single_dash -");
+}
+
+#[test]
+fn test_compgen_cmd_single_dash2() {
+    snapshot_compgen!("cmd_single_dash -f");
 }

@@ -1,0 +1,16 @@
+---
+source: tests/compgen.rs
+expression: output
+---
+RUN
+cmd_single_dash -
+
+STDOUT
+-flag1	A flag
+-f	A flag
+-opt1	A option
+-o	A option
+
+STDERR
+
+

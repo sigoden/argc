@@ -39,7 +39,7 @@ pub struct FlagOptionParam {
     pub(crate) describe: String,
     pub(crate) short: Option<char>,
     pub(crate) flag: bool,
-    pub(crate) no_long: bool,
+    pub(crate) dashes: String,
     pub(crate) choices: Option<Vec<String>>,
     pub(crate) choices_fn: Option<String>,
     pub(crate) multiple: bool,
@@ -57,21 +57,27 @@ impl FlagOptionParam {
         describe: &str,
         short: Option<char>,
         flag: bool,
-        no_long: bool,
+        dashes: &str,
         value_names: &[&str],
     ) -> Self {
+        let name = arg.name.clone();
         let value_names: Vec<String> = value_names.iter().map(|v| v.to_string()).collect();
         let arg_value_names = if value_names.is_empty() {
-            vec![to_cobol_case(&arg.name)]
+            vec![to_cobol_case(&name)]
         } else {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
+        let (short, dashes) = if short.is_none() && dashes == "-" && name.len() == 1 {
+            (Some(name.chars().next().unwrap()), "".into())
+        } else {
+            (short, dashes.into())
+        };
         Self {
-            name: arg.name.clone(),
+            name,
             describe: describe.to_string(),
             short,
             flag,
-            no_long,
+            dashes,
             choices: arg.choices,
             choices_fn: arg.choices_fn,
             multiple: arg.multiple,
@@ -102,7 +108,7 @@ impl FlagOptionParam {
     #[allow(unused)]
     pub(crate) fn render(&self) -> String {
         let mut output = vec![];
-        if self.no_long {
+        if self.dashes.is_empty() {
             let name = render_name(
                 &self.name,
                 &self.choices,
@@ -126,7 +132,7 @@ impl FlagOptionParam {
                 &self.default,
                 &self.default_fn,
             );
-            output.push(format!("--{}", name));
+            output.push(format!("{}{}", self.dashes, name));
         }
         for value_name in &self.value_names {
             output.push(format!("<{}>", value_name));
@@ -138,10 +144,10 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_name(&self) -> String {
-        if self.no_long {
+        if self.dashes.is_empty() {
             format!("-{}", self.name)
         } else {
-            format!("--{}", self.name)
+            format!("{}{}", self.dashes, self.name)
         }
     }
 
@@ -156,15 +162,20 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_body(&self) -> String {
-        let mut output = match (self.no_long, self.short) {
+        let dashes = if self.dashes.len() == 1 {
+            format!(" {}", self.dashes.clone())
+        } else {
+            self.dashes.clone()
+        };
+        let mut output = match (self.dashes.is_empty(), self.short) {
             (true, _) => {
                 format!("-{}", self.name)
             }
             (false, Some(c)) => {
-                format!("-{c}, --{}", self.name)
+                format!("-{c}, {dashes}{}", self.name)
             }
             (false, None) => {
-                format!("    --{}", self.name)
+                format!("    {dashes}{}", self.name)
             }
         };
         if self.is_flag() {
@@ -243,10 +254,10 @@ impl FlagOptionParam {
 
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![];
-        if self.no_long {
+        if self.dashes.is_empty() {
             output.push(format!("-{}", self.name));
         } else {
-            output.push(format!("--{}", self.name));
+            output.push(format!("{}{}", self.dashes, self.name));
             if let Some(short) = self.short {
                 output.push(format!("-{}", short));
             }

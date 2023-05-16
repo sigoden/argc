@@ -25,7 +25,7 @@ pub fn compgen(
     }
     let cmd = Command::new(script_content)?;
     let matcher = Matcher::new(&cmd, &args);
-    let candicates = matcher.to_comp_words();
+    let candicates = matcher.compgen();
     let candicates = expand_candicates(candicates, script_path, &line, &last_word)?;
     shell.convert(&candicates, &last_word)
 }

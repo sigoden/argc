@@ -63,7 +63,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let cmd = cmds[cmd_level].1;
             let arg = args[arg_index].as_str();
             if dashdash.is_some()
-                || (cmd.without_params_or_subcommands() && !["-h", "--help"].contains(&arg))
+                || (cmd.without_params_or_subcommands()
+                    && !["-h", "-help", "--help"].contains(&arg))
             {
                 positional_args.push(arg);
             } else if arg.starts_with('-') {
@@ -153,7 +154,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
-    pub fn to_comp_words(&self) -> Vec<(String, String)> {
+    pub fn compgen(&self) -> Vec<(String, String)> {
         match &self.arg_comp {
             ArgComp::FlagOrOption => self.comp_flag_options(),
             ArgComp::FlagOrOptionCombine(value) => self
@@ -251,7 +252,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 Some("help") => return Some(MatchError::DisplayHelp),
                 Some("version") => return Some(MatchError::DisplayVersion),
                 None => {
-                    if *key == "--help" || (last_cmd.match_help_short_name() && *key == "-h") {
+                    if *key == "--help"
+                        || *key == "-help"
+                        || (last_cmd.match_help_short_name() && *key == "-h")
+                    {
                         return Some(MatchError::DisplayHelp);
                     } else if *key == "--version"
                         || (last_cmd.match_version_short_name() && *key == "-V")
