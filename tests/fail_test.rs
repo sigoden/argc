@@ -1,12 +1,4 @@
 #[test]
-fn test_syntax_error() {
-    let script = r###"
-# @option -foo
-    "###;
-    fatal!(script, &["prog"], "syntax error at line 2");
-}
-
-#[test]
 fn test_unsupported_tag() {
     let script = r###"
 # @baz

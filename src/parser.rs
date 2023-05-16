@@ -178,22 +178,20 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
     map(
         tuple((
             parse_short,
-            preceded(
-                pair(space0, tag("--")),
-                alt((
-                    parse_param_modifer_choices_default,
-                    parse_param_modifer_choices_fn,
-                    parse_param_modifer_choices,
-                    parse_param_assign_fn,
-                    parse_param_assign,
-                    parse_param_modifer,
-                )),
-            ),
+            preceded(space0, alt((tag("--"), tag("-")))),
+            alt((
+                parse_param_modifer_choices_default,
+                parse_param_modifer_choices_fn,
+                parse_param_modifer_choices,
+                parse_param_assign_fn,
+                parse_param_assign,
+                parse_param_modifer,
+            )),
             parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |(short, arg, value_names, describe)| {
-            FlagOptionParam::new(arg, describe, short, false, false, &value_names)
+        |(short, dashes, arg, value_names, describe)| {
+            FlagOptionParam::new(arg, describe, short, false, dashes, &value_names)
         },
     )(input)
 }
@@ -221,7 +219,7 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
         )),
         |(arg, value_names, describe)| {
             let short = arg.name.chars().next();
-            FlagOptionParam::new(arg, describe, short, false, true, &value_names)
+            FlagOptionParam::new(arg, describe, short, false, "", &value_names)
         },
     )(input)
 }
@@ -254,10 +252,13 @@ fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam
     map(
         tuple((
             parse_short,
-            preceded(pair(space0, tag("--")), parse_long_flag_and_asterisk),
+            preceded(space0, alt((tag("--"), tag("-")))),
+            parse_long_flag_and_asterisk,
             parse_tail,
         )),
-        |(short, arg, describe)| FlagOptionParam::new(arg, describe, short, true, false, &[]),
+        |(short, dashes, arg, describe)| {
+            FlagOptionParam::new(arg, describe, short, true, dashes, &[])
+        },
     )(input)
 }
 
@@ -270,7 +271,7 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> 
         )),
         |(arg, describe)| {
             let short = arg.name.chars().next();
-            FlagOptionParam::new(arg, describe, short, true, true, &[])
+            FlagOptionParam::new(arg, describe, short, true, "", &[])
         },
     )(input)
 }
@@ -657,6 +658,38 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_with_long_option_arg_single_dash() {
+        assert_parse_option_arg!("-f -foo=a <FOO> A foo option");
+        assert_parse_option_arg!("-foo!");
+        assert_parse_option_arg!("-foo+");
+        assert_parse_option_arg!("-foo*");
+        assert_parse_option_arg!("-foo!");
+        assert_parse_option_arg!("-foo=a");
+        assert_parse_option_arg!("-foo=`_foo`");
+        assert_parse_option_arg!("-foo[a|b]");
+        assert_parse_option_arg!("-foo[=a|b]");
+        assert_parse_option_arg!("-foo[`_foo`]");
+        assert_parse_option_arg!("-foo![a|b]");
+        assert_parse_option_arg!("-foo![`_foo`]");
+        assert_parse_option_arg!("-foo![=a|b]", "-foo[=a|b]");
+        assert_parse_option_arg!("-foo+[a|b]");
+        assert_parse_option_arg!("-foo+[`_foo`]");
+        assert_parse_option_arg!("-foo+[=a|b]", "-foo*[=a|b]");
+        assert_parse_option_arg!("-foo*[a|b]");
+        assert_parse_option_arg!("-foo*[=a|b]");
+        assert_parse_option_arg!("-foo*[`_foo`]");
+        assert_parse_option_arg!("-foo <FOO>");
+        assert_parse_option_arg!("-foo-abc <FOO>");
+        assert_parse_option_arg!("-foo=\"a b\"");
+        assert_parse_option_arg!("-foo[\"a|b\"|\"c]d\"]");
+        assert_parse_option_arg!("-foo <abc>");
+        assert_parse_option_arg!("-foo <abc> <def>");
+        assert_parse_option_arg!("-foo <>");
+        assert_parse_option_arg!("-foo <abc def>");
+        assert_parse_option_arg!("-foo <<abc def>>");
+    }
+
+    #[test]
     fn test_parse_no_long_option_arg() {
         assert_parse_option_arg!("-f");
         assert_parse_option_arg!("-f!");
@@ -678,6 +711,16 @@ mod tests {
         assert_parse_flag_arg!("--foo A foo flag");
         assert_parse_flag_arg!("--foo");
         assert_parse_flag_arg!("--foo*");
+    }
+
+    #[test]
+    fn test_parse_with_long_flag_arg_single_dash() {
+        assert_parse_flag_arg!("-f -foo A foo flag");
+        assert_parse_flag_arg!("-. -hidden");
+        assert_parse_flag_arg!("-http1.1");
+        assert_parse_flag_arg!("-foo A foo flag");
+        assert_parse_flag_arg!("-foo");
+        assert_parse_flag_arg!("-foo*");
     }
 
     #[test]
@@ -747,7 +790,5 @@ mod tests {
         assert_token!("function foo@bar", Func, "foo@bar");
         assert_token!("foo=bar", Ignore);
         assert_token!("#!/bin/bash", Ignore);
-        assert_token!("# @flag -foo", Error);
-        assert_token!("# @option -foo![=a|b]", Error);
     }
 }

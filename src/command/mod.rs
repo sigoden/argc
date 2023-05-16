@@ -337,7 +337,11 @@ impl Command {
         }
         let mut list = vec![];
         let mut any_summmary = false;
+        let mut double_help_dashes = true;
         for param in self.flag_option_params.iter() {
+            if param.dashes == "-" {
+                double_help_dashes = false;
+            }
             let value = param.render_body();
             let describe = param.render_describe();
             if !describe.is_empty() {
@@ -345,11 +349,12 @@ impl Command {
             }
             list.push((value, describe));
         }
+        let help_dashes = if double_help_dashes { "--" } else { " -" };
         list.push((
             if self.match_help_short_name() {
-                "-h, --help".into()
+                format!("-h, {}help", help_dashes)
             } else {
-                "    --help".into()
+                format!("    {}help", help_dashes)
             },
             if any_summmary {
                 "Print help".into()

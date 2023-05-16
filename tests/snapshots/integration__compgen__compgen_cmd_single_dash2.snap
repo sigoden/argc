@@ -1,0 +1,13 @@
+---
+source: tests/compgen.rs
+expression: output
+---
+RUN
+cmd_single_dash -f
+
+STDOUT
+-fo
+
+STDERR
+
+

@@ -289,6 +289,19 @@ fn test_spec_help_command3() {
 }
 
 #[test]
-fn test_spec_combine_shorts() {
+fn test_spec_cmd_combine_shorts() {
     snapshot!(SPEC_SCRIPT, &["spec", "cmd_combine_shorts", "-ac", "yes"]);
+}
+
+#[test]
+fn test_spec_cmd_single_dash_help() {
+    snapshot!(SPEC_SCRIPT, &["spec", "cmd_single_dash", "-help"]);
+}
+
+#[test]
+fn test_spec_cmd_single_dash() {
+    snapshot!(
+        SPEC_SCRIPT,
+        &["spec", "cmd_single_dash", "-flag1", "-opt1", "abc"]
+    );
 }
