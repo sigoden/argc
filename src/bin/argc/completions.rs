@@ -29,12 +29,10 @@ _argc_complete() {
         fi
     fi
 
+    _argc_complete_nospace "${candicates[@]}"
+
     if [[ ${#candicates[@]} -gt 0 ]]; then
-        if [[ ${#candicates[@]} -eq 1 ]] && [[ "${candicates[0]}" == "$cur" ]]; then
-            COMPREPLY=("$cur ")
-        else
-            COMPREPLY=(${candicates[@]})
-        fi
+        COMPREPLY=(${candicates[@]})
     fi
 }
 
@@ -43,12 +41,30 @@ _argc_complete_path() {
         _filedir ${1-}
     else
         if [[ ${1-} == "-d" ]]; then
-            compopt -o plusdirs > /dev/null 2>&1
+            compopt -o nospace -o plusdirs > /dev/null 2>&1
             COMPREPLY=($(compgen -d -- "${cur}"))
         else
-            compopt -o plusdirs > /dev/null 2>&1
+            compopt -o nospace -o plusdirs > /dev/null 2>&1
             COMPREPLY=($(compgen -f -- "${cur}"))
         fi
+    fi
+}
+
+_argc_complete_nospace() {
+    if [[ $# -eq 0 ]]; then
+        return
+    fi
+    local nospace=1
+    local value last_char
+    for value in ${@}; do
+        last_char="${value: -1}"
+        if [[ ! "$COMP_WORDBREAKS" == *"$last_char"* ]]; then
+            nospace=0
+            break
+        fi
+    done
+    if [[ "$nospace" == "1" ]]; then
+        compopt -o nospace > /dev/null 2>&1
     fi
 }
 "###;
@@ -168,7 +184,7 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
     cmds.extend(args.iter().map(|v| v.as_str()));
     let output = match shell {
         Shell::Bash => {
-            let registers = format!("complete -o nospace -F _argc_complete {}", cmds.join(" "));
+            let registers = format!("complete -F _argc_complete {}", cmds.join(" "));
             format!("{BASH_SCRIPT}\n{registers}\n",)
         }
         Shell::Fish => {
