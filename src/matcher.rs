@@ -80,11 +80,15 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     let values_len = param.values_size();
                     let value_args = take_value_args(args, arg_index + 1, values_len);
                     arg_index += value_args.len();
-                    if arg_comp != ArgComp::FlagOrOption && arg_index == args_len - 1
+                    if arg_comp != ArgComp::FlagOrOption
+                        && arg_index == args_len - 1
                         && param.is_option()
                         && value_args.len() <= values_len
                     {
-                        arg_comp = ArgComp::OptionValue(param.name.clone(), value_args.len().saturating_sub(1));
+                        arg_comp = ArgComp::OptionValue(
+                            param.name.clone(),
+                            value_args.len().saturating_sub(1),
+                        );
                     }
                     flag_option_args[cmd_level].push((arg, value_args, Some(param.name.as_str())));
                 } else {
@@ -148,14 +152,17 @@ impl<'a, 'b> Matcher<'a, 'b> {
         match &self.arg_comp {
             ArgComp::FlagOrOption => self.comp_flag_options(),
             ArgComp::CommandOrPositional => {
-				let level = self.cmds.len() - 1;
+                let level = self.cmds.len() - 1;
                 let mut cmd = self.cmds[level].1;
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
                     return comp_subcomands(cmd);
-                } 
-				if level > 0 && self.positional_args.is_empty() && self.flag_option_args[level].is_empty() {
-					cmd = self.cmds[level - 1].1;
-				}
+                }
+                if level > 0
+                    && self.positional_args.is_empty()
+                    && self.flag_option_args[level].is_empty()
+                {
+                    cmd = self.cmds[level - 1].1;
+                }
                 let values = self.match_positionals();
                 comp_subcommands_positional(cmd, &values)
             }
@@ -287,7 +294,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         };
         for (i, param) in last_cmd.positional_params.iter().enumerate() {
             if let (Some(value), Some(choices)) = (
-                positional_values.get(i).and_then(|v| v.get(0)),
+                positional_values.get(i).and_then(|v| v.first()),
                 &param.choices,
             ) {
                 if !choices.contains(&value.to_string()) {
@@ -560,7 +567,7 @@ fn take_value_args(args: &[String], start: usize, len: usize) -> Vec<&str> {
     let mut output = vec![];
     if len == 0 {
         return output;
-    }	
+    }
     let end = (start + len).min(args.len());
     for arg in args.iter().take(end).skip(start) {
         if arg.starts_with('-') {
@@ -576,7 +583,7 @@ fn comp_subcommands_positional(cmd: &Command, values: &[Vec<&str>]) -> Vec<(Stri
     if values.len() < 2 {
         output.extend(comp_subcomands(cmd))
     }
-    if values.len() == 0 || values.len() > cmd.positional_params.len() {
+    if values.is_empty() || values.len() > cmd.positional_params.len() {
         return output;
     }
     output.extend(comp_positional(&cmd.positional_params[values.len() - 1]));
@@ -591,9 +598,9 @@ fn comp_subcomands(cmd: &Command) -> Vec<(String, String)> {
             output.push((v, describe.clone()))
         }
     }
-	if !output.is_empty() {
-		output.push(("help".into(), String::new()));
-	}
+    if !output.is_empty() {
+        output.push(("help".into(), String::new()));
+    }
     output
 }
 

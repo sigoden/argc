@@ -50,12 +50,12 @@ impl ArgcValue {
                     ));
                 }
                 ArgcValue::PositionalSingle(name, value) => {
-					let value = escape_shell_words(&value);
+                    let value = escape_shell_words(&value);
                     variables.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
                         hyphens_to_underscores(&name),
-						&value
+                        &value
                     ));
                     positional_args.push(value);
                 }
@@ -70,14 +70,14 @@ impl ArgcValue {
                 }
                 ArgcValue::PositionalMultiple(name, values) => {
                     let values = values
-                            .iter()
-                            .map(|v| escape_shell_words(v))
-                            .collect::<Vec<String>>();
+                        .iter()
+                        .map(|v| escape_shell_words(v))
+                        .collect::<Vec<String>>();
                     variables.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
                         hyphens_to_underscores(&name),
-						values.join(" ")
+                        values.join(" ")
                     ));
                     positional_args.extend(values);
                 }

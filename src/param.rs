@@ -1,5 +1,7 @@
 use crate::{
-    utils::{is_choice_value_terminate, is_default_value_terminate, to_cobol_case, escape_shell_words},
+    utils::{
+        escape_shell_words, is_choice_value_terminate, is_default_value_terminate, to_cobol_case,
+    },
     ArgcValue,
 };
 
@@ -154,17 +156,17 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_body(&self) -> String {
-		let mut output = match (self.no_long, self.short) {
-			(true, _) => {
-				format!("-{}", self.name)
-			}
-			(false, Some(c)) => {
-				format!("-{c}, --{}", self.name)
-			}
-			(false, None) => {
-				format!("    --{}", self.name)
-			}
-		};
+        let mut output = match (self.no_long, self.short) {
+            (true, _) => {
+                format!("-{}", self.name)
+            }
+            (false, Some(c)) => {
+                format!("-{c}, --{}", self.name)
+            }
+            (false, None) => {
+                format!("    --{}", self.name)
+            }
+        };
         if self.is_flag() {
             if self.multiple {
                 output.push_str("...")
@@ -189,8 +191,12 @@ impl FlagOptionParam {
             };
             output.push_str(&value);
         } else {
-			let values = self.arg_value_names.iter().map(|v| format!("<{v}>")).collect::<Vec<String>>();
-			output.push_str(&values.join(" "));
+            let values = self
+                .arg_value_names
+                .iter()
+                .map(|v| format!("<{v}>"))
+                .collect::<Vec<String>>();
+            output.push_str(&values.join(" "));
         }
         output
     }
@@ -428,16 +434,16 @@ fn render_describe(
         if !output.is_empty() {
             output.push(' ')
         }
-		let values: Vec<String> = choices.iter().map(|v| escape_shell_words(v)).collect();
+        let values: Vec<String> = choices.iter().map(|v| escape_shell_words(v)).collect();
         output.push_str(&format!("[possible values: {}]", values.join(", ")));
     }
     output
 }
 
 fn must_get_first(value: &[&str]) -> String {
-	if value.is_empty() {
-		String::new()
-	} else {
-		value[0].to_string()
-	}
+    if value.is_empty() {
+        String::new()
+    } else {
+        value[0].to_string()
+    }
 }

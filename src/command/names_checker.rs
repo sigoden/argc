@@ -33,14 +33,14 @@ impl NamesChecker {
         param: &PositionalParam,
         pos: Position,
     ) -> Result<()> {
-		let name = &param.name;
+        let name = &param.name;
         if let Some(exist_pos) = self.positionals.get(name) {
             bail!(
                 "{}",
                 Self::conflict_error(param.tag_name(), pos, name, *exist_pos)
             );
         }
-		self.positionals.insert(name.to_string(), pos);
+        self.positionals.insert(name.to_string(), pos);
         Ok(())
     }
 

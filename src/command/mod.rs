@@ -372,7 +372,7 @@ impl Command {
             ));
         }
         output.push("OPTIONS:".to_string());
-		let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() +  2;
+        let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
         for (value, describe) in list {
             if describe.is_empty() {
                 output.push(format!("  {value}"));
@@ -412,18 +412,18 @@ impl Command {
         output
     }
 
-	pub(crate) fn render_subcommand_describe(&self) -> String {
+    pub(crate) fn render_subcommand_describe(&self) -> String {
         let mut output = self.describe.clone().unwrap_or_default();
-		if self.aliases.is_empty() {
-			return output
-		}  else {
-			if !output.is_empty() {
-				output.push(' ')
-			}
-			output.push_str(&format!("[aliases: {}]", self.aliases.join(", ")));
-		};
-		output
-	}
+        if self.aliases.is_empty() {
+            return output;
+        } else {
+            if !output.is_empty() {
+                output.push(' ')
+            }
+            output.push_str(&format!("[aliases: {}]", self.aliases.join(", ")));
+        };
+        output
+    }
 
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![self.name.clone().unwrap_or_default()];
@@ -492,18 +492,20 @@ impl Command {
         } else {
             let mut parts: Vec<String> = cmd_paths.iter().skip(1).map(|v| v.to_string()).collect();
             parts.push(main);
-			let name = parts.join("::");
+            let name = parts.join("::");
             if self.root.borrow().fns.contains_key(&name) {
-				Some(name)
-			} else {
-				None
-			}
+                Some(name)
+            } else {
+                None
+            }
         }
     }
 
-	pub(crate) fn exist_main_fn(&self, cmd_paths: &[&str]) -> bool {
-		self.get_cmd_fn(&cmd_paths).map(|v| v.ends_with("main")).unwrap_or_default()
-	}
+    pub(crate) fn exist_main_fn(&self, cmd_paths: &[&str]) -> bool {
+        self.get_cmd_fn(cmd_paths)
+            .map(|v| v.ends_with("main"))
+            .unwrap_or_default()
+    }
 
     fn add_positional_param(&mut self, param: PositionalParam, pos: Position) -> Result<()> {
         self.names_checker.check_positional(&param, pos)?;
