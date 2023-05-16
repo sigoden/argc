@@ -631,7 +631,7 @@ fn match_flag_option<'a, 'b>(
         {
             *arg_comp =
                 ArgComp::OptionValue(param.name.clone(), value_args.len().saturating_sub(1));
-        } else if *arg_comp == ArgComp::FlagOrOption && param.is_flag() {
+        } else if *arg_comp == ArgComp::FlagOrOption && param.is_flag() && !arg.starts_with("--") {
             *arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
         }
     }
