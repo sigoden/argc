@@ -25,7 +25,7 @@ OUTPUT
 #[macro_export]
 macro_rules! snapshot_spec {
     ($args:expr) => {
-        let (path, source) = crate::fixtures::get_spec();
+        let (path, source) = $crate::fixtures::get_spec();
         snapshot!(Some(path.as_str()), source.as_str(), $args);
     };
 }
