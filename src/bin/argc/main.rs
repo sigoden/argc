@@ -39,7 +39,7 @@ fn run() -> Result<i32> {
         match argc_cmd {
             "--argc-eval" => {
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
-                let values = argc::eval(&source, &cmd_args)?;
+                let values = argc::eval(Some(&args[2]), &source, &cmd_args)?;
                 println!("{}", argc::ArgcValue::to_shell(values))
             }
             "--argc-create" => {

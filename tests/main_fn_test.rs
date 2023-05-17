@@ -33,7 +33,7 @@ main() {
 }
     "###;
     plain!(script, &["prog", "cmd"], "cmd");
-    snapshot!(script, &["prog", "-h"]);
+    snapshot!(None, script, &["prog", "-h"]);
 }
 
 #[test]
@@ -48,7 +48,7 @@ cmd() {
 
     "###;
     plain!(script, &["prog", "cmd"], "cmd");
-    snapshot!(script, &["prog"]);
+    snapshot!(None, script, &["prog"]);
 }
 
 #[test]
@@ -62,5 +62,5 @@ cmd() {
 }
 
     "###;
-    snapshot!(script, &["prog", "-h"]);
+    snapshot!(None, script, &["prog", "-h"]);
 }

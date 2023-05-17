@@ -3,6 +3,7 @@ use convert_case::{Boundary, Converter, Pattern};
 use std::{
     env,
     path::{Path, PathBuf},
+    process, thread,
 };
 use which::which;
 
@@ -64,6 +65,33 @@ pub fn get_bash_path() -> Option<PathBuf> {
 #[cfg(not(windows))]
 pub fn get_bash_path() -> Option<PathBuf> {
     which("bash").ok()
+}
+
+pub fn run_param_fns(script_file: &str, param_fns: &[&str], line: &str) -> Option<Vec<String>> {
+    let shell = get_shell_path()?;
+    let handles: Vec<_> = param_fns
+        .iter()
+        .map(|param_fn| {
+            let script_file = script_file.to_string();
+            let line = line.to_string();
+            let param_fn = param_fn.to_string();
+            let shell = shell.clone();
+            thread::spawn(move || {
+                process::Command::new(shell)
+                    .arg(script_file)
+                    .arg(param_fn)
+                    .arg(line)
+                    .output()
+                    .ok()
+                    .map(|out| String::from_utf8_lossy(&out.stdout).to_string())
+            })
+        })
+        .collect();
+    let list: Vec<String> = handles
+        .into_iter()
+        .map(|h| h.join().ok().flatten().unwrap_or_default())
+        .collect();
+    Some(list)
 }
 
 #[cfg(test)]

@@ -1,9 +1,9 @@
 use crate::command::Command;
 use crate::matcher::Matcher;
-use crate::utils::{escape_shell_words, get_shell_path, split_shell_words};
+use crate::utils::{escape_shell_words, run_param_fns, split_shell_words};
 use crate::Result;
 use anyhow::bail;
-use std::{process, str::FromStr};
+use std::str::FromStr;
 
 pub fn compgen(
     shell: Shell,
@@ -168,32 +168,25 @@ fn expand_candicates(
         }
     }
     if !param_fns.is_empty() {
-        if let Some(shell) = get_shell_path() {
-            for param_fn in param_fns {
-                if let Ok(fn_output) = process::Command::new(&shell)
-                    .arg(script_file)
-                    .arg(&param_fn)
-                    .arg(line)
-                    .output()
-                {
-                    let fn_output = String::from_utf8_lossy(&fn_output.stdout);
-                    for fn_output_line in fn_output.split('\n') {
-                        let output_line = fn_output_line.trim();
-                        if !output_line.is_empty()
-                            && (output_line.starts_with("__argc_")
-                                || output_line.starts_with(filter))
-                        {
-                            if let Some((x, y)) = output_line.split_once('\t') {
-                                output.push((x.to_string(), y.to_string()));
-                            } else {
-                                output.push((output_line.to_string(), String::new()));
-                            }
+        let fns: Vec<&str> = param_fns.iter().map(|v| v.as_str()).collect();
+        if let Some(param_fn_outputs) = run_param_fns(script_file, &fns, line) {
+            for param_fn_output in param_fn_outputs {
+                for output_line in param_fn_output.split('\n') {
+                    let output_line = output_line.trim();
+                    if !output_line.is_empty()
+                        && (output_line.starts_with("__argc_") || output_line.starts_with(filter))
+                    {
+                        if let Some((x, y)) = output_line.split_once('\t') {
+                            output.push((x.to_string(), y.to_string()));
+                        } else {
+                            output.push((output_line.to_string(), String::new()));
                         }
                     }
                 }
             }
         }
     }
+
     if output.len() == 1 {
         let value = &output[0].0;
         if let Some(value_name) = value.strip_prefix("__argc_value") {
