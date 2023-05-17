@@ -156,7 +156,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     .map(|v| v.trim().to_string())
                     .filter(|v| !v.is_empty())
                     .collect();
-                self.choices_values.insert(fns[i], choices);
+                if !choices.is_empty() {
+                    self.choices_values.insert(fns[i], choices);
+                }
             }
         }
     }

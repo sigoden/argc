@@ -40,6 +40,8 @@ jobs:
 
     - uses: Swatinem/rust-cache@v1
 
+    - run: cargo install --path .
+
     - name: Test
       run: cargo test --all
 
