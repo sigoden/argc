@@ -209,6 +209,10 @@ cmd_nested_command2() {
     :;
 }
 
+cmd_nested_command2::main() {
+    print_argc_vars
+}
+
 # @cmd Subcommand of nested command2
 # @option --opt1
 # @option --opt2
@@ -216,7 +220,8 @@ cmd_nested_command2::foo() {
     print_argc_vars
 }
 
-cmd_nested_command2::main() {
+# @cmd Recursive nested subcommand
+cmd_nested_command2::foo::bar() {
     print_argc_vars
 }
 

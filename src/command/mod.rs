@@ -185,64 +185,54 @@ impl Command {
                             .borrow_mut()
                             .cmd_fns
                             .insert(name.clone(), position);
-                        let (parent, child) = match name.split_once("::") {
-                            None => (name.as_str(), None),
-                            Some((parent, child)) => {
-                                if child.is_empty() {
-                                    bail!("{}(line {}) is invalid", name, position);
+
+                        let parts: Vec<&str> = name.split("::").collect();
+                        let parts_len = parts.len();
+                        if parts_len == 0 {
+                            bail!("{}(line {}) invalid command name", name, position);
+                        } else if parts_len == 1 {
+                            let cmd = root_cmd.subcommands.last_mut().unwrap();
+                            cmd.name = Some(parts[0].to_string());
+                            cmd.fn_name = Some(name.to_string());
+                            for name in &cmd.aliases {
+                                if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
+                                    bail!(
+										"@alias(line {}) is conflicted with cmd or alias at line {}",
+										cmd.alias_pos,
+										pos
+									);
                                 }
-                                (parent, Some(child))
+                                root_data
+                                    .borrow_mut()
+                                    .cmd_fns
+                                    .insert(name.clone(), cmd.alias_pos);
                             }
-                        };
-                        match child {
-                            None => {
-                                let cmd = root_cmd.subcommands.last_mut().unwrap();
-                                cmd.name = Some(parent.to_string());
-                                cmd.fn_name = Some(name.to_string());
-                                for name in &cmd.aliases {
-                                    if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
-                                        bail!(
-											"@alias(line {}) is conflicted with cmd or alias at line {}",
-											cmd.alias_pos,
-											pos
-										);
-                                    }
-                                    root_data
-                                        .borrow_mut()
-                                        .cmd_fns
-                                        .insert(name.clone(), cmd.alias_pos);
-                                }
-                            }
-                            Some(child) => {
-                                let mut cmd = root_cmd.subcommands.pop().unwrap();
-                                cmd.name = Some(child.to_string());
-                                cmd.fn_name = Some(name.to_string());
-                                match root_cmd
-                                    .subcommands
-                                    .iter_mut()
-                                    .find(|v| v.name == Some(parent.into()))
-                                {
-                                    Some(parent_cmd) => {
+                        } else {
+                            let mut cmd = root_cmd.subcommands.pop().unwrap();
+                            let (child, parents) = parts.split_last().unwrap();
+                            cmd.name = Some(child.to_string());
+                            cmd.fn_name = Some(name.to_string());
+                            match retrive_cmd(&mut root_cmd, parents) {
+                                Some(parent_cmd) => {
+                                    parent_cmd
+                                        .subcommand_fns
+                                        .insert(child.to_string(), position);
+                                    for name in &cmd.aliases {
+                                        if let Some(pos) = parent_cmd.subcommand_fns.get(name) {
+                                            bail!(
+												"@alias(line {}) is conflicted with cmd or alias at line {}",
+												cmd.alias_pos,
+												pos
+											);
+                                        }
                                         parent_cmd
                                             .subcommand_fns
-                                            .insert(child.to_string(), position);
-                                        for name in &cmd.aliases {
-                                            if let Some(pos) = parent_cmd.subcommand_fns.get(name) {
-                                                bail!(
-													"@alias(line {}) is conflicted with cmd or alias at line {}",
-													cmd.alias_pos,
-													pos
-												);
-                                            }
-                                            parent_cmd
-                                                .subcommand_fns
-                                                .insert(name.clone(), cmd.alias_pos);
-                                        }
-                                        parent_cmd.subcommands.push(cmd);
+                                            .insert(name.clone(), cmd.alias_pos);
                                     }
-                                    None => {
-                                        bail!("{}(line {}) has no parent", name, position);
-                                    }
+                                    parent_cmd.subcommands.push(cmd);
+                                }
+                                None => {
+                                    bail!("{}(line {}) lack of parent command", name, position);
                                 }
                             }
                         }
@@ -550,4 +540,15 @@ impl Command {
         self.subcommands.push(cmd);
         self.subcommands.last_mut().unwrap()
     }
+}
+
+fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[&str]) -> Option<&'a mut Command> {
+    if cmd_paths.is_empty() {
+        return Some(cmd);
+    }
+    let child = cmd
+        .subcommands
+        .iter_mut()
+        .find(|v| v.name.as_deref() == Some(cmd_paths[0]))?;
+    retrive_cmd(child, &cmd_paths[1..])
 }

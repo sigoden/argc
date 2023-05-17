@@ -1,0 +1,24 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec cmd_nested_command2 foo
+
+OUTPUT
+cat >&2 <<-'EOF' 
+Subcommand of nested command2
+
+USAGE: spec cmd_nested_command2 foo [OPTIONS] <COMMAND>
+
+OPTIONS:
+      --opt1 <OPT1>
+      --opt2 <OPT2>
+  -h, --help
+
+COMMANDS:
+  bar  Recursive nested subcommand
+
+EOF
+exit 0
+

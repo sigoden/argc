@@ -215,6 +215,11 @@ fn test_spec_nested_command2() {
 }
 
 #[test]
+fn test_spec_nested_command3() {
+    snapshot_spec!(&["spec", "cmd_nested_command2", "foo"]);
+}
+
+#[test]
 fn test_spec_cmd_no_long_flags() {
     snapshot_spec!(&["spec", "cmd_no_long_flags", "-h"]);
 }
