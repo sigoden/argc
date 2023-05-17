@@ -1,0 +1,15 @@
+---
+source: tests/compgen.rs
+expression: output
+---
+RUN
+cmd_option_names --op10 
+
+STDOUT
+a1
+a2
+a3
+
+STDERR
+
+

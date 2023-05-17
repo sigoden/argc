@@ -132,3 +132,8 @@ fn test_compgen_cmd_single_dash() {
 fn test_compgen_cmd_single_dash2() {
     snapshot_compgen!("cmd_single_dash -f");
 }
+
+#[test]
+fn test_compgen_choice_fns() {
+    snapshot_compgen!("cmd_option_names --op10 ");
+}

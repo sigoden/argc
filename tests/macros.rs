@@ -1,11 +1,12 @@
 #[macro_export]
 macro_rules! snapshot {
     (
+		$path:expr,
         $source:expr,
         $args:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values = argc::eval($source, &args).unwrap();
+        let values = argc::eval($path, $source, &args).unwrap();
         let output = argc::ArgcValue::to_shell(values);
         let args = $args.join(" ");
         let output = format!(
@@ -22,6 +23,14 @@ OUTPUT
 }
 
 #[macro_export]
+macro_rules! snapshot_spec {
+    ($args:expr) => {
+        let (path, source) = crate::fixtures::get_spec();
+        snapshot!(Some(path.as_str()), source.as_str(), $args);
+    };
+}
+
+#[macro_export]
 macro_rules! plain {
     (
         $source:expr,
@@ -29,7 +38,7 @@ macro_rules! plain {
 		$output:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values = argc::eval($source, &args).unwrap();
+        let values = argc::eval(None, $source, &args).unwrap();
         let output = argc::ArgcValue::to_shell(values);
         assert_eq!(output, $output);
     };
@@ -43,7 +52,7 @@ macro_rules! fatal {
         $err:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let err = argc::eval($source, &args).unwrap_err();
+        let err = argc::eval(None, $source, &args).unwrap_err();
         assert_eq!(err.to_string().as_str(), $err);
     };
 }

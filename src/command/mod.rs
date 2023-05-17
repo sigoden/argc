@@ -17,9 +17,13 @@ use std::collections::HashMap;
 use std::result::Result as StdResult;
 use std::sync::Arc;
 
-pub fn eval(source: &str, args: &[String]) -> Result<Vec<ArgcValue>> {
-    let mut cmd = Command::new(source)?;
-    cmd.eval(args)
+pub fn eval(
+    script_path: Option<&str>,
+    script_content: &str,
+    args: &[String],
+) -> Result<Vec<ArgcValue>> {
+    let mut cmd = Command::new(script_content)?;
+    cmd.eval(script_path, args)
 }
 
 pub fn export(source: &str, name: &str) -> Result<serde_json::Value> {
@@ -52,7 +56,7 @@ impl Command {
         Command::new_from_events(&events)
     }
 
-    pub fn eval(&mut self, args: &[String]) -> Result<Vec<ArgcValue>> {
+    pub fn eval(&mut self, script_path: Option<&str>, args: &[String]) -> Result<Vec<ArgcValue>> {
         if args.is_empty() {
             bail!("Invalid args");
         }
@@ -78,7 +82,10 @@ impl Command {
             arg_values.push(ArgcValue::ParamFn(args[1].clone()));
             return Ok(arg_values);
         }
-        let matcher = Matcher::new(self, args);
+        let mut matcher = Matcher::new(self, args);
+        if let Some(script_path) = script_path {
+            matcher.set_script_path(script_path)
+        }
         Ok(matcher.to_arg_values())
     }
 
