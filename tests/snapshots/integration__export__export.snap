@@ -1375,7 +1375,18 @@ expression: output
           ],
           "positionals": [],
           "aliases": [],
-          "subcommands": []
+          "subcommands": [
+            {
+              "describe": "Recursive nested subcommand",
+              "name": "bar",
+              "author": null,
+              "version": null,
+              "options": [],
+              "positionals": [],
+              "aliases": [],
+              "subcommands": []
+            }
+          ]
         }
       ]
     },
