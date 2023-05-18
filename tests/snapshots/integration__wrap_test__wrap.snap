@@ -1,0 +1,25 @@
+---
+source: tests/wrap_test.rs
+expression: output
+---
+cat >&2 <<-'EOF' 
+USAGE: prog --help [OPTIONS] [TARGET] <COMMAND>
+
+ARGS:
+  [TARGET]  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Sed
+            viverra tellus in hac habitasse platea.
+
+OPTIONS:
+      --foo <FOO>  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                   sed do eiusmod tempor incididunt ut labore et dolore magna
+                   aliqua. Neque laoreet suspendisse libero id.
+  -h, --help       Print help
+
+COMMANDS:
+  foo  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+       tempor incididunt ut labore et dolore magna aliqua. Arcu cursus euismod
+       quis viverra.
+
+EOF
+exit 0

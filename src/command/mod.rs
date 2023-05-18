@@ -21,9 +21,10 @@ pub fn eval(
     script_path: Option<&str>,
     script_content: &str,
     args: &[String],
+    term_width: Option<usize>,
 ) -> Result<Vec<ArgcValue>> {
     let mut cmd = Command::new(script_content)?;
-    cmd.eval(script_path, args)
+    cmd.eval(script_path, args, term_width)
 }
 
 pub fn export(source: &str, name: &str) -> Result<serde_json::Value> {
@@ -56,7 +57,12 @@ impl Command {
         Command::new_from_events(&events)
     }
 
-    pub fn eval(&mut self, script_path: Option<&str>, args: &[String]) -> Result<Vec<ArgcValue>> {
+    pub fn eval(
+        &mut self,
+        script_path: Option<&str>,
+        args: &[String],
+        term_width: Option<usize>,
+    ) -> Result<Vec<ArgcValue>> {
         if args.is_empty() {
             bail!("Invalid args");
         }
@@ -85,6 +91,9 @@ impl Command {
         let mut matcher = Matcher::new(self, args);
         if let Some(script_path) = script_path {
             matcher.set_script_path(script_path)
+        }
+        if let Some(term_width) = term_width {
+            matcher.set_term_width(term_width)
         }
         Ok(matcher.to_arg_values())
     }
@@ -248,7 +257,7 @@ impl Command {
         Ok(root_cmd)
     }
 
-    pub(crate) fn render_help(&self, cmd_paths: &[&str]) -> String {
+    pub(crate) fn render_help(&self, cmd_paths: &[&str], term_width: Option<usize>) -> String {
         let mut output = vec![];
         if self.version.is_some() {
             output.push(self.render_version(cmd_paths));
@@ -264,9 +273,9 @@ impl Command {
         }
         output.push(self.render_usage(cmd_paths));
         output.push(String::new());
-        output.extend(self.render_positionals());
-        output.extend(self.render_flag_options());
-        output.extend(self.render_subcommands());
+        output.extend(self.render_positionals(term_width));
+        output.extend(self.render_flag_options(term_width));
+        output.extend(self.render_subcommands(term_width));
         if output.is_empty() {
             return "\n".to_string();
         }
@@ -301,7 +310,7 @@ impl Command {
         output.join(" ")
     }
 
-    pub(crate) fn render_positionals(&self) -> Vec<String> {
+    pub(crate) fn render_positionals(&self, term_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         if self.positional_params.is_empty() {
             return output;
@@ -320,14 +329,18 @@ impl Command {
                 output.push(format!("  {value}"));
             } else {
                 let spaces = " ".repeat(value_size - value.len());
-                output.push(format!("  {value}{spaces}{describe}"));
+                output.push(render_line(
+                    &format!("  {value}{spaces}"),
+                    &describe,
+                    term_width,
+                ));
             }
         }
         output.push("".to_string());
         output
     }
 
-    pub(crate) fn render_flag_options(&self) -> Vec<String> {
+    pub(crate) fn render_flag_options(&self, term_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         if self.flag_option_params.is_empty() {
             return output;
@@ -380,14 +393,18 @@ impl Command {
                 output.push(format!("  {value}"));
             } else {
                 let spaces = " ".repeat(value_size - value.len());
-                output.push(format!("  {value}{spaces}{describe}"));
+                output.push(render_line(
+                    &format!("  {value}{spaces}"),
+                    &describe,
+                    term_width,
+                ));
             }
         }
         output.push("".to_string());
         output
     }
 
-    pub(crate) fn render_subcommands(&self) -> Vec<String> {
+    pub(crate) fn render_subcommands(&self, term_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         if self.subcommands.is_empty() {
             return output;
@@ -407,7 +424,11 @@ impl Command {
                 output.push(format!("  {value}"));
             } else {
                 let spaces = " ".repeat(value_size - value.len());
-                output.push(format!("  {value}{spaces}{describe}"));
+                output.push(render_line(
+                    &format!("  {value}{spaces}"),
+                    &describe,
+                    term_width,
+                ));
             }
         }
         output.push("".to_string());
@@ -551,4 +572,22 @@ fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[&str]) -> Option<&'a mut C
         .iter_mut()
         .find(|v| v.name.as_deref() == Some(cmd_paths[0]))?;
     retrive_cmd(child, &cmd_paths[1..])
+}
+
+fn render_line(name: &str, describe: &str, term_width: Option<usize>) -> String {
+    let size = term_width.unwrap_or(999) - name.len();
+    let empty = " ".repeat(name.len());
+    describe
+        .split('\n')
+        .flat_map(|v| textwrap::wrap(v, size))
+        .enumerate()
+        .map(|(i, v)| {
+            if i == 0 {
+                format!("{name}{v}")
+            } else {
+                format!("{empty}{v}")
+            }
+        })
+        .collect::<Vec<String>>()
+        .join("\n")
 }

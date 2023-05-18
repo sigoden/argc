@@ -16,3 +16,5 @@ mod interrupt;
 mod main_fn_test;
 mod param_fn_test;
 mod spec_test;
+
+mod wrap_test;

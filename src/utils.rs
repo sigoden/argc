@@ -94,6 +94,10 @@ pub fn run_param_fns(script_file: &str, param_fns: &[&str], line: &str) -> Optio
     Some(list)
 }
 
+pub fn termwidth() -> Option<usize> {
+    env::var("TERM_WIDTH").ok()?.parse().ok()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

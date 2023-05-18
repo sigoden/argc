@@ -2,7 +2,10 @@ mod completions;
 mod utils;
 
 use anyhow::{anyhow, bail, Context, Result};
-use argc::{utils::get_shell_path, Shell};
+use argc::{
+    utils::{get_shell_path, termwidth},
+    Shell,
+};
 use std::{
     env, fs, process,
     sync::{
@@ -39,7 +42,7 @@ fn run() -> Result<i32> {
         match argc_cmd {
             "--argc-eval" => {
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
-                let values = argc::eval(Some(&args[2]), &source, &cmd_args)?;
+                let values = argc::eval(Some(&args[2]), &source, &cmd_args, termwidth())?;
                 println!("{}", argc::ArgcValue::to_shell(values))
             }
             "--argc-create" => {
