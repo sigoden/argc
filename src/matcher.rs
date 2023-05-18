@@ -19,6 +19,7 @@ pub struct Matcher<'a, 'b> {
     choices_fns: HashSet<&'a str>,
     choices_values: HashMap<&'a str, Vec<String>>,
     script_path: Option<String>,
+    term_width: Option<usize>,
 }
 
 type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>);
@@ -143,6 +144,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             choices_fns,
             choices_values: HashMap::new(),
             script_path: None,
+            term_width: None,
         }
     }
 
@@ -161,6 +163,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 }
             }
         }
+    }
+
+    pub fn set_term_width(&mut self, term_width: usize) {
+        self.term_width = Some(term_width);
     }
 
     pub fn to_arg_values(&self) -> Vec<ArgcValue> {
@@ -482,13 +488,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let message = match err {
             MatchError::DisplayHelp => {
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
-                cmd.render_help(&cmd_paths)
+                cmd.render_help(&cmd_paths, self.term_width)
             }
             MatchError::DisplaySubcommandHelp(name) => {
                 let (cmd, mut cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
                 let cmd = cmd.find_subcommand(name).unwrap();
                 cmd_paths.push(name.as_str());
-                cmd.render_help(&cmd_paths)
+                cmd.render_help(&cmd_paths, self.term_width)
             }
             MatchError::DisplayVersion => {
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);

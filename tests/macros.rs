@@ -6,7 +6,7 @@ macro_rules! snapshot {
         $args:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values = argc::eval($path, $source, &args).unwrap();
+        let values = argc::eval($path, $source, &args, None).unwrap();
         let output = argc::ArgcValue::to_shell(values);
         let args = $args.join(" ");
         let output = format!(
@@ -38,7 +38,7 @@ macro_rules! plain {
 		$output:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values = argc::eval(None, $source, &args).unwrap();
+        let values = argc::eval(None, $source, &args, None).unwrap();
         let output = argc::ArgcValue::to_shell(values);
         assert_eq!(output, $output);
     };
@@ -52,7 +52,7 @@ macro_rules! fatal {
         $err:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let err = argc::eval(None, $source, &args).unwrap_err();
+        let err = argc::eval(None, $source, &args, None).unwrap_err();
         assert_eq!(err.to_string().as_str(), $err);
     };
 }

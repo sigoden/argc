@@ -34,7 +34,6 @@ foo() {
 
 # @cmd
 foo() {
-
 }
     "###;
     fatal!(
