@@ -18,12 +18,12 @@ impl RootData {
         &mut self,
         position: usize,
         default_fn: &Option<String>,
-        choices_fn: &Option<String>,
+        choices_fn: &Option<(String, bool)>,
     ) {
         if let Some(default_fn) = default_fn.as_ref() {
             self.default_fns.push((default_fn.to_string(), position));
         }
-        if let Some(choices_fn) = choices_fn.as_ref() {
+        if let Some((choices_fn, _)) = choices_fn.as_ref() {
             self.choices_fns.push((choices_fn.to_string(), position));
         }
     }

@@ -156,6 +156,12 @@ cmd_positional_with_choices_fn() {
     print_argc_vars
 }
 
+# @cmd  Positional with choices and value
+# @arg   arg[?`_fn_bars`]  A arg with choices fn, skip validate choice
+cmd_positional_with_choices_fn2() {
+    print_argc_vars
+}
+
 # @cmd  Positional with choices and required
 # @arg   arg![a|b]   A arg with choices and required
 cmd_positional_with_choices_and_required() {
