@@ -19,6 +19,7 @@ ARGS:
   [TARGET]  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
             eiusmod tempor incididunt ut labore et dolore magna aliqua. Sed
             viverra tellus in hac habitasse platea.
+            Use '-' for standard input.
 
 OPTIONS:
       --foo <FOO>  Lorem ipsum dolor sit amet, consectetur adipiscing elit,

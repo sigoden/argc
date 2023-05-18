@@ -10,6 +10,7 @@ const SCRIPT: &str = r###"
 #  * full: enables all available components.
 #  * auto: same as 'default', unless the output is piped.
 # @arg target Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sed viverra tellus in hac habitasse platea.
+# Use '-' for standard input.
 # @cmd Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Arcu cursus euismod quis viverra. 
 #
 # Extra lines after the @cmd or @describe, which don't start with an @, are 
