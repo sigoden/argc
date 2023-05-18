@@ -95,7 +95,7 @@ pub fn run_param_fns(script_file: &str, param_fns: &[&str], line: &str) -> Optio
 }
 
 pub fn termwidth() -> Option<usize> {
-    terminal_size::terminal_size().map(|(w, _)| w.0.into())
+    env::var("TERM_WIDTH").ok()?.parse().ok()
 }
 
 #[cfg(test)]

@@ -575,7 +575,7 @@ fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[&str]) -> Option<&'a mut C
 }
 
 fn render_line(name: &str, describe: &str, term_width: Option<usize>) -> String {
-    let size = term_width.unwrap_or(99999) - name.len();
+    let size = term_width.unwrap_or(999) - name.len();
     let empty = " ".repeat(name.len());
     describe
         .split('\n')

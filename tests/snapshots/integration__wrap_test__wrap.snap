@@ -3,7 +3,7 @@ source: tests/wrap_test.rs
 expression: output
 ---
 cat >&2 <<-'EOF' 
-USAGE: --help [OPTIONS] [TARGET] <COMMAND>
+USAGE: prog --help [OPTIONS] [TARGET] <COMMAND>
 
 ARGS:
   [TARGET]  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do

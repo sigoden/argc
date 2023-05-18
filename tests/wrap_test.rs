@@ -1,6 +1,6 @@
 macro_rules! snapshort_wrap {
     ($source:expr, $width:expr) => {
-        let args: Vec<String> = vec!["--help".into()];
+        let args: Vec<String> = vec!["prog --help".into()];
         let values = argc::eval(None, $source, &args, Some($width)).unwrap();
         let output = argc::ArgcValue::to_shell(values);
         insta::assert_snapshot!(output);

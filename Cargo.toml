@@ -23,7 +23,6 @@ which = "4.2"
 ctrlc = "3.2"
 shell-words = "1.1.0"
 textwrap = "0.16.0"
-terminal_size = "0.2.6"
 
 [dev-dependencies]
 insta = "1.15"
