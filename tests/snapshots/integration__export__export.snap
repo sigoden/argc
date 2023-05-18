@@ -370,7 +370,10 @@ expression: output
           "flag": false,
           "dashes": "--",
           "choices": null,
-          "choices_fn": "_fn_bars",
+          "choices_fn": [
+            "_fn_bars",
+            true
+          ],
           "multiple": false,
           "required": false,
           "default": null,
@@ -384,7 +387,10 @@ expression: output
           "flag": false,
           "dashes": "--",
           "choices": null,
-          "choices_fn": "_fn_bars",
+          "choices_fn": [
+            "_fn_bars",
+            true
+          ],
           "multiple": false,
           "required": true,
           "default": null,
@@ -533,7 +539,10 @@ expression: output
           "flag": false,
           "dashes": "",
           "choices": null,
-          "choices_fn": "_fn_foo",
+          "choices_fn": [
+            "_fn_foo",
+            true
+          ],
           "multiple": false,
           "required": false,
           "default": null,
@@ -547,7 +556,10 @@ expression: output
           "flag": false,
           "dashes": "",
           "choices": null,
-          "choices_fn": "_fn_bars",
+          "choices_fn": [
+            "_fn_bars",
+            true
+          ],
           "multiple": false,
           "required": false,
           "default": null,
@@ -561,7 +573,10 @@ expression: output
           "flag": false,
           "dashes": "",
           "choices": null,
-          "choices_fn": "_fn_bars",
+          "choices_fn": [
+            "_fn_bars",
+            true
+          ],
           "multiple": false,
           "required": true,
           "default": null,
@@ -1115,7 +1130,35 @@ expression: output
           "name": "arg",
           "describe": "A arg with choices fn",
           "choices": null,
-          "choices_fn": "_fn_bars",
+          "choices_fn": [
+            "_fn_bars",
+            true
+          ],
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "Positional with choices and value",
+      "name": "cmd_positional_with_choices_fn2",
+      "author": null,
+      "version": null,
+      "options": [],
+      "positionals": [
+        {
+          "name": "arg",
+          "describe": "A arg with choices fn, skip validate choice",
+          "choices": null,
+          "choices_fn": [
+            "_fn_bars",
+            false
+          ],
           "multiple": false,
           "required": false,
           "default": null,
@@ -1162,7 +1205,10 @@ expression: output
           "name": "arg",
           "describe": "A arg with choices fn and required",
           "choices": null,
-          "choices_fn": "_fn_bars",
+          "choices_fn": [
+            "_fn_bars",
+            true
+          ],
           "multiple": false,
           "required": true,
           "default": null,
@@ -1492,7 +1538,10 @@ expression: output
           "name": "args",
           "describe": "",
           "choices": null,
-          "choices_fn": "_fn_args",
+          "choices_fn": [
+            "_fn_args",
+            true
+          ],
           "multiple": true,
           "required": false,
           "default": null,

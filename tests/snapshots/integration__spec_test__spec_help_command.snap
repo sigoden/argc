@@ -32,6 +32,7 @@ COMMANDS:
   cmd_positional_with_default_fn               Positional with default value
   cmd_positional_with_choices_and_default      Positional with choices and value
   cmd_positional_with_choices_fn               Positional with choices and value
+  cmd_positional_with_choices_fn2              Positional with choices and value
   cmd_positional_with_choices_and_required     Positional with choices and required
   cmd_positional_with_choices_fn_and_required  Positional with choices and value
   cmd_without_any_arg                          Command without any arg
