@@ -238,6 +238,7 @@ fn test_spec_cmd_option_notations_help() {
 fn test_spec_cmd_option_notations() {
     snapshot_spec!(&["spec", "cmd_option_notations", "--opt2"]);
 }
+
 #[test]
 fn test_spec_cmd_option_notations1() {
     snapshot_spec!(&["spec", "cmd_option_notations", "--opt2", "foo"]);
@@ -286,4 +287,33 @@ fn test_spec_cmd_single_dash() {
 #[test]
 fn test_spec_cmd_positional_with_choices_fn() {
     snapshot_spec!(&["spec", "cmd_positional_with_choices_fn", "xyz"]);
+}
+
+#[test]
+fn test_spec_cmd_two_multiple_positionals() {
+    snapshot_spec!(&["spec", "cmd_two_multiple_positionals", "abc", "def", "cjk"]);
+}
+
+#[test]
+fn test_spec_cmd_two_multiple_positionals2() {
+    snapshot_spec!(&[
+        "spec",
+        "cmd_two_multiple_positionals",
+        "--",
+        "abc",
+        "def",
+        "cjk"
+    ]);
+}
+
+#[test]
+fn test_spec_cmd_two_multiple_positionals3() {
+    snapshot_spec!(&[
+        "spec",
+        "cmd_two_multiple_positionals",
+        "abc",
+        "--",
+        "def",
+        "cjk"
+    ]);
 }

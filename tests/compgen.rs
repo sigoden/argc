@@ -29,6 +29,11 @@ fn test_compgen_option_choices2() {
 }
 
 #[test]
+fn test_compgen_option_choices3() {
+    snapshot_compgen!("cmd_option_names -- ");
+}
+
+#[test]
 fn test_compgen_positional() {
     snapshot_compgen!("cmd_positional_requires ");
 }

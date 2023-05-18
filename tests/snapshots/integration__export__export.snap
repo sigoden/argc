@@ -1606,6 +1606,39 @@ expression: output
       ],
       "aliases": [],
       "subcommands": []
+    },
+    {
+      "describe": "Two positional all multiple",
+      "name": "cmd_two_multiple_positionals",
+      "author": null,
+      "version": null,
+      "options": [],
+      "positionals": [
+        {
+          "name": "val1",
+          "describe": "",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        },
+        {
+          "name": "val2",
+          "describe": "",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "aliases": [],
+      "subcommands": []
     }
   ]
 }

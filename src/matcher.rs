@@ -240,7 +240,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             ArgComp::Any => {
                 let cmd = self.cmds[self.cmds.len() - 1].1;
-                let mut output = self.comp_flag_options();
+                let mut output = if self.dashdash.is_some() {
+                    vec![]
+                } else {
+                    self.comp_flag_options()
+                };
                 let values = self.match_positionals();
                 output.extend(comp_subcommands_positional(cmd, &values));
                 if output.is_empty() {
@@ -467,7 +471,16 @@ impl<'a, 'b> Matcher<'a, 'b> {
         while param_index < params_len && arg_index < args_len {
             let param = &cmd.positional_params[param_index];
             if param.multiple {
-                let takes = (args_len - arg_index).saturating_sub(params_len - param_index) + 1;
+                let dashdash_idx = self.dashdash.unwrap_or_default();
+                let takes = if param_index == 0
+                    && dashdash_idx > 0
+                    && params_len == 2
+                    && cmd.positional_params[1].multiple
+                {
+                    dashdash_idx
+                } else {
+                    (args_len - arg_index).saturating_sub(params_len - param_index) + 1
+                };
                 output.push(self.positional_args[arg_index..(arg_index + takes)].to_vec());
                 arg_index += takes;
             } else {
