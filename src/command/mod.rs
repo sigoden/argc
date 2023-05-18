@@ -266,7 +266,7 @@ impl Command {
             output.push(author.to_string());
         }
         if !&self.describe.is_empty() {
-            output.push(self.describe.to_string());
+            output.push(wrap_render_block("", &self.describe, term_width));
         }
         if !output.is_empty() {
             output.push(String::new());
@@ -329,7 +329,7 @@ impl Command {
                 output.push(format!("  {value}"));
             } else {
                 let spaces = " ".repeat(value_size - value.len());
-                output.push(render_line(
+                output.push(wrap_render_block(
                     &format!("  {value}{spaces}"),
                     &describe,
                     term_width,
@@ -393,7 +393,7 @@ impl Command {
                 output.push(format!("  {value}"));
             } else {
                 let spaces = " ".repeat(value_size - value.len());
-                output.push(render_line(
+                output.push(wrap_render_block(
                     &format!("  {value}{spaces}"),
                     &describe,
                     term_width,
@@ -424,7 +424,7 @@ impl Command {
                 output.push(format!("  {value}"));
             } else {
                 let spaces = " ".repeat(value_size - value.len());
-                output.push(render_line(
+                output.push(wrap_render_block(
                     &format!("  {value}{spaces}"),
                     &describe,
                     term_width,
@@ -577,7 +577,7 @@ fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[&str]) -> Option<&'a mut C
     retrive_cmd(child, &cmd_paths[1..])
 }
 
-fn render_line(name: &str, describe: &str, term_width: Option<usize>) -> String {
+fn wrap_render_block(name: &str, describe: &str, term_width: Option<usize>) -> String {
     let size = term_width.unwrap_or(999) - name.len();
     let empty = " ".repeat(name.len());
     describe

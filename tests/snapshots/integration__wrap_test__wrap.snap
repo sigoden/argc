@@ -9,7 +9,7 @@ OUTPUT
 cat >&2 <<-'EOF' 
 A simple cli
 
-Extra lines after the @cmd or @describe, which don't start with an @, are 
+Extra lines after the @cmd or @describe, which don't start with an @, are
 treated as the long description. A line which is not a comment ends
 the block.
 
