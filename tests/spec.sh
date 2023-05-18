@@ -257,6 +257,13 @@ cmd_single_dash() {
     print_argc_vars
 }
 
+# @cmd Two positional all multiple
+# @arg val1*
+# @arg val2*
+cmd_two_multiple_positionals() {
+    print_argc_vars
+}
+
 print_argc_vars() {
     ( set -o posix ; set ) | grep argc_
 }

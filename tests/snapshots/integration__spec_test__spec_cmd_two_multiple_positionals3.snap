@@ -1,0 +1,12 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec cmd_two_multiple_positionals abc -- def cjk
+
+OUTPUT
+argc_val1=( abc )
+argc_val2=( def cjk )
+cmd_two_multiple_positionals abc def cjk
+

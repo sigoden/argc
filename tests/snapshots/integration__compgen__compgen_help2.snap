@@ -35,6 +35,7 @@ cmd_notation_values	Notation values
 cmd_dynamic_compgen	Dynamic compgen
 cmd_combine_shorts	Combine shorts
 cmd_single_dash	Single dashe options
+cmd_two_multiple_positionals	Two positional all multiple
 
 STDERR
 
