@@ -12,7 +12,7 @@ use std::fmt::Write;
 pub struct ParamData {
     pub(crate) name: String,
     pub(crate) choices: Option<Vec<String>>,
-    pub(crate) choices_fn: Option<String>,
+    pub(crate) choices_fn: Option<(String, bool)>,
     pub(crate) multiple: bool,
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
@@ -41,7 +41,7 @@ pub struct FlagOptionParam {
     pub(crate) flag: bool,
     pub(crate) dashes: String,
     pub(crate) choices: Option<Vec<String>>,
-    pub(crate) choices_fn: Option<String>,
+    pub(crate) choices_fn: Option<(String, bool)>,
     pub(crate) multiple: bool,
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
@@ -281,7 +281,7 @@ pub struct PositionalParam {
     pub(crate) name: String,
     pub(crate) describe: String,
     pub(crate) choices: Option<Vec<String>>,
-    pub(crate) choices_fn: Option<String>,
+    pub(crate) choices_fn: Option<(String, bool)>,
     pub(crate) multiple: bool,
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
@@ -373,7 +373,7 @@ impl PositionalParam {
 fn render_name(
     name: &str,
     choices: &Option<Vec<String>>,
-    choices_fn: &Option<String>,
+    choices_fn: &Option<(String, bool)>,
     multiple: bool,
     required: bool,
     default: &Option<String>,
@@ -400,11 +400,12 @@ fn render_name(
             .collect();
         let choices_value = format!("[{}{}]", prefix, values.join("|"));
         name.push_str(&choices_value);
-    } else if let Some(choices_fn) = choices_fn {
+    } else if let Some((choices_fn, validate)) = choices_fn {
         if let Some(ch) = get_modifer(required, multiple) {
             name.push(ch)
         }
-        let _ = write!(name, "[`{}`]", choices_fn);
+        let validate_sign = if *validate { "" } else { "?" };
+        let _ = write!(name, "[{}`{}`]", validate_sign, choices_fn);
     } else if let Some(default) = default {
         let value = if default.chars().any(is_default_value_terminate) {
             format!("\"{}\"", default)

@@ -83,13 +83,18 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             arg_comp = ArgComp::OptionValue(param.name.clone(), 0)
                         }
                     }
-                    if let Some(choices_fn) = param.and_then(|v| v.choices_fn.as_ref()) {
-                        choices_fns.insert(choices_fn.as_str());
+                    if let Some((choices_fn, validate)) = param.and_then(|v| v.choices_fn.as_ref())
+                    {
+                        if *validate {
+                            choices_fns.insert(choices_fn.as_str());
+                        }
                     }
                     flag_option_args[cmd_level].push((k, vec![v], param.map(|v| v.name.as_str())));
                 } else if let Some(param) = cmd.find_flag_option(arg) {
-                    if let Some(choices_fn) = param.choices_fn.as_ref() {
-                        choices_fns.insert(choices_fn.as_str());
+                    if let Some((choices_fn, validate)) = param.choices_fn.as_ref() {
+                        if *validate {
+                            choices_fns.insert(choices_fn.as_str());
+                        }
                     }
                     match_flag_option(
                         &mut flag_option_args[cmd_level],
@@ -101,8 +106,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 } else if let Some(mut list) = match_combine_shorts(cmd, arg) {
                     let name = list.pop().and_then(|v| v.2).unwrap();
                     let param = cmd.find_flag_option(name).unwrap();
-                    if let Some(choices_fn) = param.choices_fn.as_ref() {
-                        choices_fns.insert(choices_fn.as_str());
+                    if let Some((choices_fn, validate)) = param.choices_fn.as_ref() {
+                        if *validate {
+                            choices_fns.insert(choices_fn.as_str());
+                        }
                     }
                     flag_option_args[cmd_level].extend(list);
                     match_flag_option(
@@ -129,12 +136,14 @@ impl<'a, 'b> Matcher<'a, 'b> {
             arg_index += 1;
         }
         let last_cmd = cmds.last().unwrap().1;
-        choices_fns.extend(
-            last_cmd
-                .positional_params
-                .iter()
-                .filter_map(|v| v.choices_fn.as_deref()),
-        );
+        choices_fns.extend(last_cmd.positional_params.iter().filter_map(|v| {
+            if let Some((choices_fn, validate)) = v.choices_fn.as_ref() {
+                if *validate {
+                    return Some(choices_fn.as_str());
+                }
+            }
+            None
+        }));
         Self {
             cmds,
             flag_option_args,
@@ -764,12 +773,12 @@ fn comp_param(
     describe: &str,
     value_name: &str,
     choices: &Option<Vec<String>>,
-    choices_fn: &Option<String>,
+    choices_fn: &Option<(String, bool)>,
     multiple: bool,
     required: bool,
 ) -> Vec<(String, String)> {
     let choices: Option<Either<Vec<String>, String>> = if let Some(choices_fn) = choices_fn {
-        Some(Either::Right(choices_fn.to_string()))
+        Some(Either::Right(choices_fn.0.to_string()))
     } else {
         choices
             .as_ref()
@@ -796,12 +805,16 @@ fn comp_param(
 
 fn get_param_choices<'a, 'b: 'a>(
     choices: &'a Option<Vec<String>>,
-    choices_fn: &'a Option<String>,
+    choices_fn: &'a Option<(String, bool)>,
     choices_values: &'a HashMap<&str, Vec<String>>,
 ) -> Option<&'a Vec<String>> {
     choices.as_ref().or_else(|| {
-        choices_fn
-            .as_ref()
-            .and_then(|fn_name| choices_values.get(fn_name.as_str()))
+        choices_fn.as_ref().and_then(|(fn_name, validate)| {
+            if *validate {
+                choices_values.get(fn_name.as_str())
+            } else {
+                None
+            }
+        })
     })
 }

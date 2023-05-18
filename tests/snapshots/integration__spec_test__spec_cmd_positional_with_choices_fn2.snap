@@ -1,0 +1,11 @@
+---
+source: tests/spec_test.rs
+expression: output
+---
+RUN
+spec cmd_positional_with_choices_fn2 xyz
+
+OUTPUT
+argc_arg=xyz
+cmd_positional_with_choices_fn2 xyz
+

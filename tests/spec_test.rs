@@ -290,6 +290,11 @@ fn test_spec_cmd_positional_with_choices_fn() {
 }
 
 #[test]
+fn test_spec_cmd_positional_with_choices_fn2() {
+    snapshot_spec!(&["spec", "cmd_positional_with_choices_fn2", "xyz"]);
+}
+
+#[test]
 fn test_spec_cmd_two_multiple_positionals() {
     snapshot_spec!(&["spec", "cmd_two_multiple_positionals", "abc", "def", "cjk"]);
 }

@@ -400,10 +400,10 @@ fn parse_param_modifer_choices_fn(input: &str) -> nom::IResult<&str, ParamData> 
     map(
         pair(
             parse_param_modifer,
-            delimited(char('['), parse_value_fn, char(']')),
+            delimited(char('['), pair(opt(char('?')), parse_value_fn), char(']')),
         ),
-        |(mut arg, choices_fn)| {
-            arg.choices_fn = Some(choices_fn.into());
+        |(mut arg, (validate, choices_fn))| {
+            arg.choices_fn = Some((choices_fn.into(), validate.is_none()));
             arg
         },
     )(input)
