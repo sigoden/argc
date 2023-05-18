@@ -3,10 +3,11 @@ macro_rules! snapshot {
     (
 		$path:expr,
         $source:expr,
-        $args:expr
+        $args:expr,
+		$width:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values = argc::eval($path, $source, &args, None).unwrap();
+        let values = argc::eval($path, $source, &args, $width).unwrap();
         let output = argc::ArgcValue::to_shell(values);
         let args = $args.join(" ");
         let output = format!(
@@ -26,7 +27,7 @@ OUTPUT
 macro_rules! snapshot_spec {
     ($args:expr) => {
         let (path, source) = $crate::fixtures::get_spec();
-        snapshot!(Some(path.as_str()), source.as_str(), $args);
+        snapshot!(Some(path.as_str()), source.as_str(), $args, None);
     };
 }
 

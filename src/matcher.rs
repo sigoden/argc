@@ -709,7 +709,7 @@ fn comp_subcommands_positional(cmd: &Command, values: &[Vec<&str>]) -> Vec<(Stri
 fn comp_subcomands(cmd: &Command) -> Vec<(String, String)> {
     let mut output = vec![];
     for subcmd in cmd.subcommands.iter() {
-        let describe = subcmd.describe.clone().unwrap_or_default();
+        let describe = subcmd.describe.clone();
         for v in subcmd.list_names() {
             output.push((v, describe.clone()))
         }

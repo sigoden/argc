@@ -2,8 +2,18 @@
 source: tests/wrap_test.rs
 expression: output
 ---
+RUN
+prog -h
+
+OUTPUT
 cat >&2 <<-'EOF' 
-USAGE: prog --help [OPTIONS] [TARGET] <COMMAND>
+A simple cli
+
+Extra lines after the @cmd or @describe, which don't start with an @, are 
+treated as the long description. A line which is not a comment ends
+the block.
+
+USAGE: prog [OPTIONS] [TARGET] <COMMAND>
 
 ARGS:
   [TARGET]  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
@@ -14,6 +24,9 @@ OPTIONS:
       --foo <FOO>  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
                    sed do eiusmod tempor incididunt ut labore et dolore magna
                    aliqua. Neque laoreet suspendisse libero id.
+                    * default: enables recommended style components (default).
+                    * full: enables all available components.
+                    * auto: same as 'default', unless the output is piped.
   -h, --help       Print help
 
 COMMANDS:
@@ -23,3 +36,4 @@ COMMANDS:
 
 EOF
 exit 0
+
