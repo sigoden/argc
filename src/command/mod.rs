@@ -37,7 +37,7 @@ pub fn export(source: &str, name: &str) -> Result<serde_json::Value> {
 pub struct Command {
     pub(crate) name: Option<String>,
     pub(crate) fn_name: Option<String>,
-    pub(crate) describe: Option<String>,
+    pub(crate) describe: String,
     pub(crate) flag_option_params: Vec<FlagOptionParam>,
     pub(crate) positional_params: Vec<PositionalParam>,
     pub(crate) positional_pos: Vec<Position>,
@@ -132,7 +132,7 @@ impl Command {
             match data {
                 EventData::Describe(value) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@describe", position)?;
-                    cmd.describe = Some(value);
+                    cmd.describe = value;
                 }
                 EventData::Version(value) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@version", position)?;
@@ -150,7 +150,7 @@ impl Command {
                     root_data.borrow_mut().scope = EventScope::CmdStart;
                     let mut subcmd = root_cmd.create_cmd();
                     if !value.is_empty() {
-                        subcmd.describe = Some(value.clone());
+                        subcmd.describe = value.clone();
                     }
                 }
                 EventData::Aliases(values) => {
@@ -265,8 +265,8 @@ impl Command {
         if let Some(author) = &self.author {
             output.push(author.to_string());
         }
-        if let Some(describe) = &self.describe {
-            output.push(describe.to_string());
+        if !&self.describe.is_empty() {
+            output.push(self.describe.to_string());
         }
         if !output.is_empty() {
             output.push(String::new());
@@ -436,7 +436,10 @@ impl Command {
     }
 
     pub(crate) fn render_subcommand_describe(&self) -> String {
-        let mut output = self.describe.clone().unwrap_or_default();
+        let mut output = match self.describe.split_once('\n') {
+            Some((v, _)) => v.to_string(),
+            None => self.describe.clone(),
+        };
         if self.aliases.is_empty() {
             return output;
         } else {

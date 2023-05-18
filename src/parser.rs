@@ -2,6 +2,7 @@ use crate::param::{FlagOptionParam, ParamData, PositionalParam};
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
 use anyhow::bail;
+use nom::character::complete::one_of;
 use nom::{
     branch::alt,
     bytes::complete::{escaped, tag, take_till, take_while1},
@@ -9,7 +10,7 @@ use nom::{
         complete::{anychar, char, satisfy, space0, space1},
         streaming::none_of,
     },
-    combinator::{eof, fail, map, opt, peek, rest, success},
+    combinator::{eof, fail, map, not, opt, peek, rest, success},
     multi::{many0, many1, separated_list1},
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
@@ -59,12 +60,36 @@ impl Default for EventScope {
 /// Tokenize shell script
 pub fn parse(source: &str) -> Result<Vec<Event>> {
     let mut result = vec![];
-    for (line_idx, line) in source.lines().enumerate() {
+    let lines: Vec<&str> = source.lines().collect();
+    let mut line_idx = 0;
+    while line_idx < lines.len() {
+        let line = lines[line_idx];
         let position = line_idx + 1;
         match parse_line(line) {
             Ok((_, maybe_token)) => {
                 if let Some(maybe_data) = maybe_token {
                     if let Some(data) = maybe_data {
+                        let data = match data {
+                            EventData::Describe(mut text) => {
+                                line_idx += take_comment_lines(&lines, line_idx + 1, &mut text);
+                                EventData::Describe(text)
+                            }
+                            EventData::Cmd(mut text) => {
+                                line_idx += take_comment_lines(&lines, line_idx + 1, &mut text);
+                                EventData::Cmd(text)
+                            }
+                            EventData::FlagOption(mut param) => {
+                                line_idx +=
+                                    take_comment_lines(&lines, line_idx + 1, &mut param.describe);
+                                EventData::FlagOption(param)
+                            }
+                            EventData::Positional(mut param) => {
+                                line_idx +=
+                                    take_comment_lines(&lines, line_idx + 1, &mut param.describe);
+                                EventData::Positional(param)
+                            }
+                            v => v,
+                        };
                         result.push(Event { position, data });
                     } else {
                         bail!("syntax error at line {}", position)
@@ -75,6 +100,7 @@ pub fn parse(source: &str) -> Result<Vec<Event>> {
                 bail!("fail to parse at line {}, {}", position, err)
             }
         }
+        line_idx += 1;
     }
     Ok(result)
 }
@@ -485,6 +511,20 @@ fn parse_notation_text(input: &str) -> nom::IResult<&str, &str> {
     Ok((&input[size - 1..], &input[0..size - 1]))
 }
 
+fn parse_normal_comment(input: &str) -> nom::IResult<&str, &str> {
+    alt((
+        map(tuple((many1(char('#')), space0, eof)), |_| ""),
+        map(
+            tuple((
+                many1(char('#')),
+                opt(one_of(" \t")),
+                not(pair(space0, char('@'))),
+            )),
+            |_| "",
+        ),
+    ))(input)
+}
+
 fn notation_text(input: &str, balances: usize) -> nom::IResult<&str, usize> {
     let (i1, c1) = anychar(input)?;
     match c1 {
@@ -548,6 +588,21 @@ fn is_name_char(c: char) -> bool {
 
 fn is_short_char(c: char) -> bool {
     c.is_ascii() && is_not_fn_name_char(c) && !matches!(c, '-')
+}
+
+fn take_comment_lines(lines: &[&str], idx: usize, output: &mut String) -> usize {
+    let mut count = 0;
+    for line in lines.iter().skip(idx) {
+        if let Ok((text, _)) = parse_normal_comment(line) {
+            output.push('\n');
+            output.push_str(text);
+            count += 1;
+        } else {
+            break;
+        }
+    }
+    *output = output.trim().to_string();
+    count
 }
 
 #[cfg(test)]
