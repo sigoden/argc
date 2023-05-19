@@ -9,5 +9,7 @@ OUTPUT
 argc_hyphen_flag=1
 argc_hyphen_option=bar
 argc_hyphen_positional=foo
+argc__args=( foo )
+argc__fn=cmd_with_hyphens
 cmd_with_hyphens foo
 

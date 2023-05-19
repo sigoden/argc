@@ -185,8 +185,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
         let mut output = if cmd.without_params_or_subcommands() && !self.positional_args.is_empty()
         {
-            vec![ArgcValue::PositionalMultiple(
-                "_args".into(),
+            vec![ArgcValue::ExtraPositionalMultiple(
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
             )]
         } else {

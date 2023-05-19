@@ -7,5 +7,7 @@ spec cmd_option_notations --opt2 foo bar
 
 OUTPUT
 argc_opt2=( foo bar )
+argc__args=(  )
+argc__fn=cmd_option_notations
 cmd_option_notations
 

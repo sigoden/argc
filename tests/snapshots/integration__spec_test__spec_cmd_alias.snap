@@ -6,5 +6,7 @@ RUN
 spec alias
 
 OUTPUT
+argc__args=(  )
+argc__fn=cmd_alias
 cmd_alias
 

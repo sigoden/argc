@@ -7,5 +7,7 @@ spec cmd_positional_with_choices a
 
 OUTPUT
 argc_arg=a
+argc__args=( a )
+argc__fn=cmd_positional_with_choices
 cmd_positional_with_choices a
 

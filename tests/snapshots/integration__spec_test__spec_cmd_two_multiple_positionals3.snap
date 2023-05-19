@@ -8,5 +8,7 @@ spec cmd_two_multiple_positionals abc -- def cjk
 OUTPUT
 argc_val1=( abc )
 argc_val2=( def cjk )
+argc__args=( abc def cjk )
+argc__fn=cmd_two_multiple_positionals
 cmd_two_multiple_positionals abc def cjk
 

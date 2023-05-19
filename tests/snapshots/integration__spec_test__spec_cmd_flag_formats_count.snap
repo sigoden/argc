@@ -7,5 +7,7 @@ spec cmd_flag_formats --foo5 --foo5 --foo5
 
 OUTPUT
 argc_foo5=3
+argc__args=(  )
+argc__fn=cmd_flag_formats
 cmd_flag_formats
 
