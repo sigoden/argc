@@ -15,5 +15,7 @@ argc_opt7=a
 argc_opt8=a
 argc_opt9=`_fn_foo`
 argc_op11=a1
+argc__args=(  )
+argc__fn=cmd_option_names
 cmd_option_names
 

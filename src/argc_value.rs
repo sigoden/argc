@@ -10,6 +10,7 @@ pub enum ArgcValue {
     PositionalSingle(String, String),
     PositionalSingleFn(String, String),
     PositionalMultiple(String, Vec<String>),
+    ExtraPositionalMultiple(Vec<String>),
     CmdFn(String),
     ParamFn(String),
     Error((String, i32)),
@@ -81,7 +82,20 @@ impl ArgcValue {
                     ));
                     positional_args.extend(values);
                 }
+                ArgcValue::ExtraPositionalMultiple(values) => {
+                    let values = values
+                        .iter()
+                        .map(|v| escape_shell_words(v))
+                        .collect::<Vec<String>>();
+                    positional_args.extend(values);
+                }
                 ArgcValue::CmdFn(name) => {
+                    variables.push(format!(
+                        "{}__args=( {} )",
+                        VARIABLE_PREFIX,
+                        positional_args.join(" ")
+                    ));
+                    variables.push(format!("{}__fn={}", VARIABLE_PREFIX, name));
                     if positional_args.is_empty() {
                         variables.push(name.to_string());
                     } else {

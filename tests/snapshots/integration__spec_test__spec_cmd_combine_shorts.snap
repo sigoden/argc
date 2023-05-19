@@ -8,5 +8,7 @@ spec cmd_combine_shorts -ac yes
 OUTPUT
 argc_a=1
 argc_c=yes
+argc__args=(  )
+argc__fn=cmd_combine_shorts
 cmd_combine_shorts
 

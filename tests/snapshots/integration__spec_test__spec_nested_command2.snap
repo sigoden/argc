@@ -6,5 +6,7 @@ RUN
 spec cmd_nested_command2
 
 OUTPUT
+argc__args=(  )
+argc__fn=cmd_nested_command2::main
 cmd_nested_command2::main
 

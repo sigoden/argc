@@ -13,7 +13,6 @@ mod export;
 mod fail_test;
 #[cfg(unix)]
 mod interrupt;
-mod main_fn_test;
 mod param_fn_test;
 mod spec_test;
 

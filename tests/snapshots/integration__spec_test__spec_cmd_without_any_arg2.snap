@@ -7,5 +7,6 @@ spec cmd_without_any_arg --opt2 foo bar
 
 OUTPUT
 argc__args=( --opt2 foo bar )
+argc__fn=cmd_without_any_arg
 cmd_without_any_arg --opt2 foo bar
 
