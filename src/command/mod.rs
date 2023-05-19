@@ -499,10 +499,12 @@ impl Command {
         }
     }
 
-    pub(crate) fn without_params_or_subcommands(&self) -> bool {
-        self.flag_option_params.is_empty()
-            && self.positional_params.is_empty()
-            && self.subcommands.is_empty()
+    pub(crate) fn no_flags_options_subcommands(&self) -> bool {
+        self.flag_option_params.is_empty() && self.subcommands.is_empty()
+    }
+
+    pub(crate) fn no_params_subcommands(&self) -> bool {
+        self.no_flags_options_subcommands() && self.positional_params.is_empty()
     }
 
     pub(crate) fn get_cmd_fn(&self, cmd_paths: &[&str]) -> Option<String> {

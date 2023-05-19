@@ -14,7 +14,7 @@ pub struct Matcher<'a, 'b> {
     cmds: Vec<(&'b str, &'a Command, String)>,
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
     positional_args: Vec<&'b str>,
-    dashdash: Option<usize>,
+    dashdash: Vec<usize>,
     arg_comp: ArgComp,
     choices_fns: HashSet<&'a str>,
     choices_values: HashMap<&'a str, Vec<String>>,
@@ -54,7 +54,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut arg_index = 1;
         let mut flag_option_args = vec![vec![]];
         let mut positional_args = vec![];
-        let mut dashdash = None;
+        let mut dashdash = vec![];
         let mut arg_comp = ArgComp::Any;
         let mut choices_fns = HashSet::new();
         let args_len = args.len();
@@ -68,15 +68,14 @@ impl<'a, 'b> Matcher<'a, 'b> {
         while arg_index < args_len {
             let cmd = cmds[cmd_level].1;
             let arg = args[arg_index].as_str();
-            if dashdash.is_some()
-                || (cmd.without_params_or_subcommands()
-                    && !["-h", "-help", "--help"].contains(&arg))
+            if arg == "--" {
+                dashdash.push(positional_args.len());
+            } else if !dashdash.is_empty()
+                || (cmd.no_flags_options_subcommands() && !["-h", "-help", "--help"].contains(&arg))
             {
                 positional_args.push(arg);
             } else if arg.starts_with('-') {
-                if arg == "--" {
-                    dashdash = Some(positional_args.len());
-                } else if let Some((k, v)) = arg.split_once('=') {
+                if let Some((k, v)) = arg.split_once('=') {
                     let param = cmd.find_flag_option(k);
                     if arg_index == args_len - 1 {
                         if let Some(param) = param {
@@ -183,8 +182,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             return vec![ArgcValue::Error(self.stringify_match_error(&err))];
         }
         let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
-        let mut output = if cmd.without_params_or_subcommands() && !self.positional_args.is_empty()
-        {
+        let mut output = if cmd.no_params_subcommands() && !self.positional_args.is_empty() {
             vec![ArgcValue::ExtraPositionalMultiple(
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
             )]
@@ -199,8 +197,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
     pub fn to_arg_values_for_choice_fn(&self) -> Vec<ArgcValue> {
         let mut output: Vec<ArgcValue> = self.to_arg_values_base();
-        if let Some(v) = self.dashdash {
-            output.push(ArgcValue::Single("_dashdash".into(), v.to_string()));
+        if !self.dashdash.is_empty() {
+            output.push(ArgcValue::Multiple(
+                "_dashdash".into(),
+                self.dashdash.iter().map(|v| v.to_string()).collect(),
+            ));
         }
         output.push(ArgcValue::Multiple(
             "_args".into(),
@@ -248,7 +249,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             ArgComp::Any => {
                 let cmd = self.cmds[self.cmds.len() - 1].1;
-                let mut output = if self.dashdash.is_some() {
+                let mut output = if !self.dashdash.is_empty() {
                     vec![]
                 } else {
                     self.comp_flag_options()
@@ -479,7 +480,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         while param_index < params_len && arg_index < args_len {
             let param = &cmd.positional_params[param_index];
             if param.multiple {
-                let dashdash_idx = self.dashdash.unwrap_or_default();
+                let dashdash_idx = self.dashdash.first().cloned().unwrap_or_default();
                 let takes = if param_index == 0
                     && dashdash_idx > 0
                     && params_len == 2

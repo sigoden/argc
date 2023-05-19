@@ -938,6 +938,39 @@ expression: output
       "subcommands": []
     },
     {
+      "describe": "Positional all required",
+      "name": "cmd_positional",
+      "author": null,
+      "version": null,
+      "options": [],
+      "positionals": [
+        {
+          "name": "name",
+          "describe": "A optional arg 1",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        },
+        {
+          "name": "values",
+          "describe": "A optional arg 2, multiple",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": true,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
       "describe": "Positional one required",
       "name": "cmd_positional_only",
       "author": null,

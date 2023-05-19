@@ -285,6 +285,11 @@ fn test_spec_cmd_single_dash() {
 }
 
 #[test]
+fn test_spec_cmd_positional_option_as_positional() {
+    snapshot_spec!(&["spec", "cmd_positional", "xyz", "-a", "--abc"]);
+}
+
+#[test]
 fn test_spec_cmd_positional_with_choices_fn() {
     snapshot_spec!(&["spec", "cmd_positional_with_choices_fn", "xyz"]);
 }

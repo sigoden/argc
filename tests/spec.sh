@@ -106,6 +106,13 @@ cmd_flag_formats() {
     print_argc_vars
 }
 
+# @cmd  Positional all required
+# @arg   name     A optional arg 1
+# @arg   values*  A optional arg 2, multiple
+cmd_positional() {
+    print_argc_vars
+}
+
 # @cmd  Positional one required
 # @arg   arg1! <DIR>  A required arg1
 cmd_positional_only() {

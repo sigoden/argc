@@ -16,6 +16,7 @@ cmd_option_formats	Options all kind of formats
 cmd_option_quotes	Option value quoted
 cmd_option_notations	Option with value notations
 cmd_flag_formats	All kind of flags
+cmd_positional	Positional all required
 cmd_positional_only	Positional one required
 cmd_positional_many	Positional all required
 cmd_positional_requires	Positional all required
