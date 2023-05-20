@@ -64,7 +64,7 @@ fn arg_eval() {
             vec!["prog", "cmdf", "v1"],
             vec!["prog", "cmdg"],
             vec!["prog", "cmdh", "x"],
-            vec!["prog", "cmdj", "xyz"],
+            vec!["prog", "cmdj", "abc"],
             vec!["prog", "cmdp", "v1", "v2"],
             vec!["prog", "cmdp", "v1", "v2", "v3"],
             vec!["prog", "cmdr", "v1", "v2", "v3"],

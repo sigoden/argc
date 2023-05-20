@@ -14,6 +14,7 @@ const KNOWN_OPTIONS: [&str; 6] = ["-h", "-help", "--help", "-V", "-version", "--
 
 pub struct Matcher<'a, 'b> {
     cmds: Vec<(&'b str, &'a Command, String)>,
+    args: &'b [String],
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
     positional_args: Vec<&'b str>,
     dashdash: Vec<usize>,
@@ -147,6 +148,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         }));
         Self {
             cmds,
+            args,
             flag_option_args,
             positional_args,
             dashdash,
@@ -161,7 +163,14 @@ impl<'a, 'b> Matcher<'a, 'b> {
     pub fn set_script_path(&mut self, script_path: &str) {
         self.script_path = Some(script_path.to_string());
         let fns: Vec<&str> = self.choices_fns.iter().copied().collect();
-        if let Some(list) = run_param_fns(script_path, &fns, "") {
+        let line = self
+            .args
+            .iter()
+            .skip(1)
+            .cloned()
+            .collect::<Vec<String>>()
+            .join(" ");
+        if let Some(list) = run_param_fns(script_path, &fns, &line) {
             for (i, fn_output) in list.into_iter().enumerate() {
                 let choices: Vec<String> = fn_output
                     .split('\n')

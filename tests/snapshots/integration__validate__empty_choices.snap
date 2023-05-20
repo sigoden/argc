@@ -2,16 +2,17 @@
 source: tests/validate.rs
 expression: data
 ---
-RUN
-prog foo
+************ RUN ************
+prog --oa foo
 
 OUTPUT
 cat >&2 <<-'EOF' 
-error: invalid value 'foo' for '[VAL]'
+error: invalid value 'foo' for '<OA>'
   [possible values: ]
 
 For more information, try '--help'.
 
 EOF
 exit 1
+
 
