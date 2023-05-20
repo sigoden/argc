@@ -181,3 +181,12 @@ foo() { :; }
 "###;
     snapshot!(script, &["prog", "foo"]);
 }
+
+#[test]
+fn empty_choices() {
+    let script = r###"
+# @arg val[`_choice_fn`]
+_choice_fn() { :; }
+"###;
+    snapshot!(CREATE, script, &["prog", "foo"]);
+}

@@ -30,6 +30,13 @@ macro_rules! snapshot {
     ($source:expr, $args:expr) => {
         snapshot!(None, $source, $args, None);
     };
+    (CREATE, $source:expr, $args:expr) => {
+        let tmpdir = assert_fs::TempDir::new().unwrap();
+        let child = assert_fs::fixture::PathChild::child(&tmpdir, "script.sh");
+        assert_fs::fixture::FileWriteStr::write_str(&child, $source).unwrap();
+        let script_file = child.path().to_string_lossy().to_string();
+        snapshot!(Some(script_file.as_str()), $source, $args, None);
+    };
     ($path:expr, $source:expr, $args:expr) => {
         snapshot!(Some($path), $source, $args, None);
     };
@@ -94,9 +101,7 @@ macro_rules! snapshot_compgen {
         let tmpdir = assert_fs::TempDir::new().unwrap();
         let script_file = {
             let child = assert_fs::fixture::PathChild::child(&tmpdir, "compgen.sh");
-            // let child = tmpdir.child("compgen.sh");
             assert_fs::fixture::FileWriteStr::write_str(&child, $source).unwrap();
-            // child.write_str($source).unwrap();
             child.path().to_string_lossy().to_string()
         };
         for line in $matrix.iter() {

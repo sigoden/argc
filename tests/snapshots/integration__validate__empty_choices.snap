@@ -1,0 +1,17 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog foo
+
+OUTPUT
+cat >&2 <<-'EOF' 
+error: invalid value 'foo' for '[VAL]'
+  [possible values: ]
+
+For more information, try '--help'.
+
+EOF
+exit 1
+
