@@ -3,7 +3,7 @@ use crate::*;
 #[test]
 fn option_help() {
     let mut names = vec![];
-    for c in 'a'..'z' {
+    for c in 'a'..='z' {
         let name = format!("cmd{c}");
         if SCRIPT_OPTIONS.contains(&name) {
             names.push(name);
