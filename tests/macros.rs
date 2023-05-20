@@ -32,10 +32,20 @@ macro_rules! snapshot {
     };
     (CREATE, $source:expr, $args:expr) => {
         let tmpdir = assert_fs::TempDir::new().unwrap();
+        let script_content = if !$source.contains("--argc-eval") {
+            format!(
+                r###"{}
+eval "$(argc --argc-eval "$0" "$@")"
+"###,
+                $source
+            )
+        } else {
+            $source.to_string()
+        };
         let child = assert_fs::fixture::PathChild::child(&tmpdir, "script.sh");
-        assert_fs::fixture::FileWriteStr::write_str(&child, $source).unwrap();
+        assert_fs::fixture::FileWriteStr::write_str(&child, &script_content).unwrap();
         let script_file = child.path().to_string_lossy().to_string();
-        snapshot!(Some(script_file.as_str()), $source, $args, None);
+        snapshot!(Some(script_file.as_str()), &script_content, $args, None);
     };
     ($path:expr, $source:expr, $args:expr) => {
         snapshot!(Some($path), $source, $args, None);
@@ -99,14 +109,29 @@ macro_rules! snapshot_compgen {
     ) => {
         let mut data = String::new();
         let tmpdir = assert_fs::TempDir::new().unwrap();
+        let script_content = if !$source.contains("--argc-eval") {
+            format!(
+                r###"{}
+eval "$(argc --argc-eval "$0" "$@")"
+"###,
+                $source
+            )
+        } else {
+            $source.to_string()
+        };
         let script_file = {
             let child = assert_fs::fixture::PathChild::child(&tmpdir, "compgen.sh");
-            assert_fs::fixture::FileWriteStr::write_str(&child, $source).unwrap();
+            assert_fs::fixture::FileWriteStr::write_str(&child, &script_content).unwrap();
             child.path().to_string_lossy().to_string()
         };
         for line in $matrix.iter() {
-            let words = match argc::compgen(argc::Shell::Fish, &script_file, $source, "test", line)
-            {
+            let words = match argc::compgen(
+                argc::Shell::Fish,
+                &script_file,
+                &script_content,
+                "test",
+                line,
+            ) {
                 Ok(stdout) => stdout,
                 Err(stderr) => stderr.to_string(),
             };
