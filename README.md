@@ -111,17 +111,20 @@ COMMANDS:
 Define a positional argument.
 
 ```sh
-# @arg arg1            A positional argument
-# @arg arg2!           A required positional argument
-# @arg arg3 <PATH>     A positional argument with value notation
-# @arg arg4*           A positional argument with multiple values
-# @arg arg5+           A required positional argument with multiple values
-# @arg arg6=a          A positional argument with default value
-# @arg arg7=`_fn`      A positional argument with default value fn
-# @arg arg8[a|b]       A positional argument with choices
-# @arg arg9[`_fn`]     A positional argument with choices fn
-# @arg arg10[=a|b]     A positional argument with choices and default value
-# @arg arg11*[a|b]     A positional argument with choices and multiple values
+# @arg va
+# @arg vb!                 requird
+# @arg vc*                 multiple
+# @arg vd+                 required + multiple
+# @arg vna <PATH>          value notation
+# @arg vda=a               default
+# @arg vdb=`_default_fn`   default from fn
+# @arg vca[a|b]            choice
+# @arg vcb[=a|b]           choice + default
+# @arg vcc*[a|b]           multiple + choice
+# @arg vcd+[a|b]           required + multiple + choice
+# @arg vfa[`_choice_fn`]   choice from fn
+# @arg vfb[?`_choice_fn`]  choice from fn + no validation
+# @arg vfc*[`_choice_fn`]  multiple + choice from fn
 ```
 
 ### @option
@@ -133,19 +136,23 @@ Define a positional argument.
 Define a option.
 
 ```sh
-# @option    --opt1                 A option
-# @option -a --opt2                 A option with short alias
-# @option    --opt3 <PATH>          A option with value notation
-# @option    --opt4!                A required option
-# @option    --opt5*                A option with multiple values
-# @option    --opt6+                A required option with multiple values
-# @option    --opt7=a               A option with default value
-# @option    --opt8=`_fn`           A option with default value fn
-# @option    --opt9[a|b]            A option with choices
-# @option    --opt10[`_fn`]         A option with choices fn
-# @option    --opt11[=a|b]          A option with choices and default value
-# @option    --opt12*[a|b]          A option with choices and multiple values
-# @option    --opt13 <FILE> <FILE>  A option with value notation
+# @option    --oa                   
+# @option -b --ob                   short
+# @option -c                        short only
+# @option    --oc!                  required
+# @option    --od*                  
+# @option    --oe+                  required + multiple
+# @option    --ona <PATH>           value notation
+# @option    --onb <FILE> <FILE>    multiple value notations
+# @option    --oda=a                default
+# @option    --odb=`_default_fn`    default from fn
+# @option    --oca[a|b]             choice
+# @option    --ocb[=a|b]            choice + default
+# @option    --occ*[a|b]            multiple + choice
+# @option    --ocd*[+a|b]           required + multiple + choice
+# @option    --ofa[`_choice_fn`]    choice from fn
+# @option    --ofb[?`_choice_fn`]   choice from fn + no validation
+# @option    --ofc*[`_choice_fn`]   multiple + choice from fn
 ```
 
 ### @flag
@@ -158,9 +165,11 @@ Define a flag. A flag is an option of boolean type, and is always false by defau
 
 
 ```sh
-# @flag     --flag1       A flag
-# @flag  -f --flag2       A flag with short alias
-# @flag  -f --flag3*      A flag can occure multiple times
+# @flag     --fa 
+# @flag  -b --fb         shoft
+# @flag  -c              shoft only
+# @flag     --fd*        multiple
+# @flag  -e --fe*        short + multiple
 ```
 
 ### @alias
@@ -228,6 +237,20 @@ Here are some value notation that will affect the shell completion.
 - `<FILE>`: complete files in current directory
 - `<DIR>`: complete directories in current directory
 - `<PATH>`: complete files and directories in current directory
+
+
+## Nested Subcommands
+
+```sh
+# @cmd
+cmd() { :; }
+# @cmd
+cmd::foo() { :; }
+# @cmd
+cmd::bar() { :; }
+# @cmd
+cmd::bar::baz() { :; }
+```
 
 ## Shell Completion
 
