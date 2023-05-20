@@ -30,23 +30,6 @@ macro_rules! snapshot {
     ($source:expr, $args:expr) => {
         snapshot!(None, $source, $args, None);
     };
-    (CREATE, $source:expr, $args:expr) => {
-        let tmpdir = assert_fs::TempDir::new().unwrap();
-        let script_content = if !$source.contains("--argc-eval") {
-            format!(
-                r###"{}
-eval "$(argc --argc-eval "$0" "$@")"
-"###,
-                $source
-            )
-        } else {
-            $source.to_string()
-        };
-        let child = assert_fs::fixture::PathChild::child(&tmpdir, "script.sh");
-        assert_fs::fixture::FileWriteStr::write_str(&child, &script_content).unwrap();
-        let script_file = child.path().to_string_lossy().to_string();
-        snapshot!(Some(script_file.as_str()), &script_content, $args, None);
-    };
     ($path:expr, $source:expr, $args:expr) => {
         snapshot!(Some($path), $source, $args, None);
     };
@@ -80,9 +63,24 @@ macro_rules! snapshot_multi {
 		$matrix:expr
 	) => {
         let mut data = String::new();
+        let script_content = if !$source.contains("--argc-eval") {
+            format!(
+                r###"{}
+eval "$(argc --argc-eval "$0" "$@")"
+"###,
+                $source
+            )
+        } else {
+            $source.to_string()
+        };
+        let tmpdir = assert_fs::TempDir::new().unwrap();
+        let child = assert_fs::fixture::PathChild::child(&tmpdir, "script.sh");
+        assert_fs::fixture::FileWriteStr::write_str(&child, &script_content).unwrap();
+        let script_file = child.path().to_string_lossy().to_string();
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
-            let values = argc::eval(None, $source, &args, None).unwrap();
+            let values =
+                argc::eval(Some(script_file.as_str()), &script_content, &args, None).unwrap();
             let args = args.join(" ");
             let piece = format!(
                 r###"************ RUN ************
@@ -108,7 +106,6 @@ macro_rules! snapshot_compgen {
         $matrix:expr
     ) => {
         let mut data = String::new();
-        let tmpdir = assert_fs::TempDir::new().unwrap();
         let script_content = if !$source.contains("--argc-eval") {
             format!(
                 r###"{}
@@ -119,11 +116,10 @@ eval "$(argc --argc-eval "$0" "$@")"
         } else {
             $source.to_string()
         };
-        let script_file = {
-            let child = assert_fs::fixture::PathChild::child(&tmpdir, "compgen.sh");
-            assert_fs::fixture::FileWriteStr::write_str(&child, &script_content).unwrap();
-            child.path().to_string_lossy().to_string()
-        };
+        let tmpdir = assert_fs::TempDir::new().unwrap();
+        let child = assert_fs::fixture::PathChild::child(&tmpdir, "compgen.sh");
+        assert_fs::fixture::FileWriteStr::write_str(&child, &script_content).unwrap();
+        let script_file = child.path().to_string_lossy().to_string();
         for line in $matrix.iter() {
             let words = match argc::compgen(
                 argc::Shell::Fish,

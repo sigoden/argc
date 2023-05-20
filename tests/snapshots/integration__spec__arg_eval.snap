@@ -57,13 +57,13 @@ argc__fn=cmdh
 cmdh x
 
 ************ RUN ************
-prog cmdj xyz
+prog cmdj abc
 
 OUTPUT
-argc_val=xyz
-argc__args=( xyz )
+argc_val=abc
+argc__args=( abc )
 argc__fn=cmdj
-cmdj xyz
+cmdj abc
 
 ************ RUN ************
 prog cmdp v1 v2

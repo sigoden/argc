@@ -185,10 +185,29 @@ foo() { :; }
 #[test]
 fn empty_choices() {
     let script = r###"
-# @arg val[`_choice_fn`]
-_choice_fn() {
+# @option --oa[`_choice_fn1`]
+_choice_fn1() {
 	:;
  }
 "###;
-    snapshot!(CREATE, script, &["prog", "foo"]);
+    snapshot_multi!(script, vec![vec!["prog", "--oa", "foo"],]);
+}
+
+#[test]
+fn choice_access_vars() {
+    let script = r###"
+# @flag --fa
+# @arg val[`_choice_fn`]
+_choice_fn() {
+	if [[ $argc_fa == 1 ]]; then
+		echo abc
+	else
+		echo def
+	fi
+ }
+"###;
+    snapshot_multi!(
+        script,
+        vec![vec!["prog", "--fa", "foo"], vec!["prog", "foo"],]
+    );
 }
