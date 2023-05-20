@@ -3,12 +3,12 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmdl abc val
+prog foo
 
 OUTPUT
 cat >&2 <<-'EOF' 
-error: invalid value 'val' for '[VAL]...'
-  [possible values: abc, def, ghi]
+error: invalid value 'foo' for '[VAL]'
+  [possible values: ]
 
 For more information, try '--help'.
 

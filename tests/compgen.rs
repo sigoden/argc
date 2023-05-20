@@ -7,8 +7,6 @@ fn multiple() {
 # @option -o --oa* <DIR>
 # @option -d --od <DIR> <FILE>
 # @arg var* <FILE>
-
-eval "$(argc --argc-eval "$0" "$@")"
 "###;
 
     snapshot_compgen!(
@@ -46,8 +44,6 @@ fn shorts() {
 # @flag      -sa
 # @option -e <FILE>
 # @option -p --oa*
-
-eval "$(argc --argc-eval "$0" "$@")"
 "###;
 
     snapshot_compgen!(
@@ -67,7 +63,6 @@ fn subcmds() {
 cmda() { :; }
 # @cmd
 cmdb() { :; }
-eval "$(argc --argc-eval "$0" "$@")"
 "###;
 
     snapshot_compgen!(
@@ -94,7 +89,6 @@ cmd() { :; }
 cmd::suba() { :; }
 # @cmd
 cmd::subb() { :; }
-eval "$(argc --argc-eval "$0" "$@")"
 "###;
 
     snapshot_compgen!(
@@ -163,10 +157,8 @@ fn choice() {
 # @arg v1[x|y|z]
 # @arg v2[`_choice_fn`]
 _choice_fn() {
-	echo -e "abc\ndef\nxyz"
+	echo -e "abc\ndef\nghi"
 }
-
-eval "$(argc --argc-eval "$0" "$@")"
 "###;
 
     snapshot_compgen!(script, vec![" --oa ", " --ob ", " ", " v1 ",]);

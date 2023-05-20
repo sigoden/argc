@@ -87,12 +87,13 @@ pub fn run_param_fns(script_file: &str, param_fns: &[&str], line: &str) -> Optio
                     .output()
                     .ok()
                     .map(|out| String::from_utf8_lossy(&out.stdout).to_string())
+                    .unwrap_or_default()
             })
         })
         .collect();
     let list: Vec<String> = handles
         .into_iter()
-        .map(|h| h.join().ok().flatten().unwrap_or_default())
+        .map(|h| h.join().ok().unwrap_or_default())
         .collect();
     Some(list)
 }

@@ -81,7 +81,7 @@ _default_fn() {
 _choice_fn() {
 	echo abc
 	echo def
-	echo xyz
+	echo ghi
 }
 
 eval "$(argc --argc-eval "$0" "$@")"
