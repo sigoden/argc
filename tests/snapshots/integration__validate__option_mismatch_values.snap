@@ -1,0 +1,18 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog cmda -o file1
+
+OUTPUT
+cat >&2 <<-'EOF' 
+error: invalid values for '--od <FILE> <FILE>'
+
+USAGE: prog cmda [OPTIONS]
+
+For more information, try '--help'.
+
+EOF
+exit 1
+

@@ -1,0 +1,18 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog cmdb v1 v2
+
+OUTPUT
+cat >&2 <<-'EOF' 
+error: unexpected argument 'v2' found
+
+USAGE: prog cmdb [VAL]
+
+For more information, try '--help'.
+
+EOF
+exit 1
+

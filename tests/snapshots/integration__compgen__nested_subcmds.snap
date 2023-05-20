@@ -1,0 +1,30 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog  cmd` ************
+cmd
+
+************ COMPGEN `prog  cmd ` ************
+suba
+subb
+
+************ COMPGEN `prog  cmd s` ************
+suba
+subb
+
+************ COMPGEN `prog  cmd suba` ************
+suba
+
+************ COMPGEN `prog  cmd suba ` ************
+__argc_comp:file
+
+************ COMPGEN `prog  cmd help  ` ************
+suba
+subb
+
+************ COMPGEN `prog  cmd help s` ************
+suba
+subb
+
+

@@ -1,0 +1,11 @@
+---
+source: tests/spec.rs
+expression: data
+---
+RUN
+prog --oa v1 v2
+
+OUTPUT
+argc_oa=v1
+argc__args=( v2 )
+

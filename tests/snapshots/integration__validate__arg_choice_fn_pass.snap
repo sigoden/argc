@@ -1,0 +1,13 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog cmdj val
+
+OUTPUT
+argc_val=val
+argc__args=( val )
+argc__fn=cmdj
+cmdj val
+

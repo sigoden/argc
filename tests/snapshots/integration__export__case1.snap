@@ -1,0 +1,68 @@
+---
+source: tests/export.rs
+expression: output
+---
+{
+  "describe": "Test argc",
+  "name": null,
+  "author": "nobody <nobody@example.com>",
+  "version": "1.0.0",
+  "options": [],
+  "positionals": [],
+  "aliases": [],
+  "subcommands": [
+    {
+      "describe": "",
+      "name": "cmd",
+      "author": null,
+      "version": null,
+      "options": [
+        {
+          "name": "fa",
+          "describe": "A flag",
+          "short": "b",
+          "flag": true,
+          "dashes": "--",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        },
+        {
+          "name": "oa",
+          "describe": "A option",
+          "short": "o",
+          "flag": false,
+          "dashes": "--",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_names": []
+        }
+      ],
+      "positionals": [
+        {
+          "name": "var",
+          "describe": "",
+          "choices": null,
+          "choices_fn": null,
+          "multiple": false,
+          "required": false,
+          "default": null,
+          "default_fn": null,
+          "value_name": null
+        }
+      ],
+      "aliases": [
+        "a"
+      ],
+      "subcommands": []
+    }
+  ]
+}

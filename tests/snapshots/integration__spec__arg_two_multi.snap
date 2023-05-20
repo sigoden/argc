@@ -1,0 +1,54 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog cmdp a b c
+
+OUTPUT
+argc_val1=( a b )
+argc_val2=( c )
+argc__args=( a b c )
+argc__fn=cmdp
+cmdp a b c
+
+************ RUN ************
+prog cmdp -- a b c
+
+OUTPUT
+argc_val1=( a b )
+argc_val2=( c )
+argc__args=( a b c )
+argc__fn=cmdp
+cmdp a b c
+
+************ RUN ************
+prog cmdp a -- b c
+
+OUTPUT
+argc_val1=( a )
+argc_val2=( b c )
+argc__args=( a b c )
+argc__fn=cmdp
+cmdp a b c
+
+************ RUN ************
+prog cmdp a b -- c
+
+OUTPUT
+argc_val1=( a b )
+argc_val2=( c )
+argc__args=( a b c )
+argc__fn=cmdp
+cmdp a b c
+
+************ RUN ************
+prog cmdp a b c --
+
+OUTPUT
+argc_val1=( a b c )
+argc__args=( a b c )
+argc__fn=cmdp
+cmdp a b c
+
+

@@ -1,0 +1,13 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog cmdk abc
+
+OUTPUT
+argc_val=abc
+argc__args=( abc )
+argc__fn=cmdk
+cmdk abc
+

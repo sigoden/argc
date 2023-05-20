@@ -1,0 +1,19 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog -h
+
+OUTPUT
+argc_host=1
+argc__args=(  )
+
+************ RUN ************
+prog -V
+
+OUTPUT
+argc_verbose=1
+argc__args=(  )
+
+

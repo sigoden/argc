@@ -235,7 +235,10 @@ impl FlagOptionParam {
                 return None;
             }
             if self.multiple {
-                let values: Vec<String> = values.iter().map(|v| must_get_first(v)).collect();
+                let values: Vec<String> = values
+                    .iter()
+                    .flat_map(|v| v.iter().map(|v| v.to_string()))
+                    .collect();
                 Some(ArgcValue::Multiple(name, values))
             } else if self.values_size() > 1 {
                 Some(ArgcValue::Multiple(

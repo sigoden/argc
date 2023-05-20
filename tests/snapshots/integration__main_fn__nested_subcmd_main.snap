@@ -1,0 +1,12 @@
+---
+source: tests/main_fn.rs
+expression: data
+---
+RUN
+prog cmd
+
+OUTPUT
+argc__args=(  )
+argc__fn=cmd::main
+cmd::main
+

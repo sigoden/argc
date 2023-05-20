@@ -1,0 +1,21 @@
+---
+source: tests/wrap.rs
+expression: data
+---
+RUN
+prog foo -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Arcu cursus euismod quis viverra.
+
+Extra lines after the @cmd or @describe, which don't start with an @, are
+treated as the long description. A line which is not a comment ends
+the block.
+
+USAGE: prog foo
+
+EOF
+exit 0
+

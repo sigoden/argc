@@ -1,0 +1,66 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog cmda -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmda [OPTIONS]
+
+OPTIONS:
+  -a
+      --fa
+  -f, --fb...
+       -sa
+       -sb...
+  -e <E>
+      --oa <OA>
+      --ob [<OB>...]
+      --oc <DIR>
+  -o, --od <FILE> <FILE>
+      --ca <CA>           [possible values: x, y, z]
+      --cc <CC>
+      --cd <CD>
+      --ce [<CE>...]
+  -s,  -soa <SOA>
+  -h,  -help              Print help
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdb -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdb --oa <OA> --ob <OB>... --oca <OCA> --ocb <OCB>...
+
+OPTIONS:
+  -a, --oa <OA>
+      --ob <OB>...
+      --oca <OCA>
+      --ocb <OCB>...
+  -h, --help
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdc -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdc [OPTIONS]
+
+OPTIONS:
+      --oe <OE>  [default: val]
+      --of <OF>
+      --cb <CB>  [default: x] [possible values: x, y, z]
+  -h, --help     Print help
+
+EOF
+exit 0
+
+

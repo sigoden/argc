@@ -1,0 +1,56 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog cmda ` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmda v1` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmda v1 ` ************
+__argc_comp:file
+
+************ COMPGEN `prog cmda v1 v2` ************
+__argc_comp:file
+
+************ COMPGEN `prog cmda v1 v2 ` ************
+__argc_comp:file
+
+************ COMPGEN `prog cmdb ` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmdb v1` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmdb v1 ` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmdb v1 v2` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmdb v1 v2 ` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmdb v1 v2 v3` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmdb v1 v2 v3 ` ************
+__argc_comp:file
+
+************ COMPGEN `prog cmdc ` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmdc v1` ************
+__argc_comp:dir
+
+************ COMPGEN `prog cmdc v1 ` ************
+__argc_comp:file
+
+************ COMPGEN `prog cmdc v1 v2` ************
+__argc_comp:file
+
+************ COMPGEN `prog cmdc v1 v2 ` ************
+__argc_comp:file
+
+

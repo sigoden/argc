@@ -1,0 +1,10 @@
+---
+source: tests/main_fn.rs
+expression: data
+---
+RUN
+prog
+
+OUTPUT
+argc__args=(  )
+

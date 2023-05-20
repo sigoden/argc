@@ -1,0 +1,17 @@
+---
+source: tests/main_fn.rs
+expression: data
+---
+RUN
+prog
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  cmd
+
+EOF
+exit 0
+

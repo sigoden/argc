@@ -1,6 +1,9 @@
 mod fixtures;
 
-const SPEC_SCRIPT: &str = include_str!("spec.sh");
+pub const SCRIPT_OPTIONS: &str = include_str!("scripts/options.sh");
+pub const SCRIPT_ARGS: &str = include_str!("scripts/args.sh");
+
+pub use fixtures::locate_script;
 
 #[macro_use]
 mod macros;
@@ -8,12 +11,14 @@ mod argcfile;
 mod cli;
 mod compgen;
 mod create;
-mod escape_test;
 mod export;
-mod fail_test;
+mod fail;
+mod main_fn;
+mod misc;
+mod param_fn;
+mod spec;
+mod validate;
+mod wrap;
+
 #[cfg(unix)]
 mod interrupt;
-mod param_fn_test;
-mod spec_test;
-
-mod wrap_test;

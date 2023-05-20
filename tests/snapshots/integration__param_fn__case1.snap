@@ -1,0 +1,41 @@
+---
+source: tests/param_fn.rs
+expression: data
+---
+************ RUN ************
+prog _choice_fn
+
+OUTPUT
+argc__line=''
+argc__words=(  )
+argc__args=(  )
+argc__fn=_choice_fn
+_choice_fn;exit;
+
+************ RUN ************
+prog _choice_fn cmda --cc 
+
+OUTPUT
+argc_cc=' '
+argc__args=(  )
+argc__line='cmda --cc '
+argc__words=( prog cmda --cc ' ' )
+argc__args=(  )
+argc__fn=_choice_fn
+_choice_fn;exit;
+
+************ RUN ************
+prog _choice_fn cmda -a --oa oa --cc 
+
+OUTPUT
+argc_a=1
+argc_oa=oa
+argc_cc=' '
+argc__args=(  )
+argc__line='cmda -a --oa oa --cc '
+argc__words=( prog cmda -a --oa oa --cc ' ' )
+argc__args=(  )
+argc__fn=_choice_fn
+_choice_fn;exit;
+
+

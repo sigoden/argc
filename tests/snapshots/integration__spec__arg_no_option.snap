@@ -1,0 +1,13 @@
+---
+source: tests/spec.rs
+expression: data
+---
+RUN
+prog cmdc --o1 -o2 -3
+
+OUTPUT
+argc_val=( --o1 -o2 -3 )
+argc__args=( --o1 -o2 -3 )
+argc__fn=cmdc
+cmdc --o1 -o2 -3
+
