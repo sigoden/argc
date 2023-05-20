@@ -4,7 +4,7 @@ use crate::*;
 fn with_main() {
     let script = r###"
 # @arg val
-main() { :? }
+main() { :; }
 "###;
     snapshot!(script, &["prog"]);
 }
@@ -21,8 +21,8 @@ fn no_main() {
 fn subcmd_main() {
     let script = r###"
 # @cmd
-cmd() { :? }
-main() { :? }
+cmd() { :; }
+main() { :; }
 "###;
     snapshot!(script, &["prog"]);
 }
@@ -31,7 +31,7 @@ main() { :? }
 fn subcmd_no_main() {
     let script = r###"
 # @cmd
-cmd() { :? }
+cmd() { :; }
 "###;
     snapshot!(script, &["prog"]);
 }
@@ -40,10 +40,10 @@ cmd() { :? }
 fn nested_subcmd_main() {
     let script = r###"
 # @cmd
-cmd() { :? }
-cmd::main() { :? }
+cmd() { :; }
+cmd::main() { :; }
 # @cmd
-cmd::foo() { :? }
+cmd::foo() { :; }
 "###;
     snapshot!(script, &["prog", "cmd"]);
 }
@@ -52,9 +52,9 @@ cmd::foo() { :? }
 fn nested_subcmd_no_main() {
     let script = r###"
 # @cmd
-cmd() { :? }
+cmd() { :; }
 # @cmd
-cmd::foo() { :? }
+cmd::foo() { :; }
 "###;
     snapshot!(script, &["prog", "cmd"]);
 }

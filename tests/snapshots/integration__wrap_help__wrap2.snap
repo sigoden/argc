@@ -1,5 +1,5 @@
 ---
-source: tests/wrap.rs
+source: tests/wrap_help.rs
 expression: data
 ---
 RUN

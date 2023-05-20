@@ -18,7 +18,7 @@ mod misc;
 mod param_fn;
 mod spec;
 mod validate;
-mod wrap;
+mod wrap_help;
 
 #[cfg(unix)]
 mod interrupt;

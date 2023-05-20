@@ -16,8 +16,7 @@ const SCRIPT: &str = r###"
 # Extra lines after the @cmd or @describe, which don't start with an @, are 
 # treated as the long description. A line which is not a comment ends
 # the block.
-foo() {
-}
+foo() { :; }
 "###;
 
 #[test]
@@ -26,11 +25,11 @@ fn wrap() {
 }
 
 #[test]
-fn wrap_subcmd() {
+fn wrap2() {
     snapshot!(None, SCRIPT, &["prog", "foo", "-h"], Some(80));
 }
 
 #[test]
-fn wrap_no_width() {
+fn nowrap() {
     snapshot!(None, SCRIPT, &["prog", "-h"], None);
 }

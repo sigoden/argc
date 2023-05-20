@@ -11,7 +11,7 @@ fn case1() {
 # @flag   -b --fa A flag
 # @option -o --oa A option
 # @arg var
-cmd() { :? }
+cmd() { :; }
 "###;
     snapshot_export!(script);
 }
