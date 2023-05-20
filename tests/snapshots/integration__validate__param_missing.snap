@@ -1,0 +1,20 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog
+
+OUTPUT
+cat >&2 <<-'EOF' 
+error: the following required arguments were not provided:
+  <VAL>
+  --ao <AO>
+
+USAGE: prog --ao <AO> <VAL>
+
+For more information, try '--help'.
+
+EOF
+exit 1
+

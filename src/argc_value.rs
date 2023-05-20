@@ -19,6 +19,8 @@ pub enum ArgcValue {
 impl ArgcValue {
     pub fn to_shell(values: Vec<Self>) -> String {
         let mut variables = vec![];
+        let mut last = String::new();
+        let mut call = String::new();
         let mut positional_args = vec![];
         for value in values {
             match value {
@@ -90,31 +92,41 @@ impl ArgcValue {
                     positional_args.extend(values);
                 }
                 ArgcValue::CmdFn(name) => {
-                    variables.push(format!(
-                        "{}__args=( {} )",
-                        VARIABLE_PREFIX,
-                        positional_args.join(" ")
-                    ));
-                    variables.push(format!("{}__fn={}", VARIABLE_PREFIX, name));
                     if positional_args.is_empty() {
-                        variables.push(name.to_string());
+                        last = name.to_string();
                     } else {
-                        variables.push(format!("{} {}", name, positional_args.join(" ")));
+                        last = format!("{} {}", name, positional_args.join(" "));
                     }
+                    call = name.clone();
                 }
                 ArgcValue::ParamFn(name) => {
                     if positional_args.is_empty() {
-                        variables.push(format!("{name};exit;"));
+                        last = format!("{name};exit;");
                     } else {
-                        variables.push(format!("{} {};exit;", name, positional_args.join(" ")));
+                        last = format!("{} {};exit;", name, positional_args.join(" "));
                     }
+                    call = name.clone();
                 }
                 ArgcValue::Error((error, exit)) => {
-                    variables.clear();
-                    variables.push(format!("cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit));
+                    return format!("cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit)
                 }
             }
         }
+
+        variables.push(format!(
+            "{}__args=( {} )",
+            VARIABLE_PREFIX,
+            positional_args.join(" ")
+        ));
+
+        if !call.is_empty() {
+            variables.push(format!("{}__fn={}", VARIABLE_PREFIX, call));
+        }
+
+        if !last.is_empty() {
+            variables.push(last);
+        }
+
         variables.join("\n")
     }
 

@@ -1,0 +1,21 @@
+---
+source: tests/spec.rs
+expression: data
+---
+RUN
+prog -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog [OPTIONS] [URL]
+
+ARGS:
+  [URL]
+
+OPTIONS:
+      --url <URL>
+  -h, --help
+
+EOF
+exit 0
+

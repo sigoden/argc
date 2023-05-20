@@ -1,0 +1,15 @@
+---
+source: tests/misc.rs
+expression: data
+---
+RUN
+prog cmda $foo `pwd` $(pwd) ' \1  
+ 世界  
+
+OUTPUT
+argc__args=( '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
+' 世界 ' ' )
+argc__fn=cmda
+cmda '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
+' 世界 ' '
+

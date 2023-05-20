@@ -1,38 +1,5 @@
 #[macro_export]
-macro_rules! snapshot {
-    (
-		$path:expr,
-        $source:expr,
-        $args:expr,
-		$width:expr
-    ) => {
-        let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values = argc::eval($path, $source, &args, $width).unwrap();
-        let output = argc::ArgcValue::to_shell(values);
-        let args = $args.join(" ");
-        let output = format!(
-            r###"RUN
-{}
-
-OUTPUT
-{}
-"###,
-            args, output,
-        );
-        insta::assert_snapshot!(output);
-    };
-}
-
-#[macro_export]
-macro_rules! snapshot_spec {
-    ($args:expr) => {
-        let (path, source) = $crate::fixtures::get_spec();
-        snapshot!(Some(path.as_str()), source.as_str(), $args, None);
-    };
-}
-
-#[macro_export]
-macro_rules! plain {
+macro_rules! eval {
     (
         $source:expr,
         $args:expr,
@@ -40,13 +7,13 @@ macro_rules! plain {
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
         let values = argc::eval(None, $source, &args, None).unwrap();
-        let output = argc::ArgcValue::to_shell(values);
-        assert_eq!(output, $output);
+        let shell_code = argc::ArgcValue::to_shell(values);
+        assert_eq!(shell_code, $output);
     };
 }
 
 #[macro_export]
-macro_rules! fatal {
+macro_rules! fail {
     (
         $source:expr,
         $args:expr,
@@ -59,42 +26,102 @@ macro_rules! fatal {
 }
 
 #[macro_export]
-macro_rules! snapshot_compgen {
+macro_rules! snapshot {
+    ($source:expr, $args:expr) => {
+        snapshot!(None, $source, $args, None);
+    };
+    ($path:expr, $source:expr, $args:expr) => {
+        snapshot!(Some($path), $source, $args, None);
+    };
     (
-        $line:expr
+		$path:expr,
+        $source:expr,
+        $args:expr,
+		$width:expr
     ) => {
-        let (script_file, script_content) = $crate::fixtures::get_spec();
-        let (stdout, stderr) = match argc::compgen(
-            argc::Shell::Fish,
-            &script_file,
-            &script_content,
-            "test",
-            $line,
-        ) {
-            Ok(stdout) => (stdout, String::new()),
-            Err(stderr) => (String::new(), stderr.to_string()),
-        };
-
-        let output = format!(
+        let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
+        let values = argc::eval($path, $source, &args, $width).unwrap();
+        let shell_code = argc::ArgcValue::to_shell(values);
+        let args = $args.join(" ");
+        let data = format!(
             r###"RUN
 {}
 
-STDOUT
-{}
-
-STDERR
+OUTPUT
 {}
 "###,
-            $line, stdout, stderr
+            args, shell_code,
         );
-        insta::assert_snapshot!(output);
+        insta::assert_snapshot!(data);
+    };
+}
+
+#[macro_export]
+macro_rules! snapshot_multi {
+    (
+		$source:expr,
+		$matrix:expr
+	) => {
+        let mut data = String::new();
+        for args in $matrix.iter() {
+            let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
+            let values = argc::eval(None, $source, &args, None).unwrap();
+            let args = args.join(" ");
+            let piece = format!(
+                r###"************ RUN ************
+{}
+
+OUTPUT
+{}
+
+"###,
+                args,
+                argc::ArgcValue::to_shell(values),
+            );
+            data.push_str(&piece);
+        }
+        insta::assert_snapshot!(data);
+    };
+}
+
+#[macro_export]
+macro_rules! snapshot_compgen {
+    (
+		$source:expr,
+        $matrix:expr
+    ) => {
+        let mut data = String::new();
+        let tmpdir = assert_fs::TempDir::new().unwrap();
+        let script_file = {
+            let child = assert_fs::fixture::PathChild::child(&tmpdir, "compgen.sh");
+            // let child = tmpdir.child("compgen.sh");
+            assert_fs::fixture::FileWriteStr::write_str(&child, $source).unwrap();
+            // child.write_str($source).unwrap();
+            child.path().to_string_lossy().to_string()
+        };
+        for line in $matrix.iter() {
+            let words = match argc::compgen(argc::Shell::Fish, &script_file, $source, "test", line)
+            {
+                Ok(stdout) => stdout,
+                Err(stderr) => stderr.to_string(),
+            };
+            let piece = format!(
+                r###"************ COMPGEN `prog {}` ************
+{}
+
+"###,
+                line, words
+            );
+            data.push_str(&piece);
+        }
+        insta::assert_snapshot!(data);
     };
 }
 
 #[macro_export]
 macro_rules! snapshot_export {
-    ($source:expr, $name:literal) => {
-        let json = argc::export($source, $name).unwrap();
+    ($source:expr) => {
+        let json = argc::export($source).unwrap();
         let output = serde_json::to_string_pretty(&json).unwrap();
         insta::assert_snapshot!(output);
     };

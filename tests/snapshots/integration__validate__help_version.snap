@@ -1,0 +1,91 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog help
+
+OUTPUT
+cat >&2 <<-'EOF' 
+prog 1.0.0
+nobody <nobody@example.com>
+Test argc
+
+USAGE: prog
+
+EOF
+exit 0
+
+************ RUN ************
+prog --help
+
+OUTPUT
+cat >&2 <<-'EOF' 
+prog 1.0.0
+nobody <nobody@example.com>
+Test argc
+
+USAGE: prog
+
+EOF
+exit 0
+
+************ RUN ************
+prog -help
+
+OUTPUT
+cat >&2 <<-'EOF' 
+prog 1.0.0
+nobody <nobody@example.com>
+Test argc
+
+USAGE: prog
+
+EOF
+exit 0
+
+************ RUN ************
+prog -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+prog 1.0.0
+nobody <nobody@example.com>
+Test argc
+
+USAGE: prog
+
+EOF
+exit 0
+
+************ RUN ************
+prog --version
+
+OUTPUT
+cat >&2 <<-'EOF' 
+prog 1.0.0
+
+EOF
+exit 0
+
+************ RUN ************
+prog -version
+
+OUTPUT
+cat >&2 <<-'EOF' 
+prog 1.0.0
+
+EOF
+exit 0
+
+************ RUN ************
+prog -V
+
+OUTPUT
+cat >&2 <<-'EOF' 
+prog 1.0.0
+
+EOF
+exit 0
+
+

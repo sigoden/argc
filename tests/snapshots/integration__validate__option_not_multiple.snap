@@ -1,0 +1,18 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog cmda -e -e
+
+OUTPUT
+cat >&2 <<-'EOF' 
+error: the argument '-e' cannot be used multiple times
+
+USAGE: prog cmda [OPTIONS]
+
+For more information, try '--help'.
+
+EOF
+exit 1
+

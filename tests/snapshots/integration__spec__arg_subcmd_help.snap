@@ -1,0 +1,240 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog cmda -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmda
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdb -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdb [VAL]
+
+ARGS:
+  [VAL]
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdc -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdc [VAL]...
+
+ARGS:
+  [VAL]...
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdd -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdd <VAL>...
+
+ARGS:
+  <VAL>...
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmde -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmde <VAL>
+
+ARGS:
+  <VAL>
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdf -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdf [VAL]
+
+ARGS:
+  [VAL]  [default: xyz]
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdg -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdg [VAL]
+
+ARGS:
+  [VAL]
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdh -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdh [VAL]
+
+ARGS:
+  [VAL]  [possible values: x, y, z]
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdi -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdi [VAL]
+
+ARGS:
+  [VAL]  [default: x] [possible values: x, y, z]
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdj -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdj [VAL]
+
+ARGS:
+  [VAL]
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdk -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdk [VAL]
+
+ARGS:
+  [VAL]
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdl -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdl [VAL]...
+
+ARGS:
+  [VAL]...
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdm -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdm <VAL>
+
+ARGS:
+  <VAL>
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdn -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdn <VAL>...
+
+ARGS:
+  <VAL>...
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdo -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdo [FILE]
+
+ARGS:
+  [FILE]
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdp -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdp [VAL1]... [VAL2]...
+
+ARGS:
+  [VAL1]...
+  [VAL2]...
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdq -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdq <VAL1> <VAL2>...
+
+ARGS:
+  <VAL1>
+  <VAL2>...
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdr -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdr <VAL1> <VAL2> <VAL3>
+
+ARGS:
+  <VAL1>
+  <VAL2>
+  <VAL3>
+
+EOF
+exit 0
+
+

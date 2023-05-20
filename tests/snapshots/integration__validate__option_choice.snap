@@ -1,0 +1,17 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog cmda --ca val
+
+OUTPUT
+cat >&2 <<-'EOF' 
+error: invalid value 'val' for '<CA>'
+  [possible values: x, y, z]
+
+For more information, try '--help'.
+
+EOF
+exit 1
+

@@ -17,14 +17,12 @@ pub const SCRIPT_PATHS: [&str; 8] = [
     "dir6/ARGCFILE",
 ];
 
-pub fn get_spec() -> (String, String) {
+pub fn locate_script(script_name: &str) -> String {
     let mut spec_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     spec_path.push("tests");
-    spec_path.push("spec.sh");
-    (
-        spec_path.display().to_string(),
-        std::fs::read_to_string(spec_path).unwrap(),
-    )
+    spec_path.push("scripts");
+    spec_path.push(script_name);
+    spec_path.display().to_string()
 }
 
 /// Test fixture which creates a temporary directory with a few files and directories inside.
@@ -34,7 +32,12 @@ pub fn get_spec() -> (String, String) {
 pub fn tmpdir() -> TempDir {
     let tmpdir = assert_fs::TempDir::new().expect("Couldn't create a temp dir for tests");
     for path in SCRIPT_PATHS {
-        write_file(&tmpdir, path);
+        let cp = tmpdir_path(&tmpdir, path);
+        if path.ends_with("EMPTY") {
+            cp.write_str("").unwrap();
+        } else {
+            cp.write_str(&get_script(path)).unwrap();
+        }
     }
     tmpdir
 }
@@ -60,15 +63,6 @@ pub fn tmpdir_path(tmpdir: &TempDir, path: &str) -> ChildPath {
     let parts: Vec<&str> = path.split('/').collect();
     let cp = tmpdir.child(parts[0]);
     parts.iter().skip(1).fold(cp, |acc, part| acc.child(part))
-}
-
-fn write_file(tmpdir: &TempDir, path: &str) {
-    let cp = tmpdir_path(tmpdir, path);
-    if path.ends_with("EMPTY") {
-        cp.write_str("").unwrap();
-    } else {
-        cp.write_str(&get_script(path)).unwrap();
-    }
 }
 
 fn get_script(name: &str) -> String {

@@ -1,0 +1,19 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog foo
+
+OUTPUT
+cat >&2 <<-'EOF' 
+error: 'prog' requires a subcommand but one was not provided
+  [subcommands: cmda, cmdb]
+
+USAGE: prog <COMMAND>
+
+For more information, try '--help'.
+
+EOF
+exit 1
+

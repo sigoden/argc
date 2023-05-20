@@ -27,9 +27,8 @@ pub fn eval(
     cmd.eval(script_path, args, term_width)
 }
 
-pub fn export(source: &str, name: &str) -> Result<serde_json::Value> {
-    let mut cmd = Command::new(source)?;
-    cmd.name = Some(name.to_string());
+pub fn export(source: &str) -> Result<serde_json::Value> {
+    let cmd = Command::new(source)?;
     cmd.to_json().with_context(|| "Failed to export json")
 }
 
@@ -77,11 +76,11 @@ impl Command {
                 None => (String::new(), vec![]),
             };
             if !words.is_empty() {
-                let matcher = Matcher::new(self, &words);
-                arg_values.extend(matcher.to_arg_values_for_choice_fn());
                 if line.trim_end() != line {
                     words.push(" ".into());
                 }
+                let matcher = Matcher::new(self, &words);
+                arg_values.extend(matcher.to_arg_values_for_choice_fn());
             }
             arg_values.push(ArgcValue::Single("_line".into(), line));
             arg_values.push(ArgcValue::Multiple("_words".into(), words));
@@ -488,7 +487,7 @@ impl Command {
     pub(crate) fn match_version_short_name(&self) -> bool {
         match self.find_flag_option("-V") {
             Some(param) => &param.name == "version",
-            None => self.version.is_some(),
+            None => true,
         }
     }
 
@@ -501,10 +500,6 @@ impl Command {
 
     pub(crate) fn no_flags_options_subcommands(&self) -> bool {
         self.flag_option_params.is_empty() && self.subcommands.is_empty()
-    }
-
-    pub(crate) fn no_params_subcommands(&self) -> bool {
-        self.no_flags_options_subcommands() && self.positional_params.is_empty()
     }
 
     pub(crate) fn get_cmd_fn(&self, cmd_paths: &[&str]) -> Option<String> {

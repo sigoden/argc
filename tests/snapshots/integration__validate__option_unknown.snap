@@ -1,0 +1,18 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog cmda --unknown
+
+OUTPUT
+cat >&2 <<-'EOF' 
+error: unexpected argument '--unknown' found
+
+USAGE: prog cmda [OPTIONS]
+
+For more information, try '--help'.
+
+EOF
+exit 1
+

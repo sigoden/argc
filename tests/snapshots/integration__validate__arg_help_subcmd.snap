@@ -1,0 +1,17 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog help cmdd
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog cmdd <VAL>...
+
+ARGS:
+  <VAL>...
+
+EOF
+exit 0
+

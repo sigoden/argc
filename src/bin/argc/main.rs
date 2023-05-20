@@ -55,9 +55,9 @@ fn run() -> Result<i32> {
                     .with_context(|| format!("Failed to create {}", &names[0]))?;
                 println!("{} has been successfully created.", &names[0]);
             }
-            "--argc=export" => {
-                let (source, cmd_args) = parse_script_args(&args[2..])?;
-                let json = argc::export(&source, &cmd_args[0])?;
+            "--argc-export" => {
+                let (source, _) = parse_script_args(&args[2..])?;
+                let json = argc::export(&source)?;
                 println!("{}", serde_json::to_string_pretty(&json)?);
             }
             "--argc-compgen" => {

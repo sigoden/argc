@@ -1,0 +1,13 @@
+---
+source: tests/validate.rs
+expression: data
+---
+RUN
+prog cmda --cc val
+
+OUTPUT
+argc_cc=val
+argc__args=(  )
+argc__fn=cmda
+cmda
+

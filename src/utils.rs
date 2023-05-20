@@ -69,18 +69,21 @@ pub fn get_bash_path() -> Option<PathBuf> {
 
 pub fn run_param_fns(script_file: &str, param_fns: &[&str], line: &str) -> Option<Vec<String>> {
     let shell = get_shell_path()?;
+    let path_env = path_env_with_exe();
     let handles: Vec<_> = param_fns
         .iter()
         .map(|param_fn| {
             let script_file = script_file.to_string();
             let line = line.to_string();
+            let path_env = path_env.clone();
             let param_fn = param_fn.to_string();
             let shell = shell.clone();
             thread::spawn(move || {
                 process::Command::new(shell)
-                    .arg(script_file)
-                    .arg(param_fn)
+                    .arg(&script_file)
+                    .arg(&param_fn)
                     .arg(line)
+                    .env("PATH", path_env)
                     .output()
                     .ok()
                     .map(|out| String::from_utf8_lossy(&out.stdout).to_string())
@@ -96,6 +99,21 @@ pub fn run_param_fns(script_file: &str, param_fns: &[&str], line: &str) -> Optio
 
 pub fn termwidth() -> Option<usize> {
     env::var("TERM_WIDTH").ok()?.parse().ok()
+}
+
+fn path_env_with_exe() -> String {
+    let mut path_env = std::env::var("PATH").ok().unwrap_or_default();
+    if let Some(exe_dir) = std::env::current_exe()
+        .ok()
+        .and_then(|v| v.parent().map(|v| v.to_path_buf()))
+    {
+        if cfg!(windows) {
+            path_env = format!("{};{}", exe_dir.display(), path_env)
+        } else {
+            path_env = format!("{}:{}", exe_dir.display(), path_env)
+        }
+    }
+    path_env
 }
 
 #[cfg(test)]

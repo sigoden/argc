@@ -10,6 +10,8 @@ use crate::{
 use either::Either;
 use indexmap::{IndexMap, IndexSet};
 
+const KNOWN_OPTIONS: [&str; 6] = ["-h", "-help", "--help", "-V", "-version", "--version"];
+
 pub struct Matcher<'a, 'b> {
     cmds: Vec<(&'b str, &'a Command, String)>,
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
@@ -71,7 +73,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             if arg == "--" {
                 dashdash.push(positional_args.len());
             } else if !dashdash.is_empty()
-                || (cmd.no_flags_options_subcommands() && !["-h", "-help", "--help"].contains(&arg))
+                || (cmd.no_flags_options_subcommands() && !KNOWN_OPTIONS.contains(&arg))
             {
                 positional_args.push(arg);
             } else if arg.starts_with('-') {
@@ -182,13 +184,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
             return vec![ArgcValue::Error(self.stringify_match_error(&err))];
         }
         let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
-        let mut output = if cmd.no_params_subcommands() && !self.positional_args.is_empty() {
-            vec![ArgcValue::ExtraPositionalMultiple(
+        let mut output = self.to_arg_values_base();
+        if cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
+            output.push(ArgcValue::ExtraPositionalMultiple(
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
-            )]
-        } else {
-            self.to_arg_values_base()
-        };
+            ));
+        }
         if let Some(cmd_fn) = cmd.get_cmd_fn(&cmd_paths) {
             output.push(ArgcValue::CmdFn(cmd_fn));
         }
@@ -249,6 +250,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             ArgComp::Any => {
                 let cmd = self.cmds[self.cmds.len() - 1].1;
+                if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
+                    return comp_subcomands(cmd);
+                }
                 let mut output = if !self.dashdash.is_empty() {
                     vec![]
                 } else {
@@ -318,6 +322,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     {
                         return Some(MatchError::DisplayHelp);
                     } else if *key == "--version"
+                        || *key == "-version"
                         || (last_cmd.match_version_short_name() && *key == "-V")
                     {
                         return Some(MatchError::DisplayVersion);
@@ -364,7 +369,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 extra_args[0].to_string(),
             ));
         }
-        let missing_positionals: Vec<String> = if positional_params_len > positional_values_len {
+        let mut missing_level = level;
+        let mut missing_params: Vec<String> = if positional_params_len > positional_values_len {
             last_cmd.positional_params[positional_values_len..]
                 .iter()
                 .filter(|param| param.required)
@@ -374,21 +380,23 @@ impl<'a, 'b> Matcher<'a, 'b> {
             vec![]
         };
         for (i, param) in last_cmd.positional_params.iter().enumerate() {
-            if let (Some(value), Some(choices)) = (
-                positional_values.get(i).and_then(|v| v.first()),
+            if let (Some(values), Some(choices)) = (
+                positional_values.get(i),
                 get_param_choices(&param.choices, &param.choices_fn, &self.choices_values),
             ) {
-                if !choices.contains(&value.to_string()) {
-                    return Some(MatchError::InvalidValue(
-                        level,
-                        value.to_string(),
-                        param.render_value(),
-                        choices.clone(),
-                    ));
+                for value in values.iter() {
+                    if !choices.contains(&value.to_string()) {
+                        return Some(MatchError::InvalidValue(
+                            level,
+                            value.to_string(),
+                            param.render_value(),
+                            choices.clone(),
+                        ));
+                    }
                 }
             }
         }
-        for level in 0..cmds_len {
+        for level in (0..cmds_len).rev() {
             let args = &self.flag_option_args[level];
             let cmd = self.cmds[level].1;
             let mut flag_option_map = IndexMap::new();
@@ -412,10 +420,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     .iter()
                     .filter_map(|v| cmd.find_flag_option(v).map(|v| v.render_name_values()))
                     .collect();
-                return Some(MatchError::MissingRequiredArgument(
-                    level,
-                    [missing_positionals, missing_flag_options].concat(),
-                ));
+                missing_params.extend(missing_flag_options)
             }
             for (name, indexes) in flag_option_map {
                 if let Some(param) = cmd.flag_option_params.iter().find(|v| v.name == name) {
@@ -444,24 +449,29 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             &param.choices_fn,
                             &self.choices_values,
                         ) {
-                            let value = values[0];
-                            if !choices.contains(&value.to_string()) {
-                                return Some(MatchError::InvalidValue(
-                                    level,
-                                    value.to_string(),
-                                    param.render_single_value(),
-                                    choices.clone(),
-                                ));
+                            for value in values.iter() {
+                                if !choices.contains(&value.to_string()) {
+                                    return Some(MatchError::InvalidValue(
+                                        level,
+                                        value.to_string(),
+                                        param.render_single_value(),
+                                        choices.clone(),
+                                    ));
+                                }
                             }
                         }
                     }
                 }
             }
+            if !missing_params.is_empty() {
+                missing_level = level;
+                break;
+            }
         }
-        if !missing_positionals.is_empty() {
+        if !missing_params.is_empty() {
             return Some(MatchError::MissingRequiredArgument(
-                level,
-                missing_positionals,
+                missing_level,
+                missing_params,
             ));
         }
         None
@@ -709,7 +719,10 @@ fn match_flag_option<'a, 'b>(
         {
             *arg_comp =
                 ArgComp::OptionValue(param.name.clone(), value_args.len().saturating_sub(1));
-        } else if *arg_comp == ArgComp::FlagOrOption && param.is_flag() && !arg.starts_with("--") {
+        } else if *arg_comp == ArgComp::FlagOrOption
+            && param.is_flag()
+            && !(arg.len() > 2 && param.is_match(arg))
+        {
             *arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
         }
     }
@@ -736,9 +749,6 @@ fn comp_subcomands(cmd: &Command) -> Vec<(String, String)> {
             output.push((v, describe.clone()))
         }
     }
-    if !output.is_empty() {
-        output.push(("help".into(), String::new()));
-    }
     output
 }
 
@@ -747,7 +757,7 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<(String, Strin
         .arg_value_names
         .get(index)
         .map(|v| v.as_str())
-        .unwrap();
+        .unwrap_or_else(|| param.arg_value_names[0].as_str());
     comp_param(
         &param.describe,
         value_name,

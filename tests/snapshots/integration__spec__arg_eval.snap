@@ -1,0 +1,99 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog cmdb v1
+
+OUTPUT
+argc_val=v1
+argc__args=( v1 )
+argc__fn=cmdb
+cmdb v1
+
+************ RUN ************
+prog cmdc v1 v2
+
+OUTPUT
+argc_val=( v1 v2 )
+argc__args=( v1 v2 )
+argc__fn=cmdc
+cmdc v1 v2
+
+************ RUN ************
+prog cmdf
+
+OUTPUT
+argc_val=xyz
+argc__args=( xyz )
+argc__fn=cmdf
+cmdf xyz
+
+************ RUN ************
+prog cmdf v1
+
+OUTPUT
+argc_val=v1
+argc__args=( v1 )
+argc__fn=cmdf
+cmdf v1
+
+************ RUN ************
+prog cmdg
+
+OUTPUT
+argc_val=`_default_fn`
+argc__args=( `_default_fn` )
+argc__fn=cmdg
+cmdg `_default_fn`
+
+************ RUN ************
+prog cmdh x
+
+OUTPUT
+argc_val=x
+argc__args=( x )
+argc__fn=cmdh
+cmdh x
+
+************ RUN ************
+prog cmdj xyz
+
+OUTPUT
+argc_val=xyz
+argc__args=( xyz )
+argc__fn=cmdj
+cmdj xyz
+
+************ RUN ************
+prog cmdp v1 v2
+
+OUTPUT
+argc_val1=( v1 )
+argc_val2=( v2 )
+argc__args=( v1 v2 )
+argc__fn=cmdp
+cmdp v1 v2
+
+************ RUN ************
+prog cmdp v1 v2 v3
+
+OUTPUT
+argc_val1=( v1 v2 )
+argc_val2=( v3 )
+argc__args=( v1 v2 v3 )
+argc__fn=cmdp
+cmdp v1 v2 v3
+
+************ RUN ************
+prog cmdr v1 v2 v3
+
+OUTPUT
+argc_val1=v1
+argc_val2=v2
+argc_val3=v3
+argc__args=( v1 v2 v3 )
+argc__fn=cmdr
+cmdr v1 v2 v3
+
+

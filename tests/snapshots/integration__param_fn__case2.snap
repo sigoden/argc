@@ -1,0 +1,75 @@
+---
+source: tests/param_fn.rs
+expression: data
+---
+************ RUN ************
+prog _choice_fn
+
+OUTPUT
+argc__line=''
+argc__words=(  )
+argc__args=(  )
+argc__fn=_choice_fn
+_choice_fn;exit;
+
+************ RUN ************
+prog _choice_fn cmdl 
+
+OUTPUT
+argc_val=( ' ' )
+argc__args=( ' ' )
+argc__line='cmdl '
+argc__words=( prog cmdl ' ' )
+argc__args=( ' ' )
+argc__fn=_choice_fn
+_choice_fn ' ';exit;
+
+************ RUN ************
+prog _choice_fn cmdl v1
+
+OUTPUT
+argc_val=( v1 )
+argc__args=( v1 )
+argc__line='cmdl v1'
+argc__words=( prog cmdl v1 )
+argc__args=( v1 )
+argc__fn=_choice_fn
+_choice_fn v1;exit;
+
+************ RUN ************
+prog _choice_fn cmdl v1 
+
+OUTPUT
+argc_val=( v1 ' ' )
+argc__args=( v1 ' ' )
+argc__line='cmdl v1 '
+argc__words=( prog cmdl v1 ' ' )
+argc__args=( v1 ' ' )
+argc__fn=_choice_fn
+_choice_fn v1 ' ';exit;
+
+************ RUN ************
+prog _choice_fn cmdl v1 v2
+
+OUTPUT
+argc_val=( v1 v2 )
+argc__args=( v1 v2 )
+argc__line='cmdl v1 v2'
+argc__words=( prog cmdl v1 v2 )
+argc__args=( v1 v2 )
+argc__fn=_choice_fn
+_choice_fn v1 v2;exit;
+
+************ RUN ************
+prog _choice_fn cmdl v1 v2 
+
+OUTPUT
+argc_val=( v1 v2 ' ' )
+argc__args=( v1 v2 ' ' )
+argc__line='cmdl v1 v2 '
+argc__words=( prog cmdl v1 v2 ' ' )
+argc__args=( v1 v2 ' ' )
+argc__fn=_choice_fn
+_choice_fn v1 v2 ' ';exit;
+
+
