@@ -140,7 +140,7 @@ Define a option.
 # @option -b --ob                   short
 # @option -c                        short only
 # @option    --oc!                  required
-# @option    --od*                  
+# @option    --od*                  multiple
 # @option    --oe+                  required + multiple
 # @option    --ona <PATH>           value notation
 # @option    --onb <FILE> <FILE>    multiple value notations

@@ -1,9 +1,10 @@
+# @cmd
 # @describe    All kind of options
 # @option    --oa                   
 # @option -b --ob                   short
 # @option -c                        short only
 # @option    --oc!                  required
-# @option    --od*                  
+# @option    --od*                  multiple 
 # @option    --oe+                  required + multiple
 # @option    --ona <PATH>           value notation
 # @option    --onb <FILE> <FILE>    multiple value notations
@@ -20,6 +21,7 @@ options() {
     :;
 }
 
+# @cmd
 # @describe   All kind of flags
 # @flag     --fa 
 # @flag  -b --fb         shoft
@@ -28,6 +30,30 @@ options() {
 # @flag  -e --fe*        short + multiple
 flags() {
     :;
+}
+
+# @cmd
+# @describe  Flags or options with single dash
+# @flag    -fa
+# @flag -b -fb
+# @flag    -fd*
+# @option  -oa
+# @option  -od*
+# @option  -ona <PATH>
+# @option  -oca[a|b]
+# @option  -ofa[`_choice_fn`]
+1dash() {
+    :;
+}
+
+_default_fn() {
+    whoami
+}
+
+_choice_fn() {
+    echo abc
+    echo def
+    echo ghk
 }
 
 eval "$(argc --argc-eval "$0" "$@")"
