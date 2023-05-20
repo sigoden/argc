@@ -157,7 +157,7 @@ fn choice() {
 # @arg v1[x|y|z]
 # @arg v2[`_choice_fn`]
 _choice_fn() {
-	echo -e "abc\ndef\nxyz"
+	echo -e "abc\ndef\nghi"
 }
 "###;
 

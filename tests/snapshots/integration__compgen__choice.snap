@@ -5,7 +5,7 @@ expression: data
 ************ COMPGEN `prog  --oa ` ************
 abc
 def
-xyz
+ghi
 
 ************ COMPGEN `prog  --ob ` ************
 x
@@ -24,6 +24,6 @@ z
 --ob
 abc
 def
-xyz
+ghi
 
 

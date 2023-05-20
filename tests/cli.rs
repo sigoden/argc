@@ -38,6 +38,6 @@ fn compgen() {
         .arg("cmdj ")
         .env("PATH", path_env_var)
         .assert()
-        .stdout(predicates::str::contains("abc\ndef\nxyz"))
+        .stdout(predicates::str::contains("abc\ndef\nghi"))
         .success();
 }
