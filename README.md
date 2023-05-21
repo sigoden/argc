@@ -250,6 +250,8 @@ cmd::foo() { :; }
 cmd::bar() { :; }
 # @cmd
 cmd::bar::baz() { :; }
+# @cmd
+cmd::bar::qux() { :; }
 ```
 
 ## Shell Completion
@@ -312,8 +314,6 @@ New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\co
 ```
 
 ## License
-
-Copyright (c) 2022 argc-developers.
 
 argc is made available under the terms of either the MIT License or the Apache License 2.0, at your option.
 
