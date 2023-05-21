@@ -12,7 +12,7 @@ _argc_complete() {
        scriptfile=$(which "$cmd")
     fi
     if [[ ! -f "$scriptfile" ]]; then
-        return 0
+        return
     fi
     cur="${COMP_WORDS[COMP_CWORD]}"
     local line=${COMP_LINE:${#COMP_WORDS[0]}}
@@ -80,7 +80,7 @@ function _argc_complete
         set scriptfile (which "$cmd")
     end
     if not test -f "$scriptfile"
-        return 0
+        return
     end
     set -l line "$tokens[2..]"
     set -l IFS '\n'
@@ -111,7 +111,7 @@ _argc_complete()
        scriptfile=$(which "$cmd")
     fi
     if [[ ! -f "$scriptfile" ]]; then
-        return 0
+        return
     fi
     local line="${words[2,-1]}"
     local IFS=$'\n'
@@ -145,7 +145,7 @@ $_argc_complete = {
     if (!$scriptfile) {
         $scriptfile = $cmd
         if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
-            return;
+            return
         }
     }
     $tail = if ($wordToComplete.ToString() -eq "") { " " } else { "" }
@@ -156,16 +156,8 @@ $_argc_complete = {
     }
     $candicates = (argc --argc-compgen powershell "$scriptfile" "$line" 2>$null).Split("`n")
     if ($candicates.Count -eq 1) {
-        if ($candicates[0] -eq "__argc_comp:file") {
-            return (Get-ChildItem -Path "$wordToComplete*" | Select-Object -ExpandProperty Name) | 
-                ForEach-Object { 
-                    [CompletionResult]::new($_)
-                }
-        } elseif ($candicates[0] -eq "__argc_comp:dir") {
-            return (Get-ChildItem -Attributes Directory -Path "$wordToComplete*" | Select-Object -ExpandProperty Name) |
-                ForEach-Object { 
-                    [CompletionResult]::new($_)
-                }
+        if (($candicates[0] -eq "__argc_comp:file") -or ($candicates[0] -eq "__argc_comp:dir")) {
+            return
         } elseif ($candicates[0] -eq "") {
             return ""
         }
@@ -173,8 +165,8 @@ $_argc_complete = {
     $candicates | ForEach-Object { 
         $parts=($_ -split "`t")
         $value = $parts[0]
-        $description = if ($parts[1]) { $parts[1] } else { " " }
-        [CompletionResult]::new($parts[0], $parts[0], [CompletionResultType]::ParameterValue, $description)
+        $desc = if ($parts[1]) { $parts[1] } else { " " }
+        [CompletionResult]::new($value, $value, [CompletionResultType]::ParameterValue, $desc)
     }
 }
 "###;
