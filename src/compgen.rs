@@ -36,6 +36,7 @@ pub enum Shell {
     Zsh,
     Powershell,
     Fish,
+    Elvish,
 }
 
 impl FromStr for Shell {
@@ -47,6 +48,7 @@ impl FromStr for Shell {
             "zsh" => Ok(Self::Zsh),
             "powershell" => Ok(Self::Powershell),
             "fish" => Ok(Self::Fish),
+            "elvish" => Ok(Self::Elvish),
             _ => bail!(
                 "The provided shell is either invalid or missing, must be one of {}",
                 Shell::list()
@@ -94,7 +96,7 @@ impl Shell {
                     }
                     Shell::Zsh => format!("{}:{}", value, description),
                     Shell::Powershell => format!("{}\t{}", value, description),
-                    Shell::Fish => format!("{}\t{}", value, description),
+                    Shell::Fish | Shell::Elvish => format!("{}\t{}", value, description),
                 }
             })
             .collect::<Vec<String>>()
@@ -123,7 +125,7 @@ impl Shell {
             }
             Shell::Zsh => zsh_escape(value),
             Shell::Powershell => format!("{} ", powershell_escape(value)),
-            Shell::Fish => value.to_string(),
+            Shell::Fish | Shell::Elvish => value.to_string(),
         }
     }
 

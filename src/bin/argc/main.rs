@@ -133,7 +133,7 @@ fn get_argc_help() -> String {
 USAGE:
     argc --argc-eval <SCRIPT> [ARGS...]           Use `eval "$(argc --argc-eval "$0" "$@")"`
     argc --argc-create [TASKS...]                 Create a boilerplate argcfile
-    argc --argc-completions <SHELL> [CMDS...]     Generate completion scripts for bash,zsh,fish,powershell
+    argc --argc-completions <SHELL> [CMDS...]     Generate completion scripts for bash,zsh,powershell,fish,elvish
     argc --argc-compgen <SHELL> <SCRIPT> <LINE>   Generate dynamic completion word
     argc --argc-export <SCRIPT>                   Export command line definitions as json
     argc --argc-script-path                       Print current argcfile path
