@@ -262,14 +262,17 @@ Ensure `argc` is added to [$PATH](https://en.wikipedia.org/wiki/PATH_(variable))
 # bash (~/.bashrc)
 source <(argc --argc-completions bash mycmd1 mycmd2)
 
-# fish (~/.config/fish/config.fish)
-argc --argc-completions fish mycmd1 mycmd2 | source
+# zsh (~/.zshrc)
+source <(argc --argc-completions zsh mycmd1 mycmd2)
 
 # powershell ($env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1)
 argc --argc-completions powershell mycmd1 mycmd2 | Out-String | Invoke-Expression
 
-# zsh (~/.zshrc)
-source <(argc --argc-completions zsh mycmd1 mycmd2)
+# fish (~/.config/fish/config.fish)
+argc --argc-completions fish mycmd1 mycmd2 | source
+
+# elvish (~/.config/elvish/rc.elv)
+eval (argc --argc-completions elvish mycmd1 mycmd2 | slurp)
 ```
 
 **Replace `mycmd1 mycmd2` with your argc script names**.
