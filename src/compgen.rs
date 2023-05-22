@@ -37,6 +37,7 @@ pub enum Shell {
     Powershell,
     Fish,
     Elvish,
+    Nushell,
 }
 
 impl FromStr for Shell {
@@ -49,6 +50,7 @@ impl FromStr for Shell {
             "powershell" => Ok(Self::Powershell),
             "fish" => Ok(Self::Fish),
             "elvish" => Ok(Self::Elvish),
+            "nushell" => Ok(Self::Nushell),
             _ => bail!(
                 "The provided shell is either invalid or missing, must be one of {}",
                 Shell::list()
@@ -59,7 +61,7 @@ impl FromStr for Shell {
 
 impl Shell {
     pub fn list() -> &'static str {
-        "bash,zsh,powershell,fish"
+        "bash,zsh,powershell,fish,elvish,nushell"
     }
 
     pub fn convert(&self, candicates: &[(String, String)], last_word: &str) -> Result<String> {
@@ -95,8 +97,7 @@ impl Shell {
                         format!("{:<width$}({})", value, description, width = max_width + 2)
                     }
                     Shell::Zsh => format!("{}:{}", value, description),
-                    Shell::Powershell => format!("{}\t{}", value, description),
-                    Shell::Fish | Shell::Elvish => format!("{}\t{}", value, description),
+                    _ => format!("{}\t{}", value, description),
                 }
             })
             .collect::<Vec<String>>()
@@ -125,7 +126,7 @@ impl Shell {
             }
             Shell::Zsh => zsh_escape(value),
             Shell::Powershell => format!("{} ", powershell_escape(value)),
-            Shell::Fish | Shell::Elvish => value.to_string(),
+            _ => value.to_string(),
         }
     }
 

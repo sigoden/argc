@@ -256,7 +256,7 @@ cmd::bar::qux() { :; }
 
 ## Shell Completion
 
-Ensure `argc` is added to [$PATH](https://en.wikipedia.org/wiki/PATH_(variable)). Then register the completion
+Argc provides shell completion for argc command and all the bash scripts powered by argc.
 
 ```
 # bash (~/.bashrc)
@@ -273,11 +273,14 @@ argc --argc-completions fish mycmd1 mycmd2 | source
 
 # elvish (~/.config/elvish/rc.elv)
 eval (argc --argc-completions elvish mycmd1 mycmd2 | slurp)
+
+# nushell (~/.config/nushell/config.nu)
+argc --argc-completions nushell mycmd1 mycmd2 # update config.nu manually according to output
 ```
 
-**Replace `mycmd1 mycmd2` with your argc script names**.
+**Replace `mycmd1 mycmd2` with your argc scripts**.
 
-Argc can be used as multiple shell completion engine. see [argc-compteltions](https://github.com/sigoden/argc-completions)
+Argc can be used as multiple shell completion engine. see [argc-completions](https://github.com/sigoden/argc-completions)
 
 ## Argcscript
 
