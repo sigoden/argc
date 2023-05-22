@@ -25,11 +25,7 @@ pub fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
         .file_name()
         .and_then(|v| v.to_str())
         .unwrap();
-    let name = if let Some(v) = name.strip_suffix(".sh") {
-        v
-    } else {
-        name
-    };
+    let name = name.strip_suffix(".sh").unwrap_or(name);
     let mut cmd_args = vec![name.to_string()];
     cmd_args.extend(args);
     Ok((source, cmd_args))

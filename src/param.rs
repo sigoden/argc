@@ -205,7 +205,14 @@ impl FlagOptionParam {
             let values = self
                 .arg_value_names
                 .iter()
-                .map(|v| format!("<{v}>"))
+                .enumerate()
+                .map(|(i, v)| {
+                    if self.multiple && i == self.arg_value_names.len() - 1 {
+                        format!("<{v}>...")
+                    } else {
+                        format!("<{v}>")
+                    }
+                })
                 .collect::<Vec<String>>();
             output.push_str(&values.join(" "));
         }

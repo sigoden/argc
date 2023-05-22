@@ -1,0 +1,18 @@
+---
+source: tests/spec.rs
+expression: data
+---
+RUN
+prog -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog [OPTIONS]
+
+OPTIONS:
+      --oa <DIR> <FILE>...
+  -h, --help
+
+EOF
+exit 0
+
