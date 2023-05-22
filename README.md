@@ -273,6 +273,10 @@ argc --argc-completions fish mycmd1 mycmd2 | source
 
 # elvish (~/.config/elvish/rc.elv)
 eval (argc --argc-completions elvish mycmd1 mycmd2 | slurp)
+
+# nushell (~/.config/nushell/config.nu)
+argc --argc-completions nushell | save -f ~/.argc.nu
+source ~/.argc.nu 
 ```
 
 **Replace `mycmd1 mycmd2` with your argc script names**.

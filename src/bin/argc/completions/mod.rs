@@ -12,6 +12,8 @@ const FISH_SCRIPT: &str = include_str!("argc.fish");
 
 const ELVISH_SCRIPT: &str = include_str!("argc.elv");
 
+const NUSHELL_SCRIPT: &str = include_str!("argc.nu");
+
 pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
     let mut cmds = vec!["argc"];
     cmds.extend(args.iter().map(|v| v.as_str()));
@@ -45,6 +47,37 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
             let registers = lines.join("\n");
             format!("{ELVISH_SCRIPT}\n{registers}\n",)
         }
+        Shell::Nushell => {
+            let registers = format!("{cmds:?}");
+            format!(
+                r###"{NUSHELL_SCRIPT}
+
+let argc_scripts = {registers}
+
+let external_completer = {{|spans| 
+    if (not ($argc_scripts | find $spans.0 | is-empty)) {{
+        argc_complete $spans
+    }} else {{
+        # default completer
+    }}
+}}
+
+let-env config = {{
+  completions: {{
+    external: {{
+      enable: true
+      completer: $external_completer
+    }}
+  }}
+}}
+"###,
+            )
+        }
     };
     Ok(output)
+}
+
+#[test]
+fn feature() {
+    format!("{:?}", vec!["a", "b"]);
 }
