@@ -275,8 +275,7 @@ argc --argc-completions fish mycmd1 mycmd2 | source
 eval (argc --argc-completions elvish mycmd1 mycmd2 | slurp)
 
 # nushell (~/.config/nushell/config.nu)
-argc --argc-completions nushell | save -f ~/.argc.nu
-source ~/.argc.nu 
+argc --argc-completions nushell mycmd1 mycmd2 # update config.nu manually according to output
 ```
 
 **Replace `mycmd1 mycmd2` with your argc script names**.
