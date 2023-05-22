@@ -764,7 +764,7 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<(String, Strin
         .arg_value_names
         .get(index)
         .map(|v| v.as_str())
-        .unwrap_or_else(|| param.arg_value_names[0].as_str());
+        .unwrap_or_else(|| param.arg_value_names.last().unwrap());
     comp_param(
         &param.describe,
         value_name,

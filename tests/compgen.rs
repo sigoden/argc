@@ -163,3 +163,11 @@ _choice_fn() {
 
     snapshot_compgen!(script, vec![" --oa ", " --ob ", " ", " v1 ",]);
 }
+
+#[test]
+fn option_multi_vals() {
+    let script = r###"
+# @option --oa* <DIR> <FILE>
+"###;
+    snapshot_compgen!(script, vec![" --oa ", " --oa bash ", " --oa bash cmd1 ",]);
+}

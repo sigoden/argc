@@ -151,3 +151,11 @@ fn same_option_positional() {
 "###;
     snapshot!(script, &["prog", "-h"]);
 }
+
+#[test]
+fn option_multi_vals() {
+    let script = r###"
+# @option --oa* <DIR> <FILE>
+"###;
+    snapshot!(script, &["prog", "-h"]);
+}
