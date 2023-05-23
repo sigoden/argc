@@ -28,19 +28,18 @@ macro_rules! fail {
 #[macro_export]
 macro_rules! snapshot {
     ($source:expr, $args:expr) => {
-        snapshot!(None, $source, $args, None);
-    };
-    ($path:expr, $source:expr, $args:expr) => {
-        snapshot!(Some($path), $source, $args, None);
+        snapshot!($source, $args, None);
     };
     (
-		$path:expr,
         $source:expr,
         $args:expr,
 		$width:expr
     ) => {
+        let (script_path, script_content, script_file) =
+            $crate::fixtures::create_argc_script($source, "script.sh");
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values = argc::eval($path, $source, &args, $width).unwrap();
+        let values =
+            argc::eval(Some(script_path.as_str()), &script_content, &args, $width).unwrap();
         let shell_code = argc::ArgcValue::to_shell(values);
         let args = $args.join(" ");
         let data = format!(
@@ -52,6 +51,7 @@ OUTPUT
 "###,
             args, shell_code,
         );
+        script_file.close().unwrap();
         insta::assert_snapshot!(data);
     };
 }
@@ -63,9 +63,8 @@ macro_rules! snapshot_multi {
 		$matrix:expr
 	) => {
         let mut data = String::new();
-        let (script_file, script_content) =
+        let (script_path, script_content, script_file) =
             $crate::fixtures::create_argc_script($source, "script.sh");
-        let script_path = script_file.to_string_lossy().to_string();
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
             let values =
@@ -96,9 +95,8 @@ macro_rules! snapshot_compgen {
         $matrix:expr
     ) => {
         let mut data = String::new();
-        let (script_file, script_content) =
+        let (script_path, script_content, script_file) =
             $crate::fixtures::create_argc_script($source, "compgen.sh");
-        let script_path = script_file.to_string_lossy().to_string();
         for line in $matrix.iter() {
             let words = match argc::compgen(
                 argc::Shell::Fish,

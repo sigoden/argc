@@ -61,34 +61,17 @@ fn arg_choice() {
 
 #[test]
 fn arg_choice_fn() {
-    snapshot!(
-        &locate_script("args.sh"),
-        SCRIPT_ARGS,
-        &["prog", "cmdj", "val"]
-    );
-}
-
-#[test]
-fn arg_choice_fn_pass() {
     snapshot!(SCRIPT_ARGS, &["prog", "cmdj", "val"]);
 }
 
 #[test]
 fn arg_choice_fn_skip() {
-    snapshot!(
-        &locate_script("args.sh"),
-        SCRIPT_ARGS,
-        &["prog", "cmdk", "abc"]
-    );
+    snapshot!(SCRIPT_ARGS, &["prog", "cmdk", "abc"]);
 }
 
 #[test]
 fn arg_choice_multi() {
-    snapshot!(
-        &locate_script("args.sh"),
-        SCRIPT_ARGS,
-        &["prog", "cmdl", "abc", "val"]
-    );
+    snapshot!(SCRIPT_ARGS, &["prog", "cmdl", "abc", "val"]);
 }
 
 #[test]
@@ -128,34 +111,17 @@ fn option_choice() {
 
 #[test]
 fn option_choice_fn() {
-    snapshot!(
-        &locate_script("options.sh"),
-        SCRIPT_OPTIONS,
-        &["prog", "cmda", "--cc", "val"]
-    );
-}
-
-#[test]
-fn option_choice_fn_pass() {
     snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--cc", "val"]);
 }
 
 #[test]
 fn option_choice_fn_skip() {
-    snapshot!(
-        &locate_script("options.sh"),
-        SCRIPT_OPTIONS,
-        &["prog", "cmda", "--cd", "val"]
-    );
+    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--cd", "val"]);
 }
 
 #[test]
 fn option_choice_multi() {
-    snapshot!(
-        &locate_script("options.sh"),
-        SCRIPT_OPTIONS,
-        &["prog", "cmda", "--ce", "abc", "val"]
-    );
+    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--ce", "abc", "val"]);
 }
 
 #[test]

@@ -65,20 +65,28 @@ pub fn tmpdir_path(tmpdir: &TempDir, path: &str) -> ChildPath {
     parts.iter().skip(1).fold(cp, |acc, part| acc.child(part))
 }
 
-pub fn create_argc_script(source: &str, name: &str) -> (assert_fs::NamedTempFile, String) {
-    let script_content = if source.contains("--argc-eval") {
-        source.to_string()
-    } else {
-        format!(
-            r###"{source}
-eval "$(argc --argc-eval "$0" "$@")"
-"###,
-        )
-    };
+pub fn create_argc_script(source: &str, name: &str) -> (String, String, assert_fs::NamedTempFile) {
+    let script_content = patch_argc_bin(source);
     let script_file = assert_fs::NamedTempFile::new(name).unwrap();
     script_file.write_str(&script_content).unwrap();
     let script_file = script_file.into_persistent();
-    (script_file, script_content)
+    let script_path = script_file.to_string_lossy().to_string();
+    (script_path, script_content, script_file)
+}
+
+pub fn patch_argc_bin(source: &str) -> String {
+    let argc_path = assert_cmd::cargo::cargo_bin("argc")
+        .to_string_lossy()
+        .to_string();
+    if source.contains("--argc-eval") {
+        source.replace("argc --argc-eval", &format!("{argc_path} --argc-eval"))
+    } else {
+        format!(
+            r###"{source}
+eval "$({argc_path} --argc-eval "$0" "$@")"
+"###,
+        )
+    }
 }
 
 fn get_script(name: &str) -> String {
