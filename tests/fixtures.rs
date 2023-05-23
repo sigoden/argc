@@ -75,9 +75,7 @@ pub fn create_argc_script(source: &str, name: &str) -> (String, String, assert_f
 }
 
 pub fn patch_argc_bin(source: &str) -> String {
-    let argc_path = assert_cmd::cargo::cargo_bin("argc")
-        .to_string_lossy()
-        .to_string();
+    let argc_path = "./target/debug/argc";
     if source.contains("--argc-eval") {
         source.replace("argc --argc-eval", &format!("{argc_path} --argc-eval"))
     } else {
