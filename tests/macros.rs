@@ -20,7 +20,7 @@ macro_rules! fail {
         $err:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let err = argc::eval(None, $source, &args, None).unwrap_err();
+        let err = argc::eval($source, &args, None, None).unwrap_err();
         assert_eq!(err.to_string().as_str(), $err);
     };
 }
@@ -30,17 +30,17 @@ macro_rules! snapshot {
     ($source:expr, $args:expr) => {
         let (script_path, script_content, script_file) =
             $crate::fixtures::create_argc_script($source, "script.sh");
-        snapshot!(Some(script_path.as_str()), &script_content, $args, None);
+        snapshot!(&script_content, $args, Some(script_path.as_str()), None);
         script_file.close().unwrap();
     };
     (
-		$path:expr,
         $source:expr,
         $args:expr,
+		$path:expr,
 		$width:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values = argc::eval($path, $source, &args, $width).unwrap();
+        let values = argc::eval($source, &args, $path, $width).unwrap();
         let shell_code = argc::ArgcValue::to_shell(values);
         let args = $args.join(" ");
         let data = format!(
@@ -68,7 +68,7 @@ macro_rules! snapshot_multi {
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
             let values =
-                argc::eval(Some(script_path.as_str()), &script_content, &args, None).unwrap();
+                argc::eval(&script_content, &args, Some(script_path.as_str()), None).unwrap();
             let args = args.join(" ");
             let piece = format!(
                 r###"************ RUN ************
