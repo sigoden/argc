@@ -18,13 +18,13 @@ use std::result::Result as StdResult;
 use std::sync::Arc;
 
 pub fn eval(
-    script_path: Option<&str>,
     script_content: &str,
     args: &[String],
+    script_path: Option<&str>,
     term_width: Option<usize>,
 ) -> Result<Vec<ArgcValue>> {
     let mut cmd = Command::new(script_content)?;
-    cmd.eval(script_path, args, term_width)
+    cmd.eval(args, script_path, term_width)
 }
 
 pub fn export(source: &str) -> Result<serde_json::Value> {
@@ -58,8 +58,8 @@ impl Command {
 
     pub fn eval(
         &mut self,
-        script_path: Option<&str>,
         args: &[String],
+        script_path: Option<&str>,
         term_width: Option<usize>,
     ) -> Result<Vec<ArgcValue>> {
         if args.is_empty() {
