@@ -28,18 +28,19 @@ macro_rules! fail {
 #[macro_export]
 macro_rules! snapshot {
     ($source:expr, $args:expr) => {
-        snapshot!($source, $args, None);
+        let (script_path, script_content, script_file) =
+            $crate::fixtures::create_argc_script($source, "script.sh");
+        snapshot!(Some(script_path.as_str()), &script_content, $args, None);
+        script_file.close().unwrap();
     };
     (
+		$path:expr,
         $source:expr,
         $args:expr,
 		$width:expr
     ) => {
-        let (script_path, script_content, script_file) =
-            $crate::fixtures::create_argc_script($source, "script.sh");
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values =
-            argc::eval(Some(script_path.as_str()), &script_content, &args, $width).unwrap();
+        let values = argc::eval($path, $source, &args, $width).unwrap();
         let shell_code = argc::ArgcValue::to_shell(values);
         let args = $args.join(" ");
         let data = format!(
@@ -51,7 +52,6 @@ OUTPUT
 "###,
             args, shell_code,
         );
-        script_file.close().unwrap();
         insta::assert_snapshot!(data);
     };
 }

@@ -65,6 +65,11 @@ fn arg_choice_fn() {
 }
 
 #[test]
+fn arg_choice_fn_pass() {
+    snapshot!(None, SCRIPT_ARGS, &["prog", "cmdj", "val"], None);
+}
+
+#[test]
 fn arg_choice_fn_skip() {
     snapshot!(SCRIPT_ARGS, &["prog", "cmdk", "abc"]);
 }
@@ -112,6 +117,11 @@ fn option_choice() {
 #[test]
 fn option_choice_fn() {
     snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--cc", "val"]);
+}
+
+#[test]
+fn option_choice_fn_pass() {
+    snapshot!(None, SCRIPT_OPTIONS, &["prog", "cmda", "--cc", "val"], None);
 }
 
 #[test]

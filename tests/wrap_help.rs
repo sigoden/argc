@@ -21,15 +21,15 @@ foo() { :; }
 
 #[test]
 fn wrap() {
-    snapshot!(SCRIPT, &["prog", "-h"], Some(80));
+    snapshot!(None, SCRIPT, &["prog", "-h"], Some(80));
 }
 
 #[test]
 fn wrap2() {
-    snapshot!(SCRIPT, &["prog", "foo", "-h"], Some(80));
+    snapshot!(None, SCRIPT, &["prog", "foo", "-h"], Some(80));
 }
 
 #[test]
 fn nowrap() {
-    snapshot!(SCRIPT, &["prog", "-h"], None);
+    snapshot!(None, SCRIPT, &["prog", "-h"], None);
 }
