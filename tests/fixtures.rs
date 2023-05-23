@@ -75,7 +75,7 @@ pub fn create_argc_script(source: &str, name: &str) -> (String, String, assert_f
 }
 
 pub fn patch_argc_bin(source: &str) -> String {
-    let argc_path = "./target/debug/argc";
+    let argc_path = get_argc_path();
     if source.contains("--argc-eval") {
         source.replace("argc --argc-eval", &format!("{argc_path} --argc-eval"))
     } else {
@@ -85,6 +85,14 @@ eval "$({argc_path} --argc-eval "$0" "$@")"
 "###,
         )
     }
+}
+
+fn get_argc_path() -> String {
+    let argc_path = assert_cmd::cargo::cargo_bin("argc");
+    let cwd = std::env::current_dir().unwrap();
+    let base_path = argc_path.strip_prefix(cwd).unwrap();
+    let base_path = base_path.display().to_string();
+    base_path.replace('\\', "/")
 }
 
 fn get_script(name: &str) -> String {
