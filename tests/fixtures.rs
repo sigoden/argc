@@ -44,7 +44,7 @@ pub fn tmpdir() -> TempDir {
 
 #[fixture]
 #[allow(dead_code)]
-pub fn tmpdir2() -> TempDir {
+pub fn tmpdir_bare() -> TempDir {
     assert_fs::TempDir::new().expect("Couldn't create a temp dir for tests")
 }
 
@@ -63,6 +63,28 @@ pub fn tmpdir_path(tmpdir: &TempDir, path: &str) -> ChildPath {
     let parts: Vec<&str> = path.split('/').collect();
     let cp = tmpdir.child(parts[0]);
     parts.iter().skip(1).fold(cp, |acc, part| acc.child(part))
+}
+
+pub fn create_argc_script(source: &str, name: &str) -> (String, String, assert_fs::NamedTempFile) {
+    let script_content = patch_argc_bin(source);
+    let script_file = assert_fs::NamedTempFile::new(name).unwrap();
+    script_file.write_str(&script_content).unwrap();
+    let script_file = script_file.into_persistent();
+    let script_path = script_file.to_string_lossy().to_string();
+    (script_path, script_content, script_file)
+}
+
+pub fn patch_argc_bin(source: &str) -> String {
+    let argc_path = "./target/debug/argc";
+    if source.contains("--argc-eval") {
+        source.replace("argc --argc-eval", &format!("{argc_path} --argc-eval"))
+    } else {
+        format!(
+            r###"{source}
+eval "$({argc_path} --argc-eval "$0" "$@")"
+"###,
+        )
+    }
 }
 
 fn get_script(name: &str) -> String {
