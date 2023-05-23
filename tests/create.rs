@@ -1,22 +1,22 @@
 use assert_fs::TempDir;
 use rstest::rstest;
 
-use crate::fixtures::{get_path_env_var, tmpdir2, Error};
+use crate::fixtures::{get_path_env_var, tmpdir_bare, Error};
 use assert_cmd::prelude::*;
 use std::process::Command;
 
 #[rstest]
-fn create(tmpdir2: TempDir) -> Result<(), Error> {
+fn create(tmpdir_bare: TempDir) -> Result<(), Error> {
     let path_env_var = get_path_env_var();
     Command::cargo_bin("argc")?
-        .current_dir(tmpdir2.path())
+        .current_dir(tmpdir_bare.path())
         .env("PATH", path_env_var.clone())
         .arg("--argc-create")
         .assert()
         .success();
-    assert!(tmpdir2.path().join("Argcfile.sh").exists());
+    assert!(tmpdir_bare.path().join("Argcfile.sh").exists());
     Command::cargo_bin("argc")?
-        .current_dir(tmpdir2.path())
+        .current_dir(tmpdir_bare.path())
         .env("PATH", path_env_var)
         .assert()
         .success();
@@ -24,17 +24,17 @@ fn create(tmpdir2: TempDir) -> Result<(), Error> {
 }
 
 #[rstest]
-fn create_with_tasks(tmpdir2: TempDir) -> Result<(), Error> {
+fn create_with_tasks(tmpdir_bare: TempDir) -> Result<(), Error> {
     let path_env_var = get_path_env_var();
     Command::cargo_bin("argc")?
-        .current_dir(tmpdir2.path())
+        .current_dir(tmpdir_bare.path())
         .env("PATH", path_env_var.clone())
         .arg("--argc-create")
         .args(["foo", "bar"])
         .assert()
         .success();
     Command::cargo_bin("argc")?
-        .current_dir(tmpdir2.path())
+        .current_dir(tmpdir_bare.path())
         .env("PATH", path_env_var)
         .arg("bar")
         .assert()
