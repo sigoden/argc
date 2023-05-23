@@ -2,7 +2,7 @@ using namespace System.Management.Automation
 
 $_argc_complete = {
     param($wordToComplete, $commandAst, $cursorPosition)
-    $cmd = $commandAst.CommandElements[0]
+    $cmd = $commandAst.CommandElements[0].ToString()
     if ($cmd -eq "argc") {
         $scriptfile = (argc --argc-script-path 2>$null)
     } else {
