@@ -40,9 +40,9 @@ To write a command-line program with argc, we only need to do two things:
 Write `example.sh`
 
 ```sh
-# @flag   --foo   A flag
-# @option --bar   A option
-# @option --baz*  A option with multiple values 
+# @flag   --foo   Flag value
+# @option --bar   Option value
+# @arg baz*       Positional values
 
 eval "$(argc --argc-eval "$0" "$@")"
 echo foo: $argc_foo
@@ -50,24 +50,26 @@ echo bar: $argc_bar
 echo baz: ${argc_baz[@]}
 ```
 
-Run `./example.sh --foo --bar=value --baz a b c`, you can see argc successfully parses arguments and generate variables with `argc_` prefix.
+Run `./example.sh --foo --bar=xyz a b c`, you can see argc successfully parses arguments and generate variables with `argc_` prefix.
 
 ```
 foo: 1
-bar: value
+bar: xyz
 baz: a b c
 ```
 
 Run `./example.sh -h`, argc wll print help information for you.
 
 ```
-USAGE: example.sh [OPTIONS]
+USAGE: example.sh [OPTIONS] [BAZ]...
+
+ARGS:
+  [BAZ]...  Positional values
 
 OPTIONS:
-      --foo             A flag
-      --bar <BAR>       A option
-      --baz [<BAZ>...]  A option with multiple values
-  -h, --help            Print help information
+      --foo        Flag value
+      --bar <BAR>  Option value
+  -h, --help       Print help
 ```
 
 ## Comment Tags
@@ -234,25 +236,9 @@ Value notation is used to describe value type of options and positional paramete
 
 Here are some value notation that will affect the shell completion.
 
-- `<FILE>`: complete files in current directory
-- `<DIR>`: complete directories in current directory
-- `<PATH>`: complete files and directories in current directory
-
-
-## Nested Subcommands
-
-```sh
-# @cmd
-cmd() { :; }
-# @cmd
-cmd::foo() { :; }
-# @cmd
-cmd::bar() { :; }
-# @cmd
-cmd::bar::baz() { :; }
-# @cmd
-cmd::bar::qux() { :; }
-```
+- `<FILE>`: complete files
+- `<DIR>`: complete directories
+- `<PATH>`: complete files and directories
 
 ## Shell Completion
 
