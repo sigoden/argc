@@ -1,0 +1,8 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog cmd ` ************
+__argc_comp:file
+
+

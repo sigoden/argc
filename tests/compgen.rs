@@ -188,3 +188,26 @@ cmdb() { :; }
 "###;
     snapshot_compgen!(script, vec![" ", "cmda ",]);
 }
+
+#[test]
+fn no_param() {
+    let script = r###"
+# @cmd
+cmd() { :; }
+"###;
+    snapshot_compgen!(script, vec!["cmd ",]);
+}
+
+#[test]
+fn special_arg_name() {
+    let script = r###"
+# @cmd
+# @arg arg
+cmda() { :; }
+
+# @cmd
+# @arg any
+cmdb() { :; }
+"###;
+    snapshot_compgen!(script, vec!["cmda ", "cmdb "]);
+}
