@@ -11,7 +11,7 @@ USAGE: prog [OPTIONS]
 
 OPTIONS:
   -h, --help
-  -V, --verbose
+  -V, --version
 
 EOF
 exit 0

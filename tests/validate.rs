@@ -37,7 +37,7 @@ fn help_version_shadow() {
 fn help_version_exist() {
     let script = r###"
 # @flag -h --help
-# @flag -V --verbose
+# @flag -V --version
 "###;
     snapshot_multi!(script, vec![vec!["prog", "-h"]]);
 }
