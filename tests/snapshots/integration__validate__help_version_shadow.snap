@@ -13,7 +13,7 @@ argc__args=(  )
 prog -V
 
 OUTPUT
-argc_verbose=1
+argc_verify=1
 argc__args=(  )
 
 

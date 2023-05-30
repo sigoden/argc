@@ -345,46 +345,21 @@ impl Command {
             return output;
         }
         let mut list = vec![];
-        let mut any_summmary = false;
-        let mut double_help_dashes = true;
+        let mut any_describe = false;
+        let mut double_dash = true;
         for param in self.flag_option_params.iter() {
             if param.dashes == "-" {
-                double_help_dashes = false;
+                double_dash = false;
             }
             let value = param.render_body();
             let describe = param.render_describe();
             if !describe.is_empty() {
-                any_summmary = true;
+                any_describe = true;
             }
             list.push((value, describe));
         }
-        let help_dashes = if double_help_dashes { "--" } else { " -" };
-        list.push((
-            if self.match_help_short_name() {
-                format!("-h, {}help", help_dashes)
-            } else {
-                format!("    {}help", help_dashes)
-            },
-            if any_summmary {
-                "Print help".into()
-            } else {
-                "".into()
-            },
-        ));
-        if self.version.is_some() {
-            list.push((
-                if self.match_version_short_name() {
-                    "    --version".into()
-                } else {
-                    "-V, --version".into()
-                },
-                if any_summmary {
-                    "Print version".into()
-                } else {
-                    "".into()
-                },
-            ));
-        }
+        self.add_help_flag(&mut list, double_dash, any_describe);
+        self.add_version_flag(&mut list, double_dash, any_describe);
         output.push("OPTIONS:".to_string());
         let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
         for (value, describe) in list {
@@ -564,6 +539,57 @@ impl Command {
         };
         self.subcommands.push(cmd);
         self.subcommands.last_mut().unwrap()
+    }
+
+    fn add_help_flag(
+        &self,
+        list: &mut Vec<(String, String)>,
+        double_dash: bool,
+        any_describe: bool,
+    ) {
+        if self.find_flag_option("help").is_some() {
+            return;
+        }
+        let dashes = if double_dash { "--" } else { " -" };
+        list.push((
+            if self.match_help_short_name() {
+                format!("-h, {}help", dashes)
+            } else {
+                format!("    {}help", dashes)
+            },
+            if any_describe {
+                "Print help".into()
+            } else {
+                "".into()
+            },
+        ));
+    }
+
+    fn add_version_flag(
+        &self,
+        list: &mut Vec<(String, String)>,
+        double_dash: bool,
+        any_describe: bool,
+    ) {
+        if self.version.is_none() {
+            return;
+        }
+        if self.find_flag_option("version").is_some() {
+            return;
+        }
+        let dashes = if double_dash { "--" } else { " -" };
+        list.push((
+            if self.match_version_short_name() {
+                format!("-V, {}version", dashes)
+            } else {
+                format!("    {}version", dashes)
+            },
+            if any_describe {
+                "Print version".into()
+            } else {
+                "".into()
+            },
+        ));
     }
 }
 
