@@ -28,9 +28,18 @@ fn help_version_shadow() {
 # @version    1.0.0
 
 # @flag -h --host
-# @flag -V --verbose
+# @flag -V --verify
 "###;
     snapshot_multi!(script, vec![vec!["prog", "-h"], vec!["prog", "-V"],]);
+}
+
+#[test]
+fn help_version_exist() {
+    let script = r###"
+# @flag -h --help
+# @flag -V --version
+"###;
+    snapshot_multi!(script, vec![vec!["prog", "-h"]]);
 }
 
 #[test]

@@ -1,0 +1,19 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog -h
+
+OUTPUT
+cat >&2 <<-'EOF' 
+USAGE: prog [OPTIONS]
+
+OPTIONS:
+  -h, --help
+  -V, --version
+
+EOF
+exit 0
+
+
