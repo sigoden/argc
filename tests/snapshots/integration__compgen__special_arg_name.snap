@@ -1,0 +1,11 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog cmda ` ************
+__argc_comp:file
+
+************ COMPGEN `prog cmdb ` ************
+__argc_comp:file
+
+

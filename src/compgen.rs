@@ -198,6 +198,8 @@ fn expand_candicates(
                 output[0] = ("__argc_comp:file".into(), String::new());
             } else if value_name.contains("dir") || value_name.contains("folder") {
                 output[0] = ("__argc_comp:dir".into(), String::new());
+            } else if value_name.contains("arg") || value_name.contains("any") {
+                output[0] = ("__argc_comp:file".into(), String::new());
             } else {
                 output.clear();
             };
