@@ -171,3 +171,20 @@ fn option_multi_vals() {
 "###;
     snapshot_compgen!(script, vec![" --oa ", " --oa bash ", " --oa bash cmd1 ",]);
 }
+
+#[test]
+fn multiline_doc() {
+    let script = r###"
+# @cmd cmd-line1
+# cmd-line2
+# @option --foo option-line1
+# option-line2
+# @arg bar bar-line1
+# bar-line2
+cmda() { :; }
+
+# @cmd line
+cmdb() { :; }
+"###;
+    snapshot_compgen!(script, vec![" ", "cmda ",]);
+}
