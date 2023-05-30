@@ -664,9 +664,9 @@ For more information, try '--help'.
         for param in cmd.flag_option_params.iter() {
             let exist = args.contains(param.name.as_str());
             if !exist || param.multiple {
-                let describe = param.describe.clone();
+                let describe = param.describe_head();
                 for v in param.list_names() {
-                    output.push((v, describe.clone()))
+                    output.push((v, describe.to_string()))
                 }
             }
         }
@@ -751,9 +751,9 @@ fn comp_subcommands_positional(cmd: &Command, values: &[Vec<&str>]) -> Vec<(Stri
 fn comp_subcomands(cmd: &Command) -> Vec<(String, String)> {
     let mut output = vec![];
     for subcmd in cmd.subcommands.iter() {
-        let describe = subcmd.describe.clone();
+        let describe = subcmd.describe_head();
         for v in subcmd.list_names() {
-            output.push((v, describe.clone()))
+            output.push((v, describe.to_string()))
         }
     }
     output
@@ -766,7 +766,7 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<(String, Strin
         .map(|v| v.as_str())
         .unwrap_or_else(|| param.arg_value_names.last().unwrap());
     comp_param(
-        &param.describe,
+        param.describe_head(),
         value_name,
         &param.choices,
         &param.choices_fn,
@@ -777,7 +777,7 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<(String, Strin
 
 fn comp_positional(param: &PositionalParam) -> Vec<(String, String)> {
     comp_param(
-        &param.describe,
+        param.describe_head(),
         &param.arg_value_name,
         &param.choices,
         &param.choices_fn,

@@ -284,6 +284,13 @@ impl FlagOptionParam {
             self.arg_value_names.len()
         }
     }
+
+    pub(crate) fn describe_head(&self) -> &str {
+        match self.describe.split_once('\n') {
+            Some((v, _)) => v,
+            None => self.describe.as_str(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
@@ -376,6 +383,13 @@ impl PositionalParam {
             Some(ArgcValue::PositionalMultiple(name, values))
         } else {
             Some(ArgcValue::PositionalSingle(name, must_get_first(values)))
+        }
+    }
+
+    pub(crate) fn describe_head(&self) -> &str {
+        match self.describe.split_once('\n') {
+            Some((v, _)) => v,
+            None => self.describe.as_str(),
         }
     }
 }

@@ -435,10 +435,7 @@ impl Command {
     }
 
     pub(crate) fn render_subcommand_describe(&self) -> String {
-        let mut output = match self.describe.split_once('\n') {
-            Some((v, _)) => v.to_string(),
-            None => self.describe.clone(),
-        };
+        let mut output = self.describe_head().to_string();
         if self.aliases.is_empty() {
             return output;
         } else {
@@ -448,6 +445,13 @@ impl Command {
             output.push_str(&format!("[aliases: {}]", self.aliases.join(", ")));
         };
         output
+    }
+
+    pub(crate) fn describe_head(&self) -> &str {
+        match self.describe.split_once('\n') {
+            Some((v, _)) => v,
+            None => self.describe.as_str(),
+        }
     }
 
     pub(crate) fn list_names(&self) -> Vec<String> {
