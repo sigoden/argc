@@ -1,38 +1,42 @@
-use str
 use path
+use re
+use str
 
-fn argc-complete {|@arg|
+fn argc-complete-path {|arg &is_dir=$false|
+    edit:complete-filename $arg | each {|c|
+        var x = $c[stem]
+        if (or (not $is_dir) (path:is-dir $x)) {
+            put $c
+        }
+    }
+}
+
+fn argc-completer {|@words|
+    var word1 = $words[0]
     var scriptfile = (try {
-        if (eq $arg[0] 'argc')  {
+        if (eq $word1 'argc')  {
             argc --argc-script-path
         } else {
-            which $arg[0]
+            which $word1
         }
     }  catch e {
         echo ''
     })
-    fn _filedir {|arg &is_dir=$false|
-        edit:complete-filename $arg | each {|c|
-            var x = $c[stem]
-            if (and $is_dir (not (path:is-dir $x))) {
-            } else {
-                put $x
-            }
-        }
-    }
     if (not (path:is-regular $scriptfile)) {
-        _filedir $arg[-1]
+        argc-complete-path $words[-1]
         return
     }
-    var line = (all $arg[1..] | str:join ' ')
-    var line = (if (eq $line '') { echo ' ' } else { echo $line })
+    var line = (all $words[1..] | str:join ' ')
+    if (eq $line '') {
+        set line = ' '
+    }
     var candicates = [(argc --argc-compgen elvish $scriptfile $line)]
     if (eq (count $candicates) (num 1)) {
         if (eq $candicates[0] '__argc_comp:file') {
-            _filedir $arg[-1]
+            argc-complete-path $words[-1]
             return
         } elif (eq $candicates[0] '__argc_comp:dir') {
-            _filedir &is_dir=$true $arg[-1]
+            argc-complete-path &is_dir=$true $words[-1]
             return
         }
     }

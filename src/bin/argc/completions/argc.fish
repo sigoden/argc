@@ -1,18 +1,17 @@
-function _argc_complete
-    set -l tokens (commandline -c | string trim -l | string split " " --)
-    set -l cmd "$tokens[1]"
+function _argc_completer
+    set -l words (commandline -c | string trim -l | string split " " --)
+    set -l word1 $words[1]
     set -l scriptfile
-    if [ "$cmd" = "argc" ] 
+    if [ "$word1" = "argc" ] 
         set scriptfile (argc --argc-script-path 2>/dev/null)
     else
-        set scriptfile (which "$cmd")
+        set scriptfile (which "$word1")
     end
     if not test -f "$scriptfile"
         return
     end
-    set -l line "$tokens[2..]"
-    set -l IFS '\n'
-    set -l candicates (argc --argc-compgen fish "$scriptfile" "$line" 2>/dev/null)
+    set -l line "$words[2..]"
+    set -l candicates (argc --argc-compgen fish $scriptfile $line 2>/dev/null)
     if test (count $candicates) -eq 1
         if [ "$candicates[1]" = "__argc_comp:file" ]
             set candicates
