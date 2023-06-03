@@ -1,26 +1,26 @@
 using namespace System.Management.Automation
 
-$_argc_complete = {
+$_argc_completer = {
     param($wordToComplete, $commandAst, $cursorPosition)
-    $cmd = $commandAst.CommandElements[0].ToString()
-    if ($cmd -eq "argc") {
+    $words = @($commandAst.CommandElements | Where { $_.Extent.StartOffset -lt $cursorPosition } | ForEach-Object { $_.ToString() })
+    if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
+        $words += ''
+    }
+    $word1 = $words[0]
+    $scriptfile = ""
+    if ($word1 -eq "argc") {
         $scriptfile = (argc --argc-script-path 2>$null)
     } else {
-        $scriptfile = (Get-Command $cmd  -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)
+        $scriptfile = (Get-Command $word1 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)
     }
-    if (!$scriptfile) {
-        $scriptfile = $cmd
-        if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
-            return
-        }
+    if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
+        return
     }
-    $tail = if ($wordToComplete.ToString() -eq "") { " " } else { "" }
-    if ($commandAst.CommandElements.Count -gt 1) {
-        $line = ($commandAst.CommandElements[1..($commandAst.CommandElements.Count - 1)] -join " ") + $tail
-    } else {
-        $line = $tail
+    $line = $words[1..($words.Count-1)] -join " "
+    if ($line -eq "") {
+        $line = " "
     }
-    $candicates = (argc --argc-compgen powershell "$scriptfile" "$line" 2>$null).Split("`n")
+    $candicates = @((argc --argc-compgen powershell $scriptfile $line 2>$null).Split("`n"))
     if ($candicates.Count -eq 1) {
         if (($candicates[0] -eq "__argc_comp:file") -or ($candicates[0] -eq "__argc_comp:dir")) {
             return

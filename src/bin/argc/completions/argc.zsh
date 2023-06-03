@@ -1,16 +1,16 @@
-_argc_complete()
+_argc_completer()
 {
-    local cmd=$words[1]
+    local word1="$words[1]"
     local scriptfile
-    if [[ "$cmd" == "argc" ]]; then
+    if [[ "$word1" == "argc" ]]; then
        scriptfile=$(argc --argc-script-path 2>/dev/null)
     else
-       scriptfile=$(which "$cmd")
+       scriptfile=$(which "$word1")
     fi
     if [[ ! -f "$scriptfile" ]]; then
         return
     fi
-    local line="${words[2,-1]}"
+    local line="${words[2,$CURRENT]}"
     local IFS=$'\n'
     local candicates=( $(argc --argc-compgen zsh "$scriptfile" "$line" 2>/dev/null) )
     if [[ ${#candicates[@]} -eq 1 ]]; then
