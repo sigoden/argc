@@ -25,8 +25,17 @@ pub fn compgen(
     }
     let cmd = Command::new(script_content)?;
     let matcher = Matcher::new(&cmd, &args);
+    let has_prefix =
+        !matcher.has_dashdash() && last_word.starts_with('-') && last_word.ends_with('=');
+    let filter = if has_prefix { "" } else { &last_word };
     let candicates = matcher.compgen();
-    let candicates = expand_candicates(candicates, script_path, &line, &last_word)?;
+    let mut candicates = expand_candicates(candicates, script_path, &line, filter)?;
+    if has_prefix {
+        candicates = candicates
+            .into_iter()
+            .map(|(k, v)| (format!("{last_word}{k}"), v))
+            .collect();
+    }
     shell.convert(&candicates, &last_word)
 }
 
