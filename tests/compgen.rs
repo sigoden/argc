@@ -211,3 +211,12 @@ cmdb() { :; }
 "###;
     snapshot_compgen!(script, vec!["cmda ", "cmdb "]);
 }
+
+#[test]
+fn one_combine_shorts() {
+    let script = r###"
+# @flag -a
+# @flag -b
+"###;
+    snapshot_compgen!(script, vec![" -a"]);
+}
