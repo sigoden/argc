@@ -20,7 +20,7 @@ pub fn compgen(
     };
     let mut args = split_shell_words(&line)?;
     args.insert(0, bin_name.to_string());
-    if line.trim_end() != line {
+    if last_word.is_empty() {
         args.push("".into());
     }
     let cmd = Command::new(script_content)?;
@@ -36,7 +36,7 @@ pub fn compgen(
             .map(|(k, v)| (format!("{last_word}{k}"), v))
             .collect();
     }
-    shell.convert(&candicates, &last_word)
+    shell.convert(&candicates)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -73,16 +73,16 @@ impl Shell {
         "bash,zsh,powershell,fish,elvish,nushell"
     }
 
-    pub fn convert(&self, candicates: &[(String, String)], last_word: &str) -> Result<String> {
+    pub fn convert(&self, candicates: &[(String, String)]) -> Result<String> {
         if candicates.len() == 1 {
-            return Ok(self.convert_value(&candicates[0].0, last_word));
+            return Ok(self.convert_value(&candicates[0].0));
         }
         let with_description = self.with_description();
         let mut max_width = 0;
         let values: Vec<String> = candicates
             .iter()
             .map(|(v, _)| {
-                let value = self.convert_value(v, last_word);
+                let value = self.convert_value(v);
                 max_width = max_width.max(value.len());
                 value
             })
@@ -114,7 +114,7 @@ impl Shell {
         Ok(output)
     }
 
-    pub fn convert_value(&self, value: &str, last_word: &str) -> String {
+    pub fn convert_value(&self, value: &str) -> String {
         if value.starts_with("__argc_") {
             if value.starts_with("__argc_value") {
                 return convert_arg_value(value);
@@ -123,29 +123,10 @@ impl Shell {
             }
         }
         match self {
-            Shell::Bash => {
-                if let Some((prefix, _)) =
-                    last_word.rsplit_once(|c| self.word_breaks().contains(&c))
-                {
-                    if let Some(value) = value.strip_prefix(&last_word[0..prefix.len() + 1]) {
-                        return value.to_string();
-                    }
-                }
-                bash_escape(value)
-            }
+            Shell::Bash => bash_escape(value),
             Shell::Zsh => zsh_escape(value),
             Shell::Powershell => format!("{} ", powershell_escape(value)),
             _ => value.to_string(),
-        }
-    }
-
-    pub fn word_breaks(&self) -> Vec<char> {
-        match self {
-            Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
-                Ok(v) => v.chars().collect(),
-                Err(_) => vec!['=', ':', '|'],
-            },
-            _ => vec![],
         }
     }
 
