@@ -146,5 +146,5 @@ USAGE:
 fn get_argc_version() -> String {
     let name = env!("CARGO_CRATE_NAME");
     let version = env!("CARGO_PKG_VERSION");
-    format!("{name} {version}\n")
+    format!("{name} {version}")
 }

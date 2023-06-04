@@ -548,7 +548,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             MatchError::DisplayVersion => {
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
                 let output = cmd.render_version(&cmd_paths);
-                format!("{output}\n")
+                format!("{output}")
             }
             MatchError::InvalidSubcommand => {
                 exit = 1;
