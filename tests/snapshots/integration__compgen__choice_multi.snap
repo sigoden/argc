@@ -12,23 +12,4 @@ ghi
 --oa=def
 --oa=ghi
 
-************ COMPGEN `prog  --ob ` ************
-x
-y
-z
-
-************ COMPGEN `prog  ` ************
---oa
---ob
-x
-y
-z
-
-************ COMPGEN `prog  v1 ` ************
---oa
---ob
-abc
-def
-ghi
-
 

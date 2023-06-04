@@ -281,6 +281,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
         }
     }
 
+    pub fn has_dashdash(&self) -> bool {
+        !self.dashdash.is_empty()
+    }
+
     fn to_arg_values_base(&self) -> Vec<ArgcValue> {
         let mut output = vec![];
         let cmds_len = self.cmds.len();

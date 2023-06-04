@@ -161,7 +161,19 @@ _choice_fn() {
 }
 "###;
 
-    snapshot_compgen!(script, vec![" --oa ", " --ob ", " ", " v1 ",]);
+    snapshot_compgen!(script, vec![" --oa ", " --oa=", " --ob ", " ", " v1 ",]);
+}
+
+#[test]
+fn choice_multi() {
+    let script = r###"
+# @option --oa*[`_choice_fn`]
+_choice_fn() {
+	echo -e "abc\ndef\nghi"
+}
+"###;
+
+    snapshot_compgen!(script, vec![" --oa ", " --oa="]);
 }
 
 #[test]
