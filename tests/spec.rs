@@ -159,3 +159,29 @@ fn option_multi_vals() {
 "###;
     snapshot!(script, &["prog", "-h"]);
 }
+
+#[test]
+fn option_to_variable() {
+    let script = r###"
+# @flag --flag-foo
+# @option --option-foo*
+# @option --option-bar
+# @arg arg-foo
+# @arg arg-bar*
+"###;
+    snapshot!(
+        script,
+        &[
+            "prog",
+            "--flag-foo",
+            "--option-foo",
+            "f1",
+            "f2",
+            "--option-bar",
+            "foo",
+            "v1",
+            "x1",
+            "x2"
+        ]
+    );
+}

@@ -44,7 +44,7 @@ impl ArgcValue {
                     variables.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
-                        name,
+                        hyphens_to_underscores(&name),
                         values
                             .iter()
                             .map(|v| escape_shell_words(v))
