@@ -1,4 +1,5 @@
 _argc_completer() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
     local word1="${COMP_WORDS[0]}"
     local scriptfile
     if [[ "$word1" == "argc" ]]; then
@@ -7,21 +8,22 @@ _argc_completer() {
        scriptfile=$(which "$word1")
     fi
     if [[ ! -f "$scriptfile" ]]; then
+        _argc_complete_path "$cur"
         return
     fi
     local line="${COMP_WORDS[@]:1:COMP_CWORD}"
-    cur="${COMP_WORDS[COMP_CWORD]}"
 
     local IFS=$'\n'
     export COMP_WORDBREAKS
     local candicates=($(argc --argc-compgen bash "$scriptfile" "$line" 2>/dev/null))
     if [[ ${#candicates[@]} -eq 1 ]]; then
         if [[ "${candicates[0]}" == "__argc_comp:file" ]]; then
-            candicates=()
             _argc_complete_path "$cur"
+            return
         elif [[ "${candicates[0]}" == "__argc_comp:dir" ]]; then
             candicates=()
             _argc_complete_path "$cur" dir
+            return
         fi
     fi
 
