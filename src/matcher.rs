@@ -221,17 +221,23 @@ impl<'a, 'b> Matcher<'a, 'b> {
     pub fn compgen(&self) -> Vec<(String, String)> {
         match &self.arg_comp {
             ArgComp::FlagOrOption => self.comp_flag_options(),
-            ArgComp::FlagOrOptionCombine(value) => self
-                .comp_flag_options()
-                .iter()
-                .filter_map(|(x, y)| {
-                    if x.len() == 2 {
-                        Some((format!("{value}{}", &x[1..]), y.to_string()))
-                    } else {
-                        None
-                    }
-                })
-                .collect(),
+            ArgComp::FlagOrOptionCombine(value) => {
+                let mut output: Vec<(String, String)> = self
+                    .comp_flag_options()
+                    .iter()
+                    .filter_map(|(x, y)| {
+                        if x.len() == 2 {
+                            Some((format!("{value}{}", &x[1..]), y.to_string()))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+                if output.len() == 1 {
+                    output.insert(0, (value.to_string(), String::new()));
+                }
+                output
+            }
             ArgComp::CommandOrPositional => {
                 let level = self.cmds.len() - 1;
                 let mut cmd = self.cmds[level].1;
