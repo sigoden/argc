@@ -11,7 +11,7 @@ _argc_completer() {
         _argc_complete_path "$cur"
         return
     fi
-    local line="${COMP_WORDS[@]:0:COMP_CWORD}"
+    local line="${COMP_WORDS[@]::$(($COMP_CWORD+1))}"
 
     local IFS=$'\n'
     export COMP_WORDBREAKS
