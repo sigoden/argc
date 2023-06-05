@@ -12,7 +12,7 @@ fn multiple() {
     snapshot_compgen!(
         script,
         vec![
-            "prog  ",
+            "prog ",
             "prog --",
             "prog -- ",
             "prog -f ",
@@ -25,7 +25,6 @@ fn multiple() {
             "prog -d d1",
             "prog -d d1 ",
             "prog -d d1 d2",
-            "prog -d d1 d2 ",
             "prog -d d1 d2 ",
             "prog v1",
             "prog v1 ",
@@ -111,7 +110,7 @@ cmd::subb() { :; }
             "prog cmd s",
             "prog cmd suba",
             "prog cmd suba ",
-            "prog cmd help  ",
+            "prog cmd help ",
             "prog cmd help s",
         ]
     );

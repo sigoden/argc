@@ -163,8 +163,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
     pub fn set_script_path(&mut self, script_path: &str) {
         self.script_path = Some(script_path.to_string());
         let fns: Vec<&str> = self.choices_fns.iter().copied().collect();
-        let line = self.args.to_vec().join(" ");
-        if let Some(list) = run_param_fns(script_path, &fns, &line) {
+        if let Some(list) = run_param_fns(script_path, &fns, self.args) {
             for (i, fn_output) in list.into_iter().enumerate() {
                 let choices: Vec<String> = fn_output
                     .split('\n')

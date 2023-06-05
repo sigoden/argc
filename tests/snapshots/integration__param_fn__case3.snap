@@ -6,23 +6,21 @@ expression: data
 prog _choice_fn
 
 OUTPUT
-argc__line=''
 argc__words=(  )
 argc__args=(  )
 argc__fn=_choice_fn
 _choice_fn;exit;
 
 ************ RUN ************
-prog _choice_fn prog  
+prog _choice_fn prog 
 
 OUTPUT
-argc_v1=' '
-argc__args=( ' ' )
-argc__line='prog  '
-argc__words=( prog ' ' )
-argc__args=( ' ' )
+argc_v1=''
+argc__args=( '' )
+argc__words=( prog '' )
+argc__args=( '' )
 argc__fn=_choice_fn
-_choice_fn ' ';exit;
+_choice_fn '';exit;
 
 ************ RUN ************
 prog _choice_fn prog v1
@@ -30,7 +28,6 @@ prog _choice_fn prog v1
 OUTPUT
 argc_v1=v1
 argc__args=( v1 )
-argc__line='prog v1'
 argc__words=( prog v1 )
 argc__args=( v1 )
 argc__fn=_choice_fn
@@ -41,13 +38,12 @@ prog _choice_fn prog v1
 
 OUTPUT
 argc_v1=v1
-argc_v2=' '
-argc__args=( v1 ' ' )
-argc__line='prog v1 '
-argc__words=( prog v1 ' ' )
-argc__args=( v1 ' ' )
+argc_v2=''
+argc__args=( v1 '' )
+argc__words=( prog v1 '' )
+argc__args=( v1 '' )
 argc__fn=_choice_fn
-_choice_fn v1 ' ';exit;
+_choice_fn v1 '';exit;
 
 ************ RUN ************
 prog _choice_fn prog v1 v2
@@ -56,7 +52,6 @@ OUTPUT
 argc_v1=v1
 argc_v2=v2
 argc__args=( v1 v2 )
-argc__line='prog v1 v2'
 argc__words=( prog v1 v2 )
 argc__args=( v1 v2 )
 argc__fn=_choice_fn
@@ -68,9 +63,8 @@ prog _choice_fn prog v1 v2
 OUTPUT
 argc_v1=v1
 argc_v2=v2
-argc__args=( v1 v2 ' ' )
-argc__line='prog v1 v2 '
-argc__words=( prog v1 v2 ' ' )
+argc__args=( v1 v2 '' )
+argc__words=( prog v1 v2 '' )
 argc__args=( v1 v2 )
 argc__fn=_choice_fn
 _choice_fn v1 v2;exit;

@@ -2,7 +2,7 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN `prog  ` ************
+************ COMPGEN `prog ` ************
 --fc
 -f
 --oa
@@ -60,13 +60,6 @@ __argc_comp:file
 
 ************ COMPGEN `prog -d d1 d2` ************
 __argc_comp:file
-
-************ COMPGEN `prog -d d1 d2 ` ************
---fc
--f
---oa
--o
-[FILE]...
 
 ************ COMPGEN `prog -d d1 d2 ` ************
 --fc

@@ -19,7 +19,7 @@ suba
 ************ COMPGEN `prog cmd suba ` ************
 __argc_comp:file
 
-************ COMPGEN `prog cmd help  ` ************
+************ COMPGEN `prog cmd help ` ************
 suba
 subb
 

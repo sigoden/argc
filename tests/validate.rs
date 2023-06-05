@@ -196,3 +196,19 @@ _choice_fn() {
         vec![vec!["prog", "--fa", "foo"], vec!["prog", "foo"],]
     );
 }
+
+#[test]
+fn choice_slash() {
+    let script = r###"
+# @cmd
+# @arg foo
+# @arg bar[`_choice_fn`]
+cmd() {
+    echo $1
+}
+_choice_fn() {
+    echo $1
+}
+"###;
+    snapshot_multi!(script, vec![vec!["prog", "cmd", "a\\b", "a\\b"],]);
+}

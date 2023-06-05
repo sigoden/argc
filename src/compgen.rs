@@ -30,7 +30,7 @@ pub fn compgen(
         !matcher.has_dashdash() && last_word.starts_with('-') && last_word.ends_with('=');
     let filter = if has_prefix { "" } else { &last_word };
     let candicates = matcher.compgen();
-    let mut candicates = expand_candicates(candicates, script_path, &line, filter)?;
+    let mut candicates = expand_candicates(candicates, script_path, &args, filter)?;
     if has_prefix {
         candicates = candicates
             .into_iter()
@@ -149,7 +149,7 @@ impl Shell {
 fn expand_candicates(
     values: Vec<(String, String)>,
     script_file: &str,
-    line: &str,
+    args: &[String],
     filter: &str,
 ) -> Result<Vec<(String, String)>> {
     let mut output = vec![];
@@ -163,7 +163,7 @@ fn expand_candicates(
     }
     if !param_fns.is_empty() {
         let fns: Vec<&str> = param_fns.iter().map(|v| v.as_str()).collect();
-        if let Some(param_fn_outputs) = run_param_fns(script_file, &fns, line) {
+        if let Some(param_fn_outputs) = run_param_fns(script_file, &fns, args) {
             for param_fn_output in param_fn_outputs {
                 for output_line in param_fn_output.split('\n') {
                     let output_line = output_line.trim();
