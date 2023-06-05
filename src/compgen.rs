@@ -77,7 +77,7 @@ impl Shell {
         if candicates.len() == 1 {
             return Ok(self.convert_value(&candicates[0].0));
         }
-        let with_description = self.with_description();
+        let need_description = self.compgen_description();
         let mut max_width = 0;
         let values: Vec<String> = candicates
             .iter()
@@ -93,7 +93,7 @@ impl Shell {
             .enumerate()
             .map(|(i, value)| {
                 let description = &candicates[i].1;
-                if !with_description || description.is_empty() {
+                if !need_description || description.is_empty() {
                     return value;
                 }
                 match self {
@@ -130,8 +130,8 @@ impl Shell {
         }
     }
 
-    pub fn with_description(&self) -> bool {
-        if let Ok(v) = std::env::var("ARGC_COMPLETION_DESCRIPTION") {
+    pub fn compgen_description(&self) -> bool {
+        if let Ok(v) = std::env::var("ARGC_COMPGEN_DESCRIPTION") {
             if v == "true" || v == "1" {
                 return true;
             } else if v == "false" || v == "0" {

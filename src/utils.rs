@@ -53,11 +53,6 @@ pub fn get_bash_path() -> Option<PathBuf> {
     if git_bash_path.exists() {
         return Some(git_bash_path);
     }
-    if let Ok(bash) = which("bash") {
-        if bash.display().to_string().to_lowercase() != "c:\\windows\\system32\\bash.exe" {
-            return Some(bash);
-        }
-    }
     let git = which("git").ok()?;
     Some(git.parent()?.parent()?.join("bin").join("bash.exe"))
 }
