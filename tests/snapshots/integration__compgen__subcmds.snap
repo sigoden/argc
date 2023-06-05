@@ -2,31 +2,31 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN `prog  ` ************
+************ COMPGEN `prog ` ************
 cmda
 cmdb
 [FILE]
 
-************ COMPGEN `prog  c` ************
+************ COMPGEN `prog c` ************
 cmda
 cmdb
 [FILE]
 
-************ COMPGEN `prog  cmda` ************
+************ COMPGEN `prog cmda` ************
 cmda
 
-************ COMPGEN `prog  cmda ` ************
+************ COMPGEN `prog cmda ` ************
 __argc_comp:file
 
-************ COMPGEN `prog  help ` ************
+************ COMPGEN `prog help ` ************
 cmda
 cmdb
 
-************ COMPGEN `prog  help c` ************
+************ COMPGEN `prog help c` ************
 cmda
 cmdb
 
-************ COMPGEN `prog  help cmda ` ************
+************ COMPGEN `prog help cmda ` ************
 
 
 

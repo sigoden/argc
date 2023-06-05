@@ -9,7 +9,6 @@ pub fn compgen(
     shell: Shell,
     script_path: &str,
     script_content: &str,
-    bin_name: &str,
     line: &str,
 ) -> Result<String> {
     let (last_word, unbalance_char) = get_last_word(line);
@@ -19,9 +18,11 @@ pub fn compgen(
         line.to_string()
     };
     let mut args = split_shell_words(&line)?;
-    args.insert(0, bin_name.to_string());
     if last_word.is_empty() {
         args.push("".into());
+    }
+    if args.len() == 1 {
+        return Ok(String::new());
     }
     let cmd = Command::new(script_content)?;
     let matcher = Matcher::new(&cmd, &args);

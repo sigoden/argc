@@ -2,7 +2,7 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN `prog  ` ************
+************ COMPGEN `prog ` ************
 cmda	cmd-line1
 cmdb	line
 
