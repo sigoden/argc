@@ -198,6 +198,19 @@ _choice_fn() {
 }
 
 #[test]
+fn choice_check_vars() {
+    let script = r###"
+# @arg foo[`_choice_fn`]
+# @arg bar[`_choice_fn`]
+_choice_fn() {
+    ( set -o posix ; set ) | grep argc_
+}
+"###;
+
+    snapshot_compgen!(script, vec!["prog argc", "prog argc ", "prog argc argc"]);
+}
+
+#[test]
 fn option_multi_vals() {
     let script = r###"
 # @option --oa* <DIR> <FILE>

@@ -69,8 +69,7 @@ impl Command {
             let mut arg_values = vec![];
             let (line, mut words) = match args.get(2) {
                 Some(line) => {
-                    let mut words = split_shell_words(line).ok().unwrap_or_default();
-                    words.insert(0, args[0].clone());
+                    let words: Vec<String> = split_shell_words(line).ok().unwrap_or_default();
                     (line.clone(), words)
                 }
                 None => (String::new(), vec![]),
