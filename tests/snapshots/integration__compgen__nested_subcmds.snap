@@ -2,28 +2,28 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN `prog  cmd` ************
+************ COMPGEN `prog cmd` ************
 cmd
 
-************ COMPGEN `prog  cmd ` ************
+************ COMPGEN `prog cmd ` ************
 suba
 subb
 
-************ COMPGEN `prog  cmd s` ************
+************ COMPGEN `prog cmd s` ************
 suba
 subb
 
-************ COMPGEN `prog  cmd suba` ************
+************ COMPGEN `prog cmd suba` ************
 suba
 
-************ COMPGEN `prog  cmd suba ` ************
+************ COMPGEN `prog cmd suba ` ************
 __argc_comp:file
 
-************ COMPGEN `prog  cmd help  ` ************
+************ COMPGEN `prog cmd help  ` ************
 suba
 subb
 
-************ COMPGEN `prog  cmd help s` ************
+************ COMPGEN `prog cmd help s` ************
 suba
 subb
 

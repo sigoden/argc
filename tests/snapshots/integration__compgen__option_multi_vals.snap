@@ -2,13 +2,13 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN `prog  --oa ` ************
+************ COMPGEN `prog --oa ` ************
 __argc_comp:dir
 
-************ COMPGEN `prog  --oa bash ` ************
+************ COMPGEN `prog --oa bash ` ************
 __argc_comp:file
 
-************ COMPGEN `prog  --oa bash cmd1 ` ************
+************ COMPGEN `prog --oa bash cmd1 ` ************
 __argc_comp:file
 
 

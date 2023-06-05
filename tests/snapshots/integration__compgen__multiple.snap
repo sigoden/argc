@@ -11,24 +11,15 @@ expression: data
 -d
 [FILE]...
 
-************ COMPGEN `prog  --` ************
+************ COMPGEN `prog --` ************
 --fc
 --oa
 --od
 
-************ COMPGEN `prog  -- ` ************
+************ COMPGEN `prog -- ` ************
 __argc_comp:file
 
-************ COMPGEN `prog  -f ` ************
---fc
--f
---oa
--o
---od
--d
-[FILE]...
-
-************ COMPGEN `prog  --fc ` ************
+************ COMPGEN `prog -f ` ************
 --fc
 -f
 --oa
@@ -37,48 +28,7 @@ __argc_comp:file
 -d
 [FILE]...
 
-************ COMPGEN `prog  -o ` ************
-__argc_comp:dir
-
-************ COMPGEN `prog  -o d1` ************
-__argc_comp:dir
-
-************ COMPGEN `prog  -o d1 ` ************
-__argc_comp:dir
-
-************ COMPGEN `prog  -o d1 d2` ************
-__argc_comp:dir
-
-************ COMPGEN `prog  -o d1 d2 ` ************
-__argc_comp:dir
-
-************ COMPGEN `prog  -d d1` ************
-__argc_comp:dir
-
-************ COMPGEN `prog  -d d1 ` ************
-__argc_comp:file
-
-************ COMPGEN `prog  -d d1 d2` ************
-__argc_comp:file
-
-************ COMPGEN `prog  -d d1 d2 ` ************
---fc
--f
---oa
--o
-[FILE]...
-
-************ COMPGEN `prog  -d d1 d2 ` ************
---fc
--f
---oa
--o
-[FILE]...
-
-************ COMPGEN `prog  v1` ************
-__argc_comp:file
-
-************ COMPGEN `prog  v1 ` ************
+************ COMPGEN `prog --fc ` ************
 --fc
 -f
 --oa
@@ -87,10 +37,60 @@ __argc_comp:file
 -d
 [FILE]...
 
-************ COMPGEN `prog  v1 v2` ************
+************ COMPGEN `prog -o ` ************
+__argc_comp:dir
+
+************ COMPGEN `prog -o d1` ************
+__argc_comp:dir
+
+************ COMPGEN `prog -o d1 ` ************
+__argc_comp:dir
+
+************ COMPGEN `prog -o d1 d2` ************
+__argc_comp:dir
+
+************ COMPGEN `prog -o d1 d2 ` ************
+__argc_comp:dir
+
+************ COMPGEN `prog -d d1` ************
+__argc_comp:dir
+
+************ COMPGEN `prog -d d1 ` ************
 __argc_comp:file
 
-************ COMPGEN `prog  v1 v2 ` ************
+************ COMPGEN `prog -d d1 d2` ************
+__argc_comp:file
+
+************ COMPGEN `prog -d d1 d2 ` ************
+--fc
+-f
+--oa
+-o
+[FILE]...
+
+************ COMPGEN `prog -d d1 d2 ` ************
+--fc
+-f
+--oa
+-o
+[FILE]...
+
+************ COMPGEN `prog v1` ************
+__argc_comp:file
+
+************ COMPGEN `prog v1 ` ************
+--fc
+-f
+--oa
+-o
+--od
+-d
+[FILE]...
+
+************ COMPGEN `prog v1 v2` ************
+__argc_comp:file
+
+************ COMPGEN `prog v1 v2 ` ************
 --fc
 -f
 --oa

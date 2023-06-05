@@ -98,18 +98,13 @@ macro_rules! snapshot_compgen {
         let (script_path, script_content, script_file) =
             $crate::fixtures::create_argc_script($source, "compgen.sh");
         for line in $matrix.iter() {
-            let words = match argc::compgen(
-                argc::Shell::Fish,
-                &script_path,
-                &script_content,
-                "test",
-                line,
-            ) {
+            let words = match argc::compgen(argc::Shell::Fish, &script_path, &script_content, line)
+            {
                 Ok(stdout) => stdout,
                 Err(stderr) => stderr.to_string(),
             };
             let piece = format!(
-                r###"************ COMPGEN `prog {}` ************
+                r###"************ COMPGEN `{}` ************
 {}
 
 "###,

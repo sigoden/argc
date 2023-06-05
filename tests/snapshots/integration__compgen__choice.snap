@@ -2,29 +2,29 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN `prog  --oa ` ************
+************ COMPGEN `prog --oa ` ************
 abc
 def
 ghi
 
-************ COMPGEN `prog  --oa=` ************
+************ COMPGEN `prog --oa=` ************
 --oa=abc
 --oa=def
 --oa=ghi
 
-************ COMPGEN `prog  --ob ` ************
+************ COMPGEN `prog --ob ` ************
 x
 y
 z
 
-************ COMPGEN `prog  ` ************
+************ COMPGEN `prog ` ************
 --oa
 --ob
 x
 y
 z
 
-************ COMPGEN `prog  v1 ` ************
+************ COMPGEN `prog v1 ` ************
 --oa
 --ob
 abc

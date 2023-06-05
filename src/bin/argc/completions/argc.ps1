@@ -16,10 +16,7 @@ $_argc_completer = {
     if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
         return
     }
-    $line = $words[1..($words.Count-1)] -join " "
-    if ($line -eq "") {
-        $line = " "
-    }
+    $line = $words[0..($words.Count-1)] -join " "
     $candicates = @((argc --argc-compgen powershell $scriptfile $line 2>$null).Split("`n"))
     if ($candicates.Count -eq 1) {
         if (($candicates[0] -eq "__argc_comp:file") -or ($candicates[0] -eq "__argc_comp:dir")) {

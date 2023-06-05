@@ -2,7 +2,7 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN `prog  ` ************
+************ COMPGEN `prog ` ************
 -a
 --fb
 -b
@@ -13,7 +13,7 @@ expression: data
 --oa
 -p
 
-************ COMPGEN `prog  -` ************
+************ COMPGEN `prog -` ************
 -a
 --fb
 -b
@@ -24,18 +24,18 @@ expression: data
 --oa
 -p
 
-************ COMPGEN `prog  --` ************
+************ COMPGEN `prog --` ************
 --fb
 --fc
 --oa
 
-************ COMPGEN `prog  -a` ************
+************ COMPGEN `prog -a` ************
 -ab
 -af
 -ae
 -ap
 
-************ COMPGEN `prog  -a ` ************
+************ COMPGEN `prog -a ` ************
 --fb
 -b
 --fc
@@ -45,13 +45,13 @@ expression: data
 --oa
 -p
 
-************ COMPGEN `prog  -af` ************
+************ COMPGEN `prog -af` ************
 -afb
 -aff
 -afe
 -afp
 
-************ COMPGEN `prog  -af ` ************
+************ COMPGEN `prog -af ` ************
 --fb
 -b
 --fc
@@ -61,25 +61,25 @@ expression: data
 --oa
 -p
 
-************ COMPGEN `prog  -ae` ************
+************ COMPGEN `prog -ae` ************
 
 
-************ COMPGEN `prog  -ae ` ************
+************ COMPGEN `prog -ae ` ************
 __argc_comp:file
 
-************ COMPGEN `prog  -abe` ************
+************ COMPGEN `prog -abe` ************
 
 
-************ COMPGEN `prog  -abe ` ************
+************ COMPGEN `prog -abe ` ************
 __argc_comp:file
 
-************ COMPGEN `prog  -s` ************
+************ COMPGEN `prog -s` ************
 -sa
 
-************ COMPGEN `prog  -sa` ************
+************ COMPGEN `prog -sa` ************
 
 
-************ COMPGEN `prog  -sa ` ************
+************ COMPGEN `prog -sa ` ************
 -a
 --fb
 -b

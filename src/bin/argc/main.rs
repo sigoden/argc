@@ -67,7 +67,7 @@ fn run() -> Result<i32> {
                 };
                 let (source, cmd_args) = parse_script_args(&args[3..])?;
                 let line = cmd_args.get(1).cloned().unwrap_or_default();
-                let output = argc::compgen(shell, &args[3], &source, &cmd_args[0], &line)?;
+                let output = argc::compgen(shell, &args[3], &source, &line)?;
                 println!("{output}");
             }
             "--argc-completions" => {
