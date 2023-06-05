@@ -19,10 +19,10 @@ fn argc-completer {|@words|
         } else {
             which $word1
         }
-    }  catch e {
+    } catch e {
         echo ''
     })
-    if (not (path:is-regular $scriptfile)) {
+    if (not (path:is-regular &follow-symlink=$true $scriptfile)) {
         argc-complete-path $words[-1]
         return
     }

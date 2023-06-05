@@ -52,23 +52,20 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
             format!(
                 r###"{NUSHELL_SCRIPT}
 
-let argc_scripts = {code}
+let _argc_scripts = {code}
 
 let external_completer = {{|spans| 
-    if (not ($argc_scripts | find $spans.0 | is-empty)) {{
+    if (not ($_argc_scripts | find $spans.0 | is-empty)) {{
         _argc_completer $spans
     }} else {{
         # default completer
     }}
 }}
 
-let-env config = {{
-  completions: {{
-    external: {{
-      enable: true
-      completer: $external_completer
-    }}
-  }}
+$env.config.completions.external = {{
+    enable: true
+    max_results: 100
+    completer: $external_completer
 }}
 "###,
             )
