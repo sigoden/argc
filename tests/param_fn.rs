@@ -6,8 +6,18 @@ fn case1() {
         SCRIPT_OPTIONS,
         vec![
             vec!["prog", "_choice_fn"],
-            vec!["prog", "_choice_fn", "prog cmda --cc "],
-            vec!["prog", "_choice_fn", "prog cmda -a --oa oa --cc "],
+            vec!["prog", "_choice_fn", "prog", "cmda", "--cc", ""],
+            vec![
+                "prog",
+                "_choice_fn",
+                "prog",
+                "cmda",
+                "-a",
+                "--oa",
+                "oa",
+                "--cc",
+                ""
+            ],
         ]
     );
 }
@@ -18,11 +28,11 @@ fn case2() {
         SCRIPT_ARGS,
         vec![
             vec!["prog", "_choice_fn"],
-            vec!["prog", "_choice_fn", "prog cmdl "],
-            vec!["prog", "_choice_fn", "prog cmdl v1"],
-            vec!["prog", "_choice_fn", "prog cmdl v1 "],
-            vec!["prog", "_choice_fn", "prog cmdl v1 v2"],
-            vec!["prog", "_choice_fn", "prog cmdl v1 v2 "],
+            vec!["prog", "_choice_fn", "prog", "cmdl", ""],
+            vec!["prog", "_choice_fn", "prog", "cmdl", "v1"],
+            vec!["prog", "_choice_fn", "prog", "cmdl", "v1", ""],
+            vec!["prog", "_choice_fn", "prog", "cmdl", "v1", "v2"],
+            vec!["prog", "_choice_fn", "prog", "cmdl", "v1", "v2", ""],
         ]
     );
 }
@@ -41,11 +51,11 @@ _choice_fn() {
         script,
         vec![
             vec!["prog", "_choice_fn"],
-            vec!["prog", "_choice_fn", "prog  "],
-            vec!["prog", "_choice_fn", "prog v1"],
-            vec!["prog", "_choice_fn", "prog v1 "],
-            vec!["prog", "_choice_fn", "prog v1 v2"],
-            vec!["prog", "_choice_fn", "prog v1 v2 "],
+            vec!["prog", "_choice_fn", "prog", ""],
+            vec!["prog", "_choice_fn", "prog", "v1"],
+            vec!["prog", "_choice_fn", "prog", "v1", ""],
+            vec!["prog", "_choice_fn", "prog", "v1", "v2"],
+            vec!["prog", "_choice_fn", "prog", "v1", "v2", ""],
         ]
     );
 }

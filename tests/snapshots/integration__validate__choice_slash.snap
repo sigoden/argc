@@ -1,0 +1,15 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog cmd a\b a\b
+
+OUTPUT
+argc_foo='a\b'
+argc_bar='a\b'
+argc__args=( 'a\b' 'a\b' )
+argc__fn=cmd
+cmd 'a\b' 'a\b'
+
+

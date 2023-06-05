@@ -6,7 +6,6 @@ expression: data
 prog _choice_fn
 
 OUTPUT
-argc__line=''
 argc__words=(  )
 argc__args=(  )
 argc__fn=_choice_fn
@@ -16,10 +15,9 @@ _choice_fn;exit;
 prog _choice_fn prog cmda --cc 
 
 OUTPUT
-argc_cc=' '
+argc_cc=''
 argc__args=(  )
-argc__line='prog cmda --cc '
-argc__words=( prog cmda --cc ' ' )
+argc__words=( prog cmda --cc '' )
 argc__args=(  )
 argc__fn=_choice_fn
 _choice_fn;exit;
@@ -30,10 +28,9 @@ prog _choice_fn prog cmda -a --oa oa --cc
 OUTPUT
 argc_a=1
 argc_oa=oa
-argc_cc=' '
+argc_cc=''
 argc__args=(  )
-argc__line='prog cmda -a --oa oa --cc '
-argc__words=( prog cmda -a --oa oa --cc ' ' )
+argc__words=( prog cmda -a --oa oa --cc '' )
 argc__args=(  )
 argc__fn=_choice_fn
 _choice_fn;exit;

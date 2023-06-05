@@ -62,14 +62,18 @@ pub fn get_bash_path() -> Option<PathBuf> {
     which("bash").ok()
 }
 
-pub fn run_param_fns(script_file: &str, param_fns: &[&str], line: &str) -> Option<Vec<String>> {
+pub fn run_param_fns(
+    script_file: &str,
+    param_fns: &[&str],
+    args: &[String],
+) -> Option<Vec<String>> {
     let shell = get_shell_path()?;
     let path_env = path_env_with_exe();
     let handles: Vec<_> = param_fns
         .iter()
         .map(|param_fn| {
             let script_file = script_file.to_string();
-            let line = line.to_string();
+            let args: Vec<String> = args.to_vec();
             let path_env = path_env.clone();
             let param_fn = param_fn.to_string();
             let shell = shell.clone();
@@ -77,7 +81,7 @@ pub fn run_param_fns(script_file: &str, param_fns: &[&str], line: &str) -> Optio
                 process::Command::new(shell)
                     .arg(&script_file)
                     .arg(&param_fn)
-                    .arg(line)
+                    .args(args)
                     .env("PATH", path_env)
                     .output()
                     .ok()

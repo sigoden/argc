@@ -6,7 +6,6 @@ expression: data
 prog _choice_fn
 
 OUTPUT
-argc__line=''
 argc__words=(  )
 argc__args=(  )
 argc__fn=_choice_fn
@@ -16,13 +15,12 @@ _choice_fn;exit;
 prog _choice_fn prog cmdl 
 
 OUTPUT
-argc_val=( ' ' )
-argc__args=( ' ' )
-argc__line='prog cmdl '
-argc__words=( prog cmdl ' ' )
-argc__args=( ' ' )
+argc_val=( '' )
+argc__args=( '' )
+argc__words=( prog cmdl '' )
+argc__args=( '' )
 argc__fn=_choice_fn
-_choice_fn ' ';exit;
+_choice_fn '';exit;
 
 ************ RUN ************
 prog _choice_fn prog cmdl v1
@@ -30,7 +28,6 @@ prog _choice_fn prog cmdl v1
 OUTPUT
 argc_val=( v1 )
 argc__args=( v1 )
-argc__line='prog cmdl v1'
 argc__words=( prog cmdl v1 )
 argc__args=( v1 )
 argc__fn=_choice_fn
@@ -40,13 +37,12 @@ _choice_fn v1;exit;
 prog _choice_fn prog cmdl v1 
 
 OUTPUT
-argc_val=( v1 ' ' )
-argc__args=( v1 ' ' )
-argc__line='prog cmdl v1 '
-argc__words=( prog cmdl v1 ' ' )
-argc__args=( v1 ' ' )
+argc_val=( v1 '' )
+argc__args=( v1 '' )
+argc__words=( prog cmdl v1 '' )
+argc__args=( v1 '' )
 argc__fn=_choice_fn
-_choice_fn v1 ' ';exit;
+_choice_fn v1 '';exit;
 
 ************ RUN ************
 prog _choice_fn prog cmdl v1 v2
@@ -54,7 +50,6 @@ prog _choice_fn prog cmdl v1 v2
 OUTPUT
 argc_val=( v1 v2 )
 argc__args=( v1 v2 )
-argc__line='prog cmdl v1 v2'
 argc__words=( prog cmdl v1 v2 )
 argc__args=( v1 v2 )
 argc__fn=_choice_fn
@@ -64,12 +59,11 @@ _choice_fn v1 v2;exit;
 prog _choice_fn prog cmdl v1 v2 
 
 OUTPUT
-argc_val=( v1 v2 ' ' )
-argc__args=( v1 v2 ' ' )
-argc__line='prog cmdl v1 v2 '
-argc__words=( prog cmdl v1 v2 ' ' )
-argc__args=( v1 v2 ' ' )
+argc_val=( v1 v2 '' )
+argc__args=( v1 v2 '' )
+argc__words=( prog cmdl v1 v2 '' )
+argc__args=( v1 v2 '' )
 argc__fn=_choice_fn
-_choice_fn v1 v2 ' ';exit;
+_choice_fn v1 v2 '';exit;
 
 

@@ -8,7 +8,6 @@ use crate::argc_value::ArgcValue;
 use crate::matcher::Matcher;
 use crate::param::{FlagOptionParam, PositionalParam};
 use crate::parser::{parse, Event, EventData, EventScope, Position};
-use crate::utils::split_shell_words;
 use crate::Result;
 
 use anyhow::{bail, Context};
@@ -67,22 +66,12 @@ impl Command {
         }
         if args.len() >= 2 && self.root.borrow().exist_param_fn(args[1].as_str()) {
             let mut arg_values = vec![];
-            let (line, mut words) = match args.get(2) {
-                Some(line) => {
-                    let words: Vec<String> = split_shell_words(line).ok().unwrap_or_default();
-                    (line.clone(), words)
-                }
-                None => (String::new(), vec![]),
-            };
-            if !words.is_empty() {
-                if line.trim_end() != line {
-                    words.push(" ".into());
-                }
-                let matcher = Matcher::new(self, &words);
+            let words = &args[2..];
+            if words.len() > 1 {
+                let matcher = Matcher::new(self, words);
                 arg_values.extend(matcher.to_arg_values_for_choice_fn());
             }
-            arg_values.push(ArgcValue::Single("_line".into(), line));
-            arg_values.push(ArgcValue::Multiple("_words".into(), words));
+            arg_values.push(ArgcValue::Multiple("_words".into(), words.to_vec()));
             arg_values.push(ArgcValue::ParamFn(args[1].clone()));
             return Ok(arg_values);
         }
