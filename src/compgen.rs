@@ -385,6 +385,8 @@ fn split_words(line: &str, shell: Shell) -> (Vec<String>, String, Vec<char>) {
 
     let last = if word.is_empty() {
         String::new()
+    } else if unbalances.len() == 1 {
+        chars_to_string(&word[1..])
     } else {
         chars_to_string(&word)
     };
@@ -444,6 +446,8 @@ mod tests {
         assert_split_words!(("", "bash"), ([""], "", []));
         assert_split_words!((" ", "bash"), ([""], "", []));
         assert_split_words!(("foo", "bash"), (["foo"], "foo", []));
+        assert_split_words!(("'foo", "bash"), (["foo"], "foo", ['\'']));
+        assert_split_words!(("\"foo", "bash"), (["foo"], "foo", ['\"']));
         assert_split_words!(("foo ", "bash"), (["foo", ""], "", []));
         assert_split_words!((" foo", "bash"), (["foo"], "foo", []));
         assert_split_words!(("foo\\bar", "bash"), (["foobar"], "foobar", []));
@@ -459,10 +463,14 @@ mod tests {
             ("'foo\\\\ bar'", "bash"),
             (["foo\\\\ bar"], "foo\\\\ bar", [])
         );
+        assert_split_words!(("\\'a b\\'", "bash"), (["'a", "b'"], "b'", []));
+        assert_split_words!(("\\\"a b\\\"", "bash"), (["\"a", "b\""], "b\"", []));
 
         assert_split_words!(("", "fish"), ([""], "", []));
         assert_split_words!((" ", "fish"), ([""], "", []));
         assert_split_words!(("foo", "fish"), (["foo"], "foo", []));
+        assert_split_words!(("'foo", "fish"), (["foo"], "foo", ['\'']));
+        assert_split_words!(("\"foo", "fish"), (["foo"], "foo", ['\"']));
         assert_split_words!(("foo ", "fish"), (["foo", ""], "", []));
         assert_split_words!((" foo", "fish"), (["foo"], "foo", []));
         assert_split_words!(("foo\\bar", "fish"), (["foo\\bar"], "foo\\bar", []));
