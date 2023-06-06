@@ -9,27 +9,27 @@ fn multiple() {
 # @arg var* <FILE>
 "###;
 
-    snapshot_compgen_lines!(
+    snapshot_compgen!(
         script,
         vec![
-            "prog ",
-            "prog --",
-            "prog -- ",
-            "prog -f ",
-            "prog --fc ",
-            "prog -o ",
-            "prog -o d1",
-            "prog -o d1 ",
-            "prog -o d1 d2",
-            "prog -o d1 d2 ",
-            "prog -d d1",
-            "prog -d d1 ",
-            "prog -d d1 d2",
-            "prog -d d1 d2 ",
-            "prog v1",
-            "prog v1 ",
-            "prog v1 v2",
-            "prog v1 v2 ",
+            vec!["prog", ""],
+            vec!["prog", "--"],
+            vec!["prog", "--", ""],
+            vec!["prog", "-f", ""],
+            vec!["prog", "--fc", ""],
+            vec!["prog", "-o", ""],
+            vec!["prog", "-o", "d1"],
+            vec!["prog", "-o", "d1", ""],
+            vec!["prog", "-o", "d1", "d2"],
+            vec!["prog", "-o", "d1", "d2", ""],
+            vec!["prog", "-d", "d1"],
+            vec!["prog", "-d", "d1", ""],
+            vec!["prog", "-d", "d1", "d2"],
+            vec!["prog", "-d", "d1", "d2", ""],
+            vec!["prog", "v1"],
+            vec!["prog", "v1", ""],
+            vec!["prog", "v1", "v2"],
+            vec!["prog", "v1", "v2", ""],
         ]
     );
 }
@@ -45,23 +45,23 @@ fn shorts() {
 # @option -p --oa*
 "###;
 
-    snapshot_compgen_lines!(
+    snapshot_compgen!(
         SCRIPT,
         vec![
-            "prog ",
-            "prog -",
-            "prog --",
-            "prog -a",
-            "prog -a ",
-            "prog -af",
-            "prog -af ",
-            "prog -ae",
-            "prog -ae ",
-            "prog -abe",
-            "prog -abe ",
-            "prog -s",
-            "prog -sa",
-            "prog -sa ",
+            vec!["prog", ""],
+            vec!["prog", "-"],
+            vec!["prog", "--"],
+            vec!["prog", "-a"],
+            vec!["prog", "-a", ""],
+            vec!["prog", "-af"],
+            vec!["prog", "-af", ""],
+            vec!["prog", "-ae"],
+            vec!["prog", "-ae", ""],
+            vec!["prog", "-abe"],
+            vec!["prog", "-abe", ""],
+            vec!["prog", "-s"],
+            vec!["prog", "-sa"],
+            vec!["prog", "-sa", ""],
         ]
     );
 }
@@ -76,16 +76,16 @@ cmda() { :; }
 cmdb() { :; }
 "###;
 
-    snapshot_compgen_lines!(
+    snapshot_compgen!(
         SCRIPT,
         vec![
-            "prog ",
-            "prog c",
-            "prog cmda",
-            "prog cmda ",
-            "prog help ",
-            "prog help c",
-            "prog help cmda ",
+            vec!["prog", ""],
+            vec!["prog", "c"],
+            vec!["prog", "cmda"],
+            vec!["prog", "cmda", ""],
+            vec!["prog", "help", ""],
+            vec!["prog", "help", "c"],
+            vec!["prog", "help", "cmda", ""],
         ]
     );
 }
@@ -102,16 +102,16 @@ cmd::suba() { :; }
 cmd::subb() { :; }
 "###;
 
-    snapshot_compgen_lines!(
+    snapshot_compgen!(
         SCRIPT,
         vec![
-            "prog cmd",
-            "prog cmd ",
-            "prog cmd s",
-            "prog cmd suba",
-            "prog cmd suba ",
-            "prog cmd help ",
-            "prog cmd help s",
+            vec!["prog", "cmd"],
+            vec!["prog", "cmd", ""],
+            vec!["prog", "cmd", "s"],
+            vec!["prog", "cmd", "suba"],
+            vec!["prog", "cmd", "suba", ""],
+            vec!["prog", "cmd", "help", ""],
+            vec!["prog", "cmd", "help", "s"],
         ]
     );
 }
@@ -136,26 +136,26 @@ cmdb() { :; }
 cmdc() { :; }
 "###;
 
-    snapshot_compgen_lines!(
+    snapshot_compgen!(
         script,
         vec![
-            "prog cmda ",
-            "prog cmda v1",
-            "prog cmda v1 ",
-            "prog cmda v1 v2",
-            "prog cmda v1 v2 ",
-            "prog cmdb ",
-            "prog cmdb v1",
-            "prog cmdb v1 ",
-            "prog cmdb v1 v2",
-            "prog cmdb v1 v2 ",
-            "prog cmdb v1 v2 v3",
-            "prog cmdb v1 v2 v3 ",
-            "prog cmdc ",
-            "prog cmdc v1",
-            "prog cmdc v1 ",
-            "prog cmdc v1 v2",
-            "prog cmdc v1 v2 ",
+            vec!["prog", "cmda", ""],
+            vec!["prog", "cmda", "v1"],
+            vec!["prog", "cmda", "v1", ""],
+            vec!["prog", "cmda", "v1", "v2"],
+            vec!["prog", "cmda", "v1", "v2", ""],
+            vec!["prog", "cmdb", ""],
+            vec!["prog", "cmdb", "v1"],
+            vec!["prog", "cmdb", "v1", ""],
+            vec!["prog", "cmdb", "v1", "v2"],
+            vec!["prog", "cmdb", "v1", "v2", ""],
+            vec!["prog", "cmdb", "v1", "v2", "v3"],
+            vec!["prog", "cmdb", "v1", "v2", "v3", ""],
+            vec!["prog", "cmdc", ""],
+            vec!["prog", "cmdc", "v1"],
+            vec!["prog", "cmdc", "v1", ""],
+            vec!["prog", "cmdc", "v1", "v2"],
+            vec!["prog", "cmdc", "v1", "v2", ""],
         ]
     );
 }
@@ -172,16 +172,20 @@ _choice_fn() {
 }
 "###;
 
-    snapshot_compgen_lines!(
+    snapshot_compgen!(
         script,
         vec![
-            "prog --oa ",
-            "prog --oa=",
-            "prog --oa=a",
-            "prog --oa =a",
-            "prog --ob ",
-            "prog ",
-            "prog v1 ",
+            vec!["prog", "--oa", ""],
+            vec!["prog", "--oa="],
+            vec!["prog", "--oa=a"],
+            vec!["prog", "--oa", "=a"],
+            vec!["prog", "--ob", ""],
+            vec!["prog", ""],
+            vec!["prog", "v1", ""],
+            vec!["prog", "'--oa="],
+            vec!["prog", "'--oa=a"],
+            vec!["prog", "\"--oa="],
+            vec!["prog", "\"--oa=a"],
         ]
     );
 }
@@ -195,7 +199,10 @@ _choice_fn() {
 }
 "###;
 
-    snapshot_compgen_lines!(script, vec!["prog --oa ", "prog --oa="]);
+    snapshot_compgen!(
+        script,
+        vec![vec!["prog", "--oa", ""], vec!["prog", "--oa="],]
+    );
 }
 
 #[test]
@@ -208,7 +215,30 @@ _choice_fn() {
 }
 "###;
 
-    snapshot_compgen_lines!(script, vec!["prog argc", "prog argc ", "prog argc argc"]);
+    snapshot_compgen!(
+        script,
+        vec![
+            vec!["prog", "argc"],
+            vec!["prog", "argc", ""],
+            vec!["prog", "argc", "argc"],
+        ]
+    );
+}
+
+#[test]
+fn choice_slash() {
+    let script = r###"
+# @cmd
+# @arg foo
+# @arg bar[`_choice_fn`]
+cmd() {
+    echo $1
+}
+_choice_fn() {
+    echo $1
+}
+"###;
+    snapshot_compgen!(script, vec![vec!["prog", "cmd", "a\\b", ""],]);
 }
 
 #[test]
@@ -216,9 +246,13 @@ fn option_multi_vals() {
     let script = r###"
 # @option --oa* <DIR> <FILE>
 "###;
-    snapshot_compgen_lines!(
+    snapshot_compgen!(
         script,
-        vec!["prog --oa ", "prog --oa bash ", "prog --oa bash cmd1 ",]
+        vec![
+            vec!["prog", "--oa", ""],
+            vec!["prog", "--oa", "bash", ""],
+            vec!["prog", "--oa", "bash", "cmd1", ""],
+        ]
     );
 }
 
@@ -236,7 +270,7 @@ cmda() { :; }
 # @cmd line
 cmdb() { :; }
 "###;
-    snapshot_compgen_lines!(script, vec!["prog ", "prog cmda ",]);
+    snapshot_compgen!(script, vec![vec!["prog", ""], vec!["prog", "cmda", ""],]);
 }
 
 #[test]
@@ -245,7 +279,7 @@ fn no_param() {
 # @cmd
 cmd() { :; }
 "###;
-    snapshot_compgen_lines!(script, vec!["prog cmd ",]);
+    snapshot_compgen!(script, vec![vec!["prog", "cmd", ""],]);
 }
 
 #[test]
@@ -259,7 +293,10 @@ cmda() { :; }
 # @arg any
 cmdb() { :; }
 "###;
-    snapshot_compgen_lines!(script, vec!["prog cmda ", "prog cmdb "]);
+    snapshot_compgen!(
+        script,
+        vec![vec!["prog", "cmda", ""], vec!["prog", "cmdb", ""],]
+    );
 }
 
 #[test]
@@ -268,7 +305,7 @@ fn one_combine_shorts() {
 # @flag -a
 # @flag -b
 "###;
-    snapshot_compgen_lines!(script, vec!["prog -a"]);
+    snapshot_compgen!(script, vec![vec!["prog", "-a"],]);
 }
 
 #[test]
@@ -280,5 +317,12 @@ cmda() { :; }
 # @cmd
 cmdb() { :; }
 "###;
-    snapshot_compgen_lines!(script, vec!["prog ", "prog cmdx ", "prog cmdx cmd"]);
+    snapshot_compgen!(
+        script,
+        vec![
+            vec!["prog", ""],
+            vec!["prog", "cmdx", ""],
+            vec!["prog", "cmdx", "cmd"]
+        ]
+    );
 }

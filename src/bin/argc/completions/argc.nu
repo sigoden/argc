@@ -35,8 +35,7 @@ def _argc_completer [words: list<string>] {
     if not ($scriptfile | path exists) {
         return (_argc_complete_path ($words | last) false | _argc_complete_list)
     }
-    let line = ($words | str join " ")
-    mut candicates = ((do { argc --argc-compgen fish $scriptfile $line } | complete | get stdout) | str trim | split row "\n")
+    mut candicates = ((do { argc --argc-compgen fish $scriptfile $words } | complete | get stdout) | str trim | split row "\n")
     if ($candicates | length) == 1  {
         if $candicates.0 == '__argc_comp:file' {
             $candicates = (_argc_complete_path ($words | last) false)

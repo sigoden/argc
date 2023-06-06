@@ -63,11 +63,10 @@ fn run() -> Result<i32> {
             "--argc-compgen" => {
                 let shell: Shell = match args.get(2) {
                     Some(v) => v.parse()?,
-                    None => bail!("Usage: argc --argc-compgen <SHELL> <SCRIPT> <LINE>"),
+                    None => bail!("Usage: argc --argc-compgen <SHELL> <SCRIPT> <ARGS...>"),
                 };
                 let (source, cmd_args) = parse_script_args(&args[3..])?;
-                let line = cmd_args.get(1).cloned().unwrap_or_default();
-                let output = argc::compgen(shell, &args[3], &source, &line)?;
+                let output = argc::compgen(shell, &args[3], &source, &cmd_args[1..])?;
                 if !output.is_empty() {
                     println!("{output}");
                 }
@@ -133,14 +132,14 @@ fn get_argc_help() -> String {
 {about}
 
 USAGE:
-    argc --argc-eval <SCRIPT> [ARGS...]           Use `eval "$(argc --argc-eval "$0" "$@")"`
-    argc --argc-create [TASKS...]                 Create a boilerplate argcfile
-    argc --argc-completions <SHELL> [CMDS...]     Generate completion scripts for bash,zsh,powershell,fish,elvish,nushell
-    argc --argc-compgen <SHELL> <SCRIPT> <LINE>   Generate dynamic completion word
-    argc --argc-export <SCRIPT>                   Export command line definitions as json
-    argc --argc-script-path                       Print current argcfile path
-    argc --argc-help                              Print help information
-    argc --argc-version                           Print version information
+    argc --argc-eval <SCRIPT> [ARGS...]             Use `eval "$(argc --argc-eval "$0" "$@")"`
+    argc --argc-create [TASKS...]                   Create a boilerplate argcfile
+    argc --argc-completions <SHELL> [CMDS...]       Generate completion scripts for bash,zsh,powershell,fish,elvish,nushell
+    argc --argc-compgen <SHELL> <SCRIPT> <ARGS...>  Generate dynamic completion word
+    argc --argc-export <SCRIPT>                     Export command line definitions as json
+    argc --argc-script-path                         Print current argcfile path
+    argc --argc-help                                Print help information
+    argc --argc-version                             Print version information
 "###
     )
 }

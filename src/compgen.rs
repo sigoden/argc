@@ -11,17 +11,27 @@ pub fn compgen(
     shell: Shell,
     script_path: &str,
     script_content: &str,
-    line: &str,
+    args: &[String],
 ) -> Result<String> {
-    let (args, last, unbalances) = split_words(line, shell);
     if args.len() < 2 {
         return Ok(String::new());
     }
+    let (last, _) = unbalance_quote(&args[args.len() - 1]);
     let cmd = Command::new(script_content)?;
+    let args: Vec<String> = args
+        .iter()
+        .enumerate()
+        .map(|(i, v)| {
+            if i == args.len() - 1 {
+                last.to_string()
+            } else {
+                v.to_string()
+            }
+        })
+        .collect();
     let matcher = Matcher::new(&cmd, &args);
     let candicates = matcher.compgen();
-    let mapped_candicates =
-        mapping_candicates(&candicates, script_path, &args, shell, &last, &unbalances)?;
+    let mapped_candicates = mapping_candicates(&candicates, script_path, &args, shell, last)?;
     shell.convert(&mapped_candicates)
 }
 
@@ -227,7 +237,6 @@ fn mapping_candicates(
     args: &[String],
     shell: Shell,
     last: &str,
-    unbalances: &[char],
 ) -> Result<Vec<(String, String)>> {
     let mut output: Vec<(String, String)> = vec![];
     let mut param_fns = vec![];
@@ -237,9 +246,6 @@ fn mapping_candicates(
     }
     let breaks = &shell.word_breaks();
     let mapper = |value: &str| -> Option<String> {
-        if unbalances.len() > 1 {
-            return None;
-        }
         if let Some((prefix, matches)) = assign_option {
             if let Some(breaked_value) = split_with_breaks(value, matches, breaks) {
                 if breaked_value != value || breaks.contains(&'=') {
@@ -304,96 +310,11 @@ fn mapping_candicates(
     Ok(output)
 }
 
-fn split_words(line: &str, shell: Shell) -> (Vec<String>, String, Vec<char>) {
-    let mut words: Vec<String> = vec![];
-    let mut word = vec![];
-    let mut unbalances = vec![];
-    let chars: Vec<char> = line.trim_start().chars().collect();
-    let chars_to_string = |word: &[char]| -> String {
-        let len = word.len();
-        if word.len() > 1 {
-            let first = word[0];
-            if is_quotation(first) {
-                let last = word[len - 1];
-                let middle = &word[1..len - 1];
-                if first == last && middle.iter().all(|c| *c != first) {
-                    return middle.iter().collect();
-                }
-            }
-        }
-        word.iter().collect()
-    };
-    let mut i = 0;
-    while i < chars.len() {
-        let c = chars[i];
-        if c.is_ascii_whitespace() {
-            if unbalances.is_empty() {
-                if !word.is_empty() {
-                    words.push(chars_to_string(&word));
-                    word.clear();
-                }
-            } else {
-                word.push(c);
-            }
-        } else if c == '\\' {
-            match (
-                shell,
-                unbalances.first().cloned(),
-                chars.get(i + 1).cloned(),
-            ) {
-                (Shell::Bash | Shell::Zsh, None, Some(n)) => {
-                    i += 1;
-                    word.push(n)
-                }
-                (Shell::Bash | Shell::Zsh, Some('"'), Some(n)) => {
-                    if n == '\\' {
-                        i += 1;
-                        word.push(n);
-                        if let Some(' ') = chars.get(i + 2) {
-                            i += 1;
-                            word.push(' ');
-                        }
-                    } else {
-                        word.push(c);
-                    }
-                }
-                (Shell::Bash | Shell::Zsh, Some('\''), n) => {
-                    word.push(c);
-                    if let Some(' ') = n {
-                        i += 1;
-                        word.push(' ');
-                    }
-                }
-                (_, _, Some('\\')) => {
-                    i += 1;
-                    word.push(c)
-                }
-                _ => word.push(c),
-            }
-        } else if is_quotation(c) {
-            if unbalances.last() == Some(&c) {
-                unbalances.pop();
-            } else {
-                unbalances.push(c);
-            }
-            word.push(c);
-        } else {
-            word.push(c);
-        }
-        i += 1
+fn unbalance_quote(arg: &str) -> (&str, Option<char>) {
+    if arg.starts_with(is_quote) && arg.chars().skip(1).all(|v| !is_quote(v)) {
+        return (&arg[1..], arg.chars().next());
     }
-
-    let last = if word.is_empty() {
-        String::new()
-    } else if unbalances.len() == 1 {
-        chars_to_string(&word[1..])
-    } else {
-        chars_to_string(&word)
-    };
-
-    words.push(last.clone());
-
-    (words, last, unbalances)
+    (arg, None)
 }
 
 fn split_equal_sign(word: &str) -> Option<(&str, &str)> {
@@ -421,71 +342,13 @@ fn split_with_breaks<'a>(value: &'a str, matches: &str, breaks: &[char]) -> Opti
     Some(value)
 }
 
-fn is_quotation(c: char) -> bool {
+fn is_quote(c: char) -> bool {
     c == '\'' || c == '"'
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    macro_rules! assert_split_words {
-        (($input:literal, $shell:literal), ($args:expr, $last:literal, $unbalances:expr)) => {
-            let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-            let shell: Shell = $shell.parse().unwrap();
-            let unbalances: Vec<char> = $unbalances.iter().cloned().collect();
-            assert_eq!(
-                split_words($input, shell),
-                (args, $last.to_string(), unbalances)
-            );
-        };
-    }
-
-    #[test]
-    fn test_split_words() {
-        assert_split_words!(("", "bash"), ([""], "", []));
-        assert_split_words!((" ", "bash"), ([""], "", []));
-        assert_split_words!(("foo", "bash"), (["foo"], "foo", []));
-        assert_split_words!(("'foo", "bash"), (["foo"], "foo", ['\'']));
-        assert_split_words!(("\"foo", "bash"), (["foo"], "foo", ['\"']));
-        assert_split_words!(("foo ", "bash"), (["foo", ""], "", []));
-        assert_split_words!((" foo", "bash"), (["foo"], "foo", []));
-        assert_split_words!(("foo\\bar", "bash"), (["foobar"], "foobar", []));
-        assert_split_words!(("'foo'", "bash"), (["foo"], "foo", []));
-        assert_split_words!(("'foo\\bar'", "bash"), (["foo\\bar"], "foo\\bar", []));
-        assert_split_words!(("'foo\\\\bar'", "bash"), (["foo\\\\bar"], "foo\\\\bar", []));
-        assert_split_words!(("\"foo\"", "bash"), (["foo"], "foo", []));
-        assert_split_words!(("\"foo\\bar\"", "bash"), (["foo\\bar"], "foo\\bar", []));
-        assert_split_words!(("\"foo\\\\bar\"", "bash"), (["foo\\bar"], "foo\\bar", []));
-        assert_split_words!(("\"foo\\ bar\"", "bash"), (["foo\\ bar"], "foo\\ bar", []));
-        assert_split_words!(("'foo\\ bar'", "bash"), (["foo\\ bar"], "foo\\ bar", []));
-        assert_split_words!(
-            ("'foo\\\\ bar'", "bash"),
-            (["foo\\\\ bar"], "foo\\\\ bar", [])
-        );
-        assert_split_words!(("\\'a b\\'", "bash"), (["'a", "b'"], "b'", []));
-        assert_split_words!(("\\\"a b\\\"", "bash"), (["\"a", "b\""], "b\"", []));
-
-        assert_split_words!(("", "fish"), ([""], "", []));
-        assert_split_words!((" ", "fish"), ([""], "", []));
-        assert_split_words!(("foo", "fish"), (["foo"], "foo", []));
-        assert_split_words!(("'foo", "fish"), (["foo"], "foo", ['\'']));
-        assert_split_words!(("\"foo", "fish"), (["foo"], "foo", ['\"']));
-        assert_split_words!(("foo ", "fish"), (["foo", ""], "", []));
-        assert_split_words!((" foo", "fish"), (["foo"], "foo", []));
-        assert_split_words!(("foo\\bar", "fish"), (["foo\\bar"], "foo\\bar", []));
-        assert_split_words!(("'foo'", "fish"), (["foo"], "foo", []));
-        assert_split_words!(("'foo\\bar'", "fish"), (["foo\\bar"], "foo\\bar", []));
-        assert_split_words!(("'foo\\\\bar'", "fish"), (["foo\\bar"], "foo\\bar", []));
-        assert_split_words!(("\"foo\\bar\"", "fish"), (["foo\\bar"], "foo\\bar", []));
-        assert_split_words!(("\"foo\\\\bar\"", "fish"), (["foo\\bar"], "foo\\bar", []));
-        assert_split_words!(("\"foo\\ bar\"", "bash"), (["foo\\ bar"], "foo\\ bar", []));
-        assert_split_words!(("'foo\\ bar'", "bash"), (["foo\\ bar"], "foo\\ bar", []));
-        assert_split_words!(
-            ("'foo\\\\ bar'", "bash"),
-            (["foo\\\\ bar"], "foo\\\\ bar", [])
-        );
-    }
 
     #[test]
     fn test_split_equal_sign() {

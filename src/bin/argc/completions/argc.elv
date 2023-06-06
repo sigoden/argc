@@ -26,8 +26,7 @@ fn argc-completer {|@words|
         argc-complete-path $words[-1]
         return
     }
-    var line = (all $words | str:join ' ')
-    var candicates = [(try { argc --argc-compgen elvish $scriptfile $line } catch e { echo '' })]
+    var candicates = [(try { argc --argc-compgen elvish $scriptfile (all $words) } catch e { echo '' })]
     if (eq (count $candicates) (num 1)) {
         if (eq $candicates[0] '__argc_comp:file') {
             argc-complete-path $words[-1]

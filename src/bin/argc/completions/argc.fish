@@ -11,12 +11,11 @@ function _argc_completer
         __fish_complete_path
         return
     end
-    set line "$words"
     set -l cur (commandline -t)
     if [ $cur = "" ]
-        set line "$line "
+        set -a words ''
     end
-    set -l candicates (argc --argc-compgen fish $scriptfile $line 2>/dev/null)
+    set -l candicates (argc --argc-compgen fish $scriptfile $words 2>/dev/null)
     if test (count $candicates) -eq 1
         if [ "$candicates[1]" = "__argc_comp:file" ]
             __fish_complete_path

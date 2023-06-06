@@ -11,9 +11,11 @@ _argc_completer()
         _path_files
         return
     fi
-    local line="${words[1,$CURRENT]}"
+    if [[ "$words[$CURRENT]" == "" ]]; then
+        words+=( $'\0' )
+    fi
     local IFS=$'\n'
-    local candicates=($(argc --argc-compgen zsh "$scriptfile" "$line" 2>/dev/null))
+    local candicates=($(argc --argc-compgen zsh "$scriptfile" $words 2>/dev/null))
     if [[ ${#candicates[@]} -eq 1 ]]; then
         if [[ "$candicates[1]" == "__argc_comp:file" ]]; then
             _path_files
