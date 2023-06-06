@@ -1,6 +1,5 @@
 use crate::command::Command;
 use crate::matcher::Matcher;
-use crate::utils::escape_shell_words;
 use crate::utils::run_param_fns;
 use crate::Result;
 
@@ -180,24 +179,25 @@ impl Shell {
                 .map(|v| {
                     if matches!(
                         v,
-                        ' ' | '!'
-                            | '"'
-                            | '$'
-                            | '&'
-                            | '\''
-                            | '<'
+                        '&' | '<'
                             | '>'
                             | '`'
-                            | '|'
+                            | '\''
+                            | '"'
                             | '{'
                             | '}'
+                            | '$'
+                            | '#'
+                            | '|'
+                            | '?'
+                            | '('
+                            | ')'
+                            | ';'
+                            | ' '
                             | '['
                             | ']'
-                            | '^'
-                            | '~'
-                            | '#'
                             | '*'
-                            | '?'
+                            | '\\'
                     ) {
                         format!("\\{v}")
                     } else {
@@ -208,14 +208,49 @@ impl Shell {
             Shell::Zsh => value
                 .chars()
                 .map(|v| {
-                    if v == ':' {
+                    if matches!(
+                        v,
+                        '\\' | '&'
+                            | '<'
+                            | '>'
+                            | '`'
+                            | '\''
+                            | '"'
+                            | '{'
+                            | '}'
+                            | '$'
+                            | '#'
+                            | '|'
+                            | '?'
+                            | '('
+                            | ')'
+                            | ';'
+                            | ' '
+                            | '['
+                            | ']'
+                            | '*'
+                            | '~'
+                    ) {
                         format!("\\{v}")
                     } else {
                         v.to_string()
                     }
                 })
                 .collect::<String>(),
-            Shell::Powershell => escape_shell_words(value),
+            Shell::Powershell => {
+                let value_chars: Vec<char> = value.chars().collect();
+                if [
+                    ' ', '{', '}', '(', ')', '[', ']', '*', '$', '?', '"', '|', '<', '>', '&', '(',
+                    ')', ',', ';', '#', '`', '@',
+                ]
+                .iter()
+                .any(|v| value_chars.contains(v))
+                {
+                    format!("'{value}'")
+                } else {
+                    value.into()
+                }
+            }
             _ => value.into(),
         }
     }
