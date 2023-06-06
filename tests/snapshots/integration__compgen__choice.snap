@@ -12,6 +12,12 @@ ghi
 --oa=def
 --oa=ghi
 
+************ COMPGEN `prog --oa=a` ************
+--oa=abc
+
+************ COMPGEN `prog --oa =a` ************
+
+
 ************ COMPGEN `prog --ob ` ************
 x
 y
@@ -30,5 +36,21 @@ z
 abc
 def
 ghi
+
+************ COMPGEN `prog '--oa=` ************
+--oa=abc
+--oa=def
+--oa=ghi
+
+************ COMPGEN `prog '--oa=a` ************
+--oa=abc
+
+************ COMPGEN `prog "--oa=` ************
+--oa=abc
+--oa=def
+--oa=ghi
+
+************ COMPGEN `prog "--oa=a` ************
+--oa=abc
 
 

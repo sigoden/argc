@@ -12,12 +12,12 @@ fn argc-complete-path {|arg &is_dir=$false|
 }
 
 fn argc-completer {|@words|
-    var word1 = $words[0]
+    var cmd = $words[0]
     var scriptfile = (try {
-        if (eq $word1 'argc')  {
+        if (eq $cmd 'argc')  {
             argc --argc-script-path
         } else {
-            which $word1
+            which $cmd
         }
     } catch e {
         echo ''
@@ -26,8 +26,7 @@ fn argc-completer {|@words|
         argc-complete-path $words[-1]
         return
     }
-    var line = (all $words | str:join ' ')
-    var candicates = [(argc --argc-compgen elvish $scriptfile $line)]
+    var candicates = [(try { argc --argc-compgen elvish $scriptfile (all $words) } catch e { echo '' })]
     if (eq (count $candicates) (num 1)) {
         if (eq $candicates[0] '__argc_comp:file') {
             argc-complete-path $words[-1]

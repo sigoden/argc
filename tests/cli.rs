@@ -35,7 +35,7 @@ fn compgen() {
         .arg("--argc-compgen")
         .arg("bash")
         .arg(path)
-        .arg("args cmdj ")
+        .args(["args", "cmdj", ""])
         .env("PATH", path_env_var)
         .assert()
         .stdout(predicates::str::contains("abc\ndef\nghi"))
