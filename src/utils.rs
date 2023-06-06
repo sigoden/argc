@@ -63,6 +63,15 @@ pub fn run_param_fns(
     args: &[String],
 ) -> Option<Vec<String>> {
     let shell = get_shell_path()?;
+    let shell_extra_args = if shell
+        .file_stem()
+        .map(|v| v.to_string_lossy().to_lowercase().contains("bash"))
+        .unwrap_or_default()
+    {
+        vec!["--noprofile".to_string(), "--norc".to_string()]
+    } else {
+        vec![]
+    };
     let path_env = path_env_with_exe();
     let handles: Vec<_> = param_fns
         .iter()
@@ -72,8 +81,10 @@ pub fn run_param_fns(
             let path_env = path_env.clone();
             let param_fn = param_fn.to_string();
             let shell = shell.clone();
+            let shell_extra_args = shell_extra_args.clone();
             thread::spawn(move || {
                 process::Command::new(shell)
+                    .args(shell_extra_args)
                     .arg(&script_file)
                     .arg(&param_fn)
                     .args(args)
