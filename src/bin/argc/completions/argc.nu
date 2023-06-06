@@ -24,19 +24,19 @@ def _argc_complete_list [] {
 }
 
 def _argc_completer [words: list<string>] {
-    let word1 = $words.0
+    let cmd = $words.0
     let scriptfile = (try { 
-        if $word1 == 'argc' {
+        if $cmd == 'argc' {
             do { argc --argc-script-path } | complete | get stdout 
         } else {
-            which $word1 | get 0.path
+            which $cmd | get 0.path
         }
     })
     if not ($scriptfile | path exists) {
         return (_argc_complete_path ($words | last) false | _argc_complete_list)
     }
     let line = ($words | str join " ")
-    mut candicates = ((argc --argc-compgen fish $scriptfile $line) | str trim | split row "\n")
+    mut candicates = ((do { argc --argc-compgen fish $scriptfile $line } | complete | get stdout) | str trim | split row "\n")
     if ($candicates | length) == 1  {
         if $candicates.0 == '__argc_comp:file' {
             $candicates = (_argc_complete_path ($words | last) false)

@@ -1,4 +1,3 @@
-use anyhow::{anyhow, Context, Result};
 use convert_case::{Boundary, Converter, Pattern};
 use std::{
     env,
@@ -22,10 +21,6 @@ pub fn hyphens_to_underscores(name: &str) -> String {
 
 pub fn escape_shell_words(value: &str) -> String {
     shell_words::quote(value).to_string()
-}
-
-pub fn split_shell_words(s: &str) -> Result<Vec<String>> {
-    shell_words::split(s).with_context(|| anyhow!("Failed to split shell words"))
 }
 
 pub fn is_choice_value_terminate(c: char) -> bool {

@@ -9,7 +9,7 @@ fn multiple() {
 # @arg var* <FILE>
 "###;
 
-    snapshot_compgen!(
+    snapshot_compgen_lines!(
         script,
         vec![
             "prog ",
@@ -45,7 +45,7 @@ fn shorts() {
 # @option -p --oa*
 "###;
 
-    snapshot_compgen!(
+    snapshot_compgen_lines!(
         SCRIPT,
         vec![
             "prog ",
@@ -76,7 +76,7 @@ cmda() { :; }
 cmdb() { :; }
 "###;
 
-    snapshot_compgen!(
+    snapshot_compgen_lines!(
         SCRIPT,
         vec![
             "prog ",
@@ -102,7 +102,7 @@ cmd::suba() { :; }
 cmd::subb() { :; }
 "###;
 
-    snapshot_compgen!(
+    snapshot_compgen_lines!(
         SCRIPT,
         vec![
             "prog cmd",
@@ -136,7 +136,7 @@ cmdb() { :; }
 cmdc() { :; }
 "###;
 
-    snapshot_compgen!(
+    snapshot_compgen_lines!(
         script,
         vec![
             "prog cmda ",
@@ -172,11 +172,13 @@ _choice_fn() {
 }
 "###;
 
-    snapshot_compgen!(
+    snapshot_compgen_lines!(
         script,
         vec![
             "prog --oa ",
             "prog --oa=",
+            "prog --oa=a",
+            "prog --oa =a",
             "prog --ob ",
             "prog ",
             "prog v1 ",
@@ -193,7 +195,7 @@ _choice_fn() {
 }
 "###;
 
-    snapshot_compgen!(script, vec!["prog --oa ", "prog --oa="]);
+    snapshot_compgen_lines!(script, vec!["prog --oa ", "prog --oa="]);
 }
 
 #[test]
@@ -206,7 +208,7 @@ _choice_fn() {
 }
 "###;
 
-    snapshot_compgen!(script, vec!["prog argc", "prog argc ", "prog argc argc"]);
+    snapshot_compgen_lines!(script, vec!["prog argc", "prog argc ", "prog argc argc"]);
 }
 
 #[test]
@@ -214,7 +216,7 @@ fn option_multi_vals() {
     let script = r###"
 # @option --oa* <DIR> <FILE>
 "###;
-    snapshot_compgen!(
+    snapshot_compgen_lines!(
         script,
         vec!["prog --oa ", "prog --oa bash ", "prog --oa bash cmd1 ",]
     );
@@ -234,7 +236,7 @@ cmda() { :; }
 # @cmd line
 cmdb() { :; }
 "###;
-    snapshot_compgen!(script, vec!["prog ", "prog cmda ",]);
+    snapshot_compgen_lines!(script, vec!["prog ", "prog cmda ",]);
 }
 
 #[test]
@@ -243,7 +245,7 @@ fn no_param() {
 # @cmd
 cmd() { :; }
 "###;
-    snapshot_compgen!(script, vec!["prog cmd ",]);
+    snapshot_compgen_lines!(script, vec!["prog cmd ",]);
 }
 
 #[test]
@@ -257,7 +259,7 @@ cmda() { :; }
 # @arg any
 cmdb() { :; }
 "###;
-    snapshot_compgen!(script, vec!["prog cmda ", "prog cmdb "]);
+    snapshot_compgen_lines!(script, vec!["prog cmda ", "prog cmdb "]);
 }
 
 #[test]
@@ -266,5 +268,17 @@ fn one_combine_shorts() {
 # @flag -a
 # @flag -b
 "###;
-    snapshot_compgen!(script, vec!["prog -a"]);
+    snapshot_compgen_lines!(script, vec!["prog -a"]);
+}
+
+#[test]
+fn no_comp_subcmds() {
+    let script = r###"
+# @cmd
+cmda() { :; }
+
+# @cmd
+cmdb() { :; }
+"###;
+    snapshot_compgen_lines!(script, vec!["prog ", "prog cmdx ", "prog cmdx cmd"]);
 }

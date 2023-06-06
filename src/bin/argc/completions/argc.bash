@@ -1,17 +1,17 @@
 _argc_completer() {
     local cur="${COMP_WORDS[COMP_CWORD]}"
-    local word1="${COMP_WORDS[0]}"
+    local cmd="${COMP_WORDS[0]}"
     local scriptfile
-    if [[ "$word1" == "argc" ]]; then
+    if [[ "$cmd" == "argc" ]]; then
        scriptfile=$(argc --argc-script-path 2>/dev/null)
     else
-       scriptfile=$(which "$word1")
+       scriptfile=$(which "$cmd")
     fi
     if [[ ! -f "$scriptfile" ]]; then
         _argc_complete_path "$cur"
         return
     fi
-    local line="${COMP_WORDS[@]::$(($COMP_CWORD+1))}"
+    local line="${COMP_LINE:0:${COMP_POINT}}"
 
     local IFS=$'\n'
     export COMP_WORDBREAKS

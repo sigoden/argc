@@ -89,7 +89,7 @@ OUTPUT
 }
 
 #[macro_export]
-macro_rules! snapshot_compgen {
+macro_rules! snapshot_compgen_lines {
     (
 		$source:expr,
         $matrix:expr

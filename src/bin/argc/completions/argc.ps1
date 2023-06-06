@@ -6,12 +6,12 @@ $_argc_completer = {
     if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
         $words += ''
     }
-    $word1 = $words[0]
+    $cmd = $words[0]
     $scriptfile = ""
-    if ($word1 -eq "argc") {
+    if ($cmd -eq "argc") {
         $scriptfile = (argc --argc-script-path 2>$null)
     } else {
-        $scriptfile = (Get-Command $word1 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)
+        $scriptfile = (Get-Command $cmd -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)
     }
     if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
         return

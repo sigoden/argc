@@ -244,7 +244,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     cmd = self.cmds[level - 1].1;
                 }
                 let values = self.match_positionals();
-                comp_subcommands_positional(cmd, &values)
+                comp_subcommands_positional(cmd, &values, self.positional_args.len() < 2)
             }
             ArgComp::OptionValue(name, index) => {
                 let cmd = self.cmds[self.cmds.len() - 1].1;
@@ -265,17 +265,17 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     self.comp_flag_options()
                 };
                 let values = self.match_positionals();
-                output.extend(comp_subcommands_positional(cmd, &values));
+                output.extend(comp_subcommands_positional(
+                    cmd,
+                    &values,
+                    self.positional_args.len() < 2,
+                ));
                 if output.is_empty() {
                     output.push(("__argc_value:file".into(), String::new()))
                 }
                 output
             }
         }
-    }
-
-    pub fn has_dashdash(&self) -> bool {
-        !self.dashdash.is_empty()
     }
 
     fn to_arg_values_base(&self) -> Vec<ArgcValue> {
@@ -738,9 +738,13 @@ fn match_flag_option<'a, 'b>(
     output.push((arg, value_args, Some(param.name.as_str())));
 }
 
-fn comp_subcommands_positional(cmd: &Command, values: &[Vec<&str>]) -> Vec<(String, String)> {
+fn comp_subcommands_positional(
+    cmd: &Command,
+    values: &[Vec<&str>],
+    subcmd: bool,
+) -> Vec<(String, String)> {
     let mut output = vec![];
-    if values.len() < 2 {
+    if subcmd {
         output.extend(comp_subcomands(cmd))
     }
     if values.is_empty() || values.len() > cmd.positional_params.len() {
