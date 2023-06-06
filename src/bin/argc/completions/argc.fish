@@ -1,5 +1,6 @@
 function _argc_completer
-    set -l cmd (commandline -o)[1]
+    set -l words (commandline -o)
+    set -l cmd $words[1]
     set -l scriptfile
     if [ "$cmd" = "argc" ] 
         set scriptfile (argc --argc-script-path 2>/dev/null)
@@ -10,7 +11,11 @@ function _argc_completer
         __fish_complete_path
         return
     end
-    set -l line (commandline -c)
+    set line "$words"
+    set -l cur (commandline -t)
+    if [ $cur = "" ]
+        set line "$line "
+    end
     set -l candicates (argc --argc-compgen fish $scriptfile $line 2>/dev/null)
     if test (count $candicates) -eq 1
         if [ "$candicates[1]" = "__argc_comp:file" ]
