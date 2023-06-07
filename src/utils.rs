@@ -1,5 +1,6 @@
 use convert_case::{Boundary, Converter, Pattern};
 use std::{
+    collections::HashMap,
     env,
     path::{Path, PathBuf},
     process, thread,
@@ -32,7 +33,7 @@ pub fn is_default_value_terminate(c: char) -> bool {
 }
 
 pub fn get_shell_path() -> Option<PathBuf> {
-    let shell = match env::var("ARGC_SHELL") {
+    let shell = match env::var("ARGC_SHELL_PATH") {
         Ok(v) => Path::new(&v).to_path_buf(),
         Err(_) => get_bash_path()?,
     };
@@ -61,6 +62,7 @@ pub fn run_param_fns(
     script_file: &str,
     param_fns: &[&str],
     args: &[String],
+    envs: HashMap<String, String>,
 ) -> Option<Vec<String>> {
     let shell = get_shell_path()?;
     let shell_extra_args = if shell
@@ -82,12 +84,14 @@ pub fn run_param_fns(
             let param_fn = param_fn.to_string();
             let shell = shell.clone();
             let shell_extra_args = shell_extra_args.clone();
+            let envs = envs.clone();
             thread::spawn(move || {
                 process::Command::new(shell)
                     .args(shell_extra_args)
                     .arg(&script_file)
                     .arg(&param_fn)
                     .args(args)
+                    .envs(envs)
                     .env("PATH", path_env)
                     .output()
                     .ok()

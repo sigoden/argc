@@ -4,6 +4,7 @@ use crate::utils::run_param_fns;
 use crate::Result;
 
 use anyhow::bail;
+use std::collections::HashMap;
 use std::str::FromStr;
 
 pub fn compgen(
@@ -30,8 +31,16 @@ pub fn compgen(
         .collect();
     let matcher = Matcher::new(&cmd, &args);
     let candicates = matcher.compgen();
-    let mapped_candicates = mapping_candicates(&candicates, script_path, &args, shell, last)?;
-    shell.convert(&mapped_candicates)
+    let with_description = shell.with_description();
+    let mapped_candicates = mapping_candicates(
+        &candicates,
+        script_path,
+        &args,
+        shell,
+        last,
+        with_description,
+    )?;
+    shell.convert(&mapped_candicates, with_description)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -94,11 +103,14 @@ impl Shell {
         }
     }
 
-    pub fn convert(&self, candicates: &[(String, String)]) -> Result<String> {
+    pub fn convert(
+        &self,
+        candicates: &[(String, String)],
+        with_description: bool,
+    ) -> Result<String> {
         if candicates.len() == 1 {
             return Ok(self.convert_value(&candicates[0].0));
         }
-        let need_description = self.compgen_description();
         let mut max_width = 0;
         let values: Vec<String> = candicates
             .iter()
@@ -114,7 +126,7 @@ impl Shell {
             .enumerate()
             .map(|(i, value)| {
                 let description = &candicates[i].1;
-                if !need_description || description.is_empty() {
+                if !with_description || description.is_empty() {
                     return value;
                 }
                 match self {
@@ -158,7 +170,7 @@ impl Shell {
         }
     }
 
-    pub fn compgen_description(&self) -> bool {
+    pub fn with_description(&self) -> bool {
         if let Ok(v) = std::env::var("ARGC_COMPGEN_DESCRIPTION") {
             if v == "true" || v == "1" {
                 return true;
@@ -272,6 +284,7 @@ fn mapping_candicates(
     args: &[String],
     shell: Shell,
     last: &str,
+    with_description: bool,
 ) -> Result<Vec<(String, String)>> {
     let mut output: Vec<(String, String)> = vec![];
     let mut param_fns = vec![];
@@ -305,8 +318,10 @@ fn mapping_candicates(
         }
     }
     if !param_fns.is_empty() {
+        let mut envs = HashMap::new();
+        envs.insert("ARGC_DESCRIBE".into(), with_description.to_string());
         let fns: Vec<&str> = param_fns.iter().map(|v| v.as_str()).collect();
-        if let Some(param_fn_outputs) = run_param_fns(script_file, &fns, args) {
+        if let Some(param_fn_outputs) = run_param_fns(script_file, &fns, args, envs) {
             for param_fn_output in param_fn_outputs {
                 for line in param_fn_output.split('\n') {
                     let line = line.trim();
