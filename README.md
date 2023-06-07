@@ -262,6 +262,9 @@ eval (argc --argc-completions elvish mycmd1 mycmd2 | slurp)
 
 # nushell (~/.config/nushell/config.nu)
 argc --argc-completions nushell mycmd1 mycmd2 # update config.nu manually according to output
+
+# xonsh (~/.config/xonsh/rc.xsh)
+exec($(argc --argc-completions fish mycmd1 mycmd2))
 ```
 
 **Replace `mycmd1 mycmd2` with your argc scripts**.

@@ -51,6 +51,7 @@ pub enum Shell {
     Fish,
     Elvish,
     Nushell,
+    Xonsh,
 }
 
 impl FromStr for Shell {
@@ -64,6 +65,7 @@ impl FromStr for Shell {
             "fish" => Ok(Self::Fish),
             "elvish" => Ok(Self::Elvish),
             "nushell" => Ok(Self::Nushell),
+            "xonsh" => Ok(Self::Xonsh),
             _ => bail!(
                 "The provided shell is either invalid or missing, must be one of {}",
                 Shell::list_names(),
@@ -73,7 +75,7 @@ impl FromStr for Shell {
 }
 
 impl Shell {
-    pub fn list() -> [Shell; 6] {
+    pub fn list() -> [Shell; 7] {
         [
             Shell::Bash,
             Shell::Zsh,
@@ -81,6 +83,7 @@ impl Shell {
             Shell::Fish,
             Shell::Elvish,
             Shell::Nushell,
+            Shell::Xonsh,
         ]
     }
 
@@ -100,6 +103,7 @@ impl Shell {
             Shell::Fish => "fish",
             Shell::Elvish => "elvish",
             Shell::Nushell => "nushell",
+            Shell::Xonsh => "xonsh",
         }
     }
 
@@ -186,78 +190,19 @@ impl Shell {
 
     pub fn escape(&self, value: &str) -> String {
         match self {
-            Shell::Bash => value
-                .chars()
-                .map(|v| {
-                    if matches!(
-                        v,
-                        '&' | '<'
-                            | '>'
-                            | '`'
-                            | '\''
-                            | '"'
-                            | '{'
-                            | '}'
-                            | '$'
-                            | '#'
-                            | '|'
-                            | '?'
-                            | '('
-                            | ')'
-                            | ';'
-                            | ' '
-                            | '['
-                            | ']'
-                            | '*'
-                            | '\\'
-                    ) {
-                        format!("\\{v}")
-                    } else {
-                        v.to_string()
-                    }
-                })
-                .collect::<String>(),
-            Shell::Zsh => value
-                .chars()
-                .map(|v| {
-                    if matches!(
-                        v,
-                        '\\' | '&'
-                            | '<'
-                            | '>'
-                            | '`'
-                            | '\''
-                            | '"'
-                            | '{'
-                            | '}'
-                            | '$'
-                            | '#'
-                            | '|'
-                            | '?'
-                            | '('
-                            | ')'
-                            | ';'
-                            | ' '
-                            | '['
-                            | ']'
-                            | '*'
-                            | '~'
-                    ) {
-                        format!("\\{v}")
-                    } else {
-                        v.to_string()
-                    }
-                })
-                .collect::<String>(),
+            Shell::Bash => escape_chars(value, r#"&<>`'"{}$#|?(); []*\"#),
+            Shell::Zsh => escape_chars(value, r#"\&<>`'"{}$#|?(); []*~"#),
             Shell::Powershell => {
-                let value_chars: Vec<char> = value.chars().collect();
-                if [
-                    ' ', '{', '}', '(', ')', '[', ']', '*', '$', '?', '"', '|', '<', '>', '&', '(',
-                    ')', ',', ';', '#', '`', '@',
-                ]
-                .iter()
-                .any(|v| value_chars.contains(v))
-                {
+                if contains_chars(value, r#" ()[]{}*$?\"|<>&;#`"#) {
+                    let value = escape_chars(value, "'");
+                    format!("'{value}'")
+                } else {
+                    value.into()
+                }
+            }
+            Shell::Xonsh => {
+                if contains_chars(value, r#" {}()[]*$?\"|<>&(),;#`@"#) {
+                    let value = escape_chars(value, "'");
                     format!("'{value}'")
                 } else {
                     value.into()
@@ -390,6 +335,25 @@ fn split_with_breaks<'a>(value: &'a str, matches: &str, breaks: &[char]) -> Opti
         return Some(&value[idx + 1..]);
     }
     Some(value)
+}
+
+fn escape_chars(value: &str, chars: &str) -> String {
+    let chars: Vec<char> = chars.chars().collect();
+    value
+        .chars()
+        .map(|c| {
+            if chars.contains(&c) {
+                format!("\\{c}")
+            } else {
+                c.to_string()
+            }
+        })
+        .collect()
+}
+
+fn contains_chars(value: &str, chars: &str) -> bool {
+    let value_chars: Vec<char> = value.chars().collect();
+    chars.chars().any(|v| value_chars.contains(&v))
 }
 
 fn is_quote(c: char) -> bool {
