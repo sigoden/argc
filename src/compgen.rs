@@ -274,6 +274,9 @@ fn mapping_candicates(
     if !param_fns.is_empty() {
         let mut envs = HashMap::new();
         envs.insert("ARGC_DESCRIBE".into(), with_description.to_string());
+        if let Ok(cwd) = std::env::current_dir() {
+            envs.insert("ARGC_PWD".into(), cwd.to_string_lossy().to_string());
+        }
         let fns: Vec<&str> = param_fns.iter().map(|v| v.as_str()).collect();
         if let Some(param_fn_outputs) = run_param_fns(script_file, &fns, args, envs) {
             for param_fn_output in param_fn_outputs {
