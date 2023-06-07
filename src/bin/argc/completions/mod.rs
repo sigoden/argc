@@ -14,6 +14,8 @@ const ELVISH_SCRIPT: &str = include_str!("argc.elv");
 
 const NUSHELL_SCRIPT: &str = include_str!("argc.nu");
 
+const XONSH_SCRIPT: &str = include_str!("argc.xsh");
+
 pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
     let mut cmds = vec!["argc"];
     cmds.extend(args.iter().map(|v| v.as_str()));
@@ -69,6 +71,10 @@ $env.config.completions.external = {{
 }}
 "###,
             )
+        }
+        Shell::Xonsh => {
+            let code = format!("ARGC_SCRIPTS={cmds:?}");
+            format!("{XONSH_SCRIPT}\n{code}\n",)
         }
     };
     Ok(output)
