@@ -128,17 +128,13 @@ fn run() -> Result<i32> {
 }
 
 fn get_argc_help() -> String {
-    let name = env!("CARGO_CRATE_NAME");
-    let version = env!("CARGO_PKG_VERSION");
     let about = concat!(
         env!("CARGO_PKG_DESCRIPTION"),
         " - ",
         env!("CARGO_PKG_REPOSITORY")
     );
     format!(
-        r###"
-{name} {version}
-{about}
+        r###"{about}
 
 USAGE:
     argc --argc-eval <SCRIPT> [ARGS...]             Use `eval "$(argc --argc-eval "$0" "$@")"`
