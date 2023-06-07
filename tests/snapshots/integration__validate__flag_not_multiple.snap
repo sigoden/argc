@@ -7,7 +7,7 @@ prog cmda -a -a
 
 OUTPUT
 cat >&2 <<-'EOF' 
-error: the argument '-a' cannot be used multiple times
+error: the argument `-a` cannot be used multiple times
 
 USAGE: prog cmda [OPTIONS]
 

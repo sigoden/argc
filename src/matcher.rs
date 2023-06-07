@@ -522,6 +522,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
     fn stringify_match_error(&self, err: &MatchError) -> (String, i32) {
         let mut exit = 0;
+        let footer = "For more information, try '--help'.";
         let message = match err {
             MatchError::DisplayHelp => {
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
@@ -544,12 +545,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 let usage = cmd.render_usage(&cmd_paths);
                 let names = cmd.list_subcommand_names().join(", ");
                 format!(
-                    r###"error: '{cmd_str}' requires a subcommand but one was not provided
+                    r###"error: `{cmd_str}` requires a subcommand but one was not provided
   [subcommands: {names}]
 
 {usage}
 
-For more information, try '--help'.
+{footer}
 "###
                 )
             }
@@ -558,11 +559,11 @@ For more information, try '--help'.
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
                 let usage = cmd.render_usage(&cmd_paths);
                 format!(
-                    r###"error: unexpected argument '{name}' found
+                    r###"error: unexpected argument `{name}` found
 
 {usage}
 
-For more information, try '--help'.
+{footer}
 "###
                 )
             }
@@ -581,7 +582,7 @@ For more information, try '--help'.
 
 {usage}
 
-For more information, try '--help'.
+{footer}
 "###
                 )
             }
@@ -590,11 +591,11 @@ For more information, try '--help'.
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
                 let usage = cmd.render_usage(&cmd_paths);
                 format!(
-                    r###"error: the argument '{name}' cannot be used multiple times
+                    r###"error: the argument `{name}` cannot be used multiple times
 
 {usage}
 
-For more information, try '--help'.
+{footer}
 "###
                 )
             }
@@ -602,10 +603,10 @@ For more information, try '--help'.
                 exit = 1;
                 let list = choices.join(", ");
                 format!(
-                    r###"error: invalid value '{value}' for '{name}'
+                    r###"error: invalid value `{value}` for `{name}`
   [possible values: {list}]
 
-For more information, try '--help'.
+{footer}
 "###
                 )
             }
@@ -614,11 +615,11 @@ For more information, try '--help'.
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
                 let usage = cmd.render_usage(&cmd_paths);
                 format!(
-                    r###"error: invalid values for '{value}'
+                    r###"error: invalid values for `{value}`
 
 {usage}
 
-For more information, try '--help'.
+{footer}
 "###
                 )
             }
@@ -627,11 +628,11 @@ For more information, try '--help'.
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
                 let usage = cmd.render_usage(&cmd_paths);
                 format!(
-                    r###"error: unexpected value '{value}' for '{name}' found; no more were expected 
+                    r###"error: unexpected value `{value}` for `{name}` found; no more were expected 
 
 {usage}
 
-For more information, try '--help'.
+{footer}
 "###
                 )
             }

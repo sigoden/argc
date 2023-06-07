@@ -7,7 +7,7 @@ prog cmda -a=3
 
 OUTPUT
 cat >&2 <<-'EOF' 
-error: unexpected value '3' for '-a' found; no more were expected 
+error: unexpected value `3` for `-a` found; no more were expected 
 
 USAGE: prog cmda [OPTIONS]
 
