@@ -191,7 +191,7 @@ impl Shell {
     pub fn escape(&self, value: &str) -> String {
         match self {
             Shell::Bash => escape_chars(value, r###"()<>"'` !#$&;\|"###),
-            Shell::Zsh => escape_chars(value, r###"()<>[]"'` !#$&*;=?\|~"###),
+            Shell::Zsh => escape_chars(value, r###"()<>[]"'` !#$&*;?\|~"###),
             Shell::Powershell => {
                 if contains_chars(value, r###"()<>[]{}"'` #$&,;@|"###) {
                     let value: String = value
@@ -218,7 +218,7 @@ impl Shell {
                 }
             }
             Shell::Xonsh => {
-                if contains_chars(value, r###"()<>[]{}!"'` #&:;=\|"###) {
+                if contains_chars(value, r###"()<>[]{}!"'` #&:;\|"###) {
                     let value = escape_chars(value, "'");
                     format!("'{value}'")
                 } else {
