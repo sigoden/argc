@@ -9,7 +9,7 @@ use serde::Serialize;
 use std::fmt::Write;
 
 #[derive(Debug, Clone)]
-pub struct ParamData {
+pub(crate) struct ParamData {
     pub(crate) name: String,
     pub(crate) choices: Option<Vec<String>>,
     pub(crate) choices_fn: Option<(String, bool)>,
@@ -20,7 +20,7 @@ pub struct ParamData {
 }
 
 impl ParamData {
-    pub fn new(name: &str) -> Self {
+    pub(crate) fn new(name: &str) -> Self {
         Self {
             name: name.to_string(),
             choices: None,
@@ -34,7 +34,7 @@ impl ParamData {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
-pub struct FlagOptionParam {
+pub(crate) struct FlagOptionParam {
     pub(crate) name: String,
     pub(crate) describe: String,
     pub(crate) short: Option<char>,
@@ -294,7 +294,7 @@ impl FlagOptionParam {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
-pub struct PositionalParam {
+pub(crate) struct PositionalParam {
     pub(crate) name: String,
     pub(crate) describe: String,
     pub(crate) choices: Option<Vec<String>>,

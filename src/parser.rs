@@ -15,15 +15,15 @@ use nom::{
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Event {
-    pub data: EventData,
-    pub position: Position,
+pub(crate) struct Event {
+    pub(crate) data: EventData,
+    pub(crate) position: Position,
 }
 
-pub type Position = usize;
+pub(crate) type Position = usize;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum EventData {
+pub(crate) enum EventData {
     /// Description
     Describe(String),
     /// Version info
@@ -45,7 +45,7 @@ pub enum EventData {
 }
 
 #[derive(PartialEq, Eq)]
-pub enum EventScope {
+pub(crate) enum EventScope {
     Root,
     CmdStart,
     FnEnd,
@@ -58,7 +58,7 @@ impl Default for EventScope {
 }
 
 /// Tokenize shell script
-pub fn parse(source: &str) -> Result<Vec<Event>> {
+pub(crate) fn parse(source: &str) -> Result<Vec<Event>> {
     let mut result = vec![];
     let lines: Vec<&str> = source.lines().collect();
     let mut line_idx = 0;

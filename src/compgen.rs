@@ -156,19 +156,16 @@ impl Shell {
             if value.starts_with("__argc_value") {
                 if let Some(stripped_value) = value.strip_prefix("__argc_value") {
                     let (mark, value) = stripped_value.split_at(1);
-                    match mark {
+                    return match mark {
                         "+" => format!("<{value}>..."),
                         "*" => format!("[{value}]..."),
                         "!" => format!("<{value}>"),
                         ":" => format!("[{value}]"),
                         _ => value.to_string(),
-                    }
-                } else {
-                    value.to_string()
+                    };
                 }
-            } else {
-                value.to_string()
             }
+            value.to_string()
         } else {
             self.escape(value)
         }

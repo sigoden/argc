@@ -12,7 +12,7 @@ use indexmap::{IndexMap, IndexSet};
 
 const KNOWN_OPTIONS: [&str; 6] = ["-h", "-help", "--help", "-V", "-version", "--version"];
 
-pub struct Matcher<'a, 'b> {
+pub(crate) struct Matcher<'a, 'b> {
     cmds: Vec<(&'b str, &'a Command, String)>,
     args: &'b [String],
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
@@ -28,7 +28,7 @@ pub struct Matcher<'a, 'b> {
 type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>);
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum ArgComp {
+pub(crate) enum ArgComp {
     FlagOrOption,
     FlagOrOptionCombine(String),
     CommandOrPositional,
@@ -37,7 +37,7 @@ pub enum ArgComp {
 }
 
 #[derive(Debug)]
-pub enum MatchError {
+pub(crate) enum MatchError {
     DisplayHelp,
     DisplaySubcommandHelp(String),
     DisplayVersion,
@@ -51,7 +51,7 @@ pub enum MatchError {
 }
 
 impl<'a, 'b> Matcher<'a, 'b> {
-    pub fn new(root: &'a Command, args: &'b [String]) -> Self {
+    pub(crate) fn new(root: &'a Command, args: &'b [String]) -> Self {
         let mut cmds = vec![(args[0].as_str(), root, args[0].clone())];
         let mut cmd_level = 0;
         let mut arg_index = 1;
@@ -160,7 +160,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         }
     }
 
-    pub fn set_script_path(&mut self, script_path: &str) {
+    pub(crate) fn set_script_path(&mut self, script_path: &str) {
         self.script_path = Some(script_path.to_string());
         let fns: Vec<&str> = self.choices_fns.iter().copied().collect();
         if let Some(list) = run_param_fns(script_path, &fns, self.args, HashMap::new()) {
@@ -170,11 +170,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
         }
     }
 
-    pub fn set_term_width(&mut self, term_width: usize) {
+    pub(crate) fn set_term_width(&mut self, term_width: usize) {
         self.term_width = Some(term_width);
     }
 
-    pub fn to_arg_values(&self) -> Vec<ArgcValue> {
+    pub(crate) fn to_arg_values(&self) -> Vec<ArgcValue> {
         if let Some(err) = self.validate() {
             return vec![ArgcValue::Error(self.stringify_match_error(&err))];
         }
@@ -191,7 +191,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
-    pub fn to_arg_values_for_choice_fn(&self) -> Vec<ArgcValue> {
+    pub(crate) fn to_arg_values_for_choice_fn(&self) -> Vec<ArgcValue> {
         let mut output: Vec<ArgcValue> = self.to_arg_values_base();
         if !self.dashdash.is_empty() {
             output.push(ArgcValue::Multiple(
@@ -206,7 +206,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
-    pub fn compgen(&self) -> Vec<(String, String)> {
+    pub(crate) fn compgen(&self) -> Vec<(String, String)> {
         match &self.arg_comp {
             ArgComp::FlagOrOption => self.comp_flag_options(),
             ArgComp::FlagOrOptionCombine(value) => {
