@@ -27,6 +27,8 @@ def _argc_completer(context):
     candicates = output.decode().split('\n')
     candicates.pop()
     result = set()
+    if len(candicates) == 0:
+        return result
     if candicates[0] == '__argc_comp:file' or candicates[0] == '__argc_comp:dir':
         return
     for v in candicates:
