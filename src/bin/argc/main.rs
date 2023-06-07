@@ -3,7 +3,7 @@ mod utils;
 
 use anyhow::{anyhow, bail, Context, Result};
 use argc::{
-    utils::{get_shell_path, termwidth},
+    utils::{escape_shell_words, get_current_dir, get_shell_path, termwidth},
     Shell,
 };
 use std::{
@@ -44,11 +44,7 @@ fn run() -> Result<i32> {
             "--argc-eval" => {
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
                 let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())?;
-                let export_pwd = match env::var("ARGC_PWD").ok().or_else(|| {
-                    env::current_dir()
-                        .ok()
-                        .map(|v| v.to_string_lossy().to_string())
-                }) {
+                let export_pwd = match env::var("ARGC_PWD").ok().or_else(|| get_current_dir()) {
                     Some(v) => format!("export ARGC_PWD={v}\n"),
                     None => String::new(),
                 };
@@ -113,8 +109,8 @@ fn run() -> Result<i32> {
         ctrlc::set_handler(move || interrupt_me.store(true, Ordering::Relaxed))
             .with_context(|| "Failed to set CTRL-C handler")?;
         let mut envs = HashMap::new();
-        if let Ok(cwd) = env::current_dir() {
-            envs.insert("ARGC_PWD".to_string(), cwd.to_string_lossy().to_string());
+        if let Some(cwd) = get_current_dir() {
+            envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
         }
         let status = process::Command::new(shell)
             .arg(&script_file)
