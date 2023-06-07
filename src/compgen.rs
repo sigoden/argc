@@ -193,15 +193,24 @@ impl Shell {
             Shell::Bash => escape_chars(value, r#"&<>`'"{}$#|?(); []*\"#),
             Shell::Zsh => escape_chars(value, r#"\&<>`'"{}$#|?(); []*~"#),
             Shell::Powershell => {
-                if contains_chars(value, r#" ()[]{}*$?\"|<>&;#`"#) {
-                    let value = escape_chars(value, "'");
+                if contains_chars(value, r#" ()[]{}*$?\`'"|<>&;#"#) {
+                    let value: String = value
+                        .chars()
+                        .map(|c| {
+                            if c == '\'' {
+                                "''".to_string()
+                            } else {
+                                c.to_string()
+                            }
+                        })
+                        .collect();
                     format!("'{value}'")
                 } else {
                     value.into()
                 }
             }
             Shell::Xonsh => {
-                if contains_chars(value, r#" {}()[]*$?\"|<>&(),;#`@"#) {
+                if contains_chars(value, r#" {}()[]*$?\`'"|<>&(),;#@"#) {
                     let value = escape_chars(value, "'");
                     format!("'{value}'")
                 } else {
