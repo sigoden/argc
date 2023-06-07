@@ -44,7 +44,7 @@ fn run() -> Result<i32> {
             "--argc-eval" => {
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
                 let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())?;
-                let export_pwd = match env::var("ARGC_PWD").ok().or_else(|| get_current_dir()) {
+                let export_pwd = match env::var("ARGC_PWD").ok().or_else(get_current_dir) {
                     Some(v) => format!("export ARGC_PWD={v}\n"),
                     None => String::new(),
                 };
