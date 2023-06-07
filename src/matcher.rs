@@ -164,12 +164,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         self.script_path = Some(script_path.to_string());
         let fns: Vec<&str> = self.choices_fns.iter().copied().collect();
         if let Some(list) = run_param_fns(script_path, &fns, self.args, HashMap::new()) {
-            for (i, fn_output) in list.into_iter().enumerate() {
-                let choices: Vec<String> = fn_output
-                    .split('\n')
-                    .map(|v| v.trim().to_string())
-                    .filter(|v| !v.is_empty())
-                    .collect();
+            for (i, choices) in list.into_iter().enumerate() {
                 self.choices_values.insert(fns[i], choices);
             }
         }

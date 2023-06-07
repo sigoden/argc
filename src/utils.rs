@@ -63,7 +63,7 @@ pub fn run_param_fns(
     param_fns: &[&str],
     args: &[String],
     envs: HashMap<String, String>,
-) -> Option<Vec<String>> {
+) -> Option<Vec<Vec<String>>> {
     let shell = get_shell_path()?;
     let shell_extra_args = if shell
         .file_stem()
@@ -100,9 +100,16 @@ pub fn run_param_fns(
             })
         })
         .collect();
-    let list: Vec<String> = handles
+    let list: Vec<Vec<String>> = handles
         .into_iter()
         .map(|h| h.join().ok().unwrap_or_default())
+        .map(|v| {
+            v.split('\n')
+                .map(|v| v.trim())
+                .filter(|v| !v.is_empty())
+                .map(|v| v.to_string())
+                .collect()
+        })
         .collect();
     Some(list)
 }

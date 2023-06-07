@@ -286,17 +286,10 @@ fn mapping_candicates(
             envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
         }
         let fns: Vec<&str> = param_fns.iter().map(|v| v.as_str()).collect();
-        if let Some(param_fn_outputs) = run_param_fns(script_file, &fns, args, envs) {
-            for param_fn_output in param_fn_outputs {
-                for line in param_fn_output.split('\n') {
-                    let line = line.trim();
-                    if line.is_empty() {
-                        continue;
-                    }
-                    let (value, describe) = match line.split_once('\t') {
-                        Some(v) => v,
-                        None => (line, ""),
-                    };
+        if let Some(list) = run_param_fns(script_file, &fns, args, envs) {
+            for lines in list {
+                for line in lines {
+                    let (value, describe) = line.split_once('\t').unwrap_or((line.as_str(), ""));
                     if value.starts_with("__argc_") {
                         output.push((value.to_string(), describe.to_string()));
                     } else if let Some(value) = mapper(value) {
