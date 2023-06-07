@@ -1,6 +1,6 @@
 use crate::command::Command;
 use crate::matcher::Matcher;
-use crate::utils::run_param_fns;
+use crate::utils::{escape_shell_words, get_current_dir, run_param_fns};
 use crate::Result;
 
 use anyhow::bail;
@@ -274,6 +274,9 @@ fn mapping_candicates(
     if !param_fns.is_empty() {
         let mut envs = HashMap::new();
         envs.insert("ARGC_DESCRIBE".into(), with_description.to_string());
+        if let Some(cwd) = get_current_dir() {
+            envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
+        }
         let fns: Vec<&str> = param_fns.iter().map(|v| v.as_str()).collect();
         if let Some(param_fn_outputs) = run_param_fns(script_file, &fns, args, envs) {
             for param_fn_output in param_fn_outputs {

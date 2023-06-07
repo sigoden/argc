@@ -3,10 +3,11 @@ mod utils;
 
 use anyhow::{anyhow, bail, Context, Result};
 use argc::{
-    utils::{get_shell_path, termwidth},
+    utils::{escape_shell_words, get_current_dir, get_shell_path, termwidth},
     Shell,
 };
 use std::{
+    collections::HashMap,
     env, fs, process,
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -43,7 +44,11 @@ fn run() -> Result<i32> {
             "--argc-eval" => {
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
                 let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())?;
-                println!("{}", argc::ArgcValue::to_shell(values))
+                let export_pwd = match env::var("ARGC_PWD").ok().or_else(get_current_dir) {
+                    Some(v) => format!("export ARGC_PWD={v}\n"),
+                    None => String::new(),
+                };
+                println!("{export_pwd}{}", argc::ArgcValue::to_shell(values))
             }
             "--argc-create" => {
                 if let Some((_, script_file)) = get_script_path(false) {
@@ -103,11 +108,15 @@ fn run() -> Result<i32> {
         let interrupt_me = interrupt.clone();
         ctrlc::set_handler(move || interrupt_me.store(true, Ordering::Relaxed))
             .with_context(|| "Failed to set CTRL-C handler")?;
-        let mut command = process::Command::new(shell);
-        command.arg(&script_file);
-        command.args(&args[1..]);
-        command.current_dir(script_dir);
-        let status = command
+        let mut envs = HashMap::new();
+        if let Some(cwd) = get_current_dir() {
+            envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
+        }
+        let status = process::Command::new(shell)
+            .arg(&script_file)
+            .args(&args[1..])
+            .current_dir(script_dir)
+            .envs(envs)
             .status()
             .with_context(|| format!("Failed to run `{}`", script_file.display()))?;
         if interrupt.load(Ordering::Relaxed) {

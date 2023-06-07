@@ -111,6 +111,12 @@ pub fn termwidth() -> Option<usize> {
     env::var("TERM_WIDTH").ok()?.parse().ok()
 }
 
+pub fn get_current_dir() -> Option<String> {
+    env::current_dir()
+        .ok()
+        .map(|v| v.to_string_lossy().to_string())
+}
+
 fn path_env_with_exe() -> String {
     let mut path_env = std::env::var("PATH").ok().unwrap_or_default();
     if let Some(exe_dir) = std::env::current_exe()
