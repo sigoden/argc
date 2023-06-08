@@ -41,6 +41,7 @@ _argc_completer()
                 displays+=( "$value" )
             fi
         done
+        zstyle ":completion:${curcontext}:*" list-colors "=(#b)(-- *)=0=2;37"
         _describe "" displays values -Q -S ''
     fi
 }
