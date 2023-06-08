@@ -7,7 +7,7 @@ prog cmda --unknown
 
 OUTPUT
 cat >&2 <<-'EOF' 
-error: unexpected argument '--unknown' found
+error: unexpected argument `--unknown` found
 
 USAGE: prog cmda [OPTIONS]
 

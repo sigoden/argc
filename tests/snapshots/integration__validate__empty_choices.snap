@@ -7,7 +7,7 @@ prog --oa foo
 
 OUTPUT
 cat >&2 <<-'EOF' 
-error: invalid value 'foo' for '<OA>'
+error: invalid value `foo` for `<OA>`
   [possible values: ]
 
 For more information, try '--help'.
