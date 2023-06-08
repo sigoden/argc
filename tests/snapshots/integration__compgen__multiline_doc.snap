@@ -7,7 +7,6 @@ cmda	cmd-line1
 cmdb	line
 
 ************ COMPGEN `prog cmda ` ************
---foo	option-line1
-[BAR]	bar-line1
+
 
 
