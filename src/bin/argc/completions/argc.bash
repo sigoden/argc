@@ -29,6 +29,7 @@ _argc_completer() {
     fi
 
     if [[ ${#candicates[@]} -gt 0 ]]; then
+        compopt -o nospace
         COMPREPLY=(${candicates[@]})
     fi
 }

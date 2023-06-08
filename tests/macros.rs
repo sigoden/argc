@@ -120,6 +120,37 @@ macro_rules! snapshot_compgen {
 }
 
 #[macro_export]
+macro_rules! snapshot_compgen_shells {
+    (
+		$source:expr,
+        $args:expr
+    ) => {
+        let mut data = String::new();
+        let (script_path, script_content, script_file) =
+            $crate::fixtures::create_argc_script($source, "compgen.sh");
+        let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
+        for shell in argc::Shell::list() {
+            let words = match argc::compgen(shell, &script_path, &script_content, &args) {
+                Ok(stdout) => stdout,
+                Err(stderr) => stderr.to_string(),
+            };
+            let piece = format!(
+                r###"************ COMPGEN {:?} `{}` ************
+{}
+
+"###,
+                shell,
+                args.join(" "),
+                words
+            );
+            data.push_str(&piece);
+        }
+        script_file.close().unwrap();
+        insta::assert_snapshot!(data);
+    };
+}
+
+#[macro_export]
 macro_rules! snapshot_export {
     ($source:expr) => {
         let json = argc::export($source).unwrap();

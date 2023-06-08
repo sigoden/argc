@@ -24,23 +24,6 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
             let code = format!("complete -F _argc_completer {}", cmds.join(" "));
             format!("{BASH_SCRIPT}\n{code}\n",)
         }
-        Shell::Zsh => {
-            let code = format!("compdef _argc_completer {}", cmds.join(" "));
-            format!("{ZSH_SCRIPT}\n{code}\n",)
-        }
-        Shell::Powershell => {
-            let lines: Vec<String> = cmds.iter().map(|v| format!("Register-ArgumentCompleter -Native -ScriptBlock $_argc_completer -CommandName {v} ")).collect();
-            let code = lines.join("\n");
-            format!("{POWERSHELL_SCRIPT}\n{code}\n",)
-        }
-        Shell::Fish => {
-            let lines: Vec<String> = cmds
-                .iter()
-                .map(|v| format!(r#"complete -x -c {v} -a "(_argc_completer)""#))
-                .collect();
-            let code = lines.join("\n");
-            format!("{FISH_SCRIPT}\n{code}\n",)
-        }
         Shell::Elvish => {
             let lines: Vec<String> = cmds
                 .iter()
@@ -48,6 +31,14 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
                 .collect();
             let code = lines.join("\n");
             format!("{ELVISH_SCRIPT}\n{code}\n",)
+        }
+        Shell::Fish => {
+            let lines: Vec<String> = cmds
+                .iter()
+                .map(|v| format!(r###"complete -x -c {v} -a "(_argc_completer)" -r"###))
+                .collect();
+            let code = lines.join("\n");
+            format!("{FISH_SCRIPT}\n{code}\n",)
         }
         Shell::Nushell => {
             let code = format!("{cmds:?}");
@@ -72,9 +63,18 @@ $env.config.completions.external = {{
 "###,
             )
         }
+        Shell::Powershell => {
+            let lines: Vec<String> = cmds.iter().map(|v| format!("Register-ArgumentCompleter -Native -ScriptBlock $_argc_completer -CommandName {v} ")).collect();
+            let code = lines.join("\n");
+            format!("{POWERSHELL_SCRIPT}\n{code}\n",)
+        }
         Shell::Xonsh => {
             let code = format!("ARGC_SCRIPTS={cmds:?}");
             format!("{XONSH_SCRIPT}\n{code}\n",)
+        }
+        Shell::Zsh => {
+            let code = format!("compdef _argc_completer {}", cmds.join(" "));
+            format!("{ZSH_SCRIPT}\n{code}\n",)
         }
     };
     Ok(output)

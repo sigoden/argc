@@ -26,6 +26,22 @@ _argc_completer()
         fi
     fi
     if [[ ${#candicates[@]} -gt 0 ]]; then
-        _describe '' candicates
+        local values=()
+        local displays=()
+        for candicate in ${candicates[@]}; do
+            IFS=$'\t' read value space description <<< "$candicate"
+            if [[ $space == 1 ]]; then
+                values+=( "$value " )
+            else
+                values+=( "$value" )
+            fi
+            if [[ -n "$description" ]]; then
+                displays+=( "$value:$description" )
+            else
+                displays+=( "$value" )
+            fi
+        done
+        zstyle ":completion:${curcontext}:*" list-colors "=(#b)(-- *)=0=2;37"
+        _describe "" displays values -Q -S ''
     fi
 }

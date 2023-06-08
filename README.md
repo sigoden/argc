@@ -248,23 +248,24 @@ Argc provides shell completion for argc command and all the bash scripts powered
 # bash (~/.bashrc)
 source <(argc --argc-completions bash mycmd1 mycmd2)
 
-# zsh (~/.zshrc)
-source <(argc --argc-completions zsh mycmd1 mycmd2)
-
-# powershell ($env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1)
-argc --argc-completions powershell mycmd1 mycmd2 | Out-String | Invoke-Expression
+# elvish (~/.config/elvish/rc.elv)
+eval (argc --argc-completions elvish mycmd1 mycmd2 | slurp)
 
 # fish (~/.config/fish/config.fish)
 argc --argc-completions fish mycmd1 mycmd2 | source
 
-# elvish (~/.config/elvish/rc.elv)
-eval (argc --argc-completions elvish mycmd1 mycmd2 | slurp)
-
 # nushell (~/.config/nushell/config.nu)
 argc --argc-completions nushell mycmd1 mycmd2 # update config.nu manually according to output
 
+# powershell ($PROFILE)
+Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
+argc --argc-completions powershell mycmd1 mycmd2 | Out-String | Invoke-Expression
+
 # xonsh (~/.config/xonsh/rc.xsh)
 exec($(argc --argc-completions fish mycmd1 mycmd2))
+
+# zsh (~/.zshrc)
+source <(argc --argc-completions zsh mycmd1 mycmd2)
 ```
 
 **Replace `mycmd1 mycmd2` with your argc scripts**.

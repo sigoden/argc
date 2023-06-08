@@ -36,20 +36,13 @@ fn argc-completer {|@words|
             return
         }
     }
-    var pad = (num 2)
-    var candicates = [(all $candicates | each {|x|
-        var parts = [(str:split "\t" $x)]
-        var text = $parts[0]
-        var text-len = (count $text)
-        if (> $text-len $pad) {
-            set pad = $text-len
+    all $candicates | each {|candicate| 
+        var parts = [(str:split "\t" $candicate)]
+        var code-suffix = (if (eq $parts[1] 1) { echo ' ' } else { echo '' })
+        if (eq $parts[2] '') {
+            edit:complex-candidate $parts[0] &display=(styled $parts[0] 'default') &code-suffix=$code-suffix
+        } else {
+            edit:complex-candidate $parts[0] &display=(styled $parts[0] 'default')(styled ' ' 'dim white bg-default')(styled '('$parts[2]')' 'dim white') &code-suffix=$code-suffix
         }
-        var desc = (if (eq (count $parts) (num 1)) { echo ' ' } else { echo $parts[1] })
-        put [$text $desc]
-    })]
-    var pad = (+ $pad (num 2))
-    all $candicates | each {|x| 
-        var spaces = (repeat (- $pad (count $x[0])) ' ' | str:join '')
-        edit:complex-candidate $x[0] &display=$x[0]$spaces$x[1] &code-suffix=' '
     }
 }

@@ -34,8 +34,9 @@ def _argc_completer(context):
     for v in candicates:
         parts = v.split('\t')
         value = parts[0]
-        desc = '' if len(parts) == 1 else parts[1]
-        result.add(RichCompletion(value, display=value, description=desc, prefix_len=len(context.raw_prefix), append_closing_quote=False))
+        if parts[1] == "1":
+            value = value + " "
+        result.add(RichCompletion(value, display=parts[0], description=parts[2], prefix_len=len(context.raw_prefix), append_closing_quote=False))
     return result
     
 _add_one_completer('argc', _argc_completer, 'start')
