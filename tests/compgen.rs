@@ -326,3 +326,17 @@ cmdb() { :; }
         ]
     );
 }
+
+#[test]
+fn no_space() {
+    let script = r###"
+# @option --oa*[`_choice_fn`]
+_choice_fn() {
+	echo -e "abc"
+	echo -e "def\0"
+	echo -e "ghk\thello world"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
+}
