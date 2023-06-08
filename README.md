@@ -257,7 +257,7 @@ argc --argc-completions fish mycmd1 mycmd2 | source
 # nushell (~/.config/nushell/config.nu)
 argc --argc-completions nushell mycmd1 mycmd2 # update config.nu manually according to output
 
-# powershell ($env:PROFILE)
+# powershell ($PROFILE)
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 argc --argc-completions powershell mycmd1 mycmd2 | Out-String | Invoke-Expression
 
