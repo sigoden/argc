@@ -1,0 +1,12 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog no_arg ` ************
+--fa
+--oa
+
+************ COMPGEN `prog arg ` ************
+__argc_comp:file
+
+

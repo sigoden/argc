@@ -254,11 +254,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
                     return comp_subcomands(cmd);
                 }
-                let mut output = if !self.dashdash.is_empty() {
-                    vec![]
-                } else {
-                    self.comp_flag_options()
-                };
+                let mut output = vec![];
+                if cmd.positional_params.is_empty() {
+                    output.extend(self.comp_flag_options());
+                }
                 let values = self.match_positionals();
                 output.extend(comp_subcommands_positional(
                     cmd,
@@ -737,10 +736,10 @@ fn match_flag_option<'a, 'b>(
 fn comp_subcommands_positional(
     cmd: &Command,
     values: &[Vec<&str>],
-    subcmd: bool,
+    with_subcmd: bool,
 ) -> Vec<(String, String)> {
     let mut output = vec![];
-    if subcmd {
+    if with_subcmd {
         output.extend(comp_subcomands(cmd))
     }
     if values.is_empty() || values.len() > cmd.positional_params.len() {

@@ -172,7 +172,9 @@ impl Shell {
                     return "__argc_comp:file".into();
                 } else if value_name.contains("dir") || value_name.contains("folder") {
                     return "__argc_comp:dir".into();
-                };
+                } else {
+                    return String::new();
+                }
             }
         }
         let iter = candicates.iter().map(|(value, nospace, description)| {

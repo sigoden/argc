@@ -3,13 +3,15 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
+__argc_comp:file
+
+************ COMPGEN `prog -` ************
 --fc
 -f
 --oa
 -o
 --od
 -d
-[FILE]...
 
 ************ COMPGEN `prog --` ************
 --fc
@@ -20,22 +22,10 @@ expression: data
 __argc_comp:file
 
 ************ COMPGEN `prog -f ` ************
---fc
--f
---oa
--o
---od
--d
-[FILE]...
+__argc_comp:file
 
 ************ COMPGEN `prog --fc ` ************
---fc
--f
---oa
--o
---od
--d
-[FILE]...
+__argc_comp:file
 
 ************ COMPGEN `prog -o ` ************
 __argc_comp:dir
@@ -62,34 +52,18 @@ __argc_comp:file
 __argc_comp:file
 
 ************ COMPGEN `prog -d d1 d2 ` ************
---fc
--f
---oa
--o
-[FILE]...
+__argc_comp:file
 
 ************ COMPGEN `prog v1` ************
 __argc_comp:file
 
 ************ COMPGEN `prog v1 ` ************
---fc
--f
---oa
--o
---od
--d
-[FILE]...
+__argc_comp:file
 
 ************ COMPGEN `prog v1 v2` ************
 __argc_comp:file
 
 ************ COMPGEN `prog v1 v2 ` ************
---fc
--f
---oa
--o
---od
--d
-[FILE]...
+__argc_comp:file
 
 

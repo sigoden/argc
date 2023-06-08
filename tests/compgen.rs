@@ -13,6 +13,7 @@ fn multiple() {
         script,
         vec![
             vec!["prog", ""],
+            vec!["prog", "-"],
             vec!["prog", "--"],
             vec!["prog", "--", ""],
             vec!["prog", "-f", ""],
@@ -324,6 +325,27 @@ cmdb() { :; }
             vec!["prog", "cmdx", ""],
             vec!["prog", "cmdx", "cmd"]
         ]
+    );
+}
+
+#[test]
+fn no_flags_options() {
+    let script = r###"
+# @cmd
+# @flag --fa
+# @option --oa  <file>
+no_arg() { :; }
+
+# @cmd
+# @flag --fa
+# @option --oa  <file>
+# @arg file
+arg() { :; }
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![vec!["prog", "no_arg", ""], vec!["prog", "arg", ""]]
     );
 }
 
