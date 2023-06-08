@@ -2,11 +2,11 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN `prog no_option ` ************
-__argc_comp:file
-
 ************ COMPGEN `prog no_arg ` ************
---fa	<file>
+--fa
 --oa
+
+************ COMPGEN `prog arg ` ************
+__argc_comp:file
 
 

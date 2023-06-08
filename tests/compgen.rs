@@ -329,21 +329,23 @@ cmdb() { :; }
 }
 
 #[test]
-fn argcomp_any() {
+fn no_flags_options() {
     let script = r###"
 # @cmd
-# @arg file
-no_option() { :; }
+# @flag --fa
+# @option --oa  <file>
+no_arg() { :; }
 
 # @cmd
-# @flag --fa <file>
-# @option --oa
-no_arg() { :; }
+# @flag --fa
+# @option --oa  <file>
+# @arg file
+arg() { :; }
 "###;
 
     snapshot_compgen!(
         script,
-        vec![vec!["prog", "no_option", ""], vec!["prog", "no_arg", ""]]
+        vec![vec!["prog", "no_arg", ""], vec!["prog", "arg", ""]]
     );
 }
 
