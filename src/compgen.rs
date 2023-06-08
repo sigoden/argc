@@ -7,6 +7,8 @@ use anyhow::bail;
 use std::collections::HashMap;
 use std::str::FromStr;
 
+const MAX_DESCRIPTION_WIDTH: usize = 80;
+
 pub fn compgen(
     shell: Shell,
     script_path: &str,
@@ -30,222 +32,9 @@ pub fn compgen(
         })
         .collect();
     let matcher = Matcher::new(&cmd, &args);
-    let candicates = matcher.compgen();
+    let compgen_values = matcher.compgen();
     let with_description = shell.with_description();
-    let mapped_candicates = mapping_candicates(
-        &candicates,
-        script_path,
-        &args,
-        shell,
-        last,
-        with_description,
-    )?;
-    shell.convert(&mapped_candicates, with_description)
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Shell {
-    Bash,
-    Zsh,
-    Powershell,
-    Fish,
-    Elvish,
-    Nushell,
-    Xonsh,
-}
-
-impl FromStr for Shell {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        match s {
-            "bash" => Ok(Self::Bash),
-            "zsh" => Ok(Self::Zsh),
-            "powershell" => Ok(Self::Powershell),
-            "fish" => Ok(Self::Fish),
-            "elvish" => Ok(Self::Elvish),
-            "nushell" => Ok(Self::Nushell),
-            "xonsh" => Ok(Self::Xonsh),
-            _ => bail!(
-                "The provided shell is either invalid or missing, must be one of {}",
-                Shell::list_names(),
-            ),
-        }
-    }
-}
-
-impl Shell {
-    pub fn list() -> [Shell; 7] {
-        [
-            Shell::Bash,
-            Shell::Zsh,
-            Shell::Powershell,
-            Shell::Fish,
-            Shell::Elvish,
-            Shell::Nushell,
-            Shell::Xonsh,
-        ]
-    }
-
-    pub fn list_names() -> String {
-        Shell::list()
-            .iter()
-            .map(|v| v.name())
-            .collect::<Vec<&str>>()
-            .join(",")
-    }
-
-    pub fn name(&self) -> &str {
-        match self {
-            Shell::Bash => "bash",
-            Shell::Zsh => "zsh",
-            Shell::Powershell => "powershell",
-            Shell::Fish => "fish",
-            Shell::Elvish => "elvish",
-            Shell::Nushell => "nushell",
-            Shell::Xonsh => "xonsh",
-        }
-    }
-
-    pub fn convert(
-        &self,
-        candicates: &[(String, String)],
-        with_description: bool,
-    ) -> Result<String> {
-        if candicates.len() == 1 {
-            return Ok(self.convert_value(&candicates[0].0));
-        }
-        let mut max_width = 0;
-        let values: Vec<String> = candicates
-            .iter()
-            .map(|(v, _)| {
-                let value = self.convert_value(v);
-                max_width = max_width.max(value.len());
-                value
-            })
-            .collect();
-        let value_width = 95 - max_width;
-        let output = values
-            .into_iter()
-            .enumerate()
-            .map(|(i, value)| {
-                let description = &candicates[i].1;
-                if !with_description || description.is_empty() {
-                    return value;
-                }
-                match self {
-                    Shell::Bash => {
-                        let description = if description.len() >= value_width {
-                            format!("{}...", &description[..value_width])
-                        } else {
-                            description.clone()
-                        };
-                        format!("{:<width$}({})", value, description, width = max_width + 2)
-                    }
-                    Shell::Zsh => format!("{}:{}", value, description),
-                    _ => format!("{}\t{}", value, description),
-                }
-            })
-            .collect::<Vec<String>>()
-            .join("\n");
-        Ok(output)
-    }
-
-    pub fn convert_value(&self, value: &str) -> String {
-        if value.starts_with("__argc_") {
-            if value.starts_with("__argc_value") {
-                if let Some(stripped_value) = value.strip_prefix("__argc_value") {
-                    let (mark, value) = stripped_value.split_at(1);
-                    return match mark {
-                        "+" => format!("<{value}>..."),
-                        "*" => format!("[{value}]..."),
-                        "!" => format!("<{value}>"),
-                        ":" => format!("[{value}]"),
-                        _ => value.to_string(),
-                    };
-                }
-            }
-            value.to_string()
-        } else {
-            self.escape(value)
-        }
-    }
-
-    pub fn with_description(&self) -> bool {
-        if let Ok(v) = std::env::var("ARGC_COMPGEN_DESCRIPTION") {
-            if v == "true" || v == "1" {
-                return true;
-            } else if v == "false" || v == "0" {
-                return false;
-            }
-        }
-        if self == &Shell::Bash {
-            return false;
-        }
-        true
-    }
-
-    pub fn escape(&self, value: &str) -> String {
-        match self {
-            Shell::Bash => escape_chars(value, r###"()<>"'` !#$&;\|"###),
-            Shell::Zsh => escape_chars(value, r###"()<>[]"'` !#$&*;?\|~"###),
-            Shell::Powershell => {
-                if contains_chars(value, r###"()<>[]{}"'` #$&,;@|"###) {
-                    let value: String = value
-                        .chars()
-                        .map(|c| {
-                            if c == '\'' {
-                                "''".to_string()
-                            } else {
-                                c.to_string()
-                            }
-                        })
-                        .collect();
-                    format!("'{value}'")
-                } else {
-                    value.into()
-                }
-            }
-            Shell::Nushell => {
-                if contains_chars(value, r###"()[]{}"'` #$;|"###) {
-                    let value = escape_chars(value, "\"");
-                    format!("\"{value}\"")
-                } else {
-                    value.into()
-                }
-            }
-            Shell::Xonsh => {
-                if contains_chars(value, r###"()<>[]{}!"'` #&:;\|"###) {
-                    let value = escape_chars(value, "'");
-                    format!("'{value}'")
-                } else {
-                    value.into()
-                }
-            }
-            _ => value.into(),
-        }
-    }
-
-    pub fn word_breaks(&self) -> Vec<char> {
-        match self {
-            Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
-                Ok(v) => v.chars().collect(),
-                Err(_) => vec!['=', ':'],
-            },
-            _ => vec![],
-        }
-    }
-}
-
-fn mapping_candicates(
-    values: &[(String, String)],
-    script_file: &str,
-    args: &[String],
-    shell: Shell,
-    last: &str,
-    with_description: bool,
-) -> Result<Vec<(String, String)>> {
-    let mut output: Vec<(String, String)> = vec![];
+    let mut candicates: Vec<(String, bool, String)> = vec![];
     let mut param_fns = vec![];
     let mut assign_option = None;
     if args.iter().all(|v| v != "--") {
@@ -267,13 +56,13 @@ fn mapping_candicates(
         }
         None
     };
-    for (value, describe) in values {
+    for (value, description) in compgen_values {
         if let Some(param_fn) = value.strip_prefix("__argc_fn:") {
             param_fns.push(param_fn.to_string());
         } else if value.starts_with("__argc_") {
-            output.push((value.to_string(), describe.to_string()));
-        } else if let Some(value) = mapper(value) {
-            output.push((value, describe.to_string()));
+            candicates.push((value.to_string(), false, description));
+        } else if let Some(value) = mapper(&value) {
+            candicates.push((value, false, description));
         }
     }
     if !param_fns.is_empty() {
@@ -283,36 +72,242 @@ fn mapping_candicates(
             envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
         }
         let fns: Vec<&str> = param_fns.iter().map(|v| v.as_str()).collect();
-        if let Some(list) = run_param_fns(script_file, &fns, args, envs) {
+        if let Some(list) = run_param_fns(script_path, &fns, &args, envs) {
             for lines in list {
                 for line in lines {
-                    let (value, describe) = line.split_once('\t').unwrap_or((line.as_str(), ""));
+                    let (value, description) = line.split_once('\t').unwrap_or((line.as_str(), ""));
+                    let (value, nospace) = match value.strip_suffix('\0') {
+                        Some(value) => (value, true),
+                        None => (value, false),
+                    };
                     if value.starts_with("__argc_") {
-                        output.push((value.to_string(), describe.to_string()));
+                        candicates.push((value.to_string(), false, description.to_string()));
                     } else if let Some(value) = mapper(value) {
-                        output.push((value, describe.to_string()));
+                        candicates.push((value, nospace, description.to_string()));
                     }
                 }
             }
         }
     }
+    Ok(shell.convert_candicates(&candicates, with_description))
+}
 
-    if output.len() == 1 {
-        let value = &output[0].0;
-        if let Some(value_name) = value.strip_prefix("__argc_value") {
-            let value_name = value_name.to_ascii_lowercase();
-            if value_name.contains("path") || value_name.contains("file") {
-                output[0] = ("__argc_comp:file".into(), String::new());
-            } else if value_name.contains("dir") || value_name.contains("folder") {
-                output[0] = ("__argc_comp:dir".into(), String::new());
-            } else if value_name.contains("arg") || value_name.contains("any") {
-                output[0] = ("__argc_comp:file".into(), String::new());
-            } else {
-                output.clear();
-            };
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Shell {
+    Bash,
+    Elvish,
+    Fish,
+    Nushell,
+    Powershell,
+    Xonsh,
+    Zsh,
+}
+
+impl FromStr for Shell {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s {
+            "bash" => Ok(Self::Bash),
+            "elvish" => Ok(Self::Elvish),
+            "fish" => Ok(Self::Fish),
+            "nushell" => Ok(Self::Nushell),
+            "powershell" => Ok(Self::Powershell),
+            "xonsh" => Ok(Self::Xonsh),
+            "zsh" => Ok(Self::Zsh),
+            _ => bail!(
+                "The provided shell is either invalid or missing, must be one of {}",
+                Shell::list_names(),
+            ),
         }
     }
-    Ok(output)
+}
+
+impl Shell {
+    pub fn list() -> [Shell; 7] {
+        [
+            Shell::Bash,
+            Shell::Elvish,
+            Shell::Fish,
+            Shell::Nushell,
+            Shell::Powershell,
+            Shell::Xonsh,
+            Shell::Zsh,
+        ]
+    }
+
+    pub fn list_names() -> String {
+        Shell::list()
+            .iter()
+            .map(|v| v.name())
+            .collect::<Vec<&str>>()
+            .join(",")
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Shell::Bash => "bash",
+            Shell::Elvish => "elvish",
+            Shell::Fish => "fish",
+            Shell::Nushell => "nushell",
+            Shell::Powershell => "powershell",
+            Shell::Xonsh => "xonsh",
+            Shell::Zsh => "zsh",
+        }
+    }
+
+    pub fn convert_candicates(
+        &self,
+        candicates: &[(String, bool, String)],
+        with_description: bool,
+    ) -> String {
+        if candicates.len() == 1 {
+            if let Some(value_name) = candicates[0].0.strip_prefix("__argc_value") {
+                let value_name = value_name.to_lowercase();
+                if value_name.contains("path")
+                    || value_name.contains("file")
+                    || value_name.contains("arg")
+                    || value_name.contains("any")
+                {
+                    return "__argc_comp:file".into();
+                } else if value_name.contains("dir") || value_name.contains("folder") {
+                    return "__argc_comp:dir".into();
+                };
+            }
+        }
+        let iter = candicates.iter().map(|(value, nospace, description)| {
+            let value = self.convert_value(value);
+            let description = truncate_description(description, MAX_DESCRIPTION_WIDTH);
+            (value, *nospace, description)
+        });
+        match self {
+            Shell::Bash => iter
+                .map(|(value, nospace, description)| {
+                    if nospace {
+                        value
+                    } else if description.is_empty() || !with_description {
+                        format!("{value} ")
+                    } else {
+                        format!("{value} ({description})")
+                    }
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
+            Shell::Fish => iter
+                .map(|(value, _, description)| {
+                    if description.is_empty() || !with_description {
+                        value
+                    } else {
+                        format!("{value}\t{description}")
+                    }
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
+            Shell::Nushell => iter
+                .map(|(value, nospace, description)| {
+                    let space = if nospace { "" } else { " " };
+                    if description.is_empty() || !with_description {
+                        format!("{value}{space}")
+                    } else {
+                        format!("{value}{space}\t{description}")
+                    }
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
+            _ => iter
+                .map(|(value, nospace, description)| {
+                    let space: &str = if nospace { "0" } else { "1" };
+                    format!("{value}\t{space}\t{description}")
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
+        }
+    }
+
+    pub(crate) fn convert_value(&self, value: &str) -> String {
+        if value.starts_with("__argc_") {
+            if value.starts_with("__argc_value") {
+                if let Some(stripped_value) = value.strip_prefix("__argc_value") {
+                    let (mark, value) = stripped_value.split_at(1);
+                    return match mark {
+                        "+" => format!("<{value}>..."),
+                        "*" => format!("[{value}]..."),
+                        "!" => format!("<{value}>"),
+                        ":" => format!("[{value}]"),
+                        _ => value.to_string(),
+                    };
+                }
+            }
+            value.to_string()
+        } else {
+            self.escape(value)
+        }
+    }
+
+    pub(crate) fn with_description(&self) -> bool {
+        if let Ok(v) = std::env::var("ARGC_COMPGEN_DESCRIPTION") {
+            if v == "true" || v == "1" {
+                return true;
+            } else if v == "false" || v == "0" {
+                return false;
+            }
+        }
+        if self == &Shell::Bash {
+            return false;
+        }
+        true
+    }
+
+    pub(crate) fn escape(&self, value: &str) -> String {
+        match self {
+            Shell::Bash => escape_chars(value, r###"()<>"'` !#$&;\|"###),
+            Shell::Nushell => {
+                if contains_chars(value, r###"()[]{}"'` #$;|"###) {
+                    let value = escape_chars(value, "\"");
+                    format!("\"{value}\"")
+                } else {
+                    value.into()
+                }
+            }
+            Shell::Powershell => {
+                if contains_chars(value, r###"()<>[]{}"'` #$&,;@|"###) {
+                    let value: String = value
+                        .chars()
+                        .map(|c| {
+                            if c == '\'' {
+                                "''".to_string()
+                            } else {
+                                c.to_string()
+                            }
+                        })
+                        .collect();
+                    format!("'{value}'")
+                } else {
+                    value.into()
+                }
+            }
+            Shell::Xonsh => {
+                if contains_chars(value, r###"()<>[]{}!"'` #&:;\|"###) {
+                    let value = escape_chars(value, "'");
+                    format!("'{value}'")
+                } else {
+                    value.into()
+                }
+            }
+            Shell::Zsh => escape_chars(value, r###"()<>[]"'` !#$&*;?\|~"###),
+            _ => value.into(),
+        }
+    }
+
+    pub(crate) fn word_breaks(&self) -> Vec<char> {
+        match self {
+            Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
+                Ok(v) => v.chars().collect(),
+                Err(_) => vec!['=', ':'],
+            },
+            _ => vec![],
+        }
+    }
 }
 
 fn unbalance_quote(arg: &str) -> (&str, Option<char>) {
@@ -359,6 +354,15 @@ fn escape_chars(value: &str, chars: &str) -> String {
             }
         })
         .collect()
+}
+
+fn truncate_description(description: &str, max_width: usize) -> String {
+    let description = description.trim().replace('\t', "");
+    if description.len() < max_width {
+        description
+    } else {
+        format!("{}...", &description[0..max_width - 3])
+    }
 }
 
 fn contains_chars(value: &str, chars: &str) -> bool {

@@ -33,7 +33,7 @@ fn compgen() {
     Command::cargo_bin("argc")
         .unwrap()
         .arg("--argc-compgen")
-        .arg("bash")
+        .arg("fish")
         .arg(path)
         .args(["args", "cmdj", ""])
         .env("PATH", path_env_var)

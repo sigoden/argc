@@ -26,8 +26,8 @@ $_argc_completer = {
     }
     $candicates | ForEach-Object { 
         $parts=($_ -split "`t")
-        $value = $parts[0]
-        $desc = if ($parts[1]) { $parts[1] } else { " " }
-        [CompletionResult]::new($value, $value, [CompletionResultType]::ParameterValue, $desc)
+        $space=if ($parts[1] -eq "1") { " " } else { "" }
+        $description = $parts[0] + " (" $parts[2] + ")"
+        [CompletionResult]::new($parts[0] + $space, $description, [CompletionResultType]::ParameterValue, " ")
     }
 }
