@@ -7,8 +7,6 @@ use anyhow::bail;
 use std::collections::HashMap;
 use std::str::FromStr;
 
-const MAX_DESCRIPTION_WIDTH: usize = 80;
-
 pub fn compgen(
     shell: Shell,
     script_path: &str,
@@ -34,35 +32,24 @@ pub fn compgen(
     let matcher = Matcher::new(&cmd, &args);
     let compgen_values = matcher.compgen();
     let with_description = shell.with_description();
-    let mut candicates: Vec<(String, bool, String)> = vec![];
+    let mut candicates: Vec<Candicate> = vec![];
     let mut param_fns = vec![];
-    let mut assign_option = None;
-    if args.iter().all(|v| v != "--") {
-        assign_option = split_equal_sign(last);
+    let no_dashdash = args.iter().all(|v| v != "--");
+    let mut word = last;
+    let mut prefix = "";
+    if no_dashdash {
+        if let Some((left, right)) = split_equal_sign(word) {
+            word = right;
+            prefix = left;
+        }
     }
-    let breaks = &shell.word_breaks();
-    let mapper = |value: &str| -> Option<String> {
-        if let Some((prefix, matches)) = assign_option {
-            if let Some(breaked_value) = split_with_breaks(value, matches, breaks) {
-                if breaked_value != value || breaks.contains(&'=') {
-                    return Some(breaked_value.to_string());
-                } else {
-                    return Some(format!("{prefix}{value}"));
-                }
-            }
-        }
-        if let Some(value) = split_with_breaks(value, last, breaks) {
-            return Some(value.to_string());
-        }
-        None
-    };
     for (value, description) in compgen_values {
         if let Some(param_fn) = value.strip_prefix("__argc_fn:") {
             param_fns.push(param_fn.to_string());
         } else if value.starts_with("__argc_") {
-            candicates.push((value.to_string(), false, description));
-        } else if let Some(value) = mapper(&value) {
-            candicates.push((value, false, description));
+            candicates.push(Candicate::new(value.to_string(), description, false));
+        } else if value.starts_with(word) {
+            candicates.push(Candicate::new(value, description, false));
         }
     }
     if !param_fns.is_empty() {
@@ -81,15 +68,39 @@ pub fn compgen(
                         None => (value, false),
                     };
                     if value.starts_with("__argc_") {
-                        candicates.push((value.to_string(), false, description.to_string()));
-                    } else if let Some(value) = mapper(value) {
-                        candicates.push((value, nospace, description.to_string()));
+                        candicates.push(Candicate::new(
+                            value.to_string(),
+                            description.to_string(),
+                            false,
+                        ));
+                    } else if value.starts_with(word) {
+                        candicates.push(Candicate::new(
+                            value.to_string(),
+                            description.to_string(),
+                            nospace,
+                        ));
                     }
                 }
             }
         }
     }
-    Ok(shell.convert_candicates(&candicates, with_description))
+    if candicates.len() == 1 {
+        if let Some(value_name) = candicates[0].value.strip_prefix("__argc_value") {
+            let value_name = value_name.to_lowercase();
+            let output = if ["path", "file", "arg", "any"]
+                .iter()
+                .any(|v| value_name.contains(v))
+            {
+                "__argc_comp:file".to_string()
+            } else if value_name.contains("dir") || value_name.contains("folder") {
+                "__argc_comp:dir".to_string()
+            } else {
+                String::new()
+            };
+            return Ok(output);
+        }
+    }
+    Ok(shell.output_candicates(&candicates, word, prefix, with_description))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -156,69 +167,62 @@ impl Shell {
         }
     }
 
-    pub fn convert_candicates(
+    pub(crate) fn output_candicates(
         &self,
-        candicates: &[(String, bool, String)],
+        candicates: &[Candicate],
+        word: &str,
+        prefix: &str,
         with_description: bool,
     ) -> String {
-        if candicates.len() == 1 {
-            if let Some(value_name) = candicates[0].0.strip_prefix("__argc_value") {
-                let value_name = value_name.to_lowercase();
-                if value_name.contains("path")
-                    || value_name.contains("file")
-                    || value_name.contains("arg")
-                    || value_name.contains("any")
-                {
-                    return "__argc_comp:file".into();
-                } else if value_name.contains("dir") || value_name.contains("folder") {
-                    return "__argc_comp:dir".into();
-                } else {
-                    return String::new();
-                }
-            }
-        }
-        let iter = candicates.iter().map(|(value, nospace, description)| {
-            let value = self.convert_value(value);
-            let description = truncate_description(description, MAX_DESCRIPTION_WIDTH);
-            (value, *nospace, description)
-        });
         match self {
-            Shell::Bash => iter
-                .map(|(value, nospace, description)| {
-                    if nospace {
-                        value
-                    } else if description.is_empty() || !with_description {
+            Shell::Bash => candicates
+                .iter()
+                .map(|candicate| {
+                    let value = match strip_value(&candicate.value, word, &self.word_breaks()) {
+                        Some(v) => v,
+                        None => &candicate.value,
+                    };
+                    if candicate.nospace {
+                        value.to_string()
+                    } else if candicate.description.is_empty() || !with_description {
                         format!("{value} ")
                     } else {
-                        format!("{value} ({description})")
+                        format!("{value} ({})", candicate.truncate_description())
                     }
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            Shell::Fish => iter
-                .map(|(value, _, description)| {
-                    if description.is_empty() || !with_description {
+            Shell::Fish => candicates
+                .iter()
+                .map(|candicate| {
+                    let value = self.convert_value(&format!("{prefix}{}", candicate.value));
+                    if candicate.description.is_empty() || !with_description {
                         value
                     } else {
-                        format!("{value}\t{description}")
+                        format!("{value}\t{}", candicate.truncate_description())
                     }
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            Shell::Nushell => iter
-                .map(|(value, nospace, description)| {
-                    let space = if nospace { "" } else { " " };
-                    if description.is_empty() || !with_description {
+            Shell::Nushell => candicates
+                .iter()
+                .map(|candicate| {
+                    let value = self.convert_value(&format!("{prefix}{}", candicate.value));
+                    let space = if candicate.nospace { "" } else { " " };
+                    if candicate.description.is_empty() || !with_description {
                         format!("{value}{space}")
                     } else {
-                        format!("{value}{space}\t{description}")
+                        format!("{value}{space}\t{}", candicate.truncate_description())
                     }
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            _ => iter
-                .map(|(value, nospace, description)| {
-                    let space: &str = if nospace { "0" } else { "1" };
+            _ => candicates
+                .iter()
+                .map(|candicate| {
+                    let value = self.convert_value(&format!("{prefix}{}", candicate.value));
+                    let description = candicate.truncate_description();
+                    let space: &str = if candicate.nospace { "0" } else { "1" };
                     format!("{value}\t{space}\t{description}")
                 })
                 .collect::<Vec<String>>()
@@ -312,6 +316,33 @@ impl Shell {
     }
 }
 
+#[derive(Debug, Clone)]
+pub(crate) struct Candicate {
+    value: String,
+    description: String,
+    nospace: bool,
+}
+
+impl Candicate {
+    pub(crate) fn new(value: String, description: String, nospace: bool) -> Self {
+        Self {
+            value,
+            description,
+            nospace,
+        }
+    }
+
+    pub(crate) fn truncate_description(&self) -> String {
+        let max_width = 80;
+        let description = self.description.trim().replace('\t', "");
+        if description.len() < max_width {
+            description
+        } else {
+            format!("{}...", &description[0..max_width - 3])
+        }
+    }
+}
+
 fn unbalance_quote(arg: &str) -> (&str, Option<char>) {
     if arg.starts_with(is_quote) && arg.chars().skip(1).all(|v| !is_quote(v)) {
         return (&arg[1..], arg.chars().next());
@@ -334,14 +365,19 @@ fn split_equal_sign(word: &str) -> Option<(&str, &str)> {
     None
 }
 
-fn split_with_breaks<'a>(value: &'a str, matches: &str, breaks: &[char]) -> Option<&'a str> {
-    if !value.starts_with(matches) {
+fn strip_value<'a>(value: &'a str, word: &str, breaks: &[char]) -> Option<&'a str> {
+    if !value.starts_with(word) {
         return None;
     }
-    if let Some(idx) = matches.rfind(|c| breaks.contains(&c)) {
-        return Some(&value[idx + 1..]);
-    }
-    Some(value)
+    let hyphen = word.starts_with('-');
+    let (i, _) = word.char_indices().rfind(|(_, c)| {
+        if hyphen {
+            *c != '-' && breaks.contains(c)
+        } else {
+            breaks.contains(c)
+        }
+    })?;
+    value.strip_prefix(&word[0..=i])
 }
 
 fn escape_chars(value: &str, chars: &str) -> String {
@@ -356,15 +392,6 @@ fn escape_chars(value: &str, chars: &str) -> String {
             }
         })
         .collect()
-}
-
-fn truncate_description(description: &str, max_width: usize) -> String {
-    let description = description.trim().replace('\t', "");
-    if description.len() < max_width {
-        description
-    } else {
-        format!("{}...", &description[0..max_width - 3])
-    }
 }
 
 fn contains_chars(value: &str, chars: &str) -> bool {
@@ -384,18 +411,19 @@ mod tests {
     fn test_split_equal_sign() {
         assert_eq!(split_equal_sign("-a="), Some(("-a=", "")));
         assert_eq!(split_equal_sign("-a="), Some(("-a=", "")));
+        assert_eq!(split_equal_sign("-a=c"), Some(("-a=", "c")));
         assert_eq!(split_equal_sign("a"), None);
         assert_eq!(split_equal_sign("a:"), None);
         assert_eq!(split_equal_sign("=a"), None);
     }
 
     #[test]
-    fn test_split_with_breaks() {
-        assert_eq!(split_with_breaks("abc", "b", &[]), None);
-        assert_eq!(split_with_breaks("abc", "", &[]), Some("abc"));
-        assert_eq!(split_with_breaks("abc:", "abc:", &[]), Some("abc:"));
-        assert_eq!(split_with_breaks("abc:", "", &[':']), Some("abc:"));
-        assert_eq!(split_with_breaks("abc:", "abc:", &[':']), Some(""));
-        assert_eq!(split_with_breaks("abc:def", "abc:", &[':']), Some("def"));
+    fn test_strip_value() {
+        let breaks = vec![':', '-', '/'];
+        assert_eq!(strip_value("abc:def", "abc:d", &breaks), Some("def"));
+        assert_eq!(strip_value("abc:def", "abc:", &breaks), Some("def"));
+        assert_eq!(strip_value("abc:def", "abc", &breaks), None);
+        assert_eq!(strip_value("abc-def", "abc-d", &breaks), Some("def"));
+        assert_eq!(strip_value("--abc-def", "--abc-", &breaks), None);
     }
 }
