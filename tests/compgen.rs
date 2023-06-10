@@ -407,7 +407,7 @@ fn parts_shell() {
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
     echo __argc_parts:/
-	echo A/B/C
+    echo A/B/C
     echo A/C
     echo B/C
     echo C
