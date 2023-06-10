@@ -350,6 +350,29 @@ arg() { :; }
 }
 
 #[test]
+fn parts() {
+    let script = r###"
+# @option --oa*[`_choice_fn`]
+_choice_fn() {
+    echo __argc_parts:/
+	echo A/B/C
+    echo A/C
+    echo B/C
+    echo C
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![
+            vec!["prog", "--oa", ""],
+            vec!["prog", "--oa", "A/"],
+            vec!["prog", "--oa", "A/B/"],
+        ]
+    );
+}
+
+#[test]
 fn no_space() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
@@ -376,4 +399,20 @@ _choice_fn() {
 "###;
 
     snapshot_compgen_shells!(script, vec!["prog", "--oa="]);
+}
+
+#[test]
+fn parts_shell() {
+    let script = r###"
+# @option --oa*[`_choice_fn`]
+_choice_fn() {
+    echo __argc_parts:/
+	echo A/B/C
+    echo A/C
+    echo B/C
+    echo C
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa", "A/"]);
 }

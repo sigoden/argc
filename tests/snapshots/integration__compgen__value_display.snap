@@ -3,10 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN Bash `prog --oa=` ************
-abc:def:xyz 
-abc:def:tsr 
-abc:ijk:abc 
-abc:ijk:xyz 
+abc:
 
 ************ COMPGEN Elvish `prog --oa=` ************
 --oa=abc:def:xyz	1	abc:def:xyz	
