@@ -36,7 +36,7 @@ def _argc_completer(context):
         value = parts[0]
         if parts[1] == "1":
             value = value + " "
-        result.add(RichCompletion(value, display=parts[0], description=parts[2], prefix_len=len(context.raw_prefix), append_closing_quote=False))
+        result.add(RichCompletion(value, display=parts[2], description=parts[3], prefix_len=len(context.raw_prefix), append_closing_quote=False))
     return result
     
 _add_one_completer('argc', _argc_completer, 'start')

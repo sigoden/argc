@@ -362,3 +362,18 @@ _choice_fn() {
 
     snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
 }
+
+#[test]
+fn value_display() {
+    let script = r###"
+# @option --oa*[`_choice_fn`]
+_choice_fn() {
+	echo "abc:def:xyz"
+	echo "abc:def:tsr"
+	echo "abc:ijk:abc"
+	echo "abc:ijk:xyz"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa="]);
+}
