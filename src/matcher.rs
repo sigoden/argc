@@ -771,8 +771,6 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<(String, Strin
         value_name,
         &param.choices,
         &param.choices_fn,
-        param.multiple,
-        param.required,
     )
 }
 
@@ -782,8 +780,6 @@ fn comp_positional(param: &PositionalParam) -> Vec<(String, String)> {
         &param.arg_value_name,
         &param.choices,
         &param.choices_fn,
-        param.multiple,
-        param.required,
     )
 }
 
@@ -792,8 +788,6 @@ fn comp_param(
     value_name: &str,
     choices: &Option<Vec<String>>,
     choices_fn: &Option<(String, bool)>,
-    multiple: bool,
-    required: bool,
 ) -> Vec<(String, String)> {
     let choices: Option<Either<Vec<String>, String>> = if let Some(choices_fn) = choices_fn {
         Some(Either::Right(choices_fn.0.to_string()))
@@ -811,12 +805,7 @@ fn comp_param(
             Either::Right(choices_fn) => vec![(format!("__argc_fn:{}", choices_fn), String::new())],
         }
     } else {
-        let value = match (multiple, required) {
-            (true, true) => format!("__argc_value+{}", value_name),
-            (true, false) => format!("__argc_value*{}", value_name),
-            (false, true) => format!("__argc_value!{}", value_name),
-            (false, false) => format!("__argc_value:{}", value_name),
-        };
+        let value = format!("__argc_value:{}", value_name);
         vec![(value, describe.into())]
     }
 }

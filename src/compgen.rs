@@ -48,8 +48,8 @@ pub fn compgen(
         if value.starts_with("__argc_") {
             if let Some(param_fn) = value.strip_prefix("__argc_fn:") {
                 param_fns.push(param_fn.to_string());
-            } else if let Some(val) = value.strip_prefix("__argc_value") {
-                param_val = param_val.or_else(|| Some(val.to_string()));
+            } else if let Some(value) = value.strip_prefix("__argc_value:") {
+                param_val = param_val.or_else(|| Some(value.to_string()));
             }
         } else if value.starts_with(word) {
             candicates.push(Candicate::new(value, description, false));
@@ -86,14 +86,14 @@ pub fn compgen(
         }
     }
     if candicates.is_empty() {
-        if let Some(value_name) = param_val {
-            let value_name = value_name.to_lowercase();
+        if let Some(value) = param_val {
+            let value = value.to_lowercase();
             let output = if ["path", "file", "arg", "any"]
                 .iter()
-                .any(|v| value_name.contains(v))
+                .any(|v| value.contains(v))
             {
                 "__argc_comp:file".to_string()
-            } else if value_name.contains("dir") || value_name.contains("folder") {
+            } else if value.contains("dir") || value.contains("folder") {
                 "__argc_comp:dir".to_string()
             } else {
                 String::new()
