@@ -1,0 +1,17 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa ` ************
+A/
+B/
+C
+
+************ COMPGEN `prog --oa A/` ************
+A/B/
+A/C
+
+************ COMPGEN `prog --oa A/B/` ************
+A/B/C
+
+
