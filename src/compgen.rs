@@ -34,6 +34,7 @@ pub fn compgen(
     let with_description = shell.with_description();
     let mut candicates: Vec<Candicate> = vec![];
     let mut param_fns = vec![];
+    let mut param_val = None;
     let no_dashdash = args.iter().all(|v| v != "--");
     let mut word = last;
     let mut prefix = "";
@@ -44,10 +45,12 @@ pub fn compgen(
         }
     }
     for (value, description) in compgen_values {
-        if let Some(param_fn) = value.strip_prefix("__argc_fn:") {
-            param_fns.push(param_fn.to_string());
-        } else if value.starts_with("__argc_") {
-            candicates.push(Candicate::new(value.to_string(), description, false));
+        if value.starts_with("__argc_") {
+            if let Some(param_fn) = value.strip_prefix("__argc_fn:") {
+                param_fns.push(param_fn.to_string());
+            } else if let Some(val) = value.strip_prefix("__argc_value") {
+                param_val = param_val.or_else(|| Some(val.to_string()));
+            }
         } else if value.starts_with(word) {
             candicates.push(Candicate::new(value, description, false));
         }
@@ -68,11 +71,9 @@ pub fn compgen(
                         None => (value, false),
                     };
                     if value.starts_with("__argc_") {
-                        candicates.push(Candicate::new(
-                            value.to_string(),
-                            description.to_string(),
-                            false,
-                        ));
+                        if let Some(val) = value.strip_prefix("__argc_value") {
+                            param_val = param_val.or_else(|| Some(val.to_string()));
+                        }
                     } else if value.starts_with(word) {
                         candicates.push(Candicate::new(
                             value.to_string(),
@@ -84,8 +85,8 @@ pub fn compgen(
             }
         }
     }
-    if candicates.len() == 1 {
-        if let Some(value_name) = candicates[0].value.strip_prefix("__argc_value") {
+    if candicates.is_empty() {
+        if let Some(value_name) = param_val {
             let value_name = value_name.to_lowercase();
             let output = if ["path", "file", "arg", "any"]
                 .iter()
@@ -195,7 +196,7 @@ impl Shell {
             Shell::Fish => candicates
                 .iter()
                 .map(|candicate| {
-                    let value = self.convert_value(&format!("{prefix}{}", candicate.value));
+                    let value = self.escape(&format!("{prefix}{}", candicate.value));
                     if candicate.description.is_empty() || !with_description {
                         value
                     } else {
@@ -207,7 +208,7 @@ impl Shell {
             Shell::Nushell => candicates
                 .iter()
                 .map(|candicate| {
-                    let value = self.convert_value(&format!("{prefix}{}", candicate.value));
+                    let value = self.escape(&format!("{prefix}{}", candicate.value));
                     let space = if candicate.nospace { "" } else { " " };
                     if candicate.description.is_empty() || !with_description {
                         format!("{value}{space}")
@@ -217,36 +218,39 @@ impl Shell {
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            _ => candicates
+            Shell::Zsh => candicates
                 .iter()
                 .map(|candicate| {
-                    let value = self.convert_value(&format!("{prefix}{}", candicate.value));
-                    let description = candicate.truncate_description();
-                    let space: &str = if candicate.nospace { "0" } else { "1" };
-                    format!("{value}\t{space}\t{description}")
+                    let mut value = self.escape(&format!("{prefix}{}", candicate.value));
+                    let display = self.escape(&candicate.value);
+
+                    let description = if candicate.description.is_empty() || !with_description {
+                        display
+                    } else {
+                        format!("{display}:{}", candicate.truncate_description())
+                    };
+                    if !candicate.nospace {
+                        value.push(' ');
+                    }
+                    format!("{value}\t{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-        }
-    }
-
-    pub(crate) fn convert_value(&self, value: &str) -> String {
-        if value.starts_with("__argc_") {
-            if value.starts_with("__argc_value") {
-                if let Some(stripped_value) = value.strip_prefix("__argc_value") {
-                    let (mark, value) = stripped_value.split_at(1);
-                    return match mark {
-                        "+" => format!("<{value}>..."),
-                        "*" => format!("[{value}]..."),
-                        "!" => format!("<{value}>"),
-                        ":" => format!("[{value}]"),
-                        _ => value.to_string(),
+            _ => candicates
+                .iter()
+                .map(|candicate| {
+                    let value = self.escape(&format!("{prefix}{}", candicate.value));
+                    let display = candicate.value.to_string();
+                    let description = if candicate.description.is_empty() || !with_description {
+                        String::new()
+                    } else {
+                        candicate.truncate_description()
                     };
-                }
-            }
-            value.to_string()
-        } else {
-            self.escape(value)
+                    let space: &str = if candicate.nospace { "0" } else { "1" };
+                    format!("{value}\t{space}\t{display}\t{description}")
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
         }
     }
 
@@ -300,7 +304,7 @@ impl Shell {
                     value.into()
                 }
             }
-            Shell::Zsh => escape_chars(value, r###"()<>[]"'` !#$&*;?\|~"###),
+            Shell::Zsh => escape_chars(value, r###"()<>[]"'` !#$&*:;?\|~"###),
             _ => value.into(),
         }
     }

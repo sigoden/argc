@@ -39,10 +39,10 @@ fn argc-completer {|@words|
     all $candicates | each {|candicate| 
         var parts = [(str:split "\t" $candicate)]
         var code-suffix = (if (eq $parts[1] 1) { echo ' ' } else { echo '' })
-        if (eq $parts[2] '') {
-            edit:complex-candidate $parts[0] &display=(styled $parts[0] 'default') &code-suffix=$code-suffix
+        if (eq $parts[3] '') {
+            edit:complex-candidate $parts[0] &display=(styled $parts[2] 'default') &code-suffix=$code-suffix
         } else {
-            edit:complex-candidate $parts[0] &display=(styled $parts[0] 'default')(styled ' ' 'dim white bg-default')(styled '('$parts[2]')' 'dim white') &code-suffix=$code-suffix
+            edit:complex-candidate $parts[0] &display=(styled $parts[2] 'default')(styled ' ' 'dim white bg-default')(styled '('$parts[3]')' 'dim white') &code-suffix=$code-suffix
         }
     }
 }

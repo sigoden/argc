@@ -31,10 +31,10 @@ $_argc_completer = {
         if ($parts[1] -eq "1") {
             $value = $value + " "
         }
-        if ($parts[2] -eq "") {
-            $description = "$([char]0x1b)[92m" + $parts[0] + "$([char]0x1b)[0m"
+        if ($parts[3] -eq "") {
+            $description = "$([char]0x1b)[92m" + $parts[2] + "$([char]0x1b)[0m"
         } else {
-            $description = "$([char]0x1b)[92m" + $parts[0] + "$([char]0x1b)[0m" + "$([char]0x1b)[38;5;238m (" + $parts[2] + ")$([char]0x1b)[0m"
+            $description = "$([char]0x1b)[92m" + $parts[2] + "$([char]0x1b)[0m" + "$([char]0x1b)[38;5;238m (" + $parts[3] + ")$([char]0x1b)[0m"
         }
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
     }

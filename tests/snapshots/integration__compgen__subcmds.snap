@@ -5,12 +5,10 @@ expression: data
 ************ COMPGEN `prog ` ************
 cmda
 cmdb
-[FILE]
 
 ************ COMPGEN `prog c` ************
 cmda
 cmdb
-[FILE]
 
 ************ COMPGEN `prog cmda` ************
 cmda
