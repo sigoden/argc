@@ -121,8 +121,7 @@ pub fn compgen(
                     continue;
                 }
                 depdups.insert(parted_value.clone());
-                let nospace = candicate.value != parted_value;
-                parted_candicates.push(Candicate::new(parted_value, String::new(), nospace))
+                parted_candicates.push(Candicate::new(parted_value, String::new(), true))
             } else {
                 parted_candicates.push(candicate)
             }
@@ -325,7 +324,12 @@ impl Shell {
                     .iter()
                     .map(|candicate| {
                         let value = self.escape(&format!("{prefix}{}", candicate.value));
-                        let display = &candicate.value[parts_char_idx..];
+                        let display = if candicate.value.len() <= parts_char_idx {
+                            " "
+                        } else {
+                            &candicate.value[parts_char_idx..]
+                        };
+                        let display = if display.is_empty() { " " } else { display };
                         let description =
                             if candicate.description.is_empty() || !self.with_description() {
                                 String::new()

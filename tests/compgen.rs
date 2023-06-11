@@ -355,6 +355,7 @@ fn parts() {
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
     echo __argc_parts:/
+	echo A/B
 	echo A/B/C
     echo A/C
     echo B/C
@@ -407,12 +408,28 @@ fn parts_shell() {
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
     echo __argc_parts:/
-    echo A/B/C
-    echo A/C
-    echo B/C
-    echo C
+	echo A/B
+	echo A/B/
+	echo A/B/C
+	echo A/B/D
 }
 "###;
 
     snapshot_compgen_shells!(script, vec!["prog", "--oa", "A/"]);
+}
+
+#[test]
+fn parts2_shell() {
+    let script = r###"
+# @option --oa*[`_choice_fn`]
+_choice_fn() {
+    echo __argc_parts:/
+	echo A/B
+	echo A/B/
+	echo A/B/C
+	echo A/B/D
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa", "A/B/"]);
 }
