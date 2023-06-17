@@ -210,8 +210,12 @@ impl Shell {
                 let mut candicates = candicates.to_vec();
                 let breaks = match std::env::var("COMP_WORDBREAKS") {
                     Ok(v) => v.chars().collect(),
-                    Err(_) => vec![],
+                    Err(_) => vec!['=', ':', '|', ';'],
                 };
+                let mut prefix = prefix;
+                if prefix.chars().any(|c| breaks.contains(&c)) {
+                    prefix = "";
+                }
                 let mut last = last;
                 if let Some((i, _)) = last.char_indices().rfind(|(_, c)| breaks.contains(c)) {
                     let idx = i + 1;
@@ -225,7 +229,7 @@ impl Shell {
                 if values.len() > 1 {
                     if let Some(common) = common_prefix(&values) {
                         if common != last {
-                            return common;
+                            return format!("{prefix}{common}");
                         } else {
                             patch_first = true;
                         }
@@ -243,7 +247,12 @@ impl Shell {
                     .iter()
                     .enumerate()
                     .map(|(i, candicate)| {
-                        let mut value = self.escape(&candicate.value[parts_char_idx..]);
+                        let value = if parts_char_idx == 0 {
+                            format!("{prefix}{}", candicate.value)
+                        } else {
+                            candicate.value[parts_char_idx..].to_string()
+                        };
+                        let mut value = self.escape(&value);
                         if i == 0 && patch_first {
                             value = format!(" {}", value);
                         };
