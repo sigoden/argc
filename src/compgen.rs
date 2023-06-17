@@ -210,7 +210,7 @@ impl Shell {
                 let mut candicates = candicates.to_vec();
                 let breaks = match std::env::var("COMP_WORDBREAKS") {
                     Ok(v) => v.chars().collect(),
-                    Err(_) => vec!['='],
+                    Err(_) => vec!['=', ':', '|', ';'],
                 };
                 let mut prefix = prefix;
                 if prefix.chars().any(|c| breaks.contains(&c)) {
