@@ -32,7 +32,7 @@ pub fn compgen(
     let matcher = Matcher::new(&cmd, &args);
     let compgen_values = matcher.compgen();
     let mut candicates: Vec<Candicate> = vec![];
-    let mut param_fns = vec![];
+    let mut argc_fn = None;
     let mut argc_value = None;
     let mut argc_parts = String::new();
     let no_dashdash = args.iter().all(|v| v != "--");
@@ -45,8 +45,8 @@ pub fn compgen(
     }
     for (value, description) in compgen_values {
         if value.starts_with("__argc_") {
-            if let Some(param_fn) = value.strip_prefix("__argc_fn:") {
-                param_fns.push(param_fn.to_string());
+            if let Some(fn_name) = value.strip_prefix("__argc_fn:") {
+                argc_fn = Some(fn_name.to_string());
             } else if let Some(value) = value.strip_prefix("__argc_value:") {
                 argc_value = argc_value.or_else(|| Some(value.to_string()));
             }
@@ -54,35 +54,36 @@ pub fn compgen(
             candicates.push(Candicate::new(value.clone(), description, false));
         }
     }
-    if !param_fns.is_empty() {
+    if let Some(fn_name) = argc_fn {
         let mut envs = HashMap::new();
         let with_description = shell.with_description();
         envs.insert("ARGC_DESCRIBE".into(), with_description.to_string());
         if let Some(cwd) = get_current_dir() {
             envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
         }
-        let fns: Vec<&str> = param_fns.iter().map(|v| v.as_str()).collect();
-        if let Some(list) = run_param_fns(script_path, &fns, &args, envs) {
-            for lines in list {
-                for line in lines {
-                    let (value, description) = line.split_once('\t').unwrap_or((line.as_str(), ""));
-                    let (value, nospace) = match value.strip_suffix('\0') {
-                        Some(value) => (value, true),
-                        None => (value, false),
-                    };
-                    if value.starts_with("__argc_") {
-                        if let Some(value) = value.strip_prefix("__argc_value:") {
-                            argc_value = argc_value.or_else(|| Some(value.to_string()));
-                        } else if let Some(val) = value.strip_prefix("__argc_parts:") {
-                            argc_parts.push_str(val.trim());
-                        }
-                    } else if value.starts_with(last) {
-                        candicates.push(Candicate::new(
-                            value.to_string(),
-                            description.to_string(),
-                            nospace,
-                        ));
+        if let Some(outputs) = run_param_fns(script_path, &[fn_name.as_str()], &args, envs) {
+            for line in outputs[0]
+                .trim()
+                .split('\n')
+                .map(|v| v.trim_end_matches('\r'))
+            {
+                let (value, description) = line.split_once('\t').unwrap_or((line, ""));
+                let (value, nospace) = match value.strip_suffix('\0') {
+                    Some(value) => (value, true),
+                    None => (value, false),
+                };
+                if value.starts_with("__argc_") {
+                    if let Some(value) = value.strip_prefix("__argc_value:") {
+                        argc_value = argc_value.or_else(|| Some(value.to_string()));
+                    } else if let Some(val) = value.strip_prefix("__argc_parts:") {
+                        argc_parts.push_str(val.trim());
                     }
+                } else if value.starts_with(last) {
+                    candicates.push(Candicate::new(
+                        value.to_string(),
+                        description.to_string(),
+                        nospace,
+                    ));
                 }
             }
         }

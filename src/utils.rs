@@ -43,6 +43,20 @@ pub fn get_shell_path() -> Option<PathBuf> {
     Some(shell)
 }
 
+pub fn get_shell_args(shell_path: &Path) -> Vec<String> {
+    if let Some(name) = shell_path
+        .file_stem()
+        .map(|v| v.to_string_lossy().to_lowercase())
+    {
+        match name.as_str() {
+            "bash" => vec!["--noprofile".to_string(), "--norc".to_string()],
+            _ => vec![],
+        }
+    } else {
+        vec![]
+    }
+}
+
 #[cfg(windows)]
 pub fn get_bash_path() -> Option<PathBuf> {
     let git_bash_path = PathBuf::from("C:\\Program Files\\Git\\bin\\bash.exe");
@@ -63,17 +77,9 @@ pub fn run_param_fns(
     param_fns: &[&str],
     args: &[String],
     envs: HashMap<String, String>,
-) -> Option<Vec<Vec<String>>> {
+) -> Option<Vec<String>> {
     let shell = get_shell_path()?;
-    let shell_extra_args = if shell
-        .file_stem()
-        .map(|v| v.to_string_lossy().to_lowercase().contains("bash"))
-        .unwrap_or_default()
-    {
-        vec!["--noprofile".to_string(), "--norc".to_string()]
-    } else {
-        vec![]
-    };
+    let shell_extra_args = get_shell_args(&shell);
     let path_env = path_env_with_exe();
     let handles: Vec<_> = param_fns
         .iter()
@@ -100,18 +106,16 @@ pub fn run_param_fns(
             })
         })
         .collect();
-    let list: Vec<Vec<String>> = handles
+    let result: Vec<String> = handles
         .into_iter()
-        .map(|h| h.join().ok().unwrap_or_default())
-        .map(|v| {
-            v.split('\n')
-                .map(|v| v.trim())
-                .filter(|v| !v.is_empty())
-                .map(|v| v.to_string())
-                .collect()
+        .map(|h| {
+            h.join()
+                .ok()
+                .map(|v| v.trim().to_string())
+                .unwrap_or_default()
         })
         .collect();
-    Some(list)
+    Some(result)
 }
 
 pub fn termwidth() -> Option<usize> {
