@@ -7,7 +7,7 @@ prog abc
 
 OUTPUT
 argc_val=abc
-argc__args=( abc )
+argc__positionals=( abc )
 argc__fn=main
 main abc
 

@@ -6,7 +6,7 @@ expression: data
 prog cmda
 
 OUTPUT
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -15,7 +15,7 @@ prog cmda -a
 
 OUTPUT
 argc_a=1
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -24,7 +24,7 @@ prog cmda -f -f
 
 OUTPUT
 argc_fb=2
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -33,7 +33,7 @@ prog cmda -e e
 
 OUTPUT
 argc_e=e
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -42,7 +42,7 @@ prog cmda --oa oa
 
 OUTPUT
 argc_oa=oa
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -51,7 +51,7 @@ prog cmda --ob ob1 --ob ob2
 
 OUTPUT
 argc_ob=( ob1 ob2 )
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -60,7 +60,7 @@ prog cmda --ob ob1 ob2
 
 OUTPUT
 argc_ob=( ob1 ob2 )
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -69,7 +69,7 @@ prog cmda -o ob1 ob2
 
 OUTPUT
 argc_od=( ob1 ob2 )
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -78,7 +78,7 @@ prog cmda --cc abc
 
 OUTPUT
 argc_cc=abc
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -87,7 +87,7 @@ prog cmda -soa soa
 
 OUTPUT
 argc_soa=soa
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -96,7 +96,7 @@ prog cmda --ob a b --ob c
 
 OUTPUT
 argc_ob=( a b c )
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 
@@ -107,7 +107,7 @@ OUTPUT
 argc_oe=val
 argc_of=`_default_fn`
 argc_cb=x
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmdc
 cmdc
 
@@ -118,7 +118,7 @@ OUTPUT
 argc_oe=oe
 argc_of=`_default_fn`
 argc_cb=x
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmdc
 cmdc
 
@@ -129,7 +129,7 @@ OUTPUT
 argc_oe=val
 argc_of=of
 argc_cb=x
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmdc
 cmdc
 
@@ -140,7 +140,7 @@ OUTPUT
 argc_oe=val
 argc_of=`_default_fn`
 argc_cb=y
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmdc
 cmdc
 

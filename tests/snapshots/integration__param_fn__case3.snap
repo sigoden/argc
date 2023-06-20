@@ -6,7 +6,7 @@ expression: data
 prog _choice_fn
 
 OUTPUT
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=_choice_fn
 _choice_fn;exit;
 
@@ -15,7 +15,7 @@ prog _choice_fn prog
 
 OUTPUT
 argc_v1=''
-argc__args=( '' )
+argc__positionals=( '' )
 argc__fn=_choice_fn
 _choice_fn '';exit;
 
@@ -24,7 +24,7 @@ prog _choice_fn prog v1
 
 OUTPUT
 argc_v1=v1
-argc__args=( v1 )
+argc__positionals=( v1 )
 argc__fn=_choice_fn
 _choice_fn v1;exit;
 
@@ -34,7 +34,7 @@ prog _choice_fn prog v1
 OUTPUT
 argc_v1=v1
 argc_v2=''
-argc__args=( v1 '' )
+argc__positionals=( v1 '' )
 argc__fn=_choice_fn
 _choice_fn v1 '';exit;
 
@@ -44,7 +44,7 @@ prog _choice_fn prog v1 v2
 OUTPUT
 argc_v1=v1
 argc_v2=v2
-argc__args=( v1 v2 )
+argc__positionals=( v1 v2 )
 argc__fn=_choice_fn
 _choice_fn v1 v2;exit;
 
@@ -54,7 +54,7 @@ prog _choice_fn prog v1 v2
 OUTPUT
 argc_v1=v1
 argc_v2=v2
-argc__args=( v1 v2 )
+argc__positionals=( v1 v2 )
 argc__fn=_choice_fn
 _choice_fn v1 v2;exit;
 

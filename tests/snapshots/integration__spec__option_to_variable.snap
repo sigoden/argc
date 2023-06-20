@@ -11,5 +11,5 @@ argc_option_foo=( f1 f2 )
 argc_option_bar=foo
 argc_arg_foo=v1
 argc_arg_bar=( x1 x2 )
-argc__args=( v1 x1 x2 )
+argc__positionals=( v1 x1 x2 )
 

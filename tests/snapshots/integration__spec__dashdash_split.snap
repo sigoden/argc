@@ -9,7 +9,7 @@ OUTPUT
 argc_f=1
 argc_oa=a
 argc_v1=v1
-argc__args=( v1 )
+argc__positionals=( v1 )
 
 ************ RUN ************
 prog v1 -f -- --oa a
@@ -18,6 +18,6 @@ OUTPUT
 argc_f=1
 argc_v1=v1
 argc_v2=( --oa a )
-argc__args=( v1 --oa a )
+argc__positionals=( v1 --oa a )
 
 

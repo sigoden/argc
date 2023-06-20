@@ -7,7 +7,7 @@ prog cmda --cc val
 
 OUTPUT
 argc_cc=val
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=cmda
 cmda
 

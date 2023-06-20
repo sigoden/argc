@@ -7,13 +7,13 @@ prog -h
 
 OUTPUT
 argc_host=1
-argc__args=(  )
+argc__positionals=(  )
 
 ************ RUN ************
 prog -V
 
 OUTPUT
 argc_verify=1
-argc__args=(  )
+argc__positionals=(  )
 
 
