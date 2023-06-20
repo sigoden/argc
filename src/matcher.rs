@@ -210,10 +210,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 self.dashdash.iter().map(|v| v.to_string()).collect(),
             ));
         }
-        output.push(ArgcValue::Multiple(
-            "_args".into(),
-            self.positional_args.iter().map(|v| v.to_string()).collect(),
-        ));
         output
     }
 
