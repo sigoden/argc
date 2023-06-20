@@ -294,7 +294,7 @@ impl Shell {
                     let display = if value.is_empty() {
                         " ".into()
                     } else {
-                        value.clone()
+                        value.to_string()
                     };
                     let value = self.escape(&format!("{prefix}{}", value));
                     let description = if description.is_empty() || !self.with_description() {
