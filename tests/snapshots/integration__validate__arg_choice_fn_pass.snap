@@ -7,7 +7,7 @@ prog cmdj val
 
 OUTPUT
 argc_val=val
-argc__args=( val )
+argc__positionals=( val )
 argc__fn=cmdj
 cmdj val
 

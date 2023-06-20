@@ -6,7 +6,7 @@ RUN
 prog
 
 OUTPUT
-argc__args=(  )
+argc__positionals=(  )
 argc__fn=main
 main
 

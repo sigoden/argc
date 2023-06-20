@@ -8,7 +8,7 @@ prog cmdp a b c
 OUTPUT
 argc_val1=( a b )
 argc_val2=( c )
-argc__args=( a b c )
+argc__positionals=( a b c )
 argc__fn=cmdp
 cmdp a b c
 
@@ -18,7 +18,7 @@ prog cmdp -- a b c
 OUTPUT
 argc_val1=( a b )
 argc_val2=( c )
-argc__args=( a b c )
+argc__positionals=( a b c )
 argc__fn=cmdp
 cmdp a b c
 
@@ -28,7 +28,7 @@ prog cmdp a -- b c
 OUTPUT
 argc_val1=( a )
 argc_val2=( b c )
-argc__args=( a b c )
+argc__positionals=( a b c )
 argc__fn=cmdp
 cmdp a b c
 
@@ -38,7 +38,7 @@ prog cmdp a b -- c
 OUTPUT
 argc_val1=( a b )
 argc_val2=( c )
-argc__args=( a b c )
+argc__positionals=( a b c )
 argc__fn=cmdp
 cmdp a b c
 
@@ -47,7 +47,7 @@ prog cmdp a b c --
 
 OUTPUT
 argc_val1=( a b c )
-argc__args=( a b c )
+argc__positionals=( a b c )
 argc__fn=cmdp
 cmdp a b c
 

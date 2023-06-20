@@ -114,7 +114,7 @@ impl ArgcValue {
         }
 
         variables.push(format!(
-            "{}__args=( {} )",
+            "{}__positionals=( {} )",
             VARIABLE_PREFIX,
             positional_args.join(" ")
         ));

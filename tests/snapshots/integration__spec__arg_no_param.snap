@@ -6,7 +6,7 @@ expression: data
 prog cmda v1 v2
 
 OUTPUT
-argc__args=( v1 v2 )
+argc__positionals=( v1 v2 )
 argc__fn=cmda
 cmda v1 v2
 
@@ -14,7 +14,7 @@ cmda v1 v2
 prog cmda --o1 -o2 -3
 
 OUTPUT
-argc__args=( --o1 -o2 -3 )
+argc__positionals=( --o1 -o2 -3 )
 argc__fn=cmda
 cmda --o1 -o2 -3
 
