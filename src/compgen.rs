@@ -232,17 +232,17 @@ impl Shell {
                     .into_iter()
                     .enumerate()
                     .map(|(i, (value, description, nospace))| {
-                        let value = if i == 0 && first_space {
-                            format!(" {}", value)
+                        let escaped_value = if i == 0 && first_space {
+                            format!(" {}", self.escape(&value))
                         } else {
-                            value
+                            self.escape(&value)
                         };
                         if nospace {
-                            value
+                            escaped_value
                         } else if description.is_empty() || !self.with_description() {
-                            format!("{value} ")
+                            format!("{escaped_value} ")
                         } else {
-                            format!("{value} ({})", truncate_description(&description))
+                            format!("{escaped_value} ({})", truncate_description(&description))
                         }
                     })
                     .collect::<Vec<String>>()
@@ -251,11 +251,11 @@ impl Shell {
             Shell::Fish => candicates
                 .into_iter()
                 .map(|(value, description, _nospace)| {
-                    let value = self.escape(&format!("{prefix}{}", value));
+                    let escaped_value = self.escape(&format!("{prefix}{}", value));
                     if description.is_empty() || !self.with_description() {
-                        value
+                        escaped_value
                     } else {
-                        format!("{value}\t{}", truncate_description(&description))
+                        format!("{escaped_value}\t{}", truncate_description(&description))
                     }
                 })
                 .collect::<Vec<String>>()
@@ -263,12 +263,15 @@ impl Shell {
             Shell::Nushell => candicates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let value = self.escape(&format!("{prefix}{}", value));
+                    let escaped_value = self.escape(&format!("{prefix}{}", value));
                     let space = if nospace { "" } else { " " };
                     if description.is_empty() || !self.with_description() {
-                        format!("{value}{space}")
+                        format!("{escaped_value}{space}")
                     } else {
-                        format!("{value}{space}\t{}", truncate_description(&description))
+                        format!(
+                            "{escaped_value}{space}\t{}",
+                            truncate_description(&description)
+                        )
                     }
                 })
                 .collect::<Vec<String>>()
@@ -276,34 +279,30 @@ impl Shell {
             Shell::Zsh => candicates
                 .into_iter()
                 .map(|(value, description, nospace)| {
+                    let escaped_value = self.escape(&format!("{prefix}{}", value));
                     let display = self.escape(&value);
-                    let value = self.escape(&format!("{prefix}{}", value));
                     let description = if description.is_empty() || !self.with_description() {
                         display
                     } else {
                         format!("{display}:{}", truncate_description(&description))
                     };
                     let space = if nospace { "" } else { " " };
-                    format!("{value}{space}\t{description}")
+                    format!("{escaped_value}{space}\t{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
             _ => candicates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let display = if value.is_empty() {
-                        " ".into()
-                    } else {
-                        value.to_string()
-                    };
-                    let value = self.escape(&format!("{prefix}{}", value));
+                    let escaped_value = self.escape(&format!("{prefix}{}", value));
+                    let display = if value.is_empty() { " ".into() } else { value };
                     let description = if description.is_empty() || !self.with_description() {
                         String::new()
                     } else {
                         truncate_description(&description)
                     };
                     let space: &str = if nospace { "0" } else { "1" };
-                    format!("{value}\t{space}\t{display}\t{description}")
+                    format!("{escaped_value}\t{space}\t{display}\t{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
