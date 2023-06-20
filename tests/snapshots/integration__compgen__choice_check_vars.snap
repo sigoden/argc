@@ -5,20 +5,17 @@ expression: data
 ************ COMPGEN `prog argc` ************
 argc__args=([0]="argc")
 argc__fn=_choice_fn
-argc__words=([0]="prog" [1]="argc")
 argc_foo=argc
 
 ************ COMPGEN `prog argc ` ************
 argc__args=([0]="argc" [1]="")
 argc__fn=_choice_fn
-argc__words=([0]="prog" [1]="argc" [2]="")
 argc_bar=
 argc_foo=argc
 
 ************ COMPGEN `prog argc argc` ************
 argc__args=([0]="argc" [1]="argc")
 argc__fn=_choice_fn
-argc__words=([0]="prog" [1]="argc" [2]="argc")
 argc_bar=argc
 argc_foo=argc
 

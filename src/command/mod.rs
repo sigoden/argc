@@ -65,13 +65,14 @@ impl Command {
             bail!("Invalid args");
         }
         if args.len() >= 2 && self.root.borrow().exist_param_fn(args[1].as_str()) {
-            let mut arg_values = vec![];
-            let words = &args[2..];
-            if words.len() > 1 {
-                let matcher = Matcher::new(self, words);
-                arg_values.extend(matcher.to_arg_values_for_choice_fn());
-            }
-            arg_values.push(ArgcValue::Multiple("_words".into(), words.to_vec()));
+            let fallback_args = vec!["prog".to_string()];
+            let new_args = if args.len() == 2 {
+                &fallback_args
+            } else {
+                &args[2..]
+            };
+            let matcher = Matcher::new(self, new_args);
+            let mut arg_values = matcher.to_arg_values_for_choice_fn();
             arg_values.push(ArgcValue::ParamFn(args[1].clone()));
             return Ok(arg_values);
         }
