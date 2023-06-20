@@ -17,20 +17,20 @@ _argc_completer() {
     if [[ "$cur" == "" ]]; then
         line="$line ''"
     fi
-    local candicates=($(echo "$line" | _argc_complete_balance_quotes | xargs argc --argc-compgen bash "$scriptfile" 2>/dev/null))
-    if [[ ${#candicates[@]} -eq 1 ]]; then
-        if [[ "${candicates[0]}" == "__argc_comp:file" ]]; then
+    local candidates=($(echo "$line" | _argc_complete_balance_quotes | xargs argc --argc-compgen bash "$scriptfile" 2>/dev/null))
+    if [[ ${#candidates[@]} -eq 1 ]]; then
+        if [[ "${candidates[0]}" == "__argc_comp:file" ]]; then
             _argc_complete_path "$cur"
             return
-        elif [[ "${candicates[0]}" == "__argc_comp:dir" ]]; then
+        elif [[ "${candidates[0]}" == "__argc_comp:dir" ]]; then
             _argc_complete_path "$cur" dir
             return
         fi
     fi
 
-    if [[ ${#candicates[@]} -gt 0 ]]; then
+    if [[ ${#candidates[@]} -gt 0 ]]; then
         compopt -o nospace
-        COMPREPLY=(${candicates[@]})
+        COMPREPLY=(${candidates[@]})
     fi
 }
 

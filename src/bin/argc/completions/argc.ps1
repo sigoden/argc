@@ -16,15 +16,15 @@ $_argc_completer = {
     if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
         return
     }
-    $candicates = @((argc --argc-compgen powershell $scriptfile $words 2>$null).Split("`n"))
-    if ($candicates.Count -eq 1) {
-        if (($candicates[0] -eq "__argc_comp:file") -or ($candicates[0] -eq "__argc_comp:dir")) {
+    $candidates = @((argc --argc-compgen powershell $scriptfile $words 2>$null).Split("`n"))
+    if ($candidates.Count -eq 1) {
+        if (($candidates[0] -eq "__argc_comp:file") -or ($candidates[0] -eq "__argc_comp:dir")) {
             return
-        } elseif ($candicates[0] -eq "") {
+        } elseif ($candidates[0] -eq "") {
             return ""
         }
     }
-    $candicates | ForEach-Object { 
+    $candidates | ForEach-Object { 
         $parts = ($_ -split "`t")
         $value = $parts[0]
         $description = ""

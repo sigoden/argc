@@ -15,21 +15,21 @@ _argc_completer()
         words+=( $'\0' )
     fi
     local IFS=$'\n'
-    local candicates=($(argc --argc-compgen zsh "$scriptfile" $words 2>/dev/null))
-    if [[ ${#candicates[@]} -eq 1 ]]; then
-        if [[ "$candicates[1]" == "__argc_comp:file" ]]; then
+    local candidates=($(argc --argc-compgen zsh "$scriptfile" $words 2>/dev/null))
+    if [[ ${#candidates[@]} -eq 1 ]]; then
+        if [[ "$candidates[1]" == "__argc_comp:file" ]]; then
             _path_files
             return
-        elif [[ "$candicates[1]" == "__argc_comp:dir" ]]; then
+        elif [[ "$candidates[1]" == "__argc_comp:dir" ]]; then
             _path_files -/
             return
         fi
     fi
-    if [[ ${#candicates[@]} -gt 0 ]]; then
+    if [[ ${#candidates[@]} -gt 0 ]]; then
         local values=()
         local displays=()
-        for candicate in ${candicates[@]}; do
-            IFS=$'\t' read -r value display <<< "$candicate"
+        for candidate in ${candidates[@]}; do
+            IFS=$'\t' read -r value display <<< "$candidate"
             values+=( "$value" )
             displays+=( "$display" )
         done

@@ -24,14 +24,14 @@ def _argc_completer(context):
     if not os.path.exists(scriptfile):
         return
     output, _ = Popen(['argc', '--argc-compgen', 'xonsh', scriptfile, *words], stdout=PIPE, stderr=PIPE).communicate()
-    candicates = output.decode().split('\n')
-    candicates.pop()
+    candidates = output.decode().split('\n')
+    candidates.pop()
     result = set()
-    if len(candicates) == 0:
+    if len(candidates) == 0:
         return result
-    if candicates[0] == '__argc_comp:file' or candicates[0] == '__argc_comp:dir':
+    if candidates[0] == '__argc_comp:file' or candidates[0] == '__argc_comp:dir':
         return
-    for v in candicates:
+    for v in candidates:
         parts = v.split('\t')
         value = parts[0]
         if parts[1] == "1":

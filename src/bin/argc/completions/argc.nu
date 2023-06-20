@@ -35,13 +35,13 @@ def _argc_completer [words: list<string>] {
     if not ($scriptfile | path exists) {
         return (_argc_complete_path ($words | last) false | _argc_complete_list)
     }
-    mut candicates = ((do { argc --argc-compgen nushell $scriptfile $words } | complete | get stdout) | split row "\n")
-    if ($candicates | length) == 1  {
-        if $candicates.0 == '__argc_comp:file' {
-            $candicates = (_argc_complete_path ($words | last) false)
-        } else if $candicates.0 == '__argc_comp:dir' {
-            $candicates = (_argc_complete_path ($words | last) true)
+    mut candidates = ((do { argc --argc-compgen nushell $scriptfile $words } | complete | get stdout) | split row "\n")
+    if ($candidates | length) == 1  {
+        if $candidates.0 == '__argc_comp:file' {
+            $candidates = (_argc_complete_path ($words | last) false)
+        } else if $candidates.0 == '__argc_comp:dir' {
+            $candidates = (_argc_complete_path ($words | last) true)
         }
     }
-    $candicates | _argc_complete_list
+    $candidates | _argc_complete_list
 }

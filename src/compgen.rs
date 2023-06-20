@@ -33,7 +33,7 @@ pub fn compgen(
     let matcher = Matcher::new(&cmd, &args);
     let compgen_values = matcher.compgen();
     let mut prefix = "";
-    let mut candicates: IndexMap<String, (String, bool)> = IndexMap::new();
+    let mut candidates: IndexMap<String, (String, bool)> = IndexMap::new();
     let mut argc_fn = None;
     let mut argc_value = None;
     if args.iter().all(|v| v != "--") {
@@ -50,7 +50,7 @@ pub fn compgen(
                 argc_value = argc_value.or_else(|| Some(value.to_string()));
             }
         } else if value.starts_with(last) {
-            candicates.insert(value.clone(), (description, false));
+            candidates.insert(value.clone(), (description, false));
         }
     }
     let mut argc_prefix = prefix.to_string();
@@ -85,7 +85,7 @@ pub fn compgen(
                         argc_matcher = value.to_string();
                     }
                 } else if value.starts_with(&argc_matcher) {
-                    match candicates.get_mut(value) {
+                    match candidates.get_mut(value) {
                         Some((v1, v2)) => {
                             if v1.is_empty() && !description.is_empty() {
                                 *v1 = description.to_string();
@@ -95,7 +95,7 @@ pub fn compgen(
                             }
                         }
                         None => {
-                            candicates
+                            candidates
                                 .insert(value.to_string(), (description.to_string(), nospace));
                         }
                     }
@@ -103,7 +103,7 @@ pub fn compgen(
             }
         }
     }
-    if candicates.is_empty() {
+    if candidates.is_empty() {
         if let Some(value) = argc_value {
             let value = value.to_lowercase();
             let output = if ["path", "file", "arg", "any"]
@@ -119,11 +119,11 @@ pub fn compgen(
             return Ok(output);
         }
     }
-    let candicates: Vec<(String, String, bool)> = candicates
+    let candidates: Vec<(String, String, bool)> = candidates
         .into_iter()
         .map(|(value, (description, nospace))| (value, description, nospace))
         .collect();
-    Ok(shell.output_candicates(candicates, &argc_matcher, &argc_prefix))
+    Ok(shell.output_candidates(candidates, &argc_matcher, &argc_prefix))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -190,9 +190,9 @@ impl Shell {
         }
     }
 
-    pub(crate) fn output_candicates(
+    pub(crate) fn output_candidates(
         &self,
-        mut candicates: Vec<(String, String, bool)>,
+        mut candidates: Vec<(String, String, bool)>,
         matcher: &str,
         prefix: &str,
     ) -> String {
@@ -210,15 +210,15 @@ impl Shell {
                 if let Some((i, _)) = matcher.char_indices().rfind(|(_, c)| breaks.contains(c)) {
                     let idx = i + 1;
                     matcher = &matcher[idx..];
-                    for (value, _, _) in candicates.iter_mut() {
+                    for (value, _, _) in candidates.iter_mut() {
                         *value = value[idx..].to_string()
                     }
                 };
-                let values: Vec<&str> = candicates.iter().map(|(v, _, _)| v.as_str()).collect();
+                let values: Vec<&str> = candidates.iter().map(|(v, _, _)| v.as_str()).collect();
                 let values_len = values.len();
                 let mut first_space = false;
                 if values_len == 1 {
-                    let (value, _, nospace) = &candicates[0];
+                    let (value, _, nospace) = &candidates[0];
                     let space = if *nospace { "" } else { " " };
                     return format!("{prefix}{}{space}", self.escape(value));
                 } else if let Some(common) = common_prefix(&values) {
@@ -228,7 +228,7 @@ impl Shell {
                         first_space = true;
                     }
                 }
-                candicates
+                candidates
                     .into_iter()
                     .enumerate()
                     .map(|(i, (value, description, nospace))| {
@@ -248,7 +248,7 @@ impl Shell {
                     .collect::<Vec<String>>()
                     .join("\n")
             }
-            Shell::Fish => candicates
+            Shell::Fish => candidates
                 .into_iter()
                 .map(|(value, description, _nospace)| {
                     let escaped_value = self.escape(&format!("{prefix}{}", value));
@@ -260,7 +260,7 @@ impl Shell {
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            Shell::Nushell => candicates
+            Shell::Nushell => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
                     let escaped_value = self.escape(&format!("{prefix}{}", value));
@@ -276,7 +276,7 @@ impl Shell {
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            Shell::Zsh => candicates
+            Shell::Zsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
                     let escaped_value = self.escape(&format!("{prefix}{}", value));
@@ -291,7 +291,7 @@ impl Shell {
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            _ => candicates
+            _ => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
                     let escaped_value = self.escape(&format!("{prefix}{}", value));
