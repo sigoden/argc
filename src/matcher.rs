@@ -365,11 +365,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
         if !last_cmd.subcommands.is_empty() {
-            if self.positional_args.is_empty() && last_args.is_empty() {
-                if !last_cmd.exist_main_fn(&cmd_paths) {
+            if !last_cmd.exist_main_fn(&cmd_paths) {
+                if self.positional_args.is_empty() && last_args.is_empty() {
                     return Some(MatchError::DisplayHelp);
+                } else {
+                    return Some(MatchError::InvalidSubcommand);
                 }
-            } else {
+            } else if last_cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
                 return Some(MatchError::InvalidSubcommand);
             }
         }

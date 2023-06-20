@@ -1,0 +1,13 @@
+---
+source: tests/main_fn.rs
+expression: data
+---
+RUN
+prog abc
+
+OUTPUT
+argc_val=abc
+argc__args=( abc )
+argc__fn=main
+main abc
+
