@@ -4,7 +4,8 @@ use crate::utils::{escape_shell_words, get_current_dir, run_param_fns};
 use crate::Result;
 
 use anyhow::bail;
-use std::collections::{HashMap, HashSet};
+use indexmap::IndexMap;
+use std::collections::HashMap;
 use std::str::FromStr;
 
 pub fn compgen(
@@ -31,16 +32,14 @@ pub fn compgen(
         .collect();
     let matcher = Matcher::new(&cmd, &args);
     let compgen_values = matcher.compgen();
-    let mut candicates: Vec<Candicate> = vec![];
+    let mut prefix = "";
+    let mut candicates: IndexMap<String, (String, bool)> = IndexMap::new();
     let mut argc_fn = None;
     let mut argc_value = None;
-    let mut argc_parts = String::new();
-    let no_dashdash = args.iter().all(|v| v != "--");
-    let mut prefix = "";
-    if no_dashdash {
+    if args.iter().all(|v| v != "--") {
         if let Some((left, right)) = split_equal_sign(last) {
-            last = right;
             prefix = left;
+            last = right
         }
     }
     for (value, description) in compgen_values {
@@ -51,13 +50,16 @@ pub fn compgen(
                 argc_value = argc_value.or_else(|| Some(value.to_string()));
             }
         } else if value.starts_with(last) {
-            candicates.push(Candicate::new(value.clone(), description, false));
+            candicates.insert(value.clone(), (description, false));
         }
     }
+    let mut argc_prefix = prefix.to_string();
+    let mut argc_matcher = last.to_string();
     if let Some(fn_name) = argc_fn {
         let mut envs = HashMap::new();
         let with_description = shell.with_description();
         envs.insert("ARGC_DESCRIBE".into(), with_description.to_string());
+        envs.insert("ARGC_MATCHER".into(), argc_matcher.clone());
         if let Some(cwd) = get_current_dir() {
             envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
         }
@@ -75,15 +77,28 @@ pub fn compgen(
                 if value.starts_with("__argc_") {
                     if let Some(value) = value.strip_prefix("__argc_value:") {
                         argc_value = argc_value.or_else(|| Some(value.to_string()));
-                    } else if let Some(val) = value.strip_prefix("__argc_parts:") {
-                        argc_parts.push_str(val.trim());
+                    } else if let Some(value) = value.strip_prefix("__argc_comp:") {
+                        argc_value = Some(value.to_string());
+                    } else if let Some(value) = value.strip_prefix("__argc_prefix:") {
+                        argc_prefix = format!("{prefix}{value}")
+                    } else if let Some(value) = value.strip_prefix("__argc_matcher:") {
+                        argc_matcher = value.to_string();
                     }
-                } else if value.starts_with(last) {
-                    candicates.push(Candicate::new(
-                        value.to_string(),
-                        description.to_string(),
-                        nospace,
-                    ));
+                } else if value.starts_with(&argc_matcher) {
+                    match candicates.get_mut(value) {
+                        Some((v1, v2)) => {
+                            if v1.is_empty() && !description.is_empty() {
+                                *v1 = description.to_string();
+                            }
+                            if !*v2 && nospace {
+                                *v2 = true
+                            }
+                        }
+                        None => {
+                            candicates
+                                .insert(value.to_string(), (description.to_string(), nospace));
+                        }
+                    }
                 }
             }
         }
@@ -104,35 +119,11 @@ pub fn compgen(
             return Ok(output);
         }
     }
-    let mut parts_chars: Vec<char> = argc_parts.chars().collect();
-    parts_chars.dedup();
-    candicates = if !argc_parts.is_empty() {
-        let mut depdups = HashSet::new();
-        let mut parted_candicates = vec![];
-        for candicate in candicates.into_iter() {
-            if let Some((i, _)) = candicate
-                .value
-                .chars()
-                .enumerate()
-                .skip(last.len() + 1)
-                .find(|(_, c)| parts_chars.contains(c))
-            {
-                let parted_value: String = candicate.value.chars().take(i + 1).collect();
-                if depdups.contains(&parted_value) {
-                    continue;
-                }
-                depdups.insert(parted_value.clone());
-                parted_candicates.push(Candicate::new(parted_value, String::new(), true))
-            } else {
-                parted_candicates.push(candicate)
-            }
-        }
-        parted_candicates
-    } else {
-        candicates
-    };
-
-    Ok(shell.output_candicates(&candicates, last, prefix, &parts_chars))
+    let candicates: Vec<(String, String, bool)> = candicates
+        .into_iter()
+        .map(|(value, (description, nospace))| (value, description, nospace))
+        .collect();
+    Ok(shell.output_candicates(candicates, &argc_matcher, &argc_prefix))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -201,14 +192,12 @@ impl Shell {
 
     pub(crate) fn output_candicates(
         &self,
-        candicates: &[Candicate],
-        last: &str,
+        mut candicates: Vec<(String, String, bool)>,
+        matcher: &str,
         prefix: &str,
-        parts_chars: &[char],
     ) -> String {
         match self {
             Shell::Bash => {
-                let mut candicates = candicates.to_vec();
                 let breaks = match std::env::var("COMP_WORDBREAKS") {
                     Ok(v) => v.chars().collect(),
                     Err(_) => vec!['=', ':', '|', ';'],
@@ -217,141 +206,106 @@ impl Shell {
                 if prefix.chars().any(|c| breaks.contains(&c)) {
                     prefix = "";
                 }
-                let mut last = last;
-                if let Some((i, _)) = last.char_indices().rfind(|(_, c)| breaks.contains(c)) {
+                let mut matcher = matcher;
+                if let Some((i, _)) = matcher.char_indices().rfind(|(_, c)| breaks.contains(c)) {
                     let idx = i + 1;
-                    last = &last[idx..];
-                    for candicate in candicates.iter_mut() {
-                        candicate.value = candicate.value[idx..].to_string()
+                    matcher = &matcher[idx..];
+                    for (value, _, _) in candicates.iter_mut() {
+                        *value = value[idx..].to_string()
                     }
                 };
-                let values: Vec<&str> = candicates.iter().map(|v| v.value.as_str()).collect();
-                let mut patch_first = false;
-                if values.len() > 1 {
-                    if let Some(common) = common_prefix(&values) {
-                        if common != last {
-                            return format!("{prefix}{common}");
-                        } else {
-                            patch_first = true;
-                        }
+                let values: Vec<&str> = candicates.iter().map(|(v, _, _)| v.as_str()).collect();
+                let values_len = values.len();
+                let mut first_space = false;
+                if values_len == 1 {
+                    let (value, _, nospace) = &candicates[0];
+                    let space = if *nospace { "" } else { " " };
+                    return format!("{prefix}{}{space}", self.escape(value));
+                } else if let Some(common) = common_prefix(&values) {
+                    if common != matcher {
+                        return format!("{prefix}{}", self.escape(&common));
+                    } else {
+                        first_space = true;
                     }
                 }
-                let mut parts_char_idx = 0;
-                if candicates.len() > 1 {
-                    if let Some((i, _)) =
-                        last.char_indices().rfind(|(_, c)| parts_chars.contains(c))
-                    {
-                        parts_char_idx = i + 1;
-                    };
-                }
                 candicates
-                    .iter()
+                    .into_iter()
                     .enumerate()
-                    .map(|(i, candicate)| {
-                        let value = if parts_char_idx == 0 {
-                            format!("{prefix}{}", candicate.value)
+                    .map(|(i, (value, description, nospace))| {
+                        let escaped_value = if i == 0 && first_space {
+                            format!(" {}", self.escape(&value))
                         } else {
-                            candicate.value[parts_char_idx..].to_string()
+                            self.escape(&value)
                         };
-                        let mut value = self.escape(&value);
-                        if i == 0 && patch_first {
-                            value = format!(" {}", value);
-                        };
-                        if candicate.nospace {
-                            value
-                        } else if candicate.description.is_empty() || !self.with_description() {
-                            format!("{value} ")
+                        if nospace {
+                            escaped_value
+                        } else if description.is_empty() || !self.with_description() {
+                            format!("{escaped_value} ")
                         } else {
-                            format!("{value} ({})", candicate.truncate_description())
+                            format!("{escaped_value} ({})", truncate_description(&description))
                         }
                     })
                     .collect::<Vec<String>>()
                     .join("\n")
             }
             Shell::Fish => candicates
-                .iter()
-                .map(|candicate| {
-                    let value = self.escape(&format!("{prefix}{}", candicate.value));
-                    if candicate.description.is_empty() || !self.with_description() {
-                        value
+                .into_iter()
+                .map(|(value, description, _nospace)| {
+                    let escaped_value = self.escape(&format!("{prefix}{}", value));
+                    if description.is_empty() || !self.with_description() {
+                        escaped_value
                     } else {
-                        format!("{value}\t{}", candicate.truncate_description())
+                        format!("{escaped_value}\t{}", truncate_description(&description))
                     }
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
             Shell::Nushell => candicates
-                .iter()
-                .map(|candicate| {
-                    let value = self.escape(&format!("{prefix}{}", candicate.value));
-                    let space = if candicate.nospace { "" } else { " " };
-                    if candicate.description.is_empty() || !self.with_description() {
-                        format!("{value}{space}")
+                .into_iter()
+                .map(|(value, description, nospace)| {
+                    let escaped_value = self.escape(&format!("{prefix}{}", value));
+                    let space = if nospace { "" } else { " " };
+                    if description.is_empty() || !self.with_description() {
+                        format!("{escaped_value}{space}")
                     } else {
-                        format!("{value}{space}\t{}", candicate.truncate_description())
+                        format!(
+                            "{escaped_value}{space}\t{}",
+                            truncate_description(&description)
+                        )
                     }
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            Shell::Zsh => {
-                let mut parts_char_idx = 0;
-                if candicates.len() > 1 {
-                    if let Some((i, _)) =
-                        last.char_indices().rfind(|(_, c)| parts_chars.contains(c))
-                    {
-                        parts_char_idx = i + 1;
+            Shell::Zsh => candicates
+                .into_iter()
+                .map(|(value, description, nospace)| {
+                    let escaped_value = self.escape(&format!("{prefix}{}", value));
+                    let display = self.escape(&value);
+                    let description = if description.is_empty() || !self.with_description() {
+                        display
+                    } else {
+                        format!("{display}:{}", truncate_description(&description))
                     };
-                }
-                candicates
-                    .iter()
-                    .map(|candicate| {
-                        let mut value = self.escape(&format!("{prefix}{}", candicate.value));
-                        let display = self.escape(&candicate.value[parts_char_idx..]);
-                        let description =
-                            if candicate.description.is_empty() || !self.with_description() {
-                                display
-                            } else {
-                                format!("{display}:{}", candicate.truncate_description())
-                            };
-                        if !candicate.nospace {
-                            value.push(' ');
-                        }
-                        format!("{value}\t{description}")
-                    })
-                    .collect::<Vec<String>>()
-                    .join("\n")
-            }
-            _ => {
-                let mut parts_char_idx = 0;
-                if candicates.len() > 1 {
-                    if let Some((i, _)) =
-                        last.char_indices().rfind(|(_, c)| parts_chars.contains(c))
-                    {
-                        parts_char_idx = i + 1;
+                    let space = if nospace { "" } else { " " };
+                    format!("{escaped_value}{space}\t{description}")
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
+            _ => candicates
+                .into_iter()
+                .map(|(value, description, nospace)| {
+                    let escaped_value = self.escape(&format!("{prefix}{}", value));
+                    let display = if value.is_empty() { " ".into() } else { value };
+                    let description = if description.is_empty() || !self.with_description() {
+                        String::new()
+                    } else {
+                        truncate_description(&description)
                     };
-                }
-                candicates
-                    .iter()
-                    .map(|candicate| {
-                        let value = self.escape(&format!("{prefix}{}", candicate.value));
-                        let display = if candicate.value.len() <= parts_char_idx {
-                            " "
-                        } else {
-                            &candicate.value[parts_char_idx..]
-                        };
-                        let display = if display.is_empty() { " " } else { display };
-                        let description =
-                            if candicate.description.is_empty() || !self.with_description() {
-                                String::new()
-                            } else {
-                                candicate.truncate_description()
-                            };
-                        let space: &str = if candicate.nospace { "0" } else { "1" };
-                        format!("{value}\t{space}\t{display}\t{description}")
-                    })
-                    .collect::<Vec<String>>()
-                    .join("\n")
-            }
+                    let space: &str = if nospace { "0" } else { "1" };
+                    format!("{escaped_value}\t{space}\t{display}\t{description}")
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
         }
     }
 
@@ -411,30 +365,13 @@ impl Shell {
     }
 }
 
-#[derive(Debug, Clone)]
-pub(crate) struct Candicate {
-    value: String,
-    description: String,
-    nospace: bool,
-}
-
-impl Candicate {
-    pub(crate) fn new(value: String, description: String, nospace: bool) -> Self {
-        Self {
-            value,
-            description,
-            nospace,
-        }
-    }
-
-    pub(crate) fn truncate_description(&self) -> String {
-        let max_width = 80;
-        let description = self.description.trim().replace('\t', "");
-        if description.len() < max_width {
-            description
-        } else {
-            format!("{}...", &description[0..max_width - 3])
-        }
+fn truncate_description(description: &str) -> String {
+    let max_width = 80;
+    let description = description.trim().replace('\t', "");
+    if description.len() < max_width {
+        description
+    } else {
+        format!("{}...", &description[0..max_width - 3])
     }
 }
 

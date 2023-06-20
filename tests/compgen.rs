@@ -350,30 +350,6 @@ arg() { :; }
 }
 
 #[test]
-fn parts() {
-    let script = r###"
-# @option --oa*[`_choice_fn`]
-_choice_fn() {
-    echo __argc_parts:/
-	echo A/B
-	echo A/B/C
-    echo A/C
-    echo B/C
-    echo C
-}
-"###;
-
-    snapshot_compgen!(
-        script,
-        vec![
-            vec!["prog", "--oa", ""],
-            vec!["prog", "--oa", "A/"],
-            vec!["prog", "--oa", "A/B/"],
-        ]
-    );
-}
-
-#[test]
 fn no_space() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
@@ -403,15 +379,14 @@ _choice_fn() {
 }
 
 #[test]
-fn parts_shell() {
+fn shell_multi_parts() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
-    echo __argc_parts:/
-	echo A/B
-	echo A/B/
-	echo A/B/C
-	echo A/B/D
+    echo __argc_prefix:A/
+    echo __argc_matcher:''
+	echo B
+	echo -e "B/\0"
 }
 "###;
 
@@ -419,15 +394,15 @@ _choice_fn() {
 }
 
 #[test]
-fn parts2_shell() {
+fn shell_multi_parts2() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
-    echo __argc_parts:/
-	echo A/B
-	echo A/B/
-	echo A/B/C
-	echo A/B/D
+    echo __argc_prefix:A/B/
+    echo __argc_matcher:''
+	echo
+	echo C
+	echo D
 }
 "###;
 
