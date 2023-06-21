@@ -13,7 +13,7 @@ use indexmap::{IndexMap, IndexSet};
 const KNOWN_OPTIONS: [&str; 6] = ["-h", "-help", "--help", "-V", "-version", "--version"];
 
 pub(crate) struct Matcher<'a, 'b> {
-    cmds: Vec<(&'b str, &'a Command, String)>,
+    cmds: Vec<(&'b str, &'a Command, String, usize)>,
     args: &'b [String],
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
     positional_args: Vec<&'b str>,
@@ -52,7 +52,7 @@ pub(crate) enum MatchError {
 
 impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn new(root: &'a Command, args: &'b [String]) -> Self {
-        let mut cmds = vec![(args[0].as_str(), root, args[0].clone())];
+        let mut cmds = vec![(args[0].as_str(), root, args[0].clone(), 0)];
         let mut cmd_level = 0;
         let mut arg_index = 1;
         let mut flag_option_args = vec![vec![]];
@@ -130,6 +130,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     arg,
                     subcmd,
                     subcmd.name.clone().unwrap_or_else(|| arg.to_string()),
+                    arg_index,
                 ));
                 flag_option_args.push(vec![]);
             } else {
@@ -284,6 +285,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let cmds_len = self.cmds.len();
         let level = cmds_len - 1;
         let last_cmd = self.cmds[level].1;
+        let args_index = self.cmds[level].3;
         for level in 0..cmds_len {
             let args = &self.flag_option_args[level];
             let cmd = self.cmds[level].1;
@@ -314,6 +316,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 output.push(value);
             }
         }
+        output.push(ArgcValue::Multiple("_args".into(), self.args.to_vec()));
+        output.push(ArgcValue::Single("_index".into(), args_index.to_string()));
         output
     }
 

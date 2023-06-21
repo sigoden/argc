@@ -6,6 +6,8 @@ RUN
 prog cmd
 
 OUTPUT
+argc__args=( prog cmd )
+argc__index=1
 argc__positionals=(  )
 argc__fn=cmd::main
 cmd::main

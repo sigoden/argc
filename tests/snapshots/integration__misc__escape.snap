@@ -7,6 +7,9 @@ prog cmda $foo `pwd` $(pwd) ' \1
  世界  
 
 OUTPUT
+argc__args=( prog cmda '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
+' 世界 ' ' )
+argc__index=1
 argc__positionals=( '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
 ' 世界 ' ' )
 argc__fn=cmda

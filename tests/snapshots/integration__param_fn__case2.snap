@@ -6,6 +6,8 @@ expression: data
 prog _choice_fn
 
 OUTPUT
+argc__args=( prog )
+argc__index=0
 argc__positionals=(  )
 argc__fn=_choice_fn
 _choice_fn;exit;
@@ -15,6 +17,8 @@ prog _choice_fn prog cmdl
 
 OUTPUT
 argc_val=( '' )
+argc__args=( prog cmdl '' )
+argc__index=1
 argc__positionals=( '' )
 argc__fn=_choice_fn
 _choice_fn '';exit;
@@ -24,6 +28,8 @@ prog _choice_fn prog cmdl v1
 
 OUTPUT
 argc_val=( v1 )
+argc__args=( prog cmdl v1 )
+argc__index=1
 argc__positionals=( v1 )
 argc__fn=_choice_fn
 _choice_fn v1;exit;
@@ -33,6 +39,8 @@ prog _choice_fn prog cmdl v1
 
 OUTPUT
 argc_val=( v1 '' )
+argc__args=( prog cmdl v1 '' )
+argc__index=1
 argc__positionals=( v1 '' )
 argc__fn=_choice_fn
 _choice_fn v1 '';exit;
@@ -42,6 +50,8 @@ prog _choice_fn prog cmdl v1 v2
 
 OUTPUT
 argc_val=( v1 v2 )
+argc__args=( prog cmdl v1 v2 )
+argc__index=1
 argc__positionals=( v1 v2 )
 argc__fn=_choice_fn
 _choice_fn v1 v2;exit;
@@ -51,6 +61,8 @@ prog _choice_fn prog cmdl v1 v2
 
 OUTPUT
 argc_val=( v1 v2 '' )
+argc__args=( prog cmdl v1 v2 '' )
+argc__index=1
 argc__positionals=( v1 v2 '' )
 argc__fn=_choice_fn
 _choice_fn v1 v2 '';exit;

@@ -7,6 +7,8 @@ prog cmdb v1
 
 OUTPUT
 argc_val=v1
+argc__args=( prog cmdb v1 )
+argc__index=1
 argc__positionals=( v1 )
 argc__fn=cmdb
 cmdb v1
@@ -16,6 +18,8 @@ prog cmdc v1 v2
 
 OUTPUT
 argc_val=( v1 v2 )
+argc__args=( prog cmdc v1 v2 )
+argc__index=1
 argc__positionals=( v1 v2 )
 argc__fn=cmdc
 cmdc v1 v2
@@ -25,6 +29,8 @@ prog cmdf
 
 OUTPUT
 argc_val=xyz
+argc__args=( prog cmdf )
+argc__index=1
 argc__positionals=( xyz )
 argc__fn=cmdf
 cmdf xyz
@@ -34,6 +40,8 @@ prog cmdf v1
 
 OUTPUT
 argc_val=v1
+argc__args=( prog cmdf v1 )
+argc__index=1
 argc__positionals=( v1 )
 argc__fn=cmdf
 cmdf v1
@@ -43,6 +51,8 @@ prog cmdg
 
 OUTPUT
 argc_val=`_default_fn`
+argc__args=( prog cmdg )
+argc__index=1
 argc__positionals=( `_default_fn` )
 argc__fn=cmdg
 cmdg `_default_fn`
@@ -52,6 +62,8 @@ prog cmdh x
 
 OUTPUT
 argc_val=x
+argc__args=( prog cmdh x )
+argc__index=1
 argc__positionals=( x )
 argc__fn=cmdh
 cmdh x
@@ -61,6 +73,8 @@ prog cmdj abc
 
 OUTPUT
 argc_val=abc
+argc__args=( prog cmdj abc )
+argc__index=1
 argc__positionals=( abc )
 argc__fn=cmdj
 cmdj abc
@@ -71,6 +85,8 @@ prog cmdp v1 v2
 OUTPUT
 argc_val1=( v1 )
 argc_val2=( v2 )
+argc__args=( prog cmdp v1 v2 )
+argc__index=1
 argc__positionals=( v1 v2 )
 argc__fn=cmdp
 cmdp v1 v2
@@ -81,6 +97,8 @@ prog cmdp v1 v2 v3
 OUTPUT
 argc_val1=( v1 v2 )
 argc_val2=( v3 )
+argc__args=( prog cmdp v1 v2 v3 )
+argc__index=1
 argc__positionals=( v1 v2 v3 )
 argc__fn=cmdp
 cmdp v1 v2 v3
@@ -92,6 +110,8 @@ OUTPUT
 argc_val1=v1
 argc_val2=v2
 argc_val3=v3
+argc__args=( prog cmdr v1 v2 v3 )
+argc__index=1
 argc__positionals=( v1 v2 v3 )
 argc__fn=cmdr
 cmdr v1 v2 v3

@@ -6,6 +6,8 @@ expression: data
 prog cmd
 
 OUTPUT
+argc__args=( prog cmd )
+argc__index=1
 argc__positionals=(  )
 argc__fn=cmd::main
 cmd::main
@@ -16,6 +18,8 @@ prog cmd abc --foo 123
 OUTPUT
 argc_foo=123
 argc_val=abc
+argc__args=( prog cmd abc --foo 123 )
+argc__index=1
 argc__positionals=( abc )
 argc__fn=cmd::main
 cmd::main abc
