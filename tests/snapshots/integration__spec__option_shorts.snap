@@ -8,6 +8,8 @@ prog cmda -af
 OUTPUT
 argc_a=1
 argc_fb=1
+argc__args=( prog cmda -af )
+argc__index=1
 argc__positionals=(  )
 argc__fn=cmda
 cmda
@@ -18,6 +20,8 @@ prog cmda -ae e
 OUTPUT
 argc_a=1
 argc_e=e
+argc__args=( prog cmda -ae e )
+argc__index=1
 argc__positionals=(  )
 argc__fn=cmda
 cmda
@@ -29,6 +33,8 @@ OUTPUT
 argc_a=1
 argc_fb=1
 argc_e=e
+argc__args=( prog cmda -afe e )
+argc__index=1
 argc__positionals=(  )
 argc__fn=cmda
 cmda
@@ -39,6 +45,8 @@ prog cmda -ao v1 v2
 OUTPUT
 argc_a=1
 argc_od=( v1 v2 )
+argc__args=( prog cmda -ao v1 v2 )
+argc__index=1
 argc__positionals=(  )
 argc__fn=cmda
 cmda

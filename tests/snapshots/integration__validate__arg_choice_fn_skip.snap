@@ -7,6 +7,8 @@ prog cmdk abc
 
 OUTPUT
 argc_val=abc
+argc__args=( prog cmdk abc )
+argc__index=1
 argc__positionals=( abc )
 argc__fn=cmdk
 cmdk abc
