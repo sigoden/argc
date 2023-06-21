@@ -12,12 +12,12 @@ _argc_completer() {
         return
     fi
     local line="${COMP_LINE:0:${COMP_POINT}}"
-    local IFS=$'\n'
     export COMP_WORDBREAKS
     if [[ "$cur" == "" ]]; then
         line="$line ''"
     fi
-    local candidates=($(echo "$line" | _argc_complete_balance_quotes | xargs argc --argc-compgen bash "$scriptfile" 2>/dev/null))
+    local IFS=$'\n'
+    local candidates=($(_argc_complete_balance_quotes "$line" | xargs argc --argc-compgen bash "$scriptfile" 2>/dev/null))
     if [[ ${#candidates[@]} -eq 1 ]]; then
         if [[ "${candidates[0]}" == "__argc_comp:file" ]]; then
             _argc_complete_path "$cur"
@@ -47,7 +47,7 @@ _argc_complete_path() {
 }
 
 _argc_complete_balance_quotes() {
-    awk -v quotes="\"'" '{
+    echo "$1" | awk -v quotes="\"'" '{
         print $0 unbalance_quotations($0)
     }
 
