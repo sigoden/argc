@@ -1,4 +1,4 @@
-# @describe A simple cli
+# @describe Multi-line auto-wrapped help text
 #
 # Extra lines after the @cmd or @describe, which don't start with an @, are 
 # treated as the long description. A line which is not a comment ends
@@ -15,6 +15,6 @@
 # Extra lines after the @cmd or @describe, which don't start with an @, are 
 # treated as the long description. A line which is not a comment ends
 # the block.
-foo() { :; }
+cmd() { :; }
 
 eval "$(TERM_WIDTH=`tput cols` argc --argc-eval "$0" "$@")"
