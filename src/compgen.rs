@@ -127,8 +127,11 @@ pub fn compgen(
             Ok(v) => v.chars().collect(),
             Err(_) => vec!['=', ':', '|', ';'],
         };
-        if argc_prefix == prefix && prefix.ends_with(|c| break_chars.contains(&c)) {
-            argc_prefix = String::new();
+        if let Some((i, _)) = argc_prefix
+            .char_indices()
+            .rfind(|(_, c)| break_chars.contains(c))
+        {
+            argc_prefix = argc_prefix[i + 1..].to_string();
         }
         if last == argc_matcher {
             if let Some((i, _)) = argc_matcher
