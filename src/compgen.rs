@@ -54,6 +54,7 @@ pub fn compgen(
         }
     }
     let mut argc_prefix = prefix.to_string();
+    let mut argc_suffix = String::new();
     let mut argc_matcher = last.to_string();
     if let Some(fn_name) = argc_fn {
         let mut envs = HashMap::new();
@@ -77,6 +78,8 @@ pub fn compgen(
                         argc_value = Some(value.to_string());
                     } else if let Some(value) = value.strip_prefix("__argc_prefix:") {
                         argc_prefix = format!("{prefix}{value}")
+                    } else if let Some(value) = value.strip_prefix("__argc_suffix:") {
+                        argc_suffix = value.to_string();
                     } else if let Some(value) = value.strip_prefix("__argc_matcher:") {
                         argc_matcher = value.to_string();
                     }
@@ -141,7 +144,7 @@ pub fn compgen(
             };
         }
     }
-    Ok(shell.output_candidates(candidates, &argc_prefix, &argc_matcher))
+    Ok(shell.output_candidates(candidates, &argc_prefix, &argc_suffix, &argc_matcher))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -212,6 +215,7 @@ impl Shell {
         &self,
         candidates: Vec<(String, String, bool)>,
         prefix: &str,
+        suffix: &str,
         matcher: &str,
     ) -> String {
         if candidates.is_empty() {
@@ -220,17 +224,18 @@ impl Shell {
         match self {
             Shell::Bash => {
                 let values: Vec<&str> = candidates.iter().map(|(v, _, _)| v.as_str()).collect();
-                let values_len = values.len();
-                let mut add_space_to_first = false;
-                if values_len == 1 {
-                    let (value, _, nospace) = &candidates[0];
-                    let space = if *nospace { "" } else { " " };
-                    return format!("{}{space}", self.escape(&format!("{prefix}{value}")));
+                let mut add_space_to_first_candidate = false;
+                if values.len() == 1 {
+                    let space = if candidates[0].2 { "" } else { " " };
+                    return format!(
+                        "{}{space}",
+                        self.escape(&format!("{prefix}{}{suffix}", candidates[0].0))
+                    );
                 } else if let Some(common) = common_prefix(&values) {
                     if common != matcher {
                         return format!("{prefix}{}", self.escape(&common));
                     } else {
-                        add_space_to_first = true;
+                        add_space_to_first_candidate = true;
                     }
                 }
                 candidates
@@ -238,7 +243,7 @@ impl Shell {
                     .enumerate()
                     .map(|(i, (value, description, nospace))| {
                         let mut escaped_value = self.escape(&value);
-                        if i == 0 && add_space_to_first {
+                        if i == 0 && add_space_to_first_candidate {
                             escaped_value = format!(" {}", escaped_value)
                         };
                         if nospace {
@@ -255,7 +260,7 @@ impl Shell {
             Shell::Fish => candidates
                 .into_iter()
                 .map(|(value, description, _nospace)| {
-                    let escaped_value = self.escape(&format!("{prefix}{}", value));
+                    let escaped_value = self.escape(&format!("{prefix}{value}{suffix}"));
                     if description.is_empty() || !self.with_description() {
                         escaped_value
                     } else {
@@ -267,7 +272,7 @@ impl Shell {
             Shell::Nushell => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let escaped_value = self.escape(&format!("{prefix}{}", value));
+                    let escaped_value = self.escape(&format!("{prefix}{value}{suffix}"));
                     let space = if nospace { "" } else { " " };
                     if description.is_empty() || !self.with_description() {
                         format!("{escaped_value}{space}")
@@ -283,7 +288,7 @@ impl Shell {
             Shell::Zsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let escaped_value = self.escape(&format!("{prefix}{}", value));
+                    let escaped_value = self.escape(&format!("{prefix}{value}{suffix}"));
                     let display = self.escape(&value);
                     let description = if description.is_empty() || !self.with_description() {
                         display
@@ -298,7 +303,7 @@ impl Shell {
             _ => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let escaped_value = self.escape(&format!("{prefix}{}", value));
+                    let escaped_value = self.escape(&format!("{prefix}{value}{suffix}"));
                     let display = if value.is_empty() { " ".into() } else { value };
                     let description = if description.is_empty() || !self.with_description() {
                         String::new()
