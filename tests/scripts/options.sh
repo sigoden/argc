@@ -9,6 +9,7 @@
 # @option    --ob*
 # @option    --oc <DIR>
 # @option -o --od <FILE> <FILE>
+# @option    --oe*,
 # @option    --ca[x|y|z]
 # @option    --cc[`_choice_fn`]
 # @option    --cd[?`_choice_fn`]
@@ -19,8 +20,10 @@ cmda() { :; }
 # @cmd
 # @option -a --oa!
 # @option    --ob+
+# @option    --oc+,
 # @option    --oca![`_choice_fn`]
 # @option    --ocb+[`_choice_fn`]
+# @option    --occ+,[`_choice_fn`]
 cmdb() { :; }
 
 # @cmd

@@ -28,6 +28,7 @@ fn option_eval() {
             vec!["prog", "cmda", "--oa", "oa"],
             vec!["prog", "cmda", "--ob", "ob1", "--ob", "ob2"],
             vec!["prog", "cmda", "--ob", "ob1", "ob2"],
+            vec!["prog", "cmda", "--oe", "ob1,ob2", "ob3"],
             vec!["prog", "cmda", "-o", "ob1", "ob2"],
             vec!["prog", "cmda", "--cc", "abc"],
             vec!["prog", "cmda", "-soa", "soa"],

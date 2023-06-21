@@ -20,6 +20,7 @@ OPTIONS:
       --ob [<OB>...]
       --oc <DIR>
   -o, --od <FILE> <FILE>
+      --oe [<OE>...]
       --ca <CA>           [possible values: x, y, z]
       --cc <CC>
       --cd <CD>
@@ -35,13 +36,15 @@ prog cmdb -h
 
 OUTPUT
 cat >&2 <<-'EOF' 
-USAGE: prog cmdb --oa <OA> --ob <OB>... --oca <OCA> --ocb <OCB>...
+USAGE: prog cmdb --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
 
 OPTIONS:
   -a, --oa <OA>
       --ob <OB>...
+      --oc <OC>...
       --oca <OCA>
       --ocb <OCB>...
+      --occ <OCC>...
   -h, --help
 
 EOF

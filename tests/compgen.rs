@@ -166,6 +166,7 @@ fn choice() {
     let script = r###"
 # @option --oa[`_choice_fn`]
 # @option --ob[x|y|z]
+# @option --oc*,[`_choice_fn`]
 # @arg v1[x|y|z]
 # @arg v2[`_choice_fn`]
 _choice_fn() {
@@ -187,6 +188,8 @@ _choice_fn() {
             vec!["prog", "'--oa=a"],
             vec!["prog", "\"--oa="],
             vec!["prog", "\"--oa=a"],
+            vec!["prog", "--oc", ""],
+            vec!["prog", "--oc", "abc,"],
         ]
     );
 }
@@ -379,7 +382,7 @@ _choice_fn() {
 }
 
 #[test]
-fn shell_multi_parts() {
+fn multi_parts() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
@@ -394,7 +397,7 @@ _choice_fn() {
 }
 
 #[test]
-fn shell_multi_parts2() {
+fn multi_parts2() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
@@ -438,4 +441,28 @@ _choice_fn() {
         script,
         vec![vec!["prog", "--oa=abc"], vec!["prog", "oa=abc"],]
     );
+}
+
+#[test]
+fn mult_char() {
+    let script = r###"
+# @option --oa*,[`_choice_fn`]
+_choice_fn() {
+    echo -e "abc\ndef\nijk"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa", "abc,"]);
+}
+
+#[test]
+fn mult_char2() {
+    let script = r###"
+# @option --oa*,[`_choice_fn`]
+_choice_fn() {
+    echo -e "abc\ndef\nijk"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa=abc,"]);
 }

@@ -32,13 +32,14 @@ pub fn compgen(
         .collect();
     let matcher = Matcher::new(&cmd, &args);
     let compgen_values = matcher.compgen();
-    let mut prefix = "";
+    let mut prefix = String::new();
     let mut candidates: IndexMap<String, (String, bool)> = IndexMap::new();
     let mut argc_fn = None;
+    let mut argc_multi = None;
     let mut argc_value = None;
     if args.iter().all(|v| v != "--") && last.starts_with('-') {
         if let Some((left, right)) = split_equal_sign(last) {
-            prefix = left;
+            prefix = left.to_string();
             last = right
         }
     }
@@ -48,9 +49,17 @@ pub fn compgen(
                 argc_fn = Some(fn_name.to_string());
             } else if let Some(value) = value.strip_prefix("__argc_value:") {
                 argc_value = argc_value.or_else(|| Some(value.to_string()));
+            } else if let Some(value) = value.strip_prefix("__argc_multi:") {
+                if let Some(ch) = value.chars().next() {
+                    argc_multi = Some(ch);
+                    if let Some((i, _)) = last.char_indices().rfind(|(_, c)| ch == *c) {
+                        prefix.push_str(&last[..=i]);
+                        last = &last[i + 1..];
+                    }
+                }
             }
         } else if value.starts_with(last) {
-            candidates.insert(value.clone(), (description, false));
+            candidates.insert(value.clone(), (description, argc_multi.is_some()));
         }
     }
     let mut argc_prefix = prefix.to_string();
@@ -71,6 +80,7 @@ pub fn compgen(
                     Some(value) => (value, true),
                     None => (value, false),
                 };
+                let nospace = nospace || argc_multi.is_some();
                 if value.starts_with("__argc_") {
                     if let Some(value) = value.strip_prefix("__argc_value:") {
                         argc_value = argc_value.or_else(|| Some(value.to_string()));
