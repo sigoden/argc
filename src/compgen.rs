@@ -36,7 +36,7 @@ pub fn compgen(
     let mut candidates: IndexMap<String, (String, bool)> = IndexMap::new();
     let mut argc_fn = None;
     let mut argc_value = None;
-    if args.iter().all(|v| v != "--") {
+    if args.iter().all(|v| v != "--") && last.starts_with('-') {
         if let Some((left, right)) = split_equal_sign(last) {
             prefix = left;
             last = right
@@ -458,7 +458,7 @@ mod tests {
     #[test]
     fn test_split_equal_sign() {
         assert_eq!(split_equal_sign("-a="), Some(("-a=", "")));
-        assert_eq!(split_equal_sign("-a="), Some(("-a=", "")));
+        assert_eq!(split_equal_sign("a="), Some(("a=", "")));
         assert_eq!(split_equal_sign("-a=c"), Some(("-a=", "c")));
         assert_eq!(split_equal_sign("a"), None);
         assert_eq!(split_equal_sign("a:"), None);

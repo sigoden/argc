@@ -422,3 +422,20 @@ _choice_fn() {
 
     snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
 }
+
+#[test]
+fn option_equal() {
+    let script = r###"
+# @option --oa[`_choice_fn`]
+# @arg val[`_choice_fn`]
+_choice_fn() {
+    echo __argc_matcher:
+    ( set -o posix ; set ) | grep 'argc_\|ARGC_MATCHER'
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![vec!["prog", "--oa=abc"], vec!["prog", "oa=abc"],]
+    );
+}
