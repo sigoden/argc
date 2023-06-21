@@ -115,11 +115,33 @@ pub fn compgen(
             return Ok(output);
         }
     }
-    let candidates: Vec<(String, String, bool)> = candidates
+    let mut candidates: Vec<(String, String, bool)> = candidates
         .into_iter()
         .map(|(value, (description, nospace))| (value, description, nospace))
         .collect();
-    Ok(shell.output_candidates(candidates, &argc_matcher, &argc_prefix))
+    if shell == Shell::Bash {
+        let break_chars = match std::env::var("COMP_WORDBREAKS") {
+            Ok(v) => v.chars().collect(),
+            Err(_) => vec!['=', ':', '|', ';'],
+        };
+        if argc_prefix == prefix && prefix.ends_with(|c| break_chars.contains(&c)) {
+            argc_prefix = String::new();
+        }
+        if last == argc_matcher {
+            if let Some((i, _)) = argc_matcher
+                .char_indices()
+                .rfind(|(_, c)| break_chars.contains(c))
+            {
+                argc_prefix = String::new();
+                let idx = i + 1;
+                argc_matcher = argc_matcher[idx..].to_string();
+                for (value, _, _) in candidates.iter_mut() {
+                    *value = value[idx..].to_string()
+                }
+            };
+        }
+    }
+    Ok(shell.output_candidates(candidates, &argc_prefix, &argc_matcher))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -188,50 +210,36 @@ impl Shell {
 
     pub(crate) fn output_candidates(
         &self,
-        mut candidates: Vec<(String, String, bool)>,
-        matcher: &str,
+        candidates: Vec<(String, String, bool)>,
         prefix: &str,
+        matcher: &str,
     ) -> String {
+        if candidates.is_empty() {
+            return String::new();
+        }
         match self {
             Shell::Bash => {
-                let breaks = match std::env::var("COMP_WORDBREAKS") {
-                    Ok(v) => v.chars().collect(),
-                    Err(_) => vec!['=', ':', '|', ';'],
-                };
-                let mut prefix = prefix;
-                if prefix.chars().any(|c| breaks.contains(&c)) {
-                    prefix = "";
-                }
-                let mut matcher = matcher;
-                if let Some((i, _)) = matcher.char_indices().rfind(|(_, c)| breaks.contains(c)) {
-                    let idx = i + 1;
-                    matcher = &matcher[idx..];
-                    for (value, _, _) in candidates.iter_mut() {
-                        *value = value[idx..].to_string()
-                    }
-                };
                 let values: Vec<&str> = candidates.iter().map(|(v, _, _)| v.as_str()).collect();
                 let values_len = values.len();
-                let mut first_space = false;
+                let mut add_space_to_first = false;
                 if values_len == 1 {
                     let (value, _, nospace) = &candidates[0];
                     let space = if *nospace { "" } else { " " };
-                    return format!("{prefix}{}{space}", self.escape(value));
+                    return format!("{}{space}", self.escape(&format!("{prefix}{value}")));
                 } else if let Some(common) = common_prefix(&values) {
                     if common != matcher {
                         return format!("{prefix}{}", self.escape(&common));
                     } else {
-                        first_space = true;
+                        add_space_to_first = true;
                     }
                 }
                 candidates
                     .into_iter()
                     .enumerate()
                     .map(|(i, (value, description, nospace))| {
-                        let escaped_value = if i == 0 && first_space {
-                            format!(" {}", self.escape(&value))
-                        } else {
-                            self.escape(&value)
+                        let mut escaped_value = self.escape(&value);
+                        if i == 0 && add_space_to_first {
+                            escaped_value = format!(" {}", escaped_value)
                         };
                         if nospace {
                             escaped_value
