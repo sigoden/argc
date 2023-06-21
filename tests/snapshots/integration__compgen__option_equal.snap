@@ -1,0 +1,21 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa=abc` ************
+--oa=ARGC_MATCHER=abc
+--oa=argc__args=([0]="prog" [1]="--oa=abc")
+--oa=argc__fn=_choice_fn
+--oa=argc__index=0
+--oa=argc__positionals=()
+--oa=argc_oa=abc
+
+************ COMPGEN `prog oa=abc` ************
+ARGC_MATCHER=oa=abc
+argc__args=([0]="prog" [1]="oa=abc")
+argc__fn=_choice_fn
+argc__index=0
+argc__positionals=([0]="oa=abc")
+argc_val=oa=abc
+
+
