@@ -151,7 +151,7 @@ Define a option.
 # @option    --oca[a|b]             choice
 # @option    --ocb[=a|b]            choice + default
 # @option    --occ*[a|b]            multiple + choice
-# @option    --ocd*[+a|b]           required + multiple + choice
+# @option    --ocd+[a|b]            required + multiple + choice
 # @option    --ofa[`_choice_fn`]    choice from fn
 # @option    --ofb[?`_choice_fn`]   choice from fn + no validation
 # @option    --ofc*[`_choice_fn`]   multiple + choice from fn
