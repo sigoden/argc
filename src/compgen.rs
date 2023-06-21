@@ -64,11 +64,7 @@ pub fn compgen(
             envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
         }
         if let Some(outputs) = run_param_fns(script_path, &[fn_name.as_str()], &args, envs) {
-            for line in outputs[0]
-                .trim()
-                .split('\n')
-                .map(|v| v.trim_end_matches('\r'))
-            {
+            for line in outputs[0].trim().split('\n').map(|v| v.trim()) {
                 let (value, description) = line.split_once('\t').unwrap_or((line, ""));
                 let (value, nospace) = match value.strip_suffix('\0') {
                     Some(value) => (value, true),
