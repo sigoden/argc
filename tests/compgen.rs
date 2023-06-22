@@ -466,3 +466,27 @@ _choice_fn() {
 
     snapshot_compgen_shells!(script, vec!["prog", "--oa=abc,"]);
 }
+
+#[test]
+fn starts_quote() {
+    let script = r###"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    echo -e "abc\ndef\nijk"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa='"]);
+}
+
+#[test]
+fn starts_quote2() {
+    let script = r###"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    echo -e "abc\ndef\nijk"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "'--oa="]);
+}

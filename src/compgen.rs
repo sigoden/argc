@@ -17,14 +17,21 @@ pub fn compgen(
     if args.len() < 2 {
         return Ok(String::new());
     }
-    let (mut last, _) = unbalance_quote(&args[args.len() - 1]);
+    let last_arg = args[args.len() - 1].as_str();
+    let (mut last, unbalance) = {
+        if last_arg.starts_with(is_quote) && last_arg.chars().skip(1).all(|v| !is_quote(v)) {
+            (last_arg[1..].to_string(), last_arg.chars().next())
+        } else {
+            (last_arg.to_string(), None)
+        }
+    };
     let cmd = Command::new(script_content)?;
     let args: Vec<String> = args
         .iter()
         .enumerate()
         .map(|(i, v)| {
             if i == args.len() - 1 {
-                last.to_string()
+                last.clone()
             } else {
                 v.to_string()
             }
@@ -32,15 +39,16 @@ pub fn compgen(
         .collect();
     let matcher = Matcher::new(&cmd, &args);
     let compgen_values = matcher.compgen();
-    let mut prefix = String::new();
+    let mut default_nospace = unbalance.is_some();
+    let mut prefix = unbalance.map(|v| v.to_string()).unwrap_or_default();
     let mut candidates: IndexMap<String, (String, bool)> = IndexMap::new();
     let mut argc_fn = None;
-    let mut argc_multi = None;
     let mut argc_value = None;
     if args.iter().all(|v| v != "--") && last.starts_with('-') {
-        if let Some((left, right)) = split_equal_sign(last) {
-            prefix = left.to_string();
-            last = right
+        if let Some((left, right)) = split_equal_sign(&last) {
+            prefix.push_str(left);
+            last = right.to_string();
+            mod_quote(&mut last, &mut prefix, &mut default_nospace);
         }
     }
     for (value, description) in compgen_values {
@@ -51,15 +59,17 @@ pub fn compgen(
                 argc_value = argc_value.or_else(|| Some(value.to_string()));
             } else if let Some(value) = value.strip_prefix("__argc_multi:") {
                 if let Some(ch) = value.chars().next() {
-                    argc_multi = Some(ch);
+                    default_nospace = true;
                     if let Some((i, _)) = last.char_indices().rfind(|(_, c)| ch == *c) {
-                        prefix.push_str(&last[..=i]);
-                        last = &last[i + 1..];
+                        let idx = i + 1;
+                        prefix.push_str(&last[..idx]);
+                        last = last[idx..].to_string();
+                        mod_quote(&mut last, &mut prefix, &mut default_nospace);
                     }
                 }
             }
-        } else if value.starts_with(last) {
-            candidates.insert(value.clone(), (description, argc_multi.is_some()));
+        } else if value.starts_with(&last) {
+            candidates.insert(value.clone(), (description, default_nospace));
         }
     }
     let mut argc_prefix = prefix.to_string();
@@ -80,7 +90,7 @@ pub fn compgen(
                     Some(value) => (value, true),
                     None => (value, false),
                 };
-                let nospace = nospace || argc_multi.is_some();
+                let nospace = nospace || default_nospace;
                 if value.starts_with("__argc_") {
                     if let Some(value) = value.strip_prefix("__argc_value:") {
                         argc_value = argc_value.or_else(|| Some(value.to_string()));
@@ -137,13 +147,17 @@ pub fn compgen(
             Ok(v) => v.chars().collect(),
             Err(_) => vec!['=', ':', '|', ';'],
         };
-        if let Some((i, _)) = argc_prefix
-            .char_indices()
-            .rfind(|(_, c)| break_chars.contains(c))
+        let prefix_unbalance = unbalance_quote(&argc_prefix);
+        if let Some((i, _)) = (match prefix_unbalance {
+            Some((_, idx)) => &argc_prefix[0..idx],
+            None => &argc_prefix,
+        })
+        .char_indices()
+        .rfind(|(_, c)| break_chars.contains(c))
         {
             argc_prefix = argc_prefix[i + 1..].to_string();
         }
-        if last == argc_matcher {
+        if last == argc_matcher && prefix_unbalance.is_none() {
             if let Some((i, _)) = argc_matcher
                 .char_indices()
                 .rfind(|(_, c)| break_chars.contains(c))
@@ -236,17 +250,23 @@ impl Shell {
         }
         match self {
             Shell::Bash => {
+                let prefix_unbalance = unbalance_quote(prefix);
                 let values: Vec<&str> = candidates.iter().map(|(v, _, _)| v.as_str()).collect();
                 let mut add_space_to_first_candidate = false;
                 if values.len() == 1 {
                     let space = if candidates[0].2 { "" } else { " " };
-                    return format!(
-                        "{}{space}",
-                        self.escape(&format!("{prefix}{}{suffix}", candidates[0].0))
-                    );
+                    let mut value = format!("{prefix}{}{suffix}", candidates[0].0);
+                    if prefix_unbalance.is_none() {
+                        value = self.escape(&value);
+                    }
+                    return format!("{value}{space}");
                 } else if let Some(common) = common_prefix(&values) {
-                    if common != matcher {
-                        return format!("{prefix}{}", self.escape(&common));
+                    if common != matcher && common != "--" {
+                        let mut value = format!("{prefix}{common}");
+                        if prefix_unbalance.is_none() {
+                            value = self.escape(&value);
+                        }
+                        return value;
                     } else {
                         add_space_to_first_candidate = true;
                     }
@@ -255,16 +275,16 @@ impl Shell {
                     .into_iter()
                     .enumerate()
                     .map(|(i, (value, description, nospace))| {
-                        let mut escaped_value = self.escape(&value);
+                        let mut new_value = self.escape(&value);
                         if i == 0 && add_space_to_first_candidate {
-                            escaped_value = format!(" {}", escaped_value)
+                            new_value = format!(" {}", new_value)
                         };
                         if nospace {
-                            escaped_value
+                            new_value
                         } else if description.is_empty() || !self.with_description() {
-                            format!("{escaped_value} ")
+                            format!("{new_value} ")
                         } else {
-                            format!("{escaped_value} ({})", truncate_description(&description))
+                            format!("{new_value} ({})", truncate_description(&description))
                         }
                     })
                     .collect::<Vec<String>>()
@@ -273,11 +293,11 @@ impl Shell {
             Shell::Fish => candidates
                 .into_iter()
                 .map(|(value, description, _nospace)| {
-                    let escaped_value = self.escape(&format!("{prefix}{value}{suffix}"));
+                    let new_value = self.combine_value1(prefix, &value, suffix);
                     if description.is_empty() || !self.with_description() {
-                        escaped_value
+                        new_value
                     } else {
-                        format!("{escaped_value}\t{}", truncate_description(&description))
+                        format!("{new_value}\t{}", truncate_description(&description))
                     }
                 })
                 .collect::<Vec<String>>()
@@ -285,15 +305,12 @@ impl Shell {
             Shell::Nushell => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let escaped_value = self.escape(&format!("{prefix}{value}{suffix}"));
+                    let new_value = self.combine_value1(prefix, &value, suffix);
                     let space = if nospace { "" } else { " " };
                     if description.is_empty() || !self.with_description() {
-                        format!("{escaped_value}{space}")
+                        format!("{new_value}{space}")
                     } else {
-                        format!(
-                            "{escaped_value}{space}\t{}",
-                            truncate_description(&description)
-                        )
+                        format!("{new_value}{space}\t{}", truncate_description(&description))
                     }
                 })
                 .collect::<Vec<String>>()
@@ -301,7 +318,7 @@ impl Shell {
             Shell::Zsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let escaped_value = self.escape(&format!("{prefix}{value}{suffix}"));
+                    let new_value = self.combine_value2(prefix, &value, suffix);
                     let display = self.escape(&value);
                     let description = if description.is_empty() || !self.with_description() {
                         display
@@ -309,14 +326,14 @@ impl Shell {
                         format!("{display}:{}", truncate_description(&description))
                     };
                     let space = if nospace { "" } else { " " };
-                    format!("{escaped_value}{space}\t{description}")
+                    format!("{new_value}{space}\t{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            _ => candidates
+            Shell::Xonsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let escaped_value = self.escape(&format!("{prefix}{value}{suffix}"));
+                    let new_value = self.combine_value2(prefix, &value, suffix);
                     let display = if value.is_empty() { " ".into() } else { value };
                     let description = if description.is_empty() || !self.with_description() {
                         String::new()
@@ -324,7 +341,22 @@ impl Shell {
                         truncate_description(&description)
                     };
                     let space: &str = if nospace { "0" } else { "1" };
-                    format!("{escaped_value}\t{space}\t{display}\t{description}")
+                    format!("{new_value}\t{space}\t{display}\t{description}")
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
+            _ => candidates
+                .into_iter()
+                .map(|(value, description, nospace)| {
+                    let new_value = self.combine_value1(prefix, &value, suffix);
+                    let display = if value.is_empty() { " ".into() } else { value };
+                    let description = if description.is_empty() || !self.with_description() {
+                        String::new()
+                    } else {
+                        truncate_description(&description)
+                    };
+                    let space: &str = if nospace { "0" } else { "1" };
+                    format!("{new_value}\t{space}\t{display}\t{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
@@ -347,43 +379,49 @@ impl Shell {
 
     pub(crate) fn escape(&self, value: &str) -> String {
         match self {
-            Shell::Bash => escape_chars(value, r###"()<>"'` !#$&;\|"###),
-            Shell::Nushell => {
-                if contains_chars(value, r###"()[]{}"'` #$;|"###) {
-                    let value = escape_chars(value, "\"");
-                    format!("\"{value}\"")
-                } else {
-                    value.into()
-                }
-            }
-            Shell::Powershell => {
-                if contains_chars(value, r###"()<>[]{}"'` #$&,;@|"###) {
-                    let value: String = value
-                        .chars()
-                        .map(|c| {
-                            if c == '\'' {
-                                "''".to_string()
-                            } else {
-                                c.to_string()
-                            }
-                        })
-                        .collect();
+            Shell::Bash | Shell::Zsh => escape_chars(value, self.need_escape_chars()),
+            Shell::Nushell | Shell::Powershell | Shell::Xonsh => {
+                if contains_chars(value, self.need_escape_chars()) {
                     format!("'{value}'")
                 } else {
                     value.into()
                 }
             }
-            Shell::Xonsh => {
-                if contains_chars(value, r###"()<>[]{}!"'` #&:;\|"###) {
-                    let value = escape_chars(value, "'");
-                    format!("'{value}'")
-                } else {
-                    value.into()
-                }
-            }
-            Shell::Zsh => escape_chars(value, r###"()<>[]"'` !#$&*:;?\|~"###),
             _ => value.into(),
         }
+    }
+
+    fn need_escape_chars(&self) -> &str {
+        match self {
+            Shell::Bash => r###"()<>"'` !#$&;\|"###,
+            Shell::Elvish => "",
+            Shell::Fish => "",
+            Shell::Nushell => r###"()[]{}"'` #$;|"###,
+            Shell::Powershell => r###"()<>[]{}"'` #$&,;@|"###,
+            Shell::Xonsh => r###"()<>[]{}!"'` #&:;\|"###,
+            Shell::Zsh => r###"()<>[]"'` !#$&*:;?\|~"###,
+        }
+    }
+
+    fn combine_value1(&self, prefix: &str, value: &str, suffix: &str) -> String {
+        let mut new_value = format!("{prefix}{value}{suffix}");
+        if unbalance_quote(prefix).is_none() {
+            new_value = self.escape(&new_value);
+        }
+        new_value
+    }
+
+    fn combine_value2(&self, prefix: &str, value: &str, suffix: &str) -> String {
+        let prefix = if let Some((_, i)) = unbalance_quote(prefix) {
+            prefix
+                .char_indices()
+                .filter(|(v, _)| *v != i)
+                .map(|(_, v)| v)
+                .collect()
+        } else {
+            prefix.to_string()
+        };
+        self.escape(&format!("{prefix}{value}{suffix}"))
     }
 }
 
@@ -397,11 +435,18 @@ fn truncate_description(description: &str) -> String {
     }
 }
 
-fn unbalance_quote(arg: &str) -> (&str, Option<char>) {
-    if arg.starts_with(is_quote) && arg.chars().skip(1).all(|v| !is_quote(v)) {
-        return (&arg[1..], arg.chars().next());
+fn unbalance_quote(value: &str) -> Option<(char, usize)> {
+    let mut balances = vec![];
+    for (i, c) in value.chars().enumerate() {
+        if is_quote(c) {
+            if balances.last().map(|(v, _)| v) == Some(&c) {
+                balances.pop();
+            } else {
+                balances.push((c, i));
+            }
+        }
     }
-    (arg, None)
+    balances.first().cloned()
 }
 
 fn split_equal_sign(word: &str) -> Option<(&str, &str)> {
@@ -453,6 +498,14 @@ fn escape_chars(value: &str, chars: &str) -> String {
             }
         })
         .collect()
+}
+
+fn mod_quote(last: &mut String, prefix: &mut String, default_nospace: &mut bool) {
+    if last.starts_with(is_quote) {
+        prefix.push_str(&last[0..1]);
+        *default_nospace = true;
+    }
+    *last = last.trim_matches(is_quote).to_string();
 }
 
 fn contains_chars(value: &str, chars: &str) -> bool {
