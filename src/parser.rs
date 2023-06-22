@@ -2,12 +2,11 @@ use crate::param::{FlagOptionParam, ParamData, PositionalParam};
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
 use anyhow::bail;
-use nom::character::complete::one_of;
 use nom::{
     branch::alt,
     bytes::complete::{escaped, tag, take_till, take_while1},
     character::{
-        complete::{anychar, char, satisfy, space0, space1},
+        complete::{anychar, char, one_of, satisfy, space0, space1},
         streaming::none_of,
     },
     combinator::{eof, fail, map, not, opt, peek, rest, success},
@@ -333,15 +332,23 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
             arg.required = true;
             arg
         }),
-        map(terminated(parse_param_name, tag("*")), |mut arg| {
-            arg.multiple = true;
-            arg
-        }),
-        map(terminated(parse_param_name, tag("+")), |mut arg| {
-            arg.required = true;
-            arg.multiple = true;
-            arg
-        }),
+        map(
+            pair(parse_param_name, preceded(tag("*"), opt(parse_multi_char))),
+            |(mut arg, multi_char)| {
+                arg.multiple = true;
+                arg.multi_char = multi_char;
+                arg
+            },
+        ),
+        map(
+            pair(parse_param_name, preceded(tag("+"), opt(parse_multi_char))),
+            |(mut arg, multi_char)| {
+                arg.required = true;
+                arg.multiple = true;
+                arg.multi_char = multi_char;
+                arg
+            },
+        ),
         parse_param_name,
     ))(input)
 }
@@ -475,6 +482,10 @@ fn parse_fn_name(input: &str) -> nom::IResult<&str, &str> {
 
 fn parse_name(input: &str) -> nom::IResult<&str, &str> {
     take_while1(is_name_char)(input)
+}
+
+fn parse_multi_char(input: &str) -> nom::IResult<&str, char> {
+    one_of(",:;@")(input)
 }
 
 fn parse_default_value(input: &str) -> nom::IResult<&str, &str> {
@@ -686,6 +697,8 @@ mod tests {
         assert_parse_option_arg!("--foo!");
         assert_parse_option_arg!("--foo+");
         assert_parse_option_arg!("--foo*");
+        assert_parse_option_arg!("--foo+,");
+        assert_parse_option_arg!("--foo*,");
         assert_parse_option_arg!("--foo!");
         assert_parse_option_arg!("--foo=a");
         assert_parse_option_arg!("--foo=`_foo`");
@@ -698,9 +711,11 @@ mod tests {
         assert_parse_option_arg!("--foo+[a|b]");
         assert_parse_option_arg!("--foo+[`_foo`]");
         assert_parse_option_arg!("--foo+[=a|b]", "--foo*[=a|b]");
+        assert_parse_option_arg!("--foo+,[a|b]");
         assert_parse_option_arg!("--foo*[a|b]");
         assert_parse_option_arg!("--foo*[=a|b]");
         assert_parse_option_arg!("--foo*[`_foo`]");
+        assert_parse_option_arg!("--foo*,[a|b]");
         assert_parse_option_arg!("--foo <FOO>");
         assert_parse_option_arg!("--foo-abc <FOO>");
         assert_parse_option_arg!("--foo=\"a b\"");

@@ -49,4 +49,14 @@ ghi
 ************ COMPGEN `prog "--oa=a` ************
 --oa=abc
 
+************ COMPGEN `prog --oc ` ************
+abc
+def
+ghi
+
+************ COMPGEN `prog --oc abc,` ************
+abc,abc
+abc,def
+abc,ghi
+
 

@@ -8,8 +8,10 @@ fn case1() {
 # @author     nobody <nobody@example.com>
 # @cmd
 # @alias a
-# @flag   -b --fa A flag
-# @option -o --oa A option
+# @flag   -b --fa  A flag
+# @option -o --oa  A option
+# @option    --ob*
+# @option    --oc*,
 # @arg var
 cmd() { :; }
 "###;

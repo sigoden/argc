@@ -79,6 +79,17 @@ argc__fn=cmda
 cmda
 
 ************ RUN ************
+prog cmda --oe ob1,ob2 ob3
+
+OUTPUT
+argc_oe=( ob1 ob2 ob3 )
+argc__args=( prog cmda --oe ob1,ob2 ob3 )
+argc__index=1
+argc__positionals=(  )
+argc__fn=cmda
+cmda
+
+************ RUN ************
 prog cmda -o ob1 ob2
 
 OUTPUT

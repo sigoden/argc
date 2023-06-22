@@ -14,6 +14,7 @@ pub(crate) struct ParamData {
     pub(crate) choices: Option<Vec<String>>,
     pub(crate) choices_fn: Option<(String, bool)>,
     pub(crate) multiple: bool,
+    pub(crate) multi_char: Option<char>,
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
@@ -26,6 +27,7 @@ impl ParamData {
             choices: None,
             choices_fn: None,
             multiple: false,
+            multi_char: None,
             required: false,
             default: None,
             default_fn: None,
@@ -43,6 +45,7 @@ pub(crate) struct FlagOptionParam {
     pub(crate) choices: Option<Vec<String>>,
     pub(crate) choices_fn: Option<(String, bool)>,
     pub(crate) multiple: bool,
+    pub(crate) multi_char: Option<char>,
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
@@ -81,6 +84,7 @@ impl FlagOptionParam {
             choices: arg.choices,
             choices_fn: arg.choices_fn,
             multiple: arg.multiple,
+            multi_char: arg.multi_char,
             required: arg.required,
             default: arg.default,
             default_fn: arg.default_fn,
@@ -114,6 +118,7 @@ impl FlagOptionParam {
                 &self.choices,
                 &self.choices_fn,
                 self.multiple,
+                self.multi_char,
                 self.required,
                 &self.default,
                 &self.default_fn,
@@ -128,6 +133,7 @@ impl FlagOptionParam {
                 &self.choices,
                 &self.choices_fn,
                 self.multiple,
+                self.multi_char,
                 self.required,
                 &self.default,
                 &self.default_fn,
@@ -242,10 +248,21 @@ impl FlagOptionParam {
                 return None;
             }
             if self.multiple {
-                let values: Vec<String> = values
+                let mut values: Vec<String> = values
                     .iter()
                     .flat_map(|v| v.iter().map(|v| v.to_string()))
                     .collect();
+                if let Some(c) = self.multi_char {
+                    values = values
+                        .into_iter()
+                        .flat_map(|v| {
+                            v.split(c)
+                                .filter(|v| !v.is_empty())
+                                .map(|v| v.to_string())
+                                .collect::<Vec<String>>()
+                        })
+                        .collect()
+                }
                 Some(ArgcValue::Multiple(name, values))
             } else if self.values_size() > 1 {
                 Some(ArgcValue::Multiple(
@@ -300,6 +317,7 @@ pub(crate) struct PositionalParam {
     pub(crate) choices: Option<Vec<String>>,
     pub(crate) choices_fn: Option<(String, bool)>,
     pub(crate) multiple: bool,
+    pub(crate) multi_char: Option<char>,
     pub(crate) required: bool,
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
@@ -316,6 +334,7 @@ impl PositionalParam {
             choices: arg.choices,
             choices_fn: arg.choices_fn,
             multiple: arg.multiple,
+            multi_char: arg.multi_char,
             required: arg.required,
             default: arg.default,
             default_fn: arg.default_fn,
@@ -339,6 +358,7 @@ impl PositionalParam {
             &self.choices,
             &self.choices_fn,
             self.multiple,
+            self.multi_char,
             self.required,
             &self.default,
             &self.default_fn,
@@ -379,7 +399,18 @@ impl PositionalParam {
             return None;
         }
         if self.multiple {
-            let values: Vec<String> = values.iter().map(|v| v.to_string()).collect();
+            let mut values: Vec<String> = values.iter().map(|v| v.to_string()).collect();
+            if let Some(c) = self.multi_char {
+                values = values
+                    .into_iter()
+                    .flat_map(|v| {
+                        v.split(c)
+                            .filter(|v| !v.is_empty())
+                            .map(|v| v.to_string())
+                            .collect::<Vec<String>>()
+                    })
+                    .collect()
+            }
             Some(ArgcValue::PositionalMultiple(name, values))
         } else {
             Some(ArgcValue::PositionalSingle(name, must_get_first(values)))
@@ -394,11 +425,13 @@ impl PositionalParam {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn render_name(
     name: &str,
     choices: &Option<Vec<String>>,
     choices_fn: &Option<(String, bool)>,
     multiple: bool,
+    multi_char: Option<char>,
     required: bool,
     default: &Option<String>,
     default_fn: &Option<String>,
@@ -406,6 +439,9 @@ fn render_name(
     let mut name = name.to_string();
     if let Some(choices) = choices {
         if let Some(ch) = get_modifer(required, multiple) {
+            name.push(ch)
+        }
+        if let Some(ch) = multi_char {
             name.push(ch)
         }
         let mut prefix = String::new();
@@ -428,6 +464,9 @@ fn render_name(
         if let Some(ch) = get_modifer(required, multiple) {
             name.push(ch)
         }
+        if let Some(ch) = multi_char {
+            name.push(ch)
+        }
         let validate_sign = if *validate { "" } else { "?" };
         let _ = write!(name, "[{}`{}`]", validate_sign, choices_fn);
     } else if let Some(default) = default {
@@ -439,8 +478,13 @@ fn render_name(
         let _ = write!(name, "={}", value);
     } else if let Some(default_fn) = default_fn {
         let _ = write!(name, "=`{}`", default_fn);
-    } else if let Some(ch) = get_modifer(required, multiple) {
-        name.push(ch)
+    } else {
+        if let Some(ch) = get_modifer(required, multiple) {
+            name.push(ch)
+        }
+        if let Some(ch) = multi_char {
+            name.push(ch)
+        }
     }
     name
 }
