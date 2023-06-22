@@ -3,37 +3,30 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN Bash `prog --oa=abc,` ************
-abc
 def
 ijk
 
 ************ COMPGEN Elvish `prog --oa=abc,` ************
---oa=abc,abc	0	abc	
 --oa=abc,def	0	def	
 --oa=abc,ijk	0	ijk	
 
 ************ COMPGEN Fish `prog --oa=abc,` ************
---oa=abc,abc
 --oa=abc,def
 --oa=abc,ijk
 
 ************ COMPGEN Nushell `prog --oa=abc,` ************
---oa=abc,abc
 --oa=abc,def
 --oa=abc,ijk
 
 ************ COMPGEN Powershell `prog --oa=abc,` ************
-'--oa=abc,abc'	0	abc	
 '--oa=abc,def'	0	def	
 '--oa=abc,ijk'	0	ijk	
 
 ************ COMPGEN Xonsh `prog --oa=abc,` ************
---oa=abc,abc	0	abc	
 --oa=abc,def	0	def	
 --oa=abc,ijk	0	ijk	
 
 ************ COMPGEN Zsh `prog --oa=abc,` ************
---oa=abc,abc	abc
 --oa=abc,def	def
 --oa=abc,ijk	ijk
 

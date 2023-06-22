@@ -55,7 +55,6 @@ def
 ghi
 
 ************ COMPGEN `prog --oc abc,` ************
-abc,abc
 abc,def
 abc,ghi
 
