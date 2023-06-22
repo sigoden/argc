@@ -1,0 +1,40 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN Bash `prog --oa='` ************
+abc
+def
+ijk
+
+************ COMPGEN Elvish `prog --oa='` ************
+--oa='abc	0	abc	
+--oa='def	0	def	
+--oa='ijk	0	ijk	
+
+************ COMPGEN Fish `prog --oa='` ************
+--oa='abc
+--oa='def
+--oa='ijk
+
+************ COMPGEN Nushell `prog --oa='` ************
+--oa='abc
+--oa='def
+--oa='ijk
+
+************ COMPGEN Powershell `prog --oa='` ************
+--oa='abc	0	abc	
+--oa='def	0	def	
+--oa='ijk	0	ijk	
+
+************ COMPGEN Xonsh `prog --oa='` ************
+--oa=abc	0	abc	
+--oa=def	0	def	
+--oa=ijk	0	ijk	
+
+************ COMPGEN Zsh `prog --oa='` ************
+--oa=abc	abc
+--oa=def	def
+--oa=ijk	ijk
+
+

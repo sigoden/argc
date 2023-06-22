@@ -34,20 +34,20 @@ def
 ghi
 
 ************ COMPGEN `prog '--oa=` ************
---oa=abc
---oa=def
---oa=ghi
+'--oa=abc
+'--oa=def
+'--oa=ghi
 
 ************ COMPGEN `prog '--oa=a` ************
---oa=abc
+'--oa=abc
 
 ************ COMPGEN `prog "--oa=` ************
---oa=abc
---oa=def
---oa=ghi
+"--oa=abc
+"--oa=def
+"--oa=ghi
 
 ************ COMPGEN `prog "--oa=a` ************
---oa=abc
+"--oa=abc
 
 ************ COMPGEN `prog --oc ` ************
 abc
