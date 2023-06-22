@@ -5,7 +5,7 @@ use crate::Result;
 
 use anyhow::bail;
 use indexmap::IndexMap;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 pub fn compgen(
@@ -44,6 +44,7 @@ pub fn compgen(
     let mut candidates: IndexMap<String, (String, bool)> = IndexMap::new();
     let mut argc_fn = None;
     let mut argc_value = None;
+    let mut multi_values = HashSet::new();
     if args.iter().all(|v| v != "--") && last.starts_with('-') {
         if let Some((left, right)) = split_equal_sign(&last) {
             prefix.push_str(left);
@@ -61,6 +62,7 @@ pub fn compgen(
                 if let Some(ch) = value.chars().next() {
                     default_nospace = true;
                     if let Some((i, _)) = last.char_indices().rfind(|(_, c)| ch == *c) {
+                        multi_values = last[..i].split(ch).map(|v| v.to_string()).collect();
                         let idx = i + 1;
                         prefix.push_str(&last[..idx]);
                         last = last[idx..].to_string();
@@ -68,7 +70,7 @@ pub fn compgen(
                     }
                 }
             }
-        } else if value.starts_with(&last) {
+        } else if value.starts_with(&last) && !multi_values.contains(&value) {
             candidates.insert(value.clone(), (description, default_nospace));
         }
     }
@@ -103,7 +105,7 @@ pub fn compgen(
                     } else if let Some(value) = value.strip_prefix("__argc_matcher:") {
                         argc_matcher = value.to_string();
                     }
-                } else if value.starts_with(&argc_matcher) {
+                } else if value.starts_with(&argc_matcher) && !multi_values.contains(value) {
                     match candidates.get_mut(value) {
                         Some((v1, v2)) => {
                             if v1.is_empty() && !description.is_empty() {
