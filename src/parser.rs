@@ -485,7 +485,7 @@ fn parse_name(input: &str) -> nom::IResult<&str, &str> {
 }
 
 fn parse_multi_char(input: &str) -> nom::IResult<&str, char> {
-    one_of(",:;@")(input)
+    one_of(",:;@|")(input)
 }
 
 fn parse_default_value(input: &str) -> nom::IResult<&str, &str> {

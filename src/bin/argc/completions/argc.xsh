@@ -11,7 +11,7 @@ def _argc_completer(context):
     if len(context.args) == 0:
         return
     words = [v.value for v in context.args[0:context.arg_index]]
-    words.append(context.prefix)
+    words.append(context.raw_prefix)
     cmd = words[0]
     if not (cmd in ARGC_SCRIPTS):
         return

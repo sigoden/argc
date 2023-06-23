@@ -28,9 +28,9 @@ ijk
 --oa='ijk	0	ijk	
 
 ************ COMPGEN Xonsh `prog --oa='` ************
---oa=abc	0	abc	
---oa=def	0	def	
---oa=ijk	0	ijk	
+--oa='abc	0	abc	
+--oa='def	0	def	
+--oa='ijk	0	ijk	
 
 ************ COMPGEN Zsh `prog --oa='` ************
 --oa=abc	abc
