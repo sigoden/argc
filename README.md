@@ -262,7 +262,7 @@ Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 argc --argc-completions powershell mycmd1 mycmd2 | Out-String | Invoke-Expression
 
 # xonsh (~/.config/xonsh/rc.xsh)
-exec($(argc --argc-completions fish mycmd1 mycmd2))
+exec($(argc --argc-completions xonsh mycmd1 mycmd2))
 
 # zsh (~/.zshrc)
 source <(argc --argc-completions zsh mycmd1 mycmd2)

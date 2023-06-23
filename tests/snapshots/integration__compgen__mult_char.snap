@@ -19,8 +19,8 @@ abc,def
 abc,ijk
 
 ************ COMPGEN Powershell `prog --oa abc,` ************
-'abc,def'	0	def	
-'abc,ijk'	0	ijk	
+def	0	def	
+ijk	0	ijk	
 
 ************ COMPGEN Xonsh `prog --oa abc,` ************
 abc,def	0	def	

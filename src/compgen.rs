@@ -144,11 +144,8 @@ pub fn compgen(
         .into_iter()
         .map(|(value, (description, nospace))| (value, description, nospace))
         .collect();
-    if shell == Shell::Bash {
-        let break_chars = match std::env::var("COMP_WORDBREAKS") {
-            Ok(v) => v.chars().collect(),
-            Err(_) => vec!['=', ':', '|', ';'],
-        };
+    let break_chars = shell.need_break_chars();
+    if !break_chars.is_empty() {
         let prefix_unbalance = unbalance_quote(&argc_prefix);
         if let Some((i, _)) = (match prefix_unbalance {
             Some((_, idx)) => &argc_prefix[0..idx],
@@ -283,82 +280,74 @@ impl Shell {
                         };
                         if nospace {
                             new_value
-                        } else if description.is_empty() || !self.with_description() {
-                            format!("{new_value} ")
                         } else {
-                            format!("{new_value} ({})", truncate_description(&description))
+                            let description = self.comp_description(&description, "(", ")");
+                            format!("{new_value} {description}")
                         }
                     })
                     .collect::<Vec<String>>()
                     .join("\n")
             }
+            Shell::Elvish => candidates
+                .into_iter()
+                .map(|(value, description, nospace)| {
+                    let new_value = self.comp_value1(prefix, &value, suffix);
+                    let display = if value.is_empty() { " ".into() } else { value };
+                    let description = self.comp_description(&description, "", "");
+                    let space: &str = if nospace { "0" } else { "1" };
+                    format!("{new_value}\t{space}\t{display}\t{description}")
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
             Shell::Fish => candidates
                 .into_iter()
                 .map(|(value, description, _nospace)| {
-                    let new_value = self.combine_value1(prefix, &value, suffix);
-                    if description.is_empty() || !self.with_description() {
-                        new_value
-                    } else {
-                        format!("{new_value}\t{}", truncate_description(&description))
-                    }
+                    let new_value = self.comp_value1(prefix, &value, suffix);
+                    let description = self.comp_description(&description, "\t", "");
+                    format!("{new_value}{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
             Shell::Nushell => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let new_value = self.combine_value1(prefix, &value, suffix);
+                    let new_value = self.comp_value1(prefix, &value, suffix);
                     let space = if nospace { "" } else { " " };
-                    if description.is_empty() || !self.with_description() {
-                        format!("{new_value}{space}")
-                    } else {
-                        format!("{new_value}{space}\t{}", truncate_description(&description))
-                    }
+                    let description = self.comp_description(&description, "\t", "");
+                    format!("{new_value}{space}{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            Shell::Zsh => candidates
+            Shell::Powershell => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let new_value = self.combine_value2(prefix, &value, suffix);
-                    let display = self.escape(&value);
-                    let description = if description.is_empty() || !self.with_description() {
-                        display
-                    } else {
-                        format!("{display}:{}", truncate_description(&description))
-                    };
-                    let space = if nospace { "" } else { " " };
-                    format!("{new_value}{space}\t{description}")
+                    let new_value = self.comp_value1(prefix, &value, suffix);
+                    let display = if value.is_empty() { " ".into() } else { value };
+                    let description = self.comp_description(&description, "", "");
+                    let space: &str = if nospace { "0" } else { "1" };
+                    format!("{new_value}\t{space}\t{display}\t{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
             Shell::Xonsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let new_value = self.combine_value2(prefix, &value, suffix);
+                    let new_value = self.comp_value1(prefix, &value, suffix);
                     let display = if value.is_empty() { " ".into() } else { value };
-                    let description = if description.is_empty() || !self.with_description() {
-                        String::new()
-                    } else {
-                        truncate_description(&description)
-                    };
+                    let description = self.comp_description(&description, "", "");
                     let space: &str = if nospace { "0" } else { "1" };
                     format!("{new_value}\t{space}\t{display}\t{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
-            _ => candidates
+            Shell::Zsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let new_value = self.combine_value1(prefix, &value, suffix);
-                    let display = if value.is_empty() { " ".into() } else { value };
-                    let description = if description.is_empty() || !self.with_description() {
-                        String::new()
-                    } else {
-                        truncate_description(&description)
-                    };
-                    let space: &str = if nospace { "0" } else { "1" };
-                    format!("{new_value}\t{space}\t{display}\t{description}")
+                    let new_value = self.comp_value2(prefix, &value, suffix);
+                    let display = value.replace(':', "\\:");
+                    let description = self.comp_description(&description, ":", "");
+                    let space = if nospace { "" } else { " " };
+                    format!("{new_value}{space}\t{display}{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
@@ -381,13 +370,16 @@ impl Shell {
 
     pub(crate) fn escape(&self, value: &str) -> String {
         match self {
-            Shell::Bash | Shell::Zsh => escape_chars(value, self.need_escape_chars()),
+            Shell::Bash => escape_chars(value, self.need_escape_chars(), "\\"),
             Shell::Nushell | Shell::Powershell | Shell::Xonsh => {
                 if contains_chars(value, self.need_escape_chars()) {
                     format!("'{value}'")
                 } else {
                     value.into()
                 }
+            }
+            Shell::Zsh => {
+                escape_chars(value, self.need_escape_chars(), "\\\\").replace("\\\\:", "\\:")
             }
             _ => value.into(),
         }
@@ -405,7 +397,18 @@ impl Shell {
         }
     }
 
-    fn combine_value1(&self, prefix: &str, value: &str, suffix: &str) -> String {
+    fn need_break_chars(&self) -> Vec<char> {
+        match self {
+            Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
+                Ok(v) => v.chars().collect(),
+                Err(_) => vec!['=', ':', '|', ';'],
+            },
+            Shell::Powershell => vec![','],
+            _ => vec![],
+        }
+    }
+
+    fn comp_value1(&self, prefix: &str, value: &str, suffix: &str) -> String {
         let mut new_value = format!("{prefix}{value}{suffix}");
         if unbalance_quote(prefix).is_none() {
             new_value = self.escape(&new_value);
@@ -413,7 +416,7 @@ impl Shell {
         new_value
     }
 
-    fn combine_value2(&self, prefix: &str, value: &str, suffix: &str) -> String {
+    fn comp_value2(&self, prefix: &str, value: &str, suffix: &str) -> String {
         let prefix = if let Some((_, i)) = unbalance_quote(prefix) {
             prefix
                 .char_indices()
@@ -424,6 +427,14 @@ impl Shell {
             prefix.to_string()
         };
         self.escape(&format!("{prefix}{value}{suffix}"))
+    }
+
+    fn comp_description(&self, description: &str, prefix: &str, suffix: &str) -> String {
+        if description.is_empty() || !self.with_description() {
+            String::new()
+        } else {
+            format!("{prefix}{}{suffix}", truncate_description(description))
+        }
     }
 }
 
@@ -488,13 +499,13 @@ fn common_prefix(strings: &[&str]) -> Option<String> {
     Some(prefix)
 }
 
-fn escape_chars(value: &str, chars: &str) -> String {
-    let chars: Vec<char> = chars.chars().collect();
+fn escape_chars(value: &str, need_escape: &str, for_escape: &str) -> String {
+    let chars: Vec<char> = need_escape.chars().collect();
     value
         .chars()
         .map(|c| {
             if chars.contains(&c) {
-                format!("\\{c}")
+                format!("{for_escape}{c}")
             } else {
                 c.to_string()
             }

@@ -490,3 +490,42 @@ _choice_fn() {
 
     snapshot_compgen_shells!(script, vec!["prog", "'--oa="]);
 }
+
+#[test]
+fn desc() {
+    let script = r###"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    echo -e "abc\t(desc1)"
+    echo -e "def\t(desc2)"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
+}
+
+#[test]
+fn desc2() {
+    let script = r###"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    echo -e "abc\t(desc1)"
+    echo -e "def\t(desc2)"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa", "a"]);
+}
+
+#[test]
+fn escape() {
+    let script = r###"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    echo -e "a:b>c"
+    echo -e "d:e>f"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
+}
