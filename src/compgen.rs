@@ -26,7 +26,7 @@ pub fn compgen(
         }
     };
     let cmd = Command::new(script_content)?;
-    let args: Vec<String> = args
+    let new_args: Vec<String> = args
         .iter()
         .enumerate()
         .map(|(i, v)| {
@@ -37,7 +37,7 @@ pub fn compgen(
             }
         })
         .collect();
-    let matcher = Matcher::new(&cmd, &args);
+    let matcher = Matcher::new(&cmd, &new_args);
     let compgen_values = matcher.compgen();
     let mut default_nospace = unbalance.is_some();
     let mut prefix = unbalance.map(|v| v.to_string()).unwrap_or_default();
@@ -85,7 +85,7 @@ pub fn compgen(
         if let Some(cwd) = get_current_dir() {
             envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
         }
-        if let Some(outputs) = run_param_fns(script_path, &[fn_name.as_str()], &args, envs) {
+        if let Some(outputs) = run_param_fns(script_path, &[fn_name.as_str()], &new_args, envs) {
             for line in outputs[0].trim().split('\n').map(|v| v.trim()) {
                 let (value, description) = line.split_once('\t').unwrap_or((line, ""));
                 let (value, nospace) = match value.strip_suffix('\0') {
@@ -288,7 +288,7 @@ impl Shell {
                     .collect::<Vec<String>>()
                     .join("\n")
             }
-            Shell::Elvish => candidates
+            Shell::Elvish | Shell::Powershell | Shell::Xonsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
                     let new_value = self.comp_value1(prefix, &value, suffix);
@@ -315,28 +315,6 @@ impl Shell {
                     let space = if nospace { "" } else { " " };
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{space}{description}")
-                })
-                .collect::<Vec<String>>()
-                .join("\n"),
-            Shell::Powershell => candidates
-                .into_iter()
-                .map(|(value, description, nospace)| {
-                    let new_value = self.comp_value1(prefix, &value, suffix);
-                    let display = if value.is_empty() { " ".into() } else { value };
-                    let description = self.comp_description(&description, "", "");
-                    let space: &str = if nospace { "0" } else { "1" };
-                    format!("{new_value}\t{space}\t{display}\t{description}")
-                })
-                .collect::<Vec<String>>()
-                .join("\n"),
-            Shell::Xonsh => candidates
-                .into_iter()
-                .map(|(value, description, nospace)| {
-                    let new_value = self.comp_value1(prefix, &value, suffix);
-                    let display = if value.is_empty() { " ".into() } else { value };
-                    let description = self.comp_description(&description, "", "");
-                    let space: &str = if nospace { "0" } else { "1" };
-                    format!("{new_value}\t{space}\t{display}\t{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
@@ -388,12 +366,11 @@ impl Shell {
     fn need_escape_chars(&self) -> &str {
         match self {
             Shell::Bash => r###"()<>"'` !#$&;\|"###,
-            Shell::Elvish => "",
-            Shell::Fish => "",
             Shell::Nushell => r###"()[]{}"'` #$;|"###,
             Shell::Powershell => r###"()<>[]{}"'` #$&,;@|"###,
             Shell::Xonsh => r###"()<>[]{}!"'` #&:;\|"###,
             Shell::Zsh => r###"()<>[]"'` !#$&*:;?\|~"###,
+            _ => "",
         }
     }
 
