@@ -1,22 +1,10 @@
 using namespace System.Management.Automation
 
-$_argc_completer = {
-    param($wordToComplete, $commandAst, $cursorPosition)
-    $words = @($commandAst.CommandElements | Where { $_.Extent.StartOffset -lt $cursorPosition } | ForEach-Object { $_.ToString() })
-    if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
-        $words += ''
-    }
-    $cmd = $words[0]
-    $scriptfile = ""
-    if ($cmd -eq "argc") {
-        $scriptfile = (argc --argc-script-path 2>$null)
-    } else {
-        $scriptfile = (Get-Command $cmd -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)
-    }
-    if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
+function _argc_complete_impl([array]$array) {
+    if (-not(Test-Path -Path $array[0] -PathType Leaf)) {
         return
     }
-    $candidates = @((argc --argc-compgen powershell $scriptfile $words 2>$null).Split("`n"))
+    $candidates = @((argc --argc-compgen powershell $array 2>$null).Split("`n"))
     if ($candidates.Count -eq 1) {
         if (($candidates[0] -eq "__argc_comp:file") -or ($candidates[0] -eq "__argc_comp:dir")) {
             return
@@ -38,4 +26,22 @@ $_argc_completer = {
         }
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
     }
+}
+
+function _argc_complete_locate($cmd) {
+    if ($cmd -eq "argc") {
+        argc --argc-script-path 2>$null
+    } else {
+        Get-Command $cmd -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+    }
+}
+
+$_argc_completer = {
+    param($wordToComplete, $commandAst, $cursorPosition)
+    $array = @($commandAst.CommandElements | Where { $_.Extent.StartOffset -lt $cursorPosition } | ForEach-Object { $_.ToString() })
+    if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
+        $array += ''
+    }
+    $array = @(_argc_complete_locate $array[0]) + $array
+    _argc_complete_impl $array
 }

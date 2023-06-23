@@ -6,24 +6,10 @@ from xonsh.completers.tools import RichCompletion
 from xonsh.completers.tools import *
 from xonsh.completers._aliases import _add_one_completer
 
-@contextual_command_completer
-def _argc_completer(context):
-    if len(context.args) == 0:
+def _argc_complete_impl(args):
+    if not os.path.exists(args[0]):
         return
-    words = [v.value for v in context.args[0:context.arg_index]]
-    words.append(context.raw_prefix)
-    cmd = words[0]
-    if not (cmd in ARGC_SCRIPTS):
-        return
-    scriptfile = ""
-    if cmd == 'argc':
-        output, _ = Popen(['argc', '--argc-script-path'], stdout=PIPE, stderr=PIPE).communicate()
-        scriptfile = output.decode().split('\n')[0]
-    else:
-        scriptfile = shutil.which(cmd)
-    if not os.path.exists(scriptfile):
-        return
-    output, _ = Popen(['argc', '--argc-compgen', 'xonsh', scriptfile, *words], stdout=PIPE, stderr=PIPE).communicate()
+    output, _ = Popen(['argc', '--argc-compgen', 'xonsh', *args], stdout=PIPE, stderr=PIPE).communicate()
     candidates = output.decode().split('\n')
     candidates.pop()
     result = set()
@@ -36,7 +22,25 @@ def _argc_completer(context):
         value = parts[0]
         if parts[1] == "1":
             value = value + " "
-        result.add(RichCompletion(value, display=parts[2], description=parts[3], prefix_len=len(context.raw_prefix), append_closing_quote=False))
+        result.add(RichCompletion(value, display=parts[2], description=parts[3], prefix_len=len(args[-1]), append_closing_quote=False))
     return result
-    
+
+def _argc_complete_locate(cmd):
+    if not (cmd in ARGC_SCRIPTS):
+        return
+    if cmd == 'argc':
+        output, _ = Popen(['argc', '--argc-script-path'], stdout=PIPE, stderr=PIPE).communicate()
+        return output.decode().split('\n')[0]
+    else:
+        return shutil.which(cmd)
+
+@contextual_command_completer
+def _argc_completer(context):
+    if len(context.args) == 0:
+        return
+    args = [v.value for v in context.args[0:context.arg_index]]
+    args.append(context.raw_prefix)
+    args.insert(0, _argc_complete_locate(args[0]))
+    return _argc_complete_impl(args)
+
 _add_one_completer('argc', _argc_completer, 'start')
