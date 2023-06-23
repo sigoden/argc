@@ -36,7 +36,7 @@ function _argc_complete_locate($cmd) {
     }
 }
 
-function _argc_completer {
+$_argc_completer = {
     param($wordToComplete, $commandAst, $cursorPosition)
     $array = @($commandAst.CommandElements | Where { $_.Extent.StartOffset -lt $cursorPosition } | ForEach-Object { $_.ToString() })
     if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
