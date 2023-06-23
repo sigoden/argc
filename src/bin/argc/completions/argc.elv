@@ -11,28 +11,18 @@ fn argc-complete-path {|arg &is_dir=$false|
     }
 }
 
-fn argc-completer {|@words|
-    var cmd = $words[0]
-    var scriptfile = (try {
-        if (eq $cmd 'argc')  {
-            argc --argc-script-path
-        } else {
-            which $cmd
-        }
-    } catch e {
-        echo ''
-    })
-    if (not (path:is-regular &follow-symlink=$true $scriptfile)) {
-        argc-complete-path $words[-1]
+fn argc-complete-impl {|@args|
+    if (not (path:is-regular &follow-symlink=$true $args[0])) {
+        argc-complete-path $args[-1]
         return
     }
-    var candidates = [(try { argc --argc-compgen elvish $scriptfile (all $words) } catch e { echo '' })]
+    var candidates = [(try { argc --argc-compgen elvish (all $args) } catch e { echo '' })]
     if (eq (count $candidates) (num 1)) {
         if (eq $candidates[0] '__argc_comp:file') {
-            argc-complete-path $words[-1]
+            argc-complete-path $args[-1]
             return
         } elif (eq $candidates[0] '__argc_comp:dir') {
-            argc-complete-path &is_dir=$true $words[-1]
+            argc-complete-path &is_dir=$true $args[-1]
             return
         }
     }
@@ -45,4 +35,20 @@ fn argc-completer {|@words|
             edit:complex-candidate $parts[0] &display=(styled $parts[2] 'default')(styled ' ' 'dim white bg-default')(styled '('$parts[3]')' 'dim white') &code-suffix=$code-suffix
         }
     }
+}
+
+fn argc-complete-locate {|cmd|
+    try {
+        if (eq $cmd 'argc')  {
+            argc --argc-script-path
+        } else {
+            which $cmd
+        }
+    } catch e {
+        echo ''
+    }
+}
+
+fn argc-completer {|@args|
+    argc-complete-impl (all (conj [(argc-complete-locate $args[0])] (all $args)))
 }
