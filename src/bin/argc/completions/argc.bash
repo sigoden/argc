@@ -12,11 +12,6 @@ _argc_complete_path() {
 
 _argc_complete_impl() {
     local cur="${!#}"
-    if [[ ! -f "$1" ]]; then
-        _argc_complete_path "$cur"
-        return
-    fi
-
     export COMP_WORDBREAKS
     local candidates
     mapfile -t candidates < <(argc --argc-compgen bash "$@" 2>/dev/null)
@@ -35,19 +30,23 @@ _argc_complete_impl() {
     fi
 }
 
-_argc_complete_locate() {
-    if [[ "$1" == "argc" ]]; then
-       argc --argc-script-path 2>/dev/null
-    else
-       which "$1"
-    fi
-}
-
 _argc_completer() {
     local words=( ${COMP_LINE:0:${COMP_POINT}} )
     local cur="${COMP_WORDS[COMP_CWORD]}"
     if [[ "$cur" == "" ]]; then
         words+=( "" )
     fi
-    _argc_complete_impl "$(_argc_complete_locate "${words[0]}")" "${words[@]}"
+
+    local scriptfile
+    if [[ "${words[0]}" == "argc" ]]; then
+       scriptfile="$(argc --argc-script-path 2>/dev/null)"
+    else
+       scriptfile="$(which "${words[0]}")"
+    fi
+    if [[ ! -f "$scriptfile" ]]; then
+        _argc_complete_path "$cur"
+        return
+    fi
+
+    _argc_complete_impl "$scriptfile" "${words[@]}"
 }

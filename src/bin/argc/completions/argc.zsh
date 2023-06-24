@@ -1,8 +1,4 @@
 _argc_complete_impl() {
-    if [[ ! -f $1 ]]; then
-        _path_files
-        return
-    fi
     local candidates=()
     while IFS=$'\n' read -r line; do
         if [[ "$line" == "" ]]; then line=$'\0'; fi
@@ -30,17 +26,19 @@ _argc_complete_impl() {
     fi
 }
 
-_argc_complete_locate() {
-    if [[ $1 == "argc" ]]; then
-       argc --argc-script-path 2>/dev/null
-    else
-       which $1
-    fi
-}
-
 _argc_completer() {
     if [[ $words[$CURRENT] == "" ]]; then
         words+=( $'\0' )
     fi
-    _argc_complete_impl $(_argc_complete_locate $words[1]) $words
+    local scriptfile
+    if [[ $words[1] == "argc" ]]; then
+       scriptfile=$(argc --argc-script-path 2>/dev/null)
+    else
+       scriptfile=$(which $words[1])
+    fi
+    if [[ ! -f $scriptfile ]]; then
+        _path_files
+        return
+    fi
+    _argc_complete_impl $scriptfile $words
 }

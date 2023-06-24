@@ -39,16 +39,13 @@ def _argc_complete_impl [args: list<string>] {
     $candidates | _argc_complete_list
 }
 
-def _argc_complete_locate [cmd: string] {
-    try { 
-        if $cmd == 'argc' {
+def _argc_completer [args: list<string>] {
+    let scriptfile = (try { 
+        if $args.0 == 'argc' {
             do { argc --argc-script-path } | complete | get stdout 
         } else {
-            which $cmd | get 0.path
+            which $args.0 | get 0.path
         }
-    }
-}
-
-def _argc_completer [args: list<string>] {
-   _argc_complete_impl ($args | insert 0 (_argc_complete_locate $args.0))
+    })
+   _argc_complete_impl ($args | insert 0 $scriptfile)
 }
