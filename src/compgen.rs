@@ -93,39 +93,41 @@ pub fn compgen(
             envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
         }
         if let Some(outputs) = run_param_fns(script_path, &[fn_name.as_str()], &new_args, envs) {
-            for line in outputs[0].trim().split('\n').map(|v| v.trim()) {
-                let (value, description) = line.split_once('\t').unwrap_or((line, ""));
-                let (value, nospace) = match value.strip_suffix('\0') {
-                    Some(value) => (value, true),
-                    None => (value, false),
-                };
-                let nospace = nospace || default_nospace;
-                if value.starts_with("__argc_") {
-                    if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
-                        argc_value = argc_value.or_else(|| Some(stripped_value.to_string()));
-                    } else if let Some(stripped_value) = value.strip_prefix("__argc_prefix:") {
-                        argc_prefix = format!("{prefix}{stripped_value}")
-                    } else if let Some(stripped_value) = value.strip_prefix("__argc_suffix:") {
-                        argc_suffix = stripped_value.to_string();
-                    } else if let Some(stripped_value) = value.strip_prefix("__argc_matcher:") {
-                        argc_matcher = stripped_value.to_string();
-                    }
-                    if shell.is_generic() {
-                        argc_variables.push(value.to_string());
-                    }
-                } else if value.starts_with(&argc_matcher) && !multi_values.contains(value) {
-                    match candidates.get_mut(value) {
-                        Some((v1, v2)) => {
-                            if v1.is_empty() && !description.is_empty() {
-                                *v1 = description.to_string();
-                            }
-                            if !*v2 && nospace {
-                                *v2 = true
-                            }
+            if !outputs[0].is_empty() {
+                for line in outputs[0].trim().split('\n').map(|v| v.trim()) {
+                    let (value, description) = line.split_once('\t').unwrap_or((line, ""));
+                    let (value, nospace) = match value.strip_suffix('\0') {
+                        Some(value) => (value, true),
+                        None => (value, false),
+                    };
+                    let nospace = nospace || default_nospace;
+                    if value.starts_with("__argc_") {
+                        if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
+                            argc_value = argc_value.or_else(|| Some(stripped_value.to_string()));
+                        } else if let Some(stripped_value) = value.strip_prefix("__argc_prefix:") {
+                            argc_prefix = format!("{prefix}{stripped_value}")
+                        } else if let Some(stripped_value) = value.strip_prefix("__argc_suffix:") {
+                            argc_suffix = stripped_value.to_string();
+                        } else if let Some(stripped_value) = value.strip_prefix("__argc_matcher:") {
+                            argc_matcher = stripped_value.to_string();
                         }
-                        None => {
-                            candidates
-                                .insert(value.to_string(), (description.to_string(), nospace));
+                        if shell.is_generic() {
+                            argc_variables.push(value.to_string());
+                        }
+                    } else if value.starts_with(&argc_matcher) && !multi_values.contains(value) {
+                        match candidates.get_mut(value) {
+                            Some((v1, v2)) => {
+                                if v1.is_empty() && !description.is_empty() {
+                                    *v1 = description.to_string();
+                                }
+                                if !*v2 && nospace {
+                                    *v2 = true
+                                }
+                            }
+                            None => {
+                                candidates
+                                    .insert(value.to_string(), (description.to_string(), nospace));
+                            }
                         }
                     }
                 }

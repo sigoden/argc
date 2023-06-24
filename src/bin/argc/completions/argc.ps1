@@ -17,9 +17,9 @@ function _argc_complete_impl([array]$words) {
             $value = $value + " "
         }
         if ($parts[3] -eq "") {
-            $description = "$([char]0x1b)[92m" + $parts[2] + "$([char]0x1b)[0m"
+            $description = $parts[2]
         } else {
-            $description = "$([char]0x1b)[92m" + $parts[2] + "$([char]0x1b)[0m" + "$([char]0x1b)[38;5;238m (" + $parts[3] + ")$([char]0x1b)[0m"
+            $description = $parts[2] + "$([char]0x1b)[38;5;238m (" + $parts[3] + ")$([char]0x1b)[0m"
         }
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
     }
