@@ -332,6 +332,11 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
             arg.required = true;
             arg
         }),
+        map(terminated(parse_param_name, tag("~")), |mut arg| {
+            arg.multiple = true;
+            arg.terminated = true;
+            arg
+        }),
         map(
             pair(parse_param_name, preceded(tag("*"), opt(parse_multi_char))),
             |(mut arg, multi_char)| {
@@ -485,7 +490,7 @@ fn parse_name(input: &str) -> nom::IResult<&str, &str> {
 }
 
 fn parse_multi_char(input: &str) -> nom::IResult<&str, char> {
-    one_of(",:;@|*")(input)
+    one_of(",:;@|")(input)
 }
 
 fn parse_default_value(input: &str) -> nom::IResult<&str, &str> {

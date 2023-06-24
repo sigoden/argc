@@ -28,6 +28,7 @@ expression: output
           "multiple": false,
           "multi_char": null,
           "required": false,
+          "terminated": false,
           "default": null,
           "default_fn": null,
           "value_names": []
@@ -43,6 +44,7 @@ expression: output
           "multiple": false,
           "multi_char": null,
           "required": false,
+          "terminated": false,
           "default": null,
           "default_fn": null,
           "value_names": []
@@ -58,6 +60,7 @@ expression: output
           "multiple": true,
           "multi_char": null,
           "required": false,
+          "terminated": false,
           "default": null,
           "default_fn": null,
           "value_names": []
@@ -73,6 +76,7 @@ expression: output
           "multiple": true,
           "multi_char": ",",
           "required": false,
+          "terminated": false,
           "default": null,
           "default_fn": null,
           "value_names": []
@@ -87,6 +91,7 @@ expression: output
           "multiple": false,
           "multi_char": null,
           "required": false,
+          "terminated": false,
           "default": null,
           "default_fn": null,
           "value_name": null

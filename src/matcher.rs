@@ -58,6 +58,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut flag_option_args = vec![vec![]];
         let mut positional_args = vec![];
         let mut dashdash = vec![];
+        let mut terminated = false;
         let mut arg_comp = ArgComp::Any;
         let mut choices_fns = HashSet::new();
         let args_len = args.len();
@@ -73,10 +74,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let arg = args[arg_index].as_str();
             if arg == "--" {
                 dashdash.push(positional_args.len());
-            } else if !dashdash.is_empty()
+            } else if terminated
+                || !dashdash.is_empty()
                 || (cmd.no_flags_options_subcommands() && !KNOWN_OPTIONS.contains(&arg))
             {
-                positional_args.push(arg);
+                add_positional_arg(&mut positional_args, arg, &mut terminated, cmd);
             } else if arg.starts_with('-') {
                 if let Some((k, v)) = arg.split_once('=') {
                     let param = cmd.find_flag_option(k);
@@ -134,10 +136,15 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 ));
                 flag_option_args.push(vec![]);
             } else {
-                positional_args.push(arg);
+                add_positional_arg(&mut positional_args, arg, &mut terminated, cmd);
             }
             arg_index += 1;
         }
+
+        if terminated {
+            arg_comp = ArgComp::CommandOrPositional;
+        }
+
         let last_cmd = cmds.last().unwrap().1;
         choices_fns.extend(last_cmd.positional_params.iter().filter_map(|v| {
             if let Some((choices_fn, validate)) = v.choices_fn.as_ref() {
@@ -217,18 +224,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn compgen(&self) -> Vec<(String, String)> {
         let level = self.cmds.len() - 1;
         let mut last_cmd = self.cmds[level].1;
-        if let Some(true) = self.args.last().map(|v| v.starts_with('-')) {
-            if let Some(last_positional) = last_cmd.positional_params.last() {
-                if last_positional.multiple
-                    && last_positional.multi_char == Some('*')
-                    && !self.positional_args.is_empty()
-                {
-                    if let Some((choices_fn, _)) = last_positional.choices_fn.clone() {
-                        return vec![(format!("__argc_fn:{}", choices_fn), String::new())];
-                    }
-                }
-            }
-        }
         match &self.arg_comp {
             ArgComp::FlagOrOption => self.comp_flag_options(),
             ArgComp::FlagOrOptionCombine(value) => {
@@ -694,6 +689,21 @@ impl<'a, 'b> Matcher<'a, 'b> {
     }
 }
 
+fn add_positional_arg<'a>(
+    positional_args: &mut Vec<&'a str>,
+    arg: &'a str,
+    terminated: &mut bool,
+    cmd: &Command,
+) {
+    positional_args.push(arg);
+    if !*terminated
+        && cmd.positional_params.last().map(|v| v.terminated) == Some(true)
+        && positional_args.len() >= cmd.positional_params.len() - 1
+    {
+        *terminated = true;
+    }
+}
+
 fn take_value_args(args: &[String], start: usize, len: usize) -> Vec<&str> {
     let mut output = vec![];
     if len == 0 {
@@ -736,24 +746,37 @@ fn match_flag_option<'a, 'b>(
     param: &'a FlagOptionParam,
     arg_comp: &mut ArgComp,
 ) {
-    let values_len = param.values_size();
-    let args_len = args.len();
-    let value_args = take_value_args(args, *arg_index + 1, values_len);
-    let arg = &args[*arg_index];
-    *arg_index += value_args.len();
-    if *arg_index == args_len - 1 {
-        if *arg_comp != ArgComp::FlagOrOption && param.is_option() && value_args.len() <= values_len
-        {
+    if param.terminated {
+        let value_args: Vec<&str> = args[*arg_index + 1..].iter().map(|v| v.as_str()).collect();
+        let arg = &args[*arg_index];
+        *arg_index += value_args.len();
+        if !value_args.is_empty() {
             *arg_comp =
                 ArgComp::OptionValue(param.name.clone(), value_args.len().saturating_sub(1));
-        } else if *arg_comp == ArgComp::FlagOrOption
-            && param.is_flag()
-            && !(arg.len() > 2 && param.is_match(arg))
-        {
-            *arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
         }
+        output.push((arg, value_args, Some(param.name.as_str())));
+    } else {
+        let values_len = param.values_size();
+        let args_len = args.len();
+        let value_args = take_value_args(args, *arg_index + 1, values_len);
+        let arg = &args[*arg_index];
+        *arg_index += value_args.len();
+        if *arg_index == args_len - 1 {
+            if *arg_comp != ArgComp::FlagOrOption
+                && param.is_option()
+                && value_args.len() <= values_len
+            {
+                *arg_comp =
+                    ArgComp::OptionValue(param.name.clone(), value_args.len().saturating_sub(1));
+            } else if *arg_comp == ArgComp::FlagOrOption
+                && param.is_flag()
+                && !(arg.len() > 2 && param.is_match(arg))
+            {
+                *arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
+            }
+        }
+        output.push((arg, value_args, Some(param.name.as_str())));
     }
-    output.push((arg, value_args, Some(param.name.as_str())));
 }
 
 fn comp_subcommands_positional(
