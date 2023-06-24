@@ -65,13 +65,13 @@ expression: data
 
 
 ************ COMPGEN `prog -ae ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog -abe` ************
 
 
 ************ COMPGEN `prog -abe ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog -s` ************
 -sa

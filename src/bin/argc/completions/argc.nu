@@ -30,25 +30,22 @@ def _argc_complete_impl [args: list<string>] {
     }
     mut candidates = ((do { argc --argc-compgen nushell $args } | complete | get stdout) | split row "\n" | range 0..-2)
     if ($candidates | length) == 1  {
-        if $candidates.0 == '__argc_comp:file' {
+        if $candidates.0 == '__argc_value:file' {
             $candidates = (_argc_complete_path $cur false)
-        } else if $candidates.0 == '__argc_comp:dir' {
+        } else if $candidates.0 == '__argc_value:dir' {
             $candidates = (_argc_complete_path $cur true)
         }
     }
     $candidates | _argc_complete_list
 }
 
-def _argc_complete_locate [cmd: string] {
-    try { 
-        if $cmd == 'argc' {
+def _argc_completer [args: list<string>] {
+    let scriptfile = (try { 
+        if $args.0 == 'argc' {
             do { argc --argc-script-path } | complete | get stdout 
         } else {
-            which $cmd | get 0.path
+            which $args.0 | get 0.path
         }
-    }
-}
-
-def _argc_completer [args: list<string>] {
-   _argc_complete_impl ($args | insert 0 (_argc_complete_locate $args.0))
+    })
+   _argc_complete_impl ($args | insert 0 $scriptfile)
 }

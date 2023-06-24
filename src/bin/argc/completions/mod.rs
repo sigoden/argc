@@ -40,6 +40,7 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
             let code = lines.join("\n");
             format!("{FISH_SCRIPT}\n{code}\n",)
         }
+        Shell::Generic => String::new(),
         Shell::Nushell => {
             let code = format!("{cmds:?}");
             format!(

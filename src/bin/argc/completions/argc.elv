@@ -12,16 +12,12 @@ fn argc-complete-path {|arg &is_dir=$false|
 }
 
 fn argc-complete-impl {|@args|
-    if (not (path:is-regular &follow-symlink=$true $args[0])) {
-        argc-complete-path $args[-1]
-        return
-    }
     var candidates = [(try { argc --argc-compgen elvish (all $args) } catch e { echo '' })]
     if (eq (count $candidates) (num 1)) {
-        if (eq $candidates[0] '__argc_comp:file') {
+        if (eq $candidates[0] '__argc_value:file') {
             argc-complete-path $args[-1]
             return
-        } elif (eq $candidates[0] '__argc_comp:dir') {
+        } elif (eq $candidates[0] '__argc_value:dir') {
             argc-complete-path &is_dir=$true $args[-1]
             return
         }
@@ -37,18 +33,19 @@ fn argc-complete-impl {|@args|
     }
 }
 
-fn argc-complete-locate {|cmd|
-    try {
-        if (eq $cmd 'argc')  {
+fn argc-completer {|@args|
+    var scriptfile = (try {
+        if (eq $args[0] 'argc')  {
             argc --argc-script-path
         } else {
-            which $cmd
+            which $args[0]
         }
     } catch e {
         echo ''
+    })
+    if (not (path:is-regular &follow-symlink=$true $scriptfile)) {
+        argc-complete-path $args[-1]
+        return
     }
-}
-
-fn argc-completer {|@args|
-    argc-complete-impl (all (conj [(argc-complete-locate $args[0])] (all $args)))
+    argc-complete-impl (all (conj [$scriptfile] (all $args)))
 }

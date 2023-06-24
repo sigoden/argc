@@ -1,0 +1,17 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `sudo cmd ` ************
+ok
+
+************ COMPGEN `sudo cmd -` ************
+ok
+
+************ COMPGEN `sudo cmd --foo` ************
+ok
+
+************ COMPGEN `sudo cmd foo` ************
+ok
+
+

@@ -44,6 +44,7 @@ pub fn compgen(
     let mut candidates: IndexMap<String, (String, bool)> = IndexMap::new();
     let mut argc_fn = None;
     let mut argc_value = None;
+    let mut argc_variables = vec![];
     let mut multi_values = HashSet::new();
     if args.iter().all(|v| v != "--") && last.starts_with('-') {
         if let Some((left, right)) = split_equal_sign(&last) {
@@ -56,17 +57,22 @@ pub fn compgen(
         if value.starts_with("__argc_") {
             if let Some(fn_name) = value.strip_prefix("__argc_fn:") {
                 argc_fn = Some(fn_name.to_string());
-            } else if let Some(value) = value.strip_prefix("__argc_value:") {
-                argc_value = argc_value.or_else(|| Some(value.to_string()));
+            } else if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
+                argc_value = argc_value.or_else(|| Some(stripped_value.to_string()));
+                if shell.is_generic() {
+                    argc_variables.push(value.to_string());
+                }
             } else if let Some(value) = value.strip_prefix("__argc_multi:") {
                 if let Some(ch) = value.chars().next() {
-                    default_nospace = true;
-                    if let Some((i, _)) = last.char_indices().rfind(|(_, c)| ch == *c) {
-                        multi_values = last[..i].split(ch).map(|v| v.to_string()).collect();
-                        let idx = i + 1;
-                        prefix.push_str(&last[..idx]);
-                        last = last[idx..].to_string();
-                        mod_quote(&mut last, &mut prefix, &mut default_nospace);
+                    if ch != '*' {
+                        default_nospace = true;
+                        if let Some((i, _)) = last.char_indices().rfind(|(_, c)| ch == *c) {
+                            multi_values = last[..i].split(ch).map(|v| v.to_string()).collect();
+                            let idx = i + 1;
+                            prefix.push_str(&last[..idx]);
+                            last = last[idx..].to_string();
+                            mod_quote(&mut last, &mut prefix, &mut default_nospace);
+                        }
                     }
                 }
             }
@@ -82,6 +88,7 @@ pub fn compgen(
         let with_description = shell.with_description();
         envs.insert("ARGC_DESCRIBE".into(), with_description.to_string());
         envs.insert("ARGC_MATCHER".into(), argc_matcher.clone());
+        envs.insert("ARGC_LAST_ARG".into(), last_arg.to_string());
         if let Some(cwd) = get_current_dir() {
             envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
         }
@@ -94,14 +101,17 @@ pub fn compgen(
                 };
                 let nospace = nospace || default_nospace;
                 if value.starts_with("__argc_") {
-                    if let Some(value) = value.strip_prefix("__argc_value:") {
-                        argc_value = argc_value.or_else(|| Some(value.to_string()));
-                    } else if let Some(value) = value.strip_prefix("__argc_prefix:") {
-                        argc_prefix = format!("{prefix}{value}")
-                    } else if let Some(value) = value.strip_prefix("__argc_suffix:") {
-                        argc_suffix = value.to_string();
-                    } else if let Some(value) = value.strip_prefix("__argc_matcher:") {
-                        argc_matcher = value.to_string();
+                    if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
+                        argc_value = argc_value.or_else(|| Some(stripped_value.to_string()));
+                    } else if let Some(stripped_value) = value.strip_prefix("__argc_prefix:") {
+                        argc_prefix = format!("{prefix}{stripped_value}")
+                    } else if let Some(stripped_value) = value.strip_prefix("__argc_suffix:") {
+                        argc_suffix = stripped_value.to_string();
+                    } else if let Some(stripped_value) = value.strip_prefix("__argc_matcher:") {
+                        argc_matcher = stripped_value.to_string();
+                    }
+                    if shell.is_generic() {
+                        argc_variables.push(value.to_string());
                     }
                 } else if value.starts_with(&argc_matcher) && !multi_values.contains(value) {
                     match candidates.get_mut(value) {
@@ -122,6 +132,16 @@ pub fn compgen(
             }
         }
     }
+
+    if !argc_variables.is_empty() {
+        let mut prepend_candicates: IndexMap<String, (String, bool)> = argc_variables
+            .into_iter()
+            .map(|value| (value, (String::new(), false)))
+            .collect();
+        prepend_candicates.extend(candidates);
+        candidates = prepend_candicates;
+    }
+
     if candidates.is_empty() {
         if let Some(value) = argc_value {
             return Ok(compgen_arg_value(&value));
@@ -166,6 +186,7 @@ pub enum Shell {
     Bash,
     Elvish,
     Fish,
+    Generic,
     Nushell,
     Powershell,
     Xonsh,
@@ -180,6 +201,7 @@ impl FromStr for Shell {
             "bash" => Ok(Self::Bash),
             "elvish" => Ok(Self::Elvish),
             "fish" => Ok(Self::Fish),
+            "generic" => Ok(Self::Generic),
             "nushell" => Ok(Self::Nushell),
             "powershell" => Ok(Self::Powershell),
             "xonsh" => Ok(Self::Xonsh),
@@ -218,11 +240,16 @@ impl Shell {
             Shell::Bash => "bash",
             Shell::Elvish => "elvish",
             Shell::Fish => "fish",
+            Shell::Generic => "generic",
             Shell::Nushell => "nushell",
             Shell::Powershell => "powershell",
             Shell::Xonsh => "xonsh",
             Shell::Zsh => "zsh",
         }
+    }
+
+    pub fn is_generic(&self) -> bool {
+        *self == Shell::Generic
     }
 
     pub(crate) fn output_candidates(
@@ -290,6 +317,15 @@ impl Shell {
                     let new_value = self.comp_value1(prefix, &value, suffix);
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{description}")
+                })
+                .collect::<Vec<String>>()
+                .join("\n"),
+            Shell::Generic => candidates
+                .into_iter()
+                .map(|(value, description, nospace)| {
+                    let description = self.comp_description(&description, "\t", "");
+                    let space: &str = if nospace { "\0" } else { "" };
+                    format!("{value}{space}{description}")
                 })
                 .collect::<Vec<String>>()
                 .join("\n"),
@@ -406,9 +442,9 @@ fn compgen_arg_value(value: &str) -> String {
         .iter()
         .any(|v| value.contains(v))
     {
-        return "__argc_comp:file".to_string();
+        return "__argc_value:file".to_string();
     } else if value.contains("dir") || value.contains("folder") {
-        return "__argc_comp:dir".to_string();
+        return "__argc_value:dir".to_string();
     }
     String::new()
 }

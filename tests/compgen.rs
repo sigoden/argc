@@ -444,6 +444,28 @@ _choice_fn() {
 }
 
 #[test]
+fn choice_any_arg() {
+    let script = r###"
+# @arg cmd
+# @arg args**[`_choice_fn`]
+_choice_fn() {
+    echo __argc_matcher:
+    echo ok
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![
+            vec!["sudo", "cmd", ""],
+            vec!["sudo", "cmd", "-"],
+            vec!["sudo", "cmd", "--foo"],
+            vec!["sudo", "cmd", "foo"],
+        ]
+    );
+}
+
+#[test]
 fn mult_char() {
     let script = r###"
 # @option --oa*,[`_choice_fn`]
@@ -528,4 +550,20 @@ _choice_fn() {
 "###;
 
     snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
+}
+
+#[test]
+fn generic_shell() {
+    let script = r###"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    echo -e "__argc_prefix:'"
+    echo -e "__argc_matcher:"
+    echo -e "abc\t(desc 1)"
+    echo -e "def\0"
+    echo -e "ijk"
+}
+"###;
+
+    snapshot_compgen!(script, vec![vec!["prog", "--oa", ""]], argc::Shell::Generic);
 }
