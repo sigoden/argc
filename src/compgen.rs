@@ -64,15 +64,13 @@ pub fn compgen(
                 }
             } else if let Some(value) = value.strip_prefix("__argc_multi:") {
                 if let Some(ch) = value.chars().next() {
-                    if ch != '*' {
-                        default_nospace = true;
-                        if let Some((i, _)) = last.char_indices().rfind(|(_, c)| ch == *c) {
-                            multi_values = last[..i].split(ch).map(|v| v.to_string()).collect();
-                            let idx = i + 1;
-                            prefix.push_str(&last[..idx]);
-                            last = last[idx..].to_string();
-                            mod_quote(&mut last, &mut prefix, &mut default_nospace);
-                        }
+                    default_nospace = true;
+                    if let Some((i, _)) = last.char_indices().rfind(|(_, c)| ch == *c) {
+                        multi_values = last[..i].split(ch).map(|v| v.to_string()).collect();
+                        let idx = i + 1;
+                        prefix.push_str(&last[..idx]);
+                        last = last[idx..].to_string();
+                        mod_quote(&mut last, &mut prefix, &mut default_nospace);
                     }
                 }
             }

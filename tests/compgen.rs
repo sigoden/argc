@@ -444,10 +444,10 @@ _choice_fn() {
 }
 
 #[test]
-fn choice_any_arg() {
+fn arg_terminated() {
     let script = r###"
 # @arg cmd
-# @arg args**[`_choice_fn`]
+# @arg args~[`_choice_fn`]
 _choice_fn() {
     echo __argc_matcher:
     echo ok
@@ -461,6 +461,29 @@ _choice_fn() {
             vec!["sudo", "cmd", "-"],
             vec!["sudo", "cmd", "--foo"],
             vec!["sudo", "cmd", "foo"],
+        ]
+    );
+}
+
+#[test]
+fn option_terminated() {
+    let script = r###"
+# @option --oa~[`_choice_fn`]
+# @option --ob
+_choice_fn() {
+    echo __argc_matcher:
+    echo ok
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![
+            vec!["prog", "--oa"],
+            vec!["prog", "--oa", ""],
+            vec!["prog", "--oa", "--"],
+            vec!["prog", "--oa", "v1", "v2"],
+            vec!["prog", "--oa", "--", ""],
         ]
     );
 }

@@ -16,6 +16,7 @@ pub(crate) struct ParamData {
     pub(crate) multiple: bool,
     pub(crate) multi_char: Option<char>,
     pub(crate) required: bool,
+    pub(crate) terminated: bool,
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
 }
@@ -29,6 +30,7 @@ impl ParamData {
             multiple: false,
             multi_char: None,
             required: false,
+            terminated: false,
             default: None,
             default_fn: None,
         }
@@ -47,6 +49,7 @@ pub(crate) struct FlagOptionParam {
     pub(crate) multiple: bool,
     pub(crate) multi_char: Option<char>,
     pub(crate) required: bool,
+    pub(crate) terminated: bool,
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
     pub(crate) value_names: Vec<String>,
@@ -86,6 +89,7 @@ impl FlagOptionParam {
             multiple: arg.multiple,
             multi_char: arg.multi_char,
             required: arg.required,
+            terminated: arg.terminated,
             default: arg.default,
             default_fn: arg.default_fn,
             value_names,
@@ -120,6 +124,7 @@ impl FlagOptionParam {
                 self.multiple,
                 self.multi_char,
                 self.required,
+                self.terminated,
                 &self.default,
                 &self.default_fn,
             );
@@ -135,6 +140,7 @@ impl FlagOptionParam {
                 self.multiple,
                 self.multi_char,
                 self.required,
+                self.terminated,
                 &self.default,
                 &self.default_fn,
             );
@@ -319,6 +325,7 @@ pub(crate) struct PositionalParam {
     pub(crate) multiple: bool,
     pub(crate) multi_char: Option<char>,
     pub(crate) required: bool,
+    pub(crate) terminated: bool,
     pub(crate) default: Option<String>,
     pub(crate) default_fn: Option<String>,
     pub(crate) value_name: Option<String>,
@@ -336,6 +343,7 @@ impl PositionalParam {
             multiple: arg.multiple,
             multi_char: arg.multi_char,
             required: arg.required,
+            terminated: arg.terminated,
             default: arg.default,
             default_fn: arg.default_fn,
             value_name: value_name.map(|v| v.to_string()),
@@ -360,6 +368,7 @@ impl PositionalParam {
             self.multiple,
             self.multi_char,
             self.required,
+            self.terminated,
             &self.default,
             &self.default_fn,
         );
@@ -433,12 +442,13 @@ fn render_name(
     multiple: bool,
     multi_char: Option<char>,
     required: bool,
+    terminated: bool,
     default: &Option<String>,
     default_fn: &Option<String>,
 ) -> String {
     let mut name = name.to_string();
     if let Some(choices) = choices {
-        if let Some(ch) = get_modifer(required, multiple) {
+        if let Some(ch) = get_modifer(required, multiple, terminated) {
             name.push(ch)
         }
         if let Some(ch) = multi_char {
@@ -461,7 +471,7 @@ fn render_name(
         let choices_value = format!("[{}{}]", prefix, values.join("|"));
         name.push_str(&choices_value);
     } else if let Some((choices_fn, validate)) = choices_fn {
-        if let Some(ch) = get_modifer(required, multiple) {
+        if let Some(ch) = get_modifer(required, multiple, terminated) {
             name.push(ch)
         }
         if let Some(ch) = multi_char {
@@ -479,7 +489,7 @@ fn render_name(
     } else if let Some(default_fn) = default_fn {
         let _ = write!(name, "=`{}`", default_fn);
     } else {
-        if let Some(ch) = get_modifer(required, multiple) {
+        if let Some(ch) = get_modifer(required, multiple, terminated) {
             name.push(ch)
         }
         if let Some(ch) = multi_char {
@@ -489,7 +499,10 @@ fn render_name(
     name
 }
 
-fn get_modifer(required: bool, multiple: bool) -> Option<char> {
+fn get_modifer(required: bool, multiple: bool, terminated: bool) -> Option<char> {
+    if multiple && terminated {
+        return Some('~');
+    }
     match (required, multiple) {
         (true, true) => Some('+'),
         (true, false) => Some('!'),
