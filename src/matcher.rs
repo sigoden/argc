@@ -36,6 +36,12 @@ pub(crate) enum ArgComp {
     Any,
 }
 
+impl ArgComp {
+    pub(crate) fn is_flag_or_option(&self) -> bool {
+        matches!(self, Self::FlagOrOption | &Self::OptionValue(_, _))
+    }
+}
+
 #[derive(Debug)]
 pub(crate) enum MatchError {
     DisplayHelp,
@@ -224,7 +230,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn compgen(&self) -> Vec<(String, String)> {
         let level = self.cmds.len() - 1;
         let mut last_cmd = self.cmds[level].1;
-        match &self.arg_comp {
+        let mut output = match &self.arg_comp {
             ArgComp::FlagOrOption => self.comp_flag_options(),
             ArgComp::FlagOrOptionCombine(value) => {
                 let mut output: Vec<(String, String)> = self
@@ -277,12 +283,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     &values,
                     self.positional_args.len() < 2,
                 ));
-                if output.is_empty() {
-                    output.push(("__argc_value:file".into(), String::new()))
-                }
                 output
             }
+        };
+        if output.is_empty() && !self.arg_comp.is_flag_or_option() {
+            output.push(("__argc_value:file".into(), String::new()));
         }
+        output
     }
 
     fn to_arg_values_base(&self) -> Vec<ArgcValue> {

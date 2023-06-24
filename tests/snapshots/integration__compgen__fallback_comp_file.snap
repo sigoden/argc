@@ -1,0 +1,23 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog args ` ************
+__argc_value:file
+
+************ COMPGEN `prog args v` ************
+__argc_value:file
+
+************ COMPGEN `prog cmd --file ` ************
+__argc_value:file
+
+************ COMPGEN `prog cmd --file v` ************
+__argc_value:file
+
+************ COMPGEN `prog cmd --value ` ************
+
+
+************ COMPGEN `prog cmd --value v` ************
+
+
+

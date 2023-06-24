@@ -489,6 +489,35 @@ _choice_fn() {
 }
 
 #[test]
+fn fallback_comp_file() {
+    let script = r###"
+# @cmd
+args() {
+    :;
+}
+
+# @cmd
+# @option --file
+# @option --value
+cmd() {
+    :;
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![
+            vec!["prog", "args", ""],
+            vec!["prog", "args", "v"],
+            vec!["prog", "cmd", "--file", ""],
+            vec!["prog", "cmd", "--file", "v"],
+            vec!["prog", "cmd", "--value", ""],
+            vec!["prog", "cmd", "--value", "v"],
+        ]
+    );
+}
+
+#[test]
 fn mult_char() {
     let script = r###"
 # @option --oa*,[`_choice_fn`]
