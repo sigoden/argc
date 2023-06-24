@@ -169,7 +169,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 let choices = output
                     .split('\n')
                     .filter_map(|v| {
-                        let v = v.trim();
+                        let v = v.trim_matches(|c: char| c.is_whitespace() || c == '\0');
                         if v.is_empty() {
                             None
                         } else {

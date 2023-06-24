@@ -3,8 +3,11 @@ _argc_complete_impl() {
         _path_files
         return
     fi
-    local IFS=$'\n'
-    local candidates=($(argc --argc-compgen zsh $@ 2>/dev/null))
+    local candidates=()
+    while IFS=$'\n' read -r line; do
+        if [[ "$line" == "" ]]; then line=$'\0'; fi
+        candidates+=( "$line" )
+    done < <(argc --argc-compgen zsh $@ 2>/dev/null)
     if [[ ${#candidates[@]} -eq 1 ]]; then
         if [[ "$candidates[1]" == "__argc_comp:file" ]]; then
             _path_files

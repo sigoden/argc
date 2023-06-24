@@ -96,8 +96,6 @@ pub fn compgen(
                 if value.starts_with("__argc_") {
                     if let Some(value) = value.strip_prefix("__argc_value:") {
                         argc_value = argc_value.or_else(|| Some(value.to_string()));
-                    } else if let Some(value) = value.strip_prefix("__argc_comp:") {
-                        argc_value = Some(value.to_string());
                     } else if let Some(value) = value.strip_prefix("__argc_prefix:") {
                         argc_prefix = format!("{prefix}{value}")
                     } else if let Some(value) = value.strip_prefix("__argc_suffix:") {
@@ -126,19 +124,9 @@ pub fn compgen(
     }
     if candidates.is_empty() {
         if let Some(value) = argc_value {
-            let value = value.to_lowercase();
-            let output = if ["path", "file", "arg", "any"]
-                .iter()
-                .any(|v| value.contains(v))
-            {
-                "__argc_comp:file".to_string()
-            } else if value.contains("dir") || value.contains("folder") {
-                "__argc_comp:dir".to_string()
-            } else {
-                String::new()
-            };
-            return Ok(output);
+            return Ok(compgen_arg_value(&value));
         }
+        return Ok(String::new());
     }
     let mut candidates: Vec<(String, String, bool)> = candidates
         .into_iter()
@@ -244,9 +232,6 @@ impl Shell {
         suffix: &str,
         matcher: &str,
     ) -> String {
-        if candidates.is_empty() {
-            return String::new();
-        }
         match self {
             Shell::Bash => {
                 let prefix_unbalance = unbalance_quote(prefix);
@@ -413,6 +398,19 @@ impl Shell {
             format!("{prefix}{}{suffix}", truncate_description(description))
         }
     }
+}
+
+fn compgen_arg_value(value: &str) -> String {
+    let value = value.to_lowercase();
+    if ["path", "file", "arg", "any"]
+        .iter()
+        .any(|v| value.contains(v))
+    {
+        return "__argc_comp:file".to_string();
+    } else if value.contains("dir") || value.contains("folder") {
+        return "__argc_comp:dir".to_string();
+    }
+    String::new()
 }
 
 fn truncate_description(description: &str) -> String {

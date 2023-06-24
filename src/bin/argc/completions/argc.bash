@@ -18,8 +18,8 @@ _argc_complete_impl() {
     fi
 
     export COMP_WORDBREAKS
-    local IFS=$'\n'
-    local candidates=($(argc --argc-compgen bash "$@" 2>/dev/null))
+    local candidates
+    mapfile -t candidates < <(argc --argc-compgen bash "$@" 2>/dev/null)
     if [[ ${#candidates[@]} -eq 1 ]]; then
         if [[ "${candidates[0]}" == "__argc_comp:file" ]]; then
             _argc_complete_path "$cur"
@@ -31,7 +31,7 @@ _argc_complete_impl() {
     fi
     if [[ ${#candidates[@]} -gt 0 ]]; then
         compopt -o nospace
-        COMPREPLY=(${candidates[@]})
+        COMPREPLY=( "${candidates[@]}" )
     fi
 }
 

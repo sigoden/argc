@@ -1,10 +1,10 @@
 using namespace System.Management.Automation
 
-function _argc_complete_impl([array]$array) {
-    if (-not(Test-Path -Path $array[0] -PathType Leaf)) {
+function _argc_complete_impl([array]$words) {
+    if (-not(Test-Path -Path $words[0] -PathType Leaf)) {
         return
     }
-    $candidates = @((argc --argc-compgen powershell $array 2>$null).Split("`n"))
+    $candidates = @((argc --argc-compgen powershell $words 2>$null).Split("`n"))
     if ($candidates.Count -eq 1) {
         if (($candidates[0] -eq "__argc_comp:file") -or ($candidates[0] -eq "__argc_comp:dir")) {
             return
@@ -38,10 +38,10 @@ function _argc_complete_locate($cmd) {
 
 $_argc_completer = {
     param($wordToComplete, $commandAst, $cursorPosition)
-    $array = @($commandAst.CommandElements | Where { $_.Extent.StartOffset -lt $cursorPosition } | ForEach-Object { $_.ToString() })
+    $words = @($commandAst.CommandElements | Where { $_.Extent.StartOffset -lt $cursorPosition } | ForEach-Object { $_.ToString() })
     if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
-        $array += ''
+        $words += ''
     }
-    $array = @(_argc_complete_locate $array[0]) + $array
-    _argc_complete_impl $array
+    $words = @(_argc_complete_locate $words[0]) + $words
+    _argc_complete_impl $words
 }
