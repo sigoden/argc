@@ -7,6 +7,6 @@ expression: data
 --oa
 
 ************ COMPGEN `prog arg ` ************
-__argc_comp:file
+__argc_value:file
 
 

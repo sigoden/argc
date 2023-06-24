@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog -` ************
 --fc
@@ -19,51 +19,51 @@ __argc_comp:file
 --od
 
 ************ COMPGEN `prog -- ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog -f ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog --fc ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog -o ` ************
-__argc_comp:dir
+__argc_value:dir
 
 ************ COMPGEN `prog -o d1` ************
-__argc_comp:dir
+__argc_value:dir
 
 ************ COMPGEN `prog -o d1 ` ************
-__argc_comp:dir
+__argc_value:dir
 
 ************ COMPGEN `prog -o d1 d2` ************
-__argc_comp:dir
+__argc_value:dir
 
 ************ COMPGEN `prog -o d1 d2 ` ************
-__argc_comp:dir
+__argc_value:dir
 
 ************ COMPGEN `prog -d d1` ************
-__argc_comp:dir
+__argc_value:dir
 
 ************ COMPGEN `prog -d d1 ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog -d d1 d2` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog -d d1 d2 ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog v1` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog v1 ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog v1 v2` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog v1 v2 ` ************
-__argc_comp:file
+__argc_value:file
 
 

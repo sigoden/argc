@@ -215,6 +215,20 @@ impl<'a, 'b> Matcher<'a, 'b> {
     }
 
     pub(crate) fn compgen(&self) -> Vec<(String, String)> {
+        let level = self.cmds.len() - 1;
+        let mut last_cmd = self.cmds[level].1;
+        if let Some(true) = self.args.last().map(|v| v.starts_with('-')) {
+            if let Some(last_positional) = last_cmd.positional_params.last() {
+                if last_positional.multiple
+                    && last_positional.multi_char == Some('*')
+                    && !self.positional_args.is_empty()
+                {
+                    if let Some((choices_fn, _)) = last_positional.choices_fn.clone() {
+                        return vec![(format!("__argc_fn:{}", choices_fn), String::new())];
+                    }
+                }
+            }
+        }
         match &self.arg_comp {
             ArgComp::FlagOrOption => self.comp_flag_options(),
             ArgComp::FlagOrOptionCombine(value) => {
@@ -235,40 +249,36 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 output
             }
             ArgComp::CommandOrPositional => {
-                let level = self.cmds.len() - 1;
-                let mut cmd = self.cmds[level].1;
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
-                    return comp_subcomands(cmd);
+                    return comp_subcomands(last_cmd);
                 }
                 if level > 0
                     && self.positional_args.is_empty()
                     && self.flag_option_args[level].is_empty()
                 {
-                    cmd = self.cmds[level - 1].1;
+                    last_cmd = self.cmds[level - 1].1;
                 }
                 let values = self.match_positionals();
-                comp_subcommands_positional(cmd, &values, self.positional_args.len() < 2)
+                comp_subcommands_positional(last_cmd, &values, self.positional_args.len() < 2)
             }
             ArgComp::OptionValue(name, index) => {
-                let cmd = self.cmds[self.cmds.len() - 1].1;
-                if let Some(param) = cmd.flag_option_params.iter().find(|v| &v.name == name) {
+                if let Some(param) = last_cmd.flag_option_params.iter().find(|v| &v.name == name) {
                     comp_flag_option(param, *index)
                 } else {
                     vec![]
                 }
             }
             ArgComp::Any => {
-                let cmd = self.cmds[self.cmds.len() - 1].1;
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
-                    return comp_subcomands(cmd);
+                    return comp_subcomands(last_cmd);
                 }
                 let mut output = vec![];
-                if cmd.positional_params.is_empty() {
+                if last_cmd.positional_params.is_empty() {
                     output.extend(self.comp_flag_options());
                 }
                 let values = self.match_positionals();
                 output.extend(comp_subcommands_positional(
-                    cmd,
+                    last_cmd,
                     &values,
                     self.positional_args.len() < 2,
                 ));

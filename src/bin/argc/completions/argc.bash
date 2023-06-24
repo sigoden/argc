@@ -21,10 +21,10 @@ _argc_complete_impl() {
     local candidates
     mapfile -t candidates < <(argc --argc-compgen bash "$@" 2>/dev/null)
     if [[ ${#candidates[@]} -eq 1 ]]; then
-        if [[ "${candidates[0]}" == "__argc_comp:file" ]]; then
+        if [[ "${candidates[0]}" == "__argc_value:file" ]]; then
             _argc_complete_path "$cur"
             return
-        elif [[ "${candidates[0]}" == "__argc_comp:dir" ]]; then
+        elif [[ "${candidates[0]}" == "__argc_value:dir" ]]; then
             _argc_complete_path "$cur" dir
             return
         fi

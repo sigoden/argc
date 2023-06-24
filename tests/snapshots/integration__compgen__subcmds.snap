@@ -14,7 +14,7 @@ cmdb
 cmda
 
 ************ COMPGEN `prog cmda ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog help ` ************
 cmda

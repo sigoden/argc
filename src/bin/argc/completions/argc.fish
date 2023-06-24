@@ -6,10 +6,10 @@ function _argc_complete_impl
     end
     set -l candidates (argc --argc-compgen fish $argv 2>/dev/null)
     if test (count $candidates) -eq 1
-        if [ $candidates[1] = "__argc_comp:file" ]
+        if [ $candidates[1] = "__argc_value:file" ]
             __fish_complete_path $cur
             return
-        else if [ $candidates[1] = "__argc_comp:dir" ]
+        else if [ $candidates[1] = "__argc_value:dir" ]
             __fish_complete_directories $cur
             return
         end

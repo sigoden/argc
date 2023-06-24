@@ -7,7 +7,7 @@ cmda
 cmdb
 
 ************ COMPGEN `prog cmdx ` ************
-__argc_comp:file
+__argc_value:file
 
 ************ COMPGEN `prog cmdx cmd` ************
 

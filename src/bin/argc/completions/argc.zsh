@@ -9,10 +9,10 @@ _argc_complete_impl() {
         candidates+=( "$line" )
     done < <(argc --argc-compgen zsh $@ 2>/dev/null)
     if [[ ${#candidates[@]} -eq 1 ]]; then
-        if [[ "$candidates[1]" == "__argc_comp:file" ]]; then
+        if [[ "$candidates[1]" == "__argc_value:file" ]]; then
             _path_files
             return
-        elif [[ "$candidates[1]" == "__argc_comp:dir" ]]; then
+        elif [[ "$candidates[1]" == "__argc_value:dir" ]]; then
             _path_files -/
             return
         fi

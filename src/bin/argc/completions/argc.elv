@@ -18,10 +18,10 @@ fn argc-complete-impl {|@args|
     }
     var candidates = [(try { argc --argc-compgen elvish (all $args) } catch e { echo '' })]
     if (eq (count $candidates) (num 1)) {
-        if (eq $candidates[0] '__argc_comp:file') {
+        if (eq $candidates[0] '__argc_value:file') {
             argc-complete-path $args[-1]
             return
-        } elif (eq $candidates[0] '__argc_comp:dir') {
+        } elif (eq $candidates[0] '__argc_value:dir') {
             argc-complete-path &is_dir=$true $args[-1]
             return
         }

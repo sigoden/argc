@@ -6,7 +6,7 @@ function _argc_complete_impl([array]$words) {
     }
     $candidates = @((argc --argc-compgen powershell $words 2>$null).Split("`n"))
     if ($candidates.Count -eq 1) {
-        if (($candidates[0] -eq "__argc_comp:file") -or ($candidates[0] -eq "__argc_comp:dir")) {
+        if (($candidates[0] -eq "__argc_value:file") -or ($candidates[0] -eq "__argc_value:dir")) {
             return
         } elseif ($candidates[0] -eq "") {
             return ""

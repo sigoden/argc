@@ -15,7 +15,7 @@ def _argc_complete_impl(args):
     result = set()
     if len(candidates) == 0:
         return result
-    if candidates[0] == '__argc_comp:file' or candidates[0] == '__argc_comp:dir':
+    if candidates[0] == '__argc_value:file' or candidates[0] == '__argc_value:dir':
         return
     for v in candidates:
         parts = v.split('\t')

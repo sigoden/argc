@@ -92,15 +92,15 @@ OUTPUT
 macro_rules! snapshot_compgen {
     (
 		$source:expr,
-        $matrix:expr
+        $matrix:expr,
+        $shell:expr
     ) => {
         let mut data = String::new();
         let (script_path, script_content, script_file) =
             $crate::fixtures::create_argc_script($source, "compgen.sh");
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
-            let words = match argc::compgen(argc::Shell::Fish, &script_path, &script_content, &args)
-            {
+            let words = match argc::compgen($shell, &script_path, &script_content, &args) {
                 Ok(stdout) => stdout,
                 Err(stderr) => stderr.to_string(),
             };
@@ -116,6 +116,12 @@ macro_rules! snapshot_compgen {
         }
         script_file.close().unwrap();
         insta::assert_snapshot!(data);
+    };
+    (
+		$source:expr,
+        $matrix:expr
+    ) => {
+        snapshot_compgen!($source, $matrix, argc::Shell::Fish);
     };
 }
 

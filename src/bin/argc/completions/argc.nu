@@ -30,9 +30,9 @@ def _argc_complete_impl [args: list<string>] {
     }
     mut candidates = ((do { argc --argc-compgen nushell $args } | complete | get stdout) | split row "\n" | range 0..-2)
     if ($candidates | length) == 1  {
-        if $candidates.0 == '__argc_comp:file' {
+        if $candidates.0 == '__argc_value:file' {
             $candidates = (_argc_complete_path $cur false)
-        } else if $candidates.0 == '__argc_comp:dir' {
+        } else if $candidates.0 == '__argc_value:dir' {
             $candidates = (_argc_complete_path $cur true)
         }
     }
