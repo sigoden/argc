@@ -12,9 +12,10 @@ def _argc_complete_impl(args):
     candidates.pop()
     result = set()
     if len(candidates) == 0:
+        result.add(RichCompletion(""))
         return result
     if candidates[0] == '__argc_value:file' or candidates[0] == '__argc_value:dir':
-        return
+        return result
     for v in candidates:
         parts = v.split('\t')
         value = parts[0]

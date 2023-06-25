@@ -5,8 +5,12 @@ _argc_complete_path() {
         compopt -o nospace -o plusdirs > /dev/null 2>&1
         COMPREPLY=($(compgen -d -- "${cur}"))
     else
-        compopt -o nospace -o plusdirs > /dev/null 2>&1
         COMPREPLY=($(compgen -f -- "${cur}"))
+        local args
+        if [[ ${#COMPREPLY[@]} -ne 1 ]]; then
+            args="-o nospace"
+        fi
+        compopt $args -o plusdirs > /dev/null 2>&1
     fi
 }
 
