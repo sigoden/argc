@@ -1,13 +1,37 @@
 using namespace System.Management.Automation
 
+function _argc_complete_path([string]$cur, [bool]$is_dir) {
+    $prefix = ($cur -replace '/[^/]+$','/')
+    $paths = @()
+    if ($is_dir) {
+        $paths = (Get-ChildItem -Attributes Directory -Path "$cur*")
+    } else {
+        $paths = (Get-ChildItem -Path "$cur*")
+    }
+
+    $paths | ForEach-Object {
+        $name = $_.Name
+        if ($_.Attributes -band [System.IO.FileAttributes]::Directory) {
+            $name = $name + '/'
+        } else {
+            $name = $name + ' '
+        }
+        $value = $prefix + $name
+        $description = $name
+        [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
+    } 
+}
+
 function _argc_complete_impl([array]$words) {
     $candidates = @((argc --argc-compgen powershell $words 2>$null) -split "`n")
     if ($candidates.Count -eq 0) {
         return ""
     }
     if ($candidates.Count -eq 1) {
-        if (($candidates[0] -eq "__argc_value:file") -or ($candidates[0] -eq "__argc_value:dir")) {
-            return
+        if ($candidates[0] -eq "__argc_value:file") {
+            return (_argc_complete_path $words[-1] $false)
+        } elseif ($candidates[0] -eq "__argc_value:dir") {
+            return (_argc_complete_path $words[-1] $true)
         }
     }
     $candidates | ForEach-Object { 

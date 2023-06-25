@@ -2,9 +2,27 @@ import os
 import re
 import shutil
 from subprocess import Popen, PIPE
-from xonsh.completers.tools import RichCompletion
 from xonsh.completers.tools import *
+from xonsh.completers.path import contextual_complete_path
+from xonsh.parsers.completion_context import *
 from xonsh.completers._aliases import _add_one_completer
+
+def _argc_complete_path(cur, is_dir):
+    if is_dir:
+        return contextual_complete_path(
+            CommandContext(
+                args=(CommandArg(value='ls'),),
+                arg_index=1, prefix=cur,
+            ),
+            filtfunc=os.path.isdir
+        )
+    else:
+        return contextual_complete_path(
+            CommandContext(
+                args=(CommandArg(value='cd'),),
+                arg_index=1, prefix=cur,
+            )
+        )
 
 def _argc_complete_impl(args):
     output, _ = Popen(['argc', '--argc-compgen', 'xonsh', *args], stdout=PIPE, stderr=PIPE).communicate()
@@ -14,8 +32,11 @@ def _argc_complete_impl(args):
     if len(candidates) == 0:
         result.add(RichCompletion(""))
         return result
-    if candidates[0] == '__argc_value:file' or candidates[0] == '__argc_value:dir':
-        return result
+    elif len(candidates) == 1:
+        if candidates[0] == '__argc_value:file':
+            return _argc_complete_path(args[-1], False)
+        elif  candidates[0] == '__argc_value:dir':
+            return _argc_complete_path(args[-1], True)
     for v in candidates:
         parts = v.split('\t')
         value = parts[0]
