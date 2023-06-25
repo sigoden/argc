@@ -1,0 +1,14 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --ob=` ************
+__argc_value:file
+
+************ COMPGEN `prog --oa --ob=` ************
+ok
+
+************ COMPGEN `prog abc --ob=` ************
+ok
+
+

@@ -46,7 +46,7 @@ pub fn compgen(
     let mut argc_value = None;
     let mut argc_variables = vec![];
     let mut multi_values = HashSet::new();
-    if args.iter().all(|v| v != "--") && last.starts_with('-') {
+    if matcher.is_last_arg_option_assign() {
         if let Some((left, right)) = split_equal_sign(&last) {
             prefix.push_str(left);
             last = right.to_string();
