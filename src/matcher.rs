@@ -23,6 +23,7 @@ pub(crate) struct Matcher<'a, 'b> {
     choices_values: HashMap<&'a str, Vec<String>>,
     script_path: Option<String>,
     term_width: Option<usize>,
+    is_last_arg_option_assign: bool,
 }
 
 type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>);
@@ -64,7 +65,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut flag_option_args = vec![vec![]];
         let mut positional_args = vec![];
         let mut dashdash = vec![];
-        let mut terminated = false;
+        let mut is_rest_args_positional = false;
+        let mut is_last_arg_option_assign = false;
         let mut arg_comp = ArgComp::Any;
         let mut choices_fns = HashSet::new();
         let args_len = args.len();
@@ -80,11 +82,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let arg = args[arg_index].as_str();
             if arg == "--" {
                 dashdash.push(positional_args.len());
-            } else if terminated
+            } else if is_rest_args_positional
                 || !dashdash.is_empty()
                 || (cmd.no_flags_options_subcommands() && !KNOWN_OPTIONS.contains(&arg))
             {
-                add_positional_arg(&mut positional_args, arg, &mut terminated, cmd);
+                add_positional_arg(&mut positional_args, arg, &mut is_rest_args_positional, cmd);
             } else if arg.starts_with('-') {
                 if let Some((k, v)) = arg.split_once('=') {
                     let param = cmd.find_flag_option(k);
@@ -92,6 +94,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         if let Some(param) = param {
                             arg_comp = ArgComp::OptionValue(param.name.clone(), 0)
                         }
+                        is_last_arg_option_assign = true;
                     }
                     if let Some((choices_fn, validate)) = param.and_then(|v| v.choices_fn.as_ref())
                     {
@@ -142,12 +145,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 ));
                 flag_option_args.push(vec![]);
             } else {
-                add_positional_arg(&mut positional_args, arg, &mut terminated, cmd);
+                add_positional_arg(&mut positional_args, arg, &mut is_rest_args_positional, cmd);
             }
             arg_index += 1;
         }
 
-        if terminated {
+        if is_rest_args_positional {
             arg_comp = ArgComp::CommandOrPositional;
         }
 
@@ -171,6 +174,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             choices_values: HashMap::new(),
             script_path: None,
             term_width: None,
+            is_last_arg_option_assign,
         }
     }
 
@@ -290,6 +294,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
             output.push(("__argc_value:file".into(), String::new()));
         }
         output
+    }
+
+    pub(crate) fn is_last_arg_option_assign(&self) -> bool {
+        self.is_last_arg_option_assign
     }
 
     fn to_arg_values_base(&self) -> Vec<ArgcValue> {
@@ -699,15 +707,15 @@ impl<'a, 'b> Matcher<'a, 'b> {
 fn add_positional_arg<'a>(
     positional_args: &mut Vec<&'a str>,
     arg: &'a str,
-    terminated: &mut bool,
+    is_rest_args_positional: &mut bool,
     cmd: &Command,
 ) {
     positional_args.push(arg);
-    if !*terminated
+    if !*is_rest_args_positional
         && cmd.positional_params.last().map(|v| v.terminated) == Some(true)
         && positional_args.len() >= cmd.positional_params.len() - 1
     {
-        *terminated = true;
+        *is_rest_args_positional = true;
     }
 }
 

@@ -489,6 +489,28 @@ _choice_fn() {
 }
 
 #[test]
+fn last_arg_option_assign() {
+    let script = r###"
+# @option --oa~[`_choice_fn`]
+# @option --ob <file>
+# @arg args~[`_choice_fn`]
+_choice_fn() {
+    echo __argc_matcher:
+    echo ok
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![
+            vec!["prog", "--ob="],
+            vec!["prog", "--oa", "--ob="],
+            vec!["prog", "abc", "--ob="],
+        ]
+    );
+}
+
+#[test]
 fn fallback_comp_file() {
     let script = r###"
 # @cmd
