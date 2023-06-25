@@ -641,3 +641,35 @@ _choice_fn() {
 
     snapshot_compgen!(script, vec![vec!["prog", "--oa", ""]], argc::Shell::Generic);
 }
+
+#[test]
+fn bash_shell() {
+    let script = r###"
+# @option --oa[`_choice_fn`]
+# @option --ob[`_choice_fn2`]
+# @flag   --fa
+_choice_fn() {
+	echo "abc:def:xyz"
+	echo "abc:def:tsr"
+	echo "abc:ijk:abc"
+	echo "abc:ijk:xyz"
+}
+_choice_fn2() {
+    echo __argc_prefix:/A/
+    echo __argc_matcher:B
+    echo -e "B"
+    echo -e "B/\0"
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![
+            vec!["prog", "--oa", ""],
+            vec!["prog", "--oa", "abc:"],
+            vec!["prog", "--ob", "/A/B"],
+            vec!["prog", "-"]
+        ],
+        argc::Shell::Bash
+    );
+}

@@ -272,13 +272,15 @@ impl Shell {
                     }
                     return format!("{value}{space}");
                 } else if let Some(common) = common_prefix(&values) {
-                    if common != matcher && common != "--" {
-                        let mut value = format!("{prefix}{common}");
-                        if prefix_unbalance.is_none() {
-                            value = self.escape(&value);
+                    if common != matcher {
+                        if common != "--" {
+                            let mut value = format!("{prefix}{common}");
+                            if prefix_unbalance.is_none() {
+                                value = self.escape(&value);
+                            }
+                            return value;
                         }
-                        return value;
-                    } else {
+                    } else if !prefix.is_empty() && !common.starts_with(prefix) {
                         add_space_to_first_candidate = true;
                     }
                 }
