@@ -4,19 +4,20 @@ _argc_complete_impl() {
         if [[ "$line" == "" ]]; then line=$'\0'; fi
         candidates+=( "$line" )
     done < <(argc --argc-compgen zsh $@ 2>/dev/null)
-    if [[ ${#candidates[@]} -eq 1 ]]; then
+    local skip=0
+    if [[ ${#candidates[@]} -gt 0 ]]; then
         if [[ "$candidates[1]" == "__argc_value:file" ]]; then
+            skip=1
             _path_files
-            return
         elif [[ "$candidates[1]" == "__argc_value:dir" ]]; then
+            skip=1
             _path_files -/
-            return
         fi
     fi
-    if [[ ${#candidates[@]} -gt 0 ]]; then
+    if [[ ${#candidates[@]} -gt $skip ]]; then
         local values=()
         local displays=()
-        for candidate in ${candidates[@]}; do
+        for candidate in ${candidates[@]:$skip}; do
             IFS=$'\t' read -r value display <<< "$candidate"
             values+=( "$value" )
             displays+=( "$display" )

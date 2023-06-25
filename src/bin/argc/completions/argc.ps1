@@ -27,14 +27,18 @@ function _argc_complete_impl([array]$words) {
     if ($candidates.Count -eq 0) {
         return ""
     }
-    if ($candidates.Count -eq 1) {
+    $skip = 0
+    $paths = @()
+    if ($candidates.Count -gt 0) {
         if ($candidates[0] -eq "__argc_value:file") {
-            return (_argc_complete_path $words[-1] $false)
+            $skip = 1
+            $paths = (_argc_complete_path $words[-1] $false)
         } elseif ($candidates[0] -eq "__argc_value:dir") {
-            return (_argc_complete_path $words[-1] $true)
+            $skip = 1
+            $paths = (_argc_complete_path $words[-1] $true)
         }
     }
-    $candidates | ForEach-Object { 
+    $candidates = ($candidates | Select-Object -Skip $skip | ForEach-Object { 
         $parts = ($_ -split "`t")
         $value = $parts[0]
         $description = ""
@@ -47,7 +51,8 @@ function _argc_complete_impl([array]$words) {
             $description = $parts[2] + "$([char]0x1b)[38;5;238m (" + $parts[3] + ")$([char]0x1b)[0m"
         }
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
-    }
+    })
+    $paths + $candidates
 }
 
 $_argc_completer = {

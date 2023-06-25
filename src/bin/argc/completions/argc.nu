@@ -4,7 +4,7 @@ def _argc_complete_path [name: string, is_dir: bool] {
     } else {
         "/"
     }
-    let paths = (ls ($name + '*'))
+    let paths = (try {ls ($name + '*')} catch { [] })
     mut paths = if $is_dir {
         $paths | where type == dir
     } else {
@@ -34,15 +34,12 @@ def _argc_complete_list [] {
 
 def _argc_complete_impl [args: list<string>] {
     let cur = ($args | last)
-    if not ($args.0 | path exists) {
-        return (_argc_complete_path $cur false | _argc_complete_list)
-    }
     mut candidates = ((do { argc --argc-compgen nushell $args } | complete | get stdout) | split row "\n" | range 0..-2)
-    if ($candidates | length) == 1  {
+    if ($candidates | length) > 0  {
         if $candidates.0 == '__argc_value:file' {
-            $candidates = (_argc_complete_path $cur false)
+            $candidates = ($candidates | skip 1 | append (_argc_complete_path $cur false))
         } else if $candidates.0 == '__argc_value:dir' {
-            $candidates = (_argc_complete_path $cur true)
+            $candidates = ($candidates | skip 1 | append (_argc_complete_path $cur true))
         }
     }
     $candidates | _argc_complete_list
@@ -56,5 +53,8 @@ def _argc_completer [args: list<string>] {
             which $args.0 | get 0.path
         }
     })
+    if not ($scriptfile | path exists) {
+        return (_argc_complete_path ($args | last) false | _argc_complete_list)
+    }
    _argc_complete_impl ($args | insert 0 $scriptfile)
 }
