@@ -4,17 +4,26 @@ def _argc_complete_path [name: string, is_dir: bool] {
     } else {
         "/"
     }
-    let paths = (ls ($name + '*') | skip 2)
-    let paths = if $is_dir {
+    let paths = (ls ($name + '*'))
+    mut paths = if $is_dir {
         $paths | where type == dir
     } else {
         $paths
     }
+    let homedir = ('~' | path expand)
+    let num_paths = ($paths | length)
     $paths | each {|it| 
-        if $it.type == 'dir' {
+        let value = (if $it.type == 'dir' {
             $it.name + $sep 
         } else {
-            $it.name 
+            $it.name + ' '
+        })
+        if ($name | str starts-with '~') {
+            $value | str replace $homedir '~'
+        } else if ($name | str starts-with ('.' + $sep)) {
+            '.' + $sep + $value
+        } else {
+            $value
         }
     }
 }
