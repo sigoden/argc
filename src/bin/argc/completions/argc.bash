@@ -16,22 +16,22 @@ _argc_complete_impl() {
     while IFS=$'\n' read -r line; do
         candidates+=( "$line" )
     done < <(argc --argc-compgen bash "$@" 2>/dev/null)
-    local nospace=1
+    local space=0
     local skip=0
     if [[ ${#candidates[@]} -gt 0 ]]; then
         if [[ "${candidates[0]}" == "__argc_value:file" ]]; then
             skip=1
             _argc_complete_path "$cur"
             if [[ ${#COMPREPLY[@]} -eq 1 ]] && [[ ${#candidates[@]} -eq 1 ]]; then
-                nospace=0
+                space=1
             fi
         elif [[ "${candidates[0]}" == "__argc_value:dir" ]]; then
             skip=1
             _argc_complete_path "$cur" dir
         fi
     fi
-    if [[ $nospace -eq 1 ]]; then
-        compopt -o nospace
+    if [[ $space -eq 1 ]]; then
+        compopt +o nospace
     fi
     COMPREPLY=( "${candidates[@]:$skip}" "${COMPREPLY[@]}" )
 }

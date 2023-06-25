@@ -1,7 +1,23 @@
 using namespace System.Management.Automation
 
 function _argc_complete_path([string]$cur, [bool]$is_dir) {
-    $prefix = ($cur -replace '/[^/]+$','/')
+    $prefix = ''
+    $quoted = $false
+    if ($cur.StartsWith('"') -or $cur.StartsWith("'")) {
+        $prefix = $prefix + $cur.SubString(0, 1)
+        $quoted = $true
+        $cur = $cur.SubString(1)
+    }
+    if ($cur.StartsWith('~') -or $cur.StartsWith('/') -or $cur.StartsWith('\')) {
+        $cur = (Resolve-Path $cur.SubString(0, 1)).Path + $cur.SubString(1)
+    }
+    if ($cur -eq "") {
+        $cur = ".\"
+    }
+    $cur = $cur -replace '/','\'
+    if ($cur.Contains('\')) {
+        $prefix = $prefix + ($cur -replace '\[^\]+$','\')
+    }
     $paths = @()
     if ($is_dir) {
         $paths = (Get-ChildItem -Attributes Directory -Path "$cur*")
@@ -11,12 +27,20 @@ function _argc_complete_path([string]$cur, [bool]$is_dir) {
 
     $paths | ForEach-Object {
         $name = $_.Name
+        $file = $true
         if ($_.Attributes -band [System.IO.FileAttributes]::Directory) {
-            $name = $name + '/'
-        } else {
-            $name = $name + ' '
+            $name = $name + '\'
+            $file = $false
         }
         $value = $prefix + $name
+        if (-not($quoted)) {
+            if ($value -match '[()<>\[\]{}"` #$&,;@|]') {
+                $value = "'" + $value + "'"
+            }
+            if ($file) {
+                $value = $value + ' '
+            }
+        }
         $description = $name
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
     } 
