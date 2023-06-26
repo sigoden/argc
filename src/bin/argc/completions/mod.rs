@@ -21,7 +21,7 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
     cmds.extend(args.iter().map(|v| v.as_str()));
     let output = match shell {
         Shell::Bash => {
-            let code = format!("complete -F _argc_completer {}", cmds.join(" "));
+            let code = format!("complete -F _argc_completer -o nospace {}", cmds.join(" "));
             format!("{BASH_SCRIPT}\n{code}\n",)
         }
         Shell::Elvish => {

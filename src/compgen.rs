@@ -142,16 +142,11 @@ pub fn compgen(
         candidates = prepend_candicates;
     }
 
-    if candidates.is_empty() {
-        if let Some(value) = argc_value {
-            return Ok(compgen_arg_value(&value));
-        }
-        return Ok(String::new());
-    }
     let mut candidates: Vec<(String, String, bool)> = candidates
         .into_iter()
         .map(|(value, (description, nospace))| (value, description, nospace))
         .collect();
+
     let break_chars = shell.need_break_chars();
     if !break_chars.is_empty() {
         let prefix_unbalance = unbalance_quote(&argc_prefix);
@@ -178,7 +173,14 @@ pub fn compgen(
             };
         }
     }
-    Ok(shell.output_candidates(candidates, &argc_prefix, &argc_suffix, &argc_matcher))
+
+    let mut values =
+        shell.convert_candidates(candidates, &argc_prefix, &argc_suffix, &argc_matcher);
+    if let Some(value) = argc_value.and_then(|v| convert_arg_value(&v)) {
+        values.insert(0, value);
+    }
+
+    Ok(values.join("\n"))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -252,13 +254,13 @@ impl Shell {
         *self == Shell::Generic
     }
 
-    pub(crate) fn output_candidates(
+    pub(crate) fn convert_candidates(
         &self,
         candidates: Vec<(String, String, bool)>,
         prefix: &str,
         suffix: &str,
         matcher: &str,
-    ) -> String {
+    ) -> Vec<String> {
         match self {
             Shell::Bash => {
                 let prefix_unbalance = unbalance_quote(prefix);
@@ -270,7 +272,7 @@ impl Shell {
                     if prefix_unbalance.is_none() {
                         value = self.escape(&value);
                     }
-                    return format!("{value}{space}");
+                    return vec![format!("{value}{space}")];
                 } else if let Some(common) = common_prefix(&values) {
                     if common != matcher {
                         if common != "--" {
@@ -278,7 +280,7 @@ impl Shell {
                             if prefix_unbalance.is_none() {
                                 value = self.escape(&value);
                             }
-                            return value;
+                            return vec![value];
                         }
                     } else if !prefix.is_empty() && !common.starts_with(prefix) {
                         add_space_to_first_candidate = true;
@@ -300,7 +302,6 @@ impl Shell {
                         }
                     })
                     .collect::<Vec<String>>()
-                    .join("\n")
             }
             Shell::Elvish | Shell::Powershell | Shell::Xonsh => candidates
                 .into_iter()
@@ -311,8 +312,7 @@ impl Shell {
                     let space: &str = if nospace { "0" } else { "1" };
                     format!("{new_value}\t{space}\t{display}\t{description}")
                 })
-                .collect::<Vec<String>>()
-                .join("\n"),
+                .collect::<Vec<String>>(),
             Shell::Fish => candidates
                 .into_iter()
                 .map(|(value, description, _nospace)| {
@@ -320,8 +320,7 @@ impl Shell {
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{description}")
                 })
-                .collect::<Vec<String>>()
-                .join("\n"),
+                .collect::<Vec<String>>(),
             Shell::Generic => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
@@ -329,8 +328,7 @@ impl Shell {
                     let space: &str = if nospace { "\0" } else { "" };
                     format!("{value}{space}{description}")
                 })
-                .collect::<Vec<String>>()
-                .join("\n"),
+                .collect::<Vec<String>>(),
             Shell::Nushell => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
@@ -339,8 +337,7 @@ impl Shell {
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{space}{description}")
                 })
-                .collect::<Vec<String>>()
-                .join("\n"),
+                .collect::<Vec<String>>(),
             Shell::Zsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
@@ -350,8 +347,7 @@ impl Shell {
                     let space = if nospace { "" } else { " " };
                     format!("{new_value}{space}\t{display}{description}")
                 })
-                .collect::<Vec<String>>()
-                .join("\n"),
+                .collect::<Vec<String>>(),
         }
     }
 
@@ -438,17 +434,18 @@ impl Shell {
     }
 }
 
-fn compgen_arg_value(value: &str) -> String {
+fn convert_arg_value(value: &str) -> Option<String> {
     let value = value.to_lowercase();
     if ["path", "file", "arg", "any"]
         .iter()
         .any(|v| value.contains(v))
     {
-        return "__argc_value:file".to_string();
+        Some("__argc_value:file".to_string())
     } else if value.contains("dir") || value.contains("folder") {
-        return "__argc_value:dir".to_string();
+        Some("__argc_value:dir".to_string())
+    } else {
+        None
     }
-    String::new()
 }
 
 fn truncate_description(description: &str) -> String {

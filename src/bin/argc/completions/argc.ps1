@@ -1,7 +1,23 @@
 using namespace System.Management.Automation
 
 function _argc_complete_path([string]$cur, [bool]$is_dir) {
-    $prefix = ($cur -replace '/[^/]+$','/')
+    $prefix = ''
+    $quoted = $false
+    if ($cur.StartsWith('"') -or $cur.StartsWith("'")) {
+        $prefix = $prefix + $cur.SubString(0, 1)
+        $quoted = $true
+        $cur = $cur.SubString(1)
+    }
+    if ($cur.StartsWith('~') -or $cur.StartsWith('/') -or $cur.StartsWith('\')) {
+        $cur = (Resolve-Path $cur.SubString(0, 1)).Path + $cur.SubString(1)
+    }
+    if ($cur -eq "") {
+        $cur = ".\"
+    }
+    $cur = $cur -replace '/','\'
+    if ($cur.Contains('\')) {
+        $prefix = $prefix + ($cur -replace '\[^\]+$','\')
+    }
     $paths = @()
     if ($is_dir) {
         $paths = (Get-ChildItem -Attributes Directory -Path "$cur*")
@@ -11,12 +27,20 @@ function _argc_complete_path([string]$cur, [bool]$is_dir) {
 
     $paths | ForEach-Object {
         $name = $_.Name
+        $file = $true
         if ($_.Attributes -band [System.IO.FileAttributes]::Directory) {
-            $name = $name + '/'
-        } else {
-            $name = $name + ' '
+            $name = $name + '\'
+            $file = $false
         }
         $value = $prefix + $name
+        if (-not($quoted)) {
+            if ($value -match '[()<>\[\]{}"` #$&,;@|]') {
+                $value = "'" + $value + "'"
+            }
+            if ($file) {
+                $value = $value + ' '
+            }
+        }
         $description = $name
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
     } 
@@ -27,14 +51,18 @@ function _argc_complete_impl([array]$words) {
     if ($candidates.Count -eq 0) {
         return ""
     }
-    if ($candidates.Count -eq 1) {
+    $skip = 0
+    $paths = @()
+    if ($candidates.Count -gt 0) {
         if ($candidates[0] -eq "__argc_value:file") {
-            return (_argc_complete_path $words[-1] $false)
+            $skip = 1
+            $paths = (_argc_complete_path $words[-1] $false)
         } elseif ($candidates[0] -eq "__argc_value:dir") {
-            return (_argc_complete_path $words[-1] $true)
+            $skip = 1
+            $paths = (_argc_complete_path $words[-1] $true)
         }
     }
-    $candidates | ForEach-Object { 
+    $candidates = ($candidates | Select-Object -Skip $skip | ForEach-Object { 
         $parts = ($_ -split "`t")
         $value = $parts[0]
         $description = ""
@@ -47,7 +75,8 @@ function _argc_complete_impl([array]$words) {
             $description = $parts[2] + "$([char]0x1b)[38;5;238m (" + $parts[3] + ")$([char]0x1b)[0m"
         }
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
-    }
+    })
+    $paths + $candidates
 }
 
 $_argc_completer = {
@@ -63,7 +92,7 @@ $_argc_completer = {
         $scriptfile = (Get-Command $words[0] -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)
     }
     if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
-        return
+        return (_argc_complete_path $words[-1] $false)
     }
     $words = @($scriptfile) + $words
     _argc_complete_impl $words

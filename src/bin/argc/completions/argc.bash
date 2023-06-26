@@ -2,15 +2,15 @@ _argc_complete_path() {
     local cur="$1"
     local kind="$2"
     if [[ "$kind" == "dir" ]]; then
-        compopt -o nospace -o plusdirs > /dev/null 2>&1
         COMPREPLY=($(compgen -d -- "${cur}"))
+        compopt -o plusdirs
     else
         COMPREPLY=($(compgen -f -- "${cur}"))
-        local args
-        if [[ ${#COMPREPLY[@]} -ne 1 ]]; then
-            args="-o nospace"
+        local opts
+        if [[ ${#COMPREPLY[@]} -eq 1 ]]; then
+            opts="+o nospace"
         fi
-        compopt $args -o plusdirs > /dev/null 2>&1
+        compopt $opts -o plusdirs
     fi
 }
 
@@ -18,20 +18,20 @@ _argc_complete_impl() {
     local cur="${!#}"
     export COMP_WORDBREAKS
     local candidates
-    mapfile -t candidates < <(argc --argc-compgen bash "$@" 2>/dev/null)
-    if [[ ${#candidates[@]} -eq 1 ]]; then
+    while IFS=$'\n' read -r line; do
+        candidates+=( "$line" )
+    done < <(argc --argc-compgen bash "$@" 2>/dev/null)
+    local skip=0
+    if [[ ${#candidates[@]} -gt 0 ]]; then
         if [[ "${candidates[0]}" == "__argc_value:file" ]]; then
+            skip=1
             _argc_complete_path "$cur"
-            return
         elif [[ "${candidates[0]}" == "__argc_value:dir" ]]; then
+            skip=1
             _argc_complete_path "$cur" dir
-            return
         fi
     fi
-    if [[ ${#candidates[@]} -gt 0 ]]; then
-        compopt -o nospace
-        COMPREPLY=( "${candidates[@]}" )
-    fi
+    COMPREPLY=( "${candidates[@]:$skip}" "${COMPREPLY[@]}" )
 }
 
 _argc_completer() {
