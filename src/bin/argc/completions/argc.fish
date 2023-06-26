@@ -19,7 +19,7 @@ end
 function _argc_completer
     set -l args (commandline -o)
     set -l cur (commandline -t)
-    if [ $cur = "" ]
+    if [ ! "$cur" ]
         set -a args ''
     end
 
@@ -28,11 +28,11 @@ function _argc_completer
         set scriptfile (argc --argc-script-path 2>/dev/null)
     else
         set scriptfile (which $args[1])
-    end
-    if not test -f $scriptfile
-        __fish_complete_path $cur
-        return
+        if [ ! "$scriptfile" ]
+            __fish_complete_path $cur
+            return
+        end
     end
 
-    _argc_complete_impl $scriptfile $args
+    _argc_complete_impl "$scriptfile" $args
 end

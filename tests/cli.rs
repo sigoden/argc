@@ -41,3 +41,16 @@ fn compgen() {
         .stdout(predicates::str::contains("abc\ndef\nghi"))
         .success();
 }
+
+#[test]
+fn compgen_argc() {
+    Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-compgen")
+        .arg("fish")
+        .arg("")
+        .args(["argc", "--argc-complete", ""])
+        .assert()
+        .stdout(predicates::str::contains("zsh"))
+        .success();
+}

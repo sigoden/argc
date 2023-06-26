@@ -70,9 +70,9 @@ def _argc_completer(context):
         scriptfile = output.decode().split('\n')[0]
     else:
         scriptfile = shutil.which(args[0])
-    if scriptfile == "" or scriptfile is None:
-        return _argc_complete_path(args[-1])
-        
+        if scriptfile is None:
+            return _argc_complete_path(args[-1])
+
     args.insert(0, scriptfile)
 
     return _argc_complete_impl(args)
