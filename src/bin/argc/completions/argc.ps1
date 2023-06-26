@@ -16,7 +16,7 @@ function _argc_complete_path([string]$cur, [bool]$is_dir) {
     }
     $cur = $cur -replace '/','\'
     if ($cur.Contains('\')) {
-        $prefix = $prefix + ($cur -replace '\[^\]+$','\')
+        $prefix = $prefix + ($cur -replace '\\[^\\]+$', '\')
     }
     $paths = @()
     if ($is_dir) {

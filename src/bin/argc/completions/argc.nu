@@ -1,10 +1,10 @@
-def _argc_complete_path [name: string, is_dir: bool] {
+def _argc_complete_path [cur: string, is_dir: bool] {
     let sep = if $nu.os-info.family == "windows" {
         "\\"
     } else {
         "/"
     }
-    let paths = (try {ls ($name + '*')} catch { [] })
+    let paths = (try {ls ($cur + '*')} catch { [] })
     mut paths = if $is_dir {
         $paths | where type == dir
     } else {
@@ -18,9 +18,9 @@ def _argc_complete_path [name: string, is_dir: bool] {
         } else {
             $it.name + ' '
         })
-        if ($name | str starts-with '~') {
+        if ($cur | str starts-with '~') {
             $value | str replace $homedir '~'
-        } else if ($name | str starts-with ('.' + $sep)) {
+        } else if ($cur | str starts-with ('.' + $sep)) {
             '.' + $sep + $value
         } else {
             $value
