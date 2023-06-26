@@ -46,15 +46,14 @@ def _argc_complete_impl [args: list<string>] {
 }
 
 def _argc_completer [args: list<string>] {
-    let scriptfile = (try { 
-        if $args.0 == 'argc' {
-            do { argc --argc-script-path } | complete | get stdout 
-        } else {
-            which $args.0 | get 0.path
+    mut scriptfile = ''
+    if $args.0 == 'argc' {
+        $scriptfile = (do { argc --argc-script-path } | complete | get stdout)
+    } else {
+        $scriptfile = (which $args.0 | get 0.path)
+        if ($scriptfile | is-empty) {
+            return (_argc_complete_path ($args | last) false | _argc_complete_list)
         }
-    })
-    if not ($scriptfile | path exists) {
-        return (_argc_complete_path ($args | last) false | _argc_complete_list)
     }
    _argc_complete_impl ($args | insert 0 $scriptfile)
 }

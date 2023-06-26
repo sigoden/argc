@@ -34,12 +34,15 @@ _argc_completer() {
     local scriptfile
     if [[ $words[1] == "argc" ]]; then
        scriptfile=$(argc --argc-script-path 2>/dev/null)
+        if [[ $? -eq 1 ]]; then
+            scriptfile=$'\0'
+        fi
     else
        scriptfile=$(which $words[1])
+        if [[ $? -eq 1 ]]; then
+            _path_files
+            return
+        fi
     fi
-    if [[ ! -f $scriptfile ]]; then
-        _path_files
-        return
-    fi
-    _argc_complete_impl $scriptfile $words
+    _argc_complete_impl "$scriptfile" $words
 }

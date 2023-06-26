@@ -82,17 +82,23 @@ function _argc_complete_impl([array]$words) {
 $_argc_completer = {
     param($wordToComplete, $commandAst, $cursorPosition)
     $words = @($commandAst.CommandElements | Where { $_.Extent.StartOffset -lt $cursorPosition } | ForEach-Object { $_.ToString() })
-    if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
-        $words += ''
+    $emptyS = ''
+    if ($PSVersionTable.PSVersion.Major -eq 5) {
+        $emptyS = '""'
     }
-    $scriptfile = ''
+    if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
+        $words += $emptyS
+    }
     if ($words[0] -eq "argc") {
         $scriptfile = (argc --argc-script-path 2>$null)
     } else {
         $scriptfile = (Get-Command $words[0] -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)
+        if (-not($scriptfile)) {
+            return (_argc_complete_path $words[-1] $false)
+        }
     }
-    if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
-        return (_argc_complete_path $words[-1] $false)
+    if (-not($scriptfile)) {
+        $scriptfile = $emptyS
     }
     $words = @($scriptfile) + $words
     _argc_complete_impl $words

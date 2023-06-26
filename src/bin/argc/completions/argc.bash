@@ -46,10 +46,10 @@ _argc_completer() {
        scriptfile="$(argc --argc-script-path 2>/dev/null)"
     else
        scriptfile="$(which "${words[0]}")"
-    fi
-    if [[ ! -f "$scriptfile" ]]; then
-        _argc_complete_path "$cur"
-        return
+        if [[ $? -eq 1 ]]; then
+            _argc_complete_path "$cur"
+            return
+        fi
     fi
 
     _argc_complete_impl "$scriptfile" "${words[@]}"

@@ -16,6 +16,8 @@ use std::{
 };
 use utils::*;
 
+const COMPLETION_SCRIPT: &str = include_str!("completions/completion.sh");
+
 fn main() {
     match run() {
         Ok(code) => {
@@ -70,8 +72,16 @@ fn run() -> Result<i32> {
                     Some(v) => v.parse()?,
                     None => bail!("Usage: argc --argc-compgen <SHELL> <SCRIPT> <ARGS...>"),
                 };
-                let (source, cmd_args) = parse_script_args(&args[3..])?;
-                let output = argc::compgen(shell, &args[3], &source, &cmd_args[1..])?;
+                let output = if args.len() >= 6
+                    && args[4] == "argc"
+                    && (args[3].is_empty() || args[5].starts_with("--argc"))
+                {
+                    let cmd_args = &args[4..];
+                    argc::compgen(shell, "", COMPLETION_SCRIPT, cmd_args)?
+                } else {
+                    let (source, cmd_args) = parse_script_args(&args[3..])?;
+                    argc::compgen(shell, &args[3], &source, &cmd_args[1..])?
+                };
                 if !output.is_empty() {
                     println!("{output}");
                 }
