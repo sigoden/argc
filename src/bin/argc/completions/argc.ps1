@@ -92,7 +92,7 @@ $_argc_completer = {
         $scriptfile = (Get-Command $words[0] -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source)
     }
     if (-not(Test-Path -Path $scriptfile -PathType Leaf)) {
-        return
+        return (_argc_complete_path $words[-1] $false)
     }
     $words = @($scriptfile) + $words
     _argc_complete_impl $words

@@ -63,15 +63,16 @@ def _argc_completer(context):
     args.append(context.raw_prefix)
 
     scriptfile = ""
-    if not (args[0] in ARGC_SCRIPTS):
+    if args[0] not in ARGC_SCRIPTS:
         return
     if args[0] == 'argc':
         output, _ = Popen(['argc', '--argc-script-path'], stdout=PIPE, stderr=PIPE).communicate()
         scriptfile = output.decode().split('\n')[0]
     else:
         scriptfile = shutil.which(args[0])
-    if not os.path.exists(scriptfile):
-        return
+    if scriptfile == "" or scriptfile is None:
+        return _argc_complete_path(args[-1])
+        
     args.insert(0, scriptfile)
 
     return _argc_complete_impl(args)
