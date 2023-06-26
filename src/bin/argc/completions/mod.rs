@@ -42,14 +42,17 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
         }
         Shell::Generic => String::new(),
         Shell::Nushell => {
-            let code = format!("{cmds:?}");
+            let cmds = format!("{cmds:?}");
             format!(
                 r###"{NUSHELL_SCRIPT}
-
-let _argc_scripts = {code}
+if ('ARGC_SCRIPTS' in $env) {{
+    let-env ARGC_SCRIPTS = ($env.ARGC_SCRIPTS | append {cmds} | uniq)
+}} else {{
+    let-env ARGC_SCRIPTS = {cmds} 
+}}
 
 let external_completer = {{|spans| 
-    if (not ($_argc_scripts | find $spans.0 | is-empty)) {{
+    if (not ($env.ARGC_SCRIPTS | find $spans.0 | is-empty)) {{
         _argc_completer $spans
     }} else {{
         # default completer
@@ -70,8 +73,16 @@ $env.config.completions.external = {{
             format!("{POWERSHELL_SCRIPT}\n{code}\n",)
         }
         Shell::Xonsh => {
-            let code = format!("ARGC_SCRIPTS={cmds:?}");
-            format!("{XONSH_SCRIPT}\n{code}\n",)
+            let cmds = format!("{cmds:?}");
+            format!(
+                r###"{XONSH_SCRIPT}
+if 'ARGC_SCRIPTS' in globals():
+    ARGC_SCRIPTS.extend(item for item in {cmds} 
+        if item not in ARGC_SCRIPTS)
+else:
+    ARGC_SCRIPTS = {cmds} 
+"###,
+            )
         }
         Shell::Zsh => {
             let code = format!("compdef _argc_completer {}", cmds.join(" "));
