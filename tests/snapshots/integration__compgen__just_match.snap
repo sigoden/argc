@@ -1,0 +1,9 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa` ************
+--oa-file
+--oa
+
+
