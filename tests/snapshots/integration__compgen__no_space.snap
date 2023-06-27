@@ -5,7 +5,7 @@ expression: data
 ************ COMPGEN Bash `prog --oa ` ************
 abc 
 def
-ghk 
+ghk (hello world)
 
 ************ COMPGEN Elvish `prog --oa ` ************
 abc	1	abc	

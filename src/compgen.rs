@@ -375,9 +375,6 @@ impl Shell {
                 return false;
             }
         }
-        if self == &Shell::Bash {
-            return false;
-        }
         true
     }
 
