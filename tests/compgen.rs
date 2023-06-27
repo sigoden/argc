@@ -332,6 +332,15 @@ cmdb() { :; }
 }
 
 #[test]
+fn just_match() {
+    let script = r###"
+# @option --oa
+# @option --oa-file
+"###;
+    snapshot_compgen!(script, vec![vec!["prog", "--oa"]]);
+}
+
+#[test]
 fn no_flags_options() {
     let script = r###"
 # @cmd

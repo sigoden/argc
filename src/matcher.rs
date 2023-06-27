@@ -235,7 +235,18 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let level = self.cmds.len() - 1;
         let mut last_cmd = self.cmds[level].1;
         let mut output = match &self.arg_comp {
-            ArgComp::FlagOrOption => self.comp_flag_options(),
+            ArgComp::FlagOrOption => {
+                let mut output = self.comp_flag_options();
+                if let Some((value, param)) = self
+                    .args
+                    .last()
+                    .and_then(|value| last_cmd.find_flag_option(value).map(|param| (value, param)))
+                {
+                    let describe = param.describe_head();
+                    output.push((value.clone(), describe.into()));
+                }
+                output
+            }
             ArgComp::FlagOrOptionCombine(value) => {
                 let mut output: Vec<(String, String)> = self
                     .comp_flag_options()

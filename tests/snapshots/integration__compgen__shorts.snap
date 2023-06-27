@@ -77,7 +77,7 @@ __argc_value:file
 -sa
 
 ************ COMPGEN `prog -sa` ************
-
+-sa
 
 ************ COMPGEN `prog -sa ` ************
 -a
