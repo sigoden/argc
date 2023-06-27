@@ -3,8 +3,8 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN Bash `prog --oa ` ************
-abc 
-def 
+abc ((desc1))
+def ((desc2))
 
 ************ COMPGEN Elvish `prog --oa ` ************
 abc	1	abc	(desc1)
