@@ -682,3 +682,13 @@ _choice_fn2() {
         argc::Shell::Bash
     );
 }
+
+#[test]
+fn redirect_symbols() {
+    let script = r###"
+# @option --oa
+# @arg text*
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", ">", ""]);
+}
