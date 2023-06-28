@@ -2,6 +2,10 @@
 source: tests/compgen.rs
 expression: data
 ---
+************ COMPGEN `prog ` ************
+__argc_value:file
+cmd
+
 ************ COMPGEN `prog cmd` ************
 cmd
 

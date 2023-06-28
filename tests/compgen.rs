@@ -106,6 +106,7 @@ cmd::subb() { :; }
     snapshot_compgen!(
         SCRIPT,
         vec![
+            vec!["prog", ""],
             vec!["prog", "cmd"],
             vec!["prog", "cmd", ""],
             vec!["prog", "cmd", "s"],
@@ -362,6 +363,34 @@ arg() { :; }
 }
 
 #[test]
+fn no_flags_options2() {
+    const SCRIPT: &str = r###"
+# @option --oa
+# @option --ob
+
+# @cmd
+cmda() { :; }
+# @cmd
+cmdb() { :; }
+"###;
+
+    snapshot_compgen!(SCRIPT, vec![vec!["prog", ""],]);
+}
+
+#[test]
+fn one_subcmd_with_options() {
+    const SCRIPT: &str = r###"
+# @option --oa
+# @option --ob
+
+# @cmd
+cmda() { :; }
+"###;
+
+    snapshot_compgen!(SCRIPT, vec![vec!["prog", ""],]);
+}
+
+#[test]
 fn no_space() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
@@ -436,7 +465,7 @@ _choice_fn() {
 }
 
 #[test]
-fn option_equal() {
+fn assing_option_value() {
     let script = r###"
 # @option --oa[`_choice_fn`]
 # @arg val[`_choice_fn`]
