@@ -1,0 +1,10 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog ` ************
+--oa
+--ob
+cmda
+
+

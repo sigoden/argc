@@ -289,7 +289,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     return comp_subcomands(last_cmd);
                 }
                 let mut output = vec![];
-                if last_cmd.positional_params.is_empty() {
+                if last_cmd.positional_params.is_empty() && last_cmd.subcommands.len() < 2 {
                     output.extend(self.comp_flag_options());
                 }
                 let values = self.match_positionals();
