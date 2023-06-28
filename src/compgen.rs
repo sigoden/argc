@@ -25,10 +25,15 @@ pub fn compgen(
             (last_arg.to_string(), None)
         }
     };
+    let redirect_symbols = shell.redirect_symbols();
+    let mut exist_redirect_symbol = false;
     let new_args: Vec<String> = args
         .iter()
         .enumerate()
         .map(|(i, v)| {
+            if !exist_redirect_symbol && redirect_symbols.contains(&v.as_str()) {
+                exist_redirect_symbol = true
+            }
             if i == args.len() - 1 {
                 last.clone()
             } else {
@@ -36,6 +41,9 @@ pub fn compgen(
             }
         })
         .collect();
+    if exist_redirect_symbol {
+        return Ok("__argc_value:file".to_string());
+    }
     let cmd = Command::new(script_content)?;
     let matcher = Matcher::new(&cmd, &new_args);
     let compgen_values = matcher.compgen();
@@ -392,6 +400,13 @@ impl Shell {
                 escape_chars(value, self.need_escape_chars(), "\\\\").replace("\\\\:", "\\:")
             }
             _ => value.into(),
+        }
+    }
+
+    fn redirect_symbols(&self) -> Vec<&str> {
+        match self {
+            Shell::Nushell => vec![],
+            _ => vec!["<", ">"],
         }
     }
 
