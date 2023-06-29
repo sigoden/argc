@@ -424,6 +424,18 @@ impl Shell {
         }
     }
 
+    fn is_unix_only(&self) -> bool {
+        matches!(self, Shell::Bash | Shell::Fish | Shell::Zsh)
+    }
+
+    fn is_windows_path(&self) -> bool {
+        if cfg!(windows) {
+            !self.is_unix_only()
+        } else {
+            false
+        }
+    }
+
     fn need_escape_chars(&self) -> &str {
         match self {
             Shell::Bash => r###"()<>"'` !#$&;\|"###,
@@ -446,6 +458,10 @@ impl Shell {
         }
     }
 
+    fn need_expand_tilde(&self) -> bool {
+        self.is_windows_path() && self == &Self::Powershell
+    }
+
     fn comp_argc_value(
         &self,
         argc_value: &str,
@@ -463,14 +479,32 @@ impl Shell {
             return None;
         };
         let (search_dir, matcher, prefix) = self.resolve_path(value)?;
-        if !value.contains(&prefix) {
-            return Some(("".into(), "".into(), vec![(prefix, "".into(), true)]));
-        }
         if !search_dir.is_dir() {
             return None;
         }
+
+        let is_windows_path = self.is_windows_path();
         let exts = exts.unwrap_or_default();
+
+        let (value_prefix, path_sep) = if is_windows_path {
+            if !value.contains(&prefix) {
+                return Some((
+                    "".into(),
+                    "".into(),
+                    vec![(format!("{prefix}{matcher}"), "".into(), true)],
+                ));
+            }
+            let value_prefix = if prefix.is_empty() { ".\\" } else { "" };
+            (value_prefix, "\\")
+        } else {
+            if value == "~" {
+                return Some(("".into(), "".into(), vec![("~/".into(), "".into(), true)]));
+            }
+            ("", "/")
+        };
+
         let mut output = vec![];
+
         for entry in (fs::read_dir(&search_dir).ok()?).flatten() {
             let path = entry.path();
             let file_name = entry.file_name().to_string_lossy().to_string();
@@ -481,7 +515,7 @@ impl Shell {
                 continue;
             }
             if (matcher.is_empty() || !matcher.starts_with('.'))
-                && cfg!(not(windows))
+                && !is_windows_path
                 && file_name.starts_with('.')
             {
                 continue;
@@ -495,36 +529,58 @@ impl Shell {
                 continue;
             }
             let path_value = if is_dir {
-                format!("{}/", file_name)
+                format!("{value_prefix}{file_name}{}", path_sep)
             } else {
-                file_name
+                format!("{value_prefix}{file_name}")
             };
             let nospace = if default_nospace { true } else { is_dir };
             output.push((path_value, String::new(), nospace))
         }
 
+        output.sort_by(|a, b| a.0.cmp(&b.0));
+
         Some((prefix, matcher, output))
     }
 
     fn resolve_path(&self, value: &str) -> Option<(PathBuf, String, String)> {
-        let (value, sep, home_p, cwd_p) = if cfg!(windows) {
+        let is_windows_path = self.is_windows_path();
+        let (value, sep, home_p, cwd_p) = if is_windows_path {
             (value.replace('/', "\\"), "\\", "~\\", ".\\")
         } else {
             (value.to_string(), "/", "~/", "./")
         };
-        let (new_value, trims, prefix) = if value.starts_with(home_p) {
+        let (new_value, trims, prefix) = if value.starts_with(home_p) || value == "~" {
             let home = home_dir()?;
             let home_s = home.to_string_lossy();
-            let path_s = format!("{home_s}{}", &value[1..]);
-            let (trims, prefix) = if cfg!(windows) && self == &Self::Powershell {
+            let path_s = if value == "~" {
+                format!("{home_s}{sep}")
+            } else {
+                format!("{home_s}{}", &value[1..])
+            };
+            let (trims, prefix) = if self.need_expand_tilde() {
                 (0, "")
             } else {
                 (home_s.len(), "~")
             };
             (path_s, trims, prefix.into())
         } else if value.starts_with(sep) {
-            let new_value = if cfg!(windows) {
+            let new_value = if is_windows_path {
                 format!("C:{}", value)
+            } else {
+                value.clone()
+            };
+            (new_value, 0, "".into())
+        } else if is_windows_path
+            && value.len() >= 2
+            && value
+                .chars()
+                .next()
+                .map(|v| v.is_ascii_alphabetic())
+                .unwrap_or_default()
+            && value.chars().nth(1).map(|v| v == ':').unwrap_or_default()
+        {
+            let new_value = if value.len() == 2 {
+                format!("{value}{sep}")
             } else {
                 value.clone()
             };
