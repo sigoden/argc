@@ -3,12 +3,12 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value:file
+__argc_value:FILE
 cmda
 cmdb
 
 ************ COMPGEN `prog c` ************
-__argc_value:file
+__argc_value:FILE
 cmda
 cmdb
 

@@ -9,15 +9,15 @@ __argc_value:file
 __argc_value:file
 
 ************ COMPGEN `prog cmd --file ` ************
-__argc_value:file
+__argc_value:FILE
 
 ************ COMPGEN `prog cmd --file v` ************
-__argc_value:file
+__argc_value:FILE
 
 ************ COMPGEN `prog cmd --value ` ************
-
+__argc_value:VALUE
 
 ************ COMPGEN `prog cmd --value v` ************
-
+__argc_value:VALUE
 
 

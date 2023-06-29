@@ -7,6 +7,6 @@ cmda	cmd-line1
 cmdb	line
 
 ************ COMPGEN `prog cmda ` ************
-
+__argc_value:BAR
 
 

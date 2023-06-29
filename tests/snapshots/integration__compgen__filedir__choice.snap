@@ -1,0 +1,21 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa ` ************
+README.md 
+tmp/
+target/
+tests/
+LICENSE-MIT 
+Cargo.toml 
+Cargo.lock 
+Argcfile.sh 
+LICENSE-APACHE 
+src/
+examples/
+
+************ COMPGEN `prog --ob ` ************
+README.md 
+
+

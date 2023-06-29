@@ -1,0 +1,61 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa ` ************
+README.md 
+tmp/
+target/
+tests/
+LICENSE-MIT 
+Cargo.toml 
+Cargo.lock 
+Argcfile.sh 
+LICENSE-APACHE 
+src/
+examples/
+
+************ COMPGEN `prog --oa ./` ************
+README.md 
+tmp/
+target/
+tests/
+LICENSE-MIT 
+Cargo.toml 
+Cargo.lock 
+Argcfile.sh 
+LICENSE-APACHE 
+src/
+examples/
+
+************ COMPGEN `prog --oa t` ************
+tmp/
+target/
+tests/
+
+************ COMPGEN `prog --oa ./t` ************
+ tmp/
+target/
+tests/
+
+************ COMPGEN `prog --oa ex` ************
+examples/
+
+************ COMPGEN `prog --ob ` ************
+README.md 
+
+************ COMPGEN `prog --ob RE` ************
+README.md 
+
+************ COMPGEN `prog --oc ` ************
+tmp/
+target/
+tests/
+src/
+examples/
+
+************ COMPGEN `prog --od ` ************
+README.md 
+Cargo.toml 
+
+

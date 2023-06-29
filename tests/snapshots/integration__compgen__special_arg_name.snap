@@ -3,9 +3,9 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog cmda ` ************
-__argc_value:file
+__argc_value:ARG
 
 ************ COMPGEN `prog cmdb ` ************
-__argc_value:file
+__argc_value:ANY
 
 

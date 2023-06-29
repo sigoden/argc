@@ -721,3 +721,54 @@ fn redirect_symbols() {
 
     snapshot_compgen_shells!(script, vec!["prog", ">", ""]);
 }
+
+#[cfg(not(windows))]
+mod filedir {
+    #[test]
+    fn value_name() {
+        let script = r###"
+# @option --oa <file>
+# @option --ob <file:.md>
+# @option --oc <dir>
+# @option --od <file:.md,.toml>
+"###;
+
+        snapshot_compgen!(
+            script,
+            vec![
+                vec!["prog", "--oa", ""],
+                vec!["prog", "--oa", "./"],
+                vec!["prog", "--oa", "t"],
+                vec!["prog", "--oa", "./t"],
+                vec!["prog", "--oa", "ex"],
+                vec!["prog", "--ob", ""],
+                vec!["prog", "--ob", "RE"],
+                vec!["prog", "--oc", ""],
+                vec!["prog", "--od", ""],
+            ],
+            argc::Shell::Bash
+        );
+    }
+
+    #[test]
+    fn choice() {
+        let script = r###"
+# @option --oa[`_choice_fn`]
+# @option --ob[`_choice_fn2`]
+
+_choice_fn() {
+    echo __argc_value:file
+}
+
+_choice_fn2() {
+    echo __argc_value:file:.md
+}
+"###;
+
+        snapshot_compgen!(
+            script,
+            vec![vec!["prog", "--oa", ""], vec!["prog", "--ob", ""],],
+            argc::Shell::Bash
+        );
+    }
+}

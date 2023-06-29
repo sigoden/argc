@@ -15,6 +15,7 @@ use std::{
     },
 };
 use utils::*;
+use which::which;
 
 const COMPLETION_SCRIPT: &str = include_str!("completions/completion.sh");
 
@@ -68,23 +69,7 @@ fn run() -> Result<i32> {
                 println!("{}", serde_json::to_string_pretty(&json)?);
             }
             "--argc-compgen" => {
-                let shell: Shell = match args.get(2) {
-                    Some(v) => v.parse()?,
-                    None => bail!("Usage: argc --argc-compgen <SHELL> <SCRIPT> <ARGS...>"),
-                };
-                let output = if args.len() >= 6
-                    && args[4] == "argc"
-                    && (args[3].is_empty() || args[5].starts_with("--argc"))
-                {
-                    let cmd_args = &args[4..];
-                    argc::compgen(shell, "", COMPLETION_SCRIPT, cmd_args)?
-                } else {
-                    let (source, cmd_args) = parse_script_args(&args[3..])?;
-                    argc::compgen(shell, &args[3], &source, &cmd_args[1..])?
-                };
-                if !output.is_empty() {
-                    println!("{output}");
-                }
+                run_compgen(args.to_vec());
             }
             "--argc-completions" => {
                 let shell: Shell = match args.get(2) {
@@ -135,6 +120,39 @@ fn run() -> Result<i32> {
             Ok(status.code().unwrap_or_default())
         }
     }
+}
+
+fn run_compgen(mut args: Vec<String>) -> Option<()> {
+    if args.len() < 6 {
+        return None;
+    };
+    let shell: Shell = args.get(2).and_then(|v| v.parse().ok())?;
+    if args[3].is_empty() {
+        if args[4] == "argc" {
+            if let Some((_, script_file_)) = get_script_path(true) {
+                args[3] = script_file_.to_string_lossy().to_string();
+            }
+        } else if let Ok(script_file_) = which(&args[4]) {
+            args[3] = script_file_.to_string_lossy().to_string();
+        } else {
+            return None;
+        }
+    }
+
+    let output = if args.len() >= 6
+        && &args[4] == "argc"
+        && (args[3].is_empty() || args[5].starts_with("--argc"))
+    {
+        let cmd_args = &args[4..];
+        argc::compgen(shell, "", COMPLETION_SCRIPT, cmd_args).ok()?
+    } else {
+        let (source, cmd_args) = parse_script_args(&args[3..]).ok()?;
+        argc::compgen(shell, &args[3], &source, &cmd_args[1..]).ok()?
+    };
+    if !output.is_empty() {
+        println!("{output}");
+    }
+    Some(())
 }
 
 fn get_argc_help() -> String {
