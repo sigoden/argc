@@ -3,15 +3,19 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `sudo cmd ` ************
+__argc_matcher:
 ok
 
 ************ COMPGEN `sudo cmd -` ************
+__argc_matcher:
 ok
 
 ************ COMPGEN `sudo cmd --foo` ************
+__argc_matcher:
 ok
 
 ************ COMPGEN `sudo cmd foo` ************
+__argc_matcher:
 ok
 
 

@@ -4,8 +4,12 @@ use crate::utils::{escape_shell_words, get_current_dir, run_param_fns};
 use crate::Result;
 
 use anyhow::bail;
+use dirs::home_dir;
 use indexmap::IndexMap;
 use std::collections::{HashMap, HashSet};
+use std::env;
+use std::fs;
+use std::path::PathBuf;
 use std::str::FromStr;
 
 pub fn compgen(
@@ -66,7 +70,7 @@ pub fn compgen(
             if let Some(fn_name) = value.strip_prefix("__argc_fn:") {
                 argc_fn = Some(fn_name.to_string());
             } else if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
-                argc_value = argc_value.or_else(|| Some(stripped_value.to_string()));
+                argc_value = Some(stripped_value.to_lowercase());
                 if shell.is_generic() {
                     argc_variables.push(value.to_string());
                 }
@@ -126,7 +130,7 @@ pub fn compgen(
                 let nospace = nospace || default_nospace;
                 if value.starts_with("__argc_") {
                     if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
-                        argc_value = argc_value.or_else(|| Some(stripped_value.to_string()));
+                        argc_value = Some(stripped_value.to_lowercase());
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_prefix:") {
                         argc_prefix = format!("{prefix}{stripped_value}")
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_suffix:") {
@@ -198,11 +202,19 @@ pub fn compgen(
         }
     }
 
-    let mut values =
-        shell.convert_candidates(candidates, &argc_prefix, &argc_suffix, &argc_matcher);
-    if let Some(value) = argc_value.and_then(|v| convert_arg_value(&v)) {
-        values.insert(0, value);
+    if !shell.is_generic() {
+        if let Some(value) = argc_value.and_then(|v| convert_arg_value(&v)) {
+            if let Some((value_prefix, value_matcher, more_candidates)) =
+                shell.comp_argc_value(&value, &last, default_nospace)
+            {
+                argc_prefix = format!("{prefix}{value_prefix}");
+                argc_matcher = value_matcher;
+                candidates.extend(more_candidates)
+            }
+        }
     }
+
+    let values = shell.convert_candidates(candidates, &argc_prefix, &argc_suffix, &argc_matcher);
 
     Ok(values.join("\n"))
 }
@@ -239,6 +251,8 @@ impl FromStr for Shell {
         }
     }
 }
+
+pub(crate) type CandidateValue = (String, String, bool); // value, description, nospace
 
 impl Shell {
     pub fn list() -> [Shell; 7] {
@@ -280,7 +294,7 @@ impl Shell {
 
     pub(crate) fn convert_candidates(
         &self,
-        candidates: Vec<(String, String, bool)>,
+        candidates: Vec<CandidateValue>,
         prefix: &str,
         suffix: &str,
         matcher: &str,
@@ -410,13 +424,25 @@ impl Shell {
         }
     }
 
+    fn is_unix_only(&self) -> bool {
+        matches!(self, Shell::Bash | Shell::Fish | Shell::Zsh)
+    }
+
+    fn is_windows_path(&self) -> bool {
+        if cfg!(windows) {
+            !self.is_unix_only()
+        } else {
+            false
+        }
+    }
+
     fn need_escape_chars(&self) -> &str {
         match self {
             Shell::Bash => r###"()<>"'` !#$&;\|"###,
             Shell::Nushell => r###"()[]{}"'` #$;|"###,
             Shell::Powershell => r###"()<>[]{}"'` #$&,;@|"###,
             Shell::Xonsh => r###"()<>[]{}!"'` #&:;\|"###,
-            Shell::Zsh => r###"()<>[]"'` !#$&*:;?\|~"###,
+            Shell::Zsh => r###"()<>[]"'` !#$&*:;?\|"###,
             _ => "",
         }
     }
@@ -430,6 +456,157 @@ impl Shell {
             Shell::Powershell => vec![','],
             _ => vec![],
         }
+    }
+
+    fn need_expand_tilde(&self) -> bool {
+        self.is_windows_path() && self == &Self::Powershell
+    }
+
+    fn comp_argc_value(
+        &self,
+        argc_value: &str,
+        value: &str,
+        default_nospace: bool,
+    ) -> Option<(String, String, Vec<CandidateValue>)> {
+        let (dir_only, exts) = if argc_value == "__argc_value:dir" {
+            (true, None)
+        } else if argc_value == "__argc_value:file" {
+            (false, None)
+        } else if let Some(suffix) = argc_value.strip_prefix("__argc_value:file:") {
+            let exts: Vec<String> = suffix.split(',').map(|v| v.to_string()).collect();
+            (false, Some(exts))
+        } else {
+            return None;
+        };
+        let (search_dir, matcher, prefix) = self.resolve_path(value)?;
+        if !search_dir.is_dir() {
+            return None;
+        }
+
+        let is_windows_path = self.is_windows_path();
+        let exts = exts.unwrap_or_default();
+
+        let (value_prefix, path_sep) = if is_windows_path {
+            if !value.contains(&prefix) {
+                return Some((
+                    "".into(),
+                    "".into(),
+                    vec![(format!("{prefix}{matcher}"), "".into(), true)],
+                ));
+            }
+            let value_prefix = if prefix.is_empty() { ".\\" } else { "" };
+            (value_prefix, "\\")
+        } else {
+            if value == "~" {
+                return Some(("".into(), "".into(), vec![("~/".into(), "".into(), true)]));
+            }
+            ("", "/")
+        };
+
+        let mut output = vec![];
+
+        for entry in (fs::read_dir(&search_dir).ok()?).flatten() {
+            let path = entry.path();
+            let file_name = entry.file_name().to_string_lossy().to_string();
+            if !file_name.starts_with(&matcher) {
+                continue;
+            }
+            if !exts.is_empty() && exts.iter().all(|v| !file_name.to_lowercase().ends_with(v)) {
+                continue;
+            }
+            if (matcher.is_empty() || !matcher.starts_with('.'))
+                && !is_windows_path
+                && file_name.starts_with('.')
+            {
+                continue;
+            };
+            let is_dir = if let Ok(meta) = fs::metadata(&path) {
+                meta.is_dir()
+            } else {
+                continue;
+            };
+            if !is_dir && dir_only {
+                continue;
+            }
+            let path_value = if is_dir {
+                format!("{value_prefix}{file_name}{}", path_sep)
+            } else {
+                format!("{value_prefix}{file_name}")
+            };
+            let nospace = if default_nospace { true } else { is_dir };
+            output.push((path_value, String::new(), nospace))
+        }
+
+        output.sort_by(|a, b| a.0.cmp(&b.0));
+
+        Some((prefix, matcher, output))
+    }
+
+    fn resolve_path(&self, value: &str) -> Option<(PathBuf, String, String)> {
+        let is_windows_path = self.is_windows_path();
+        let (value, sep, home_p, cwd_p) = if is_windows_path {
+            (value.replace('/', "\\"), "\\", "~\\", ".\\")
+        } else {
+            (value.to_string(), "/", "~/", "./")
+        };
+        let (new_value, trims, prefix) = if value.starts_with(home_p) || value == "~" {
+            let home = home_dir()?;
+            let home_s = home.to_string_lossy();
+            let path_s = if value == "~" {
+                format!("{home_s}{sep}")
+            } else {
+                format!("{home_s}{}", &value[1..])
+            };
+            let (trims, prefix) = if self.need_expand_tilde() {
+                (0, "")
+            } else {
+                (home_s.len(), "~")
+            };
+            (path_s, trims, prefix.into())
+        } else if value.starts_with(sep) {
+            let new_value = if is_windows_path {
+                format!("C:{}", value)
+            } else {
+                value.clone()
+            };
+            (new_value, 0, "".into())
+        } else if is_windows_path
+            && value.len() >= 2
+            && value
+                .chars()
+                .next()
+                .map(|v| v.is_ascii_alphabetic())
+                .unwrap_or_default()
+            && value.chars().nth(1).map(|v| v == ':').unwrap_or_default()
+        {
+            let new_value = if value.len() == 2 {
+                format!("{value}{sep}")
+            } else {
+                value.clone()
+            };
+            (new_value, 0, "".into())
+        } else {
+            let (new_value, prefix) = if let Some(value) = value.strip_prefix(cwd_p) {
+                (value.to_string(), cwd_p)
+            } else {
+                (value.clone(), "")
+            };
+            let cwd = env::current_dir().ok()?;
+            let cwd_s = cwd.to_string_lossy();
+            let new_value = format!("{}{sep}{new_value}", cwd_s);
+            let trims = cwd_s.len() + 1;
+            (new_value, trims, prefix.to_string())
+        };
+        let (path, matcher) = if new_value.ends_with(sep) {
+            (new_value, "".into())
+        } else if value == "~" {
+            (format!("{new_value}{sep}"), "".into())
+        } else {
+            let (parent, matcher) = new_value.rsplit_once(sep)?;
+            (format!("{parent}{sep}"), matcher.into())
+        };
+        let prefix = format!("{prefix}{}", &path[trims..]);
+        Some((PathBuf::from(path), matcher, prefix))
     }
 
     fn comp_value1(&self, prefix: &str, value: &str, suffix: &str) -> String {
@@ -463,8 +640,9 @@ impl Shell {
 }
 
 fn convert_arg_value(value: &str) -> Option<String> {
-    let value = value.to_lowercase();
-    if ["path", "file", "arg", "any"]
+    if value.starts_with("file:") {
+        Some(format!("__argc_value:{value}"))
+    } else if ["path", "file", "arg", "any"]
         .iter()
         .any(|v| value.contains(v))
     {

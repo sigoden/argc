@@ -121,7 +121,7 @@ macro_rules! snapshot_compgen {
 		$source:expr,
         $matrix:expr
     ) => {
-        snapshot_compgen!($source, $matrix, argc::Shell::Fish);
+        snapshot_compgen!($source, $matrix, argc::Shell::Generic);
     };
 }
 

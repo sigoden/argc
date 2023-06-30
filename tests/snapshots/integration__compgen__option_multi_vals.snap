@@ -3,12 +3,12 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa ` ************
-__argc_value:dir
+__argc_value:DIR
 
 ************ COMPGEN `prog --oa bash ` ************
-__argc_value:file
+__argc_value:FILE
 
 ************ COMPGEN `prog --oa bash cmd1 ` ************
-__argc_value:file
+__argc_value:FILE
 
 

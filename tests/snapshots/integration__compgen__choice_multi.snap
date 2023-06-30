@@ -8,8 +8,8 @@ def
 ghi
 
 ************ COMPGEN `prog --oa=` ************
---oa=abc
---oa=def
---oa=ghi
+abc
+def
+ghi
 
 

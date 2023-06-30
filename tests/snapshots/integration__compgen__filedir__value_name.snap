@@ -1,0 +1,47 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa src/` ************
+argc_value.rs 
+bin/
+command/
+compgen.rs 
+lib.rs 
+matcher.rs 
+param.rs 
+parser.rs 
+utils.rs 
+
+************ COMPGEN `prog --oa src/p` ************
+src/par
+
+************ COMPGEN `prog --oa ./src/` ************
+argc_value.rs 
+bin/
+command/
+compgen.rs 
+lib.rs 
+matcher.rs 
+param.rs 
+parser.rs 
+utils.rs 
+
+************ COMPGEN `prog --oa C` ************
+Cargo.
+
+************ COMPGEN `prog --oa ./C` ************
+./Cargo.
+
+************ COMPGEN `prog --ob RE` ************
+README.md 
+
+************ COMPGEN `prog --oc src/` ************
+bin/
+command/
+
+************ COMPGEN `prog --od ` ************
+Cargo.toml 
+README.md 
+
+

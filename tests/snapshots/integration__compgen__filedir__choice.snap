@@ -1,0 +1,19 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa src/` ************
+argc_value.rs 
+bin/
+command/
+compgen.rs 
+lib.rs 
+matcher.rs 
+param.rs 
+parser.rs 
+utils.rs 
+
+************ COMPGEN `prog --ob ` ************
+README.md 
+
+

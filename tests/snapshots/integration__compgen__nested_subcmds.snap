@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value:file
+__argc_value:FILE
 cmd
 
 ************ COMPGEN `prog cmd` ************

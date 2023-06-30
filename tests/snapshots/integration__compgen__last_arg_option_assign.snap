@@ -3,12 +3,14 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --ob=` ************
-__argc_value:file
+__argc_value:FILE
 
 ************ COMPGEN `prog --oa --ob=` ************
+__argc_matcher:
 ok
 
 ************ COMPGEN `prog abc --ob=` ************
+__argc_matcher:
 ok
 
 

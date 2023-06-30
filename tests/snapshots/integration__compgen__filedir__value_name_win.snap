@@ -1,0 +1,53 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa src\` ************
+src\argc_value.rs	1	argc_value.rs	
+src\bin\	0	bin\	
+src\command\	0	command\	
+src\compgen.rs	1	compgen.rs	
+src\lib.rs	1	lib.rs	
+src\matcher.rs	1	matcher.rs	
+src\param.rs	1	param.rs	
+src\parser.rs	1	parser.rs	
+src\utils.rs	1	utils.rs	
+
+************ COMPGEN `prog --oa src\p` ************
+src\param.rs	1	param.rs	
+src\parser.rs	1	parser.rs	
+
+************ COMPGEN `prog --oa .\src\` ************
+.\src\argc_value.rs	1	argc_value.rs	
+.\src\bin\	0	bin\	
+.\src\command\	0	command\	
+.\src\compgen.rs	1	compgen.rs	
+.\src\lib.rs	1	lib.rs	
+.\src\matcher.rs	1	matcher.rs	
+.\src\param.rs	1	param.rs	
+.\src\parser.rs	1	parser.rs	
+.\src\utils.rs	1	utils.rs	
+
+************ COMPGEN `prog --oa C` ************
+.\Cargo.lock	1	.\Cargo.lock	
+.\Cargo.toml	1	.\Cargo.toml	
+
+************ COMPGEN `prog --oa .\C` ************
+.\Cargo.lock	1	Cargo.lock	
+.\Cargo.toml	1	Cargo.toml	
+
+************ COMPGEN `prog --ob RE` ************
+.\README.md	1	.\README.md	
+
+************ COMPGEN `prog --oc src\` ************
+src\bin\	0	bin\	
+src\command\	0	command\	
+
+************ COMPGEN `prog --od ` ************
+.\Cargo.toml	1	.\Cargo.toml	
+.\README.md	1	.\README.md	
+
+************ COMPGEN `prog --oa src/` ************
+src\	0	src\	
+
+
