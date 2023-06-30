@@ -10,7 +10,7 @@ $_argc_completer = {
     if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
         $words += $emptyS
     }
-    @((argc --argc-compgen powershell $emptyS $words) -split "`n") | Select-Object -Skip $skip | ForEach-Object { 
+    @((argc --argc-compgen powershell $emptyS $words) -split "`n") | ForEach-Object { 
         $parts = ($_ -split "`t")
         $value = $parts[0]
         $description = ""

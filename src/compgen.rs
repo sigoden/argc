@@ -341,10 +341,10 @@ impl Shell {
                     })
                     .collect::<Vec<String>>()
             }
-            Shell::Elvish | Shell::Powershell | Shell::Xonsh => candidates
+            Shell::Elvish | Shell::Powershell => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let new_value = self.comp_value1(prefix, &value, suffix);
+                    let new_value = self.combine_value(prefix, &value, suffix);
                     let display = if value.is_empty() { " ".into() } else { value };
                     let description = self.comp_description(&description, "", "");
                     let space: &str = if nospace { "0" } else { "1" };
@@ -354,7 +354,7 @@ impl Shell {
             Shell::Fish => candidates
                 .into_iter()
                 .map(|(value, description, _nospace)| {
-                    let new_value = self.comp_value1(prefix, &value, suffix);
+                    let new_value = self.combine_value(prefix, &value, suffix);
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{description}")
                 })
@@ -370,16 +370,50 @@ impl Shell {
             Shell::Nushell => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let new_value = self.comp_value1(prefix, &value, suffix);
+                    let new_value = self.combine_value(prefix, &value, suffix);
                     let space = if nospace { "" } else { " " };
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{space}{description}")
                 })
                 .collect::<Vec<String>>(),
+            Shell::Xonsh => candidates
+                .into_iter()
+                .map(|(value, description, nospace)| {
+                    let mut new_value = format!("{prefix}{value}{suffix}");
+                    if unbalance_quote(prefix).is_none() {
+                        let escaped_new_value = self.escape(&new_value);
+                        if escaped_new_value.ends_with("\\'")
+                            && !escaped_new_value.ends_with("\\\\'")
+                        {
+                            new_value = format!(
+                                "{}\\'",
+                                &escaped_new_value.as_str()[0..escaped_new_value.len() - 1]
+                            );
+                        } else {
+                            new_value = escaped_new_value
+                        }
+                    } else if new_value.ends_with('\\') && !new_value.ends_with("\\\\") {
+                        new_value.push('\\')
+                    }
+                    let display = if value.is_empty() { " ".into() } else { value };
+                    let description = self.comp_description(&description, "", "");
+                    let space: &str = if nospace { "0" } else { "1" };
+                    format!("{new_value}\t{space}\t{display}\t{description}")
+                })
+                .collect::<Vec<String>>(),
             Shell::Zsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace)| {
-                    let new_value = self.comp_value2(prefix, &value, suffix);
+                    let prefix = if let Some((_, i)) = unbalance_quote(prefix) {
+                        prefix
+                            .char_indices()
+                            .filter(|(v, _)| *v != i)
+                            .map(|(_, v)| v)
+                            .collect()
+                    } else {
+                        prefix.to_string()
+                    };
+                    let new_value = self.escape(&format!("{prefix}{value}{suffix}"));
                     let display = value.replace(':', "\\:");
                     let description = self.comp_description(&description, ":", "");
                     let space = if nospace { "" } else { " " };
@@ -441,7 +475,7 @@ impl Shell {
             Shell::Bash => r###"()<>"'` !#$&;\|"###,
             Shell::Nushell => r###"()[]{}"'` #$;|"###,
             Shell::Powershell => r###"()<>[]{}"'` #$&,;@|"###,
-            Shell::Xonsh => r###"()<>[]{}!"'` #&:;\|"###,
+            Shell::Xonsh => r###"()<>[]{}!"'` #&;|"###,
             Shell::Zsh => r###"()<>[]"'` !#$&*:;?\|"###,
             _ => "",
         }
@@ -609,25 +643,12 @@ impl Shell {
         Some((PathBuf::from(path), matcher, prefix))
     }
 
-    fn comp_value1(&self, prefix: &str, value: &str, suffix: &str) -> String {
+    fn combine_value(&self, prefix: &str, value: &str, suffix: &str) -> String {
         let mut new_value = format!("{prefix}{value}{suffix}");
         if unbalance_quote(prefix).is_none() {
             new_value = self.escape(&new_value);
         }
         new_value
-    }
-
-    fn comp_value2(&self, prefix: &str, value: &str, suffix: &str) -> String {
-        let prefix = if let Some((_, i)) = unbalance_quote(prefix) {
-            prefix
-                .char_indices()
-                .filter(|(v, _)| *v != i)
-                .map(|(_, v)| v)
-                .collect()
-        } else {
-            prefix.to_string()
-        };
-        self.escape(&format!("{prefix}{value}{suffix}"))
     }
 
     fn comp_description(&self, description: &str, prefix: &str, suffix: &str) -> String {
