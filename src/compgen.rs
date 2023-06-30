@@ -523,7 +523,7 @@ impl Shell {
                 CompKind::Command => Some("35"),
                 CompKind::Value => Some("32"),
                 CompKind::Dir => Some("1;34"),
-                CompKind::File => Some("0"),
+                CompKind::File => Some("39"),
                 CompKind::Symlink => Some("1;36"),
                 CompKind::Exe => Some("1;32"),
             },
@@ -621,6 +621,14 @@ impl Shell {
             ("", "/")
         };
 
+        #[cfg(windows)]
+        let path_exts: Vec<String> = env::var("PATHEXT")
+            .unwrap_or(".COM;.EXE;.BAT;.CMD".into())
+            .split(';')
+            .filter(|v| !v.is_empty())
+            .map(|v| v.to_lowercase())
+            .collect();
+
         let mut output = vec![];
 
         for entry in (fs::read_dir(&search_dir).ok()?).flatten() {
@@ -665,10 +673,22 @@ impl Shell {
                 CompKind::Dir
             } else if is_symlink {
                 CompKind::Symlink
-            } else if is_executable(meta.permissions()) {
-                CompKind::Exe
             } else {
-                CompKind::File
+                #[cfg(not(windows))]
+                let is_executable = {
+                    use std::os::unix::fs::PermissionsExt;
+                    meta.permissions().mode() & 0o111 != 0
+                };
+                #[cfg(windows)]
+                let is_executable = {
+                    let new_file_name = file_name.to_lowercase();
+                    path_exts.iter().any(|v| new_file_name.ends_with(v))
+                };
+                if is_executable {
+                    CompKind::Exe
+                } else {
+                    CompKind::File
+                }
             };
             let nospace = if default_nospace { true } else { is_dir };
             output.push((path_value, String::new(), nospace, comp_kind))
@@ -787,17 +807,6 @@ fn parse_candidate_value(input: &str) -> CandidateValue {
         }
     }
     (value, description, nospace, comp_kind)
-}
-
-#[cfg(not(windows))]
-fn is_executable(perm: fs::Permissions) -> bool {
-    use std::os::unix::fs::PermissionsExt;
-    perm.mode() & 0o111 != 0
-}
-
-#[cfg(windows)]
-fn is_executable(perm: fs::Permissions) -> bool {
-    false
 }
 
 fn convert_arg_value(value: &str) -> Option<String> {
