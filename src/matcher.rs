@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::{
     command::Command,
+    compgen::CompKind,
     param::{FlagOptionParam, PositionalParam},
     utils::run_param_fns,
     ArgcValue,
@@ -239,7 +240,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
-    pub(crate) fn compgen(&self) -> Vec<(String, String)> {
+    pub(crate) fn compgen(&self) -> Vec<CompItem> {
         let level = self.cmds.len() - 1;
         let mut last_cmd = self.cmds[level].1;
         let mut output = match &self.arg_comp {
@@ -251,24 +252,29 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     .and_then(|value| last_cmd.find_flag_option(value).map(|param| (value, param)))
                 {
                     let describe = param.describe_head();
-                    output.push((value.clone(), describe.into()));
+                    let kind = if param.is_flag() {
+                        CompKind::Flag
+                    } else {
+                        CompKind::Option
+                    };
+                    output.push((value.clone(), describe.into(), kind));
                 }
                 output
             }
             ArgComp::FlagOrOptionCombine(value) => {
-                let mut output: Vec<(String, String)> = self
+                let mut output: Vec<CompItem> = self
                     .comp_flag_options()
                     .iter()
-                    .filter_map(|(x, y)| {
+                    .filter_map(|(x, y, z)| {
                         if x.len() == 2 {
-                            Some((format!("{value}{}", &x[1..]), y.to_string()))
+                            Some((format!("{value}{}", &x[1..]), y.to_string(), *z))
                         } else {
                             None
                         }
                     })
                     .collect();
                 if output.len() == 1 {
-                    output.insert(0, (value.to_string(), String::new()));
+                    output.insert(0, (value.to_string(), String::new(), CompKind::Flag));
                 }
                 output
             }
@@ -310,7 +316,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         };
         if output.is_empty() && !self.arg_comp.is_flag_or_option() {
-            output.push(("__argc_value:file".into(), String::new()));
+            output.push(("__argc_value:file".into(), String::new(), CompKind::Value));
         }
         output
     }
@@ -702,7 +708,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         (cmd, cmd_paths)
     }
 
-    fn comp_flag_options(&self) -> Vec<(String, String)> {
+    fn comp_flag_options(&self) -> Vec<CompItem> {
         let mut output = vec![];
         let level = self.cmds.len() - 1;
         let cmd = self.cmds[level].1;
@@ -714,14 +720,21 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let exist = args.contains(param.name.as_str());
             if !exist || param.multiple {
                 let describe = param.describe_head();
+                let kind = if param.is_flag() {
+                    CompKind::Flag
+                } else {
+                    CompKind::Option
+                };
                 for v in param.list_names() {
-                    output.push((v, describe.to_string()))
+                    output.push((v, describe.to_string(), kind))
                 }
             }
         }
         output
     }
 }
+
+pub(crate) type CompItem = (String, String, CompKind);
 
 fn add_positional_arg<'a>(
     positional_args: &mut Vec<&'a str>,
@@ -817,7 +830,7 @@ fn comp_subcommands_positional(
     cmd: &Command,
     values: &[Vec<&str>],
     with_subcmd: bool,
-) -> Vec<(String, String)> {
+) -> Vec<CompItem> {
     let mut output = vec![];
     if with_subcmd {
         output.extend(comp_subcomands(cmd))
@@ -829,18 +842,18 @@ fn comp_subcommands_positional(
     output
 }
 
-fn comp_subcomands(cmd: &Command) -> Vec<(String, String)> {
+fn comp_subcomands(cmd: &Command) -> Vec<CompItem> {
     let mut output = vec![];
     for subcmd in cmd.subcommands.iter() {
         let describe = subcmd.describe_head();
         for v in subcmd.list_names() {
-            output.push((v, describe.to_string()))
+            output.push((v, describe.to_string(), CompKind::Command))
         }
     }
     output
 }
 
-fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<(String, String)> {
+fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
     let value_name = param
         .arg_value_names
         .get(index)
@@ -855,7 +868,7 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<(String, Strin
     )
 }
 
-fn comp_positional(param: &PositionalParam) -> Vec<(String, String)> {
+fn comp_positional(param: &PositionalParam) -> Vec<CompItem> {
     comp_param(
         param.describe_head(),
         &param.arg_value_name,
@@ -871,7 +884,7 @@ fn comp_param(
     choices: &Option<Vec<String>>,
     choices_fn: &Option<(String, bool)>,
     multi_char: &Option<char>,
-) -> Vec<(String, String)> {
+) -> Vec<CompItem> {
     let choices: Option<Either<Vec<String>, String>> = if let Some(choices_fn) = choices_fn {
         Some(Either::Right(choices_fn.0.to_string()))
     } else {
@@ -883,16 +896,27 @@ fn comp_param(
         match choices {
             Either::Left(choices) => choices
                 .iter()
-                .map(|v| (v.to_string(), String::new()))
+                .map(|v| (v.to_string(), String::new(), CompKind::Value))
                 .collect(),
-            Either::Right(choices_fn) => vec![(format!("__argc_fn:{}", choices_fn), String::new())],
+            Either::Right(choices_fn) => vec![(
+                format!("__argc_fn:{}", choices_fn),
+                String::new(),
+                CompKind::Value,
+            )],
         }
     } else {
         let value = format!("__argc_value:{}", value_name);
-        vec![(value, describe.into())]
+        vec![(value, describe.into(), CompKind::Value)]
     };
     if let Some(ch) = multi_char {
-        output.insert(0, (format!("__argc_multi:{}", ch), String::new()));
+        output.insert(
+            0,
+            (
+                format!("__argc_multi:{}", ch),
+                String::new(),
+                CompKind::Value,
+            ),
+        );
     }
     output
 }

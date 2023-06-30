@@ -3,54 +3,54 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog cmda ` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog cmda v1` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog cmda v1 ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog cmda v1 v2` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog cmda v1 v2 ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog cmdb ` ************
-__argc_value:DIR1
+__argc_value:DIR1	/kind:value
 
 ************ COMPGEN `prog cmdb v1` ************
-__argc_value:DIR1
+__argc_value:DIR1	/kind:value
 
 ************ COMPGEN `prog cmdb v1 ` ************
-__argc_value:DIR2
+__argc_value:DIR2	/kind:value
 
 ************ COMPGEN `prog cmdb v1 v2` ************
-__argc_value:DIR2
+__argc_value:DIR2	/kind:value
 
 ************ COMPGEN `prog cmdb v1 v2 ` ************
-__argc_value:DIR3
+__argc_value:DIR3	/kind:value
 
 ************ COMPGEN `prog cmdb v1 v2 v3` ************
-__argc_value:DIR3
+__argc_value:DIR3	/kind:value
 
 ************ COMPGEN `prog cmdb v1 v2 v3 ` ************
-__argc_value:file
+__argc_value:file	/kind:value
 
 ************ COMPGEN `prog cmdc ` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog cmdc v1` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog cmdc v1 ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog cmdc v1 v2` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog cmdc v1 v2 ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 

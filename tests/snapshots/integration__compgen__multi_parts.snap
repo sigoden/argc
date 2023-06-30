@@ -6,8 +6,8 @@ expression: data
 A/B
 
 ************ COMPGEN Elvish `prog --oa A/` ************
-A/B	1	B	
-A/B/	0	B/	
+A/B	1	B		green
+A/B/	0	B/		green
 
 ************ COMPGEN Fish `prog --oa A/` ************
 A/B
@@ -18,15 +18,15 @@ A/B
 A/B/
 
 ************ COMPGEN Powershell `prog --oa A/` ************
-A/B	1	B	
-A/B/	0	B/	
+A/B	1	B		32
+A/B/	0	B/		32
 
 ************ COMPGEN Xonsh `prog --oa A/` ************
 A/B	1	B	
 A/B/	0	B/	
 
 ************ COMPGEN Zsh `prog --oa A/` ************
-A/B 	B
-A/B/	B/
+A/B 	B	B	32
+A/B/	B/	B/	32
 
 

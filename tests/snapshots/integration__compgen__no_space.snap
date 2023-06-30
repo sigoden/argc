@@ -8,9 +8,9 @@ def
 ghk (hello world)
 
 ************ COMPGEN Elvish `prog --oa ` ************
-abc	1	abc	
-def	0	def	
-ghk	1	ghk	hello world
+abc	1	abc		green
+def	0	def		green
+ghk	1	ghk	hello world	green
 
 ************ COMPGEN Fish `prog --oa ` ************
 abc
@@ -23,9 +23,9 @@ def
 ghk 	hello world
 
 ************ COMPGEN Powershell `prog --oa ` ************
-abc	1	abc	
-def	0	def	
-ghk	1	ghk	hello world
+abc	1	abc		32
+def	0	def		32
+ghk	1	ghk	hello world	32
 
 ************ COMPGEN Xonsh `prog --oa ` ************
 abc	1	abc	
@@ -33,8 +33,8 @@ def	0	def
 ghk	1	ghk	hello world
 
 ************ COMPGEN Zsh `prog --oa ` ************
-abc 	abc
-def	def
-ghk 	ghk:hello world
+abc 	abc	abc	32
+def	def	def	32
+ghk 	ghk:hello world	ghk	32
 
 

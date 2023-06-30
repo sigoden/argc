@@ -3,51 +3,51 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa src\` ************
-src\argc_value.rs	1	argc_value.rs	
-src\bin\	0	bin\	
-src\command\	0	command\	
-src\compgen.rs	1	compgen.rs	
-src\lib.rs	1	lib.rs	
-src\matcher.rs	1	matcher.rs	
-src\param.rs	1	param.rs	
-src\parser.rs	1	parser.rs	
-src\utils.rs	1	utils.rs	
+src\argc_value.rs	1	argc_value.rs		39
+src\bin\	0	bin\		1;34
+src\command\	0	command\		1;34
+src\compgen.rs	1	compgen.rs		39
+src\lib.rs	1	lib.rs		39
+src\matcher.rs	1	matcher.rs		39
+src\param.rs	1	param.rs		39
+src\parser.rs	1	parser.rs		39
+src\utils.rs	1	utils.rs		39
 
 ************ COMPGEN `prog --oa src\p` ************
-src\param.rs	1	param.rs	
-src\parser.rs	1	parser.rs	
+src\param.rs	1	param.rs		39
+src\parser.rs	1	parser.rs		39
 
 ************ COMPGEN `prog --oa .\src\` ************
-.\src\argc_value.rs	1	argc_value.rs	
-.\src\bin\	0	bin\	
-.\src\command\	0	command\	
-.\src\compgen.rs	1	compgen.rs	
-.\src\lib.rs	1	lib.rs	
-.\src\matcher.rs	1	matcher.rs	
-.\src\param.rs	1	param.rs	
-.\src\parser.rs	1	parser.rs	
-.\src\utils.rs	1	utils.rs	
+.\src\argc_value.rs	1	argc_value.rs		39
+.\src\bin\	0	bin\		1;34
+.\src\command\	0	command\		1;34
+.\src\compgen.rs	1	compgen.rs		39
+.\src\lib.rs	1	lib.rs		39
+.\src\matcher.rs	1	matcher.rs		39
+.\src\param.rs	1	param.rs		39
+.\src\parser.rs	1	parser.rs		39
+.\src\utils.rs	1	utils.rs		39
 
 ************ COMPGEN `prog --oa C` ************
-.\Cargo.lock	1	.\Cargo.lock	
-.\Cargo.toml	1	.\Cargo.toml	
+.\Cargo.lock	1	.\Cargo.lock		39
+.\Cargo.toml	1	.\Cargo.toml		39
 
 ************ COMPGEN `prog --oa .\C` ************
-.\Cargo.lock	1	Cargo.lock	
-.\Cargo.toml	1	Cargo.toml	
+.\Cargo.lock	1	Cargo.lock		39
+.\Cargo.toml	1	Cargo.toml		39
 
 ************ COMPGEN `prog --ob RE` ************
-.\README.md	1	.\README.md	
+.\README.md	1	.\README.md		39
 
 ************ COMPGEN `prog --oc src\` ************
-src\bin\	0	bin\	
-src\command\	0	command\	
+src\bin\	0	bin\		1;34
+src\command\	0	command\		1;34
 
 ************ COMPGEN `prog --od ` ************
-.\Cargo.toml	1	.\Cargo.toml	
-.\README.md	1	.\README.md	
+.\Cargo.toml	1	.\Cargo.toml		39
+.\README.md	1	.\README.md		39
 
 ************ COMPGEN `prog --oa src/` ************
-src\	0	src\	
+src\	0	src\		1;34
 
 

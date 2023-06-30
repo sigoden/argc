@@ -7,8 +7,8 @@ A
 B
 
 ************ COMPGEN Elvish `prog --oa ` ************
-A=	0	A	
-B=	0	B	
+A=	0	A		green
+B=	0	B		green
 
 ************ COMPGEN Fish `prog --oa ` ************
 A=
@@ -19,15 +19,15 @@ A=
 B=
 
 ************ COMPGEN Powershell `prog --oa ` ************
-A=	0	A	
-B=	0	B	
+A=	0	A		32
+B=	0	B		32
 
 ************ COMPGEN Xonsh `prog --oa ` ************
 A=	0	A	
 B=	0	B	
 
 ************ COMPGEN Zsh `prog --oa ` ************
-A=	A
-B=	B
+A=	A	A	32
+B=	B	B	32
 
 

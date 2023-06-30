@@ -3,21 +3,21 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog args ` ************
-__argc_value:file
+__argc_value:file	/kind:value
 
 ************ COMPGEN `prog args v` ************
-__argc_value:file
+__argc_value:file	/kind:value
 
 ************ COMPGEN `prog cmd --file ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog cmd --file v` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog cmd --value ` ************
-__argc_value:VALUE
+__argc_value:VALUE	/kind:value
 
 ************ COMPGEN `prog cmd --value v` ************
-__argc_value:VALUE
+__argc_value:VALUE	/kind:value
 
 

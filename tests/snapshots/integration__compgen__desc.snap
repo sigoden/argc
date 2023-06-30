@@ -7,8 +7,8 @@ abc ((desc1))
 def ((desc2))
 
 ************ COMPGEN Elvish `prog --oa ` ************
-abc	1	abc	(desc1)
-def	1	def	(desc2)
+abc	1	abc	(desc1)	green
+def	1	def	(desc2)	green
 
 ************ COMPGEN Fish `prog --oa ` ************
 abc	(desc1)
@@ -19,15 +19,15 @@ abc 	(desc1)
 def 	(desc2)
 
 ************ COMPGEN Powershell `prog --oa ` ************
-abc	1	abc	(desc1)
-def	1	def	(desc2)
+abc	1	abc	(desc1)	32
+def	1	def	(desc2)	32
 
 ************ COMPGEN Xonsh `prog --oa ` ************
 abc	1	abc	(desc1)
 def	1	def	(desc2)
 
 ************ COMPGEN Zsh `prog --oa ` ************
-abc 	abc:(desc1)
-def 	def:(desc2)
+abc 	abc:(desc1)	abc	32
+def 	def:(desc2)	def	32
 
 

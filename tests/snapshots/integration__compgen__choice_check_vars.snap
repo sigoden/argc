@@ -3,26 +3,26 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog argc` ************
-argc__args=([0]="prog" [1]="argc")
-argc__fn=_choice_fn
-argc__index=0
-argc__positionals=([0]="argc")
-argc_foo=argc
+argc__args=([0]="prog" [1]="argc")	/kind:value
+argc__fn=_choice_fn	/kind:value
+argc__index=0	/kind:value
+argc__positionals=([0]="argc")	/kind:value
+argc_foo=argc	/kind:value
 
 ************ COMPGEN `prog argc ` ************
-argc__args=([0]="prog" [1]="argc" [2]="")
-argc__fn=_choice_fn
-argc__index=0
-argc__positionals=([0]="argc" [1]="")
-argc_bar=
-argc_foo=argc
+argc__args=([0]="prog" [1]="argc" [2]="")	/kind:value
+argc__fn=_choice_fn	/kind:value
+argc__index=0	/kind:value
+argc__positionals=([0]="argc" [1]="")	/kind:value
+argc_bar=	/kind:value
+argc_foo=argc	/kind:value
 
 ************ COMPGEN `prog argc argc` ************
-argc__args=([0]="prog" [1]="argc" [2]="argc")
-argc__fn=_choice_fn
-argc__index=0
-argc__positionals=([0]="argc" [1]="argc")
-argc_bar=argc
-argc_foo=argc
+argc__args=([0]="prog" [1]="argc" [2]="argc")	/kind:value
+argc__fn=_choice_fn	/kind:value
+argc__index=0	/kind:value
+argc__positionals=([0]="argc" [1]="argc")	/kind:value
+argc_bar=argc	/kind:value
+argc_foo=argc	/kind:value
 
 

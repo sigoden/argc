@@ -3,22 +3,22 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa` ************
---oa
+--oa	/kind:option
 
 ************ COMPGEN `prog --oa ` ************
-__argc_matcher:
-ok
+__argc_matcher:	/kind:value
+ok	/kind:value
 
 ************ COMPGEN `prog --oa --` ************
-__argc_matcher:
-ok
+__argc_matcher:	/kind:value
+ok	/kind:value
 
 ************ COMPGEN `prog --oa v1 v2` ************
-__argc_matcher:
-ok
+__argc_matcher:	/kind:value
+ok	/kind:value
 
 ************ COMPGEN `prog --oa -- ` ************
-__argc_matcher:
-ok
+__argc_matcher:	/kind:value
+ok	/kind:value
 
 

@@ -10,17 +10,17 @@ $_argc_completer = {
     if ($commandAst.CommandElements[-1].Extent.EndOffset -lt $cursorPosition) {
         $words += $emptyS
     }
-    @((argc --argc-compgen powershell $emptyS $words) -split "`n") | ForEach-Object { 
+    @((argc --argc-compgen powershell $emptyS $words) -split "`n") | ForEach-Object {
         $parts = ($_ -split "`t")
-        $value = $parts[0]
-        $description = ""
         if ($parts[1] -eq "1") {
-            $value = $value + " "
+            $value = $parts[0] + " "
+        } else {
+            $value = $parts[0]
         }
         if ($parts[3] -eq "") {
-            $description = $parts[2]
+            $description = "$([char]0x1b)[" + $parts[4] + "m" + $parts[2] + "$([char]0x1b)[0m"
         } else {
-            $description = $parts[2] + "$([char]0x1b)[38;5;244m (" + $parts[3] + ")$([char]0x1b)[0m"
+            $description = "$([char]0x1b)[" + $parts[4] + "m" + $parts[2] + "$([char]0x1b)[38;5;244m (" + $parts[3] + ")$([char]0x1b)[0m"
         }
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
     }
