@@ -644,9 +644,6 @@ impl Shell {
             if !file_name.starts_with(&matcher) {
                 continue;
             }
-            if !exts.is_empty() && exts.iter().all(|v| !file_name.to_lowercase().ends_with(v)) {
-                continue;
-            }
             if (matcher.is_empty() || !matcher.starts_with('.'))
                 && !is_windows_path
                 && file_name.starts_with('.')
@@ -668,6 +665,12 @@ impl Shell {
             }
             let is_dir = meta.is_dir();
             if !is_dir && dir_only {
+                continue;
+            }
+            if !is_dir
+                && !exts.is_empty()
+                && exts.iter().all(|v| !file_name.to_lowercase().ends_with(v))
+            {
                 continue;
             }
             let path_value = if is_dir {

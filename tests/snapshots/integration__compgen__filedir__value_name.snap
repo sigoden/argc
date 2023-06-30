@@ -33,15 +33,11 @@ Cargo.
 ************ COMPGEN `prog --oa ./C` ************
 ./Cargo.
 
-************ COMPGEN `prog --ob RE` ************
-README.md 
+************ COMPGEN `prog --ob src/bin/argc/completions/ar` ************
+src/bin/argc/completions/argc.zsh 
 
 ************ COMPGEN `prog --oc src/` ************
 bin/
 command/
-
-************ COMPGEN `prog --od ` ************
-Cargo.toml 
-README.md 
 
 

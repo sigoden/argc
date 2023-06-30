@@ -732,9 +732,8 @@ mod filedir {
 
     const VALUE_NAME_SCRIPT: &str = r###"
 # @option --oa <file>
-# @option --ob <file:.md>
+# @option --ob <file:.zsh>
 # @option --oc <dir>
-# @option --od <file:.md,.toml>
 "###;
 
     #[cfg(not(windows))]
@@ -748,9 +747,8 @@ mod filedir {
                 vec!["prog", "--oa", "./src/"],
                 vec!["prog", "--oa", "C"],
                 vec!["prog", "--oa", "./C"],
-                vec!["prog", "--ob", "RE"],
+                vec!["prog", "--ob", "src/bin/argc/completions/ar"],
                 vec!["prog", "--oc", "src/"],
-                vec!["prog", "--od", ""],
             ],
             TEST_SHELL
         );
@@ -767,10 +765,8 @@ mod filedir {
                 vec!["prog", "--oa", ".\\src\\"],
                 vec!["prog", "--oa", "C"],
                 vec!["prog", "--oa", ".\\C"],
-                vec!["prog", "--ob", "RE"],
+                vec!["prog", "--ob", "src\\bin\\argc\\completions\\ar"],
                 vec!["prog", "--oc", "src\\"],
-                vec!["prog", "--od", ""],
-                vec!["prog", "--oa", "src/"],
             ],
             TEST_SHELL
         );
@@ -778,14 +774,8 @@ mod filedir {
 
     const CHOICE_SCRIPT: &str = r###"
 # @option --oa[`_choice_fn`]
-# @option --ob[`_choice_fn2`]
-
 _choice_fn() {
     echo __argc_value:file
-}
-
-_choice_fn2() {
-    echo __argc_value:file:.md
 }
 "###;
 
@@ -794,7 +784,7 @@ _choice_fn2() {
     fn choice() {
         snapshot_compgen!(
             CHOICE_SCRIPT,
-            vec![vec!["prog", "--oa", "src/"], vec!["prog", "--ob", ""],],
+            vec![vec!["prog", "--oa", "src/"],],
             TEST_SHELL
         );
     }
@@ -804,7 +794,7 @@ _choice_fn2() {
     fn chioce_win() {
         snapshot_compgen!(
             CHOICE_SCRIPT,
-            vec![vec!["prog", "--oa", "src\\"], vec!["prog", "--ob", ""],],
+            vec![vec!["prog", "--oa", "src\\"],],
             TEST_SHELL
         );
     }

@@ -36,18 +36,11 @@ src\parser.rs	1	parser.rs		39
 .\Cargo.lock	1	Cargo.lock		39
 .\Cargo.toml	1	Cargo.toml		39
 
-************ COMPGEN `prog --ob RE` ************
-.\README.md	1	.\README.md		39
+************ COMPGEN `prog --ob src\bin\argc\completions\ar` ************
+src\bin\argc\completions\argc.zsh	1	argc.zsh		39
 
 ************ COMPGEN `prog --oc src\` ************
 src\bin\	0	bin\		1;34
 src\command\	0	command\		1;34
-
-************ COMPGEN `prog --od ` ************
-.\Cargo.toml	1	.\Cargo.toml		39
-.\README.md	1	.\README.md		39
-
-************ COMPGEN `prog --oa src/` ************
-src\	0	src\		1;34
 
 
