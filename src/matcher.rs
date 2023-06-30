@@ -82,6 +82,14 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let arg = args[arg_index].as_str();
             if arg == "--" {
                 dashdash.push(positional_args.len());
+                if is_rest_args_positional {
+                    add_positional_arg(
+                        &mut positional_args,
+                        arg,
+                        &mut is_rest_args_positional,
+                        cmd,
+                    );
+                }
             } else if is_rest_args_positional
                 || !dashdash.is_empty()
                 || (cmd.no_flags_options_subcommands() && !KNOWN_OPTIONS.contains(&arg))

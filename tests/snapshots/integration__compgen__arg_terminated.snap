@@ -4,18 +4,27 @@ expression: data
 ---
 ************ COMPGEN `sudo cmd ` ************
 __argc_matcher:
+cmd
 ok
 
 ************ COMPGEN `sudo cmd -` ************
 __argc_matcher:
+cmd -
+ok
+
+************ COMPGEN `sudo cmd --` ************
+__argc_matcher:
+cmd --
 ok
 
 ************ COMPGEN `sudo cmd --foo` ************
 __argc_matcher:
+cmd --foo
 ok
 
 ************ COMPGEN `sudo cmd foo` ************
 __argc_matcher:
+cmd foo
 ok
 
 

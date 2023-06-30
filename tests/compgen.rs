@@ -488,6 +488,7 @@ fn arg_terminated() {
 # @arg args~[`_choice_fn`]
 _choice_fn() {
     echo __argc_matcher:
+    echo ${argc__positionals[@]}
     echo ok
 }
 "###;
@@ -497,6 +498,7 @@ _choice_fn() {
         vec![
             vec!["sudo", "cmd", ""],
             vec!["sudo", "cmd", "-"],
+            vec!["sudo", "cmd", "--"],
             vec!["sudo", "cmd", "--foo"],
             vec!["sudo", "cmd", "foo"],
         ]
