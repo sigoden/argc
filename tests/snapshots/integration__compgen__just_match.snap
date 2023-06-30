@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa` ************
---oa-file
---oa
+--oa-file	/kind:option
+--oa	/kind:option
 
 

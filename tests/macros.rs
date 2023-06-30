@@ -100,7 +100,7 @@ macro_rules! snapshot_compgen {
             $crate::fixtures::create_argc_script($source, "compgen.sh");
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
-            let words = match argc::compgen($shell, &script_path, &script_content, &args) {
+            let words = match argc::compgen($shell, &script_path, &script_content, &args, false) {
                 Ok(stdout) => stdout,
                 Err(stderr) => stderr.to_string(),
             };
@@ -136,7 +136,7 @@ macro_rules! snapshot_compgen_shells {
             $crate::fixtures::create_argc_script($source, "compgen.sh");
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
         for shell in argc::Shell::list() {
-            let words = match argc::compgen(shell, &script_path, &script_content, &args) {
+            let words = match argc::compgen(shell, &script_path, &script_content, &args, false) {
                 Ok(stdout) => stdout,
                 Err(stderr) => stderr.to_string(),
             };

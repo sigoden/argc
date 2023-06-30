@@ -3,28 +3,28 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `sudo cmd ` ************
-__argc_matcher:
-cmd
-ok
+__argc_matcher:	/kind:value
+cmd	/kind:value
+ok	/kind:value
 
 ************ COMPGEN `sudo cmd -` ************
-__argc_matcher:
-cmd -
-ok
+__argc_matcher:	/kind:value
+cmd -	/kind:value
+ok	/kind:value
 
 ************ COMPGEN `sudo cmd --` ************
-__argc_matcher:
-cmd --
-ok
+__argc_matcher:	/kind:value
+cmd --	/kind:value
+ok	/kind:value
 
 ************ COMPGEN `sudo cmd --foo` ************
-__argc_matcher:
-cmd --foo
-ok
+__argc_matcher:	/kind:value
+cmd --foo	/kind:value
+ok	/kind:value
 
 ************ COMPGEN `sudo cmd foo` ************
-__argc_matcher:
-cmd foo
-ok
+__argc_matcher:	/kind:value
+cmd foo	/kind:value
+ok	/kind:value
 
 

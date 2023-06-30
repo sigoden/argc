@@ -3,21 +3,21 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa=abc` ************
-__argc_matcher:
-ARGC_MATCHER=abc
-argc__args=([0]="prog" [1]="--oa=abc")
-argc__fn=_choice_fn
-argc__index=0
-argc__positionals=()
-argc_oa=abc
+__argc_matcher:	/kind:value
+ARGC_MATCHER=abc	/kind:value
+argc__args=([0]="prog" [1]="--oa=abc")	/kind:value
+argc__fn=_choice_fn	/kind:value
+argc__index=0	/kind:value
+argc__positionals=()	/kind:value
+argc_oa=abc	/kind:value
 
 ************ COMPGEN `prog oa=abc` ************
-__argc_matcher:
-ARGC_MATCHER=oa=abc
-argc__args=([0]="prog" [1]="oa=abc")
-argc__fn=_choice_fn
-argc__index=0
-argc__positionals=([0]="oa=abc")
-argc_val=oa=abc
+__argc_matcher:	/kind:value
+ARGC_MATCHER=oa=abc	/kind:value
+argc__args=([0]="prog" [1]="oa=abc")	/kind:value
+argc__fn=_choice_fn	/kind:value
+argc__index=0	/kind:value
+argc__positionals=([0]="oa=abc")	/kind:value
+argc_val=oa=abc	/kind:value
 
 

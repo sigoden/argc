@@ -8,9 +8,9 @@ C
 D 
 
 ************ COMPGEN Elvish `prog --oa A/B/` ************
-A/B/	1	 	
-A/B/C	1	C	
-A/B/D	1	D	
+A/B/	1	 		green
+A/B/C	1	C		green
+A/B/D	1	D		green
 
 ************ COMPGEN Fish `prog --oa A/B/` ************
 A/B/
@@ -23,9 +23,9 @@ A/B/C
 A/B/D 
 
 ************ COMPGEN Powershell `prog --oa A/B/` ************
-A/B/	1	 	
-A/B/C	1	C	
-A/B/D	1	D	
+A/B/	1	 		32
+A/B/C	1	C		32
+A/B/D	1	D		32
 
 ************ COMPGEN Xonsh `prog --oa A/B/` ************
 A/B/	1	 	
@@ -33,8 +33,8 @@ A/B/C	1	C
 A/B/D	1	D	
 
 ************ COMPGEN Zsh `prog --oa A/B/` ************
-A/B/ 	
-A/B/C 	C
-A/B/D 	D
+A/B/ 			32
+A/B/C 	C	C	32
+A/B/D 	D	D	32
 
 

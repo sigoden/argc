@@ -3,10 +3,10 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog no_arg ` ************
---fa
---oa
+--fa	/kind:flag
+--oa	/kind:option
 
 ************ COMPGEN `prog arg ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 

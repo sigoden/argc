@@ -3,10 +3,10 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-cmda	cmd-line1
-cmdb	line
+cmda	/kind:command	cmd-line1
+cmdb	/kind:command	line
 
 ************ COMPGEN `prog cmda ` ************
-__argc_value:BAR
+__argc_value:BAR	/kind:value
 
 

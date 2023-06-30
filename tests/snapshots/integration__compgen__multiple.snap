@@ -3,67 +3,67 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog -` ************
---fc
--f
---oa
--o
---od
--d
+--fc	/kind:flag
+-f	/kind:flag
+--oa	/kind:option
+-o	/kind:option
+--od	/kind:option
+-d	/kind:option
 
 ************ COMPGEN `prog --` ************
---fc
---oa
---od
+--fc	/kind:flag
+--oa	/kind:option
+--od	/kind:option
 
 ************ COMPGEN `prog -- ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog -f ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog --fc ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog -o ` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog -o d1` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog -o d1 ` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog -o d1 d2` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog -o d1 d2 ` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog -d d1` ************
-__argc_value:DIR
+__argc_value:DIR	/kind:value
 
 ************ COMPGEN `prog -d d1 ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog -d d1 d2` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog -d d1 d2 ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog v1` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog v1 ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog v1 v2` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog v1 v2 ` ************
-__argc_value:FILE
+__argc_value:FILE	/kind:value
 
 

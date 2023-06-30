@@ -12,15 +12,11 @@ $_argc_completer = {
     }
     @((argc --argc-compgen powershell $emptyS $words) -split "`n") | ForEach-Object { 
         $parts = ($_ -split "`t")
-        $value = $parts[0]
-        $description = ""
-        if ($parts[1] -eq "1") {
-            $value = $value + " "
-        }
-        if ($parts[3] -eq "") {
-            $description = $parts[2]
+        $value = (if ($parts[1] -eq "1") { $parts[0] + " " } else { $parts[0] })
+        $description = if ($parts[3] -eq "") {
+            $description = "$([char]0x1b)[" + $parts[4] + "m" + $parts[2] + "$([char]0x1b)[0m"
         } else {
-            $description = $parts[2] + "$([char]0x1b)[38;5;244m (" + $parts[3] + ")$([char]0x1b)[0m"
+            $description = "$([char]0x1b)[" + $parts[4] + "m" + $parts[2] + "$([char]0x1b)[38;5;244m (" + $parts[3] + ")$([char]0x1b)[0m"
         }
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
     }

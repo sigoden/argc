@@ -9,11 +9,13 @@ _argc_completer() {
     done < <(argc --argc-compgen zsh $'\0' $words 2>/dev/null)
     local values=()
     local displays=()
+    local colors
     for candidate in ${candidates[@]}; do
-        IFS=$'\t' read -r value display <<< "$candidate"
-        values+=( "$value" )
+        IFS=$'\t' read -r value display display_value color <<< "$candidate"
+        colors="$colors:=(#b)($display_value)( * -- *)=0=$color=2;37:=(#b)($display_value)()=0=$color=2;37"
+        values+=( "${value}" )
         displays+=( "$display" )
     done
-    zstyle ":completion:${curcontext}:*" list-colors "=(#b)(-- *)=0=2;37:=(#b)(--[A-Za-z0-9_-]#)( * -- *)=0==2;37"
+    zstyle ":completion:${curcontext}:*" list-colors "${colors:1}:=(#b)(-- *)=0=2;37:=(#b)(--[A-Za-z0-9_-]#)( * -- *)=0==2;37"
     _describe "" displays values -Q -S ''
 }

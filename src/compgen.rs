@@ -17,6 +17,7 @@ pub fn compgen(
     script_path: &str,
     script_content: &str,
     args: &[String],
+    no_color: bool,
 ) -> Result<String> {
     if args.len() < 2 {
         return Ok(String::new());
@@ -53,7 +54,7 @@ pub fn compgen(
     let compgen_values = matcher.compgen();
     let mut default_nospace = unbalance.is_some();
     let mut prefix = unbalance.map(|v| v.to_string()).unwrap_or_default();
-    let mut candidates: IndexMap<String, (String, bool)> = IndexMap::new();
+    let mut candidates: IndexMap<String, (String, bool, CompKind)> = IndexMap::new();
     let mut argc_fn = None;
     let mut argc_value = None;
     let mut argc_variables = vec![];
@@ -65,7 +66,7 @@ pub fn compgen(
             mod_quote(&mut last, &mut prefix, &mut default_nospace);
         }
     }
-    for (value, description) in compgen_values {
+    for (value, description, comp_kind) in compgen_values {
         if value.starts_with("__argc_") {
             if let Some(fn_name) = value.strip_prefix("__argc_fn:") {
                 argc_fn = Some(fn_name.to_string());
@@ -87,7 +88,7 @@ pub fn compgen(
                 }
             }
         } else if value.starts_with(&last) && !multi_values.contains(&value) {
-            candidates.insert(value.clone(), (description, default_nospace));
+            candidates.insert(value.clone(), (description, default_nospace, comp_kind));
         }
     }
     let mut argc_prefix = prefix.to_string();
@@ -122,11 +123,7 @@ pub fn compgen(
         };
         if let Some(output) = output.and_then(|v| if v.is_empty() { None } else { Some(v) }) {
             for line in output.trim().split('\n').map(|v| v.trim()) {
-                let (value, description) = line.split_once('\t').unwrap_or((line, ""));
-                let (value, nospace) = match value.strip_suffix('\0') {
-                    Some(value) => (value, true),
-                    None => (value, false),
-                };
+                let (value, description, nospace, comp_type) = parse_candidate_value(line);
                 let nospace = nospace || default_nospace;
                 if value.starts_with("__argc_") {
                     if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
@@ -141,9 +138,9 @@ pub fn compgen(
                     if shell.is_generic() {
                         argc_variables.push(value.to_string());
                     }
-                } else if value.starts_with(&argc_matcher) && !multi_values.contains(value) {
-                    match candidates.get_mut(value) {
-                        Some((v1, v2)) => {
+                } else if value.starts_with(&argc_matcher) && !multi_values.contains(&value) {
+                    match candidates.get_mut(&value) {
+                        Some((v1, v2, _)) => {
                             if v1.is_empty() && !description.is_empty() {
                                 *v1 = description.to_string();
                             }
@@ -152,8 +149,10 @@ pub fn compgen(
                             }
                         }
                         None => {
-                            candidates
-                                .insert(value.to_string(), (description.to_string(), nospace));
+                            candidates.insert(
+                                value.to_string(),
+                                (description.to_string(), nospace, comp_type),
+                            );
                         }
                     }
                 }
@@ -162,17 +161,17 @@ pub fn compgen(
     }
 
     if !argc_variables.is_empty() {
-        let mut prepend_candicates: IndexMap<String, (String, bool)> = argc_variables
+        let mut prepend_candicates: IndexMap<String, (String, bool, CompKind)> = argc_variables
             .into_iter()
-            .map(|value| (value, (String::new(), false)))
+            .map(|value| (value, (String::new(), false, CompKind::Value)))
             .collect();
         prepend_candicates.extend(candidates);
         candidates = prepend_candicates;
     }
 
-    let mut candidates: Vec<(String, String, bool)> = candidates
+    let mut candidates: Vec<CandidateValue> = candidates
         .into_iter()
-        .map(|(value, (description, nospace))| (value, description, nospace))
+        .map(|(value, (description, nospace, comp_kind))| (value, description, nospace, comp_kind))
         .collect();
 
     let break_chars = shell.need_break_chars();
@@ -195,7 +194,7 @@ pub fn compgen(
                 argc_prefix = String::new();
                 let idx = i + 1;
                 argc_matcher = argc_matcher[idx..].to_string();
-                for (value, _, _) in candidates.iter_mut() {
+                for (value, _, _, _) in candidates.iter_mut() {
                     *value = value[idx..].to_string()
                 }
             };
@@ -214,9 +213,57 @@ pub fn compgen(
         }
     }
 
-    let values = shell.convert_candidates(candidates, &argc_prefix, &argc_suffix, &argc_matcher);
+    let values = shell.convert_candidates(
+        candidates,
+        &argc_prefix,
+        &argc_suffix,
+        &argc_matcher,
+        no_color,
+    );
 
     Ok(values.join("\n"))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum CompKind {
+    Flag,
+    Option,
+    Command,
+    Value,
+    Dir,
+    File,
+    Symlink,
+    Exe,
+}
+
+impl FromStr for CompKind {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s {
+            "flag" => Ok(Self::Flag),
+            "option" => Ok(Self::Option),
+            "command" => Ok(Self::Command),
+            "dir" => Ok(Self::Dir),
+            "file" => Ok(Self::File),
+            _ => Ok(Self::Value),
+        }
+    }
+}
+
+impl CompKind {
+    pub(crate) fn name(&self) -> &str {
+        match self {
+            Self::Flag => "flag",
+            Self::Option => "option",
+            Self::Command => "command",
+            Self::Value => "value",
+            Self::File => "file",
+            Self::Dir => "dir",
+            Self::Symlink => "symlink",
+            Self::Exe => "exe",
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -252,7 +299,7 @@ impl FromStr for Shell {
     }
 }
 
-pub(crate) type CandidateValue = (String, String, bool); // value, description, nospace
+pub(crate) type CandidateValue = (String, String, bool, CompKind); // value, description, nospace
 
 impl Shell {
     pub fn list() -> [Shell; 7] {
@@ -298,11 +345,12 @@ impl Shell {
         prefix: &str,
         suffix: &str,
         matcher: &str,
+        no_color: bool,
     ) -> Vec<String> {
         match self {
             Shell::Bash => {
                 let prefix_unbalance = unbalance_quote(prefix);
-                let values: Vec<&str> = candidates.iter().map(|(v, _, _)| v.as_str()).collect();
+                let values: Vec<&str> = candidates.iter().map(|(v, _, _, _)| v.as_str()).collect();
                 let mut add_space_to_first_candidate = false;
                 if values.len() == 1 {
                     let space = if candidates[0].2 { "" } else { " " };
@@ -327,7 +375,7 @@ impl Shell {
                 candidates
                     .into_iter()
                     .enumerate()
-                    .map(|(i, (value, description, nospace))| {
+                    .map(|(i, (value, description, nospace, _comp_kind))| {
                         let mut new_value = self.escape(&value);
                         if i == 0 && add_space_to_first_candidate {
                             new_value = format!(" {}", new_value)
@@ -343,17 +391,18 @@ impl Shell {
             }
             Shell::Elvish | Shell::Powershell => candidates
                 .into_iter()
-                .map(|(value, description, nospace)| {
+                .map(|(value, description, nospace, comp_kind)| {
                     let new_value = self.combine_value(prefix, &value, suffix);
                     let display = if value.is_empty() { " ".into() } else { value };
                     let description = self.comp_description(&description, "", "");
                     let space: &str = if nospace { "0" } else { "1" };
-                    format!("{new_value}\t{space}\t{display}\t{description}")
+                    let color = self.color(comp_kind, no_color).unwrap_or_default();
+                    format!("{new_value}\t{space}\t{display}\t{description}\t{color}")
                 })
                 .collect::<Vec<String>>(),
             Shell::Fish => candidates
                 .into_iter()
-                .map(|(value, description, _nospace)| {
+                .map(|(value, description, _nospace, _comp_kind)| {
                     let new_value = self.combine_value(prefix, &value, suffix);
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{description}")
@@ -361,15 +410,16 @@ impl Shell {
                 .collect::<Vec<String>>(),
             Shell::Generic => candidates
                 .into_iter()
-                .map(|(value, description, nospace)| {
+                .map(|(value, description, nospace, comp_kind)| {
+                    let comp_kind = format!("\t/kind:{}", comp_kind.name());
                     let description = self.comp_description(&description, "\t", "");
                     let space: &str = if nospace { "\0" } else { "" };
-                    format!("{value}{space}{description}")
+                    format!("{value}{space}{comp_kind}{description}")
                 })
                 .collect::<Vec<String>>(),
             Shell::Nushell => candidates
                 .into_iter()
-                .map(|(value, description, nospace)| {
+                .map(|(value, description, nospace, _)| {
                     let new_value = self.combine_value(prefix, &value, suffix);
                     let space = if nospace { "" } else { " " };
                     let description = self.comp_description(&description, "\t", "");
@@ -378,7 +428,7 @@ impl Shell {
                 .collect::<Vec<String>>(),
             Shell::Xonsh => candidates
                 .into_iter()
-                .map(|(value, description, nospace)| {
+                .map(|(value, description, nospace, _)| {
                     let mut new_value = format!("{prefix}{value}{suffix}");
                     if unbalance_quote(prefix).is_none() {
                         let escaped_new_value = self.escape(&new_value);
@@ -403,7 +453,7 @@ impl Shell {
                 .collect::<Vec<String>>(),
             Shell::Zsh => candidates
                 .into_iter()
-                .map(|(value, description, nospace)| {
+                .map(|(value, description, nospace, comp_kind)| {
                     let prefix = if let Some((_, i)) = unbalance_quote(prefix) {
                         prefix
                             .char_indices()
@@ -416,8 +466,9 @@ impl Shell {
                     let new_value = self.escape(&format!("{prefix}{value}{suffix}"));
                     let display = value.replace(':', "\\:");
                     let description = self.comp_description(&description, ":", "");
+                    let color = self.color(comp_kind, no_color).unwrap_or_default();
                     let space = if nospace { "" } else { " " };
-                    format!("{new_value}{space}\t{display}{description}")
+                    format!("{new_value}{space}\t{display}{description}\t{value}\t{color}")
                 })
                 .collect::<Vec<String>>(),
         }
@@ -448,6 +499,35 @@ impl Shell {
                 escape_chars(value, self.need_escape_chars(), "\\\\").replace("\\\\:", "\\:")
             }
             _ => value.into(),
+        }
+    }
+
+    fn color(&self, comp_kind: CompKind, no_color: bool) -> Option<&'static str> {
+        if no_color {
+            return None;
+        }
+        match self {
+            Shell::Elvish => match comp_kind {
+                CompKind::Flag => Some("cyan"),
+                CompKind::Option => Some("blue"),
+                CompKind::Command => Some("magenta"),
+                CompKind::Value => Some("green"),
+                CompKind::Dir => Some("blue bold"),
+                CompKind::File => Some("default"),
+                CompKind::Symlink => Some("cyan bold"),
+                CompKind::Exe => Some("green bold"),
+            },
+            Shell::Powershell | Shell::Zsh => match comp_kind {
+                CompKind::Flag => Some("36"),
+                CompKind::Option => Some("34"),
+                CompKind::Command => Some("35"),
+                CompKind::Value => Some("32"),
+                CompKind::Dir => Some("1;34"),
+                CompKind::File => Some("0"),
+                CompKind::Symlink => Some("1;36"),
+                CompKind::Exe => Some("1;32"),
+            },
+            _ => None,
         }
     }
 
@@ -525,14 +605,18 @@ impl Shell {
                 return Some((
                     "".into(),
                     "".into(),
-                    vec![(format!("{prefix}{matcher}"), "".into(), true)],
+                    vec![(format!("{prefix}{matcher}"), "".into(), true, CompKind::Dir)],
                 ));
             }
             let value_prefix = if prefix.is_empty() { ".\\" } else { "" };
             (value_prefix, "\\")
         } else {
             if value == "~" {
-                return Some(("".into(), "".into(), vec![("~/".into(), "".into(), true)]));
+                return Some((
+                    "".into(),
+                    "".into(),
+                    vec![("~/".into(), "".into(), true, CompKind::Dir)],
+                ));
             }
             ("", "/")
         };
@@ -554,11 +638,20 @@ impl Shell {
             {
                 continue;
             };
-            let is_dir = if let Ok(meta) = fs::metadata(&path) {
-                meta.is_dir()
-            } else {
-                continue;
+
+            let mut meta = match fs::symlink_metadata(&path) {
+                Ok(v) => v,
+                Err(_) => continue,
             };
+            let is_symlink = meta.is_symlink();
+
+            if is_symlink {
+                meta = match fs::metadata(&path) {
+                    Ok(v) => v,
+                    Err(_) => continue,
+                };
+            }
+            let is_dir = meta.is_dir();
             if !is_dir && dir_only {
                 continue;
             }
@@ -567,8 +660,18 @@ impl Shell {
             } else {
                 format!("{value_prefix}{file_name}")
             };
+
+            let comp_kind = if is_dir {
+                CompKind::Dir
+            } else if is_symlink {
+                CompKind::Symlink
+            } else if is_executable(meta.permissions()) {
+                CompKind::Exe
+            } else {
+                CompKind::File
+            };
             let nospace = if default_nospace { true } else { is_dir };
-            output.push((path_value, String::new(), nospace))
+            output.push((path_value, String::new(), nospace, comp_kind))
         }
 
         output.sort_by(|a, b| a.0.cmp(&b.0));
@@ -658,6 +761,43 @@ impl Shell {
             format!("{prefix}{}{suffix}", truncate_description(description))
         }
     }
+}
+
+fn parse_candidate_value(input: &str) -> CandidateValue {
+    let parts: Vec<&str> = input.split('\t').collect();
+    let parts_len = parts.len();
+    let mut value = String::new();
+    let mut description = String::new();
+    let mut nospace = false;
+    let mut comp_kind = CompKind::Value;
+    if parts_len >= 2 {
+        if let Some(kind_value) = parts[1].strip_prefix("/kind:").and_then(|v| v.parse().ok()) {
+            comp_kind = kind_value;
+            description = parts[2..].join("\t");
+        } else {
+            description = parts[1..].join("\t");
+        };
+    }
+    if parts_len > 0 {
+        if let Some(stripped_value) = parts.first().and_then(|v| v.strip_suffix('\0')) {
+            value = stripped_value.to_string();
+            nospace = true;
+        } else {
+            value = parts[0].to_string();
+        }
+    }
+    (value, description, nospace, comp_kind)
+}
+
+#[cfg(not(windows))]
+fn is_executable(perm: fs::Permissions) -> bool {
+    use std::os::unix::fs::PermissionsExt;
+    perm.mode() & 0o111 != 0
+}
+
+#[cfg(windows)]
+fn is_executable(perm: fs::Permissions) -> bool {
+    false
 }
 
 fn convert_arg_value(value: &str) -> Option<String> {
@@ -770,6 +910,47 @@ fn is_quote(c: char) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    macro_rules! assert_parse_candidate_value {
+        ($input:expr, $value:expr, $desc:expr, $nospace:expr, $comp_kind:expr) => {
+            assert_eq!(
+                parse_candidate_value($input),
+                ($value.to_string(), $desc.to_string(), $nospace, $comp_kind)
+            )
+        };
+    }
+
+    #[test]
+    fn test_parse_candidate_value() {
+        assert_parse_candidate_value!("abc", "abc", "", false, CompKind::Value);
+        assert_parse_candidate_value!("abc\0", "abc", "", true, CompKind::Value);
+        assert_parse_candidate_value!("abc\tA value", "abc", "A value", false, CompKind::Value);
+        assert_parse_candidate_value!("abc\0\tA value", "abc", "A value", true, CompKind::Value);
+        assert_parse_candidate_value!(
+            "abc\0\tA value\tmore desc",
+            "abc",
+            "A value\tmore desc",
+            true,
+            CompKind::Value
+        );
+        assert_parse_candidate_value!(
+            "abc\0\t/kind:command\tA value\tmore desc",
+            "abc",
+            "A value\tmore desc",
+            true,
+            CompKind::Command
+        );
+        assert_parse_candidate_value!(
+            "abc\0\t/kind:command\tA value",
+            "abc",
+            "A value",
+            true,
+            CompKind::Command
+        );
+        assert_parse_candidate_value!("abc\0\t/kind:command", "abc", "", true, CompKind::Command);
+        assert_parse_candidate_value!("abc\t/kind:command", "abc", "", false, CompKind::Command);
+        assert_parse_candidate_value!("", "", "", false, CompKind::Value);
+    }
 
     #[test]
     fn test_split_equal_sign() {

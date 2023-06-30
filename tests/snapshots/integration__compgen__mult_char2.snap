@@ -7,8 +7,8 @@ def
 ijk
 
 ************ COMPGEN Elvish `prog --oa=abc,` ************
---oa=abc,def	0	def	
---oa=abc,ijk	0	ijk	
+--oa=abc,def	0	def		green
+--oa=abc,ijk	0	ijk		green
 
 ************ COMPGEN Fish `prog --oa=abc,` ************
 --oa=abc,def
@@ -19,15 +19,15 @@ ijk
 --oa=abc,ijk
 
 ************ COMPGEN Powershell `prog --oa=abc,` ************
-def	0	def	
-ijk	0	ijk	
+def	0	def		32
+ijk	0	ijk		32
 
 ************ COMPGEN Xonsh `prog --oa=abc,` ************
 --oa=abc,def	0	def	
 --oa=abc,ijk	0	ijk	
 
 ************ COMPGEN Zsh `prog --oa=abc,` ************
---oa=abc,def	def
---oa=abc,ijk	ijk
+--oa=abc,def	def	def	32
+--oa=abc,ijk	ijk	ijk	32
 
 
