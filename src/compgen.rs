@@ -396,7 +396,7 @@ impl Shell {
                     let display = if value.is_empty() { " ".into() } else { value };
                     let description = self.comp_description(&description, "", "");
                     let space: &str = if nospace { "0" } else { "1" };
-                    let color = self.color(comp_kind, no_color).unwrap_or_default();
+                    let color = self.color(comp_kind, no_color);
                     format!("{new_value}\t{space}\t{display}\t{description}\t{color}")
                 })
                 .collect::<Vec<String>>(),
@@ -466,7 +466,7 @@ impl Shell {
                     let new_value = self.escape(&format!("{prefix}{value}{suffix}"));
                     let display = value.replace(':', "\\:");
                     let description = self.comp_description(&description, ":", "");
-                    let color = self.color(comp_kind, no_color).unwrap_or_default();
+                    let color = self.color(comp_kind, no_color);
                     let space = if nospace { "" } else { " " };
                     format!("{new_value}{space}\t{display}{description}\t{value}\t{color}")
                 })
@@ -502,32 +502,39 @@ impl Shell {
         }
     }
 
-    fn color(&self, comp_kind: CompKind, no_color: bool) -> Option<&'static str> {
-        if no_color {
-            return None;
-        }
+    fn color(&self, comp_kind: CompKind, no_color: bool) -> &'static str {
         match self {
-            Shell::Elvish => match comp_kind {
-                CompKind::Flag => Some("cyan"),
-                CompKind::Option => Some("blue"),
-                CompKind::Command => Some("magenta"),
-                CompKind::Value => Some("green"),
-                CompKind::Dir => Some("blue bold"),
-                CompKind::File => Some("default"),
-                CompKind::Symlink => Some("cyan bold"),
-                CompKind::Exe => Some("green bold"),
-            },
-            Shell::Powershell | Shell::Zsh => match comp_kind {
-                CompKind::Flag => Some("36"),
-                CompKind::Option => Some("34"),
-                CompKind::Command => Some("35"),
-                CompKind::Value => Some("32"),
-                CompKind::Dir => Some("1;34"),
-                CompKind::File => Some("39"),
-                CompKind::Symlink => Some("1;36"),
-                CompKind::Exe => Some("1;32"),
-            },
-            _ => None,
+            Shell::Elvish => {
+                if no_color {
+                    return "default";
+                }
+                match comp_kind {
+                    CompKind::Flag => "cyan",
+                    CompKind::Option => "blue",
+                    CompKind::Command => "magenta",
+                    CompKind::Value => "green",
+                    CompKind::Dir => "blue bold",
+                    CompKind::File => "default",
+                    CompKind::Symlink => "cyan bold",
+                    CompKind::Exe => "green bold",
+                }
+            }
+            Shell::Powershell | Shell::Zsh => {
+                if no_color {
+                    return "39";
+                }
+                match comp_kind {
+                    CompKind::Flag => "36",
+                    CompKind::Option => "34",
+                    CompKind::Command => "35",
+                    CompKind::Value => "32",
+                    CompKind::Dir => "1;34",
+                    CompKind::File => "39",
+                    CompKind::Symlink => "1;36",
+                    CompKind::Exe => "1;32",
+                }
+            }
+            _ => "",
         }
     }
 
