@@ -309,17 +309,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
                     return comp_subcomands(last_cmd);
                 }
-                let mut output = vec![];
-                if last_cmd.positional_params.is_empty() && last_cmd.subcommands.len() < 2 {
-                    output.extend(self.comp_flag_options());
-                }
                 let values = self.match_positionals();
-                output.extend(comp_subcommands_positional(
-                    last_cmd,
-                    &values,
-                    self.positional_args.len() < 2,
-                ));
-                output
+                comp_subcommands_positional(last_cmd, &values, self.positional_args.len() < 2)
             }
         };
         if output.is_empty() && !self.arg_comp.is_flag_or_option() {
