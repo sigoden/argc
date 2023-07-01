@@ -749,7 +749,7 @@ mod filedir {
     #[cfg(windows)]
     const TEST_SHELL: argc::Shell = argc::Shell::Powershell;
     #[cfg(not(windows))]
-    const TEST_SHELL: argc::Shell = argc::Shell::Bash;
+    const TEST_SHELL: argc::Shell = argc::Shell::Elvish;
 
     const VALUE_NAME_SCRIPT: &str = r###"
 # @option --oa <file>
@@ -793,29 +793,48 @@ mod filedir {
         );
     }
 
-    const CHOICE_SCRIPT: &str = r###"
+    const CD_SCRIPT: &str = r###"
 # @option --oa[`_choice_fn`]
+# @arg val[`_choice_fn2`]
 _choice_fn() {
-    echo __argc_value:file
+    echo "__argc_cd:src"
+    echo "__argc_value:file"
 }
-"###;
+_choice_fn2() {
+    if [[ "$1" == *"="* ]]; then
+        echo __argc_prefix:${1%%=*}=
+        echo __argc_matcher:${1#*=}
+        echo __argc_cd:src
+        echo __argc_value:file
+
+    fi
+}
+    "###;
 
     #[cfg(not(windows))]
     #[test]
-    fn choice() {
+    fn cd() {
         snapshot_compgen!(
-            CHOICE_SCRIPT,
-            vec![vec!["prog", "--oa", "src/"],],
+            CD_SCRIPT,
+            vec![
+                vec!["prog", "--oa", ""],
+                vec!["prog", "--oa="],
+                vec!["prog", "foo="]
+            ],
             TEST_SHELL
         );
     }
 
     #[cfg(windows)]
     #[test]
-    fn chioce_win() {
+    fn cd_win() {
         snapshot_compgen!(
-            CHOICE_SCRIPT,
-            vec![vec!["prog", "--oa", "src\\"],],
+            CD_SCRIPT,
+            vec![
+                vec!["prog", "--oa", ""],
+                vec!["prog", "--oa="],
+                vec!["prog", "foo="]
+            ],
             TEST_SHELL
         );
     }

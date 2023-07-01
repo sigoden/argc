@@ -3,41 +3,44 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa src/` ************
-argc_value.rs 
-bin/
-command/
-compgen.rs 
-lib.rs 
-matcher.rs 
-param.rs 
-parser.rs 
-utils.rs 
+src/argc_value.rs	1	argc_value.rs		default
+src/bin/	0	bin/		blue bold
+src/command/	0	command/		blue bold
+src/compgen.rs	1	compgen.rs		default
+src/lib.rs	1	lib.rs		default
+src/matcher.rs	1	matcher.rs		default
+src/param.rs	1	param.rs		default
+src/parser.rs	1	parser.rs		default
+src/utils.rs	1	utils.rs		default
 
 ************ COMPGEN `prog --oa src/p` ************
-src/par
+src/param.rs	1	param.rs		default
+src/parser.rs	1	parser.rs		default
 
 ************ COMPGEN `prog --oa ./src/` ************
-argc_value.rs 
-bin/
-command/
-compgen.rs 
-lib.rs 
-matcher.rs 
-param.rs 
-parser.rs 
-utils.rs 
+./src/argc_value.rs	1	argc_value.rs		default
+./src/bin/	0	bin/		blue bold
+./src/command/	0	command/		blue bold
+./src/compgen.rs	1	compgen.rs		default
+./src/lib.rs	1	lib.rs		default
+./src/matcher.rs	1	matcher.rs		default
+./src/param.rs	1	param.rs		default
+./src/parser.rs	1	parser.rs		default
+./src/utils.rs	1	utils.rs		default
 
 ************ COMPGEN `prog --oa C` ************
-Cargo.
+Cargo.lock	1	Cargo.lock		default
+Cargo.toml	1	Cargo.toml		default
 
 ************ COMPGEN `prog --oa ./C` ************
-./Cargo.
+./Cargo.lock	1	Cargo.lock		default
+./Cargo.toml	1	Cargo.toml		default
 
 ************ COMPGEN `prog --ob src/bin/argc/completions/ar` ************
-src/bin/argc/completions/argc.zsh 
+src/bin/argc/completions/argc.zsh	1	argc.zsh		default
 
 ************ COMPGEN `prog --oc src/` ************
-bin/
-command/
+src/bin/	0	bin/		blue bold
+src/command/	0	command/		blue bold
 
 

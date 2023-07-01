@@ -1,6 +1,6 @@
 use crate::command::Command;
 use crate::matcher::Matcher;
-use crate::utils::{escape_shell_words, get_current_dir, run_param_fns};
+use crate::utils::{escape_shell_words, get_current_dir, is_windows_path, run_param_fns};
 use crate::Result;
 
 use anyhow::bail;
@@ -94,6 +94,7 @@ pub fn compgen(
     let mut argc_prefix = prefix.to_string();
     let mut argc_suffix = String::new();
     let mut argc_matcher = last.to_string();
+    let mut argc_cd = None;
     if let Some(fn_name) = argc_fn {
         let output = if script_path.is_empty() {
             let mut values = vec![];
@@ -135,6 +136,8 @@ pub fn compgen(
                         argc_suffix = stripped_value.to_string();
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_matcher:") {
                         argc_matcher = stripped_value.to_string();
+                    } else if let Some(stripped_value) = value.strip_prefix("__argc_cd:") {
+                        argc_cd = Some(stripped_value.to_string());
                     }
                     if shell.is_generic() {
                         argc_variables.push(value.to_string());
@@ -203,11 +206,11 @@ pub fn compgen(
     }
 
     if !shell.is_generic() {
-        if let Some(value) = argc_value.and_then(|v| convert_arg_value(&v)) {
+        if let Some(argc_value) = argc_value.and_then(|v| convert_arg_value(&v)) {
             if let Some((value_prefix, value_matcher, more_candidates)) =
-                shell.comp_argc_value(&value, &last, default_nospace)
+                shell.comp_argc_value(&argc_value, &argc_matcher, &argc_cd, default_nospace)
             {
-                argc_prefix = format!("{prefix}{value_prefix}");
+                argc_prefix = format!("{argc_prefix}{value_prefix}");
                 argc_matcher = value_matcher;
                 candidates.extend(more_candidates)
             }
@@ -567,7 +570,7 @@ impl Shell {
         matches!(self, Shell::Bash | Shell::Fish | Shell::Zsh)
     }
 
-    fn is_windows_path(&self) -> bool {
+    fn is_windows_mode(&self) -> bool {
         if cfg!(windows) {
             !self.is_unix_only()
         } else {
@@ -598,13 +601,14 @@ impl Shell {
     }
 
     fn need_expand_tilde(&self) -> bool {
-        self.is_windows_path() && self == &Self::Powershell
+        self.is_windows_mode() && self == &Self::Powershell
     }
 
     fn comp_argc_value(
         &self,
         argc_value: &str,
         value: &str,
+        cd: &Option<String>,
         default_nospace: bool,
     ) -> Option<(String, String, Vec<CandidateValue>)> {
         let (dir_only, exts) = if argc_value == "__argc_value:dir" {
@@ -617,15 +621,15 @@ impl Shell {
         } else {
             return None;
         };
-        let (search_dir, matcher, prefix) = self.resolve_path(value)?;
+        let (search_dir, matcher, prefix) = self.resolve_path(value, cd)?;
         if !search_dir.is_dir() {
             return None;
         }
 
-        let is_windows_path = self.is_windows_path();
+        let is_windows_mode = self.is_windows_mode();
         let exts = exts.unwrap_or_default();
 
-        let (value_prefix, path_sep) = if is_windows_path {
+        let (value_prefix, path_sep) = if is_windows_mode {
             if !value.contains(&prefix) {
                 return Some((
                     "".into(),
@@ -663,7 +667,7 @@ impl Shell {
                 continue;
             }
             if (matcher.is_empty() || !matcher.starts_with('.'))
-                && !is_windows_path
+                && !is_windows_mode
                 && file_name.starts_with('.')
             {
                 continue;
@@ -727,9 +731,9 @@ impl Shell {
         Some((prefix, matcher, output))
     }
 
-    fn resolve_path(&self, value: &str) -> Option<(PathBuf, String, String)> {
-        let is_windows_path = self.is_windows_path();
-        let (value, sep, home_p, cwd_p) = if is_windows_path {
+    fn resolve_path(&self, value: &str, cd: &Option<String>) -> Option<(PathBuf, String, String)> {
+        let is_windows_mode = self.is_windows_mode();
+        let (value, sep, home_p, cwd_p) = if is_windows_mode {
             (value.replace('/', "\\"), "\\", "~\\", ".\\")
         } else {
             (value.to_string(), "/", "~/", "./")
@@ -749,21 +753,13 @@ impl Shell {
             };
             (path_s, trims, prefix.into())
         } else if value.starts_with(sep) {
-            let new_value = if is_windows_path {
+            let new_value = if is_windows_mode {
                 format!("C:{}", value)
             } else {
                 value.clone()
             };
             (new_value, 0, "".into())
-        } else if is_windows_path
-            && value.len() >= 2
-            && value
-                .chars()
-                .next()
-                .map(|v| v.is_ascii_alphabetic())
-                .unwrap_or_default()
-            && value.chars().nth(1).map(|v| v == ':').unwrap_or_default()
-        {
+        } else if is_windows_mode && is_windows_path(&value) {
             let new_value = if value.len() == 2 {
                 format!("{value}{sep}")
             } else {
@@ -776,7 +772,10 @@ impl Shell {
             } else {
                 (value.clone(), "")
             };
-            let cwd = env::current_dir().ok()?;
+            let mut cwd = env::current_dir().ok()?;
+            if let Some(cd) = cd {
+                cwd = cwd.join(cd).canonicalize().ok()?;
+            }
             let cwd_s = cwd.to_string_lossy();
             let new_value = format!("{}{sep}{new_value}", cwd_s);
             let trims = cwd_s.len() + 1;
