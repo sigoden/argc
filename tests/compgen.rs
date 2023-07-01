@@ -802,7 +802,7 @@ _choice_fn() {
 }
 _choice_fn2() {
     if [[ "$1" == *"="* ]]; then
-        echo __argc_prefix:${1%%=*}
+        echo __argc_prefix:${1%%=*}=
         echo __argc_matcher:${1#*=}
         echo __argc_cd:src
         echo __argc_value:file
