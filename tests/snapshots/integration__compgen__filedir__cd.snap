@@ -1,0 +1,38 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa ` ************
+argc_value.rs 
+bin/
+command/
+compgen.rs 
+lib.rs 
+matcher.rs 
+param.rs 
+parser.rs 
+utils.rs 
+
+************ COMPGEN `prog --oa=` ************
+argc_value.rs 
+bin/
+command/
+compgen.rs 
+lib.rs 
+matcher.rs 
+param.rs 
+parser.rs 
+utils.rs 
+
+************ COMPGEN `prog foo=` ************
+argc_value.rs 
+bin/
+command/
+compgen.rs 
+lib.rs 
+matcher.rs 
+param.rs 
+parser.rs 
+utils.rs 
+
+

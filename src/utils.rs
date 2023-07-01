@@ -122,6 +122,11 @@ pub fn termwidth() -> Option<usize> {
     env::var("TERM_WIDTH").ok()?.parse().ok()
 }
 
+pub fn is_windows_path(value: &str) -> bool {
+    let value = value.to_ascii_lowercase();
+    ('a'..='z').any(|v| value.starts_with(&format!("{v}:")))
+}
+
 pub fn get_current_dir() -> Option<String> {
     env::current_dir()
         .ok()
