@@ -3,7 +3,7 @@ fn unsupported_tag() {
     let script = r###"
 # @baz
     "###;
-    fail!(script, &["prog"], "@baz(line 2) is unknown");
+    fail!(script, &["prog"], "@baz(line 2) is unknown tag");
 }
 
 #[test]
@@ -19,7 +19,7 @@ foo() {
     fail!(
         script,
         &["prog"],
-        "@arg(line 7) is unexpected, maybe miss @cmd?"
+        "@arg(line 7) shouldn't be here, @cmd is missing?"
     );
 }
 
@@ -39,7 +39,7 @@ foo() {
     fail!(
         script,
         &["prog"],
-        "foo(line 9) is conflicted with cmd or alias at line 5"
+        "foo(line 9) conflicts with cmd or alias at line 5"
     );
 }
 
@@ -123,7 +123,7 @@ try() {
     fail!(
         script,
         &["prog"],
-        "@alias(line 7) is conflicted with cmd or alias at line 3"
+        "@alias(line 7) conflicts with cmd or alias at line 3"
     );
 }
 
@@ -165,5 +165,5 @@ fn cmd_miss_fn() {
 # @cmd
 # @cmd
     "###;
-    fail!(script, &["prog"], "@cmd(line 2) miss function?");
+    fail!(script, &["prog"], "@cmd(line 2) missing function?");
 }
