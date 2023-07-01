@@ -112,6 +112,7 @@ pub fn compgen(
             Some(values.join("\n"))
         } else {
             let mut envs = HashMap::new();
+            envs.insert("ARGC_COMPGEN".into(), "1".into());
             envs.insert("ARGC_DESCRIBE".into(), shell.with_description().to_string());
             envs.insert("ARGC_MATCHER".into(), argc_matcher.clone());
             envs.insert("ARGC_LAST_ARG".into(), last_arg.to_string());

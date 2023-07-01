@@ -4,6 +4,9 @@ expression: data
 ---
 ************ COMPGEN `prog --oa=abc` ************
 __argc_matcher:	/kind:value
+ARGC_COMPGEN=1	/kind:value
+ARGC_DESCRIBE=true	/kind:value
+ARGC_LAST_ARG=--oa=abc	/kind:value
 ARGC_MATCHER=abc	/kind:value
 argc__args=([0]="prog" [1]="--oa=abc")	/kind:value
 argc__fn=_choice_fn	/kind:value
@@ -13,6 +16,9 @@ argc_oa=abc	/kind:value
 
 ************ COMPGEN `prog oa=abc` ************
 __argc_matcher:	/kind:value
+ARGC_COMPGEN=1	/kind:value
+ARGC_DESCRIBE=true	/kind:value
+ARGC_LAST_ARG=oa=abc	/kind:value
 ARGC_MATCHER=oa=abc	/kind:value
 argc__args=([0]="prog" [1]="oa=abc")	/kind:value
 argc__fn=_choice_fn	/kind:value
