@@ -230,23 +230,31 @@ pub(crate) enum CompKind {
     Flag,
     Option,
     Command,
-    Value,
     Dir,
     File,
+    FileExe,
     Symlink,
-    Exe,
+    ValueAnother,
+    ValueEmphasis,
+    ValueSubtle,
+    Value,
 }
 
 impl FromStr for CompKind {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        match s {
+        match s.to_ascii_lowercase().as_str() {
             "flag" => Ok(Self::Flag),
             "option" => Ok(Self::Option),
             "command" => Ok(Self::Command),
             "dir" => Ok(Self::Dir),
             "file" => Ok(Self::File),
+            "fileexe" => Ok(Self::FileExe),
+            "symlink" => Ok(Self::Symlink),
+            "valueanother" => Ok(Self::ValueAnother),
+            "valueemphasis" => Ok(Self::ValueEmphasis),
+            "valuesubtle" => Ok(Self::ValueSubtle),
             _ => Ok(Self::Value),
         }
     }
@@ -258,11 +266,14 @@ impl CompKind {
             Self::Flag => "flag",
             Self::Option => "option",
             Self::Command => "command",
-            Self::Value => "value",
-            Self::File => "file",
             Self::Dir => "dir",
+            Self::File => "file",
+            Self::FileExe => "exe",
             Self::Symlink => "symlink",
-            Self::Exe => "exe",
+            Self::ValueAnother => "valueAnother",
+            Self::ValueEmphasis => "valueEmphasis",
+            Self::ValueSubtle => "valueSubtle",
+            Self::Value => "value",
         }
     }
 }
@@ -511,13 +522,16 @@ impl Shell {
                 }
                 match comp_kind {
                     CompKind::Flag => "cyan",
-                    CompKind::Option => "blue",
+                    CompKind::Option => "cyan bold",
                     CompKind::Command => "magenta",
-                    CompKind::Value => "green",
                     CompKind::Dir => "blue bold",
                     CompKind::File => "default",
+                    CompKind::FileExe => "green bold",
                     CompKind::Symlink => "cyan bold",
-                    CompKind::Exe => "green bold",
+                    CompKind::ValueEmphasis => "green bold",
+                    CompKind::ValueSubtle => "green dim",
+                    CompKind::ValueAnother => "yellow",
+                    CompKind::Value => "green",
                 }
             }
             Shell::Powershell | Shell::Zsh => {
@@ -526,13 +540,16 @@ impl Shell {
                 }
                 match comp_kind {
                     CompKind::Flag => "36",
-                    CompKind::Option => "34",
+                    CompKind::Option => "1;36",
                     CompKind::Command => "35",
-                    CompKind::Value => "32",
                     CompKind::Dir => "1;34",
                     CompKind::File => "39",
+                    CompKind::FileExe => "1;32",
                     CompKind::Symlink => "1;36",
-                    CompKind::Exe => "1;32",
+                    CompKind::ValueEmphasis => "1;32",
+                    CompKind::ValueSubtle => "2;32",
+                    CompKind::ValueAnother => "33",
+                    CompKind::Value => "32",
                 }
             }
             _ => "",
@@ -696,7 +713,7 @@ impl Shell {
                     path_exts.iter().any(|v| new_file_name.ends_with(v))
                 };
                 if is_executable {
-                    CompKind::Exe
+                    CompKind::FileExe
                 } else {
                     CompKind::File
                 }

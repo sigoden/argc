@@ -1,0 +1,96 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN Bash `prog ` ************
+flag
+option
+command
+dir
+file
+fileExe
+symlink
+valueAnother
+valueEmphasis
+valueSubtle
+value
+
+************ COMPGEN Elvish `prog ` ************
+flag	0	flag		cyan
+option	0	option		cyan bold
+command	0	command		magenta
+dir	0	dir		blue bold
+file	0	file		default
+fileExe	0	fileExe		green bold
+symlink	0	symlink		cyan bold
+valueAnother	0	valueAnother		yellow
+valueEmphasis	0	valueEmphasis		green bold
+valueSubtle	0	valueSubtle		green dim
+value	0	value		green
+
+************ COMPGEN Fish `prog ` ************
+flag
+option
+command
+dir
+file
+fileExe
+symlink
+valueAnother
+valueEmphasis
+valueSubtle
+value
+
+************ COMPGEN Nushell `prog ` ************
+flag
+option
+command
+dir
+file
+fileExe
+symlink
+valueAnother
+valueEmphasis
+valueSubtle
+value
+
+************ COMPGEN Powershell `prog ` ************
+flag	0	flag		36
+option	0	option		1;36
+command	0	command		35
+dir	0	dir		1;34
+file	0	file		39
+fileExe	0	fileExe		1;32
+symlink	0	symlink		1;36
+valueAnother	0	valueAnother		33
+valueEmphasis	0	valueEmphasis		1;32
+valueSubtle	0	valueSubtle		2;32
+value	0	value		32
+
+************ COMPGEN Xonsh `prog ` ************
+flag	0	flag	
+option	0	option	
+command	0	command	
+dir	0	dir	
+file	0	file	
+fileExe	0	fileExe	
+symlink	0	symlink	
+valueAnother	0	valueAnother	
+valueEmphasis	0	valueEmphasis	
+valueSubtle	0	valueSubtle	
+value	0	value	
+
+************ COMPGEN Zsh `prog ` ************
+flag	flag	flag	36
+option	option	option	1;36
+command	command	command	35
+dir	dir	dir	1;34
+file	file	file	39
+fileExe	fileExe	fileExe	1;32
+symlink	symlink	symlink	1;36
+valueAnother	valueAnother	valueAnother	33
+valueEmphasis	valueEmphasis	valueEmphasis	1;32
+valueSubtle	valueSubtle	valueSubtle	2;32
+value	value	value	32
+
+

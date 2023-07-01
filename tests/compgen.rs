@@ -724,6 +724,27 @@ fn redirect_symbols() {
     snapshot_compgen_shells!(script, vec!["prog", ">", ""]);
 }
 
+#[test]
+fn color() {
+    let script = r###"
+# @arg val[`_fn_color`]
+_fn_color() {
+    echo -e "flag\0\t/kind:flag"
+    echo -e "option\0\t/kind:option"
+    echo -e "command\0\t/kind:command"
+    echo -e "dir\0\t/kind:dir"
+    echo -e "file\0\t/kind:file"
+    echo -e "fileExe\0\t/kind:fileExe"
+    echo -e "symlink\0\t/kind:symlink"
+    echo -e "valueAnother\0\t/kind:valueAnother"
+    echo -e "valueEmphasis\0\t/kind:valueEmphasis"
+    echo -e "valueSubtle\0\t/kind:valueSubtle"
+    echo -e "value\0\t/kind:value"
+}
+"###;
+    snapshot_compgen_shells!(script, vec!["prog", ""]);
+}
+
 mod filedir {
     #[cfg(windows)]
     const TEST_SHELL: argc::Shell = argc::Shell::Powershell;
