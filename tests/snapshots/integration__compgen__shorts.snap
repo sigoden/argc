@@ -3,15 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
--a	/kind:flag
---fb	/kind:flag
--b	/kind:flag
---fc	/kind:flag
--f	/kind:flag
--sa	/kind:flag
--e	/kind:option
---oa	/kind:option
--p	/kind:option
+__argc_value:file	/kind:value
 
 ************ COMPGEN `prog -` ************
 -a	/kind:flag
@@ -36,14 +28,7 @@ expression: data
 -ap	/kind:option
 
 ************ COMPGEN `prog -a ` ************
---fb	/kind:flag
--b	/kind:flag
---fc	/kind:flag
--f	/kind:flag
--sa	/kind:flag
--e	/kind:option
---oa	/kind:option
--p	/kind:option
+__argc_value:file	/kind:value
 
 ************ COMPGEN `prog -af` ************
 -afb	/kind:flag
@@ -52,14 +37,7 @@ expression: data
 -afp	/kind:option
 
 ************ COMPGEN `prog -af ` ************
---fb	/kind:flag
--b	/kind:flag
---fc	/kind:flag
--f	/kind:flag
--sa	/kind:flag
--e	/kind:option
---oa	/kind:option
--p	/kind:option
+__argc_value:file	/kind:value
 
 ************ COMPGEN `prog -ae` ************
 
@@ -80,13 +58,6 @@ __argc_value:FILE	/kind:value
 -sa	/kind:flag
 
 ************ COMPGEN `prog -sa ` ************
--a	/kind:flag
---fb	/kind:flag
--b	/kind:flag
---fc	/kind:flag
--f	/kind:flag
--e	/kind:option
---oa	/kind:option
--p	/kind:option
+__argc_value:file	/kind:value
 
 

@@ -46,10 +46,7 @@ fn compgen() {
 fn compgen_argc() {
     Command::cargo_bin("argc")
         .unwrap()
-        .arg("--argc-compgen")
-        .arg("fish")
-        .arg("")
-        .args(["argc", "--argc-complete", ""])
+        .args(["--argc-compgen", "fish", "", "argc", "--argc-compgen", ""])
         .assert()
         .stdout(predicates::str::contains("zsh"))
         .success();

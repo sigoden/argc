@@ -3,8 +3,6 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
---oa	/kind:option
---ob	/kind:option
 cmda	/kind:command
 
 
