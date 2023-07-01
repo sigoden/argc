@@ -46,7 +46,8 @@ fn run() -> Result<i32> {
         match argc_cmd {
             "--argc-eval" => {
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
-                let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())?;
+                let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())
+                    .map_err(|err| anyhow!("error: {err}"))?;
                 let export_pwd = match env::var("ARGC_PWD").ok().or_else(get_current_dir) {
                     Some(v) => format!("export ARGC_PWD={v}\n"),
                     None => String::new(),
@@ -91,7 +92,7 @@ fn run() -> Result<i32> {
                 println!("{}", get_argc_version())
             }
             _ => {
-                bail!("Invalid option `{argc_cmd}`")
+                bail!("Unknown option `{argc_cmd}`")
             }
         }
         Ok(0)

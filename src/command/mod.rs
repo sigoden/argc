@@ -132,7 +132,10 @@ impl Command {
                 }
                 EventData::Cmd(value) => {
                     if root_data.borrow().scope == EventScope::CmdStart {
-                        bail!("@cmd(line {}) miss function?", root_data.borrow().cmd_pos)
+                        bail!(
+                            "@cmd(line {}) missing function?",
+                            root_data.borrow().cmd_pos
+                        )
                     }
                     root_data.borrow_mut().cmd_pos = position;
                     root_data.borrow_mut().scope = EventScope::CmdStart;
@@ -170,7 +173,7 @@ impl Command {
                 EventData::Func(name) => {
                     if let Some(pos) = root_data.borrow_mut().cmd_fns.get(&name) {
                         bail!(
-                            "{}(line {}) is conflicted with cmd or alias at line {}",
+                            "{}(line {}) conflicts with cmd or alias at line {}",
                             name,
                             position,
                             pos
@@ -194,10 +197,10 @@ impl Command {
                             for name in &cmd.aliases {
                                 if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
                                     bail!(
-										"@alias(line {}) is conflicted with cmd or alias at line {}",
-										cmd.alias_pos,
-										pos
-									);
+                                        "@alias(line {}) conflicts with cmd or alias at line {}",
+                                        cmd.alias_pos,
+                                        pos
+                                    );
                                 }
                                 root_data
                                     .borrow_mut()
@@ -217,7 +220,7 @@ impl Command {
                                     for name in &cmd.aliases {
                                         if let Some(pos) = parent_cmd.subcommand_fns.get(name) {
                                             bail!(
-												"@alias(line {}) is conflicted with cmd or alias at line {}",
+												"@alias(line {}) conflicts with cmd or alias at line {}",
 												cmd.alias_pos,
 												pos
 											);
@@ -237,7 +240,7 @@ impl Command {
                     root_data.borrow_mut().scope = EventScope::FnEnd;
                 }
                 EventData::Unknown(name) => {
-                    bail!("@{}(line {}) is unknown", name, position);
+                    bail!("@{}(line {}) is unknown tag", name, position);
                 }
             }
         }
@@ -508,7 +511,7 @@ impl Command {
     fn get_cmd<'a>(cmd: &'a mut Self, tag_name: &str, position: usize) -> Result<&'a mut Self> {
         if cmd.root.borrow().scope == EventScope::FnEnd {
             bail!(
-                "{}(line {}) is unexpected, maybe miss @cmd?",
+                "{}(line {}) shouldn't be here, @cmd is missing?",
                 tag_name,
                 position
             )
