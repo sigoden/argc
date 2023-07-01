@@ -749,7 +749,7 @@ mod filedir {
     #[cfg(windows)]
     const TEST_SHELL: argc::Shell = argc::Shell::Powershell;
     #[cfg(not(windows))]
-    const TEST_SHELL: argc::Shell = argc::Shell::Bash;
+    const TEST_SHELL: argc::Shell = argc::Shell::Elvish;
 
     const VALUE_NAME_SCRIPT: &str = r###"
 # @option --oa <file>
@@ -821,7 +821,7 @@ _choice_fn2() {
                 vec!["prog", "--oa="],
                 vec!["prog", "foo="]
             ],
-            argc::Shell::Bash
+            TEST_SHELL
         );
     }
 
@@ -835,7 +835,7 @@ _choice_fn2() {
                 vec!["prog", "--oa="],
                 vec!["prog", "foo="]
             ],
-            argc::Shell::Powershell
+            TEST_SHELL
         );
     }
 }
