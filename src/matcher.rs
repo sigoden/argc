@@ -1,4 +1,8 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    env,
+    path::MAIN_SEPARATOR,
+};
 
 use crate::{
     command::Command,
@@ -190,7 +194,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn set_script_path(&mut self, script_path: &str) {
         self.script_path = Some(script_path.to_string());
         let fns: Vec<&str> = self.choices_fns.iter().copied().collect();
-        if let Some(outputs) = run_param_fns(script_path, &fns, self.args, HashMap::new()) {
+        let mut envs = HashMap::new();
+        envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
+        envs.insert("ARGC_PATH_SEP".into(), MAIN_SEPARATOR.into());
+        if let Some(outputs) = run_param_fns(script_path, &fns, self.args, envs) {
             for (i, output) in outputs.into_iter().enumerate() {
                 let choices = output
                     .split('\n')
