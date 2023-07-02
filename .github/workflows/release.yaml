@@ -47,6 +47,8 @@ jobs:
           use-cross: true
           cargo-flags: ""
     runs-on: ${{matrix.os}}
+    env:
+      BUILD_CMD: cargo
 
     steps:
     - uses: actions/checkout@v3
