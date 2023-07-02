@@ -314,7 +314,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         };
         if output.is_empty() && !self.arg_comp.is_flag_or_option() {
-            output.push(("__argc_value:file".into(), String::new(), CompKind::Value));
+            output.push(("__argc_value=file".into(), String::new(), CompKind::Value));
         }
         output
     }
@@ -897,20 +897,20 @@ fn comp_param(
                 .map(|v| (v.to_string(), String::new(), CompKind::Value))
                 .collect(),
             Either::Right(choices_fn) => vec![(
-                format!("__argc_fn:{}", choices_fn),
+                format!("__argc_fn={}", choices_fn),
                 String::new(),
                 CompKind::Value,
             )],
         }
     } else {
-        let value = format!("__argc_value:{}", value_name);
+        let value = format!("__argc_value={}", value_name);
         vec![(value, describe.into(), CompKind::Value)]
     };
     if let Some(ch) = multi_char {
         output.insert(
             0,
             (
-                format!("__argc_multi:{}", ch),
+                format!("__argc_multi={}", ch),
                 String::new(),
                 CompKind::Value,
             ),

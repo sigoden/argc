@@ -3,12 +3,12 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value:FILE	/kind:value
+__argc_value=FILE	/kind:value
 cmda	/kind:command
 cmdb	/kind:command
 
 ************ COMPGEN `prog c` ************
-__argc_value:FILE	/kind:value
+__argc_value=FILE	/kind:value
 cmda	/kind:command
 cmdb	/kind:command
 
@@ -16,7 +16,7 @@ cmdb	/kind:command
 cmda	/kind:command
 
 ************ COMPGEN `prog cmda ` ************
-__argc_value:file	/kind:value
+__argc_value=file	/kind:value
 
 ************ COMPGEN `prog help ` ************
 cmda	/kind:command

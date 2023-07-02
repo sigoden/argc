@@ -3,9 +3,9 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog no_arg ` ************
-__argc_value:file	/kind:value
+__argc_value=file	/kind:value
 
 ************ COMPGEN `prog arg ` ************
-__argc_value:FILE	/kind:value
+__argc_value=FILE	/kind:value
 
 

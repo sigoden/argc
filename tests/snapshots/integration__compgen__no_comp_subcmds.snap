@@ -7,9 +7,9 @@ cmda	/kind:command
 cmdb	/kind:command
 
 ************ COMPGEN `prog cmdx ` ************
-__argc_value:file	/kind:value
+__argc_value=file	/kind:value
 
 ************ COMPGEN `prog cmdx cmd` ************
-__argc_value:file	/kind:value
+__argc_value=file	/kind:value
 
 

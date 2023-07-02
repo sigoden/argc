@@ -47,7 +47,7 @@ pub fn compgen(
         })
         .collect();
     if exist_redirect_symbol {
-        return Ok("__argc_value:file".to_string());
+        return Ok("__argc_value=file".to_string());
     }
     let cmd = Command::new(script_content)?;
     let matcher = Matcher::new(&cmd, &new_args);
@@ -68,14 +68,14 @@ pub fn compgen(
     }
     for (value, description, comp_kind) in compgen_values {
         if value.starts_with("__argc_") {
-            if let Some(fn_name) = value.strip_prefix("__argc_fn:") {
+            if let Some(fn_name) = value.strip_prefix("__argc_fn=") {
                 argc_fn = Some(fn_name.to_string());
-            } else if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
+            } else if let Some(stripped_value) = value.strip_prefix("__argc_value=") {
                 argc_value = Some(stripped_value.to_lowercase());
                 if shell.is_generic() {
                     argc_variables.push(value.to_string());
                 }
-            } else if let Some(value) = value.strip_prefix("__argc_multi:") {
+            } else if let Some(value) = value.strip_prefix("__argc_multi=") {
                 if let Some(ch) = value.chars().next() {
                     default_nospace = true;
                     if let Some((i, _)) = last.char_indices().rfind(|(_, c)| ch == *c) {
@@ -106,7 +106,7 @@ pub fn compgen(
                 if new_args.len() == 3 {
                     values.extend(Shell::list().map(|v| v.name().to_string()))
                 } else {
-                    values.push("__argc_value:file".to_string());
+                    values.push("__argc_value=file".to_string());
                 }
             }
             Some(values.join("\n"))
@@ -129,14 +129,14 @@ pub fn compgen(
                 let (value, description, nospace, comp_type) = parse_candidate_value(line);
                 let nospace = nospace || default_nospace;
                 if value.starts_with("__argc_") {
-                    if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
+                    if let Some(stripped_value) = value.strip_prefix("__argc_value=") {
                         argc_value = Some(stripped_value.to_lowercase());
-                    } else if let Some(stripped_value) = value.strip_prefix("__argc_prefix:") {
+                    } else if let Some(stripped_value) = value.strip_prefix("__argc_prefix=") {
                         argc_prefix = format!("{prefix}{stripped_value}");
-                    } else if let Some(stripped_value) = value.strip_prefix("__argc_filter:") {
+                    } else if let Some(stripped_value) = value.strip_prefix("__argc_filter=") {
                         argc_filter = stripped_value.to_string();
                         mod_quote(&mut argc_filter, &mut argc_prefix, &mut default_nospace);
-                    } else if let Some(stripped_value) = value.strip_prefix("__argc_cd:") {
+                    } else if let Some(stripped_value) = value.strip_prefix("__argc_cd=") {
                         argc_cd = Some(stripped_value.to_string());
                     }
                     if shell.is_generic() {
@@ -612,11 +612,11 @@ impl Shell {
         cd: &Option<String>,
         default_nospace: bool,
     ) -> Option<(String, String, Vec<CandidateValue>)> {
-        let (dir_only, exts) = if argc_value == "__argc_value:dir" {
+        let (dir_only, exts) = if argc_value == "__argc_value=dir" {
             (true, None)
-        } else if argc_value == "__argc_value:file" {
+        } else if argc_value == "__argc_value=file" {
             (false, None)
-        } else if let Some(stripped_value) = argc_value.strip_prefix("__argc_value:file:") {
+        } else if let Some(stripped_value) = argc_value.strip_prefix("__argc_value=file:") {
             let exts: Vec<String> = stripped_value.split(',').map(|v| v.to_string()).collect();
             (false, Some(exts))
         } else {
@@ -839,14 +839,14 @@ fn parse_candidate_value(input: &str) -> CandidateValue {
 
 fn convert_arg_value(value: &str) -> Option<String> {
     if value.starts_with("file:") {
-        Some(format!("__argc_value:{value}"))
+        Some(format!("__argc_value={value}"))
     } else if ["path", "file", "arg", "any"]
         .iter()
         .any(|v| value.contains(v))
     {
-        Some("__argc_value:file".to_string())
+        Some("__argc_value=file".to_string())
     } else if value.contains("dir") || value.contains("folder") {
-        Some("__argc_value:dir".to_string())
+        Some("__argc_value=dir".to_string())
     } else {
         None
     }
