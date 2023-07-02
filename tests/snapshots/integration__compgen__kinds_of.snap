@@ -1,0 +1,61 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN Bash `prog ` ************
+a1 (desc a1)
+b1 (desc b1)
+c1 
+d1
+e1 
+f1 (desc f1)
+
+************ COMPGEN Elvish `prog ` ************
+a1	1	a1	desc a1	green
+b1	0	b1	desc b1	green
+c1	1	c1		green
+d1	0	d1		green
+e1	1	e1		green
+f1	1	f1	desc f1	yellow
+
+************ COMPGEN Fish `prog ` ************
+a1	desc a1
+b1	desc b1
+c1
+d1
+e1
+f1	desc f1
+
+************ COMPGEN Nushell `prog ` ************
+a1 	desc a1
+b1	desc b1
+c1 
+d1
+e1 
+f1 	desc f1
+
+************ COMPGEN Powershell `prog ` ************
+a1	1	a1	desc a1	32
+b1	0	b1	desc b1	32
+c1	1	c1		32
+d1	0	d1		32
+e1	1	e1		32
+f1	1	f1	desc f1	33
+
+************ COMPGEN Xonsh `prog ` ************
+a1	1	a1	desc a1
+b1	0	b1	desc b1
+c1	1	c1	
+d1	0	d1	
+e1	1	e1	
+f1	1	f1	desc f1
+
+************ COMPGEN Zsh `prog ` ************
+a1 	a1:desc a1	a1	32
+b1	b1:desc b1	b1	32
+c1 	c1	c1	32
+d1	d1	d1	32
+e1 	e1	e1	32
+f1 	f1:desc f1	f1	33
+
+

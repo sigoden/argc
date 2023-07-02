@@ -653,22 +653,6 @@ _choice_fn() {
 }
 
 #[test]
-fn generic_shell() {
-    let script = r###"
-# @option --oa[`_choice_fn`]
-_choice_fn() {
-    echo -e "__argc_prefix:'"
-    echo -e "__argc_filter:"
-    echo -e "abc\t(desc 1)"
-    echo -e "def\0"
-    echo -e "ijk"
-}
-"###;
-
-    snapshot_compgen!(script, vec![vec!["prog", "--oa", ""]], argc::Shell::Generic);
-}
-
-#[test]
 fn bash_shell() {
     let script = r###"
 # @option --oa[`_choice_fn`]
@@ -698,6 +682,39 @@ _choice_fn2() {
         ],
         argc::Shell::Bash
     );
+}
+
+#[test]
+fn kinds_of() {
+    let script = r###"
+# @arg val[`_choice_fn`]
+_choice_fn() {
+    echo -e "a1\tdesc a1"
+    echo -e "b1\0\tdesc b1"
+    echo -e "c1\t"
+    echo -e "d1\0"
+    echo -e "e1"
+    echo -e "f1\t/kind:valueOther\tdesc f1"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", ""]);
+}
+
+#[test]
+fn filter_quote() {
+    let script = r###"
+# @arg args[`_choice_fn`]
+_choice_fn() {
+    echo "__argc_prefix:${ARGC_FILTER%%=*}="
+    echo "__argc_filter:${ARGC_FILTER#*=}"
+    echo foo
+    echo bar
+    :;
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "v='"]);
 }
 
 #[test]

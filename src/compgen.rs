@@ -132,9 +132,10 @@ pub fn compgen(
                     if let Some(stripped_value) = value.strip_prefix("__argc_value:") {
                         argc_value = Some(stripped_value.to_lowercase());
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_prefix:") {
-                        argc_prefix = format!("{prefix}{stripped_value}")
+                        argc_prefix = format!("{prefix}{stripped_value}");
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_filter:") {
                         argc_filter = stripped_value.to_string();
+                        mod_quote(&mut argc_filter, &mut argc_prefix, &mut default_nospace);
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_cd:") {
                         argc_cd = Some(stripped_value.to_string());
                     }
@@ -926,12 +927,12 @@ fn escape_chars(value: &str, need_escape: &str, for_escape: &str) -> String {
         .collect()
 }
 
-fn mod_quote(last: &mut String, prefix: &mut String, default_nospace: &mut bool) {
-    if last.starts_with(is_quote) {
-        prefix.push_str(&last[0..1]);
+fn mod_quote(filter: &mut String, prefix: &mut String, default_nospace: &mut bool) {
+    if filter.starts_with(is_quote) {
+        prefix.push_str(&filter[0..1]);
         *default_nospace = true;
     }
-    *last = last.trim_matches(is_quote).to_string();
+    *filter = filter.trim_matches(is_quote).to_string();
 }
 
 fn contains_chars(value: &str, chars: &str) -> bool {
