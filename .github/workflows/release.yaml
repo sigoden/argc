@@ -49,7 +49,7 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Check Tag
       id: check-tag
@@ -65,13 +65,24 @@ jobs:
 
 
     - name: Install Rust Toolchain Components
-      uses: actions-rs/toolchain@v1
+      uses: actions-rs/toolchain@v2
       with:
         override: true
         target: ${{ matrix.target }}
         toolchain: stable
         profile: minimal # minimal component installation (ie, no documentation)
+
+    - name: Install cross
+      if: matrix.use-cross
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cross
   
+    - name: Overwrite build command env variable
+      if: matrix.use-cross
+      shell: bash
+      run: echo "BUILD_CMD=cross" >> $GITHUB_ENV
+
     - name: Show Version Information (Rust, cargo, GCC)
       shell: bash
       run: |
@@ -83,11 +94,8 @@ jobs:
         rustc -V
       
     - name: Build
-      uses: actions-rs/cargo@v1
-      with:
-        use-cross: ${{ matrix.use-cross }}
-        command: build
-        args: --locked --release --target=${{ matrix.target }} ${{ matrix.cargo-flags }}
+      shell: bash
+      run: $BUILD_CMD build --locked --release --target=${{ matrix.target }} ${{ matrix.cargo-flags }}
 
     - name: Build Archive
       shell: bash
@@ -123,7 +131,7 @@ jobs:
         fi
 
     - name: Publish Archive
-      uses: softprops/action-gh-release@v0.1.5
+      uses: softprops/action-gh-release@v1
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
       with:
         draft: false
@@ -138,13 +146,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: release
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+
+      - uses: actions-rs/toolchain@v2
         with:
           profile: minimal
           toolchain: stable
-      - name: Publish
 
+      - name: Publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_API_TOKEN }}
         run: cargo publish
