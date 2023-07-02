@@ -92,7 +92,6 @@ pub fn compgen(
         }
     }
     let mut argc_prefix = prefix.to_string();
-    let mut argc_suffix = String::new();
     let mut argc_filter = last.to_string();
     let mut argc_cd = None;
     if let Some(fn_name) = argc_fn {
@@ -134,8 +133,6 @@ pub fn compgen(
                         argc_value = Some(stripped_value.to_lowercase());
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_prefix:") {
                         argc_prefix = format!("{prefix}{stripped_value}")
-                    } else if let Some(stripped_value) = value.strip_prefix("__argc_suffix:") {
-                        argc_suffix = stripped_value.to_string();
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_filter:") {
                         argc_filter = stripped_value.to_string();
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_cd:") {
@@ -219,13 +216,7 @@ pub fn compgen(
         }
     }
 
-    let values = shell.convert_candidates(
-        candidates,
-        &argc_prefix,
-        &argc_suffix,
-        &argc_filter,
-        no_color,
-    );
+    let values = shell.convert_candidates(candidates, &argc_prefix, &argc_filter, no_color);
 
     Ok(values.join("\n"))
 }
@@ -363,7 +354,6 @@ impl Shell {
         &self,
         candidates: Vec<CandidateValue>,
         prefix: &str,
-        suffix: &str,
         filter: &str,
         no_color: bool,
     ) -> Vec<String> {
@@ -374,7 +364,7 @@ impl Shell {
                 let mut add_space_to_first_candidate = false;
                 if values.len() == 1 {
                     let space = if candidates[0].2 { "" } else { " " };
-                    let mut value = format!("{prefix}{}{suffix}", candidates[0].0);
+                    let mut value = format!("{prefix}{}", candidates[0].0);
                     if prefix_unbalance.is_none() {
                         value = self.escape(&value);
                     }
@@ -413,7 +403,7 @@ impl Shell {
             Shell::Elvish | Shell::Powershell => candidates
                 .into_iter()
                 .map(|(value, description, nospace, comp_kind)| {
-                    let new_value = self.combine_value(prefix, &value, suffix);
+                    let new_value = self.combine_value(prefix, &value);
                     let display = if value.is_empty() { " ".into() } else { value };
                     let description = self.comp_description(&description, "", "");
                     let space: &str = if nospace { "0" } else { "1" };
@@ -424,7 +414,7 @@ impl Shell {
             Shell::Fish => candidates
                 .into_iter()
                 .map(|(value, description, _nospace, _comp_kind)| {
-                    let new_value = self.combine_value(prefix, &value, suffix);
+                    let new_value = self.combine_value(prefix, &value);
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{description}")
                 })
@@ -441,7 +431,7 @@ impl Shell {
             Shell::Nushell => candidates
                 .into_iter()
                 .map(|(value, description, nospace, _)| {
-                    let new_value = self.combine_value(prefix, &value, suffix);
+                    let new_value = self.combine_value(prefix, &value);
                     let space = if nospace { "" } else { " " };
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{space}{description}")
@@ -450,7 +440,7 @@ impl Shell {
             Shell::Xonsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace, _)| {
-                    let mut new_value = format!("{prefix}{value}{suffix}");
+                    let mut new_value = format!("{prefix}{value}");
                     if unbalance_quote(prefix).is_none() {
                         let escaped_new_value = self.escape(&new_value);
                         if escaped_new_value.ends_with("\\'")
@@ -484,7 +474,7 @@ impl Shell {
                     } else {
                         prefix.to_string()
                     };
-                    let new_value = self.escape(&format!("{prefix}{value}{suffix}"));
+                    let new_value = self.escape(&format!("{prefix}{value}"));
                     let match_value =
                         escape_chars(&value, self.need_escape_chars(), "\\").replace("\\:", ":");
                     let display = value.replace(':', "\\:");
@@ -625,8 +615,8 @@ impl Shell {
             (true, None)
         } else if argc_value == "__argc_value:file" {
             (false, None)
-        } else if let Some(suffix) = argc_value.strip_prefix("__argc_value:file:") {
-            let exts: Vec<String> = suffix.split(',').map(|v| v.to_string()).collect();
+        } else if let Some(stripped_value) = argc_value.strip_prefix("__argc_value:file:") {
+            let exts: Vec<String> = stripped_value.split(',').map(|v| v.to_string()).collect();
             (false, Some(exts))
         } else {
             return None;
@@ -803,8 +793,8 @@ impl Shell {
         Some((PathBuf::from(path), filter, prefix))
     }
 
-    fn combine_value(&self, prefix: &str, value: &str, suffix: &str) -> String {
-        let mut new_value = format!("{prefix}{value}{suffix}");
+    fn combine_value(&self, prefix: &str, value: &str) -> String {
+        let mut new_value = format!("{prefix}{value}");
         if unbalance_quote(prefix).is_none() {
             new_value = self.escape(&new_value);
         }

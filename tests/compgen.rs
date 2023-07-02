@@ -451,20 +451,6 @@ _choice_fn() {
 }
 
 #[test]
-fn suffix() {
-    let script = r###"
-# @option --oa*[`_choice_fn`]
-_choice_fn() {
-    echo __argc_suffix:=
-    echo -e "A\0"
-    echo -e "B\0"
-}
-"###;
-
-    snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
-}
-
-#[test]
 fn assing_option_value() {
     let script = r###"
 # @option --oa[`_choice_fn`]
