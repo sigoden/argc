@@ -736,6 +736,7 @@ _fn_color() {
     echo -e "file\0\t/kind:file"
     echo -e "fileExe\0\t/kind:fileExe"
     echo -e "symlink\0\t/kind:symlink"
+    echo -e "valueOther\0\t/kind:valueOther"
     echo -e "valueAnother\0\t/kind:valueAnother"
     echo -e "valueEmphasis\0\t/kind:valueEmphasis"
     echo -e "valueSubtle\0\t/kind:valueSubtle"
