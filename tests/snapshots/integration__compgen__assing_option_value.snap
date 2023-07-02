@@ -8,8 +8,8 @@ ARGC_COMPGEN=1	/kind:value
 ARGC_DESCRIBE=true	/kind:value
 ARGC_LAST_ARG=--oa=abc	/kind:value
 ARGC_MATCHER=abc	/kind:value
+ARGC_VARS=YXJnY19vYT1hYmM7YXJnY19fYXJncz0oIHByb2cgJy0tb2E9YWJjJyApO2FyZ2NfX2luZGV4PTA7YXJnY19fcG9zaXRpb25hbHM9KCAgKTs=	/kind:value
 argc__args=([0]="prog" [1]="--oa=abc")	/kind:value
-argc__fn=_choice_fn	/kind:value
 argc__index=0	/kind:value
 argc__positionals=()	/kind:value
 argc_oa=abc	/kind:value
@@ -20,8 +20,8 @@ ARGC_COMPGEN=1	/kind:value
 ARGC_DESCRIBE=true	/kind:value
 ARGC_LAST_ARG=oa=abc	/kind:value
 ARGC_MATCHER=oa=abc	/kind:value
+ARGC_VARS=YXJnY192YWw9J29hPWFiYyc7YXJnY19fYXJncz0oIHByb2cgJ29hPWFiYycgKTthcmdjX19pbmRleD0wO2FyZ2NfX3Bvc2l0aW9uYWxzPSggJ29hPWFiYycgKTs=	/kind:value
 argc__args=([0]="prog" [1]="oa=abc")	/kind:value
-argc__fn=_choice_fn	/kind:value
 argc__index=0	/kind:value
 argc__positionals=([0]="oa=abc")	/kind:value
 argc_val=oa=abc	/kind:value

@@ -24,6 +24,9 @@ ctrlc = "3.4"
 shell-words = "1.1"
 textwrap = "0.16"
 dirs = "5.0"
+num_cpus = "1.16.0"
+threadpool = "1.8.1"
+base64 = "0.21.2"
 
 [dev-dependencies]
 insta = "1.30"

@@ -15,6 +15,7 @@ mod export;
 mod fail;
 mod main_fn;
 mod misc;
+mod parallel;
 mod param_fn;
 mod spec;
 mod validate;

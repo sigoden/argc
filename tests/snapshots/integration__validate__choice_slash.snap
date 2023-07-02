@@ -10,8 +10,8 @@ argc_foo='a\b'
 argc_bar='a\b'
 argc__args=( prog cmd 'a\b' 'a\b' )
 argc__index=1
-argc__positionals=( 'a\b' 'a\b' )
 argc__fn=cmd
+argc__positionals=( 'a\b' 'a\b' )
 cmd 'a\b' 'a\b'
 
 
