@@ -65,12 +65,9 @@ jobs:
 
 
     - name: Install Rust Toolchain Components
-      uses: actions-rs/toolchain@v2
+      uses: dtolnay/rust-toolchain@stable
       with:
-        override: true
-        target: ${{ matrix.target }}
-        toolchain: stable
-        profile: minimal # minimal component installation (ie, no documentation)
+        targets: ${{ matrix.target }}
 
     - name: Install cross
       if: matrix.use-cross
@@ -148,10 +145,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v2
-        with:
-          profile: minimal
-          toolchain: stable
+      - uses: dtolnay/rust-toolchain@stable
 
       - name: Publish
         env:
