@@ -180,8 +180,8 @@ pub fn compgen(
 
     let break_chars = shell.need_break_chars();
     if !break_chars.is_empty() {
-        let prefix_unbalance = unbalance_quote(&argc_prefix);
-        if let Some((i, _)) = (match prefix_unbalance {
+        let prefix_quote = unbalance_quote(&argc_prefix);
+        if let Some((i, _)) = (match prefix_quote {
             Some((_, idx)) => &argc_prefix[0..idx],
             None => &argc_prefix,
         })
@@ -190,7 +190,7 @@ pub fn compgen(
         {
             argc_prefix = argc_prefix[i + 1..].to_string();
         }
-        if last == argc_filter && prefix_unbalance.is_none() {
+        if last == argc_filter && prefix_quote.is_none() {
             if let Some((i, _)) = argc_filter
                 .char_indices()
                 .rfind(|(_, c)| break_chars.contains(c))
@@ -594,7 +594,7 @@ impl Shell {
         match self {
             Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
                 Ok(v) => v.chars().collect(),
-                Err(_) => vec!['=', ':', '|', ';'],
+                Err(_) => vec!['=', ':', '|', ';', '\'', '"'],
             },
             Shell::Powershell => vec![','],
             _ => vec![],
@@ -863,17 +863,18 @@ fn truncate_description(description: &str) -> String {
 }
 
 fn unbalance_quote(value: &str) -> Option<(char, usize)> {
-    let mut balances = vec![];
-    for (i, c) in value.chars().enumerate() {
-        if is_quote(c) {
-            if balances.last().map(|(v, _)| v) == Some(&c) {
-                balances.pop();
-            } else {
-                balances.push((c, i));
-            }
+    if value.starts_with(is_quote) {
+        let ch = value.chars().next()?;
+        if value.chars().filter(|c| *c == ch).count() % 2 == 1 {
+            return Some((ch, 0));
+        }
+    } else if value.ends_with(is_quote) {
+        let ch = value.chars().rev().next()?;
+        if value.chars().filter(|c| *c == ch).count() % 2 == 1 {
+            return Some((ch, value.len() - 1));
         }
     }
-    balances.first().cloned()
+    None
 }
 
 fn split_equal_sign(word: &str) -> Option<(&str, &str)> {
