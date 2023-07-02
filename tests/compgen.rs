@@ -425,7 +425,7 @@ fn multi_parts() {
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
     echo __argc_prefix:A/
-    echo __argc_matcher:''
+    echo __argc_filter:''
 	echo B
 	echo -e "B/\0"
 }
@@ -440,7 +440,7 @@ fn multi_parts2() {
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
     echo __argc_prefix:A/B/
-    echo __argc_matcher:''
+    echo __argc_filter:''
 	echo
 	echo C
 	echo D
@@ -470,7 +470,7 @@ fn assing_option_value() {
 # @option --oa[`_choice_fn`]
 # @arg val[`_choice_fn`]
 _choice_fn() {
-    echo __argc_matcher:
+    echo __argc_filter:
     ( set -o posix ; set ) | grep 'argc_\|ARGC_' | grep -v 'ARGC_PWD\|ARGC_PATH_SEP\|ARGC_OS'
 }
 "###;
@@ -487,7 +487,7 @@ fn arg_terminated() {
 # @arg cmd
 # @arg args~[`_choice_fn`]
 _choice_fn() {
-    echo __argc_matcher:
+    echo __argc_filter:
     echo ${argc__positionals[@]}
     echo ok
 }
@@ -511,7 +511,7 @@ fn option_terminated() {
 # @option --oa~[`_choice_fn`]
 # @option --ob
 _choice_fn() {
-    echo __argc_matcher:
+    echo __argc_filter:
     echo ok
 }
 "###;
@@ -535,7 +535,7 @@ fn last_arg_option_assign() {
 # @option --ob <file>
 # @arg args~[`_choice_fn`]
 _choice_fn() {
-    echo __argc_matcher:
+    echo __argc_filter:
     echo ok
 }
 "###;
@@ -672,7 +672,7 @@ fn generic_shell() {
 # @option --oa[`_choice_fn`]
 _choice_fn() {
     echo -e "__argc_prefix:'"
-    echo -e "__argc_matcher:"
+    echo -e "__argc_filter:"
     echo -e "abc\t(desc 1)"
     echo -e "def\0"
     echo -e "ijk"
@@ -696,7 +696,7 @@ _choice_fn() {
 }
 _choice_fn2() {
     echo __argc_prefix:/A/
-    echo __argc_matcher:B
+    echo __argc_filter:B
     echo -e "B"
     echo -e "B/\0"
 }
@@ -803,7 +803,7 @@ _choice_fn() {
 _choice_fn2() {
     if [[ "$1" == *"="* ]]; then
         echo __argc_prefix:${1%%=*}=
-        echo __argc_matcher:${1#*=}
+        echo __argc_filter:${1#*=}
         echo __argc_cd:src
         echo __argc_value:file
 

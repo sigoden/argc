@@ -93,7 +93,7 @@ pub fn compgen(
     }
     let mut argc_prefix = prefix.to_string();
     let mut argc_suffix = String::new();
-    let mut argc_matcher = last.to_string();
+    let mut argc_filter = last.to_string();
     let mut argc_cd = None;
     if let Some(fn_name) = argc_fn {
         let output = if script_path.is_empty() {
@@ -117,7 +117,7 @@ pub fn compgen(
             envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
             envs.insert("ARGC_PATH_SEP".into(), MAIN_SEPARATOR.into());
             envs.insert("ARGC_DESCRIBE".into(), shell.with_description().to_string());
-            envs.insert("ARGC_MATCHER".into(), argc_matcher.clone());
+            envs.insert("ARGC_FILTER".into(), argc_filter.clone());
             envs.insert("ARGC_LAST_ARG".into(), last_arg.to_string());
             if let Some(cwd) = get_current_dir() {
                 envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
@@ -136,15 +136,15 @@ pub fn compgen(
                         argc_prefix = format!("{prefix}{stripped_value}")
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_suffix:") {
                         argc_suffix = stripped_value.to_string();
-                    } else if let Some(stripped_value) = value.strip_prefix("__argc_matcher:") {
-                        argc_matcher = stripped_value.to_string();
+                    } else if let Some(stripped_value) = value.strip_prefix("__argc_filter:") {
+                        argc_filter = stripped_value.to_string();
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_cd:") {
                         argc_cd = Some(stripped_value.to_string());
                     }
                     if shell.is_generic() {
                         argc_variables.push(value.to_string());
                     }
-                } else if value.starts_with(&argc_matcher) && !multi_values.contains(&value) {
+                } else if value.starts_with(&argc_filter) && !multi_values.contains(&value) {
                     match candidates.get_mut(&value) {
                         Some((v1, v2, _)) => {
                             if v1.is_empty() && !description.is_empty() {
@@ -192,14 +192,14 @@ pub fn compgen(
         {
             argc_prefix = argc_prefix[i + 1..].to_string();
         }
-        if last == argc_matcher && prefix_unbalance.is_none() {
-            if let Some((i, _)) = argc_matcher
+        if last == argc_filter && prefix_unbalance.is_none() {
+            if let Some((i, _)) = argc_filter
                 .char_indices()
                 .rfind(|(_, c)| break_chars.contains(c))
             {
                 argc_prefix = String::new();
                 let idx = i + 1;
-                argc_matcher = argc_matcher[idx..].to_string();
+                argc_filter = argc_filter[idx..].to_string();
                 for (value, _, _, _) in candidates.iter_mut() {
                     *value = value[idx..].to_string()
                 }
@@ -209,11 +209,11 @@ pub fn compgen(
 
     if !shell.is_generic() {
         if let Some(argc_value) = argc_value.and_then(|v| convert_arg_value(&v)) {
-            if let Some((value_prefix, value_matcher, more_candidates)) =
-                shell.comp_argc_value(&argc_value, &argc_matcher, &argc_cd, default_nospace)
+            if let Some((value_prefix, value_filter, more_candidates)) =
+                shell.comp_argc_value(&argc_value, &argc_filter, &argc_cd, default_nospace)
             {
                 argc_prefix = format!("{argc_prefix}{value_prefix}");
-                argc_matcher = value_matcher;
+                argc_filter = value_filter;
                 candidates.extend(more_candidates)
             }
         }
@@ -223,7 +223,7 @@ pub fn compgen(
         candidates,
         &argc_prefix,
         &argc_suffix,
-        &argc_matcher,
+        &argc_filter,
         no_color,
     );
 
@@ -361,7 +361,7 @@ impl Shell {
         candidates: Vec<CandidateValue>,
         prefix: &str,
         suffix: &str,
-        matcher: &str,
+        filter: &str,
         no_color: bool,
     ) -> Vec<String> {
         match self {
@@ -377,7 +377,7 @@ impl Shell {
                     }
                     return vec![format!("{value}{space}")];
                 } else if let Some(common) = common_prefix(&values) {
-                    if common != matcher {
+                    if common != filter {
                         if common != "--" {
                             let mut value = format!("{prefix}{common}");
                             if prefix_unbalance.is_none() {
@@ -623,7 +623,7 @@ impl Shell {
         } else {
             return None;
         };
-        let (search_dir, matcher, prefix) = self.resolve_path(value, cd)?;
+        let (search_dir, filter, prefix) = self.resolve_path(value, cd)?;
         if !search_dir.is_dir() {
             return None;
         }
@@ -636,7 +636,7 @@ impl Shell {
                 return Some((
                     "".into(),
                     "".into(),
-                    vec![(format!("{prefix}{matcher}"), "".into(), true, CompKind::Dir)],
+                    vec![(format!("{prefix}{filter}"), "".into(), true, CompKind::Dir)],
                 ));
             }
             let value_prefix = if prefix.is_empty() { ".\\" } else { "" };
@@ -665,10 +665,10 @@ impl Shell {
         for entry in (fs::read_dir(&search_dir).ok()?).flatten() {
             let path = entry.path();
             let file_name = entry.file_name().to_string_lossy().to_string();
-            if !file_name.starts_with(&matcher) {
+            if !file_name.starts_with(&filter) {
                 continue;
             }
-            if (matcher.is_empty() || !matcher.starts_with('.'))
+            if (filter.is_empty() || !filter.starts_with('.'))
                 && !is_windows_mode
                 && file_name.starts_with('.')
             {
@@ -730,7 +730,7 @@ impl Shell {
 
         output.sort_by(|a, b| a.0.cmp(&b.0));
 
-        Some((prefix, matcher, output))
+        Some((prefix, filter, output))
     }
 
     fn resolve_path(&self, value: &str, cd: &Option<String>) -> Option<(PathBuf, String, String)> {
@@ -783,16 +783,16 @@ impl Shell {
             let trims = cwd_s.len() + 1;
             (new_value, trims, prefix.to_string())
         };
-        let (path, matcher) = if new_value.ends_with(sep) {
+        let (path, filter) = if new_value.ends_with(sep) {
             (new_value, "".into())
         } else if value == "~" {
             (format!("{new_value}{sep}"), "".into())
         } else {
-            let (parent, matcher) = new_value.rsplit_once(sep)?;
-            (format!("{parent}{sep}"), matcher.into())
+            let (parent, filter) = new_value.rsplit_once(sep)?;
+            (format!("{parent}{sep}"), filter.into())
         };
         let prefix = format!("{prefix}{}", &path[trims..]);
-        Some((PathBuf::from(path), matcher, prefix))
+        Some((PathBuf::from(path), filter, prefix))
     }
 
     fn combine_value(&self, prefix: &str, value: &str, suffix: &str) -> String {

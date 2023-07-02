@@ -6,11 +6,11 @@ expression: data
 __argc_value:FILE	/kind:value
 
 ************ COMPGEN `prog --oa --ob=` ************
-__argc_matcher:	/kind:value
+__argc_filter:	/kind:value
 ok	/kind:value
 
 ************ COMPGEN `prog abc --ob=` ************
-__argc_matcher:	/kind:value
+__argc_filter:	/kind:value
 ok	/kind:value
 
 

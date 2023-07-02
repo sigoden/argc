@@ -6,19 +6,19 @@ expression: data
 --oa	/kind:option
 
 ************ COMPGEN `prog --oa ` ************
-__argc_matcher:	/kind:value
+__argc_filter:	/kind:value
 ok	/kind:value
 
 ************ COMPGEN `prog --oa --` ************
-__argc_matcher:	/kind:value
+__argc_filter:	/kind:value
 ok	/kind:value
 
 ************ COMPGEN `prog --oa v1 v2` ************
-__argc_matcher:	/kind:value
+__argc_filter:	/kind:value
 ok	/kind:value
 
 ************ COMPGEN `prog --oa -- ` ************
-__argc_matcher:	/kind:value
+__argc_filter:	/kind:value
 ok	/kind:value
 
 
