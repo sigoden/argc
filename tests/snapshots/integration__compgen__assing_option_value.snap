@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa=abc` ************
-__argc_filter:	/kind:value
+__argc_filter=	/kind:value
 ARGC_COMPGEN=1	/kind:value
 ARGC_DESCRIBE=true	/kind:value
 ARGC_FILTER=abc	/kind:value
@@ -15,7 +15,7 @@ argc__positionals=()	/kind:value
 argc_oa=abc	/kind:value
 
 ************ COMPGEN `prog oa=abc` ************
-__argc_filter:	/kind:value
+__argc_filter=	/kind:value
 ARGC_COMPGEN=1	/kind:value
 ARGC_DESCRIBE=true	/kind:value
 ARGC_FILTER=oa=abc	/kind:value

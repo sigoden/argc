@@ -424,8 +424,8 @@ fn multi_parts() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
-    echo __argc_prefix:A/
-    echo __argc_filter:''
+    echo __argc_prefix=A/
+    echo __argc_filter=''
 	echo B
 	echo -e "B/\0"
 }
@@ -439,8 +439,8 @@ fn multi_parts2() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
-    echo __argc_prefix:A/B/
-    echo __argc_filter:''
+    echo __argc_prefix=A/B/
+    echo __argc_filter=''
 	echo
 	echo C
 	echo D
@@ -456,7 +456,7 @@ fn assing_option_value() {
 # @option --oa[`_choice_fn`]
 # @arg val[`_choice_fn`]
 _choice_fn() {
-    echo __argc_filter:
+    echo __argc_filter=
     ( set -o posix ; set ) | grep 'argc_\|ARGC_' | grep -v 'ARGC_PWD\|ARGC_PATH_SEP\|ARGC_OS'
 }
 "###;
@@ -473,7 +473,7 @@ fn arg_terminated() {
 # @arg cmd
 # @arg args~[`_choice_fn`]
 _choice_fn() {
-    echo __argc_filter:
+    echo __argc_filter=
     echo ${argc__positionals[@]}
     echo ok
 }
@@ -497,7 +497,7 @@ fn option_terminated() {
 # @option --oa~[`_choice_fn`]
 # @option --ob
 _choice_fn() {
-    echo __argc_filter:
+    echo __argc_filter=
     echo ok
 }
 "###;
@@ -521,7 +521,7 @@ fn last_arg_option_assign() {
 # @option --ob <file>
 # @arg args~[`_choice_fn`]
 _choice_fn() {
-    echo __argc_filter:
+    echo __argc_filter=
     echo ok
 }
 "###;
@@ -665,8 +665,8 @@ _choice_fn() {
 	echo "abc:ijk:xyz"
 }
 _choice_fn2() {
-    echo __argc_prefix:/A/
-    echo __argc_filter:B
+    echo __argc_prefix=/A/
+    echo __argc_filter=B
     echo -e "B"
     echo -e "B/\0"
 }
@@ -706,8 +706,8 @@ fn filter_quote() {
     let script = r###"
 # @arg args[`_choice_fn`]
 _choice_fn() {
-    echo "__argc_prefix:${ARGC_FILTER%%=*}="
-    echo "__argc_filter:${ARGC_FILTER#*=}"
+    echo "__argc_prefix=${ARGC_FILTER%%=*}="
+    echo "__argc_filter=${ARGC_FILTER#*=}"
     echo foo
     echo bar
     :;
@@ -801,15 +801,15 @@ mod filedir {
 # @option --oa[`_choice_fn`]
 # @arg val[`_choice_fn2`]
 _choice_fn() {
-    echo "__argc_cd:src"
-    echo "__argc_value:file"
+    echo "__argc_cd=src"
+    echo "__argc_value=file"
 }
 _choice_fn2() {
     if [[ "$1" == *"="* ]]; then
-        echo __argc_prefix:${1%%=*}=
-        echo __argc_filter:${1#*=}
-        echo __argc_cd:src
-        echo __argc_value:file
+        echo __argc_prefix=${1%%=*}=
+        echo __argc_filter=${1#*=}
+        echo __argc_cd=src
+        echo __argc_value=file
 
     fi
 }
