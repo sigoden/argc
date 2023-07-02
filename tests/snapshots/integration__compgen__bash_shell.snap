@@ -15,9 +15,13 @@ ijk:xyz
  B 
 B/
 
+************ COMPGEN `prog --oc foo=` ************
+
+
 ************ COMPGEN `prog -` ************
 --oa 
 --ob 
+--oc 
 --fa 
 
 

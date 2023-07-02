@@ -178,6 +178,18 @@ pub fn compgen(
         .map(|(value, (description, nospace, comp_kind))| (value, description, nospace, comp_kind))
         .collect();
 
+    if !shell.is_generic() {
+        if let Some(argc_value) = argc_value.and_then(|v| convert_arg_value(&v)) {
+            if let Some((value_prefix, value_filter, more_candidates)) =
+                shell.comp_argc_value(&argc_value, &argc_filter, &argc_cd, default_nospace)
+            {
+                argc_prefix = format!("{argc_prefix}{value_prefix}");
+                argc_filter = value_filter;
+                candidates.extend(more_candidates)
+            }
+        }
+    }
+
     let break_chars = shell.need_break_chars();
     if !break_chars.is_empty() {
         let prefix_quote = unbalance_quote(&argc_prefix);
@@ -202,18 +214,6 @@ pub fn compgen(
                     *value = value[idx..].to_string()
                 }
             };
-        }
-    }
-
-    if !shell.is_generic() {
-        if let Some(argc_value) = argc_value.and_then(|v| convert_arg_value(&v)) {
-            if let Some((value_prefix, value_filter, more_candidates)) =
-                shell.comp_argc_value(&argc_value, &argc_filter, &argc_cd, default_nospace)
-            {
-                argc_prefix = format!("{argc_prefix}{value_prefix}");
-                argc_filter = value_filter;
-                candidates.extend(more_candidates)
-            }
         }
     }
 

@@ -657,6 +657,7 @@ fn bash_shell() {
     let script = r###"
 # @option --oa[`_choice_fn`]
 # @option --ob[`_choice_fn2`]
+# @option --oc <file>
 # @flag   --fa
 _choice_fn() {
 	echo "abc:def:xyz"
@@ -678,6 +679,7 @@ _choice_fn2() {
             vec!["prog", "--oa", ""],
             vec!["prog", "--oa", "abc:"],
             vec!["prog", "--ob", "/A/B"],
+            vec!["prog", "--oc", "foo="],
             vec!["prog", "-"]
         ],
         argc::Shell::Bash
