@@ -27,7 +27,7 @@ d:e>f
 'd:e>f'	1	d:e>f	
 
 ************ COMPGEN Zsh `prog --oa ` ************
-a\:b\\>c 	a\:b>c	a:b>c	32
-d\:e\\>f 	d\:e>f	d:e>f	32
+a\:b\\>c 	a\:b>c	a:b\>c	32
+d\:e\\>f 	d\:e>f	d:e\>f	32
 
 

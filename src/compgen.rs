@@ -482,11 +482,13 @@ impl Shell {
                         prefix.to_string()
                     };
                     let new_value = self.escape(&format!("{prefix}{value}{suffix}"));
+                    let match_value =
+                        escape_chars(&value, self.need_escape_chars(), "\\").replace("\\:", ":");
                     let display = value.replace(':', "\\:");
                     let description = self.comp_description(&description, ":", "");
                     let color = self.color(comp_kind, no_color);
                     let space = if nospace { "" } else { " " };
-                    format!("{new_value}{space}\t{display}{description}\t{value}\t{color}")
+                    format!("{new_value}{space}\t{display}{description}\t{match_value}\t{color}")
                 })
                 .collect::<Vec<String>>(),
         }
