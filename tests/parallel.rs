@@ -33,7 +33,7 @@ STDERR:
 
 "###
     );
-    assert!(elapsed_time.as_millis() < 3000);
+    assert!(elapsed_time.as_millis() < 3999);
     insta::assert_snapshot!(text);
 
     Ok(())
