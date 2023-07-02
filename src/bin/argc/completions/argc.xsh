@@ -1,6 +1,3 @@
-import os
-import re
-import shutil
 from subprocess import Popen, PIPE
 from xonsh.completers.tools import *
 from xonsh.completers._aliases import _add_one_completer

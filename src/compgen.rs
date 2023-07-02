@@ -397,10 +397,11 @@ impl Shell {
                         if i == 0 && add_space_to_first_candidate {
                             new_value = format!(" {}", new_value)
                         };
-                        if nospace {
-                            new_value
+                        let description = self.comp_description(&description, "(", ")");
+                        if description.is_empty() {
+                            let space = if nospace { "" } else { " " };
+                            format!("{new_value}{space}")
                         } else {
-                            let description = self.comp_description(&description, "(", ")");
                             format!("{new_value} {description}")
                         }
                     })
