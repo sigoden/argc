@@ -274,27 +274,34 @@ Argc can be used as multiple shell completion engine. see [argc-completions](htt
 
 ## Argcscript
 
-We can create a script called `Argcscript.sh`. If argc is run without the `--argc-*` options, argc will locate the file and run it.  
+Argc will automatically find and run `Argcfile.sh` unless `--argc-*` options are used to change this behaviour.
+
+Argcfile is to argc what Makefile is to make.
 
 what is the benefit?
 
 - Can enjoy a handy shell completion.
 - Can be invoked in arbitrarily subdirectory, no need to locate script file each time.
-- As a centralized entrypoint for executing the project's bash scripts.
-- serves as a script for a task runner similar to how Makefile acts as make.
+- As a centralized entrypoint/document for executing the project's bash scripts.
+- Serves as a script for a task runner.
 
-You can use `argc --argc-create` to quickly create boilerplate Argcscripts.
+You can use `argc --argc-create` to quickly create boilerplate Argcscripts. For example:
 
-## Migrate
-
-To migrate from v0 to v1, the only thing you need to do is:
-
-Replace `eval "$(argc "$0" "$@")"` with `eval "$(argc --argc-eval "$0" "$@")"` in your script.
-
-Otherwise you may encounter an error message like this when running the script:
+```sh
+argc --argc-create test build run
 ```
-Not found argcscript, try `argc --argc-help` to get help.
+
+The above command will create an `Argcfile.sh` in the current directory containing the commands: `test`, `build` and `run`.
+
+## Parallel
+
+argc provides features for running commands/functions in parallel.
+
+```sh
+argc --argc-parallel "$0" cmd1 arg1 arg2 ::: cmd2
 ```
+
+The above command will run `cmd1 arg1 arg2` and `cmd2` in parellel. TFunctions running in parallel mode can still use the `argc_*` variable.
 
 ## Windows Only
 
