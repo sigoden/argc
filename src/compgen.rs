@@ -239,6 +239,7 @@ pub(crate) enum CompKind {
     File,
     FileExe,
     Symlink,
+    ValueOther,
     ValueAnother,
     ValueEmphasis,
     ValueSubtle,
@@ -257,6 +258,7 @@ impl FromStr for CompKind {
             "file" => Ok(Self::File),
             "fileexe" => Ok(Self::FileExe),
             "symlink" => Ok(Self::Symlink),
+            "valueother" => Ok(Self::ValueOther),
             "valueanother" => Ok(Self::ValueAnother),
             "valueemphasis" => Ok(Self::ValueEmphasis),
             "valuesubtle" => Ok(Self::ValueSubtle),
@@ -275,6 +277,7 @@ impl CompKind {
             Self::File => "file",
             Self::FileExe => "exe",
             Self::Symlink => "symlink",
+            Self::ValueOther => "valueOther",
             Self::ValueAnother => "valueAnother",
             Self::ValueEmphasis => "valueEmphasis",
             Self::ValueSubtle => "valueSubtle",
@@ -536,9 +539,10 @@ impl Shell {
                     CompKind::File => "default",
                     CompKind::FileExe => "green bold",
                     CompKind::Symlink => "cyan bold",
+                    CompKind::ValueOther => "yellow",
+                    CompKind::ValueAnother => "red",
                     CompKind::ValueEmphasis => "green bold",
                     CompKind::ValueSubtle => "green dim",
-                    CompKind::ValueAnother => "yellow",
                     CompKind::Value => "green",
                 }
             }
@@ -554,9 +558,10 @@ impl Shell {
                     CompKind::File => "39",
                     CompKind::FileExe => "1;32",
                     CompKind::Symlink => "1;36",
+                    CompKind::ValueOther => "33",
+                    CompKind::ValueAnother => "31",
                     CompKind::ValueEmphasis => "1;32",
                     CompKind::ValueSubtle => "2;32",
-                    CompKind::ValueAnother => "33",
                     CompKind::Value => "32",
                 }
             }
