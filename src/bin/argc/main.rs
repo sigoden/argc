@@ -1,4 +1,5 @@
 mod completions;
+mod parallel;
 mod utils;
 
 use anyhow::{anyhow, bail, Context, Result};
@@ -6,6 +7,7 @@ use argc::{
     utils::{escape_shell_words, get_current_dir, get_shell_path, termwidth},
     Shell,
 };
+use base64::{engine::general_purpose, Engine as _};
 use std::{
     collections::HashMap,
     env, fs, process,
@@ -46,13 +48,31 @@ fn run() -> Result<i32> {
         match argc_cmd {
             "--argc-eval" => {
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
-                let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())
-                    .map_err(|err| anyhow!("error: {err}"))?;
-                let export_pwd = match env::var("ARGC_PWD").ok().or_else(get_current_dir) {
-                    Some(v) => format!("export ARGC_PWD={v}\n"),
-                    None => String::new(),
-                };
-                println!("{export_pwd}{}", argc::ArgcValue::to_shell(values))
+                if cmd_args
+                    .get(1)
+                    .map(|v| v == parallel::PARALLEL_MODE)
+                    .unwrap_or_default()
+                {
+                    let cmd_args_len = cmd_args.len();
+                    if cmd_args_len < 3 {
+                        bail!("No parallel command")
+                    }
+                    let mut code = retrive_argc_variables().unwrap_or_default();
+                    let mut cmds = vec![cmd_args[2].to_string()];
+                    cmds.extend(cmd_args[3..].iter().map(|v| escape_shell_words(v)));
+                    code.push_str(&cmds.join(" "));
+                    println!("{code}")
+                } else {
+                    let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())
+                        .map_err(|err| anyhow!("error: {err}"))?;
+                    let export_pwd = match env::var("ARGC_PWD").ok().or_else(get_current_dir) {
+                        Some(v) => format!("export ARGC_PWD={v}\n"),
+                        None => String::new(),
+                    };
+                    let code = argc::ArgcValue::to_shell(&values);
+                    let export_vars = export_argc_variables(&code);
+                    println!("{export_pwd}{export_vars}{code}")
+                }
             }
             "--argc-create" => {
                 if let Some((_, script_file)) = get_script_path(false) {
@@ -79,6 +99,18 @@ fn run() -> Result<i32> {
                 };
                 let script = crate::completions::generate(shell, &args[3..])?;
                 println!("{}", script);
+            }
+            "--argc-parallel" => {
+                if args.len() <= 3 {
+                    bail!("Usage: argc --argc-parallel <SCRIPT> <ARGS...>");
+                }
+                let shell = get_shell_path().ok_or_else(|| anyhow!("Shell not found"))?;
+                let (source, cmd_args) = parse_script_args(&args[2..])?;
+                if !source.contains("--argc-eval") {
+                    bail!("Parallel only available for argc based scripts.")
+                }
+                let script_file = args[2].clone();
+                parallel::parallel(&shell, &script_file, &cmd_args[1..])?;
             }
             "--argc-script-path" => {
                 let (_, script_file) =
@@ -160,6 +192,30 @@ fn run_compgen(mut args: Vec<String>) -> Option<()> {
     Some(())
 }
 
+fn export_argc_variables(code: &str) -> String {
+    let mut value = code
+        .split('\n')
+        .filter(|line| line.starts_with(argc::VARIABLE_PREFIX))
+        .map(|v| v.to_string())
+        .collect::<Vec<String>>()
+        .join(";");
+    if value.is_empty() {
+        return value;
+    } else {
+        value.push(';');
+    }
+    format!(
+        "export ARGC_VARS={}\n",
+        general_purpose::STANDARD.encode(value)
+    )
+}
+
+fn retrive_argc_variables() -> Option<String> {
+    let value = env::var("ARGC_VARS").ok()?;
+    let value = general_purpose::STANDARD.decode(value).ok()?;
+    String::from_utf8(value).ok()
+}
+
 fn get_argc_help() -> String {
     let about = concat!(
         env!("CARGO_PKG_DESCRIPTION"),
@@ -175,6 +231,7 @@ USAGE:
     argc --argc-completions <SHELL> [CMDS...]       Generate completion scripts for bash,elvish,fish,nushell,powershell,xsh,zsh
     argc --argc-compgen <SHELL> <SCRIPT> <ARGS...>  Generate dynamic completion word
     argc --argc-export <SCRIPT>                     Export command line definitions as json
+    argc --argc-parallel <SCRIPT> <ARGS...>         Execute argc functions in parallel
     argc --argc-script-path                         Print current argcfile path
     argc --argc-help                                Print help information
     argc --argc-version                             Print version information

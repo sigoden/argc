@@ -33,7 +33,7 @@ pub fn tmpdir() -> TempDir {
     let tmpdir = assert_fs::TempDir::new().expect("Couldn't create a temp dir for tests");
     for path in SCRIPT_PATHS {
         let cp = tmpdir_path(&tmpdir, path);
-        if path.ends_with("EMPTY") {
+        if path == "EMPTY" {
             cp.write_str("").unwrap();
         } else {
             cp.write_str(&get_script(path)).unwrap();
@@ -107,6 +107,30 @@ main() {{
 # @cmd
 task1() {{
     sleep $1
+}}
+
+# @cmd
+cmd1() {{
+    sleep 2
+    echo cmd1 "$@" 
+    (set -o posix; set)  | grep argc_
+    env | grep ARGC_ | grep -v 'ARGC_PWD\|ARGC_PATH_SEP\|ARGC_OS'
+    echo cmd1 "$@"  >&2
+}}
+
+# @cmd
+cmd2() {{
+    sleep 2
+    echo cmd2 "$@" 
+    (set -o posix; set)  | grep argc_
+    env | grep ARGC_ | grep -v 'ARGC_PWD\|ARGC_PATH_SEP\|ARGC_OS'
+    echo cmd2 "$@"  >&2
+}}
+
+# @cmd
+# @option --oa
+task2() {{
+    argc --argc-parallel "$0" cmd1 abc ::: cmd2
 }}
 
 eval "$(argc --argc-eval "$0" "$@")"

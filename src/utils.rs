@@ -133,7 +133,7 @@ pub fn get_current_dir() -> Option<String> {
         .map(|v| v.to_string_lossy().to_string())
 }
 
-fn path_env_with_exe() -> String {
+pub fn path_env_with_exe() -> String {
     let mut path_env = std::env::var("PATH").ok().unwrap_or_default();
     if let Some(exe_dir) = std::env::current_exe()
         .ok()

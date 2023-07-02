@@ -8,7 +8,7 @@ prog
 OUTPUT
 argc__args=( prog )
 argc__index=0
-argc__positionals=(  )
 argc__fn=main
+argc__positionals=(  )
 main
 

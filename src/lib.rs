@@ -7,7 +7,7 @@ mod parser;
 pub mod utils;
 
 use anyhow::Error;
-pub use argc_value::ArgcValue;
+pub use argc_value::{ArgcValue, VARIABLE_PREFIX};
 pub use command::{eval, export};
 pub use compgen::{compgen, Shell};
 

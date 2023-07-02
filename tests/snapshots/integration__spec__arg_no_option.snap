@@ -9,7 +9,7 @@ OUTPUT
 argc_val=( --o1 -o2 -3 )
 argc__args=( prog cmdc --o1 -o2 -3 )
 argc__index=1
-argc__positionals=( --o1 -o2 -3 )
 argc__fn=cmdc
+argc__positionals=( --o1 -o2 -3 )
 cmdc --o1 -o2 -3
 

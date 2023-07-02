@@ -7,7 +7,7 @@ macro_rules! eval {
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
         let values = argc::eval(None, $source, &args, None).unwrap();
-        let shell_code = argc::ArgcValue::to_shell(values);
+        let shell_code = argc::ArgcValue::to_shell(&values);
         assert_eq!(shell_code, $output);
     };
 }
@@ -41,7 +41,7 @@ macro_rules! snapshot {
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
         let values = argc::eval($source, &args, $path, $width).unwrap();
-        let shell_code = argc::ArgcValue::to_shell(values);
+        let shell_code = argc::ArgcValue::to_shell(&values);
         let args = $args.join(" ");
         let data = format!(
             r###"RUN
@@ -79,7 +79,7 @@ OUTPUT
 
 "###,
                 args,
-                argc::ArgcValue::to_shell(values),
+                argc::ArgcValue::to_shell(&values),
             );
             data.push_str(&piece);
         }

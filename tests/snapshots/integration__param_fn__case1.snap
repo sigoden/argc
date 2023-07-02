@@ -9,7 +9,6 @@ OUTPUT
 argc__args=( prog )
 argc__index=0
 argc__positionals=(  )
-argc__fn=_choice_fn
 _choice_fn;exit;
 
 ************ RUN ************
@@ -20,7 +19,6 @@ argc_cc=''
 argc__args=( prog cmda --cc '' )
 argc__index=1
 argc__positionals=(  )
-argc__fn=_choice_fn
 _choice_fn;exit;
 
 ************ RUN ************
@@ -33,7 +31,6 @@ argc_cc=''
 argc__args=( prog cmda -a --oa oa --cc '' )
 argc__index=1
 argc__positionals=(  )
-argc__fn=_choice_fn
 _choice_fn;exit;
 
 

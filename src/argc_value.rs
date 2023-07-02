@@ -17,34 +17,33 @@ pub enum ArgcValue {
 }
 
 impl ArgcValue {
-    pub fn to_shell(values: Vec<Self>) -> String {
-        let mut variables = vec![];
+    pub fn to_shell(values: &[Self]) -> String {
+        let mut output = vec![];
         let mut last = String::new();
-        let mut call = String::new();
         let mut positional_args = vec![];
         for value in values {
             match value {
                 ArgcValue::Single(name, value) => {
-                    variables.push(format!(
+                    output.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(&name),
-                        escape_shell_words(&value)
+                        hyphens_to_underscores(name),
+                        escape_shell_words(value)
                     ));
                 }
                 ArgcValue::SingleFn(name, fn_name) => {
-                    variables.push(format!(
+                    output.push(format!(
                         "{}_{}=`{}`",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(&name),
+                        hyphens_to_underscores(name),
                         fn_name,
                     ));
                 }
                 ArgcValue::Multiple(name, values) => {
-                    variables.push(format!(
+                    output.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(&name),
+                        hyphens_to_underscores(name),
                         values
                             .iter()
                             .map(|v| escape_shell_words(v))
@@ -53,20 +52,20 @@ impl ArgcValue {
                     ));
                 }
                 ArgcValue::PositionalSingle(name, value) => {
-                    let value = escape_shell_words(&value);
-                    variables.push(format!(
+                    let value = escape_shell_words(value);
+                    output.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(&name),
+                        hyphens_to_underscores(name),
                         &value
                     ));
                     positional_args.push(value);
                 }
                 ArgcValue::PositionalSingleFn(name, fn_name) => {
-                    variables.push(format!(
+                    output.push(format!(
                         "{}_{}=`{}`",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(&name),
+                        hyphens_to_underscores(name),
                         &fn_name
                     ));
                     positional_args.push(format!("`{}`", fn_name));
@@ -76,10 +75,10 @@ impl ArgcValue {
                         .iter()
                         .map(|v| escape_shell_words(v))
                         .collect::<Vec<String>>();
-                    variables.push(format!(
+                    output.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(&name),
+                        hyphens_to_underscores(name),
                         values.join(" ")
                     ));
                     positional_args.extend(values);
@@ -97,7 +96,7 @@ impl ArgcValue {
                     } else {
                         last = format!("{} {}", name, positional_args.join(" "));
                     }
-                    call = name.clone();
+                    output.push(format!("{}__fn={}", VARIABLE_PREFIX, name));
                 }
                 ArgcValue::ParamFn(name) => {
                     if positional_args.is_empty() {
@@ -105,7 +104,6 @@ impl ArgcValue {
                     } else {
                         last = format!("{} {};exit;", name, positional_args.join(" "));
                     }
-                    call = name.clone();
                 }
                 ArgcValue::Error((error, exit)) => {
                     return format!("cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit)
@@ -113,24 +111,16 @@ impl ArgcValue {
             }
         }
 
-        variables.push(format!(
+        output.push(format!(
             "{}__positionals=( {} )",
             VARIABLE_PREFIX,
             positional_args.join(" ")
         ));
 
-        if !call.is_empty() {
-            variables.push(format!("{}__fn={}", VARIABLE_PREFIX, call));
-        }
-
         if !last.is_empty() {
-            variables.push(last);
+            output.push(last);
         }
 
-        variables.join("\n")
-    }
-
-    pub fn is_cmd_fn(&self) -> bool {
-        matches!(self, Self::CmdFn(_))
+        output.join("\n")
     }
 }
