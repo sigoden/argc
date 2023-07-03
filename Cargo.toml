@@ -1,6 +1,6 @@
 [package]
 name = "argc"
-version = "1.6.0"
+version = "1.7.0"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
 description = "An elegant command-line options, arguments and sub-commands parser for bash."
@@ -14,7 +14,7 @@ keywords = ["command-line", "shell-script", "argument-parser"]
 [dependencies]
 anyhow = "1"
 convert_case = "0.6"
-indexmap = "1.9"
+indexmap = "2"
 nom = "7.1"
 either = "1.8"
 serde = { version = "1.0", features = ["derive"] }
@@ -32,8 +32,8 @@ base64 = "0.21.2"
 insta = "1.30"
 assert_cmd = "2"
 assert_fs = "1"
-rstest = "0.15"
-predicates = "2"
+rstest = "0.17"
+predicates = "3"
 
 [target.'cfg(unix)'.dev-dependencies]
 libc = "0.2"
