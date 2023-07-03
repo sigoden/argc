@@ -6,7 +6,7 @@ use std::process::{self, Command};
 use std::sync::mpsc::channel;
 use threadpool::ThreadPool;
 
-pub const PARALLEL_MODE: &str = "__parallel__";
+pub const PARALLEL_MODE: &str = "___parallel___";
 
 pub fn parallel(shell: &Path, script_file: &str, args: &[String]) -> Result<()> {
     let jobs = to_jobs(args);

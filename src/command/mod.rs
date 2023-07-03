@@ -8,6 +8,7 @@ use crate::argc_value::ArgcValue;
 use crate::matcher::Matcher;
 use crate::param::{FlagOptionParam, PositionalParam};
 use crate::parser::{parse, Event, EventData, EventScope, Position};
+use crate::utils::INTERNAL_MODE;
 use crate::Result;
 
 use anyhow::{bail, Context};
@@ -64,16 +65,16 @@ impl Command {
         if args.is_empty() {
             bail!("Invalid args");
         }
-        if args.len() >= 2 && self.root.borrow().exist_param_fn(args[1].as_str()) {
+        if args.len() >= 3 && args[1] == INTERNAL_MODE {
             let fallback_args = vec!["prog".to_string()];
-            let new_args = if args.len() == 2 {
+            let new_args = if args.len() == 3 {
                 &fallback_args
             } else {
-                &args[2..]
+                &args[3..]
             };
             let matcher = Matcher::new(self, new_args);
             let mut arg_values = matcher.to_arg_values_for_choice_fn();
-            arg_values.push(ArgcValue::ParamFn(args[1].clone()));
+            arg_values.push(ArgcValue::ParamFn(args[2].clone()));
             return Ok(arg_values);
         }
         let mut matcher = Matcher::new(self, args);

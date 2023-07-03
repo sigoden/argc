@@ -5,10 +5,19 @@ fn case1() {
     snapshot_multi!(
         SCRIPT_OPTIONS,
         vec![
-            vec!["prog", "_choice_fn"],
-            vec!["prog", "_choice_fn", "prog", "cmda", "--cc", ""],
+            vec!["prog", "___internal___", "_choice_fn"],
             vec![
                 "prog",
+                "___internal___",
+                "_choice_fn",
+                "prog",
+                "cmda",
+                "--cc",
+                ""
+            ],
+            vec![
+                "prog",
+                "___internal___",
                 "_choice_fn",
                 "prog",
                 "cmda",
@@ -27,12 +36,37 @@ fn case2() {
     snapshot_multi!(
         SCRIPT_ARGS,
         vec![
-            vec!["prog", "_choice_fn"],
-            vec!["prog", "_choice_fn", "prog", "cmdl", ""],
-            vec!["prog", "_choice_fn", "prog", "cmdl", "v1"],
-            vec!["prog", "_choice_fn", "prog", "cmdl", "v1", ""],
-            vec!["prog", "_choice_fn", "prog", "cmdl", "v1", "v2"],
-            vec!["prog", "_choice_fn", "prog", "cmdl", "v1", "v2", ""],
+            vec!["prog", "___internal___", "_choice_fn"],
+            vec!["prog", "___internal___", "_choice_fn", "prog", "cmdl", ""],
+            vec!["prog", "___internal___", "_choice_fn", "prog", "cmdl", "v1"],
+            vec![
+                "prog",
+                "___internal___",
+                "_choice_fn",
+                "prog",
+                "cmdl",
+                "v1",
+                ""
+            ],
+            vec![
+                "prog",
+                "___internal___",
+                "_choice_fn",
+                "prog",
+                "cmdl",
+                "v1",
+                "v2"
+            ],
+            vec![
+                "prog",
+                "___internal___",
+                "_choice_fn",
+                "prog",
+                "cmdl",
+                "v1",
+                "v2",
+                ""
+            ],
         ]
     );
 }
@@ -50,12 +84,20 @@ _choice_fn() {
     snapshot_multi!(
         script,
         vec![
-            vec!["prog", "_choice_fn"],
-            vec!["prog", "_choice_fn", "prog", ""],
-            vec!["prog", "_choice_fn", "prog", "v1"],
-            vec!["prog", "_choice_fn", "prog", "v1", ""],
-            vec!["prog", "_choice_fn", "prog", "v1", "v2"],
-            vec!["prog", "_choice_fn", "prog", "v1", "v2", ""],
+            vec!["prog", "___internal___", "_choice_fn"],
+            vec!["prog", "___internal___", "_choice_fn", "prog", ""],
+            vec!["prog", "___internal___", "_choice_fn", "prog", "v1"],
+            vec!["prog", "___internal___", "_choice_fn", "prog", "v1", ""],
+            vec!["prog", "___internal___", "_choice_fn", "prog", "v1", "v2"],
+            vec![
+                "prog",
+                "___internal___",
+                "_choice_fn",
+                "prog",
+                "v1",
+                "v2",
+                ""
+            ],
         ]
     );
 }
