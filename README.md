@@ -236,9 +236,8 @@ Value notation is used to describe value type of options and positional paramete
 
 Here are some value notation that will affect the shell completion.
 
-- `<FILE>`: complete files
-- `<DIR>`: complete directories
-- `<PATH>`: complete files and directories
+- `FILE`/`PATH`: complete files
+- `DIR`: complete directories
 
 ## Shell Completion
 
@@ -287,7 +286,7 @@ what is the benefit?
 
 You can use `argc --argc-create` to quickly create boilerplate Argcscripts. For example:
 
-```sh
+```
 argc --argc-create test build run
 ```
 
@@ -301,17 +300,20 @@ argc provides features for running commands/functions in parallel.
 argc --argc-parallel "$0" cmd1 arg1 arg2 ::: cmd2
 ```
 
-The above command will run `cmd1 arg1 arg2` and `cmd2` in parellel. TFunctions running in parallel mode can still use the `argc_*` variable.
+The above command will run `cmd1 arg1 arg2` and `cmd2` in parellel. Functions running in parallel mode can still access the `argc_*` variable.
 
 ## Windows Only
 
 Argc requires bash to run scripts. [git](https://git-scm.com/)'s built-in bash is good enough for argc.
 
-If you want to use another bash, please specify it via `ARGC_SHELL` environment variable.
+If you want to use another bash, please specify it via `ARGC_SHELL_PATH` environment variable.
 
 If you want to run the bash script directly, you can add the following configuration to Windows Registry.
 
-```
+```ps1
+# Add .sh to PATHEXT
+[Environment]::SetEnvironmentVariable("PATHEXT", [Environment]::GetEnvironmentVariable("PATHEXT", "Machine") + ";.SH", "Machine")
+# Associate the .sh file extension with Git Bash
 New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\command' `
   -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
 ```
