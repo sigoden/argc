@@ -3,7 +3,7 @@ source: tests/param_fn.rs
 expression: data
 ---
 ************ RUN ************
-prog _choice_fn
+prog ___internal___ _choice_fn
 
 OUTPUT
 argc__args=( prog )
@@ -12,7 +12,7 @@ argc__positionals=(  )
 _choice_fn;exit;
 
 ************ RUN ************
-prog _choice_fn prog cmda --cc 
+prog ___internal___ _choice_fn prog cmda --cc 
 
 OUTPUT
 argc_cc=''
@@ -22,7 +22,7 @@ argc__positionals=(  )
 _choice_fn;exit;
 
 ************ RUN ************
-prog _choice_fn prog cmda -a --oa oa --cc 
+prog ___internal___ _choice_fn prog cmda -a --oa oa --cc 
 
 OUTPUT
 argc_a=1

@@ -41,8 +41,4 @@ impl RootData {
         }
         Ok(())
     }
-
-    pub(crate) fn exist_param_fn(&self, name: &str) -> bool {
-        self.choices_fns.iter().any(|(v, _)| v == name)
-    }
 }
