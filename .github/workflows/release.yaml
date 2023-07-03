@@ -57,12 +57,12 @@ jobs:
       id: check-tag
       shell: bash
       run: |
-        tag=${GITHUB_REF##*/}
-        echo "::set-output name=version::$tag"
-        if [[ "$tag" =~ [0-9]+.[0-9]+.[0-9]+$ ]]; then
-          echo "::set-output name=rc::false"
+        ver=${GITHUB_REF##*/}
+        echo "version=$ver" >> $GITHUB_OUTPUT
+        if [[ "$ver" =~ [0-9]+.[0-9]+.[0-9]+$ ]]; then
+          echo "rc=false" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=rc::true"
+          echo "rc=true" >> $GITHUB_OUTPUT
         fi
 
 
@@ -122,11 +122,11 @@ jobs:
         if [[ "$RUNNER_OS" == "Windows" ]]; then
             archive=$dist/$name.zip
             7z a $archive *
-            echo "::set-output name=archive::`pwd -W`/$name.zip"
+            echo "archive=$archive" >> $GITHUB_OUTPUT
         else
             archive=$dist/$name.tar.gz
             tar czf $archive *
-            echo "::set-output name=archive::$archive"
+            echo "archive=$archive" >> $GITHUB_OUTPUT
         fi
 
     - name: Publish Archive
