@@ -120,7 +120,7 @@ fn arg_two_multi() {
 }
 
 #[test]
-fn dashdash_split() {
+fn dash_split() {
     let script = r###"
 # @flag -f
 # @option --oa
