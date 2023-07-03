@@ -22,7 +22,7 @@ pub(crate) struct Matcher<'a, 'b> {
     args: &'b [String],
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
     positional_args: Vec<&'b str>,
-    dashdash: Vec<usize>,
+    dashes: Vec<usize>,
     arg_comp: ArgComp,
     choices_fns: HashSet<&'a str>,
     choices_values: HashMap<&'a str, Vec<String>>,
@@ -69,7 +69,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut arg_index = 1;
         let mut flag_option_args = vec![vec![]];
         let mut positional_args = vec![];
-        let mut dashdash = vec![];
+        let mut dashes = vec![];
         let mut is_rest_args_positional = false;
         let mut is_last_arg_option_assign = false;
         let mut arg_comp = ArgComp::Any;
@@ -86,7 +86,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let cmd = cmds[cmd_level].1;
             let arg = args[arg_index].as_str();
             if arg == "--" {
-                dashdash.push(positional_args.len());
+                dashes.push(positional_args.len());
                 if is_rest_args_positional {
                     add_positional_arg(
                         &mut positional_args,
@@ -96,7 +96,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     );
                 }
             } else if is_rest_args_positional
-                || !dashdash.is_empty()
+                || !dashes.is_empty()
                 || (cmd.no_flags_options_subcommands() && !KNOWN_OPTIONS.contains(&arg))
             {
                 add_positional_arg(&mut positional_args, arg, &mut is_rest_args_positional, cmd);
@@ -181,7 +181,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             args,
             flag_option_args,
             positional_args,
-            dashdash,
+            dashes,
             arg_comp,
             choices_fns,
             choices_values: HashMap::new(),
@@ -238,10 +238,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
     pub(crate) fn to_arg_values_for_choice_fn(&self) -> Vec<ArgcValue> {
         let mut output: Vec<ArgcValue> = self.to_arg_values_base();
-        if !self.dashdash.is_empty() {
+        if !self.dashes.is_empty() {
             output.push(ArgcValue::Multiple(
-                "_dashdash".into(),
-                self.dashdash.iter().map(|v| v.to_string()).collect(),
+                "_dashes".into(),
+                self.dashes.iter().map(|v| v.to_string()).collect(),
             ));
         }
         output
@@ -550,13 +550,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
         while param_index < params_len && arg_index < args_len {
             let param = &cmd.positional_params[param_index];
             if param.multiple {
-                let dashdash_idx = self.dashdash.first().cloned().unwrap_or_default();
+                let dash_idx = self.dashes.first().cloned().unwrap_or_default();
                 let takes = if param_index == 0
-                    && dashdash_idx > 0
+                    && dash_idx > 0
                     && params_len == 2
                     && cmd.positional_params[1].multiple
                 {
-                    dashdash_idx
+                    dash_idx
                 } else {
                     (args_len - arg_index).saturating_sub(params_len - param_index) + 1
                 };
