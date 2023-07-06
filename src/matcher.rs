@@ -321,7 +321,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 comp_subcommands_positional(last_cmd, &values, self.positional_args.len() < 2)
             }
         };
-        if output.is_empty() && !self.arg_comp.is_flag_or_option() {
+        if output.is_empty()
+            && !self.arg_comp.is_flag_or_option()
+            && last_cmd.positional_params.is_empty()
+        {
             output.push(("__argc_value=file".into(), String::new(), CompKind::Value));
         }
         output
