@@ -30,15 +30,10 @@ pub fn compgen(
             (last_arg.to_string(), None)
         }
     };
-    let redirect_symbols = shell.redirect_symbols();
-    let mut exist_redirect_symbol = false;
     let new_args: Vec<String> = args
         .iter()
         .enumerate()
         .map(|(i, v)| {
-            if !exist_redirect_symbol && redirect_symbols.contains(&v.as_str()) {
-                exist_redirect_symbol = true
-            }
             if i == args.len() - 1 {
                 last.clone()
             } else {
@@ -46,12 +41,9 @@ pub fn compgen(
             }
         })
         .collect();
-    if exist_redirect_symbol {
-        return Ok("__argc_value=file".to_string());
-    }
     let cmd = Command::new(script_content)?;
     let matcher = Matcher::new(&cmd, &new_args);
-    let compgen_values = matcher.compgen();
+    let compgen_values = matcher.compgen(shell);
     let mut default_nospace = unbalance.is_some();
     let mut prefix = unbalance.map(|v| v.to_string()).unwrap_or_default();
     let mut candidates: IndexMap<String, (String, bool, CompKind)> = IndexMap::new();
@@ -516,7 +508,7 @@ impl Shell {
         }
     }
 
-    fn color(&self, comp_kind: CompKind, no_color: bool) -> &'static str {
+    pub(crate) fn color(&self, comp_kind: CompKind, no_color: bool) -> &'static str {
         match self {
             Shell::Elvish => {
                 if no_color {
@@ -560,7 +552,7 @@ impl Shell {
         }
     }
 
-    fn redirect_symbols(&self) -> Vec<&str> {
+    pub(crate) fn redirect_symbols(&self) -> Vec<&str> {
         match self {
             Shell::Nushell => vec![],
             _ => vec!["<", ">"],

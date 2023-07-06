@@ -726,7 +726,7 @@ fn redirect_symbols() {
 # @arg text*
 "###;
 
-    snapshot_compgen_shells!(script, vec!["prog", ">", ""]);
+    snapshot_compgen_shells!(script, vec!["prog", ">", "Argc"]);
 }
 
 #[test]
