@@ -2,25 +2,7 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN Bash `prog > ` ************
-__argc_value=file
-
-************ COMPGEN Elvish `prog > ` ************
-__argc_value=file
-
-************ COMPGEN Fish `prog > ` ************
-__argc_value=file
-
-************ COMPGEN Nushell `prog > ` ************
-
-
-************ COMPGEN Powershell `prog > ` ************
-__argc_value=file
-
-************ COMPGEN Xonsh `prog > ` ************
-__argc_value=file
-
-************ COMPGEN Zsh `prog > ` ************
-__argc_value=file
+************ COMPGEN `prog > Argc` ************
+Argcfile.sh 
 
 

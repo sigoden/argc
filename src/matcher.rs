@@ -9,7 +9,7 @@ use crate::{
     compgen::CompKind,
     param::{FlagOptionParam, PositionalParam},
     utils::run_param_fns,
-    ArgcValue,
+    ArgcValue, Shell,
 };
 
 use either::Either;
@@ -247,7 +247,15 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
-    pub(crate) fn compgen(&self) -> Vec<CompItem> {
+    pub(crate) fn compgen(&self, shell: Shell) -> Vec<CompItem> {
+        let redirect_symbols = shell.redirect_symbols();
+        if self
+            .args
+            .iter()
+            .any(|v| redirect_symbols.contains(&v.as_str()))
+        {
+            return vec![("__argc_value=file".into(), String::new(), CompKind::Value)];
+        }
         let level = self.cmds.len() - 1;
         let mut last_cmd = self.cmds[level].1;
         let mut output = match &self.arg_comp {

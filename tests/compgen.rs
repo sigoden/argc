@@ -566,6 +566,16 @@ cmd() {
 }
 
 #[test]
+fn redirect_symbols() {
+    let script = r###"
+# @option --oa
+# @arg text*
+"###;
+
+    snapshot_compgen!(script, vec![vec!["prog", ">", "Argc"]], argc::Shell::Bash);
+}
+
+#[test]
 fn mult_char() {
     let script = r###"
 # @option --oa*,[`_choice_fn`]
@@ -717,16 +727,6 @@ _choice_fn() {
 "###;
 
     snapshot_compgen_shells!(script, vec!["prog", "v='"]);
-}
-
-#[test]
-fn redirect_symbols() {
-    let script = r###"
-# @option --oa
-# @arg text*
-"###;
-
-    snapshot_compgen_shells!(script, vec!["prog", ">", ""]);
 }
 
 #[test]
