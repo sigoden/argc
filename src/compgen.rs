@@ -379,7 +379,7 @@ impl Shell {
                     .into_iter()
                     .enumerate()
                     .map(|(i, (value, description, nospace, _comp_kind))| {
-                        let mut new_value = self.escape(&value);
+                        let mut new_value = value;
                         if i == 0 && add_space_to_first_candidate {
                             new_value = format!(" {}", new_value)
                         };
