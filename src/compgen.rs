@@ -861,7 +861,7 @@ fn unbalance_quote(value: &str) -> Option<(char, usize)> {
             return Some((ch, 0));
         }
     } else if value.ends_with(is_quote) {
-        let ch = value.chars().rev().next()?;
+        let ch = value.chars().next_back()?;
         if value.chars().filter(|c| *c == ch).count() % 2 == 1 {
             return Some((ch, value.len() - 1));
         }
