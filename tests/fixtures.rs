@@ -114,7 +114,7 @@ cmd1() {{
     sleep 2
     echo cmd1 "$@" 
     (set -o posix; set)  | grep argc_
-    env | grep ARGC_ | grep -v 'ARGC_PWD\|ARGC_PATH_SEP\|ARGC_OS' | sort
+    env | grep ARGC_ | grep 'ARGC_PARALLEL\|ARGC_VARS' | sort
     echo cmd1 "$@"  >&2
 }}
 
@@ -123,7 +123,7 @@ cmd2() {{
     sleep 2
     echo cmd2 "$@" 
     (set -o posix; set)  | grep argc_
-    env | grep ARGC_ | grep -v 'ARGC_PWD\|ARGC_PATH_SEP\|ARGC_OS' | sort
+    env | grep ARGC_ | grep 'ARGC_PARALLEL\|ARGC_VARS' | sort
     echo cmd2 "$@"  >&2
 }}
 

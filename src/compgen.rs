@@ -379,7 +379,7 @@ impl Shell {
                     .into_iter()
                     .enumerate()
                     .map(|(i, (value, description, nospace, _comp_kind))| {
-                        let mut new_value = self.escape(&value);
+                        let mut new_value = value;
                         if i == 0 && add_space_to_first_candidate {
                             new_value = format!(" {}", new_value)
                         };
@@ -861,7 +861,7 @@ fn unbalance_quote(value: &str) -> Option<(char, usize)> {
             return Some((ch, 0));
         }
     } else if value.ends_with(is_quote) {
-        let ch = value.chars().rev().next()?;
+        let ch = value.chars().next_back()?;
         if value.chars().filter(|c| *c == ch).count() % 2 == 1 {
             return Some((ch, value.len() - 1));
         }
