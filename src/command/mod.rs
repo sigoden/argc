@@ -140,7 +140,7 @@ impl Command {
                     }
                     root_data.borrow_mut().cmd_pos = position;
                     root_data.borrow_mut().scope = EventScope::CmdStart;
-                    let mut subcmd = root_cmd.create_cmd();
+                    let subcmd = root_cmd.create_cmd();
                     if !value.is_empty() {
                         subcmd.describe = value.clone();
                     }

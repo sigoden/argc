@@ -457,7 +457,7 @@ fn assing_option_value() {
 # @arg val[`_choice_fn`]
 _choice_fn() {
     echo __argc_filter=
-    ( set -o posix ; set ) | grep 'argc_\|ARGC_' | grep -v 'ARGC_PWD\|ARGC_PATH_SEP\|ARGC_OS'
+    ( set -o posix ; set ) | grep 'argc_\|ARGC_COMPGEN\|ARGC_DESCRIBE\|ARGC_FILTER\|ARGC_LAST_ARG\|ARGC_VARS' 
 }
 "###;
 
