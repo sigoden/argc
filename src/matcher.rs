@@ -25,7 +25,6 @@ pub(crate) struct Matcher<'a, 'b> {
     dashes: Vec<usize>,
     arg_comp: ArgComp,
     choices_fns: HashSet<&'a str>,
-    choices_values: HashMap<&'a str, Vec<String>>,
     script_path: Option<String>,
     term_width: Option<usize>,
     is_last_arg_option_assign: bool,
@@ -184,7 +183,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
             dashes,
             arg_comp,
             choices_fns,
-            choices_values: HashMap::new(),
             script_path: None,
             term_width: None,
             is_last_arg_option_assign,
@@ -193,26 +191,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
     pub(crate) fn set_script_path(&mut self, script_path: &str) {
         self.script_path = Some(script_path.to_string());
-        let fns: Vec<&str> = self.choices_fns.iter().copied().collect();
-        let mut envs = HashMap::new();
-        envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
-        envs.insert("ARGC_PATH_SEP".into(), MAIN_SEPARATOR.into());
-        if let Some(outputs) = run_param_fns(script_path, &fns, self.args, envs) {
-            for (i, output) in outputs.into_iter().enumerate() {
-                let choices = output
-                    .split('\n')
-                    .filter_map(|v| {
-                        let v = v.trim_matches(|c: char| c.is_whitespace() || c == '\0');
-                        if v.is_empty() {
-                            None
-                        } else {
-                            Some(v.to_string())
-                        }
-                    })
-                    .collect();
-                self.choices_values.insert(fns[i], choices);
-            }
-        }
     }
 
     pub(crate) fn set_term_width(&mut self, term_width: usize) {
@@ -450,10 +428,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
         } else {
             vec![]
         };
+
+        let choices_fn_values = self.run_choices_fns().unwrap_or_default();
+
         for (i, param) in last_cmd.positional_params.iter().enumerate() {
             if let (Some(values), Some(choices)) = (
                 positional_values.get(i),
-                get_param_choices(&param.choices, &param.choices_fn, &self.choices_values),
+                get_param_choices(&param.choices, &param.choices_fn, &choices_fn_values),
             ) {
                 for value in values.iter() {
                     if !choices.contains(&value.to_string()) {
@@ -515,11 +496,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 ));
                             }
                         }
-                        if let Some(choices) = get_param_choices(
-                            &param.choices,
-                            &param.choices_fn,
-                            &self.choices_values,
-                        ) {
+                        if let Some(choices) =
+                            get_param_choices(&param.choices, &param.choices_fn, &choices_fn_values)
+                        {
                             for value in values.iter() {
                                 if !choices.contains(&value.to_string()) {
                                     return Some(MatchError::InvalidValue(
@@ -546,6 +525,31 @@ impl<'a, 'b> Matcher<'a, 'b> {
             ));
         }
         None
+    }
+
+    fn run_choices_fns(&'a self) -> Option<HashMap<&'a str, Vec<String>>> {
+        let script_path = self.script_path.as_ref()?;
+        let mut choices_fn_values = HashMap::new();
+        let fns: Vec<&str> = self.choices_fns.iter().copied().collect();
+        let mut envs = HashMap::new();
+        envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
+        envs.insert("ARGC_PATH_SEP".into(), MAIN_SEPARATOR.into());
+        let outputs = run_param_fns(script_path, &fns, self.args, envs)?;
+        for (i, output) in outputs.into_iter().enumerate() {
+            let choices = output
+                .split('\n')
+                .filter_map(|v| {
+                    let v = v.trim_matches(|c: char| c.is_whitespace() || c == '\0');
+                    if v.is_empty() {
+                        None
+                    } else {
+                        Some(v.to_string())
+                    }
+                })
+                .collect();
+            choices_fn_values.insert(fns[i], choices);
+        }
+        Some(choices_fn_values)
     }
 
     fn match_positionals(&self) -> Vec<Vec<&str>> {
@@ -933,12 +937,12 @@ fn comp_param(
 fn get_param_choices<'a, 'b: 'a>(
     choices: &'a Option<Vec<String>>,
     choices_fn: &'a Option<(String, bool)>,
-    choices_values: &'a HashMap<&str, Vec<String>>,
+    choices_fn_values: &'a HashMap<&str, Vec<String>>,
 ) -> Option<&'a Vec<String>> {
     choices.as_ref().or_else(|| {
         choices_fn.as_ref().and_then(|(fn_name, validate)| {
             if *validate {
-                choices_values.get(fn_name.as_str())
+                choices_fn_values.get(fn_name.as_str())
             } else {
                 None
             }
