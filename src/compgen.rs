@@ -85,6 +85,7 @@ pub fn compgen(
     }
     let mut argc_prefix = prefix.to_string();
     let mut argc_filter = last.to_string();
+    let mut argc_suffix = String::new();
     let mut argc_cd = None;
     if let Some(fn_name) = argc_fn {
         let output = if script_path.is_empty() {
@@ -125,6 +126,11 @@ pub fn compgen(
                         argc_value = Some(stripped_value.to_lowercase());
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_prefix=") {
                         argc_prefix = format!("{prefix}{stripped_value}");
+                    } else if let Some(stripped_value) = value.strip_prefix("__argc_suffix=") {
+                        if nospace {
+                            default_nospace = true;
+                        }
+                        argc_suffix = stripped_value.to_string();
                     } else if let Some(stripped_value) = value.strip_prefix("__argc_filter=") {
                         argc_filter = stripped_value.to_string();
                         mod_quote(&mut argc_filter, &mut argc_prefix, &mut default_nospace);
@@ -134,21 +140,24 @@ pub fn compgen(
                     if shell.is_generic() {
                         argc_variables.push(value.to_string());
                     }
-                } else if value.starts_with(&argc_filter) && !multi_values.contains(&value) {
-                    match candidates.get_mut(&value) {
-                        Some((v1, v2, _)) => {
-                            if v1.is_empty() && !description.is_empty() {
-                                *v1 = description.to_string();
+                } else {
+                    let value = format!("{value}{argc_suffix}");
+                    if value.starts_with(&argc_filter) && !multi_values.contains(&value) {
+                        match candidates.get_mut(&value) {
+                            Some((v1, v2, _)) => {
+                                if v1.is_empty() && !description.is_empty() {
+                                    *v1 = description.to_string();
+                                }
+                                if !*v2 && nospace {
+                                    *v2 = true
+                                }
                             }
-                            if !*v2 && nospace {
-                                *v2 = true
+                            None => {
+                                candidates.insert(
+                                    value.to_string(),
+                                    (description.to_string(), nospace, comp_type),
+                                );
                             }
-                        }
-                        None => {
-                            candidates.insert(
-                                value.to_string(),
-                                (description.to_string(), nospace, comp_type),
-                            );
                         }
                     }
                 }
@@ -172,9 +181,13 @@ pub fn compgen(
 
     if !shell.is_generic() {
         if let Some(argc_value) = argc_value.and_then(|v| convert_arg_value(&v)) {
-            if let Some((value_prefix, value_filter, more_candidates)) =
-                shell.comp_argc_value(&argc_value, &argc_filter, &argc_cd, default_nospace)
-            {
+            if let Some((value_prefix, value_filter, more_candidates)) = shell.comp_argc_value(
+                &argc_value,
+                &argc_filter,
+                &argc_cd,
+                default_nospace,
+                &argc_suffix,
+            ) {
                 argc_prefix = format!("{argc_prefix}{value_prefix}");
                 argc_filter = value_filter;
                 candidates.extend(more_candidates)
@@ -603,6 +616,7 @@ impl Shell {
         value: &str,
         cd: &Option<String>,
         default_nospace: bool,
+        suffix: &str,
     ) -> Option<(String, String, Vec<CandidateValue>)> {
         let (dir_only, exts) = if argc_value == "__argc_value=dir" {
             (true, None)
@@ -691,7 +705,7 @@ impl Shell {
             let path_value = if is_dir {
                 format!("{value_prefix}{file_name}{}", path_sep)
             } else {
-                format!("{value_prefix}{file_name}")
+                format!("{value_prefix}{file_name}{suffix}")
             };
 
             let comp_kind = if is_dir {

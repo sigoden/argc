@@ -1,0 +1,40 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN Bash `prog --oa ` ************
+abc=
+def=
+ghk=
+
+************ COMPGEN Elvish `prog --oa ` ************
+abc=	0	abc=		green
+def=	0	def=		green
+ghk=	0	ghk=		green
+
+************ COMPGEN Fish `prog --oa ` ************
+abc=
+def=
+ghk=
+
+************ COMPGEN Nushell `prog --oa ` ************
+abc=
+def=
+ghk=
+
+************ COMPGEN Powershell `prog --oa ` ************
+abc=	0	abc=		32
+def=	0	def=		32
+ghk=	0	ghk=		32
+
+************ COMPGEN Xonsh `prog --oa ` ************
+abc=	0	abc=	
+def=	0	def=	
+ghk=	0	ghk=	
+
+************ COMPGEN Zsh `prog --oa ` ************
+abc=	abc=	abc=	32
+def=	def=	def=	32
+ghk=	ghk=	ghk=	32
+
+

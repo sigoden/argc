@@ -24,6 +24,17 @@ utils.rs	1	utils.rs		default
 --oa=parser.rs	1	parser.rs		default
 --oa=utils.rs	1	utils.rs		default
 
+************ COMPGEN `prog --ob ` ************
+argc_value.rs:	0	argc_value.rs:		default
+bin/	0	bin/		blue bold
+command/	0	command/		blue bold
+compgen.rs:	0	compgen.rs:		default
+lib.rs:	0	lib.rs:		default
+matcher.rs:	0	matcher.rs:		default
+param.rs:	0	param.rs:		default
+parser.rs:	0	parser.rs:		default
+utils.rs:	0	utils.rs:		default
+
 ************ COMPGEN `prog foo=` ************
 foo=argc_value.rs	1	argc_value.rs		default
 foo=bin/	0	bin/		blue bold

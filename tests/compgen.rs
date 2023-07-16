@@ -405,6 +405,21 @@ _choice_fn() {
 }
 
 #[test]
+fn suffix() {
+    let script = r###"
+# @option --oa*[`_choice_fn`]
+_choice_fn() {
+    echo -e "__argc_suffix==\0"
+	echo -e "abc"
+	echo -e "def"
+	echo -e "ghk"
+}
+"###;
+
+    snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
+}
+
+#[test]
 fn value_display() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
@@ -800,13 +815,19 @@ mod filedir {
     }
 
     const CD_SCRIPT: &str = r###"
-# @option --oa[`_choice_fn`]
-# @arg val[`_choice_fn2`]
-_choice_fn() {
+# @option --oa[`_choice_oa`]
+# @option --ob[`_choice_ob`]
+# @arg val[`choice_val`]
+_choice_oa() {
     echo "__argc_cd=src"
     echo "__argc_value=file"
 }
-_choice_fn2() {
+_choice_ob() {
+    echo -e "__argc_suffix=:\0"
+    echo "__argc_cd=src"
+    echo "__argc_value=file"
+}
+choice_val() {
     if [[ "$1" == *"="* ]]; then
         echo __argc_prefix=${1%%=*}=
         echo __argc_filter=${1#*=}
@@ -825,6 +846,7 @@ _choice_fn2() {
             vec![
                 vec!["prog", "--oa", ""],
                 vec!["prog", "--oa="],
+                vec!["prog", "--ob", ""],
                 vec!["prog", "foo="]
             ],
             TEST_SHELL
@@ -838,6 +860,7 @@ _choice_fn2() {
             CD_SCRIPT,
             vec![
                 vec!["prog", "--oa", ""],
+                vec!["prog", "--ob", ""],
                 vec!["prog", "--oa="],
                 vec!["prog", "foo="]
             ],
