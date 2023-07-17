@@ -5,7 +5,6 @@ expression: data
 ************ COMPGEN `prog --oa=abc` ************
 __argc_filter=	/kind:value
 ARGC_COMPGEN=1	/kind:value
-ARGC_DESCRIBE=true	/kind:value
 ARGC_FILTER=abc	/kind:value
 ARGC_LAST_ARG=--oa=abc	/kind:value
 ARGC_VARS=YXJnY19vYT1hYmM7YXJnY19fYXJncz0oIHByb2cgJy0tb2E9YWJjJyApO2FyZ2NfX2luZGV4PTA7YXJnY19fcG9zaXRpb25hbHM9KCAgKTs=	/kind:value
@@ -17,7 +16,6 @@ argc_oa=abc	/kind:value
 ************ COMPGEN `prog oa=abc` ************
 __argc_filter=	/kind:value
 ARGC_COMPGEN=1	/kind:value
-ARGC_DESCRIBE=true	/kind:value
 ARGC_FILTER=oa=abc	/kind:value
 ARGC_LAST_ARG=oa=abc	/kind:value
 ARGC_VARS=YXJnY192YWw9J29hPWFiYyc7YXJnY19fYXJncz0oIHByb2cgJ29hPWFiYycgKTthcmdjX19pbmRleD0wO2FyZ2NfX3Bvc2l0aW9uYWxzPSggJ29hPWFiYycgKTs=	/kind:value
