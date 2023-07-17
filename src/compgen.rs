@@ -9,7 +9,7 @@ use indexmap::IndexMap;
 use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fs;
-use std::path::{PathBuf, MAIN_SEPARATOR};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 pub fn compgen(
@@ -107,8 +107,6 @@ pub fn compgen(
             let mut envs = HashMap::new();
             envs.insert("ARGC_COMPGEN".into(), "1".into());
             envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
-            envs.insert("ARGC_PATH_SEP".into(), MAIN_SEPARATOR.into());
-            envs.insert("ARGC_DESCRIBE".into(), shell.with_description().to_string());
             envs.insert("ARGC_FILTER".into(), argc_filter.clone());
             envs.insert("ARGC_LAST_ARG".into(), last_arg.to_string());
             if let Some(cwd) = get_current_dir() {
