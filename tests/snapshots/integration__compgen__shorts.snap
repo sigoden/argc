@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value=file	/kind:value
+__argc_value=path	/kind:value
 
 ************ COMPGEN `prog -` ************
 -a	/kind:flag
@@ -28,7 +28,7 @@ __argc_value=file	/kind:value
 -ap	/kind:option
 
 ************ COMPGEN `prog -a ` ************
-__argc_value=file	/kind:value
+__argc_value=path	/kind:value
 
 ************ COMPGEN `prog -af` ************
 -afb	/kind:flag
@@ -37,7 +37,7 @@ __argc_value=file	/kind:value
 -afp	/kind:option
 
 ************ COMPGEN `prog -af ` ************
-__argc_value=file	/kind:value
+__argc_value=path	/kind:value
 
 ************ COMPGEN `prog -ae` ************
 
@@ -58,6 +58,6 @@ __argc_value=FILE	/kind:value
 -sa	/kind:flag
 
 ************ COMPGEN `prog -sa ` ************
-__argc_value=file	/kind:value
+__argc_value=path	/kind:value
 
 
