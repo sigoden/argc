@@ -232,7 +232,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             .iter()
             .any(|v| redirect_symbols.contains(&v.as_str()))
         {
-            return vec![("__argc_value=file".into(), String::new(), CompKind::Value)];
+            return vec![("__argc_value=path".into(), String::new(), CompKind::Value)];
         }
         let level = self.cmds.len() - 1;
         let mut last_cmd = self.cmds[level].1;
@@ -303,7 +303,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             && !self.arg_comp.is_flag_or_option()
             && last_cmd.positional_params.is_empty()
         {
-            output.push(("__argc_value=file".into(), String::new(), CompKind::Value));
+            output.push(("__argc_value=path".into(), String::new(), CompKind::Value));
         }
         output
     }

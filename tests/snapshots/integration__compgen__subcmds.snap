@@ -16,7 +16,7 @@ cmdb	/kind:command
 cmda	/kind:command
 
 ************ COMPGEN `prog cmda ` ************
-__argc_value=file	/kind:value
+__argc_value=path	/kind:value
 
 ************ COMPGEN `prog help ` ************
 cmda	/kind:command

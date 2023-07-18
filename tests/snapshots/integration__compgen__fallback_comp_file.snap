@@ -3,10 +3,10 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog args ` ************
-__argc_value=file	/kind:value
+__argc_value=path	/kind:value
 
 ************ COMPGEN `prog args v` ************
-__argc_value=file	/kind:value
+__argc_value=path	/kind:value
 
 ************ COMPGEN `prog cmd --file ` ************
 __argc_value=FILE	/kind:value

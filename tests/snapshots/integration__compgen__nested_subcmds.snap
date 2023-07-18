@@ -21,7 +21,7 @@ subb	/kind:command
 suba	/kind:command
 
 ************ COMPGEN `prog cmd suba ` ************
-__argc_value=file	/kind:value
+__argc_value=path	/kind:value
 
 ************ COMPGEN `prog cmd help ` ************
 suba	/kind:command

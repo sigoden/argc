@@ -89,8 +89,8 @@ pub fn compgen(
     let mut argc_cd = None;
     if let Some(fn_name) = argc_fn {
         let output = if script_path.is_empty() {
-            let mut values = vec![];
             // complete for argc
+            let mut values = vec![];
             if fn_name == "_choice_completion" {
                 if new_args.len() == 3 {
                     values.extend(Shell::list().map(|v| v.name().to_string()))
@@ -99,7 +99,7 @@ pub fn compgen(
                 if new_args.len() == 3 {
                     values.extend(Shell::list().map(|v| v.name().to_string()))
                 } else {
-                    values.push("__argc_value=file".to_string());
+                    values.push("__argc_value=path".to_string());
                 }
             }
             Some(values.join("\n"))
@@ -618,9 +618,9 @@ impl Shell {
     ) -> Option<(String, String, Vec<CandidateValue>)> {
         let (dir_only, exts) = if argc_value == "__argc_value=dir" {
             (true, None)
-        } else if argc_value == "__argc_value=file" {
+        } else if argc_value == "__argc_value=path" {
             (false, None)
-        } else if let Some(stripped_value) = argc_value.strip_prefix("__argc_value=file:") {
+        } else if let Some(stripped_value) = argc_value.strip_prefix("__argc_value=path:") {
             let exts: Vec<String> = stripped_value.split(',').map(|v| v.to_string()).collect();
             (false, Some(exts))
         } else {
@@ -842,13 +842,15 @@ fn parse_candidate_value(input: &str) -> CandidateValue {
 }
 
 fn convert_arg_value(value: &str) -> Option<String> {
-    if value.starts_with("file:") {
+    if value.starts_with("path:") {
         Some(format!("__argc_value={value}"))
+    } else if let Some(stripped_value) = value.strip_prefix("file:") {
+        Some(format!("__argc_value=path:{stripped_value}"))
     } else if ["path", "file", "arg", "any"]
         .iter()
         .any(|v| value.contains(v))
     {
-        Some("__argc_value=file".to_string())
+        Some("__argc_value=path".to_string())
     } else if value.contains("dir") || value.contains("folder") {
         Some("__argc_value=dir".to_string())
     } else {
