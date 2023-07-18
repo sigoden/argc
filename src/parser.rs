@@ -2,6 +2,7 @@ use crate::param::{FlagOptionParam, ParamData, PositionalParam};
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
 use anyhow::bail;
+use nom::error::ErrorKind;
 use nom::{
     branch::alt,
     bytes::complete::{escaped, tag, take_till, take_while1},
@@ -524,7 +525,12 @@ fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
 
 fn parse_notation_text(input: &str) -> nom::IResult<&str, &str> {
     let (_, size) = notation_text(input, 1)?;
-    Ok((&input[size - 1..], &input[0..size - 1]))
+    let (offset, _) = input
+        .char_indices()
+        .nth(size - 1)
+        .ok_or_else(|| create_err(input, ErrorKind::Eof))?;
+    let (x, y) = input.split_at(offset);
+    Ok((y, x))
 }
 
 fn parse_normal_comment(input: &str) -> nom::IResult<&str, &str> {
@@ -567,12 +573,13 @@ fn verify_single_char(input: &str) -> nom::IResult<&str, &str> {
         .count()
         > 1
     {
-        return Err(nom::Err::Error(nom::error::Error::new(
-            input,
-            nom::error::ErrorKind::Verify,
-        )));
+        return Err(create_err(input, ErrorKind::Verify));
     }
     Ok((input, ""))
+}
+
+fn create_err(input: &str, kind: ErrorKind) -> nom::Err<nom::error::Error<&str>> {
+    nom::Err::Error(nom::error::Error::new(input, kind))
 }
 
 fn is_not_fn_name_char(c: char) -> bool {
@@ -832,6 +839,11 @@ mod tests {
         assert_parse_positional_arg!("foo*[a|b]");
         assert_parse_positional_arg!("foo*[`_foo`]");
         assert_parse_positional_arg!("foo*[=a|b]");
+    }
+
+    #[test]
+    fn test_special_notation() {
+        assert_parse_option_arg!("--foo <◉>");
     }
 
     #[test]
