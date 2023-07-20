@@ -6,7 +6,7 @@ RUN
 prog cmda --ca val
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: invalid value `val` for `<CA>`
   [possible values: x, y, z]
 

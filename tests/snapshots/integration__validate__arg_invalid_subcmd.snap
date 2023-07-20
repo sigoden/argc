@@ -6,7 +6,7 @@ RUN
 prog foo
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: `prog` requires a subcommand but one was not provided
   [subcommands: cmda, cmdb]
 

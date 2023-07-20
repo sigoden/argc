@@ -6,7 +6,7 @@ expression: data
 prog cmda -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmda
 
 EOF
@@ -16,7 +16,7 @@ exit 0
 prog cmdb -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdb [VAL]
 
 ARGS:
@@ -29,7 +29,7 @@ exit 0
 prog cmdc -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdc [VAL]...
 
 ARGS:
@@ -42,7 +42,7 @@ exit 0
 prog cmdd -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdd <VAL>...
 
 ARGS:
@@ -55,7 +55,7 @@ exit 0
 prog cmde -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmde <VAL>
 
 ARGS:
@@ -68,7 +68,7 @@ exit 0
 prog cmdf -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdf [VAL]
 
 ARGS:
@@ -81,7 +81,7 @@ exit 0
 prog cmdg -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdg [VAL]
 
 ARGS:
@@ -94,7 +94,7 @@ exit 0
 prog cmdh -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdh [VAL]
 
 ARGS:
@@ -107,7 +107,7 @@ exit 0
 prog cmdi -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdi [VAL]
 
 ARGS:
@@ -120,7 +120,7 @@ exit 0
 prog cmdj -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdj [VAL]
 
 ARGS:
@@ -133,7 +133,7 @@ exit 0
 prog cmdk -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdk [VAL]
 
 ARGS:
@@ -146,7 +146,7 @@ exit 0
 prog cmdl -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdl [VAL]...
 
 ARGS:
@@ -159,7 +159,7 @@ exit 0
 prog cmdm -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdm <VAL>
 
 ARGS:
@@ -172,7 +172,7 @@ exit 0
 prog cmdn -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdn <VAL>...
 
 ARGS:
@@ -185,7 +185,7 @@ exit 0
 prog cmdo -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdo [FILE]
 
 ARGS:
@@ -198,7 +198,7 @@ exit 0
 prog cmdp -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdp [VAL1]... [VAL2]...
 
 ARGS:
@@ -212,7 +212,7 @@ exit 0
 prog cmdq -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdq <VAL1> <VAL2>...
 
 ARGS:
@@ -226,7 +226,7 @@ exit 0
 prog cmdr -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdr <VAL1> <VAL2> <VAL3>
 
 ARGS:

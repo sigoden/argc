@@ -6,7 +6,7 @@ expression: data
 prog cmda -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmda [OPTIONS]
 
 OPTIONS:
@@ -35,7 +35,7 @@ exit 0
 prog cmdb -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdb --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
 
 OPTIONS:
@@ -54,7 +54,7 @@ exit 0
 prog cmdc -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdc [OPTIONS]
 
 OPTIONS:

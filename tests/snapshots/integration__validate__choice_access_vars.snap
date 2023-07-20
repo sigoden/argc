@@ -6,7 +6,7 @@ expression: data
 prog --fa foo
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: invalid value `foo` for `[VAL]`
   [possible values: abc]
 
@@ -19,7 +19,7 @@ exit 1
 prog foo
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: invalid value `foo` for `[VAL]`
   [possible values: def]
 

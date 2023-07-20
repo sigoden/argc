@@ -6,7 +6,7 @@ expression: data
 prog help
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 prog 1.0.0
 nobody <nobody@example.com>
 Test argc
@@ -20,7 +20,7 @@ exit 0
 prog --help
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 prog 1.0.0
 nobody <nobody@example.com>
 Test argc
@@ -34,7 +34,7 @@ exit 0
 prog -help
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 prog 1.0.0
 nobody <nobody@example.com>
 Test argc
@@ -48,7 +48,7 @@ exit 0
 prog -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 prog 1.0.0
 nobody <nobody@example.com>
 Test argc
@@ -62,7 +62,7 @@ exit 0
 prog --version
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 prog 1.0.0
 EOF
 exit 0
@@ -71,7 +71,7 @@ exit 0
 prog -version
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 prog 1.0.0
 EOF
 exit 0
@@ -80,7 +80,7 @@ exit 0
 prog -V
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 prog 1.0.0
 EOF
 exit 0

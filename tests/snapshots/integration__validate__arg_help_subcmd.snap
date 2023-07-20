@@ -6,7 +6,7 @@ RUN
 prog help cmdd
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog cmdd <VAL>...
 
 ARGS:
