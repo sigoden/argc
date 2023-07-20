@@ -6,21 +6,21 @@ expression: data
 abc 
 
 ************ COMPGEN Elvish `prog --oa a` ************
-abc	1	abc	(desc1)	green
+abc	1	abc	desc1	green
 
 ************ COMPGEN Fish `prog --oa a` ************
-abc	(desc1)
+abc	desc1
 
 ************ COMPGEN Nushell `prog --oa a` ************
-abc 	(desc1)
+abc 	desc1
 
 ************ COMPGEN Powershell `prog --oa a` ************
-abc	1	abc	(desc1)	32
+abc	1	abc	desc1	32
 
 ************ COMPGEN Xonsh `prog --oa a` ************
-abc	1	abc	(desc1)
+abc	1	abc	desc1
 
 ************ COMPGEN Zsh `prog --oa a` ************
-abc 	abc:(desc1)	abc	32
+abc 	abc:desc1	abc	32
 
 

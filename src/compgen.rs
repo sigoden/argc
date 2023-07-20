@@ -832,10 +832,10 @@ fn parse_candidate_value(input: &str) -> CandidateValue {
     }
     if parts_len > 0 {
         if let Some(stripped_value) = parts.first().and_then(|v| v.strip_suffix('\0')) {
-            value = stripped_value.to_string();
+            value = stripped_value.trim().to_string();
             nospace = true;
         } else {
-            value = parts[0].to_string();
+            value = parts[0].trim().to_string();
         }
     }
     (value, description, nospace, comp_kind)
@@ -860,7 +860,13 @@ fn convert_arg_value(value: &str) -> Option<String> {
 
 fn truncate_description(description: &str) -> String {
     let max_width = 80;
-    let description = description.trim().replace('\t', "");
+    let mut description = description.trim().replace('\t', "");
+    if description.starts_with('(') && description.ends_with(')') {
+        description = description
+            .trim_start_matches('(')
+            .trim_end_matches(')')
+            .to_string();
+    }
     if description.len() < max_width {
         description
     } else {
