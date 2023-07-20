@@ -643,8 +643,10 @@ fn desc() {
     let script = r###"
 # @option --oa[`_choice_fn`]
 _choice_fn() {
-    echo -e "abc\t(desc1)"
-    echo -e "def\t(desc2)"
+    echo -e "abc\t  desc"
+    echo -e "def\t  (desc) "
+    echo -e " ijk\t  value (desc)"
+    echo -e " xyz \t  [desc]"
 }
 "###;
 
