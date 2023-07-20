@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     command::Command,
-    compgen::CompKind,
+    compgen::CompColor,
     param::{FlagOptionParam, PositionalParam},
     utils::run_param_fns,
     ArgcValue, Shell,
@@ -251,7 +251,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
             .iter()
             .any(|v| redirect_symbols.contains(&v.as_str()))
         {
-            return vec![("__argc_value=path".into(), String::new(), CompKind::Value)];
+            return vec![(
+                "__argc_value=path".into(),
+                String::new(),
+                CompColor::of_value(),
+            )];
         }
         let level = self.cmds.len() - 1;
         let mut last_cmd = self.cmds[level].1;
@@ -272,9 +276,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 {
                     let describe = param.describe_head();
                     let kind = if param.is_flag() {
-                        CompKind::Flag
+                        CompColor::of_flag()
                     } else {
-                        CompKind::Option
+                        CompColor::of_option()
                     };
                     output.push((value.clone(), describe.into(), kind));
                 }
@@ -293,7 +297,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     })
                     .collect();
                 if output.len() == 1 {
-                    output.insert(0, (value.to_string(), String::new(), CompKind::Flag));
+                    output.insert(0, (value.to_string(), String::new(), CompColor::of_flag()));
                 }
                 output
             }
@@ -329,7 +333,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
             && !self.arg_comp.is_flag_or_option()
             && last_cmd.positional_params.is_empty()
         {
-            output.push(("__argc_value=path".into(), String::new(), CompKind::Value));
+            output.push((
+                "__argc_value=path".into(),
+                String::new(),
+                CompColor::of_value(),
+            ));
         }
         output
     }
@@ -760,9 +768,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
             if !exist || param.multiple {
                 let describe = param.describe_head();
                 let kind = if param.is_flag() {
-                    CompKind::Flag
+                    CompColor::of_flag()
                 } else {
-                    CompKind::Option
+                    CompColor::of_option()
                 };
                 for v in param.list_names() {
                     output.push((v, describe.to_string(), kind))
@@ -773,7 +781,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
     }
 }
 
-pub(crate) type CompItem = (String, String, CompKind);
+pub(crate) type CompItem = (String, String, CompColor);
 
 fn add_positional_arg<'a>(
     positional_args: &mut Vec<&'a str>,
@@ -886,7 +894,7 @@ fn comp_subcomands(cmd: &Command) -> Vec<CompItem> {
     for subcmd in cmd.subcommands.iter() {
         let describe = subcmd.describe_head();
         for v in subcmd.list_names() {
-            output.push((v, describe.to_string(), CompKind::Command))
+            output.push((v, describe.to_string(), CompColor::of_command()))
         }
     }
     output
@@ -935,17 +943,17 @@ fn comp_param(
         match choices {
             Either::Left(choices) => choices
                 .iter()
-                .map(|v| (v.to_string(), String::new(), CompKind::Value))
+                .map(|v| (v.to_string(), String::new(), CompColor::of_value()))
                 .collect(),
             Either::Right(choices_fn) => vec![(
                 format!("__argc_fn={}", choices_fn),
                 String::new(),
-                CompKind::Value,
+                CompColor::of_value(),
             )],
         }
     } else {
         let value = format!("__argc_value={}", value_name);
-        vec![(value, describe.into(), CompKind::Value)]
+        vec![(value, describe.into(), CompColor::of_value())]
     };
     if let Some(ch) = multi_char {
         output.insert(
@@ -953,7 +961,7 @@ fn comp_param(
             (
                 format!("__argc_multi={}", ch),
                 String::new(),
-                CompKind::Value,
+                CompColor::of_value(),
             ),
         );
     }

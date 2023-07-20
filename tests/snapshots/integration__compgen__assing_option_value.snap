@@ -3,25 +3,25 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa=abc` ************
-__argc_filter=	/kind:value
-ARGC_COMPGEN=1	/kind:value
-ARGC_FILTER=abc	/kind:value
-ARGC_LAST_ARG=--oa=abc	/kind:value
-ARGC_VARS=YXJnY19vYT1hYmM7YXJnY19fYXJncz0oIHByb2cgJy0tb2E9YWJjJyApO2FyZ2NfX2luZGV4PTA7YXJnY19fcG9zaXRpb25hbHM9KCAgKTs=	/kind:value
-argc__args=([0]="prog" [1]="--oa=abc")	/kind:value
-argc__index=0	/kind:value
-argc__positionals=()	/kind:value
-argc_oa=abc	/kind:value
+__argc_filter=	/color:green
+ARGC_COMPGEN=1	/color:green
+ARGC_FILTER=abc	/color:green
+ARGC_LAST_ARG=--oa=abc	/color:green
+ARGC_VARS=YXJnY19vYT1hYmM7YXJnY19fYXJncz0oIHByb2cgJy0tb2E9YWJjJyApO2FyZ2NfX2luZGV4PTA7YXJnY19fcG9zaXRpb25hbHM9KCAgKTs=	/color:green
+argc__args=([0]="prog" [1]="--oa=abc")	/color:green
+argc__index=0	/color:green
+argc__positionals=()	/color:green
+argc_oa=abc	/color:green
 
 ************ COMPGEN `prog oa=abc` ************
-__argc_filter=	/kind:value
-ARGC_COMPGEN=1	/kind:value
-ARGC_FILTER=oa=abc	/kind:value
-ARGC_LAST_ARG=oa=abc	/kind:value
-ARGC_VARS=YXJnY192YWw9J29hPWFiYyc7YXJnY19fYXJncz0oIHByb2cgJ29hPWFiYycgKTthcmdjX19pbmRleD0wO2FyZ2NfX3Bvc2l0aW9uYWxzPSggJ29hPWFiYycgKTs=	/kind:value
-argc__args=([0]="prog" [1]="oa=abc")	/kind:value
-argc__index=0	/kind:value
-argc__positionals=([0]="oa=abc")	/kind:value
-argc_val=oa=abc	/kind:value
+__argc_filter=	/color:green
+ARGC_COMPGEN=1	/color:green
+ARGC_FILTER=oa=abc	/color:green
+ARGC_LAST_ARG=oa=abc	/color:green
+ARGC_VARS=YXJnY192YWw9J29hPWFiYyc7YXJnY19fYXJncz0oIHByb2cgJ29hPWFiYycgKTthcmdjX19pbmRleD0wO2FyZ2NfX3Bvc2l0aW9uYWxzPSggJ29hPWFiYycgKTs=	/color:green
+argc__args=([0]="prog" [1]="oa=abc")	/color:green
+argc__index=0	/color:green
+argc__positionals=([0]="oa=abc")	/color:green
+argc_val=oa=abc	/color:green
 
 

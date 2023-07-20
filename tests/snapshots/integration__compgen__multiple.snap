@@ -3,67 +3,67 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog -` ************
---fc	/kind:flag
--f	/kind:flag
---oa	/kind:option
--o	/kind:option
---od	/kind:option
--d	/kind:option
+--fc	/color:cyan
+-f	/color:cyan
+--oa	/color:cyan,bold
+-o	/color:cyan,bold
+--od	/color:cyan,bold
+-d	/color:cyan,bold
 
 ************ COMPGEN `prog --` ************
---fc	/kind:flag
---oa	/kind:option
---od	/kind:option
+--fc	/color:cyan
+--oa	/color:cyan,bold
+--od	/color:cyan,bold
 
 ************ COMPGEN `prog -- ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog -f ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog --fc ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog -o ` ************
-__argc_value=DIR	/kind:value
+__argc_value=DIR	/color:green
 
 ************ COMPGEN `prog -o d1` ************
-__argc_value=DIR	/kind:value
+__argc_value=DIR	/color:green
 
 ************ COMPGEN `prog -o d1 ` ************
-__argc_value=DIR	/kind:value
+__argc_value=DIR	/color:green
 
 ************ COMPGEN `prog -o d1 d2` ************
-__argc_value=DIR	/kind:value
+__argc_value=DIR	/color:green
 
 ************ COMPGEN `prog -o d1 d2 ` ************
-__argc_value=DIR	/kind:value
+__argc_value=DIR	/color:green
 
 ************ COMPGEN `prog -d d1` ************
-__argc_value=DIR	/kind:value
+__argc_value=DIR	/color:green
 
 ************ COMPGEN `prog -d d1 ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog -d d1 d2` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog -d d1 d2 ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog v1` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog v1 ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog v1 v2` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog v1 v2 ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 

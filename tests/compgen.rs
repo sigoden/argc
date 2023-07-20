@@ -740,7 +740,7 @@ _choice_fn() {
     echo -e "c1\t"
     echo -e "d1\0"
     echo -e "e1"
-    echo -e "f1\t/kind:valueOther\tdesc f1"
+    echo -e "f1\t/color:yellow\tdesc f1"
 }
 "###;
 
@@ -768,18 +768,32 @@ fn color() {
     let script = r###"
 # @arg val[`_fn_color`]
 _fn_color() {
-    echo -e "flag\0\t/kind:flag"
-    echo -e "option\0\t/kind:option"
-    echo -e "command\0\t/kind:command"
-    echo -e "dir\0\t/kind:dir"
-    echo -e "file\0\t/kind:file"
-    echo -e "fileExe\0\t/kind:fileExe"
-    echo -e "symlink\0\t/kind:symlink"
-    echo -e "valueOther\0\t/kind:valueOther"
-    echo -e "valueAnother\0\t/kind:valueAnother"
-    echo -e "valueEmphasis\0\t/kind:valueEmphasis"
-    echo -e "valueSubtle\0\t/kind:valueSubtle"
-    echo -e "value\0\t/kind:value"
+    echo -e "kindFlag\0\t/color:cyan"
+    echo -e "kindOption\0\t/color:cyan,bold"
+    echo -e "kindCommand\0\t/color:magenta"
+    echo -e "kindDir\0\t/color:blue,bold"
+    echo -e "kindFile\0\t/color:default"
+    echo -e "kindFileExe\0\t/color:green,bold"
+    echo -e "kindSymlink\0\t/color:cyan,bold"
+    echo -e "kindValue\0\t/color:green"
+    echo -e "colorBlack\0\t/color:black"
+    echo -e "colorBlackBold\0\t/color:black,bold"
+    echo -e "colorRed\0\t/color:red"
+    echo -e "colorRedBold\0\t/color:red,bold"
+    echo -e "colorGreen\0\t/color:green"
+    echo -e "colorGreenBold\0\t/color:green,bold"
+    echo -e "colorYellow\0\t/color:yellow"
+    echo -e "colorYellowBold\0\t/color:yellow,bold"
+    echo -e "colorBlue\0\t/color:blue"
+    echo -e "colorBlueBold\0\t/color:blue,bold"
+    echo -e "colorMagenta\0\t/color:magenta"
+    echo -e "colorMagentaBold\0\t/color:magenta,bold"
+    echo -e "colorCyan\0\t/color:cyan"
+    echo -e "colorCyanBold\0\t/color:cyan,bold"
+    echo -e "colorWhite\0\t/color:white"
+    echo -e "colorWhiteBold\0\t/color:white,bold"
+    echo -e "colorDefault\0\t/color:default"
+    echo -e "colorDefaultBold\0\t/color:default,bold"
 }
 "###;
     snapshot_compgen_shells!(script, vec!["prog", ""]);

@@ -3,28 +3,28 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `sudo cmd ` ************
-__argc_filter=	/kind:value
-cmd	/kind:value
-ok	/kind:value
+__argc_filter=	/color:green
+cmd	/color:green
+ok	/color:green
 
 ************ COMPGEN `sudo cmd -` ************
-__argc_filter=	/kind:value
-cmd -	/kind:value
-ok	/kind:value
+__argc_filter=	/color:green
+cmd -	/color:green
+ok	/color:green
 
 ************ COMPGEN `sudo cmd --` ************
-__argc_filter=	/kind:value
-cmd --	/kind:value
-ok	/kind:value
+__argc_filter=	/color:green
+cmd --	/color:green
+ok	/color:green
 
 ************ COMPGEN `sudo cmd --foo` ************
-__argc_filter=	/kind:value
-cmd --foo	/kind:value
-ok	/kind:value
+__argc_filter=	/color:green
+cmd --foo	/color:green
+ok	/color:green
 
 ************ COMPGEN `sudo cmd foo` ************
-__argc_filter=	/kind:value
-cmd foo	/kind:value
-ok	/kind:value
+__argc_filter=	/color:green
+cmd foo	/color:green
+ok	/color:green
 
 
