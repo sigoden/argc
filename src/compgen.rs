@@ -30,18 +30,21 @@ pub fn compgen(
             (last_arg.to_string(), None)
         }
     };
-    let new_args: Vec<String> = args
-        .iter()
-        .enumerate()
-        .map(|(i, v)| {
-            if i == args.len() - 1 {
-                last.clone()
-            } else {
-                v.to_string()
-            }
-        })
-        .collect();
     let cmd = Command::new(script_content)?;
+    let new_args: Vec<String> = if cmd.delegated() {
+        args.to_vec()
+    } else {
+        args.iter()
+            .enumerate()
+            .map(|(i, v)| {
+                if i == args.len() - 1 {
+                    last.clone()
+                } else {
+                    v.to_string()
+                }
+            })
+            .collect()
+    };
     let matcher = Matcher::new(&cmd, &new_args);
     let compgen_values = matcher.compgen(shell);
     let mut default_nospace = unbalance.is_some();

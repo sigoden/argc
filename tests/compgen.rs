@@ -591,6 +591,23 @@ fn redirect_symbols() {
 }
 
 #[test]
+fn delegated() {
+    let script = r###"
+# @arg args~[`_choice_delegate`]
+
+_choice_delegate() {
+    echo $1
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![vec!["prog", "abc"], vec!["prog", "-a"], vec!["prog", "-"]],
+        argc::Shell::Bash
+    );
+}
+
+#[test]
 fn mult_char() {
     let script = r###"
 # @option --oa*,[`_choice_fn`]
