@@ -496,6 +496,17 @@ impl Command {
         }
     }
 
+    pub(crate) fn delegated(&self) -> bool {
+        self.subcommands.is_empty()
+            && self.flag_option_params.is_empty()
+            && self.positional_params.len() == 1
+            && self
+                .positional_params
+                .first()
+                .map(|v| v.terminated)
+                .unwrap_or_default()
+    }
+
     pub(crate) fn exist_main_fn(&self, cmd_paths: &[&str]) -> bool {
         self.get_cmd_fn(cmd_paths)
             .map(|v| v.ends_with("main"))

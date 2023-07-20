@@ -1,0 +1,14 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog abc` ************
+abc 
+
+************ COMPGEN `prog -a` ************
+-a 
+
+************ COMPGEN `prog -` ************
+- 
+
+

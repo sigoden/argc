@@ -69,24 +69,107 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut flag_option_args = vec![vec![]];
         let mut positional_args = vec![];
         let mut dashes = vec![];
-        let mut is_rest_args_positional = false;
         let mut is_last_arg_option_assign = false;
         let mut arg_comp = ArgComp::Any;
         let mut choices_fns = HashSet::new();
         let args_len = args.len();
-        if let Some(arg) = args.last() {
-            if arg.starts_with('-') {
-                arg_comp = ArgComp::FlagOrOption;
-            } else if !arg.is_empty() {
-                arg_comp = ArgComp::CommandOrPositional;
+        if root.delegated() {
+            positional_args = args.iter().skip(1).map(|v| v.as_str()).collect();
+        } else {
+            let mut is_rest_args_positional = false;
+            if let Some(arg) = args.last() {
+                if arg.starts_with('-') {
+                    arg_comp = ArgComp::FlagOrOption;
+                } else if !arg.is_empty() {
+                    arg_comp = ArgComp::CommandOrPositional;
+                }
             }
-        }
-        while arg_index < args_len {
-            let cmd = cmds[cmd_level].1;
-            let arg = args[arg_index].as_str();
-            if arg == "--" {
-                dashes.push(positional_args.len());
-                if is_rest_args_positional {
+            while arg_index < args_len {
+                let cmd = cmds[cmd_level].1;
+                let arg = args[arg_index].as_str();
+                if arg == "--" {
+                    dashes.push(positional_args.len());
+                    if is_rest_args_positional {
+                        add_positional_arg(
+                            &mut positional_args,
+                            arg,
+                            &mut is_rest_args_positional,
+                            cmd,
+                        );
+                    }
+                } else if is_rest_args_positional
+                    || !dashes.is_empty()
+                    || (cmd.no_flags_options_subcommands() && !KNOWN_OPTIONS.contains(&arg))
+                {
+                    add_positional_arg(
+                        &mut positional_args,
+                        arg,
+                        &mut is_rest_args_positional,
+                        cmd,
+                    );
+                } else if arg.starts_with('-') {
+                    if let Some((k, v)) = arg.split_once('=') {
+                        let param = cmd.find_flag_option(k);
+                        if arg_index == args_len - 1 {
+                            if let Some(param) = param {
+                                arg_comp = ArgComp::OptionValue(param.name.clone(), 0)
+                            }
+                            is_last_arg_option_assign = true;
+                        }
+                        if let Some((choices_fn, validate)) =
+                            param.and_then(|v| v.choices_fn.as_ref())
+                        {
+                            if *validate {
+                                choices_fns.insert(choices_fn.as_str());
+                            }
+                        }
+                        flag_option_args[cmd_level].push((
+                            k,
+                            vec![v],
+                            param.map(|v| v.name.as_str()),
+                        ));
+                    } else if let Some(param) = cmd.find_flag_option(arg) {
+                        if let Some((choices_fn, validate)) = param.choices_fn.as_ref() {
+                            if *validate {
+                                choices_fns.insert(choices_fn.as_str());
+                            }
+                        }
+                        match_flag_option(
+                            &mut flag_option_args[cmd_level],
+                            args,
+                            &mut arg_index,
+                            param,
+                            &mut arg_comp,
+                        );
+                    } else if let Some(mut list) = match_combine_shorts(cmd, arg) {
+                        let name = list.pop().and_then(|v| v.2).unwrap();
+                        let param = cmd.find_flag_option(name).unwrap();
+                        if let Some((choices_fn, validate)) = param.choices_fn.as_ref() {
+                            if *validate {
+                                choices_fns.insert(choices_fn.as_str());
+                            }
+                        }
+                        flag_option_args[cmd_level].extend(list);
+                        match_flag_option(
+                            &mut flag_option_args[cmd_level],
+                            args,
+                            &mut arg_index,
+                            param,
+                            &mut arg_comp,
+                        );
+                    } else {
+                        flag_option_args[cmd_level].push((arg, vec![], None));
+                    }
+                } else if let Some(subcmd) = cmd.find_subcommand(arg) {
+                    cmd_level += 1;
+                    cmds.push((
+                        arg,
+                        subcmd,
+                        subcmd.name.clone().unwrap_or_else(|| arg.to_string()),
+                        arg_index,
+                    ));
+                    flag_option_args.push(vec![]);
+                } else {
                     add_positional_arg(
                         &mut positional_args,
                         arg,
@@ -94,87 +177,23 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         cmd,
                     );
                 }
-            } else if is_rest_args_positional
-                || !dashes.is_empty()
-                || (cmd.no_flags_options_subcommands() && !KNOWN_OPTIONS.contains(&arg))
-            {
-                add_positional_arg(&mut positional_args, arg, &mut is_rest_args_positional, cmd);
-            } else if arg.starts_with('-') {
-                if let Some((k, v)) = arg.split_once('=') {
-                    let param = cmd.find_flag_option(k);
-                    if arg_index == args_len - 1 {
-                        if let Some(param) = param {
-                            arg_comp = ArgComp::OptionValue(param.name.clone(), 0)
-                        }
-                        is_last_arg_option_assign = true;
-                    }
-                    if let Some((choices_fn, validate)) = param.and_then(|v| v.choices_fn.as_ref())
-                    {
-                        if *validate {
-                            choices_fns.insert(choices_fn.as_str());
-                        }
-                    }
-                    flag_option_args[cmd_level].push((k, vec![v], param.map(|v| v.name.as_str())));
-                } else if let Some(param) = cmd.find_flag_option(arg) {
-                    if let Some((choices_fn, validate)) = param.choices_fn.as_ref() {
-                        if *validate {
-                            choices_fns.insert(choices_fn.as_str());
-                        }
-                    }
-                    match_flag_option(
-                        &mut flag_option_args[cmd_level],
-                        args,
-                        &mut arg_index,
-                        param,
-                        &mut arg_comp,
-                    );
-                } else if let Some(mut list) = match_combine_shorts(cmd, arg) {
-                    let name = list.pop().and_then(|v| v.2).unwrap();
-                    let param = cmd.find_flag_option(name).unwrap();
-                    if let Some((choices_fn, validate)) = param.choices_fn.as_ref() {
-                        if *validate {
-                            choices_fns.insert(choices_fn.as_str());
-                        }
-                    }
-                    flag_option_args[cmd_level].extend(list);
-                    match_flag_option(
-                        &mut flag_option_args[cmd_level],
-                        args,
-                        &mut arg_index,
-                        param,
-                        &mut arg_comp,
-                    );
-                } else {
-                    flag_option_args[cmd_level].push((arg, vec![], None));
-                }
-            } else if let Some(subcmd) = cmd.find_subcommand(arg) {
-                cmd_level += 1;
-                cmds.push((
-                    arg,
-                    subcmd,
-                    subcmd.name.clone().unwrap_or_else(|| arg.to_string()),
-                    arg_index,
-                ));
-                flag_option_args.push(vec![]);
-            } else {
-                add_positional_arg(&mut positional_args, arg, &mut is_rest_args_positional, cmd);
+                arg_index += 1;
             }
-            arg_index += 1;
-        }
 
-        if is_rest_args_positional {
-            arg_comp = ArgComp::CommandOrPositional;
-        }
-
-        let last_cmd = cmds.last().unwrap().1;
-        choices_fns.extend(last_cmd.positional_params.iter().filter_map(|v| {
-            if let Some((choices_fn, validate)) = v.choices_fn.as_ref() {
-                if *validate {
-                    return Some(choices_fn.as_str());
-                }
+            if is_rest_args_positional {
+                arg_comp = ArgComp::CommandOrPositional;
             }
-            None
-        }));
+
+            let last_cmd = cmds.last().unwrap().1;
+            choices_fns.extend(last_cmd.positional_params.iter().filter_map(|v| {
+                if let Some((choices_fn, validate)) = v.choices_fn.as_ref() {
+                    if *validate {
+                        return Some(choices_fn.as_str());
+                    }
+                }
+                None
+            }));
+        }
         Self {
             cmds,
             args,
@@ -236,6 +255,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
         }
         let level = self.cmds.len() - 1;
         let mut last_cmd = self.cmds[level].1;
+        if last_cmd.delegated() {
+            return last_cmd
+                .positional_params
+                .first()
+                .map(comp_positional)
+                .unwrap_or_default();
+        }
         let mut output = match &self.arg_comp {
             ArgComp::FlagOrOption => {
                 let mut output = self.comp_flag_options();
