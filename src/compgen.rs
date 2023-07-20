@@ -660,7 +660,7 @@ impl Shell {
             output.push((path_value, String::new(), nospace, comp_color))
         }
 
-        output.sort_by(|a, b| a.0.cmp(&b.0));
+        output.sort_by(|a, b| natord::compare_ignore_case(&a.0, &b.0));
 
         Some((prefix, filter, output))
     }

@@ -17,5 +17,5 @@ _argc_completer() {
         displays+=( "$display" )
     done
     zstyle ":completion:${curcontext}:*" list-colors "${colors:1}:=(#b)(-- *)=0=2;37:=(#b)(--[A-Za-z0-9_-]#)( * -- *)=0==2;37"
-    _describe "" displays values -Q -S ''
+    _describe "" displays values -Q -S '' -o nosort
 }
