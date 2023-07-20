@@ -6,7 +6,7 @@ RUN
 prog cmdh val
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: invalid value `val` for `[VAL]`
   [possible values: x, y, z]
 

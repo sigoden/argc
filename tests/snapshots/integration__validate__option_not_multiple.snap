@@ -6,7 +6,7 @@ RUN
 prog cmda -e -e
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: the argument `-e` cannot be used multiple times
 
 USAGE: prog cmda [OPTIONS]

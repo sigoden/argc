@@ -6,7 +6,7 @@ expression: data
 prog -h
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 USAGE: prog [OPTIONS]
 
 OPTIONS:

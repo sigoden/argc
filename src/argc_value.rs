@@ -106,7 +106,7 @@ impl ArgcValue {
                     }
                 }
                 ArgcValue::Error((error, exit)) => {
-                    return format!("cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit)
+                    return format!("command cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit)
                 }
             }
         }

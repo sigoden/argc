@@ -6,7 +6,7 @@ RUN
 prog cmda --cc val
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: invalid value `val` for `<CC>`
   [possible values: abc, def, ghi]
 

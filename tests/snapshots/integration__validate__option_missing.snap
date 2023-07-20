@@ -6,7 +6,7 @@ RUN
 prog cmdb
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: the following required arguments were not provided:
   --oa <OA>
   --ob <OB>...

@@ -6,7 +6,7 @@ RUN
 prog cmda --ce abc val
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: invalid value `val` for `<CE>`
   [possible values: abc, def, ghi]
 

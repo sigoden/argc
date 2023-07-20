@@ -6,7 +6,7 @@ RUN
 prog cmdb v1 v2
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: unexpected argument `v2` found
 
 USAGE: prog cmdb [VAL]

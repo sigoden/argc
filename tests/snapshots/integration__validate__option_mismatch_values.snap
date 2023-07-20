@@ -6,7 +6,7 @@ RUN
 prog cmda -o file1
 
 OUTPUT
-cat >&2 <<-'EOF' 
+command cat >&2 <<-'EOF' 
 error: invalid values for `--od <FILE> <FILE>`
 
 USAGE: prog cmda [OPTIONS]
