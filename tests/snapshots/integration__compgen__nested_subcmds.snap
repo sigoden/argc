@@ -3,32 +3,32 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value=FILE	/kind:value
-cmd	/kind:command
+__argc_value=FILE	/color:green
+cmd	/color:magenta
 
 ************ COMPGEN `prog cmd` ************
-cmd	/kind:command
+cmd	/color:magenta
 
 ************ COMPGEN `prog cmd ` ************
-suba	/kind:command
-subb	/kind:command
+suba	/color:magenta
+subb	/color:magenta
 
 ************ COMPGEN `prog cmd s` ************
-suba	/kind:command
-subb	/kind:command
+suba	/color:magenta
+subb	/color:magenta
 
 ************ COMPGEN `prog cmd suba` ************
-suba	/kind:command
+suba	/color:magenta
 
 ************ COMPGEN `prog cmd suba ` ************
-__argc_value=path	/kind:value
+__argc_value=path	/color:green
 
 ************ COMPGEN `prog cmd help ` ************
-suba	/kind:command
-subb	/kind:command
+suba	/color:magenta
+subb	/color:magenta
 
 ************ COMPGEN `prog cmd help s` ************
-suba	/kind:command
-subb	/kind:command
+suba	/color:magenta
+subb	/color:magenta
 
 

@@ -3,22 +3,22 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa` ************
---oa	/kind:option
+--oa	/color:cyan,bold
 
 ************ COMPGEN `prog --oa ` ************
-__argc_filter=	/kind:value
-ok	/kind:value
+__argc_filter=	/color:green
+ok	/color:green
 
 ************ COMPGEN `prog --oa --` ************
-__argc_filter=	/kind:value
-ok	/kind:value
+__argc_filter=	/color:green
+ok	/color:green
 
 ************ COMPGEN `prog --oa v1 v2` ************
-__argc_filter=	/kind:value
-ok	/kind:value
+__argc_filter=	/color:green
+ok	/color:green
 
 ************ COMPGEN `prog --oa -- ` ************
-__argc_filter=	/kind:value
-ok	/kind:value
+__argc_filter=	/color:green
+ok	/color:green
 
 

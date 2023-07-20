@@ -3,61 +3,61 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value=path	/kind:value
+__argc_value=path	/color:green
 
 ************ COMPGEN `prog -` ************
--a	/kind:flag
---fb	/kind:flag
--b	/kind:flag
---fc	/kind:flag
--f	/kind:flag
--sa	/kind:flag
--e	/kind:option
---oa	/kind:option
--p	/kind:option
+-a	/color:cyan
+--fb	/color:cyan
+-b	/color:cyan
+--fc	/color:cyan
+-f	/color:cyan
+-sa	/color:cyan
+-e	/color:cyan,bold
+--oa	/color:cyan,bold
+-p	/color:cyan,bold
 
 ************ COMPGEN `prog --` ************
---fb	/kind:flag
---fc	/kind:flag
---oa	/kind:option
+--fb	/color:cyan
+--fc	/color:cyan
+--oa	/color:cyan,bold
 
 ************ COMPGEN `prog -a` ************
--ab	/kind:flag
--af	/kind:flag
--ae	/kind:option
--ap	/kind:option
+-ab	/color:cyan
+-af	/color:cyan
+-ae	/color:cyan,bold
+-ap	/color:cyan,bold
 
 ************ COMPGEN `prog -a ` ************
-__argc_value=path	/kind:value
+__argc_value=path	/color:green
 
 ************ COMPGEN `prog -af` ************
--afb	/kind:flag
--aff	/kind:flag
--afe	/kind:option
--afp	/kind:option
+-afb	/color:cyan
+-aff	/color:cyan
+-afe	/color:cyan,bold
+-afp	/color:cyan,bold
 
 ************ COMPGEN `prog -af ` ************
-__argc_value=path	/kind:value
+__argc_value=path	/color:green
 
 ************ COMPGEN `prog -ae` ************
 
 
 ************ COMPGEN `prog -ae ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog -abe` ************
 
 
 ************ COMPGEN `prog -abe ` ************
-__argc_value=FILE	/kind:value
+__argc_value=FILE	/color:green
 
 ************ COMPGEN `prog -s` ************
--sa	/kind:flag
+-sa	/color:cyan
 
 ************ COMPGEN `prog -sa` ************
--sa	/kind:flag
+-sa	/color:cyan
 
 ************ COMPGEN `prog -sa ` ************
-__argc_value=path	/kind:value
+__argc_value=path	/color:green
 
 

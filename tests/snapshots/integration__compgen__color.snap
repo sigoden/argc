@@ -3,101 +3,199 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN Bash `prog ` ************
-flag
-option
-command
-dir
-file
-fileExe
-symlink
-valueOther
-valueAnother
-valueEmphasis
-valueSubtle
-value
+kindFlag
+kindOption
+kindCommand
+kindDir
+kindFile
+kindFileExe
+kindSymlink
+kindValue
+colorBlack
+colorBlackBold
+colorRed
+colorRedBold
+colorGreen
+colorGreenBold
+colorYellow
+colorYellowBold
+colorBlue
+colorBlueBold
+colorMagenta
+colorMagentaBold
+colorCyan
+colorCyanBold
+colorWhite
+colorWhiteBold
+colorDefault
+colorDefaultBold
 
 ************ COMPGEN Elvish `prog ` ************
-flag	0	flag		cyan
-option	0	option		cyan bold
-command	0	command		magenta
-dir	0	dir		blue bold
-file	0	file		default
-fileExe	0	fileExe		green bold
-symlink	0	symlink		cyan bold
-valueOther	0	valueOther		yellow
-valueAnother	0	valueAnother		red
-valueEmphasis	0	valueEmphasis		green bold
-valueSubtle	0	valueSubtle		green dim
-value	0	value		green
+kindFlag	0	kindFlag		cyan
+kindOption	0	kindOption		cyan bold
+kindCommand	0	kindCommand		magenta
+kindDir	0	kindDir		blue bold
+kindFile	0	kindFile		default
+kindFileExe	0	kindFileExe		green bold
+kindSymlink	0	kindSymlink		cyan bold
+kindValue	0	kindValue		green
+colorBlack	0	colorBlack		black
+colorBlackBold	0	colorBlackBold		black bold
+colorRed	0	colorRed		red
+colorRedBold	0	colorRedBold		red bold
+colorGreen	0	colorGreen		green
+colorGreenBold	0	colorGreenBold		green bold
+colorYellow	0	colorYellow		yellow
+colorYellowBold	0	colorYellowBold		yellow bold
+colorBlue	0	colorBlue		blue
+colorBlueBold	0	colorBlueBold		blue bold
+colorMagenta	0	colorMagenta		magenta
+colorMagentaBold	0	colorMagentaBold		magenta bold
+colorCyan	0	colorCyan		cyan
+colorCyanBold	0	colorCyanBold		cyan bold
+colorWhite	0	colorWhite		white
+colorWhiteBold	0	colorWhiteBold		white bold
+colorDefault	0	colorDefault		default
+colorDefaultBold	0	colorDefaultBold		default bold
 
 ************ COMPGEN Fish `prog ` ************
-flag
-option
-command
-dir
-file
-fileExe
-symlink
-valueOther
-valueAnother
-valueEmphasis
-valueSubtle
-value
+kindFlag
+kindOption
+kindCommand
+kindDir
+kindFile
+kindFileExe
+kindSymlink
+kindValue
+colorBlack
+colorBlackBold
+colorRed
+colorRedBold
+colorGreen
+colorGreenBold
+colorYellow
+colorYellowBold
+colorBlue
+colorBlueBold
+colorMagenta
+colorMagentaBold
+colorCyan
+colorCyanBold
+colorWhite
+colorWhiteBold
+colorDefault
+colorDefaultBold
 
 ************ COMPGEN Nushell `prog ` ************
-flag
-option
-command
-dir
-file
-fileExe
-symlink
-valueOther
-valueAnother
-valueEmphasis
-valueSubtle
-value
+kindFlag
+kindOption
+kindCommand
+kindDir
+kindFile
+kindFileExe
+kindSymlink
+kindValue
+colorBlack
+colorBlackBold
+colorRed
+colorRedBold
+colorGreen
+colorGreenBold
+colorYellow
+colorYellowBold
+colorBlue
+colorBlueBold
+colorMagenta
+colorMagentaBold
+colorCyan
+colorCyanBold
+colorWhite
+colorWhiteBold
+colorDefault
+colorDefaultBold
 
 ************ COMPGEN Powershell `prog ` ************
-flag	0	flag		36
-option	0	option		1;36
-command	0	command		35
-dir	0	dir		1;34
-file	0	file		39
-fileExe	0	fileExe		1;32
-symlink	0	symlink		1;36
-valueOther	0	valueOther		33
-valueAnother	0	valueAnother		31
-valueEmphasis	0	valueEmphasis		1;32
-valueSubtle	0	valueSubtle		2;32
-value	0	value		32
+kindFlag	0	kindFlag		36
+kindOption	0	kindOption		1;36
+kindCommand	0	kindCommand		35
+kindDir	0	kindDir		1;34
+kindFile	0	kindFile		39
+kindFileExe	0	kindFileExe		1;32
+kindSymlink	0	kindSymlink		1;36
+kindValue	0	kindValue		32
+colorBlack	0	colorBlack		30
+colorBlackBold	0	colorBlackBold		1;30
+colorRed	0	colorRed		31
+colorRedBold	0	colorRedBold		1;31
+colorGreen	0	colorGreen		32
+colorGreenBold	0	colorGreenBold		1;32
+colorYellow	0	colorYellow		33
+colorYellowBold	0	colorYellowBold		1;33
+colorBlue	0	colorBlue		34
+colorBlueBold	0	colorBlueBold		1;34
+colorMagenta	0	colorMagenta		35
+colorMagentaBold	0	colorMagentaBold		1;35
+colorCyan	0	colorCyan		36
+colorCyanBold	0	colorCyanBold		1;36
+colorWhite	0	colorWhite		37
+colorWhiteBold	0	colorWhiteBold		1;37
+colorDefault	0	colorDefault		39
+colorDefaultBold	0	colorDefaultBold		1;39
 
 ************ COMPGEN Xonsh `prog ` ************
-flag	0	flag	
-option	0	option	
-command	0	command	
-dir	0	dir	
-file	0	file	
-fileExe	0	fileExe	
-symlink	0	symlink	
-valueOther	0	valueOther	
-valueAnother	0	valueAnother	
-valueEmphasis	0	valueEmphasis	
-valueSubtle	0	valueSubtle	
-value	0	value	
+kindFlag	0	kindFlag	
+kindOption	0	kindOption	
+kindCommand	0	kindCommand	
+kindDir	0	kindDir	
+kindFile	0	kindFile	
+kindFileExe	0	kindFileExe	
+kindSymlink	0	kindSymlink	
+kindValue	0	kindValue	
+colorBlack	0	colorBlack	
+colorBlackBold	0	colorBlackBold	
+colorRed	0	colorRed	
+colorRedBold	0	colorRedBold	
+colorGreen	0	colorGreen	
+colorGreenBold	0	colorGreenBold	
+colorYellow	0	colorYellow	
+colorYellowBold	0	colorYellowBold	
+colorBlue	0	colorBlue	
+colorBlueBold	0	colorBlueBold	
+colorMagenta	0	colorMagenta	
+colorMagentaBold	0	colorMagentaBold	
+colorCyan	0	colorCyan	
+colorCyanBold	0	colorCyanBold	
+colorWhite	0	colorWhite	
+colorWhiteBold	0	colorWhiteBold	
+colorDefault	0	colorDefault	
+colorDefaultBold	0	colorDefaultBold	
 
 ************ COMPGEN Zsh `prog ` ************
-flag	flag	flag	36
-option	option	option	1;36
-command	command	command	35
-dir	dir	dir	1;34
-file	file	file	39
-fileExe	fileExe	fileExe	1;32
-symlink	symlink	symlink	1;36
-valueOther	valueOther	valueOther	33
-valueAnother	valueAnother	valueAnother	31
-valueEmphasis	valueEmphasis	valueEmphasis	1;32
-valueSubtle	valueSubtle	valueSubtle	2;32
-value	value	value	32
+kindFlag	kindFlag	kindFlag	36
+kindOption	kindOption	kindOption	1;36
+kindCommand	kindCommand	kindCommand	35
+kindDir	kindDir	kindDir	1;34
+kindFile	kindFile	kindFile	39
+kindFileExe	kindFileExe	kindFileExe	1;32
+kindSymlink	kindSymlink	kindSymlink	1;36
+kindValue	kindValue	kindValue	32
+colorBlack	colorBlack	colorBlack	30
+colorBlackBold	colorBlackBold	colorBlackBold	1;30
+colorRed	colorRed	colorRed	31
+colorRedBold	colorRedBold	colorRedBold	1;31
+colorGreen	colorGreen	colorGreen	32
+colorGreenBold	colorGreenBold	colorGreenBold	1;32
+colorYellow	colorYellow	colorYellow	33
+colorYellowBold	colorYellowBold	colorYellowBold	1;33
+colorBlue	colorBlue	colorBlue	34
+colorBlueBold	colorBlueBold	colorBlueBold	1;34
+colorMagenta	colorMagenta	colorMagenta	35
+colorMagentaBold	colorMagentaBold	colorMagentaBold	1;35
+colorCyan	colorCyan	colorCyan	36
+colorCyanBold	colorCyanBold	colorCyanBold	1;36
+colorWhite	colorWhite	colorWhite	37
+colorWhiteBold	colorWhiteBold	colorWhiteBold	1;37
+colorDefault	colorDefault	colorDefault	39
+colorDefaultBold	colorDefaultBold	colorDefaultBold	1;39
 
 

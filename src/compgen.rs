@@ -8,6 +8,7 @@ use dirs::home_dir;
 use indexmap::IndexMap;
 use std::collections::{HashMap, HashSet};
 use std::env;
+use std::fmt;
 use std::fs;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -49,7 +50,7 @@ pub fn compgen(
     let compgen_values = matcher.compgen(shell);
     let mut default_nospace = unbalance.is_some();
     let mut prefix = unbalance.map(|v| v.to_string()).unwrap_or_default();
-    let mut candidates: IndexMap<String, (String, bool, CompKind)> = IndexMap::new();
+    let mut candidates: IndexMap<String, (String, bool, CompColor)> = IndexMap::new();
     let mut argc_fn = None;
     let mut argc_value = None;
     let mut argc_variables = vec![];
@@ -61,7 +62,7 @@ pub fn compgen(
             mod_quote(&mut last, &mut prefix, &mut default_nospace);
         }
     }
-    for (value, description, comp_kind) in compgen_values {
+    for (value, description, comp_color) in compgen_values {
         if value.starts_with("__argc_") {
             if let Some(fn_name) = value.strip_prefix("__argc_fn=") {
                 argc_fn = Some(fn_name.to_string());
@@ -83,7 +84,7 @@ pub fn compgen(
                 }
             }
         } else if value.starts_with(&last) && !multi_values.contains(&value) {
-            candidates.insert(value.clone(), (description, default_nospace, comp_kind));
+            candidates.insert(value.clone(), (description, default_nospace, comp_color));
         }
     }
     let mut argc_prefix = prefix.to_string();
@@ -167,9 +168,9 @@ pub fn compgen(
     }
 
     if !argc_variables.is_empty() {
-        let mut prepend_candicates: IndexMap<String, (String, bool, CompKind)> = argc_variables
+        let mut prepend_candicates: IndexMap<String, (String, bool, CompColor)> = argc_variables
             .into_iter()
-            .map(|value| (value, (String::new(), false, CompKind::Value)))
+            .map(|value| (value, (String::new(), false, CompColor::of_value())))
             .collect();
         prepend_candicates.extend(candidates);
         candidates = prepend_candicates;
@@ -177,7 +178,9 @@ pub fn compgen(
 
     let mut candidates: Vec<CandidateValue> = candidates
         .into_iter()
-        .map(|(value, (description, nospace, comp_kind))| (value, description, nospace, comp_kind))
+        .map(|(value, (description, nospace, comp_color))| {
+            (value, description, nospace, comp_color)
+        })
         .collect();
 
     if !shell.is_generic() {
@@ -229,62 +232,6 @@ pub fn compgen(
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum CompKind {
-    Flag,
-    Option,
-    Command,
-    Dir,
-    File,
-    FileExe,
-    Symlink,
-    ValueOther,
-    ValueAnother,
-    ValueEmphasis,
-    ValueSubtle,
-    Value,
-}
-
-impl FromStr for CompKind {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().as_str() {
-            "flag" => Ok(Self::Flag),
-            "option" => Ok(Self::Option),
-            "command" => Ok(Self::Command),
-            "dir" => Ok(Self::Dir),
-            "file" => Ok(Self::File),
-            "fileexe" => Ok(Self::FileExe),
-            "symlink" => Ok(Self::Symlink),
-            "valueother" => Ok(Self::ValueOther),
-            "valueanother" => Ok(Self::ValueAnother),
-            "valueemphasis" => Ok(Self::ValueEmphasis),
-            "valuesubtle" => Ok(Self::ValueSubtle),
-            _ => Ok(Self::Value),
-        }
-    }
-}
-
-impl CompKind {
-    pub(crate) fn name(&self) -> &str {
-        match self {
-            Self::Flag => "flag",
-            Self::Option => "option",
-            Self::Command => "command",
-            Self::Dir => "dir",
-            Self::File => "file",
-            Self::FileExe => "exe",
-            Self::Symlink => "symlink",
-            Self::ValueOther => "valueOther",
-            Self::ValueAnother => "valueAnother",
-            Self::ValueEmphasis => "valueEmphasis",
-            Self::ValueSubtle => "valueSubtle",
-            Self::Value => "value",
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Shell {
     Bash,
     Elvish,
@@ -317,7 +264,7 @@ impl FromStr for Shell {
     }
 }
 
-pub(crate) type CandidateValue = (String, String, bool, CompKind); // value, description, nospace
+pub(crate) type CandidateValue = (String, String, bool, CompColor); // value, description, nospace, comp_color
 
 impl Shell {
     pub fn list() -> [Shell; 7] {
@@ -392,7 +339,7 @@ impl Shell {
                 candidates
                     .into_iter()
                     .enumerate()
-                    .map(|(i, (value, description, nospace, _comp_kind))| {
+                    .map(|(i, (value, description, nospace, _comp_color))| {
                         let mut new_value = value;
                         if i == 0 && add_space_to_first_candidate {
                             new_value = format!(" {}", new_value)
@@ -409,18 +356,18 @@ impl Shell {
             }
             Shell::Elvish | Shell::Powershell => candidates
                 .into_iter()
-                .map(|(value, description, nospace, comp_kind)| {
+                .map(|(value, description, nospace, comp_color)| {
                     let new_value = self.combine_value(prefix, &value);
                     let display = if value.is_empty() { " ".into() } else { value };
                     let description = self.comp_description(&description, "", "");
                     let space: &str = if nospace { "0" } else { "1" };
-                    let color = self.color(comp_kind, no_color);
+                    let color = self.color(comp_color, no_color);
                     format!("{new_value}\t{space}\t{display}\t{description}\t{color}")
                 })
                 .collect::<Vec<String>>(),
             Shell::Fish => candidates
                 .into_iter()
-                .map(|(value, description, _nospace, _comp_kind)| {
+                .map(|(value, description, _nospace, _comp_color)| {
                     let new_value = self.combine_value(prefix, &value);
                     let description = self.comp_description(&description, "\t", "");
                     format!("{new_value}{description}")
@@ -428,11 +375,11 @@ impl Shell {
                 .collect::<Vec<String>>(),
             Shell::Generic => candidates
                 .into_iter()
-                .map(|(value, description, nospace, comp_kind)| {
-                    let comp_kind = format!("\t/kind:{}", comp_kind.name());
+                .map(|(value, description, nospace, comp_color)| {
+                    let comp_color = format!("\t/color:{}", comp_color.ser());
                     let description = self.comp_description(&description, "\t", "");
                     let space: &str = if nospace { "\0" } else { "" };
-                    format!("{value}{space}{comp_kind}{description}")
+                    format!("{value}{space}{comp_color}{description}")
                 })
                 .collect::<Vec<String>>(),
             Shell::Nushell => candidates
@@ -471,7 +418,7 @@ impl Shell {
                 .collect::<Vec<String>>(),
             Shell::Zsh => candidates
                 .into_iter()
-                .map(|(value, description, nospace, comp_kind)| {
+                .map(|(value, description, nospace, comp_color)| {
                     let prefix = if let Some((_, i)) = unbalance_quote(prefix) {
                         prefix
                             .char_indices()
@@ -486,7 +433,7 @@ impl Shell {
                         escape_chars(&value, self.need_escape_chars(), "\\").replace("\\:", ":");
                     let display = value.replace(':', "\\:");
                     let description = self.comp_description(&description, ":", "");
-                    let color = self.color(comp_kind, no_color);
+                    let color = self.color(comp_color, no_color);
                     let space = if nospace { "" } else { " " };
                     format!("{new_value}{space}\t{display}{description}\t{match_value}\t{color}")
                 })
@@ -522,47 +469,21 @@ impl Shell {
         }
     }
 
-    pub(crate) fn color(&self, comp_kind: CompKind, no_color: bool) -> &'static str {
+    pub(crate) fn color(&self, comp_color: CompColor, no_color: bool) -> String {
         match self {
             Shell::Elvish => {
                 if no_color {
-                    return "default";
+                    return "default".into();
                 }
-                match comp_kind {
-                    CompKind::Flag => "cyan",
-                    CompKind::Option => "cyan bold",
-                    CompKind::Command => "magenta",
-                    CompKind::Dir => "blue bold",
-                    CompKind::File => "default",
-                    CompKind::FileExe => "green bold",
-                    CompKind::Symlink => "cyan bold",
-                    CompKind::ValueOther => "yellow",
-                    CompKind::ValueAnother => "red",
-                    CompKind::ValueEmphasis => "green bold",
-                    CompKind::ValueSubtle => "green dim",
-                    CompKind::Value => "green",
-                }
+                comp_color.style()
             }
             Shell::Powershell | Shell::Zsh => {
                 if no_color {
-                    return "39";
+                    return "39".into();
                 }
-                match comp_kind {
-                    CompKind::Flag => "36",
-                    CompKind::Option => "1;36",
-                    CompKind::Command => "35",
-                    CompKind::Dir => "1;34",
-                    CompKind::File => "39",
-                    CompKind::FileExe => "1;32",
-                    CompKind::Symlink => "1;36",
-                    CompKind::ValueOther => "33",
-                    CompKind::ValueAnother => "31",
-                    CompKind::ValueEmphasis => "1;32",
-                    CompKind::ValueSubtle => "2;32",
-                    CompKind::Value => "32",
-                }
+                comp_color.ansi_code()
             }
-            _ => "",
+            _ => String::new(),
         }
     }
 
@@ -642,7 +563,12 @@ impl Shell {
                 return Some((
                     "".into(),
                     "".into(),
-                    vec![(format!("{prefix}{filter}"), "".into(), true, CompKind::Dir)],
+                    vec![(
+                        format!("{prefix}{filter}"),
+                        "".into(),
+                        true,
+                        CompColor::of_dir(),
+                    )],
                 ));
             }
             let value_prefix = if prefix.is_empty() { ".\\" } else { "" };
@@ -652,7 +578,7 @@ impl Shell {
                 return Some((
                     "".into(),
                     "".into(),
-                    vec![("~/".into(), "".into(), true, CompKind::Dir)],
+                    vec![("~/".into(), "".into(), true, CompColor::of_dir())],
                 ));
             }
             ("", "/")
@@ -709,10 +635,10 @@ impl Shell {
                 format!("{value_prefix}{file_name}{suffix}")
             };
 
-            let comp_kind = if is_dir {
-                CompKind::Dir
+            let comp_color = if is_dir {
+                CompColor::of_dir()
             } else if is_symlink {
-                CompKind::Symlink
+                CompColor::of_symlink()
             } else {
                 #[cfg(not(windows))]
                 let is_executable = {
@@ -725,13 +651,13 @@ impl Shell {
                     path_exts.iter().any(|v| new_file_name.ends_with(v))
                 };
                 if is_executable {
-                    CompKind::FileExe
+                    CompColor::of_file_exe()
                 } else {
-                    CompKind::File
+                    CompColor::of_file()
                 }
             };
             let nospace = if default_nospace { true } else { is_dir };
-            output.push((path_value, String::new(), nospace, comp_kind))
+            output.push((path_value, String::new(), nospace, comp_color))
         }
 
         output.sort_by(|a, b| a.0.cmp(&b.0));
@@ -818,16 +744,200 @@ impl Shell {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct CompColor {
+    pub(crate) code: ColorCode,
+    pub(crate) style: ColorStyle,
+}
+
+impl CompColor {
+    pub(crate) fn new(code: ColorCode, style: ColorStyle) -> Self {
+        Self { code, style }
+    }
+
+    pub(crate) fn deser(s: &str) -> Result<Self> {
+        if let Some((code, style)) = s.split_once(',') {
+            if let (Ok(code), Ok(style)) = (code.parse(), style.parse()) {
+                return Ok(Self::new(code, style));
+            }
+        } else if let Ok(code) = s.parse() {
+            return Ok(Self::new(code, ColorStyle::Regular));
+        }
+        bail!("Invalid CompColor value")
+    }
+
+    pub(crate) fn ser(&self) -> String {
+        if self.style == ColorStyle::Regular {
+            format!("{}", self.code)
+        } else {
+            format!("{},{}", self.code, self.style)
+        }
+    }
+
+    pub(crate) fn ansi_code(&self) -> String {
+        let mut ret = if self.style != ColorStyle::Regular {
+            format!("{};", self.style.ansi_code())
+        } else {
+            String::new()
+        };
+        ret.push_str(self.code.ansi_code());
+        ret
+    }
+
+    pub(crate) fn style(&self) -> String {
+        let mut ret = self.code.to_string();
+        if self.style != ColorStyle::Regular {
+            ret.push_str(&format!(" {}", self.style))
+        }
+        ret
+    }
+
+    pub(crate) fn of_flag() -> Self {
+        Self::new(ColorCode::Cyan, ColorStyle::Regular)
+    }
+
+    pub(crate) fn of_option() -> Self {
+        Self::new(ColorCode::Cyan, ColorStyle::Bold)
+    }
+
+    pub(crate) fn of_command() -> Self {
+        Self::new(ColorCode::Magenta, ColorStyle::Regular)
+    }
+
+    pub(crate) fn of_dir() -> Self {
+        Self::new(ColorCode::Blue, ColorStyle::Bold)
+    }
+
+    pub(crate) fn of_file() -> Self {
+        Self::new(ColorCode::Default, ColorStyle::Regular)
+    }
+
+    pub(crate) fn of_file_exe() -> Self {
+        Self::new(ColorCode::Green, ColorStyle::Bold)
+    }
+
+    pub(crate) fn of_symlink() -> Self {
+        Self::new(ColorCode::Cyan, ColorStyle::Bold)
+    }
+
+    pub(crate) fn of_value() -> Self {
+        Self::new(ColorCode::Green, ColorStyle::Regular)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ColorCode {
+    Black,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Magenta,
+    Cyan,
+    White,
+    Default,
+}
+
+impl FromStr for ColorCode {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s {
+            "black" => Ok(Self::Black),
+            "red" => Ok(Self::Red),
+            "green" => Ok(Self::Green),
+            "yellow" => Ok(Self::Yellow),
+            "blue" => Ok(Self::Blue),
+            "magenta" => Ok(Self::Magenta),
+            "cyan" => Ok(Self::Cyan),
+            "white" => Ok(Self::White),
+            "default" => Ok(Self::Default),
+            _ => bail!("Invalid ColorCode value"),
+        }
+    }
+}
+
+impl fmt::Display for ColorCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Black => write!(f, "black"),
+            Self::Red => write!(f, "red"),
+            Self::Green => write!(f, "green"),
+            Self::Yellow => write!(f, "yellow"),
+            Self::Blue => write!(f, "blue"),
+            Self::Magenta => write!(f, "magenta"),
+            Self::Cyan => write!(f, "cyan"),
+            Self::White => write!(f, "white"),
+            Self::Default => write!(f, "default"),
+        }
+    }
+}
+
+impl ColorCode {
+    pub fn ansi_code(&self) -> &str {
+        match self {
+            Self::Black => "30",
+            Self::Red => "31",
+            Self::Green => "32",
+            Self::Yellow => "33",
+            Self::Blue => "34",
+            Self::Magenta => "35",
+            Self::Cyan => "36",
+            Self::White => "37",
+            Self::Default => "39",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ColorStyle {
+    Regular,
+    Bold,
+}
+
+impl FromStr for ColorStyle {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s {
+            "regular" => Ok(Self::Regular),
+            "bold" => Ok(Self::Bold),
+            _ => bail!("Invalid CodeStyle value"),
+        }
+    }
+}
+
+impl fmt::Display for ColorStyle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Regular => write!(f, "regular"),
+            Self::Bold => write!(f, "bold"),
+        }
+    }
+}
+
+impl ColorStyle {
+    pub fn ansi_code(&self) -> &str {
+        match self {
+            Self::Regular => "0",
+            Self::Bold => "1",
+        }
+    }
+}
+
 fn parse_candidate_value(input: &str) -> CandidateValue {
     let parts: Vec<&str> = input.split('\t').collect();
     let parts_len = parts.len();
     let mut value = String::new();
     let mut description = String::new();
     let mut nospace = false;
-    let mut comp_kind = CompKind::Value;
+    let mut comp_color = CompColor::of_value();
     if parts_len >= 2 {
-        if let Some(kind_value) = parts[1].strip_prefix("/kind:").and_then(|v| v.parse().ok()) {
-            comp_kind = kind_value;
+        if let Some(color) = parts[1]
+            .strip_prefix("/color:")
+            .and_then(|v| CompColor::deser(v).ok())
+        {
+            comp_color = color;
             description = parts[2..].join("\t");
         } else {
             description = parts[1..].join("\t");
@@ -841,7 +951,7 @@ fn parse_candidate_value(input: &str) -> CandidateValue {
             value = parts[0].trim().to_string();
         }
     }
-    (value, description, nospace, comp_kind)
+    (value, description, nospace, comp_color)
 }
 
 fn convert_arg_value(value: &str) -> Option<String> {
@@ -965,44 +1075,62 @@ mod tests {
     use super::*;
 
     macro_rules! assert_parse_candidate_value {
-        ($input:expr, $value:expr, $desc:expr, $nospace:expr, $comp_kind:expr) => {
+        ($input:expr, $value:expr, $desc:expr, $nospace:expr, $comp_color:expr) => {
             assert_eq!(
                 parse_candidate_value($input),
-                ($value.to_string(), $desc.to_string(), $nospace, $comp_kind)
+                ($value.to_string(), $desc.to_string(), $nospace, $comp_color)
             )
         };
     }
 
     #[test]
     fn test_parse_candidate_value() {
-        assert_parse_candidate_value!("abc", "abc", "", false, CompKind::Value);
-        assert_parse_candidate_value!("abc\0", "abc", "", true, CompKind::Value);
-        assert_parse_candidate_value!("abc\tA value", "abc", "A value", false, CompKind::Value);
-        assert_parse_candidate_value!("abc\0\tA value", "abc", "A value", true, CompKind::Value);
+        assert_parse_candidate_value!("abc", "abc", "", false, CompColor::of_value());
+        assert_parse_candidate_value!("abc\0", "abc", "", true, CompColor::of_value());
+        assert_parse_candidate_value!(
+            "abc\tA value",
+            "abc",
+            "A value",
+            false,
+            CompColor::of_value()
+        );
+        assert_parse_candidate_value!(
+            "abc\0\tA value",
+            "abc",
+            "A value",
+            true,
+            CompColor::of_value()
+        );
         assert_parse_candidate_value!(
             "abc\0\tA value\tmore desc",
             "abc",
             "A value\tmore desc",
             true,
-            CompKind::Value
+            CompColor::of_value()
         );
         assert_parse_candidate_value!(
-            "abc\0\t/kind:command\tA value\tmore desc",
+            "abc\0\t/color:magenta\tA value\tmore desc",
             "abc",
             "A value\tmore desc",
             true,
-            CompKind::Command
+            CompColor::of_command()
         );
         assert_parse_candidate_value!(
-            "abc\0\t/kind:command\tA value",
+            "abc\0\t/color:cyan,bold\tA value",
             "abc",
             "A value",
             true,
-            CompKind::Command
+            CompColor::of_option()
         );
-        assert_parse_candidate_value!("abc\0\t/kind:command", "abc", "", true, CompKind::Command);
-        assert_parse_candidate_value!("abc\t/kind:command", "abc", "", false, CompKind::Command);
-        assert_parse_candidate_value!("", "", "", false, CompKind::Value);
+        assert_parse_candidate_value!("abc\0\t/color:cyan", "abc", "", true, CompColor::of_flag());
+        assert_parse_candidate_value!(
+            "abc\t/color:default",
+            "abc",
+            "",
+            false,
+            CompColor::of_file()
+        );
+        assert_parse_candidate_value!("", "", "", false, CompColor::of_value());
     }
 
     #[test]

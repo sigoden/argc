@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog -a` ************
--a	/kind:flag
--ab	/kind:flag
+-a	/color:cyan
+-ab	/color:cyan
 
 

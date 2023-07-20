@@ -3,6 +3,6 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-cmda	/kind:command
+cmda	/color:magenta
 
 

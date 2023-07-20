@@ -3,13 +3,13 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-cmda	/kind:command
-cmdb	/kind:command
+cmda	/color:magenta
+cmdb	/color:magenta
 
 ************ COMPGEN `prog cmdx ` ************
-__argc_value=path	/kind:value
+__argc_value=path	/color:green
 
 ************ COMPGEN `prog cmdx cmd` ************
-__argc_value=path	/kind:value
+__argc_value=path	/color:green
 
 
