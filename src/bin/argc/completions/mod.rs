@@ -21,7 +21,10 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
     cmds.extend(args.iter().map(|v| v.as_str()));
     let output = match shell {
         Shell::Bash => {
-            let code = format!("complete -F _argc_completer -o nospace {}", cmds.join(" "));
+            let code = format!(
+                "complete -F _argc_completer -o nospace -o nosort {}",
+                cmds.join(" ")
+            );
             format!("{BASH_SCRIPT}\n{code}\n",)
         }
         Shell::Elvish => {
@@ -35,7 +38,7 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
         Shell::Fish => {
             let lines: Vec<String> = cmds
                 .iter()
-                .map(|v| format!(r###"complete -x -c {v} -a "(_argc_completer)" -r"###))
+                .map(|v| format!(r###"complete -x -k -c {v} -a "(_argc_completer)""###))
                 .collect();
             let code = lines.join("\n");
             format!("{FISH_SCRIPT}\n{code}\n",)
