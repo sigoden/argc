@@ -188,9 +188,16 @@ pub fn compgen(
             if let Some((value_prefix, value_filter, more_candidates)) =
                 path_value.compgen(shell, &argc_filter, &argc_suffix, &argc_cd, default_nospace)
             {
-                argc_prefix = format!("{argc_prefix}{value_prefix}");
-                argc_filter = value_filter;
-                candidates.extend(more_candidates)
+                if candidates.is_empty() || value_prefix.is_empty() {
+                    argc_prefix = format!("{argc_prefix}{value_prefix}");
+                    argc_filter = value_filter;
+                    candidates.extend(more_candidates)
+                } else {
+                    candidates.extend(more_candidates.into_iter().map(|mut v| {
+                        v.0 = format!("{value_prefix}{}", v.0);
+                        v
+                    }))
+                }
             }
         }
     }
