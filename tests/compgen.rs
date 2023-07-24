@@ -660,10 +660,11 @@ fn desc() {
     let script = r###"
 # @option --oa[`_choice_fn`]
 _choice_fn() {
-    echo -e "abc\t  desc"
-    echo -e "def\t  (desc) "
+    echo -e "abc\tdesc"
+    echo -e "def\t(desc) "
     echo -e " ijk\t  value (desc)"
-    echo -e " xyz \t  [desc]"
+    echo -e " xyz \t[desc]"
+    echo -e " cjk\t福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完"
 }
 "###;
 
