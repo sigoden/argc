@@ -7,41 +7,48 @@ abc (desc)
 def (desc)
 ijk (value (desc))
 xyz ([desc])
+cjk (福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完)
 
 ************ COMPGEN Elvish `prog --oa ` ************
 abc	1	abc	desc	green
 def	1	def	desc	green
 ijk	1	ijk	value (desc)	green
 xyz	1	xyz	[desc]	green
+cjk	1	cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完	green
 
 ************ COMPGEN Fish `prog --oa ` ************
 abc	desc
 def	desc
 ijk	value (desc)
 xyz	[desc]
+cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完
 
 ************ COMPGEN Nushell `prog --oa ` ************
 abc 	desc
 def 	desc
 ijk 	value (desc)
 xyz 	[desc]
+cjk 	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完
 
 ************ COMPGEN Powershell `prog --oa ` ************
 abc	1	abc	desc	32
 def	1	def	desc	32
 ijk	1	ijk	value (desc)	32
 xyz	1	xyz	[desc]	32
+cjk	1	cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完	32
 
 ************ COMPGEN Xonsh `prog --oa ` ************
 abc	1	abc	desc
 def	1	def	desc
 ijk	1	ijk	value (desc)
 xyz	1	xyz	[desc]
+cjk	1	cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完
 
 ************ COMPGEN Zsh `prog --oa ` ************
 abc 	abc:desc	abc	32
 def 	def:desc	def	32
 ijk 	ijk:value (desc)	ijk	32
 xyz 	xyz:[desc]	xyz	32
+cjk 	cjk:福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完	cjk	32
 
 

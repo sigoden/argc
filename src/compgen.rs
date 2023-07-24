@@ -997,10 +997,11 @@ fn truncate_description(description: &str) -> String {
             .trim_end_matches(')')
             .to_string();
     }
-    if description.len() < max_width {
+    if description.chars().count() < max_width {
         description
     } else {
-        format!("{}...", &description[0..max_width - 3])
+        let truncated: String = description.chars().take(max_width).collect();
+        format!("{}...", truncated)
     }
 }
 
