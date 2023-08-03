@@ -1,4 +1,6 @@
-use crate::param::{FlagOptionParam, ParamData, PositionalParam};
+use crate::param::{
+    ChoiceData, DefaultData, FlagOptionParam, Modifier, ParamData, PositionalParam,
+};
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
 use anyhow::bail;
@@ -216,8 +218,15 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
             parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |(short, dashes, arg, value_names, describe)| {
-            FlagOptionParam::new(arg, describe, short, false, dashes, &value_names)
+        |(short, hyphens, arg, value_names, describe)| {
+            FlagOptionParam::new(
+                arg,
+                describe,
+                short,
+                false,
+                hyphens.len() == 1,
+                &value_names,
+            )
         },
     )(input)
 }
@@ -244,8 +253,7 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             parse_tail,
         )),
         |(arg, value_names, describe)| {
-            let short = arg.name.chars().next();
-            FlagOptionParam::new(arg, describe, short, false, "", &value_names)
+            FlagOptionParam::new(arg, describe, None, false, true, &value_names)
         },
     )(input)
 }
@@ -273,6 +281,7 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
 fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     alt((parse_with_long_flag_param, parse_no_long_flag_param))(input)
 }
+
 // Parse `@flag`
 fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
@@ -282,8 +291,8 @@ fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             parse_long_flag_and_asterisk,
             parse_tail,
         )),
-        |(short, dashes, arg, describe)| {
-            FlagOptionParam::new(arg, describe, short, true, dashes, &[])
+        |(short, hyphens, arg, describe)| {
+            FlagOptionParam::new(arg, describe, short, true, hyphens.len() == 1, &[])
         },
     )(input)
 }
@@ -295,10 +304,7 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> 
             preceded(pair(space0, tag("-")), parse_short_flag_and_asterisk),
             parse_tail,
         )),
-        |(arg, describe)| {
-            let short = arg.name.chars().next();
-            FlagOptionParam::new(arg, describe, short, true, "", &[])
-        },
+        |(arg, describe)| FlagOptionParam::new(arg, describe, None, true, true, &[]),
     )(input)
 }
 
@@ -306,7 +312,7 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> 
 fn parse_long_flag_and_asterisk(input: &str) -> nom::IResult<&str, ParamData> {
     alt((
         map(terminated(parse_param_name, tag("*")), |mut arg| {
-            arg.multiple = true;
+            arg.modifer = Modifier::MultipleOptional;
             arg
         }),
         parse_param_name,
@@ -321,37 +327,43 @@ fn parse_short_flag_and_asterisk(input: &str) -> nom::IResult<&str, ParamData> {
         })(input)
     }
     map(pair(parser, opt(tag("*"))), |(mut arg, multiple)| {
-        arg.multiple = multiple.is_some();
+        if multiple.is_some() {
+            arg.modifer = Modifier::MultipleOptional;
+        }
         arg
     })(input)
 }
 
-// Parse `str!` `str*` `str+` `str`
+// Parse `str!` `str~` `str*` `str+` `str`
 fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
     alt((
         map(terminated(parse_param_name, tag("!")), |mut arg| {
-            arg.required = true;
+            arg.modifer = Modifier::Required;
             arg
         }),
         map(terminated(parse_param_name, tag("~")), |mut arg| {
-            arg.multiple = true;
-            arg.terminated = true;
+            arg.modifer = Modifier::Terminated;
             arg
         }),
         map(
             pair(parse_param_name, preceded(tag("*"), opt(parse_multi_char))),
             |(mut arg, multi_char)| {
-                arg.multiple = true;
-                arg.multi_char = multi_char;
+                let modifier = match multi_char {
+                    Some(c) => Modifier::MultiCharOptional(c),
+                    None => Modifier::MultipleOptional,
+                };
+                arg.modifer = modifier;
                 arg
             },
         ),
         map(
             pair(parse_param_name, preceded(tag("+"), opt(parse_multi_char))),
             |(mut arg, multi_char)| {
-                arg.required = true;
-                arg.multiple = true;
-                arg.multi_char = multi_char;
+                let modifier = match multi_char {
+                    Some(c) => Modifier::MultiCharRequired(c),
+                    None => Modifier::MultipleRequired,
+                };
+                arg.modifer = modifier;
                 arg
             },
         ),
@@ -364,7 +376,7 @@ fn parse_param_assign(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         separated_pair(parse_param_name, char('='), parse_default_value),
         |(mut arg, value)| {
-            arg.default = Some(value.to_string());
+            arg.default = Some(DefaultData::Value(value.to_string()));
             arg
         },
     )(input)
@@ -374,8 +386,8 @@ fn parse_param_assign(input: &str) -> nom::IResult<&str, ParamData> {
 fn parse_param_assign_fn(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         separated_pair(parse_param_name, char('='), parse_value_fn),
-        |(mut arg, value)| {
-            arg.default_fn = Some(value.to_string());
+        |(mut arg, f)| {
+            arg.default = Some(DefaultData::Fn(f.to_string()));
             arg
         },
     )(input)
@@ -387,10 +399,13 @@ fn parse_param_modifer_choices_default(input: &str) -> nom::IResult<&str, ParamD
             parse_param_modifer,
             delimited(char('['), parse_choices_default, char(']')),
         ),
-        |(mut arg, (choices, default))| {
-            arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
-            arg.required = false;
-            arg.default = default.map(|v| v.to_string());
+        |(mut arg, (values, default))| {
+            arg.choice = Some(ChoiceData::Values(
+                values.iter().map(|v| v.to_string()).collect(),
+            ));
+            if let Some(value) = default {
+                arg.default = Some(DefaultData::Value(value.to_string()));
+            }
             arg
         },
     )(input)
@@ -402,8 +417,10 @@ fn parse_param_modifer_choices(input: &str) -> nom::IResult<&str, ParamData> {
             parse_param_modifer,
             delimited(char('['), parse_choices, char(']')),
         ),
-        |(mut arg, choices)| {
-            arg.choices = Some(choices.iter().map(|v| v.to_string()).collect());
+        |(mut arg, values)| {
+            arg.choice = Some(ChoiceData::Values(
+                values.iter().map(|v| v.to_string()).collect(),
+            ));
             arg
         },
     )(input)
@@ -415,8 +432,8 @@ fn parse_param_modifer_choices_fn(input: &str) -> nom::IResult<&str, ParamData> 
             parse_param_modifer,
             delimited(char('['), pair(opt(char('?')), parse_value_fn), char(']')),
         ),
-        |(mut arg, (validate, choices_fn))| {
-            arg.choices_fn = Some((choices_fn.into(), validate.is_none()));
+        |(mut arg, (validate, f))| {
+            arg.choice = Some(ChoiceData::Fn(f.into(), validate.is_none()));
             arg
         },
     )(input)
@@ -719,10 +736,10 @@ mod tests {
         assert_parse_option_arg!("--foo[`_foo`]");
         assert_parse_option_arg!("--foo![a|b]");
         assert_parse_option_arg!("--foo![`_foo`]");
-        assert_parse_option_arg!("--foo![=a|b]", "--foo[=a|b]");
+        assert_parse_option_arg!("--foo![=a|b]");
         assert_parse_option_arg!("--foo+[a|b]");
         assert_parse_option_arg!("--foo+[`_foo`]");
-        assert_parse_option_arg!("--foo+[=a|b]", "--foo*[=a|b]");
+        assert_parse_option_arg!("--foo+[=a|b]");
         assert_parse_option_arg!("--foo+,[a|b]");
         assert_parse_option_arg!("--foo*[a|b]");
         assert_parse_option_arg!("--foo*[=a|b]");
@@ -753,10 +770,10 @@ mod tests {
         assert_parse_option_arg!("-foo[`_foo`]");
         assert_parse_option_arg!("-foo![a|b]");
         assert_parse_option_arg!("-foo![`_foo`]");
-        assert_parse_option_arg!("-foo![=a|b]", "-foo[=a|b]");
+        assert_parse_option_arg!("-foo![=a|b]");
         assert_parse_option_arg!("-foo+[a|b]");
         assert_parse_option_arg!("-foo+[`_foo`]");
-        assert_parse_option_arg!("-foo+[=a|b]", "-foo*[=a|b]");
+        assert_parse_option_arg!("-foo+[=a|b]");
         assert_parse_option_arg!("-foo*[a|b]");
         assert_parse_option_arg!("-foo*[=a|b]");
         assert_parse_option_arg!("-foo*[`_foo`]");
@@ -782,7 +799,7 @@ mod tests {
         assert_parse_option_arg!("-f[`_foo`]");
         assert_parse_option_arg!("-f![a|b]");
         assert_parse_option_arg!("-f![`_foo`]");
-        assert_parse_option_arg!("-f![=a|b]", "-f[=a|b]");
+        assert_parse_option_arg!("-f![=a|b]");
     }
 
     #[test]
@@ -832,10 +849,10 @@ mod tests {
         assert_parse_positional_arg!("foo[=a|b]");
         assert_parse_positional_arg!("foo![a|b]");
         assert_parse_positional_arg!("foo![`_foo`]");
-        assert_parse_positional_arg!("foo![=a|b]", "foo[=a|b]");
+        assert_parse_positional_arg!("foo![=a|b]");
         assert_parse_positional_arg!("foo+[a|b]");
         assert_parse_positional_arg!("foo+[`_foo`]");
-        assert_parse_positional_arg!("foo+[=a|b]", "foo*[=a|b]");
+        assert_parse_positional_arg!("foo+[=a|b]");
         assert_parse_positional_arg!("foo*[a|b]");
         assert_parse_positional_arg!("foo*[`_foo`]");
         assert_parse_positional_arg!("foo*[=a|b]");

@@ -7,7 +7,7 @@ use std::{
 use crate::{
     command::Command,
     compgen::CompColor,
-    param::{FlagOptionParam, PositionalParam},
+    param::{ChoiceData, FlagOptionParam, ParamData, PositionalParam},
     utils::run_param_fns,
     ArgcValue, Shell,
 };
@@ -24,7 +24,7 @@ pub(crate) struct Matcher<'a, 'b> {
     positional_args: Vec<&'b str>,
     dashes: Vec<usize>,
     arg_comp: ArgComp,
-    choices_fns: HashSet<&'a str>,
+    choice_fns: HashSet<&'a str>,
     script_path: Option<String>,
     term_width: Option<usize>,
     is_last_arg_option_assign: bool,
@@ -71,7 +71,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut dashes = vec![];
         let mut is_last_arg_option_assign = false;
         let mut arg_comp = ArgComp::Any;
-        let mut choices_fns = HashSet::new();
+        let mut choice_fns = HashSet::new();
         let args_len = args.len();
         if root.delegated() {
             positional_args = args.iter().skip(1).map(|v| v.as_str()).collect();
@@ -116,11 +116,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             }
                             is_last_arg_option_assign = true;
                         }
-                        if let Some((choices_fn, validate)) =
-                            param.and_then(|v| v.choices_fn.as_ref())
-                        {
+                        if let Some((choice_fn, validate)) = param.and_then(|v| v.choice_fn()) {
                             if *validate {
-                                choices_fns.insert(choices_fn.as_str());
+                                choice_fns.insert(choice_fn.as_str());
                             }
                         }
                         flag_option_args[cmd_level].push((
@@ -129,9 +127,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             param.map(|v| v.name.as_str()),
                         ));
                     } else if let Some(param) = cmd.find_flag_option(arg) {
-                        if let Some((choices_fn, validate)) = param.choices_fn.as_ref() {
+                        if let Some((choice_fn, validate)) = param.choice_fn() {
                             if *validate {
-                                choices_fns.insert(choices_fn.as_str());
+                                choice_fns.insert(choice_fn.as_str());
                             }
                         }
                         match_flag_option(
@@ -144,9 +142,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     } else if let Some(mut list) = match_combine_shorts(cmd, arg) {
                         let name = list.pop().and_then(|v| v.2).unwrap();
                         let param = cmd.find_flag_option(name).unwrap();
-                        if let Some((choices_fn, validate)) = param.choices_fn.as_ref() {
+                        if let Some((choice_fn, validate)) = param.choice_fn() {
                             if *validate {
-                                choices_fns.insert(choices_fn.as_str());
+                                choice_fns.insert(choice_fn.as_str());
                             }
                         }
                         flag_option_args[cmd_level].extend(list);
@@ -185,10 +183,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
 
             let last_cmd = cmds.last().unwrap().1;
-            choices_fns.extend(last_cmd.positional_params.iter().filter_map(|v| {
-                if let Some((choices_fn, validate)) = v.choices_fn.as_ref() {
+            choice_fns.extend(last_cmd.positional_params.iter().filter_map(|v| {
+                if let Some((choice_fn, validate)) = v.choice_fn() {
                     if *validate {
-                        return Some(choices_fn.as_str());
+                        return Some(choice_fn.as_str());
                     }
                 }
                 None
@@ -201,7 +199,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             positional_args,
             dashes,
             arg_comp,
-            choices_fns,
+            choice_fns,
             script_path: None,
             term_width: None,
             is_last_arg_option_assign,
@@ -456,7 +454,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut missing_params: Vec<String> = if positional_params_len > positional_values_len {
             last_cmd.positional_params[positional_values_len..]
                 .iter()
-                .filter(|param| param.required)
+                .filter(|param| param.required())
                 .map(|v| v.render_value())
                 .collect()
         } else {
@@ -468,7 +466,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         for (i, param) in last_cmd.positional_params.iter().enumerate() {
             if let (Some(values), Some(choices)) = (
                 positional_values.get(i),
-                get_param_choices(&param.choices, &param.choices_fn, &choices_fn_values),
+                get_param_choice(&param.data.choice, &choices_fn_values),
             ) {
                 for value in values.iter() {
                     if !choices.contains(&value.to_string()) {
@@ -489,7 +487,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let mut missing_flag_options: IndexSet<&str> = cmd
                 .flag_option_params
                 .iter()
-                .filter(|v| v.required)
+                .filter(|v| v.required())
                 .map(|v| v.name.as_str())
                 .collect();
             for (i, (key, _, name)) in args.iter().enumerate() {
@@ -512,7 +510,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 if let Some(param) = cmd.flag_option_params.iter().find(|v| v.name == name) {
                     let values_list: Vec<&[&str]> =
                         indexes.iter().map(|v| args[*v].1.as_slice()).collect();
-                    if !param.multiple && values_list.len() > 1 {
+                    if !param.multiple() && values_list.len() > 1 {
                         return Some(MatchError::NotMultipleArgument(level, param.render_name()));
                     }
                     for values in values_list.iter() {
@@ -523,7 +521,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                     param.render_name(),
                                     values[0].to_string(),
                                 ));
-                            } else if !param.multiple {
+                            } else if !param.multiple() {
                                 return Some(MatchError::MismatchValues(
                                     level,
                                     param.render_name_values(),
@@ -531,7 +529,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             }
                         }
                         if let Some(choices) =
-                            get_param_choices(&param.choices, &param.choices_fn, &choices_fn_values)
+                            get_param_choice(&param.data.choice, &choices_fn_values)
                         {
                             for value in values.iter() {
                                 if !choices.contains(&value.to_string()) {
@@ -564,7 +562,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
     fn run_choices_fns(&'a self) -> Option<HashMap<&'a str, Vec<String>>> {
         let script_path = self.script_path.as_ref()?;
         let mut choices_fn_values = HashMap::new();
-        let fns: Vec<&str> = self.choices_fns.iter().copied().collect();
+        let fns: Vec<&str> = self.choice_fns.iter().copied().collect();
         let mut envs = HashMap::new();
         envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
         envs.insert("ARGC_PATH_SEP".into(), MAIN_SEPARATOR.into());
@@ -598,12 +596,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut param_index = 0;
         while param_index < params_len && arg_index < args_len {
             let param = &cmd.positional_params[param_index];
-            if param.multiple {
+            if param.multiple() {
                 let dash_idx = self.dashes.first().cloned().unwrap_or_default();
                 let takes = if param_index == 0
                     && dash_idx > 0
                     && params_len == 2
-                    && cmd.positional_params[1].multiple
+                    && cmd.positional_params[1].multiple()
                 {
                     dash_idx
                 } else {
@@ -765,7 +763,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             .collect();
         for param in cmd.flag_option_params.iter() {
             let exist = args.contains(param.name.as_str());
-            if !exist || param.multiple {
+            if !exist || param.multiple() {
                 let describe = param.describe_head();
                 let kind = if param.is_flag() {
                     CompColor::of_flag()
@@ -791,7 +789,7 @@ fn add_positional_arg<'a>(
 ) {
     positional_args.push(arg);
     if !*is_rest_args_positional
-        && cmd.positional_params.last().map(|v| v.terminated) == Some(true)
+        && cmd.positional_params.last().map(|v| v.terminated()) == Some(true)
         && positional_args.len() >= cmd.positional_params.len() - 1
     {
         *is_rest_args_positional = true;
@@ -840,7 +838,7 @@ fn match_flag_option<'a, 'b>(
     param: &'a FlagOptionParam,
     arg_comp: &mut ArgComp,
 ) {
-    if param.terminated {
+    if param.terminated() {
         let value_args: Vec<&str> = args[*arg_index + 1..].iter().map(|v| v.as_str()).collect();
         let arg = &args[*arg_index];
         *arg_index += value_args.len();
@@ -906,39 +904,21 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
         .get(index)
         .map(|v| v.as_str())
         .unwrap_or_else(|| param.arg_value_names.last().unwrap());
-    comp_param(
-        param.describe_head(),
-        value_name,
-        &param.choices,
-        &param.choices_fn,
-        &param.multi_char,
-    )
+    comp_param(param.describe_head(), value_name, &param.data)
 }
 
 fn comp_positional(param: &PositionalParam) -> Vec<CompItem> {
-    comp_param(
-        param.describe_head(),
-        &param.arg_value_name,
-        &param.choices,
-        &param.choices_fn,
-        &param.multi_char,
-    )
+    comp_param(param.describe_head(), &param.arg_value_name, &param.data)
 }
 
-fn comp_param(
-    describe: &str,
-    value_name: &str,
-    choices: &Option<Vec<String>>,
-    choices_fn: &Option<(String, bool)>,
-    multi_char: &Option<char>,
-) -> Vec<CompItem> {
-    let choices: Option<Either<Vec<String>, String>> = if let Some(choices_fn) = choices_fn {
-        Some(Either::Right(choices_fn.0.to_string()))
-    } else {
-        choices
-            .as_ref()
-            .map(|choices| Either::Left(choices.iter().map(|v| v.to_string()).collect()))
-    };
+fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompItem> {
+    let choices: Option<Either<Vec<String>, String>> =
+        if let Some((choice_fn, _)) = data.choice_fn() {
+            Some(Either::Right(choice_fn.to_string()))
+        } else {
+            data.choice_values()
+                .map(|choices| Either::Left(choices.iter().map(|v| v.to_string()).collect()))
+        };
     let mut output = if let Some(choices) = choices {
         match choices {
             Either::Left(choices) => choices
@@ -955,7 +935,7 @@ fn comp_param(
         let value = format!("__argc_value={}", value_name);
         vec![(value, describe.into(), CompColor::of_value())]
     };
-    if let Some(ch) = multi_char {
+    if let Some(ch) = data.multi_char() {
         output.insert(
             0,
             (
@@ -968,18 +948,19 @@ fn comp_param(
     output
 }
 
-fn get_param_choices<'a, 'b: 'a>(
-    choices: &'a Option<Vec<String>>,
-    choices_fn: &'a Option<(String, bool)>,
+fn get_param_choice<'a, 'b: 'a>(
+    choice: &'a Option<ChoiceData>,
     choices_fn_values: &'a HashMap<&str, Vec<String>>,
 ) -> Option<&'a Vec<String>> {
-    choices.as_ref().or_else(|| {
-        choices_fn.as_ref().and_then(|(fn_name, validate)| {
+    match choice {
+        Some(ChoiceData::Values(v)) => Some(v),
+        Some(ChoiceData::Fn(choice_fn, validate)) => {
             if *validate {
-                choices_fn_values.get(fn_name.as_str())
+                choices_fn_values.get(choice_fn.as_str())
             } else {
                 None
             }
-        })
-    })
+        }
+        None => None,
+    }
 }

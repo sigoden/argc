@@ -155,8 +155,8 @@ impl Command {
                     if param.is_option() {
                         root_data.borrow_mut().add_param_fn(
                             position,
-                            &param.default_fn,
-                            &param.choices_fn,
+                            param.default_fn(),
+                            param.choice_fn(),
                         );
                     }
                     cmd.names_checker.check_flag_option(&param, position)?;
@@ -166,8 +166,8 @@ impl Command {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
                     root_data.borrow_mut().add_param_fn(
                         position,
-                        &param.default_fn,
-                        &param.choices_fn,
+                        param.default_fn(),
+                        param.choice_fn(),
                     );
                     cmd.add_positional_param(param, position)?;
                 }
@@ -288,7 +288,7 @@ impl Command {
         let required_options: Vec<String> = self
             .flag_option_params
             .iter()
-            .filter(|v| v.required)
+            .filter(|v| v.required())
             .map(|v| v.render_name_values())
             .collect();
         if self.flag_option_params.len() != required_options.len() {
@@ -339,10 +339,10 @@ impl Command {
         }
         let mut list = vec![];
         let mut any_describe = false;
-        let mut double_dash = true;
+        let mut single_hyphen = false;
         for param in self.flag_option_params.iter() {
-            if param.dashes == "-" {
-                double_dash = false;
+            if param.single_hyphen {
+                single_hyphen = true;
             }
             let value = param.render_body();
             let describe = param.render_describe();
@@ -351,8 +351,8 @@ impl Command {
             }
             list.push((value, describe));
         }
-        self.add_help_flag(&mut list, double_dash, any_describe);
-        self.add_version_flag(&mut list, double_dash, any_describe);
+        self.add_help_flag(&mut list, single_hyphen, any_describe);
+        self.add_version_flag(&mut list, single_hyphen, any_describe);
         output.push("OPTIONS:".to_string());
         let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
         for (value, describe) in list {
@@ -503,7 +503,7 @@ impl Command {
             && self
                 .positional_params
                 .first()
-                .map(|v| v.terminated)
+                .map(|v| v.terminated())
                 .unwrap_or_default()
     }
 
@@ -548,18 +548,18 @@ impl Command {
     fn add_help_flag(
         &self,
         list: &mut Vec<(String, String)>,
-        double_dash: bool,
+        single_hyphen: bool,
         any_describe: bool,
     ) {
         if self.find_flag_option("help").is_some() {
             return;
         }
-        let dashes = if double_dash { "--" } else { " -" };
+        let hyphens = if single_hyphen { " -" } else { "--" };
         list.push((
             if self.match_help_short_name() {
-                format!("-h, {}help", dashes)
+                format!("-h, {}help", hyphens)
             } else {
-                format!("    {}help", dashes)
+                format!("    {}help", hyphens)
             },
             if any_describe {
                 "Print help".into()
@@ -572,7 +572,7 @@ impl Command {
     fn add_version_flag(
         &self,
         list: &mut Vec<(String, String)>,
-        double_dash: bool,
+        single_hyphen: bool,
         any_describe: bool,
     ) {
         if self.version.is_none() {
@@ -581,12 +581,12 @@ impl Command {
         if self.find_flag_option("version").is_some() {
             return;
         }
-        let dashes = if double_dash { "--" } else { " -" };
+        let hyphens = if single_hyphen { " -" } else { "--" };
         list.push((
             if self.match_version_short_name() {
-                format!("-V, {}version", dashes)
+                format!("-V, {}version", hyphens)
             } else {
-                format!("    {}version", dashes)
+                format!("    {}version", hyphens)
             },
             if any_describe {
                 "Print version".into()
