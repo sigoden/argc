@@ -456,6 +456,17 @@ impl Command {
             .find(|v| v.name == name || v.is_match(name))
     }
 
+    pub(crate) fn find_prefixed_option(&self, name: &str) -> Option<(&FlagOptionParam, String)> {
+        for param in self.flag_option_params.iter() {
+            if let Some(prefix) = param.prefixed() {
+                if name.starts_with(&prefix) {
+                    return Some((param, prefix));
+                }
+            }
+        }
+        None
+    }
+
     pub(crate) fn match_version_short_name(&self) -> bool {
         match self.find_flag_option("-V") {
             Some(param) => &param.name == "version",

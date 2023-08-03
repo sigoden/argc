@@ -1,0 +1,27 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog -D` ************
+VAR1=value1	/color:green
+VAR2=value2	/color:green
+VAR3	/color:green
+
+************ COMPGEN `prog -DVAR1` ************
+VAR1=value1	/color:green
+
+************ COMPGEN `prog -X` ************
+VAR1=value1	/color:green
+VAR2=value2	/color:green
+VAR3	/color:green
+
+************ COMPGEN `prog -XVAR1` ************
+VAR1=value1	/color:green
+
+************ COMPGEN `prog --ox` ************
+--ox	/color:cyan,bold
+
+************ COMPGEN `prog --ox VAR1` ************
+VAR1=value1	/color:green
+
+
