@@ -155,8 +155,8 @@ impl Command {
                     if param.is_option() {
                         root_data.borrow_mut().add_param_fn(
                             position,
-                            &param.default_fn,
-                            &param.choices_fn,
+                            param.default_fn(),
+                            param.choice_fn(),
                         );
                     }
                     cmd.names_checker.check_flag_option(&param, position)?;
@@ -166,8 +166,8 @@ impl Command {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
                     root_data.borrow_mut().add_param_fn(
                         position,
-                        &param.default_fn,
-                        &param.choices_fn,
+                        param.default_fn(),
+                        param.choice_fn(),
                     );
                     cmd.add_positional_param(param, position)?;
                 }
@@ -288,7 +288,7 @@ impl Command {
         let required_options: Vec<String> = self
             .flag_option_params
             .iter()
-            .filter(|v| v.required)
+            .filter(|v| v.required())
             .map(|v| v.render_name_values())
             .collect();
         if self.flag_option_params.len() != required_options.len() {
@@ -341,7 +341,7 @@ impl Command {
         let mut any_describe = false;
         let mut double_dash = true;
         for param in self.flag_option_params.iter() {
-            if param.dashes == "-" {
+            if param.hyphens == "-" {
                 double_dash = false;
             }
             let value = param.render_body();
@@ -503,7 +503,7 @@ impl Command {
             && self
                 .positional_params
                 .first()
-                .map(|v| v.terminated)
+                .map(|v| v.terminated())
                 .unwrap_or_default()
     }
 

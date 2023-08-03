@@ -10,21 +10,21 @@ pub(crate) struct RootData {
     pub(crate) cmd_fns: HashMap<String, Position>,
     pub(crate) cmd_pos: usize,
     pub(crate) default_fns: Vec<(String, Position)>,
-    pub(crate) choices_fns: Vec<(String, Position)>,
+    pub(crate) choice_fns: Vec<(String, Position)>,
 }
 
 impl RootData {
     pub(crate) fn add_param_fn(
         &mut self,
         position: usize,
-        default_fn: &Option<String>,
-        choices_fn: &Option<(String, bool)>,
+        default_fn: Option<&String>,
+        choice_fn: Option<(&String, &bool)>,
     ) {
-        if let Some(default_fn) = default_fn.as_ref() {
-            self.default_fns.push((default_fn.to_string(), position));
+        if let Some(f) = default_fn {
+            self.default_fns.push((f.to_string(), position));
         }
-        if let Some((choices_fn, _)) = choices_fn.as_ref() {
-            self.choices_fns.push((choices_fn.to_string(), position));
+        if let Some((f, _)) = choice_fn {
+            self.choice_fns.push((f.to_string(), position));
         }
     }
 
@@ -34,7 +34,7 @@ impl RootData {
                 bail!("{}(line {}) is missing", name, pos,)
             }
         }
-        for (name, pos) in self.choices_fns.iter() {
+        for (name, pos) in self.choice_fns.iter() {
             if !self.fns.contains_key(name) {
                 bail!("{}(line {}) is missing", name, pos,)
             }

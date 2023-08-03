@@ -1,41 +1,9 @@
-use crate::{
-    utils::{
-        escape_shell_words, is_choice_value_terminate, is_default_value_terminate, to_cobol_case,
-    },
-    ArgcValue,
+use crate::utils::{
+    escape_shell_words, is_choice_value_terminate, is_default_value_terminate, to_cobol_case,
 };
+use crate::ArgcValue;
 
 use serde::Serialize;
-use std::fmt::Write;
-
-#[derive(Debug, Clone)]
-pub(crate) struct ParamData {
-    pub(crate) name: String,
-    pub(crate) choices: Option<Vec<String>>,
-    pub(crate) choices_fn: Option<(String, bool)>,
-    pub(crate) multiple: bool,
-    pub(crate) multi_char: Option<char>,
-    pub(crate) required: bool,
-    pub(crate) terminated: bool,
-    pub(crate) default: Option<String>,
-    pub(crate) default_fn: Option<String>,
-}
-
-impl ParamData {
-    pub(crate) fn new(name: &str) -> Self {
-        Self {
-            name: name.to_string(),
-            choices: None,
-            choices_fn: None,
-            multiple: false,
-            multi_char: None,
-            required: false,
-            terminated: false,
-            default: None,
-            default_fn: None,
-        }
-    }
-}
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub(crate) struct FlagOptionParam {
@@ -43,15 +11,8 @@ pub(crate) struct FlagOptionParam {
     pub(crate) describe: String,
     pub(crate) short: Option<char>,
     pub(crate) flag: bool,
-    pub(crate) dashes: String,
-    pub(crate) choices: Option<Vec<String>>,
-    pub(crate) choices_fn: Option<(String, bool)>,
-    pub(crate) multiple: bool,
-    pub(crate) multi_char: Option<char>,
-    pub(crate) required: bool,
-    pub(crate) terminated: bool,
-    pub(crate) default: Option<String>,
-    pub(crate) default_fn: Option<String>,
+    pub(crate) hyphens: String,
+    pub(crate) data: ParamData,
     pub(crate) value_names: Vec<String>,
     #[serde(skip_serializing)]
     pub(crate) arg_value_names: Vec<String>,
@@ -59,39 +20,32 @@ pub(crate) struct FlagOptionParam {
 
 impl FlagOptionParam {
     pub(crate) fn new(
-        arg: ParamData,
+        param: ParamData,
         describe: &str,
         short: Option<char>,
         flag: bool,
-        dashes: &str,
+        hyphens: &str,
         value_names: &[&str],
     ) -> Self {
-        let name = arg.name.clone();
+        let name = param.name.clone();
         let value_names: Vec<String> = value_names.iter().map(|v| v.to_string()).collect();
         let arg_value_names = if value_names.is_empty() {
             vec![to_cobol_case(&name)]
         } else {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
-        let (short, dashes) = if short.is_none() && dashes == "-" && name.len() == 1 {
+        let (short, hyphens) = if short.is_none() && hyphens == "-" && name.len() == 1 {
             (Some(name.chars().next().unwrap()), "".into())
         } else {
-            (short, dashes.into())
+            (short, hyphens.into())
         };
         Self {
             name,
             describe: describe.to_string(),
             short,
             flag,
-            dashes,
-            choices: arg.choices,
-            choices_fn: arg.choices_fn,
-            multiple: arg.multiple,
-            multi_char: arg.multi_char,
-            required: arg.required,
-            terminated: arg.terminated,
-            default: arg.default,
-            default_fn: arg.default_fn,
+            hyphens,
+            data: param,
             value_names,
             arg_value_names,
         }
@@ -113,38 +67,44 @@ impl FlagOptionParam {
         }
     }
 
+    pub(crate) fn multiple(&self) -> bool {
+        self.data.multiple()
+    }
+
+    pub(crate) fn required(&self) -> bool {
+        self.data.required()
+    }
+
+    pub(crate) fn terminated(&self) -> bool {
+        self.data.terminated()
+    }
+
+    pub(crate) fn multi_char(&self) -> Option<char> {
+        self.data.multi_char()
+    }
+
+    pub(crate) fn choice_fn(&self) -> Option<(&String, &bool)> {
+        self.data.choice_fn()
+    }
+
+    pub(crate) fn default_fn(&self) -> Option<&String> {
+        self.data.default_fn()
+    }
+
     #[allow(unused)]
     pub(crate) fn render(&self) -> String {
         let mut output = vec![];
-        if self.dashes.is_empty() {
-            let name = render_name(
-                &self.name,
-                &self.choices,
-                &self.choices_fn,
-                self.multiple,
-                self.multi_char,
-                self.required,
-                self.terminated,
-                &self.default,
-                &self.default_fn,
-            );
-            output.push(format!("-{}", name));
+        if self.hyphens.is_empty() {
+            output.push(format!("-{}", self.data.render_name(&self.name)));
         } else {
             if let Some(ch) = self.short {
                 output.push(format!("-{}", ch));
             };
-            let name = render_name(
-                &self.name,
-                &self.choices,
-                &self.choices_fn,
-                self.multiple,
-                self.multi_char,
-                self.required,
-                self.terminated,
-                &self.default,
-                &self.default_fn,
-            );
-            output.push(format!("{}{}", self.dashes, name));
+            output.push(format!(
+                "{}{}",
+                self.hyphens,
+                self.data.render_name(&self.name)
+            ));
         }
         for value_name in &self.value_names {
             output.push(format!("<{}>", value_name));
@@ -156,10 +116,10 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_name(&self) -> String {
-        if self.dashes.is_empty() {
+        if self.hyphens.is_empty() {
             format!("-{}", self.name)
         } else {
-            format!("{}{}", self.dashes, self.name)
+            format!("{}{}", self.hyphens, self.name)
         }
     }
 
@@ -174,12 +134,12 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_body(&self) -> String {
-        let dashes = if self.dashes.len() == 1 {
-            format!(" {}", self.dashes.clone())
+        let dashes = if self.hyphens.len() == 1 {
+            format!(" {}", self.hyphens.clone())
         } else {
-            self.dashes.clone()
+            self.hyphens.clone()
         };
-        let mut output = match (self.dashes.is_empty(), self.short) {
+        let mut output = match (self.hyphens.is_empty(), self.short) {
             (true, _) => {
                 format!("-{}", self.name)
             }
@@ -191,7 +151,7 @@ impl FlagOptionParam {
             }
         };
         if self.is_flag() {
-            if self.multiple {
+            if self.multiple() {
                 output.push_str("...")
             }
         } else {
@@ -207,7 +167,7 @@ impl FlagOptionParam {
         let mut output = " ".to_string();
         if self.arg_value_names.len() == 1 {
             let name: &String = &self.arg_value_names[0];
-            let value = match (self.required, self.multiple) {
+            let value = match (self.required(), self.multiple()) {
                 (true, true) => format!("<{name}>..."),
                 (false, true) => format!("[<{name}>...]"),
                 (_, false) => format!("<{name}>"),
@@ -219,7 +179,7 @@ impl FlagOptionParam {
                 .iter()
                 .enumerate()
                 .map(|(i, v)| {
-                    if self.multiple && i == self.arg_value_names.len() - 1 {
+                    if self.multiple() && i == self.arg_value_names.len() - 1 {
                         format!("<{v}>...")
                     } else {
                         format!("<{v}>")
@@ -232,7 +192,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_describe(&self) -> String {
-        render_describe(&self.describe, &self.default, &self.choices)
+        self.data.render_describe(&self.describe)
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&[&str]]) -> Option<ArgcValue> {
@@ -245,20 +205,22 @@ impl FlagOptionParam {
             }
         } else {
             if values.is_empty() {
-                if let Some(value) = self.default.as_ref() {
-                    return Some(ArgcValue::Single(name, value.clone()));
+                match &self.data.default {
+                    Some(DefaultData::Value(value)) => {
+                        return Some(ArgcValue::Single(name, value.clone()));
+                    }
+                    Some(DefaultData::Fn(f)) => {
+                        return Some(ArgcValue::SingleFn(name, f.clone()));
+                    }
+                    None => return None,
                 }
-                if let Some(value) = self.default_fn.as_ref() {
-                    return Some(ArgcValue::SingleFn(name, value.clone()));
-                }
-                return None;
             }
-            if self.multiple {
+            if self.multiple() {
                 let mut values: Vec<String> = values
                     .iter()
                     .flat_map(|v| v.iter().map(|v| v.to_string()))
                     .collect();
-                if let Some(c) = self.multi_char {
+                if let Some(c) = self.multi_char() {
                     values = values
                         .into_iter()
                         .flat_map(|v| {
@@ -287,10 +249,10 @@ impl FlagOptionParam {
 
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![];
-        if self.dashes.is_empty() {
+        if self.hyphens.is_empty() {
             output.push(format!("-{}", self.name));
         } else {
-            output.push(format!("{}{}", self.dashes, self.name));
+            output.push(format!("{}{}", self.hyphens, self.name));
             if let Some(short) = self.short {
                 output.push(format!("-{}", short));
             }
@@ -301,7 +263,7 @@ impl FlagOptionParam {
     pub(crate) fn values_size(&self) -> usize {
         if self.is_flag() {
             0
-        } else if self.multiple {
+        } else if self.multiple() {
             9999
         } else {
             self.arg_value_names.len()
@@ -320,35 +282,22 @@ impl FlagOptionParam {
 pub(crate) struct PositionalParam {
     pub(crate) name: String,
     pub(crate) describe: String,
-    pub(crate) choices: Option<Vec<String>>,
-    pub(crate) choices_fn: Option<(String, bool)>,
-    pub(crate) multiple: bool,
-    pub(crate) multi_char: Option<char>,
-    pub(crate) required: bool,
-    pub(crate) terminated: bool,
-    pub(crate) default: Option<String>,
-    pub(crate) default_fn: Option<String>,
+    pub(crate) data: ParamData,
     pub(crate) value_name: Option<String>,
     #[serde(skip_serializing)]
     pub(crate) arg_value_name: String,
 }
 
 impl PositionalParam {
-    pub(crate) fn new(arg: ParamData, describe: &str, value_name: Option<&str>) -> Self {
+    pub(crate) fn new(param: ParamData, describe: &str, value_name: Option<&str>) -> Self {
+        let name = param.name.clone();
         PositionalParam {
-            name: arg.name.clone(),
+            name: name.clone(),
             describe: describe.to_string(),
-            choices: arg.choices,
-            choices_fn: arg.choices_fn,
-            multiple: arg.multiple,
-            multi_char: arg.multi_char,
-            required: arg.required,
-            terminated: arg.terminated,
-            default: arg.default,
-            default_fn: arg.default_fn,
+            data: param,
             value_name: value_name.map(|v| v.to_string()),
             arg_value_name: value_name
-                .or(Some(&arg.name))
+                .or(Some(&name))
                 .map(to_cobol_case)
                 .unwrap_or_default(),
         }
@@ -358,21 +307,34 @@ impl PositionalParam {
         "@arg"
     }
 
+    pub(crate) fn multiple(&self) -> bool {
+        self.data.multiple()
+    }
+
+    pub(crate) fn required(&self) -> bool {
+        self.data.required()
+    }
+
+    pub(crate) fn terminated(&self) -> bool {
+        self.data.terminated()
+    }
+
+    pub(crate) fn multi_char(&self) -> Option<char> {
+        self.data.multi_char()
+    }
+
+    pub(crate) fn choice_fn(&self) -> Option<(&String, &bool)> {
+        self.data.choice_fn()
+    }
+
+    pub(crate) fn default_fn(&self) -> Option<&String> {
+        self.data.default_fn()
+    }
+
     #[allow(unused)]
     pub(crate) fn render(&self) -> String {
         let mut output = vec![];
-        let name = render_name(
-            &self.name,
-            &self.choices,
-            &self.choices_fn,
-            self.multiple,
-            self.multi_char,
-            self.required,
-            self.terminated,
-            &self.default,
-            &self.default_fn,
-        );
-        output.push(name);
+        output.push(self.data.render_name(&self.name));
         if let Some(value_name) = self.value_name.as_ref() {
             output.push(format!("<{}>", value_name));
         }
@@ -384,7 +346,7 @@ impl PositionalParam {
 
     pub(crate) fn render_value(&self) -> String {
         let name: &String = &self.arg_value_name;
-        match (self.required, self.multiple) {
+        match (self.required(), self.multiple()) {
             (true, true) => format!("<{name}>..."),
             (true, false) => format!("<{name}>"),
             (false, true) => format!("[{name}]..."),
@@ -393,23 +355,25 @@ impl PositionalParam {
     }
 
     pub(crate) fn render_describe(&self) -> String {
-        render_describe(&self.describe, &self.default, &self.choices)
+        self.data.render_describe(&self.describe)
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&str]) -> Option<ArgcValue> {
         let name = self.name.clone();
         if values.is_empty() {
-            if let Some(value) = self.default.as_ref() {
-                return Some(ArgcValue::PositionalSingle(name, value.clone()));
+            match &self.data.default {
+                Some(DefaultData::Value(value)) => {
+                    return Some(ArgcValue::PositionalSingle(name, value.clone()));
+                }
+                Some(DefaultData::Fn(f)) => {
+                    return Some(ArgcValue::PositionalSingleFn(name, f.clone()));
+                }
+                None => return None,
             }
-            if let Some(value) = self.default_fn.as_ref() {
-                return Some(ArgcValue::PositionalSingleFn(name, value.clone()));
-            }
-            return None;
         }
-        if self.multiple {
+        if self.multiple() {
             let mut values: Vec<String> = values.iter().map(|v| v.to_string()).collect();
-            if let Some(c) = self.multi_char {
+            if let Some(c) = self.multi_char() {
                 values = values
                     .into_iter()
                     .flat_map(|v| {
@@ -433,32 +397,109 @@ impl PositionalParam {
         }
     }
 }
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+pub(crate) struct ParamData {
+    pub(crate) name: String,
+    pub(crate) choice: Option<ChoiceData>,
+    pub(crate) default: Option<DefaultData>,
+    pub(crate) modifer: Modifier,
+}
 
-#[allow(clippy::too_many_arguments)]
-fn render_name(
-    name: &str,
-    choices: &Option<Vec<String>>,
-    choices_fn: &Option<(String, bool)>,
-    multiple: bool,
-    multi_char: Option<char>,
-    required: bool,
-    terminated: bool,
-    default: &Option<String>,
-    default_fn: &Option<String>,
-) -> String {
-    let mut name = name.to_string();
-    if let Some(choices) = choices {
-        if let Some(ch) = get_modifer(required, multiple, terminated) {
-            name.push(ch)
+impl ParamData {
+    pub(crate) fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+            choice: None,
+            default: None,
+            modifer: Modifier::Optional,
         }
-        if let Some(ch) = multi_char {
-            name.push(ch)
+    }
+
+    pub(crate) fn multiple(&self) -> bool {
+        self.modifer.multiple()
+    }
+
+    pub(crate) fn required(&self) -> bool {
+        self.modifer.required() && self.default.is_none()
+    }
+
+    pub(crate) fn multi_char(&self) -> Option<char> {
+        match &self.modifer {
+            Modifier::MultiCharRequired(c) | Modifier::MultiCharOptional(c) => Some(*c),
+            _ => None,
         }
-        let mut prefix = String::new();
-        if default.is_some() {
-            prefix.push('=');
+    }
+
+    pub(crate) fn terminated(&self) -> bool {
+        matches!(self.modifer, Modifier::Terminated)
+    }
+
+    pub(crate) fn choice_fn(&self) -> Option<(&String, &bool)> {
+        match &self.choice {
+            Some(ChoiceData::Fn(f, v)) => Some((f, v)),
+            _ => None,
         }
-        let values: Vec<String> = choices
+    }
+
+    pub(crate) fn choice_values(&self) -> Option<&Vec<String>> {
+        match &self.choice {
+            Some(ChoiceData::Values(v)) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn default_fn(&self) -> Option<&String> {
+        match &self.default {
+            Some(DefaultData::Fn(f)) => Some(f),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn render_name(&self, name: &str) -> String {
+        let mut result = name.to_string();
+        result.push_str(&self.modifer.render());
+        match (&self.choice, &self.default) {
+            (Some(ChoiceData::Values(values)), None) => {
+                result.push_str(&format!("[{}]", Self::render_choice_values(values)));
+            }
+            (Some(ChoiceData::Values(values)), Some(DefaultData::Value(_))) => {
+                result.push_str(&format!("[={}]", Self::render_choice_values(values)));
+            }
+            (Some(ChoiceData::Fn(f, validate)), _) => {
+                let sign = if *validate { "" } else { "?" };
+                result.push_str(&format!("[{sign}`{f}`]"));
+            }
+            (None, Some(DefaultData::Value(value))) => {
+                result.push_str(&format!("={}", Self::render_default_value(value)));
+            }
+            (None, Some(DefaultData::Fn(f))) => {
+                result.push_str(&format!("=`{f}`"));
+            }
+            _ => {}
+        }
+        result
+    }
+
+    pub(crate) fn render_describe(&self, describe: &str) -> String {
+        let mut output = describe.to_string();
+        if let Some(DefaultData::Value(value)) = &self.default {
+            if !output.is_empty() {
+                output.push(' ')
+            }
+            output.push_str(&format!("[default: {}]", escape_shell_words(value)));
+        }
+        if let Some(ChoiceData::Values(values)) = &self.choice {
+            if !output.is_empty() {
+                output.push(' ')
+            }
+            let values: Vec<String> = values.iter().map(|v| escape_shell_words(v)).collect();
+            output.push_str(&format!("[possible values: {}]", values.join(", ")));
+        }
+        output
+    }
+
+    fn render_choice_values(values: &[String]) -> String {
+        let values: Vec<String> = values
             .iter()
             .map(|value| {
                 if value.chars().any(is_choice_value_terminate) {
@@ -468,69 +509,78 @@ fn render_name(
                 }
             })
             .collect();
-        let choices_value = format!("[{}{}]", prefix, values.join("|"));
-        name.push_str(&choices_value);
-    } else if let Some((choices_fn, validate)) = choices_fn {
-        if let Some(ch) = get_modifer(required, multiple, terminated) {
-            name.push(ch)
-        }
-        if let Some(ch) = multi_char {
-            name.push(ch)
-        }
-        let validate_sign = if *validate { "" } else { "?" };
-        let _ = write!(name, "[{}`{}`]", validate_sign, choices_fn);
-    } else if let Some(default) = default {
-        let value = if default.chars().any(is_default_value_terminate) {
-            format!("\"{}\"", default)
+        values.join("|")
+    }
+
+    fn render_default_value(value: &str) -> String {
+        if value.chars().any(is_default_value_terminate) {
+            format!("\"{}\"", value)
         } else {
-            default.to_string()
-        };
-        let _ = write!(name, "={}", value);
-    } else if let Some(default_fn) = default_fn {
-        let _ = write!(name, "=`{}`", default_fn);
-    } else {
-        if let Some(ch) = get_modifer(required, multiple, terminated) {
-            name.push(ch)
+            value.to_string()
         }
-        if let Some(ch) = multi_char {
-            name.push(ch)
-        }
-    }
-    name
-}
-
-fn get_modifer(required: bool, multiple: bool, terminated: bool) -> Option<char> {
-    if multiple && terminated {
-        return Some('~');
-    }
-    match (required, multiple) {
-        (true, true) => Some('+'),
-        (true, false) => Some('!'),
-        (false, true) => Some('*'),
-        (false, false) => None,
     }
 }
 
-fn render_describe(
-    describe: &str,
-    default: &Option<String>,
-    choices: &Option<Vec<String>>,
-) -> String {
-    let mut output = describe.to_string();
-    if let Some(default) = default.as_ref() {
-        if !output.is_empty() {
-            output.push(' ')
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[serde(tag = "type", content = "value")]
+pub(crate) enum Modifier {
+    Optional,
+    Required,
+    MultipleOptional,
+    MultipleRequired,
+    MultiCharOptional(char),
+    MultiCharRequired(char),
+    Terminated,
+}
+
+impl Modifier {
+    pub(crate) fn multiple(&self) -> bool {
+        match self {
+            Self::Optional => false,
+            Self::Required => false,
+            Self::MultipleOptional => true,
+            Self::MultipleRequired => true,
+            Self::MultiCharOptional(_) => true,
+            Self::MultiCharRequired(_) => true,
+            Self::Terminated => true,
         }
-        output.push_str(&format!("[default: {}]", escape_shell_words(default)));
     }
-    if let Some(choices) = &choices.as_ref() {
-        if !output.is_empty() {
-            output.push(' ')
+
+    pub(crate) fn required(&self) -> bool {
+        match self {
+            Self::Optional => false,
+            Self::Required => true,
+            Self::MultipleOptional => false,
+            Self::MultipleRequired => true,
+            Self::MultiCharOptional(_) => false,
+            Self::MultiCharRequired(_) => true,
+            Self::Terminated => false,
         }
-        let values: Vec<String> = choices.iter().map(|v| escape_shell_words(v)).collect();
-        output.push_str(&format!("[possible values: {}]", values.join(", ")));
     }
-    output
+
+    pub(crate) fn render(&self) -> String {
+        match self {
+            Self::Optional => "".into(),
+            Self::Required => "!".into(),
+            Self::MultipleOptional => "*".into(),
+            Self::MultipleRequired => "+".into(),
+            Self::MultiCharOptional(c) => format!("*{c}"),
+            Self::MultiCharRequired(c) => format!("+{c}"),
+            Self::Terminated => "~".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+pub(crate) enum ChoiceData {
+    Values(Vec<String>),
+    Fn(String, bool),
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+pub(crate) enum DefaultData {
+    Value(String),
+    Fn(String),
 }
 
 fn must_get_first(value: &[&str]) -> String {
