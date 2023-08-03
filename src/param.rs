@@ -11,7 +11,7 @@ pub(crate) struct FlagOptionParam {
     pub(crate) describe: String,
     pub(crate) short: Option<char>,
     pub(crate) flag: bool,
-    pub(crate) hyphens: String,
+    pub(crate) single_hyphen: bool,
     pub(crate) data: ParamData,
     pub(crate) value_names: Vec<String>,
     #[serde(skip_serializing)]
@@ -24,7 +24,7 @@ impl FlagOptionParam {
         describe: &str,
         short: Option<char>,
         flag: bool,
-        hyphens: &str,
+        single_hyphen: bool,
         value_names: &[&str],
     ) -> Self {
         let name = param.name.clone();
@@ -34,17 +34,12 @@ impl FlagOptionParam {
         } else {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
-        let (short, hyphens) = if short.is_none() && hyphens == "-" && name.len() == 1 {
-            (Some(name.chars().next().unwrap()), "".into())
-        } else {
-            (short, hyphens.into())
-        };
         Self {
             name,
             describe: describe.to_string(),
             short,
             flag,
-            hyphens,
+            single_hyphen,
             data: param,
             value_names,
             arg_value_names,
@@ -94,18 +89,14 @@ impl FlagOptionParam {
     #[allow(unused)]
     pub(crate) fn render(&self) -> String {
         let mut output = vec![];
-        if self.hyphens.is_empty() {
-            output.push(format!("-{}", self.data.render_name(&self.name)));
-        } else {
-            if let Some(ch) = self.short {
-                output.push(format!("-{}", ch));
-            };
-            output.push(format!(
-                "{}{}",
-                self.hyphens,
-                self.data.render_name(&self.name)
-            ));
-        }
+        if let Some(ch) = self.short {
+            output.push(format!("-{}", ch));
+        };
+        output.push(format!(
+            "{}{}",
+            self.render_hyphens(),
+            self.data.render_name(&self.name)
+        ));
         for value_name in &self.value_names {
             output.push(format!("<{}>", value_name));
         }
@@ -115,12 +106,16 @@ impl FlagOptionParam {
         output.join(" ")
     }
 
-    pub(crate) fn render_name(&self) -> String {
-        if self.hyphens.is_empty() {
-            format!("-{}", self.name)
+    pub(crate) fn render_hyphens(&self) -> &str {
+        if self.single_hyphen {
+            "-"
         } else {
-            format!("{}{}", self.hyphens, self.name)
+            "--"
         }
+    }
+
+    pub(crate) fn render_name(&self) -> String {
+        format!("{}{}", self.render_hyphens(), self.name)
     }
 
     pub(crate) fn render_single_value(&self) -> String {
@@ -134,22 +129,23 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_body(&self) -> String {
-        let dashes = if self.hyphens.len() == 1 {
-            format!(" {}", self.hyphens.clone())
+        let mut output = String::new();
+        if self.single_hyphen && self.short.is_none() && self.name.len() == 1 {
+            output.push_str(&format!("-{}", self.name));
         } else {
-            self.hyphens.clone()
-        };
-        let mut output = match (self.hyphens.is_empty(), self.short) {
-            (true, _) => {
-                format!("-{}", self.name)
+            if let Some(ch) = self.short {
+                output.push_str(&format!("-{ch}, "))
+            } else {
+                output.push_str("    ")
+            };
+            if self.single_hyphen {
+                output.push_str(" -")
+            } else {
+                output.push_str("--")
             }
-            (false, Some(c)) => {
-                format!("-{c}, {dashes}{}", self.name)
-            }
-            (false, None) => {
-                format!("    {dashes}{}", self.name)
-            }
-        };
+            output.push_str(&self.name);
+        }
+
         if self.is_flag() {
             if self.multiple() {
                 output.push_str("...")
@@ -249,13 +245,9 @@ impl FlagOptionParam {
 
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![];
-        if self.hyphens.is_empty() {
-            output.push(format!("-{}", self.name));
-        } else {
-            output.push(format!("{}{}", self.hyphens, self.name));
-            if let Some(short) = self.short {
-                output.push(format!("-{}", short));
-            }
+        output.push(format!("{}{}", self.render_hyphens(), self.name));
+        if let Some(short) = self.short {
+            output.push(format!("-{}", short));
         }
         output
     }

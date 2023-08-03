@@ -219,7 +219,14 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
             parse_tail,
         )),
         |(short, hyphens, arg, value_names, describe)| {
-            FlagOptionParam::new(arg, describe, short, false, hyphens, &value_names)
+            FlagOptionParam::new(
+                arg,
+                describe,
+                short,
+                false,
+                hyphens.len() == 1,
+                &value_names,
+            )
         },
     )(input)
 }
@@ -246,8 +253,7 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             parse_tail,
         )),
         |(arg, value_names, describe)| {
-            let short = arg.name.chars().next();
-            FlagOptionParam::new(arg, describe, short, false, "", &value_names)
+            FlagOptionParam::new(arg, describe, None, false, true, &value_names)
         },
     )(input)
 }
@@ -275,6 +281,7 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
 fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     alt((parse_with_long_flag_param, parse_no_long_flag_param))(input)
 }
+
 // Parse `@flag`
 fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
@@ -285,7 +292,7 @@ fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             parse_tail,
         )),
         |(short, hyphens, arg, describe)| {
-            FlagOptionParam::new(arg, describe, short, true, hyphens, &[])
+            FlagOptionParam::new(arg, describe, short, true, hyphens.len() == 1, &[])
         },
     )(input)
 }
@@ -297,10 +304,7 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> 
             preceded(pair(space0, tag("-")), parse_short_flag_and_asterisk),
             parse_tail,
         )),
-        |(arg, describe)| {
-            let short = arg.name.chars().next();
-            FlagOptionParam::new(arg, describe, short, true, "", &[])
-        },
+        |(arg, describe)| FlagOptionParam::new(arg, describe, None, true, true, &[]),
     )(input)
 }
 

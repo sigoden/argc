@@ -22,7 +22,7 @@ expression: output
           "describe": "A flag",
           "short": "b",
           "flag": true,
-          "hyphens": "--",
+          "single_hyphen": false,
           "data": {
             "name": "fa",
             "choice": null,
@@ -38,7 +38,7 @@ expression: output
           "describe": "A option",
           "short": "o",
           "flag": false,
-          "hyphens": "--",
+          "single_hyphen": false,
           "data": {
             "name": "oa",
             "choice": null,
@@ -54,7 +54,7 @@ expression: output
           "describe": "",
           "short": null,
           "flag": false,
-          "hyphens": "--",
+          "single_hyphen": false,
           "data": {
             "name": "ob",
             "choice": null,
@@ -70,7 +70,7 @@ expression: output
           "describe": "",
           "short": null,
           "flag": false,
-          "hyphens": "--",
+          "single_hyphen": false,
           "data": {
             "name": "oc",
             "choice": null,
