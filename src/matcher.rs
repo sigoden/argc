@@ -27,7 +27,7 @@ pub(crate) struct Matcher<'a, 'b> {
     choice_fns: HashSet<&'a str>,
     script_path: Option<String>,
     term_width: Option<usize>,
-    is_last_arg_option_assign: bool,
+    split_last_arg_at: Option<usize>,
 }
 
 type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>);
@@ -69,7 +69,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut flag_option_args = vec![vec![]];
         let mut positional_args = vec![];
         let mut dashes = vec![];
-        let mut is_last_arg_option_assign = false;
+        let mut split_last_arg_at = None;
         let mut arg_comp = ArgComp::Any;
         let mut choice_fns = HashSet::new();
         let args_len = args.len();
@@ -109,44 +109,45 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     );
                 } else if arg.starts_with('-') {
                     if let Some((k, v)) = arg.split_once('=') {
-                        let param = cmd.find_flag_option(k);
-                        if arg_index == args_len - 1 {
-                            if let Some(param) = param {
-                                arg_comp = ArgComp::OptionValue(param.name.clone(), 0)
+                        if let Some(param) = cmd.find_flag_option(k) {
+                            if arg_index == args_len - 1 {
+                                arg_comp = ArgComp::OptionValue(param.name.clone(), 0);
+                                split_last_arg_at = Some(k.len() + 1);
                             }
-                            is_last_arg_option_assign = true;
+                            add_param_choice_fn(&mut choice_fns, param);
+                            flag_option_args[cmd_level].push((
+                                k,
+                                vec![v],
+                                Some(param.name.as_str()),
+                            ));
+                        } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
+                            add_param_choice_fn(&mut choice_fns, param);
+                            match_prefix_option(
+                                &mut flag_option_args[cmd_level],
+                                args,
+                                &mut arg_index,
+                                param,
+                                &mut arg_comp,
+                                &mut split_last_arg_at,
+                                &prefix,
+                            );
+                        } else {
+                            flag_option_args[cmd_level].push((k, vec![v], None));
                         }
-                        if let Some((choice_fn, validate)) = param.and_then(|v| v.choice_fn()) {
-                            if *validate {
-                                choice_fns.insert(choice_fn.as_str());
-                            }
-                        }
-                        flag_option_args[cmd_level].push((
-                            k,
-                            vec![v],
-                            param.map(|v| v.name.as_str()),
-                        ));
                     } else if let Some(param) = cmd.find_flag_option(arg) {
-                        if let Some((choice_fn, validate)) = param.choice_fn() {
-                            if *validate {
-                                choice_fns.insert(choice_fn.as_str());
-                            }
-                        }
+                        add_param_choice_fn(&mut choice_fns, param);
                         match_flag_option(
                             &mut flag_option_args[cmd_level],
                             args,
                             &mut arg_index,
                             param,
                             &mut arg_comp,
+                            &mut split_last_arg_at,
                         );
                     } else if let Some(mut list) = match_combine_shorts(cmd, arg) {
                         let name = list.pop().and_then(|v| v.2).unwrap();
                         let param = cmd.find_flag_option(name).unwrap();
-                        if let Some((choice_fn, validate)) = param.choice_fn() {
-                            if *validate {
-                                choice_fns.insert(choice_fn.as_str());
-                            }
-                        }
+                        add_param_choice_fn(&mut choice_fns, param);
                         flag_option_args[cmd_level].extend(list);
                         match_flag_option(
                             &mut flag_option_args[cmd_level],
@@ -154,6 +155,18 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             &mut arg_index,
                             param,
                             &mut arg_comp,
+                            &mut split_last_arg_at,
+                        );
+                    } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
+                        add_param_choice_fn(&mut choice_fns, param);
+                        match_prefix_option(
+                            &mut flag_option_args[cmd_level],
+                            args,
+                            &mut arg_index,
+                            param,
+                            &mut arg_comp,
+                            &mut split_last_arg_at,
+                            &prefix,
                         );
                     } else {
                         flag_option_args[cmd_level].push((arg, vec![], None));
@@ -202,7 +215,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             choice_fns,
             script_path: None,
             term_width: None,
-            is_last_arg_option_assign,
+            split_last_arg_at,
         }
     }
 
@@ -340,8 +353,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
-    pub(crate) fn is_last_arg_option_assign(&self) -> bool {
-        self.is_last_arg_option_assign
+    pub(crate) fn split_last_arg_at(&self) -> Option<usize> {
+        self.split_last_arg_at
     }
 
     fn to_arg_values_base(&self) -> Vec<ArgcValue> {
@@ -837,6 +850,7 @@ fn match_flag_option<'a, 'b>(
     arg_index: &mut usize,
     param: &'a FlagOptionParam,
     arg_comp: &mut ArgComp,
+    split_last_arg_at: &mut Option<usize>,
 ) {
     if param.terminated() {
         let value_args: Vec<&str> = args[*arg_index + 1..].iter().map(|v| v.as_str()).collect();
@@ -854,20 +868,50 @@ fn match_flag_option<'a, 'b>(
         let arg = &args[*arg_index];
         *arg_index += value_args.len();
         if *arg_index == args_len - 1 {
-            if *arg_comp != ArgComp::FlagOrOption
-                && param.is_option()
-                && value_args.len() <= values_len
-            {
-                *arg_comp =
-                    ArgComp::OptionValue(param.name.clone(), value_args.len().saturating_sub(1));
-            } else if *arg_comp == ArgComp::FlagOrOption
-                && param.is_flag()
-                && !(arg.len() > 2 && param.is_match(arg))
-            {
+            if *arg_comp != ArgComp::FlagOrOption {
+                if param.is_option() && value_args.len() <= values_len {
+                    *arg_comp = ArgComp::OptionValue(
+                        param.name.clone(),
+                        value_args.len().saturating_sub(1),
+                    );
+                }
+            } else if let Some(prefix) = param.prefixed() {
+                if arg.starts_with(&prefix) {
+                    *arg_comp = ArgComp::OptionValue(param.name.clone(), 0);
+                    *split_last_arg_at = Some(prefix.len());
+                }
+            } else if param.is_flag() && !(arg.len() > 2 && param.is_match(arg)) {
                 *arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
             }
         }
         output.push((arg, value_args, Some(param.name.as_str())));
+    }
+}
+
+fn match_prefix_option<'a, 'b>(
+    output: &mut Vec<FlagOptionArg<'a, 'b>>,
+    args: &'b [String],
+    arg_index: &mut usize,
+    param: &'a FlagOptionParam,
+    arg_comp: &mut ArgComp,
+    split_last_arg_at: &mut Option<usize>,
+    prefix: &str,
+) {
+    let prefix_len = prefix.len();
+    let args_len = args.len();
+    let arg = &args[*arg_index];
+    if *arg_index == args_len - 1 {
+        *arg_comp = ArgComp::OptionValue(param.name.clone(), 0);
+        *split_last_arg_at = Some(prefix_len);
+    }
+    output.push((arg, vec![&arg[prefix_len..]], Some(param.name.as_str())));
+}
+
+fn add_param_choice_fn<'a>(choice_fns: &mut HashSet<&'a str>, param: &'a FlagOptionParam) {
+    if let Some((choice_fn, validate)) = param.choice_fn() {
+        if *validate {
+            choice_fns.insert(choice_fn.as_str());
+        }
     }
 }
 

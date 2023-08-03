@@ -55,12 +55,11 @@ pub fn compgen(
     let mut argc_value = None;
     let mut argc_variables = vec![];
     let mut multi_values = HashSet::new();
-    if matcher.is_last_arg_option_assign() {
-        if let Some((left, right)) = split_equal_sign(&last) {
-            prefix.push_str(left);
-            last = right.to_string();
-            mod_quote(&mut last, &mut prefix, &mut default_nospace);
-        }
+    if let Some(at) = matcher.split_last_arg_at() {
+        let (left, right) = last.split_at(at);
+        prefix.push_str(left);
+        last = right.to_string();
+        mod_quote(&mut last, &mut prefix, &mut default_nospace);
     }
     for (value, description, comp_color) in compgen_values {
         if value.starts_with("__argc_") {
@@ -1020,21 +1019,6 @@ fn unbalance_quote(value: &str) -> Option<(char, usize)> {
     None
 }
 
-fn split_equal_sign(word: &str) -> Option<(&str, &str)> {
-    let chars: Vec<char> = word
-        .chars()
-        .skip_while(|c| c.is_ascii_alphanumeric() || *c == '_' || *c == '-')
-        .collect();
-    if let Some('=') = chars.first() {
-        let idx = word.len() - chars.len() + 1;
-        if idx == 1 {
-            return None;
-        }
-        return Some((&word[..idx], &word[idx..]));
-    }
-    None
-}
-
 fn common_prefix(strings: &[&str]) -> Option<String> {
     if strings.is_empty() {
         return None;
@@ -1149,15 +1133,5 @@ mod tests {
             CompColor::of_file()
         );
         assert_parse_candidate_value!("", "", "", false, CompColor::of_value());
-    }
-
-    #[test]
-    fn test_split_equal_sign() {
-        assert_eq!(split_equal_sign("-a="), Some(("-a=", "")));
-        assert_eq!(split_equal_sign("a="), Some(("a=", "")));
-        assert_eq!(split_equal_sign("-a=c"), Some(("-a=", "c")));
-        assert_eq!(split_equal_sign("a"), None);
-        assert_eq!(split_equal_sign("a:"), None);
-        assert_eq!(split_equal_sign("=a"), None);
     }
 }

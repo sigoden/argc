@@ -530,6 +530,31 @@ _choice_fn() {
 }
 
 #[test]
+fn option_prefixed() {
+    let script = r###"
+# @option -D%[`_choice_fn`]
+# @option -X --ox%[`_choice_fn`]
+_choice_fn() {
+    echo VAR1=value1 
+    echo VAR2=value2
+    echo VAR3
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![
+            vec!["prog", "-D"],
+            vec!["prog", "-DVAR1"],
+            vec!["prog", "-X"],
+            vec!["prog", "-XVAR1"],
+            vec!["prog", "--ox"],
+            vec!["prog", "--ox", "VAR1"],
+        ]
+    );
+}
+
+#[test]
 fn last_arg_option_assign() {
     let script = r###"
 # @option --oa~[`_choice_fn`]

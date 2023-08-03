@@ -345,6 +345,10 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
             arg.modifer = Modifier::Terminated;
             arg
         }),
+        map(terminated(parse_param_name, tag("%")), |mut arg| {
+            arg.modifer = Modifier::Prefixed;
+            arg
+        }),
         map(
             pair(parse_param_name, preceded(tag("*"), opt(parse_multi_char))),
             |(mut arg, multi_char)| {
@@ -800,6 +804,7 @@ mod tests {
         assert_parse_option_arg!("-f![a|b]");
         assert_parse_option_arg!("-f![`_foo`]");
         assert_parse_option_arg!("-f![=a|b]");
+        assert_parse_option_arg!("-D%");
     }
 
     #[test]

@@ -1,0 +1,13 @@
+---
+source: tests/spec.rs
+expression: data
+---
+RUN
+prog --oa bash Argcfile.sh --ob
+
+OUTPUT
+argc_oa=( bash Argcfile.sh --ob )
+argc__args=( prog --oa bash Argcfile.sh --ob )
+argc__index=0
+argc__positionals=(  )
+

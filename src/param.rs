@@ -243,6 +243,18 @@ impl FlagOptionParam {
         self.list_names().iter().any(|v| v == name)
     }
 
+    pub(crate) fn prefixed(&self) -> Option<String> {
+        if self.data.modifer != Modifier::Prefixed {
+            return None;
+        }
+
+        if let Some(ch) = self.short {
+            return Some(format!("-{ch}"));
+        }
+
+        Some(self.render_name())
+    }
+
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![];
         output.push(format!("{}{}", self.render_hyphens(), self.name));
@@ -523,6 +535,7 @@ pub(crate) enum Modifier {
     MultiCharOptional(char),
     MultiCharRequired(char),
     Terminated,
+    Prefixed,
 }
 
 impl Modifier {
@@ -535,6 +548,7 @@ impl Modifier {
             Self::MultiCharOptional(_) => true,
             Self::MultiCharRequired(_) => true,
             Self::Terminated => true,
+            Self::Prefixed => true,
         }
     }
 
@@ -547,6 +561,7 @@ impl Modifier {
             Self::MultiCharOptional(_) => false,
             Self::MultiCharRequired(_) => true,
             Self::Terminated => false,
+            Self::Prefixed => false,
         }
     }
 
@@ -559,6 +574,7 @@ impl Modifier {
             Self::MultiCharOptional(c) => format!("*{c}"),
             Self::MultiCharRequired(c) => format!("+{c}"),
             Self::Terminated => "~".to_string(),
+            Self::Prefixed => "%".to_string(),
         }
     }
 }

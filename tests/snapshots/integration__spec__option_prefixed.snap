@@ -1,0 +1,13 @@
+---
+source: tests/spec.rs
+expression: data
+---
+RUN
+prog -D v1 -Dv2=foo
+
+OUTPUT
+argc_D=( v1 'v2=foo' )
+argc__args=( prog -D v1 '-Dv2=foo' )
+argc__index=0
+argc__positionals=(  )
+
