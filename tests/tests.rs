@@ -20,6 +20,3 @@ mod param_fn;
 mod spec;
 mod validate;
 mod wrap_help;
-
-#[cfg(unix)]
-mod interrupt;
