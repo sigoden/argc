@@ -46,7 +46,7 @@ pub(crate) enum EventData {
     Unknown(String),
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub(crate) enum EventScope {
     Root,
     CmdStart,

@@ -3,7 +3,7 @@ use crate::parser::{EventScope, Position};
 use anyhow::{bail, Result};
 use std::collections::HashMap;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub(crate) struct RootData {
     pub(crate) scope: EventScope,
     pub(crate) fns: HashMap<String, Position>,

@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa` ************
---oa-file	/color:cyan,bold
 --oa	/color:cyan,bold
+--oa-file	/color:cyan,bold
 
 

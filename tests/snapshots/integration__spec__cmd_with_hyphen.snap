@@ -1,0 +1,27 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog --foo --fa
+
+OUTPUT
+argc_fa=1
+argc__args=( prog --foo --fa )
+argc__index=1
+argc__fn=--foo
+argc__positionals=(  )
+--foo
+
+************ RUN ************
+prog -B --fa
+
+OUTPUT
+argc_fa=1
+argc__args=( prog -B --fa )
+argc__index=1
+argc__fn=bar
+argc__positionals=(  )
+bar
+
+
