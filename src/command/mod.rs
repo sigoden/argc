@@ -32,7 +32,7 @@ pub fn export(source: &str) -> Result<serde_json::Value> {
     cmd.to_json().with_context(|| "Failed to export json")
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Command {
     pub(crate) name: Option<String>,
     pub(crate) fn_name: Option<String>,

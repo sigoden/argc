@@ -203,3 +203,38 @@ fn option_prefixed() {
 "###;
     snapshot!(script, &["prog", "-D", "v1", "-Dv2=foo"]);
 }
+
+#[test]
+fn cmd_with_hyphen() {
+    let script = r###"
+# @cmd Run --foo
+# @flag --fa
+--foo() {
+    :;
+}
+
+# @cmd Run bar
+# @alias -B
+# @flag --fa
+bar() {
+    :;
+}
+"###;
+    snapshot_multi!(
+        script,
+        vec![vec!["prog", "--foo", "--fa"], vec!["prog", "-B", "--fa"]]
+    );
+}
+
+#[test]
+fn cmd_combine_shorts() {
+    let script = r###"
+# @cmd
+# @flag -B
+# @flag -C
+-A() {
+    :;
+}
+"###;
+    snapshot_multi!(script, vec![vec!["prog", "-A"], vec!["prog", "-AB"]]);
+}

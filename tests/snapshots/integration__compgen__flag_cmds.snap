@@ -1,0 +1,30 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog ` ************
+bar	/color:magenta	Run bar
+
+************ COMPGEN `prog -` ************
+-G	/color:cyan,bold
+--foo	/color:magenta	Run --foo
+-F	/color:magenta	Run --foo
+-B	/color:magenta	Run bar
+
+************ COMPGEN `prog -B` ************
+-BC	/color:cyan
+-BD	/color:cyan
+
+************ COMPGEN `prog -B -` ************
+-C	/color:cyan
+-D	/color:cyan
+--fa	/color:cyan
+
+************ COMPGEN `prog -BC` ************
+-BC	/color:cyan
+-BCD	/color:cyan
+
+************ COMPGEN `prog -G` ************
+-G	/color:cyan,bold
+
+

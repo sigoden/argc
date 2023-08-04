@@ -119,6 +119,41 @@ cmd::subb() { :; }
 }
 
 #[test]
+fn flag_cmds() {
+    const SCRIPT: &str = r###"
+# @option -G
+
+# @cmd Run --foo
+# @alias -F
+# @flag --fa
+--foo() {
+    :;
+}
+
+# @cmd Run bar
+# @alias -B
+# @flag -C
+# @flag -D
+# @flag --fa
+bar() {
+    :;
+}
+"###;
+
+    snapshot_compgen!(
+        SCRIPT,
+        vec![
+            vec!["prog", ""],
+            vec!["prog", "-"],
+            vec!["prog", "-B"],
+            vec!["prog", "-B", "-"],
+            vec!["prog", "-BC"],
+            vec!["prog", "-G"],
+        ]
+    );
+}
+
+#[test]
 fn positionals() {
     let script = r###"
 # @cmd

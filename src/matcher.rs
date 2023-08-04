@@ -31,6 +31,7 @@ pub(crate) struct Matcher<'a, 'b> {
 }
 
 type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>);
+type LevelCommand<'a, 'b> = (&'b str, &'a Command, String, usize);
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum ArgComp {
@@ -63,7 +64,7 @@ pub(crate) enum MatchError {
 
 impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn new(root: &'a Command, args: &'b [String]) -> Self {
-        let mut cmds = vec![(args[0].as_str(), root, args[0].clone(), 0)];
+        let mut cmds: Vec<LevelCommand> = vec![(args[0].as_str(), root, args[0].clone(), 0)];
         let mut cmd_level = 0;
         let mut arg_index = 1;
         let mut flag_option_args = vec![vec![]];
@@ -110,11 +111,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 } else if arg.starts_with('-') {
                     if let Some((k, v)) = arg.split_once('=') {
                         if let Some(param) = cmd.find_flag_option(k) {
+                            add_param_choice_fn(&mut choice_fns, param);
                             if arg_index == args_len - 1 {
                                 arg_comp = ArgComp::OptionValue(param.name.clone(), 0);
                                 split_last_arg_at = Some(k.len() + 1);
                             }
-                            add_param_choice_fn(&mut choice_fns, param);
                             flag_option_args[cmd_level].push((
                                 k,
                                 vec![v],
@@ -144,19 +145,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             &mut arg_comp,
                             &mut split_last_arg_at,
                         );
-                    } else if let Some(mut list) = match_combine_shorts(cmd, arg) {
-                        let name = list.pop().and_then(|v| v.2).unwrap();
-                        let param = cmd.find_flag_option(name).unwrap();
-                        add_param_choice_fn(&mut choice_fns, param);
-                        flag_option_args[cmd_level].extend(list);
-                        match_flag_option(
-                            &mut flag_option_args[cmd_level],
-                            args,
-                            &mut arg_index,
-                            param,
-                            &mut arg_comp,
-                            &mut split_last_arg_at,
-                        );
                     } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
                         add_param_choice_fn(&mut choice_fns, param);
                         match_prefix_option(
@@ -168,18 +156,55 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             &mut split_last_arg_at,
                             &prefix,
                         );
+                    } else if let Some(subcmd) = cmd.find_subcommand(arg) {
+                        match_command(
+                            &mut cmds,
+                            &mut cmd_level,
+                            &mut flag_option_args,
+                            subcmd,
+                            arg,
+                            arg_index,
+                        );
+                        if arg_index == args_len - 1 && arg.len() == 2 {
+                            arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
+                        }
+                    } else if let Some((mut arr, maybe_subcmd)) = match_combine_shorts(cmd, arg) {
+                        let mut current_cmd = cmd;
+                        if let Some(subcmd) = maybe_subcmd {
+                            match_command(
+                                &mut cmds,
+                                &mut cmd_level,
+                                &mut flag_option_args,
+                                subcmd,
+                                arg,
+                                arg_index,
+                            );
+                            current_cmd = subcmd;
+                        }
+                        let name = arr.pop().and_then(|v| v.2).unwrap();
+                        let param = current_cmd.find_flag_option(name).unwrap();
+                        add_param_choice_fn(&mut choice_fns, param);
+                        flag_option_args[cmd_level].extend(arr);
+                        match_flag_option(
+                            &mut flag_option_args[cmd_level],
+                            args,
+                            &mut arg_index,
+                            param,
+                            &mut arg_comp,
+                            &mut split_last_arg_at,
+                        );
                     } else {
                         flag_option_args[cmd_level].push((arg, vec![], None));
                     }
                 } else if let Some(subcmd) = cmd.find_subcommand(arg) {
-                    cmd_level += 1;
-                    cmds.push((
-                        arg,
+                    match_command(
+                        &mut cmds,
+                        &mut cmd_level,
+                        &mut flag_option_args,
                         subcmd,
-                        subcmd.name.clone().unwrap_or_else(|| arg.to_string()),
+                        arg,
                         arg_index,
-                    ));
-                    flag_option_args.push(vec![]);
+                    );
                 } else {
                     add_positional_arg(
                         &mut positional_args,
@@ -280,19 +305,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut output = match &self.arg_comp {
             ArgComp::FlagOrOption => {
                 let mut output = self.comp_flag_options();
-                if let Some((value, param)) = self
-                    .args
-                    .last()
-                    .and_then(|value| last_cmd.find_flag_option(value).map(|param| (value, param)))
-                {
-                    let describe = param.describe_head();
-                    let kind = if param.is_flag() {
-                        CompColor::of_flag()
-                    } else {
-                        CompColor::of_option()
-                    };
-                    output.push((value.clone(), describe.into(), kind));
-                }
+                output.extend(comp_subcomands(last_cmd, true));
                 output
             }
             ArgComp::FlagOrOptionCombine(value) => {
@@ -300,7 +313,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     .comp_flag_options()
                     .iter()
                     .filter_map(|(x, y, z)| {
-                        if x.len() == 2 {
+                        if x.len() == 2 && x != value {
                             Some((format!("{value}{}", &x[1..]), y.to_string(), *z))
                         } else {
                             None
@@ -314,7 +327,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             ArgComp::CommandOrPositional => {
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
-                    return comp_subcomands(last_cmd);
+                    return comp_subcomands(last_cmd, false);
                 }
                 if level > 0
                     && self.positional_args.is_empty()
@@ -334,7 +347,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             ArgComp::Any => {
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
-                    return comp_subcomands(last_cmd);
+                    return comp_subcomands(last_cmd, false);
                 }
                 let values = self.match_positionals();
                 comp_subcommands_positional(last_cmd, &values, self.positional_args.len() < 2)
@@ -774,8 +787,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
             .iter()
             .filter_map(|v| v.2)
             .collect();
+        let last = self.args.last().map(|v| v.as_str()).unwrap_or_default();
         for param in cmd.flag_option_params.iter() {
-            let exist = args.contains(param.name.as_str());
+            let mut exist = args.contains(param.name.as_str());
+            if !last.is_empty() && param.is_match(last) {
+                exist = false;
+            }
             if !exist || param.multiple() {
                 let describe = param.describe_head();
                 let kind = if param.is_flag() {
@@ -827,25 +844,34 @@ fn take_value_args(args: &[String], start: usize, len: usize) -> Vec<&str> {
 fn match_combine_shorts<'a, 'b>(
     cmd: &'a Command,
     arg: &'b str,
-) -> Option<Vec<FlagOptionArg<'a, 'b>>> {
-    if arg.len() > 2 && !arg.starts_with("--") {
-        let mut output = vec![];
-        for ch in arg.chars().skip(1) {
-            let name: String = format!("-{ch}");
-            if let Some(param) = cmd.find_flag_option(&name) {
-                output.push((arg, vec![], Some(param.name.as_str())))
-            } else {
-                return None;
+) -> Option<(Vec<FlagOptionArg<'a, 'b>>, Option<&'a Command>)> {
+    if arg.starts_with("--") || arg.len() <= 2 {
+        return None;
+    }
+    let mut current_cmd = cmd;
+    let mut subcmd = None;
+    let mut output = vec![];
+    for (i, ch) in arg.chars().skip(1).enumerate() {
+        let name: String = format!("-{ch}");
+        if i == 0 {
+            if let Some(v) = cmd.find_subcommand(&name) {
+                current_cmd = v;
+                subcmd = Some(v);
+                continue;
             }
         }
-        Some(output)
-    } else {
-        None
+        if let Some(param) = current_cmd.find_flag_option(&name) {
+            output.push((arg, vec![], Some(param.name.as_str())))
+        } else {
+            return None;
+        }
     }
+
+    Some((output, subcmd))
 }
 
 fn match_flag_option<'a, 'b>(
-    output: &mut Vec<FlagOptionArg<'a, 'b>>,
+    flag_option_args: &mut Vec<FlagOptionArg<'a, 'b>>,
     args: &'b [String],
     arg_index: &mut usize,
     param: &'a FlagOptionParam,
@@ -860,7 +886,7 @@ fn match_flag_option<'a, 'b>(
             *arg_comp =
                 ArgComp::OptionValue(param.name.clone(), value_args.len().saturating_sub(1));
         }
-        output.push((arg, value_args, Some(param.name.as_str())));
+        flag_option_args.push((arg, value_args, Some(param.name.as_str())));
     } else {
         let values_len = param.values_size();
         let args_len = args.len();
@@ -884,12 +910,12 @@ fn match_flag_option<'a, 'b>(
                 *arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
             }
         }
-        output.push((arg, value_args, Some(param.name.as_str())));
+        flag_option_args.push((arg, value_args, Some(param.name.as_str())));
     }
 }
 
 fn match_prefix_option<'a, 'b>(
-    output: &mut Vec<FlagOptionArg<'a, 'b>>,
+    flag_option_args: &mut Vec<FlagOptionArg<'a, 'b>>,
     args: &'b [String],
     arg_index: &mut usize,
     param: &'a FlagOptionParam,
@@ -904,7 +930,25 @@ fn match_prefix_option<'a, 'b>(
         *arg_comp = ArgComp::OptionValue(param.name.clone(), 0);
         *split_last_arg_at = Some(prefix_len);
     }
-    output.push((arg, vec![&arg[prefix_len..]], Some(param.name.as_str())));
+    flag_option_args.push((arg, vec![&arg[prefix_len..]], Some(param.name.as_str())));
+}
+
+fn match_command<'a, 'b>(
+    cmds: &mut Vec<LevelCommand<'a, 'b>>,
+    cmd_level: &mut usize,
+    flag_option_args: &mut Vec<Vec<FlagOptionArg<'a, 'b>>>,
+    subcmd: &'a Command,
+    arg: &'b str,
+    arg_index: usize,
+) {
+    *cmd_level += 1;
+    cmds.push((
+        arg,
+        subcmd,
+        subcmd.name.clone().unwrap_or_else(|| arg.to_string()),
+        arg_index,
+    ));
+    flag_option_args.push(vec![]);
 }
 
 fn add_param_choice_fn<'a>(choice_fns: &mut HashSet<&'a str>, param: &'a FlagOptionParam) {
@@ -922,7 +966,7 @@ fn comp_subcommands_positional(
 ) -> Vec<CompItem> {
     let mut output = vec![];
     if with_subcmd {
-        output.extend(comp_subcomands(cmd))
+        output.extend(comp_subcomands(cmd, false))
     }
     if values.is_empty() || values.len() > cmd.positional_params.len() {
         return output;
@@ -931,12 +975,14 @@ fn comp_subcommands_positional(
     output
 }
 
-fn comp_subcomands(cmd: &Command) -> Vec<CompItem> {
+fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
     let mut output = vec![];
     for subcmd in cmd.subcommands.iter() {
         let describe = subcmd.describe_head();
         for v in subcmd.list_names() {
-            output.push((v, describe.to_string(), CompColor::of_command()))
+            if (flag && v.starts_with('-')) || (!flag && !v.starts_with('-')) {
+                output.push((v, describe.to_string(), CompColor::of_command()))
+            }
         }
     }
     output
