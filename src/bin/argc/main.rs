@@ -8,14 +8,7 @@ use argc::{
     Shell,
 };
 use base64::{engine::general_purpose, Engine as _};
-use std::{
-    collections::HashMap,
-    env, fs, process,
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
-};
+use std::{collections::HashMap, env, fs, process};
 use utils::*;
 use which::which;
 
@@ -132,24 +125,27 @@ fn run() -> Result<i32> {
         let shell = get_shell_path().ok_or_else(|| anyhow!("Shell not found"))?;
         let (script_dir, script_file) = get_script_path(true)
             .ok_or_else(|| anyhow!("Argcfile not found, try `argc --argc-help` for help."))?;
-        let interrupt = Arc::new(AtomicBool::new(false));
-        let interrupt_me = interrupt.clone();
-        ctrlc::set_handler(move || interrupt_me.store(true, Ordering::Relaxed))
-            .with_context(|| "Failed to set CTRL-C handler")?;
         let mut envs = HashMap::new();
         if let Some(cwd) = get_current_dir() {
             envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
         }
-        let status = process::Command::new(shell)
+        let mut command = process::Command::new(shell);
+        command
             .arg(&script_file)
             .args(&args[1..])
             .current_dir(script_dir)
-            .envs(envs)
-            .status()
-            .with_context(|| format!("Failed to run `{}`", script_file.display()))?;
-        if interrupt.load(Ordering::Relaxed) {
-            Ok(130)
-        } else {
+            .envs(envs);
+        #[cfg(unix)]
+        {
+            use std::os::unix::process::CommandExt;
+            let err = command.exec();
+            bail!("Failed to run `{err}`");
+        }
+        #[cfg(not(unix))]
+        {
+            let status = command
+                .status()
+                .with_context(|| format!("Failed to run `{}`", script_file.display()))?;
             Ok(status.code().unwrap_or_default())
         }
     }
