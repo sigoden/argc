@@ -1,0 +1,88 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog --help
+
+OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  cat
+  do
+  foo-bar
+
+EOF
+exit 0
+
+************ RUN ************
+prog cat --help
+
+OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog cat
+
+EOF
+exit 0
+
+************ RUN ************
+prog cat
+
+OUTPUT
+argc__args=( prog cat )
+argc__index=1
+argc__fn=cat_
+argc__positionals=(  )
+cat_
+
+************ RUN ************
+prog do --help
+
+OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog do <COMMAND>
+
+COMMANDS:
+  foo
+  bar
+
+EOF
+exit 0
+
+************ RUN ************
+prog do
+
+OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog do <COMMAND>
+
+COMMANDS:
+  foo
+  bar
+
+EOF
+exit 0
+
+************ RUN ************
+prog do foo
+
+OUTPUT
+argc__args=( prog do foo )
+argc__index=2
+argc__fn=do_::foo
+argc__positionals=(  )
+do_::foo
+
+************ RUN ************
+prog foo-bar
+
+OUTPUT
+argc__args=( prog foo-bar )
+argc__index=1
+argc__fn=foo_bar
+argc__positionals=(  )
+foo_bar
+
+

@@ -212,3 +212,45 @@ _choice_fn() {
 "###;
     snapshot_multi!(script, vec![vec!["prog", "cmd", "a\\b", "a\\b"],]);
 }
+
+#[test]
+fn cmd_name_sanitize() {
+    let script = r###"
+# @cmd
+cat_() {
+    echo run cat_
+}
+
+# @cmd
+do_() {
+    echo run do_
+}
+
+# @cmd
+do_::foo() {
+    echo run do_::foo
+}
+
+# @cmd
+do_::bar() {
+    echo run do_::bar
+}
+
+# @cmd
+foo_bar() {
+    echo run foo_bar
+}
+"###;
+    snapshot_multi!(
+        script,
+        vec![
+            vec!["prog", "--help"],
+            vec!["prog", "cat", "--help"],
+            vec!["prog", "cat"],
+            vec!["prog", "do", "--help"],
+            vec!["prog", "do"],
+            vec!["prog", "do", "foo"],
+            vec!["prog", "foo-bar"],
+        ]
+    );
+}
