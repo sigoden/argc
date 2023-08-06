@@ -942,12 +942,7 @@ fn match_command<'a, 'b>(
     arg_index: usize,
 ) {
     *cmd_level += 1;
-    cmds.push((
-        arg,
-        subcmd,
-        subcmd.name.clone().unwrap_or_else(|| arg.to_string()),
-        arg_index,
-    ));
+    cmds.push((arg, subcmd, arg.to_string(), arg_index));
     flag_option_args.push(vec![]);
 }
 

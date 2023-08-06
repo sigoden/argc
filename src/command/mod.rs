@@ -193,7 +193,7 @@ impl Command {
                             bail!("{}(line {}) invalid command name", name, position);
                         } else if parts_len == 1 {
                             let cmd = root_cmd.subcommands.last_mut().unwrap();
-                            cmd.name = Some(parts[0].to_string());
+                            cmd.name = Some(sanitize_cmd_name(&name));
                             cmd.fn_name = Some(name.to_string());
                             for name in &cmd.aliases {
                                 if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
@@ -211,9 +211,11 @@ impl Command {
                         } else {
                             let mut cmd = root_cmd.subcommands.pop().unwrap();
                             let (child, parents) = parts.split_last().unwrap();
-                            cmd.name = Some(child.to_string());
+                            let parents: Vec<String> =
+                                parents.iter().map(|v| sanitize_cmd_name(v)).collect();
+                            cmd.name = Some(sanitize_cmd_name(child));
                             cmd.fn_name = Some(name.to_string());
-                            match retrive_cmd(&mut root_cmd, parents) {
+                            match retrive_cmd(&mut root_cmd, &parents) {
                                 Some(parent_cmd) => {
                                     parent_cmd
                                         .subcommand_fns
@@ -423,20 +425,16 @@ impl Command {
     }
 
     pub(crate) fn list_names(&self) -> Vec<String> {
-        let mut output = vec![self.name.clone().unwrap_or_default()];
+        let mut output: Vec<String> = self.name.clone().into_iter().collect();
         output.extend(self.aliases.to_vec());
         output
     }
 
     pub(crate) fn list_subcommand_names(&self) -> Vec<String> {
-        let mut output = vec![];
-        for subcmd in self.subcommands.iter() {
-            if let Some(name) = subcmd.name.clone() {
-                output.push(name);
-            }
-            output.extend(subcmd.aliases.to_vec());
-        }
-        output
+        self.subcommands
+            .iter()
+            .flat_map(|v| v.list_names())
+            .collect()
     }
 
     pub(crate) fn find_subcommand(&self, name: &str) -> Option<&Self> {
@@ -608,15 +606,19 @@ impl Command {
     }
 }
 
-fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[&str]) -> Option<&'a mut Command> {
+fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[String]) -> Option<&'a mut Command> {
     if cmd_paths.is_empty() {
         return Some(cmd);
     }
     let child = cmd
         .subcommands
         .iter_mut()
-        .find(|v| v.name.as_deref() == Some(cmd_paths[0]))?;
+        .find(|v| v.name.as_deref() == Some(cmd_paths[0].as_str()))?;
     retrive_cmd(child, &cmd_paths[1..])
+}
+
+fn sanitize_cmd_name(name: &str) -> String {
+    name.trim_end_matches('_').replace('_', "-")
 }
 
 fn wrap_render_block(name: &str, describe: &str, term_width: Option<usize>) -> String {
