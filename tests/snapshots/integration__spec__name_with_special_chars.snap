@@ -1,0 +1,16 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog --oa:foo --oa.bar --oa_bar
+
+OUTPUT
+argc_oa_foo=1
+argc_oa_bar=1
+argc_oa_bar=1
+argc__args=( prog --oa:foo --oa.bar --oa_bar )
+argc__index=0
+argc__positionals=(  )
+
+

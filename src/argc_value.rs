@@ -1,4 +1,4 @@
-use crate::utils::{escape_shell_words, hyphens_to_underscores};
+use crate::utils::escape_shell_words;
 
 pub const VARIABLE_PREFIX: &str = "argc";
 
@@ -27,7 +27,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(name),
+                        sanitize_name(name),
                         escape_shell_words(value)
                     ));
                 }
@@ -35,7 +35,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}=`{}`",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(name),
+                        sanitize_name(name),
                         fn_name,
                     ));
                 }
@@ -43,7 +43,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(name),
+                        sanitize_name(name),
                         values
                             .iter()
                             .map(|v| escape_shell_words(v))
@@ -56,7 +56,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(name),
+                        sanitize_name(name),
                         &value
                     ));
                     positional_args.push(value);
@@ -65,7 +65,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}=`{}`",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(name),
+                        sanitize_name(name),
                         &fn_name
                     ));
                     positional_args.push(format!("`{}`", fn_name));
@@ -78,7 +78,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
-                        hyphens_to_underscores(name),
+                        sanitize_name(name),
                         values.join(" ")
                     ));
                     positional_args.extend(values);
@@ -123,4 +123,8 @@ impl ArgcValue {
 
         output.join("\n")
     }
+}
+
+fn sanitize_name(name: &str) -> String {
+    name.replace(['-', '.', ':'], "_")
 }
