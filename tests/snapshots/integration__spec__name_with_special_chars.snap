@@ -3,13 +3,13 @@ source: tests/spec.rs
 expression: data
 ---
 ************ RUN ************
-prog --oa:foo --oa.bar --oa_bar
+prog --fa:foo --fa.bar --fa_baz
 
 OUTPUT
-argc_oa_foo=1
-argc_oa_bar=1
-argc_oa_bar=1
-argc__args=( prog --oa:foo --oa.bar --oa_bar )
+argc_fa_foo=1
+argc_fa_bar=1
+argc_fa_baz=1
+argc__args=( prog --fa:foo --fa.bar --fa_baz )
 argc__index=0
 argc__positionals=(  )
 

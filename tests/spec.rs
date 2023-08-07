@@ -242,12 +242,12 @@ fn cmd_combine_shorts() {
 #[test]
 fn name_with_special_chars() {
     let script = r###"
-# @flag --oa:foo
-# @flag --oa.bar
-# @flag --oa_bar
+# @flag --fa:foo
+# @flag --fa.bar
+# @flag --fa_baz
 "###;
     snapshot_multi!(
         script,
-        vec![vec!["prog", "--oa:foo", "--oa.bar", "--oa_bar"]]
+        vec![vec!["prog", "--fa:foo", "--fa.bar", "--fa_baz"]]
     );
 }
