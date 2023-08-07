@@ -12,7 +12,6 @@ USAGE: prog <COMMAND>
 COMMANDS:
   cat
   do
-  foo-bar
 
 EOF
 exit 0
@@ -74,15 +73,5 @@ argc__index=2
 argc__fn=do_::foo
 argc__positionals=(  )
 do_::foo
-
-************ RUN ************
-prog foo-bar
-
-OUTPUT
-argc__args=( prog foo-bar )
-argc__index=1
-argc__fn=foo_bar
-argc__positionals=(  )
-foo_bar
 
 

@@ -235,11 +235,6 @@ do_::foo() {
 do_::bar() {
     echo run do_::bar
 }
-
-# @cmd
-foo_bar() {
-    echo run foo_bar
-}
 "###;
     snapshot_multi!(
         script,
@@ -250,7 +245,6 @@ foo_bar() {
             vec!["prog", "do", "--help"],
             vec!["prog", "do"],
             vec!["prog", "do", "foo"],
-            vec!["prog", "foo-bar"],
         ]
     );
 }

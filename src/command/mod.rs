@@ -618,7 +618,7 @@ fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[String]) -> Option<&'a mut
 }
 
 fn sanitize_cmd_name(name: &str) -> String {
-    name.trim_end_matches('_').replace('_', "-")
+    name.trim_end_matches('_').to_string()
 }
 
 fn wrap_render_block(name: &str, describe: &str, term_width: Option<usize>) -> String {
