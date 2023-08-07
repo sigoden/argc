@@ -627,7 +627,7 @@ fn is_not_fn_name_char(c: char) -> bool {
 }
 
 fn is_name_char(c: char) -> bool {
-    c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.')
+    c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | ':')
 }
 
 fn is_short_char(c: char) -> bool {
@@ -727,6 +727,8 @@ mod tests {
     #[test]
     fn test_parse_with_long_option_arg() {
         assert_parse_option_arg!("-f --foo=a <FOO> A foo option");
+        assert_parse_option_arg!("--foo:bar");
+        assert_parse_option_arg!("--foo.bar");
         assert_parse_option_arg!("--foo!");
         assert_parse_option_arg!("--foo+");
         assert_parse_option_arg!("--foo*");

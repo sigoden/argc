@@ -238,3 +238,16 @@ fn cmd_combine_shorts() {
 "###;
     snapshot_multi!(script, vec![vec!["prog", "-A"], vec!["prog", "-AB"]]);
 }
+
+#[test]
+fn name_with_special_chars() {
+    let script = r###"
+# @flag --fa:foo
+# @flag --fa.bar
+# @flag --fa_baz
+"###;
+    snapshot_multi!(
+        script,
+        vec![vec!["prog", "--fa:foo", "--fa.bar", "--fa_baz"]]
+    );
+}
