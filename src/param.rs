@@ -267,7 +267,7 @@ impl FlagOptionParam {
     pub(crate) fn values_size(&self) -> usize {
         if self.is_flag() {
             0
-        } else if self.multiple() {
+        } else if self.multiple() && self.arg_value_names.len() > 1 {
             9999
         } else {
             self.arg_value_names.len()

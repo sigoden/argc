@@ -5,6 +5,7 @@ fn multiple() {
     let script = r###"
 # @flag   -f --fc*
 # @option -o --oa* <DIR>
+# @option -b --ob* <CMD> <DIR>
 # @option -d --od <DIR> <FILE>
 # @arg var* <FILE>
 "###;
@@ -21,8 +22,11 @@ fn multiple() {
             vec!["prog", "-o", ""],
             vec!["prog", "-o", "d1"],
             vec!["prog", "-o", "d1", ""],
-            vec!["prog", "-o", "d1", "d2"],
-            vec!["prog", "-o", "d1", "d2", ""],
+            vec!["prog", "-b", ""],
+            vec!["prog", "-b", "d1"],
+            vec!["prog", "-b", "d1", ""],
+            vec!["prog", "-b", "d1", "d2"],
+            vec!["prog", "-b", "d1", "d2", ""],
             vec!["prog", "-d", "d1"],
             vec!["prog", "-d", "d1", ""],
             vec!["prog", "-d", "d1", "d2"],

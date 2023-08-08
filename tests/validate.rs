@@ -140,7 +140,10 @@ fn option_choice_fn_skip() {
 
 #[test]
 fn option_choice_multi() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--ce", "abc", "val"]);
+    snapshot!(
+        SCRIPT_OPTIONS,
+        &["prog", "cmda", "--ce", "abc", "--ce", "val"]
+    );
 }
 
 #[test]
