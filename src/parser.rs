@@ -368,8 +368,8 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
             },
         ),
         map(parse_param_name, |mut arg| {
-            if arg.name.ends_with("-") {
-                arg.name = arg.name.trim_end_matches("-").to_string();
+            if let Some(name) = arg.name.strip_suffix('-') {
+                arg.name = name.to_string();
                 arg.modifer = Modifier::Prefixed;
             }
             arg
@@ -809,6 +809,7 @@ mod tests {
         assert_parse_option_arg!("-f![`_foo`]");
         assert_parse_option_arg!("-f![=a|b]");
         assert_parse_option_arg!("-D-");
+        assert_parse_option_arg!("-D--");
     }
 
     #[test]
