@@ -10,12 +10,15 @@ __argc_value=FILE	/color:green
 -f	/color:cyan
 --oa	/color:cyan,bold
 -o	/color:cyan,bold
+--ob	/color:cyan,bold
+-b	/color:cyan,bold
 --od	/color:cyan,bold
 -d	/color:cyan,bold
 
 ************ COMPGEN `prog --` ************
 --fc	/color:cyan
 --oa	/color:cyan,bold
+--ob	/color:cyan,bold
 --od	/color:cyan,bold
 
 ************ COMPGEN `prog -- ` ************
@@ -34,12 +37,21 @@ __argc_value=DIR	/color:green
 __argc_value=DIR	/color:green
 
 ************ COMPGEN `prog -o d1 ` ************
+__argc_value=FILE	/color:green
+
+************ COMPGEN `prog -b ` ************
+__argc_value=CMD	/color:green
+
+************ COMPGEN `prog -b d1` ************
+__argc_value=CMD	/color:green
+
+************ COMPGEN `prog -b d1 ` ************
 __argc_value=DIR	/color:green
 
-************ COMPGEN `prog -o d1 d2` ************
+************ COMPGEN `prog -b d1 d2` ************
 __argc_value=DIR	/color:green
 
-************ COMPGEN `prog -o d1 d2 ` ************
+************ COMPGEN `prog -b d1 d2 ` ************
 __argc_value=DIR	/color:green
 
 ************ COMPGEN `prog -d d1` ************

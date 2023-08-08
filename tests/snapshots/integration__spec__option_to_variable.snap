@@ -3,15 +3,15 @@ source: tests/spec.rs
 expression: data
 ---
 RUN
-prog --flag-foo --option-foo f1 f2 --option-bar foo v1 x1 x2
+prog --flag-foo --option-foo foo1 --option-foo foo2 --option-bar bar v1 x1 x2
 
 OUTPUT
 argc_flag_foo=1
-argc_option_foo=( f1 f2 )
-argc_option_bar=foo
+argc_option_foo=( foo1 foo2 )
+argc_option_bar=bar
 argc_arg_foo=v1
 argc_arg_bar=( x1 x2 )
-argc__args=( prog --flag-foo --option-foo f1 f2 --option-bar foo v1 x1 x2 )
+argc__args=( prog --flag-foo --option-foo foo1 --option-foo foo2 --option-bar bar v1 x1 x2 )
 argc__index=0
 argc__positionals=( v1 x1 x2 )
 

@@ -68,22 +68,11 @@ argc__positionals=(  )
 cmda
 
 ************ RUN ************
-prog cmda --ob ob1 ob2
-
-OUTPUT
-argc_ob=( ob1 ob2 )
-argc__args=( prog cmda --ob ob1 ob2 )
-argc__index=1
-argc__fn=cmda
-argc__positionals=(  )
-cmda
-
-************ RUN ************
-prog cmda --oe ob1,ob2 ob3
+prog cmda --oe ob1,ob2 --oe ob3
 
 OUTPUT
 argc_oe=( ob1 ob2 ob3 )
-argc__args=( prog cmda --oe ob1,ob2 ob3 )
+argc__args=( prog cmda --oe ob1,ob2 --oe ob3 )
 argc__index=1
 argc__fn=cmda
 argc__positionals=(  )
@@ -117,17 +106,6 @@ prog cmda -soa soa
 OUTPUT
 argc_soa=soa
 argc__args=( prog cmda -soa soa )
-argc__index=1
-argc__fn=cmda
-argc__positionals=(  )
-cmda
-
-************ RUN ************
-prog cmda --ob a b --ob c
-
-OUTPUT
-argc_ob=( a b c )
-argc__args=( prog cmda --ob a b --ob c )
 argc__index=1
 argc__fn=cmda
 argc__positionals=(  )
