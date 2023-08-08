@@ -199,7 +199,7 @@ fn option_terminated() {
 #[test]
 fn option_prefixed() {
     let script = r###"
-# @option -D%
+# @option -D-
 "###;
     snapshot!(script, &["prog", "-D", "v1", "-Dv2=foo"]);
 }

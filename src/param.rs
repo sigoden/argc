@@ -574,7 +574,7 @@ impl Modifier {
             Self::MultiCharOptional(c) => format!("*{c}"),
             Self::MultiCharRequired(c) => format!("+{c}"),
             Self::Terminated => "~".to_string(),
-            Self::Prefixed => "%".to_string(),
+            Self::Prefixed => "-".to_string(),
         }
     }
 }
