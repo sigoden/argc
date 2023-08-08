@@ -567,8 +567,8 @@ _choice_fn() {
 #[test]
 fn option_prefixed() {
     let script = r###"
-# @option -D%[`_choice_fn`]
-# @option -X --ox%[`_choice_fn`]
+# @option -D-[`_choice_fn`]
+# @option -X --ox-[`_choice_fn`]
 _choice_fn() {
     echo VAR1=value1 
     echo VAR2=value2
