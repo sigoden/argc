@@ -5,6 +5,7 @@ expression: data
 ************ COMPGEN `prog ` ************
 cmda	/color:magenta
 cmdb	/color:magenta
+help	/color:magenta
 
 ************ COMPGEN `prog cmdx ` ************
 __argc_value=path	/color:green

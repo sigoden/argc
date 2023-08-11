@@ -972,13 +972,33 @@ fn comp_subcommands_positional(
 
 fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
     let mut output = vec![];
+    let mut has_help_subcmd = false;
+    let mut describe_help_subcmd = false;
     for subcmd in cmd.subcommands.iter() {
         let describe = subcmd.describe_head();
         for v in subcmd.list_names() {
             if (flag && v.starts_with('-')) || (!flag && !v.starts_with('-')) {
+                if !flag {
+                    has_help_subcmd = true;
+                }
+                if !describe.is_empty() {
+                    describe_help_subcmd = true
+                }
                 output.push((v, describe.to_string(), CompColor::of_command()))
             }
         }
+    }
+    if has_help_subcmd {
+        let describe = if describe_help_subcmd {
+            "Show help for a command"
+        } else {
+            ""
+        };
+        output.push((
+            "help".to_string(),
+            describe.to_string(),
+            CompColor::of_command(),
+        ))
     }
     output
 }

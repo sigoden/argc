@@ -5,5 +5,6 @@ expression: data
 ************ COMPGEN `prog ` ************
 cmda	/color:magenta
 cmdb	/color:magenta
+help	/color:magenta
 
 
