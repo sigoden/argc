@@ -77,7 +77,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         if root.delegated() {
             positional_args = args.iter().skip(1).map(|v| v.as_str()).collect();
         } else {
-            let mut is_rest_args_positional = false;
+            let mut is_rest_args_positional = false; // arg(like -f --foo) will be positional arg
             if let Some(arg) = args.last() {
                 if arg.starts_with('-') {
                     arg_comp = ArgComp::FlagOrOption;
@@ -156,7 +156,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             &mut split_last_arg_at,
                             &prefix,
                         );
-                    } else if let Some(subcmd) = cmd.find_subcommand(arg) {
+                    } else if let Some(subcmd) = find_subcommand(cmd, arg, &positional_args) {
                         match_command(
                             &mut cmds,
                             &mut cmd_level,
@@ -196,7 +196,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     } else {
                         flag_option_args[cmd_level].push((arg, vec![], None));
                     }
-                } else if let Some(subcmd) = cmd.find_subcommand(arg) {
+                } else if let Some(subcmd) = find_subcommand(cmd, arg, &positional_args) {
                     match_command(
                         &mut cmds,
                         &mut cmd_level,
@@ -810,6 +810,20 @@ impl<'a, 'b> Matcher<'a, 'b> {
 }
 
 pub(crate) type CompItem = (String, String, CompColor);
+
+fn find_subcommand<'a>(
+    cmd: &'a Command,
+    arg: &str,
+    positional_args: &Vec<&str>,
+) -> Option<&'a Command> {
+    cmd.find_subcommand(arg).and_then(|v| {
+        if positional_args.is_empty() {
+            Some(v)
+        } else {
+            None
+        }
+    })
+}
 
 fn add_positional_arg<'a>(
     positional_args: &mut Vec<&'a str>,
