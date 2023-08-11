@@ -79,6 +79,8 @@ fn subcmds() {
 cmda() { :; }
 # @cmd
 cmdb() { :; }
+# @cmd
+cmdbc() { :; }
 "###;
 
     snapshot_compgen!(
@@ -91,6 +93,7 @@ cmdb() { :; }
             vec!["prog", "help", ""],
             vec!["prog", "help", "c"],
             vec!["prog", "help", "cmda", ""],
+            vec!["prog", "help", "cmdb"],
         ]
     );
 }
