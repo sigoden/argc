@@ -4,6 +4,7 @@ expression: data
 ---
 ************ COMPGEN `prog ` ************
 bar	/color:magenta	Run bar
+help	/color:magenta	Show help for a command
 
 ************ COMPGEN `prog -` ************
 -G	/color:cyan,bold

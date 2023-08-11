@@ -5,6 +5,7 @@ expression: data
 ************ COMPGEN `prog ` ************
 __argc_value=FILE	/color:green
 cmd	/color:magenta
+help	/color:magenta
 
 ************ COMPGEN `prog cmd` ************
 cmd	/color:magenta
@@ -12,6 +13,7 @@ cmd	/color:magenta
 ************ COMPGEN `prog cmd ` ************
 suba	/color:magenta
 subb	/color:magenta
+help	/color:magenta
 
 ************ COMPGEN `prog cmd s` ************
 suba	/color:magenta
@@ -26,6 +28,7 @@ __argc_value=path	/color:green
 ************ COMPGEN `prog cmd help ` ************
 suba	/color:magenta
 subb	/color:magenta
+help	/color:magenta
 
 ************ COMPGEN `prog cmd help s` ************
 suba	/color:magenta

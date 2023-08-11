@@ -6,6 +6,7 @@ expression: data
 __argc_value=FILE	/color:green
 cmda	/color:magenta
 cmdb	/color:magenta
+help	/color:magenta
 
 ************ COMPGEN `prog c` ************
 __argc_value=FILE	/color:green
@@ -21,6 +22,7 @@ __argc_value=path	/color:green
 ************ COMPGEN `prog help ` ************
 cmda	/color:magenta
 cmdb	/color:magenta
+help	/color:magenta
 
 ************ COMPGEN `prog help c` ************
 cmda	/color:magenta
