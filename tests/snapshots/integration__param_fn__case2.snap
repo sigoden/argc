@@ -18,6 +18,7 @@ OUTPUT
 argc_val=( '' )
 argc__args=( prog cmdl '' )
 argc__index=1
+argc__cmd_fn=cmdl
 argc__positionals=( '' )
 _choice_fn '';exit;
 
@@ -28,6 +29,7 @@ OUTPUT
 argc_val=( v1 )
 argc__args=( prog cmdl v1 )
 argc__index=1
+argc__cmd_fn=cmdl
 argc__positionals=( v1 )
 _choice_fn v1;exit;
 
@@ -38,6 +40,7 @@ OUTPUT
 argc_val=( v1 '' )
 argc__args=( prog cmdl v1 '' )
 argc__index=1
+argc__cmd_fn=cmdl
 argc__positionals=( v1 '' )
 _choice_fn v1 '';exit;
 
@@ -48,6 +51,7 @@ OUTPUT
 argc_val=( v1 v2 )
 argc__args=( prog cmdl v1 v2 )
 argc__index=1
+argc__cmd_fn=cmdl
 argc__positionals=( v1 v2 )
 _choice_fn v1 v2;exit;
 
@@ -58,6 +62,7 @@ OUTPUT
 argc_val=( v1 v2 '' )
 argc__args=( prog cmdl v1 v2 '' )
 argc__index=1
+argc__cmd_fn=cmdl
 argc__positionals=( v1 v2 '' )
 _choice_fn v1 v2 '';exit;
 

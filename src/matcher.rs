@@ -277,6 +277,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 self.dashes.iter().map(|v| v.to_string()).collect(),
             ));
         }
+        let last_cmd = self.cmds[self.cmds.len() - 1].1;
+        if let Some(name) = &last_cmd.name {
+            output.push(ArgcValue::Single("_cmd_fn".into(), name.to_string()));
+        }
         output
     }
 
