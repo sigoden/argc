@@ -4,17 +4,16 @@ use crate::utils::{
 use crate::ArgcValue;
 
 use serde::Serialize;
+use serde_json::json;
 
-#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct FlagOptionParam {
-    pub(crate) name: String,
     pub(crate) describe: String,
     pub(crate) short: Option<char>,
     pub(crate) flag: bool,
     pub(crate) single_hyphen: bool,
     pub(crate) data: ParamData,
     pub(crate) value_names: Vec<String>,
-    #[serde(skip_serializing)]
     pub(crate) arg_value_names: Vec<String>,
 }
 
@@ -35,7 +34,6 @@ impl FlagOptionParam {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
         Self {
-            name,
             describe: describe.to_string(),
             short,
             flag,
@@ -44,6 +42,10 @@ impl FlagOptionParam {
             value_names,
             arg_value_names,
         }
+    }
+
+    pub(crate) fn name(&self) -> &str {
+        self.data.name.as_str()
     }
 
     pub(crate) fn is_flag(&self) -> bool {
@@ -95,7 +97,7 @@ impl FlagOptionParam {
         output.push(format!(
             "{}{}",
             self.render_hyphens(),
-            self.data.render_name(&self.name)
+            self.data.render_name_value()
         ));
         for value_name in &self.value_names {
             output.push(format!("<{}>", value_name));
@@ -115,7 +117,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_name(&self) -> String {
-        format!("{}{}", self.render_hyphens(), self.name)
+        format!("{}{}", self.render_hyphens(), self.name())
     }
 
     pub(crate) fn render_single_value(&self) -> String {
@@ -130,8 +132,8 @@ impl FlagOptionParam {
 
     pub(crate) fn render_body(&self) -> String {
         let mut output = String::new();
-        if self.single_hyphen && self.short.is_none() && self.name.len() == 1 {
-            output.push_str(&format!("-{}", self.name));
+        if self.single_hyphen && self.short.is_none() && self.name().len() == 1 {
+            output.push_str(&format!("-{}", self.name()));
         } else {
             if let Some(ch) = self.short {
                 output.push_str(&format!("-{ch}, "))
@@ -143,7 +145,7 @@ impl FlagOptionParam {
             } else {
                 output.push_str("--")
             }
-            output.push_str(&self.name);
+            output.push_str(self.name());
         }
 
         if self.is_flag() {
@@ -192,7 +194,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&[&str]]) -> Option<ArgcValue> {
-        let name = self.name.clone();
+        let name = self.name().to_string();
         if self.flag {
             if values.is_empty() {
                 None
@@ -257,7 +259,7 @@ impl FlagOptionParam {
 
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![];
-        output.push(format!("{}{}", self.render_hyphens(), self.name));
+        output.push(format!("{}{}", self.render_hyphens(), self.name()));
         if let Some(short) = self.short {
             output.push(format!("-{}", short));
         }
@@ -280,15 +282,27 @@ impl FlagOptionParam {
             None => self.describe.as_str(),
         }
     }
+
+    pub fn to_json(&self) -> serde_json::Value {
+        let option_names = self.list_names();
+        json!({
+            "name": self.name(),
+            "describe": self.describe,
+            "flag": self.flag,
+            "option_names": option_names,
+            "value_names": self.value_names,
+            "modifier": self.data.modifer,
+            "choices": self.data.choice_values(),
+            "default": self.data.defualt_value(),
+        })
+    }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct PositionalParam {
-    pub(crate) name: String,
     pub(crate) describe: String,
     pub(crate) data: ParamData,
     pub(crate) value_name: Option<String>,
-    #[serde(skip_serializing)]
     pub(crate) arg_value_name: String,
 }
 
@@ -296,7 +310,6 @@ impl PositionalParam {
     pub(crate) fn new(param: ParamData, describe: &str, value_name: Option<&str>) -> Self {
         let name = param.name.clone();
         PositionalParam {
-            name: name.clone(),
             describe: describe.to_string(),
             data: param,
             value_name: value_name.map(|v| v.to_string()),
@@ -305,6 +318,10 @@ impl PositionalParam {
                 .map(to_cobol_case)
                 .unwrap_or_default(),
         }
+    }
+
+    pub(crate) fn name(&self) -> &str {
+        &self.data.name
     }
 
     pub(crate) fn tag_name(&self) -> &str {
@@ -338,7 +355,7 @@ impl PositionalParam {
     #[allow(unused)]
     pub(crate) fn render(&self) -> String {
         let mut output = vec![];
-        output.push(self.data.render_name(&self.name));
+        output.push(self.data.render_name_value());
         if let Some(value_name) = self.value_name.as_ref() {
             output.push(format!("<{}>", value_name));
         }
@@ -363,7 +380,7 @@ impl PositionalParam {
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&str]) -> Option<ArgcValue> {
-        let name = self.name.clone();
+        let name = self.name().to_string();
         if values.is_empty() {
             match &self.data.default {
                 Some(DefaultData::Value(value)) => {
@@ -400,8 +417,18 @@ impl PositionalParam {
             None => self.describe.as_str(),
         }
     }
+
+    pub fn to_json(&self) -> serde_json::Value {
+        json!({
+            "name": self.name(),
+            "describe": self.describe,
+            "modifier": self.data.modifer,
+            "choices": self.data.choice_values(),
+            "default": self.data.defualt_value(),
+        })
+    }
 }
-#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct ParamData {
     pub(crate) name: String,
     pub(crate) choice: Option<ChoiceData>,
@@ -459,8 +486,15 @@ impl ParamData {
         }
     }
 
-    pub(crate) fn render_name(&self, name: &str) -> String {
-        let mut result = name.to_string();
+    pub(crate) fn defualt_value(&self) -> Option<&String> {
+        match &self.default {
+            Some(DefaultData::Value(v)) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn render_name_value(&self) -> String {
+        let mut result = self.name.to_string();
         result.push_str(&self.modifer.render());
         match (&self.choice, &self.default) {
             (Some(ChoiceData::Values(values)), None) => {

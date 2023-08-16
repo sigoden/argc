@@ -20,82 +20,72 @@ expression: output
         {
           "name": "fa",
           "describe": "A flag",
-          "short": "b",
           "flag": true,
-          "single_hyphen": false,
-          "data": {
-            "name": "fa",
-            "choice": null,
-            "default": null,
-            "modifer": {
-              "type": "Optional"
-            }
+          "option_names": [
+            "--fa",
+            "-b"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
           },
-          "value_names": []
+          "choices": null,
+          "default": null
         },
         {
           "name": "oa",
           "describe": "A option",
-          "short": "o",
           "flag": false,
-          "single_hyphen": false,
-          "data": {
-            "name": "oa",
-            "choice": null,
-            "default": null,
-            "modifer": {
-              "type": "Optional"
-            }
+          "option_names": [
+            "--oa",
+            "-o"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
           },
-          "value_names": []
+          "choices": null,
+          "default": null
         },
         {
           "name": "ob",
           "describe": "",
-          "short": null,
           "flag": false,
-          "single_hyphen": false,
-          "data": {
-            "name": "ob",
-            "choice": null,
-            "default": null,
-            "modifer": {
-              "type": "MultipleOptional"
-            }
+          "option_names": [
+            "--ob"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
           },
-          "value_names": []
+          "choices": null,
+          "default": null
         },
         {
           "name": "oc",
           "describe": "",
-          "short": null,
           "flag": false,
-          "single_hyphen": false,
-          "data": {
-            "name": "oc",
-            "choice": null,
-            "default": null,
-            "modifer": {
-              "type": "MultiCharOptional",
-              "value": ","
-            }
+          "option_names": [
+            "--oc"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultiCharOptional",
+            "value": ","
           },
-          "value_names": []
+          "choices": null,
+          "default": null
         }
       ],
       "positionals": [
         {
           "name": "var",
           "describe": "",
-          "data": {
-            "name": "var",
-            "choice": null,
-            "default": null,
-            "modifer": {
-              "type": "Optional"
-            }
+          "modifier": {
+            "type": "Optional"
           },
-          "value_name": null
+          "choices": null,
+          "default": null
         }
       ],
       "aliases": [

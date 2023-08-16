@@ -113,14 +113,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         if let Some(param) = cmd.find_flag_option(k) {
                             add_param_choice_fn(&mut choice_fns, param);
                             if arg_index == args_len - 1 {
-                                arg_comp = ArgComp::OptionValue(param.name.clone(), 0);
+                                arg_comp = ArgComp::OptionValue(param.name().to_string(), 0);
                                 split_last_arg_at = Some(k.len() + 1);
                             }
-                            flag_option_args[cmd_level].push((
-                                k,
-                                vec![v],
-                                Some(param.name.as_str()),
-                            ));
+                            flag_option_args[cmd_level].push((k, vec![v], Some(param.name())));
                         } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
                             add_param_choice_fn(&mut choice_fns, param);
                             match_prefix_option(
@@ -343,7 +339,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 comp_subcommands_positional(last_cmd, &values, self.positional_args.len() < 2)
             }
             ArgComp::OptionValue(name, index) => {
-                if let Some(param) = last_cmd.flag_option_params.iter().find(|v| &v.name == name) {
+                if let Some(param) = last_cmd
+                    .flag_option_params
+                    .iter()
+                    .find(|v| v.name() == name)
+                {
                     comp_flag_option(param, *index)
                 } else {
                     vec![]
@@ -387,7 +387,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 let values: Vec<&[&str]> = args
                     .iter()
                     .filter_map(|(_, value, name)| {
-                        if let Some(true) = name.map(|v| param.name == v) {
+                        if let Some(true) = name.map(|v| param.name() == v) {
                             Some(value.as_slice())
                         } else {
                             None
@@ -518,7 +518,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 .flag_option_params
                 .iter()
                 .filter(|v| v.required())
-                .map(|v| v.name.as_str())
+                .map(|v| v.name())
                 .collect();
             for (i, (key, _, name)) in args.iter().enumerate() {
                 match *name {
@@ -537,7 +537,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 missing_params.extend(missing_flag_options)
             }
             for (name, indexes) in flag_option_map {
-                if let Some(param) = cmd.flag_option_params.iter().find(|v| v.name == name) {
+                if let Some(param) = cmd.flag_option_params.iter().find(|v| v.name() == name) {
                     let values_list: Vec<&[&str]> =
                         indexes.iter().map(|v| args[*v].1.as_slice()).collect();
                     if !param.multiple() && values_list.len() > 1 {
@@ -793,7 +793,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             .collect();
         let last = self.args.last().map(|v| v.as_str()).unwrap_or_default();
         for param in cmd.flag_option_params.iter() {
-            let mut exist = args.contains(param.name.as_str());
+            let mut exist = args.contains(param.name());
             if !last.is_empty() && param.is_match(last) {
                 exist = false;
             }
@@ -879,7 +879,7 @@ fn match_combine_shorts<'a, 'b>(
             }
         }
         if let Some(param) = current_cmd.find_flag_option(&name) {
-            output.push((arg, vec![], Some(param.name.as_str())))
+            output.push((arg, vec![], Some(param.name())))
         } else {
             return None;
         }
@@ -902,9 +902,9 @@ fn match_flag_option<'a, 'b>(
         *arg_index += value_args.len();
         if !value_args.is_empty() {
             *arg_comp =
-                ArgComp::OptionValue(param.name.clone(), value_args.len().saturating_sub(1));
+                ArgComp::OptionValue(param.name().to_string(), value_args.len().saturating_sub(1));
         }
-        flag_option_args.push((arg, value_args, Some(param.name.as_str())));
+        flag_option_args.push((arg, value_args, Some(param.name())));
     } else {
         let values_len = param.values_size();
         let args_len = args.len();
@@ -915,20 +915,20 @@ fn match_flag_option<'a, 'b>(
             if *arg_comp != ArgComp::FlagOrOption {
                 if param.is_option() && value_args.len() <= values_len {
                     *arg_comp = ArgComp::OptionValue(
-                        param.name.clone(),
+                        param.name().to_string(),
                         value_args.len().saturating_sub(1),
                     );
                 }
             } else if let Some(prefix) = param.prefixed() {
                 if arg.starts_with(&prefix) {
-                    *arg_comp = ArgComp::OptionValue(param.name.clone(), 0);
+                    *arg_comp = ArgComp::OptionValue(param.name().to_string(), 0);
                     *split_last_arg_at = Some(prefix.len());
                 }
             } else if param.is_flag() && !(arg.len() > 2 && param.is_match(arg)) {
                 *arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
             }
         }
-        flag_option_args.push((arg, value_args, Some(param.name.as_str())));
+        flag_option_args.push((arg, value_args, Some(param.name())));
     }
 }
 
@@ -945,10 +945,10 @@ fn match_prefix_option<'a, 'b>(
     let args_len = args.len();
     let arg = &args[*arg_index];
     if *arg_index == args_len - 1 {
-        *arg_comp = ArgComp::OptionValue(param.name.clone(), 0);
+        *arg_comp = ArgComp::OptionValue(param.name().to_string(), 0);
         *split_last_arg_at = Some(prefix_len);
     }
-    flag_option_args.push((arg, vec![&arg[prefix_len..]], Some(param.name.as_str())));
+    flag_option_args.push((arg, vec![&arg[prefix_len..]], Some(param.name())));
 }
 
 fn match_command<'a, 'b>(
