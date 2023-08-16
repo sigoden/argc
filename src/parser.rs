@@ -506,7 +506,28 @@ fn parse_name_list(input: &str) -> nom::IResult<&str, Vec<&str>> {
 }
 
 fn parse_fn_name(input: &str) -> nom::IResult<&str, &str> {
-    take_while1(is_not_fn_name_char)(input)
+    take_while1(|c| {
+        !matches!(
+            c,
+            ' ' | '\t'
+                | '"'
+                | '\''
+                | '`'
+                | '('
+                | ')'
+                | '['
+                | ']'
+                | '{'
+                | '}'
+                | '<'
+                | '>'
+                | '$'
+                | '&'
+                | '\\'
+                | ';'
+                | '|'
+        )
+    })(input)
 }
 
 fn parse_name(input: &str) -> nom::IResult<&str, &str> {
@@ -605,35 +626,16 @@ fn create_err(input: &str, kind: ErrorKind) -> nom::Err<nom::error::Error<&str>>
     nom::Err::Error(nom::error::Error::new(input, kind))
 }
 
-fn is_not_fn_name_char(c: char) -> bool {
-    !matches!(
-        c,
-        ' ' | '\t'
-            | '"'
-            | '\''
-            | '`'
-            | '('
-            | ')'
-            | '['
-            | ']'
-            | '{'
-            | '}'
-            | '<'
-            | '>'
-            | '$'
-            | '&'
-            | '\\'
-            | ';'
-            | '|'
-    )
-}
-
 fn is_name_char(c: char) -> bool {
     c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | ':')
 }
 
 fn is_short_char(c: char) -> bool {
-    c.is_ascii() && is_not_fn_name_char(c) && !matches!(c, '-')
+    c.is_ascii()
+        && !matches!(
+            c,
+            '-' | '\t' | '"' | '\'' | '(' | ')' | '[' | ']' | '<' | '>' | '&' | '\\' | ';' | '|'
+        )
 }
 
 fn take_comment_lines(lines: &[&str], idx: usize, output: &mut String) -> usize {

@@ -11,10 +11,9 @@ use crate::parser::{parse, Event, EventData, EventScope, Position};
 use crate::utils::INTERNAL_MODE;
 use crate::Result;
 
-use anyhow::{bail, Context};
+use anyhow::bail;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::result::Result as StdResult;
 use std::sync::Arc;
 
 pub fn eval(
@@ -29,7 +28,7 @@ pub fn eval(
 
 pub fn export(source: &str) -> Result<serde_json::Value> {
     let cmd = Command::new(source)?;
-    cmd.to_json().with_context(|| "Failed to export json")
+    Ok(cmd.to_json())
 }
 
 #[derive(Debug, Default)]
@@ -87,30 +86,26 @@ impl Command {
         Ok(matcher.to_arg_values())
     }
 
-    pub fn to_json(&self) -> StdResult<serde_json::Value, serde_json::Error> {
-        let subcommands: StdResult<Vec<serde_json::Value>, _> =
+    pub fn to_json(&self) -> serde_json::Value {
+        let subcommands: Vec<serde_json::Value> =
             self.subcommands.iter().map(|v| v.to_json()).collect();
-        let flag_option_params: StdResult<Vec<serde_json::Value>, _> = self
+        let flag_option_params: Vec<serde_json::Value> = self
             .flag_option_params
             .iter()
-            .map(serde_json::to_value)
+            .map(|v| v.to_json())
             .collect();
-        let positional_params: StdResult<Vec<serde_json::Value>, _> = self
-            .positional_params
-            .iter()
-            .map(serde_json::to_value)
-            .collect();
-        let value = serde_json::json!({
+        let positional_params: Vec<serde_json::Value> =
+            self.positional_params.iter().map(|v| v.to_json()).collect();
+        serde_json::json!({
             "describe": self.describe,
             "name": self.name,
             "author": self.author,
             "version": self.version,
-            "options": flag_option_params?,
-            "positionals": positional_params?,
+            "options": flag_option_params,
+            "positionals": positional_params,
             "aliases": self.aliases,
-            "subcommands": subcommands?,
-        });
-        Ok(value)
+            "subcommands": subcommands,
+        })
     }
 
     pub(crate) fn new_from_events(events: &[Event]) -> Result<Self> {
@@ -451,7 +446,7 @@ impl Command {
     pub(crate) fn find_flag_option(&self, name: &str) -> Option<&FlagOptionParam> {
         self.flag_option_params
             .iter()
-            .find(|v| v.name == name || v.is_match(name))
+            .find(|v| v.name() == name || v.is_match(name))
     }
 
     pub(crate) fn find_prefixed_option(&self, name: &str) -> Option<(&FlagOptionParam, String)> {
@@ -467,14 +462,14 @@ impl Command {
 
     pub(crate) fn match_version_short_name(&self) -> bool {
         match self.find_flag_option("-V") {
-            Some(param) => &param.name == "version",
+            Some(param) => param.name() == "version",
             None => true,
         }
     }
 
     pub(crate) fn match_help_short_name(&self) -> bool {
         match self.find_flag_option("-h") {
-            Some(param) => &param.name == "help",
+            Some(param) => param.name() == "help",
             None => true,
         }
     }

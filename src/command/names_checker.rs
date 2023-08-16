@@ -33,7 +33,7 @@ impl NamesChecker {
         param: &PositionalParam,
         pos: Position,
     ) -> Result<()> {
-        let name = &param.name;
+        let name = param.name();
         if let Some(exist_pos) = self.positionals.get(name) {
             bail!(
                 "{}",
