@@ -4,7 +4,7 @@ use crate::*;
 fn case1() {
     snapshot_multi!(
         SCRIPT_OPTIONS,
-        vec![
+        [
             vec!["prog", "___internal___", "_choice_fn"],
             vec![
                 "prog",
@@ -35,7 +35,7 @@ fn case1() {
 fn case2() {
     snapshot_multi!(
         SCRIPT_ARGS,
-        vec![
+        [
             vec!["prog", "___internal___", "_choice_fn"],
             vec!["prog", "___internal___", "_choice_fn", "prog", "cmdl", ""],
             vec!["prog", "___internal___", "_choice_fn", "prog", "cmdl", "v1"],
@@ -83,7 +83,7 @@ _choice_fn() {
 "###;
     snapshot_multi!(
         script,
-        vec![
+        [
             vec!["prog", "___internal___", "_choice_fn"],
             vec!["prog", "___internal___", "_choice_fn", "prog", ""],
             vec!["prog", "___internal___", "_choice_fn", "prog", "v1"],

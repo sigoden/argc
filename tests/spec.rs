@@ -20,7 +20,7 @@ fn option_help() {
 fn option_eval() {
     snapshot_multi!(
         SCRIPT_OPTIONS,
-        vec![
+        [
             vec!["prog", "cmda"],
             vec!["prog", "cmda", "-a"],
             vec!["prog", "cmda", "-f", "-f"],
@@ -43,7 +43,7 @@ fn option_eval() {
 fn option_shorts() {
     snapshot_multi!(
         SCRIPT_OPTIONS,
-        vec![
+        [
             vec!["prog", "cmda", "-af"],
             vec!["prog", "cmda", "-ae", "e"],
             vec!["prog", "cmda", "-afe", "e"],
@@ -56,7 +56,7 @@ fn option_shorts() {
 fn arg_eval() {
     snapshot_multi!(
         SCRIPT_ARGS,
-        vec![
+        [
             vec!["prog", "cmdb", "v1"],
             vec!["prog", "cmdc", "v1", "v2"],
             vec!["prog", "cmdf"],
@@ -91,7 +91,7 @@ fn arg_subcmd_help() {
 fn arg_no_param() {
     snapshot_multi!(
         SCRIPT_ARGS,
-        vec![
+        [
             vec!["prog", "cmda", "v1", "v2"],
             vec!["prog", "cmda", "--o1", "-o2", "-3"]
         ]
@@ -107,7 +107,7 @@ fn arg_no_option() {
 fn arg_two_multi() {
     snapshot_multi!(
         SCRIPT_ARGS,
-        vec![
+        [
             vec!["prog", "cmdp", "a", "b", "c"],
             vec!["prog", "cmdp", "--", "a", "b", "c"],
             vec!["prog", "cmdp", "a", "--", "b", "c"],
@@ -127,7 +127,7 @@ fn dash_split() {
 "###;
     snapshot_multi!(
         script,
-        vec![
+        [
             vec!["prog", "v1", "-f", "--oa", "a"],
             vec!["prog", "v1", "-f", "--", "--oa", "a"],
         ]
@@ -221,7 +221,7 @@ bar() {
 "###;
     snapshot_multi!(
         script,
-        vec![vec!["prog", "--foo", "--fa"], vec!["prog", "-B", "--fa"]]
+        [vec!["prog", "--foo", "--fa"], vec!["prog", "-B", "--fa"]]
     );
 }
 
@@ -235,7 +235,7 @@ fn cmd_combine_shorts() {
     :;
 }
 "###;
-    snapshot_multi!(script, vec![vec!["prog", "-A"], vec!["prog", "-AB"]]);
+    snapshot_multi!(script, [vec!["prog", "-A"], vec!["prog", "-AB"]]);
 }
 
 #[test]
@@ -245,8 +245,5 @@ fn name_with_special_chars() {
 # @flag --fa.bar
 # @flag --fa_baz
 "###;
-    snapshot_multi!(
-        script,
-        vec![vec!["prog", "--fa:foo", "--fa.bar", "--fa_baz"]]
-    );
+    snapshot_multi!(script, [vec!["prog", "--fa:foo", "--fa.bar", "--fa_baz"]]);
 }

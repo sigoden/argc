@@ -881,8 +881,8 @@ mod tests {
         assert_token!("# @version 1.0.0", Version, "1.0.0");
         assert_token!("# @author Somebody", Author, "Somebody");
         assert_token!("# @cmd A subcommand", Cmd, "A subcommand");
-        assert_token!("# @alias tst", Aliases, vec!["tst"]);
-        assert_token!("# @alias t,tst", Aliases, vec!["t", "tst"]);
+        assert_token!("# @alias tst", Aliases, ["tst"]);
+        assert_token!("# @alias t,tst", Aliases, ["t", "tst"]);
         assert_token!("# @flag -f --foo", FlagOption);
         assert_token!("# @option -f --foo", FlagOption);
         assert_token!("# @arg foo", Positional);

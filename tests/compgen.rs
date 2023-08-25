@@ -12,7 +12,7 @@ fn multiple() {
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", ""],
             vec!["prog", "-"],
             vec!["prog", "--"],
@@ -52,7 +52,7 @@ fn shorts() {
 
     snapshot_compgen!(
         SCRIPT,
-        vec![
+        [
             vec!["prog", ""],
             vec!["prog", "-"],
             vec!["prog", "--"],
@@ -85,7 +85,7 @@ cmdbc() { :; }
 
     snapshot_compgen!(
         SCRIPT,
-        vec![
+        [
             vec!["prog", ""],
             vec!["prog", "c"],
             vec!["prog", "cmda"],
@@ -112,7 +112,7 @@ cmd::subb() { :; }
 
     snapshot_compgen!(
         SCRIPT,
-        vec![
+        [
             vec!["prog", ""],
             vec!["prog", "cmd"],
             vec!["prog", "cmd", ""],
@@ -149,7 +149,7 @@ bar() {
 
     snapshot_compgen!(
         SCRIPT,
-        vec![
+        [
             vec!["prog", ""],
             vec!["prog", "-"],
             vec!["prog", "-B"],
@@ -182,7 +182,7 @@ cmdc() { :; }
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "cmda", ""],
             vec!["prog", "cmda", "v1"],
             vec!["prog", "cmda", "v1", ""],
@@ -206,7 +206,7 @@ cmdc() { :; }
 
 #[test]
 fn choice() {
-    let script = r###"
+    let script = r#"
 # @option --oa[`_choice_fn`]
 # @option --ob[x|y|z]
 # @option --oc*,[`_choice_fn`]
@@ -215,11 +215,11 @@ fn choice() {
 _choice_fn() {
 	echo -e "abc\ndef\nghi"
 }
-"###;
+"#;
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "--oa", ""],
             vec!["prog", "--oa="],
             vec!["prog", "--oa=a"],
@@ -239,17 +239,14 @@ _choice_fn() {
 
 #[test]
 fn choice_multi() {
-    let script = r###"
+    let script = r#"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
 	echo -e "abc\ndef\nghi"
 }
-"###;
+"#;
 
-    snapshot_compgen!(
-        script,
-        vec![vec!["prog", "--oa", ""], vec!["prog", "--oa="],]
-    );
+    snapshot_compgen!(script, [vec!["prog", "--oa", ""], vec!["prog", "--oa="],]);
 }
 
 #[test]
@@ -264,7 +261,7 @@ _choice_fn() {
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "argc"],
             vec!["prog", "argc", ""],
             vec!["prog", "argc", "argc"],
@@ -285,7 +282,7 @@ _choice_fn() {
     echo $1
 }
 "###;
-    snapshot_compgen!(script, vec![vec!["prog", "cmd", "a\\b", ""],]);
+    snapshot_compgen!(script, [vec!["prog", "cmd", "a\\b", ""],]);
 }
 
 #[test]
@@ -295,7 +292,7 @@ fn option_multi_vals() {
 "###;
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "--oa", ""],
             vec!["prog", "--oa", "bash", ""],
             vec!["prog", "--oa", "bash", "cmd1", ""],
@@ -317,7 +314,7 @@ cmda() { :; }
 # @cmd line
 cmdb() { :; }
 "###;
-    snapshot_compgen!(script, vec![vec!["prog", ""], vec!["prog", "cmda", ""],]);
+    snapshot_compgen!(script, [vec!["prog", ""], vec!["prog", "cmda", ""],]);
 }
 
 #[test]
@@ -326,7 +323,7 @@ fn no_param() {
 # @cmd
 cmd() { :; }
 "###;
-    snapshot_compgen!(script, vec![vec!["prog", "cmd", ""],]);
+    snapshot_compgen!(script, [vec!["prog", "cmd", ""],]);
 }
 
 #[test]
@@ -342,7 +339,7 @@ cmdb() { :; }
 "###;
     snapshot_compgen!(
         script,
-        vec![vec!["prog", "cmda", ""], vec!["prog", "cmdb", ""],]
+        [vec!["prog", "cmda", ""], vec!["prog", "cmdb", ""],]
     );
 }
 
@@ -352,7 +349,7 @@ fn one_combine_shorts() {
 # @flag -a
 # @flag -b
 "###;
-    snapshot_compgen!(script, vec![vec!["prog", "-a"],]);
+    snapshot_compgen!(script, [vec!["prog", "-a"],]);
 }
 
 #[test]
@@ -366,7 +363,7 @@ cmdb() { :; }
 "###;
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", ""],
             vec!["prog", "cmdx", ""],
             vec!["prog", "cmdx", "cmd"]
@@ -380,7 +377,7 @@ fn just_match() {
 # @option --oa
 # @option --oa-file
 "###;
-    snapshot_compgen!(script, vec![vec!["prog", "--oa"]]);
+    snapshot_compgen!(script, [vec!["prog", "--oa"]]);
 }
 
 #[test]
@@ -400,7 +397,7 @@ arg() { :; }
 
     snapshot_compgen!(
         script,
-        vec![vec!["prog", "no_arg", ""], vec!["prog", "arg", ""]]
+        [vec!["prog", "no_arg", ""], vec!["prog", "arg", ""]]
     );
 }
 
@@ -416,7 +413,7 @@ cmda() { :; }
 cmdb() { :; }
 "###;
 
-    snapshot_compgen!(SCRIPT, vec![vec!["prog", ""],]);
+    snapshot_compgen!(SCRIPT, [vec!["prog", ""],]);
 }
 
 #[test]
@@ -429,12 +426,12 @@ fn one_subcmd_with_options() {
 cmda() { :; }
 "###;
 
-    snapshot_compgen!(SCRIPT, vec![vec!["prog", ""],]);
+    snapshot_compgen!(SCRIPT, [vec!["prog", ""],]);
 }
 
 #[test]
 fn dashes_at() {
-    let script = r###"
+    let script = r#"
 # @arg val*[`_choice_fn`]
 _choice_fn() {
     if [[ -z "$argc__dashes" ]]; then
@@ -443,31 +440,31 @@ _choice_fn() {
         echo -e "v1\nv2"
     fi
 }
-"###;
+"#;
 
     snapshot_compgen!(
         script,
-        vec![vec!["prog", "abc", ""], vec!["prog", "abc", "--", ""],]
+        [vec!["prog", "abc", ""], vec!["prog", "abc", "--", ""],]
     );
 }
 
 #[test]
 fn no_space() {
-    let script = r###"
+    let script = r#"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
 	echo -e "abc"
 	echo -e "def\0"
 	echo -e "ghk\thello world"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
+    snapshot_compgen_shells!(script, ["prog", "--oa", ""]);
 }
 
 #[test]
 fn suffix() {
-    let script = r###"
+    let script = r#"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
     echo -e "__argc_suffix==\0"
@@ -475,14 +472,14 @@ _choice_fn() {
 	echo -e "def"
 	echo -e "ghk"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
+    snapshot_compgen_shells!(script, ["prog", "--oa", ""]);
 }
 
 #[test]
 fn value_display() {
-    let script = r###"
+    let script = r#"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
 	echo "abc:def:xyz"
@@ -490,14 +487,14 @@ _choice_fn() {
 	echo "abc:ijk:abc"
 	echo "abc:ijk:xyz"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa="]);
+    snapshot_compgen_shells!(script, ["prog", "--oa="]);
 }
 
 #[test]
 fn multi_parts() {
-    let script = r###"
+    let script = r#"
 # @option --oa*[`_choice_fn`]
 _choice_fn() {
     echo __argc_prefix=A/
@@ -505,9 +502,9 @@ _choice_fn() {
 	echo B
 	echo -e "B/\0"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa", "A/"]);
+    snapshot_compgen_shells!(script, ["prog", "--oa", "A/"]);
 }
 
 #[test]
@@ -523,23 +520,23 @@ _choice_fn() {
 }
 "###;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa", "A/B/"]);
+    snapshot_compgen_shells!(script, ["prog", "--oa", "A/B/"]);
 }
 
 #[test]
 fn assing_option_value() {
-    let script = r###"
+    let script = r"
 # @option --oa[`_choice_fn`]
 # @arg val[`_choice_fn`]
 _choice_fn() {
     echo __argc_filter=
     ( set -o posix ; set ) | grep 'argc_\|ARGC_COMPGEN\|ARGC_FILTER\|ARGC_LAST_ARG\|ARGC_VARS' 
 }
-"###;
+";
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "--oa=abc"],
             vec!["prog", "oa=abc"],
             vec!["prog", "--", "--oa=abc"]
@@ -561,7 +558,7 @@ _choice_fn() {
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["sudo", "cmd", ""],
             vec!["sudo", "cmd", "-"],
             vec!["sudo", "cmd", "--"],
@@ -584,7 +581,7 @@ _choice_fn() {
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "--oa"],
             vec!["prog", "--oa", ""],
             vec!["prog", "--oa", "--"],
@@ -608,7 +605,7 @@ _choice_fn() {
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "-D"],
             vec!["prog", "-DVAR1"],
             vec!["prog", "-X"],
@@ -633,7 +630,7 @@ _choice_fn() {
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "--ob="],
             vec!["prog", "--oa", "--ob="],
             vec!["prog", "abc", "--ob="],
@@ -659,7 +656,7 @@ cmd() {
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "args", ""],
             vec!["prog", "args", "v"],
             vec!["prog", "cmd", "--file", ""],
@@ -677,7 +674,7 @@ fn redirect_symbols() {
 # @arg text*
 "###;
 
-    snapshot_compgen!(script, vec![vec!["prog", ">", "Argc"]], argc::Shell::Bash);
+    snapshot_compgen!(script, [vec!["prog", ">", "Argc"]], argc::Shell::Bash);
 }
 
 #[test]
@@ -692,62 +689,62 @@ _choice_delegate() {
 
     snapshot_compgen!(
         script,
-        vec![vec!["prog", "abc"], vec!["prog", "-a"], vec!["prog", "-"]],
+        [vec!["prog", "abc"], vec!["prog", "-a"], vec!["prog", "-"]],
         argc::Shell::Bash
     );
 }
 
 #[test]
 fn mult_char() {
-    let script = r###"
+    let script = r#"
 # @option --oa*,[`_choice_fn`]
 _choice_fn() {
     echo -e "abc\ndef\nijk"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa", "abc,"]);
+    snapshot_compgen_shells!(script, ["prog", "--oa", "abc,"]);
 }
 
 #[test]
 fn mult_char2() {
-    let script = r###"
+    let script = r#"
 # @option --oa*,[`_choice_fn`]
 _choice_fn() {
     echo -e "abc\ndef\nijk"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa=abc,"]);
+    snapshot_compgen_shells!(script, ["prog", "--oa=abc,"]);
 }
 
 #[test]
 fn starts_quote() {
-    let script = r###"
+    let script = r#"
 # @option --oa[`_choice_fn`]
 _choice_fn() {
     echo -e "abc\ndef\nijk"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa='"]);
+    snapshot_compgen_shells!(script, ["prog", "--oa='"]);
 }
 
 #[test]
 fn starts_quote2() {
-    let script = r###"
+    let script = r#"
 # @option --oa[`_choice_fn`]
 _choice_fn() {
     echo -e "abc\ndef\nijk"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "'--oa="]);
+    snapshot_compgen_shells!(script, ["prog", "'--oa="]);
 }
 
 #[test]
 fn desc() {
-    let script = r###"
+    let script = r#"
 # @option --oa[`_choice_fn`]
 _choice_fn() {
     echo -e "abc\tdesc"
@@ -756,40 +753,40 @@ _choice_fn() {
     echo -e " xyz \t[desc]"
     echo -e " cjk\t福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
+    snapshot_compgen_shells!(script, ["prog", "--oa", ""]);
 }
 
 #[test]
 fn desc2() {
-    let script = r###"
+    let script = r#"
 # @option --oa[`_choice_fn`]
 _choice_fn() {
     echo -e "abc\t(desc1)"
     echo -e "def\t(desc2)"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa", "a"]);
+    snapshot_compgen_shells!(script, ["prog", "--oa", "a"]);
 }
 
 #[test]
 fn escape() {
-    let script = r###"
+    let script = r#"
 # @option --oa[`_choice_fn`]
 _choice_fn() {
     echo -e "a:b>c"
     echo -e "d:e>f"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "--oa", ""]);
+    snapshot_compgen_shells!(script, ["prog", "--oa", ""]);
 }
 
 #[test]
 fn bash_shell() {
-    let script = r###"
+    let script = r#"
 # @option --oa[`_choice_fn`]
 # @option --ob[`_choice_fn2`]
 # @option --oc <file>
@@ -806,11 +803,11 @@ _choice_fn2() {
     echo -e "B"
     echo -e "B/\0"
 }
-"###;
+"#;
 
     snapshot_compgen!(
         script,
-        vec![
+        [
             vec!["prog", "--oa", ""],
             vec!["prog", "--oa", "abc:"],
             vec!["prog", "--ob", "/A/B"],
@@ -823,7 +820,7 @@ _choice_fn2() {
 
 #[test]
 fn kinds_of() {
-    let script = r###"
+    let script = r#"
 # @arg val[`_choice_fn`]
 _choice_fn() {
     echo -e "a1\tdesc a1"
@@ -833,14 +830,14 @@ _choice_fn() {
     echo -e "e1"
     echo -e "f1\t/color:yellow\tdesc f1"
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", ""]);
+    snapshot_compgen_shells!(script, ["prog", ""]);
 }
 
 #[test]
 fn filter_quote() {
-    let script = r###"
+    let script = r#"
 # @arg args[`_choice_fn`]
 _choice_fn() {
     echo "__argc_prefix=${ARGC_FILTER%%=*}="
@@ -849,14 +846,14 @@ _choice_fn() {
     echo bar
     :;
 }
-"###;
+"#;
 
-    snapshot_compgen_shells!(script, vec!["prog", "v='"]);
+    snapshot_compgen_shells!(script, ["prog", "v='"]);
 }
 
 #[test]
 fn color() {
-    let script = r###"
+    let script = r#"
 # @arg val[`_fn_color`]
 _fn_color() {
     echo -e "kindFlag\0\t/color:cyan"
@@ -886,8 +883,8 @@ _fn_color() {
     echo -e "colorDefault\0\t/color:default"
     echo -e "colorDefaultBold\0\t/color:default,bold"
 }
-"###;
-    snapshot_compgen_shells!(script, vec!["prog", ""]);
+"#;
+    snapshot_compgen_shells!(script, ["prog", ""]);
 }
 
 mod filedir {
@@ -907,7 +904,7 @@ mod filedir {
     fn value_name() {
         snapshot_compgen!(
             VALUE_NAME_SCRIPT,
-            vec![
+            [
                 vec!["prog", "--oa", "src/"],
                 vec!["prog", "--oa", "src/p"],
                 vec!["prog", "--oa", "./src/"],
@@ -938,7 +935,7 @@ mod filedir {
         );
     }
 
-    const CD_SCRIPT: &str = r###"
+    const CD_SCRIPT: &str = r#"
 # @option --oa[`_choice_oa`]
 # @option --ob[`_choice_ob`]
 # @arg val[`choice_val`]
@@ -960,14 +957,14 @@ choice_val() {
 
     fi
 }
-    "###;
+    "#;
 
     #[cfg(not(windows))]
     #[test]
     fn cd() {
         snapshot_compgen!(
             CD_SCRIPT,
-            vec![
+            [
                 vec!["prog", "--oa", ""],
                 vec!["prog", "--oa="],
                 vec!["prog", "--ob", ""],
