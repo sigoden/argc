@@ -380,7 +380,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let cmds_len = self.cmds.len();
         let level = cmds_len - 1;
         let last_cmd = self.cmds[level].1;
-        let args_index = self.cmds[level].3;
+        let cmd_arg_index = self.cmds[level].3;
         for level in 0..cmds_len {
             let args = &self.flag_option_args[level];
             let cmd = self.cmds[level].1;
@@ -412,7 +412,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
         output.push(ArgcValue::Multiple("_args".into(), self.args.to_vec()));
-        output.push(ArgcValue::Single("_index".into(), args_index.to_string()));
+        output.push(ArgcValue::Single(
+            "_cmd_arg_index".into(),
+            cmd_arg_index.to_string(),
+        ));
         output
     }
 

@@ -31,7 +31,7 @@ prog cat
 
 OUTPUT
 argc__args=( prog cat )
-argc__index=1
+argc__cmd_arg_index=1
 argc__fn=cat_
 argc__positionals=(  )
 cat_
@@ -69,7 +69,7 @@ prog do foo
 
 OUTPUT
 argc__args=( prog do foo )
-argc__index=2
+argc__cmd_arg_index=2
 argc__fn=do_::foo
 argc__positionals=(  )
 do_::foo

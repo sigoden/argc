@@ -9,7 +9,7 @@ OUTPUT
 argc_val1=( a b )
 argc_val2=( c )
 argc__args=( prog cmdp a b c )
-argc__index=1
+argc__cmd_arg_index=1
 argc__fn=cmdp
 argc__positionals=( a b c )
 cmdp a b c
@@ -21,7 +21,7 @@ OUTPUT
 argc_val1=( a b )
 argc_val2=( c )
 argc__args=( prog cmdp -- a b c )
-argc__index=1
+argc__cmd_arg_index=1
 argc__fn=cmdp
 argc__positionals=( a b c )
 cmdp a b c
@@ -33,7 +33,7 @@ OUTPUT
 argc_val1=( a )
 argc_val2=( b c )
 argc__args=( prog cmdp a -- b c )
-argc__index=1
+argc__cmd_arg_index=1
 argc__fn=cmdp
 argc__positionals=( a b c )
 cmdp a b c
@@ -45,7 +45,7 @@ OUTPUT
 argc_val1=( a b )
 argc_val2=( c )
 argc__args=( prog cmdp a b -- c )
-argc__index=1
+argc__cmd_arg_index=1
 argc__fn=cmdp
 argc__positionals=( a b c )
 cmdp a b c
@@ -56,7 +56,7 @@ prog cmdp a b c --
 OUTPUT
 argc_val1=( a b c )
 argc__args=( prog cmdp a b c -- )
-argc__index=1
+argc__cmd_arg_index=1
 argc__fn=cmdp
 argc__positionals=( a b c )
 cmdp a b c

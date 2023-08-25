@@ -7,9 +7,9 @@ __argc_filter=	/color:green
 ARGC_COMPGEN=1	/color:green
 ARGC_FILTER=abc	/color:green
 ARGC_LAST_ARG=--oa=abc	/color:green
-ARGC_VARS=YXJnY19vYT1hYmM7YXJnY19fYXJncz0oIHByb2cgJy0tb2E9YWJjJyApO2FyZ2NfX2luZGV4PTA7YXJnY19fcG9zaXRpb25hbHM9KCAgKTs=	/color:green
+ARGC_VARS=YXJnY19vYT1hYmM7YXJnY19fYXJncz0oIHByb2cgJy0tb2E9YWJjJyApO2FyZ2NfX2NtZF9hcmdfaW5kZXg9MDthcmdjX19wb3NpdGlvbmFscz0oICApOw==	/color:green
 argc__args=([0]="prog" [1]="--oa=abc")	/color:green
-argc__index=0	/color:green
+argc__cmd_arg_index=0	/color:green
 argc__positionals=()	/color:green
 argc_oa=abc	/color:green
 
@@ -18,9 +18,9 @@ __argc_filter=	/color:green
 ARGC_COMPGEN=1	/color:green
 ARGC_FILTER=oa=abc	/color:green
 ARGC_LAST_ARG=oa=abc	/color:green
-ARGC_VARS=YXJnY192YWw9J29hPWFiYyc7YXJnY19fYXJncz0oIHByb2cgJ29hPWFiYycgKTthcmdjX19pbmRleD0wO2FyZ2NfX3Bvc2l0aW9uYWxzPSggJ29hPWFiYycgKTs=	/color:green
+ARGC_VARS=YXJnY192YWw9J29hPWFiYyc7YXJnY19fYXJncz0oIHByb2cgJ29hPWFiYycgKTthcmdjX19jbWRfYXJnX2luZGV4PTA7YXJnY19fcG9zaXRpb25hbHM9KCAnb2E9YWJjJyApOw==	/color:green
 argc__args=([0]="prog" [1]="oa=abc")	/color:green
-argc__index=0	/color:green
+argc__cmd_arg_index=0	/color:green
 argc__positionals=([0]="oa=abc")	/color:green
 argc_val=oa=abc	/color:green
 
@@ -29,10 +29,10 @@ __argc_filter=	/color:green
 ARGC_COMPGEN=1	/color:green
 ARGC_FILTER=--oa=abc	/color:green
 ARGC_LAST_ARG=--oa=abc	/color:green
-ARGC_VARS=YXJnY192YWw9Jy0tb2E9YWJjJzthcmdjX19hcmdzPSggcHJvZyAtLSAnLS1vYT1hYmMnICk7YXJnY19faW5kZXg9MDthcmdjX19kYXNoZXM9MDthcmdjX19wb3NpdGlvbmFscz0oICctLW9hPWFiYycgKTs=	/color:green
+ARGC_VARS=YXJnY192YWw9Jy0tb2E9YWJjJzthcmdjX19hcmdzPSggcHJvZyAtLSAnLS1vYT1hYmMnICk7YXJnY19fY21kX2FyZ19pbmRleD0wO2FyZ2NfX2Rhc2hlcz0wO2FyZ2NfX3Bvc2l0aW9uYWxzPSggJy0tb2E9YWJjJyApOw==	/color:green
 argc__args=([0]="prog" [1]="--" [2]="--oa=abc")	/color:green
+argc__cmd_arg_index=0	/color:green
 argc__dashes=0	/color:green
-argc__index=0	/color:green
 argc__positionals=([0]="--oa=abc")	/color:green
 argc_val=--oa=abc	/color:green
 

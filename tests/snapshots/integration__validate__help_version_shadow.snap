@@ -8,7 +8,7 @@ prog -h
 OUTPUT
 argc_host=1
 argc__args=( prog -h )
-argc__index=0
+argc__cmd_arg_index=0
 argc__positionals=(  )
 
 ************ RUN ************
@@ -17,7 +17,7 @@ prog -V
 OUTPUT
 argc_verify=1
 argc__args=( prog -V )
-argc__index=0
+argc__cmd_arg_index=0
 argc__positionals=(  )
 
 

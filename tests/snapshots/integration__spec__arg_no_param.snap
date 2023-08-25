@@ -7,7 +7,7 @@ prog cmda v1 v2
 
 OUTPUT
 argc__args=( prog cmda v1 v2 )
-argc__index=1
+argc__cmd_arg_index=1
 argc__fn=cmda
 argc__positionals=( v1 v2 )
 cmda v1 v2
@@ -17,7 +17,7 @@ prog cmda --o1 -o2 -3
 
 OUTPUT
 argc__args=( prog cmda --o1 -o2 -3 )
-argc__index=1
+argc__cmd_arg_index=1
 argc__fn=cmda
 argc__positionals=( --o1 -o2 -3 )
 cmda --o1 -o2 -3
