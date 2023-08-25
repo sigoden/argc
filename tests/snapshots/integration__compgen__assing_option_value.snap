@@ -5,7 +5,7 @@ expression: data
 ************ COMPGEN `prog --oa=abc` ************
 __argc_filter=	/color:green
 ARGC_COMPGEN=1	/color:green
-ARGC_FILTER=abc	/color:green
+ARGC_CWORD=abc	/color:green
 ARGC_LAST_ARG=--oa=abc	/color:green
 ARGC_VARS=YXJnY19vYT1hYmM7YXJnY19fYXJncz0oIHByb2cgJy0tb2E9YWJjJyApO2FyZ2NfX2NtZF9hcmdfaW5kZXg9MDthcmdjX19wb3NpdGlvbmFscz0oICApOw==	/color:green
 argc__args=([0]="prog" [1]="--oa=abc")	/color:green
@@ -16,7 +16,7 @@ argc_oa=abc	/color:green
 ************ COMPGEN `prog oa=abc` ************
 __argc_filter=	/color:green
 ARGC_COMPGEN=1	/color:green
-ARGC_FILTER=oa=abc	/color:green
+ARGC_CWORD=oa=abc	/color:green
 ARGC_LAST_ARG=oa=abc	/color:green
 ARGC_VARS=YXJnY192YWw9J29hPWFiYyc7YXJnY19fYXJncz0oIHByb2cgJ29hPWFiYycgKTthcmdjX19jbWRfYXJnX2luZGV4PTA7YXJnY19fcG9zaXRpb25hbHM9KCAnb2E9YWJjJyApOw==	/color:green
 argc__args=([0]="prog" [1]="oa=abc")	/color:green
@@ -27,7 +27,7 @@ argc_val=oa=abc	/color:green
 ************ COMPGEN `prog -- --oa=abc` ************
 __argc_filter=	/color:green
 ARGC_COMPGEN=1	/color:green
-ARGC_FILTER=--oa=abc	/color:green
+ARGC_CWORD=--oa=abc	/color:green
 ARGC_LAST_ARG=--oa=abc	/color:green
 ARGC_VARS=YXJnY192YWw9Jy0tb2E9YWJjJzthcmdjX19hcmdzPSggcHJvZyAtLSAnLS1vYT1hYmMnICk7YXJnY19fY21kX2FyZ19pbmRleD0wO2FyZ2NfX2Rhc2hlcz0wO2FyZ2NfX3Bvc2l0aW9uYWxzPSggJy0tb2E9YWJjJyApOw==	/color:green
 argc__args=([0]="prog" [1]="--" [2]="--oa=abc")	/color:green

@@ -110,7 +110,7 @@ pub fn compgen(
             let mut envs = HashMap::new();
             envs.insert("ARGC_COMPGEN".into(), "1".into());
             envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
-            envs.insert("ARGC_FILTER".into(), argc_filter.clone());
+            envs.insert("ARGC_CWORD".into(), argc_filter.clone());
             envs.insert("ARGC_LAST_ARG".into(), last_arg.to_string());
             if let Some(cwd) = get_current_dir() {
                 envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
