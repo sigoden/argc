@@ -24,4 +24,16 @@ argc__index=0	/color:green
 argc__positionals=([0]="oa=abc")	/color:green
 argc_val=oa=abc	/color:green
 
+************ COMPGEN `prog -- --oa=abc` ************
+__argc_filter=	/color:green
+ARGC_COMPGEN=1	/color:green
+ARGC_FILTER=--oa=abc	/color:green
+ARGC_LAST_ARG=--oa=abc	/color:green
+ARGC_VARS=YXJnY192YWw9Jy0tb2E9YWJjJzthcmdjX19hcmdzPSggcHJvZyAtLSAnLS1vYT1hYmMnICk7YXJnY19faW5kZXg9MDthcmdjX19kYXNoZXM9MDthcmdjX19wb3NpdGlvbmFscz0oICctLW9hPWFiYycgKTs=	/color:green
+argc__args=([0]="prog" [1]="--" [2]="--oa=abc")	/color:green
+argc__dashes=0	/color:green
+argc__index=0	/color:green
+argc__positionals=([0]="--oa=abc")	/color:green
+argc_val=--oa=abc	/color:green
+
 

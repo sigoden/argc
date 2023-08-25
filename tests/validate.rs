@@ -9,7 +9,7 @@ fn help_version() {
 "###;
     snapshot_multi!(
         script,
-        vec![
+        [
             vec!["prog", "help"],
             vec!["prog", "--help"],
             vec!["prog", "-help"],
@@ -30,7 +30,7 @@ fn help_version_shadow() {
 # @flag -h --host
 # @flag -V --verify
 "###;
-    snapshot_multi!(script, vec![vec!["prog", "-h"], vec!["prog", "-V"],]);
+    snapshot_multi!(script, [vec!["prog", "-h"], vec!["prog", "-V"],]);
 }
 
 #[test]
@@ -39,7 +39,7 @@ fn help_version_exist() {
 # @flag -h --help
 # @flag -V --version
 "###;
-    snapshot_multi!(script, vec![vec!["prog", "-h"]]);
+    snapshot_multi!(script, [vec!["prog", "-h"]]);
 }
 
 #[test]
@@ -178,7 +178,7 @@ _choice_fn1() {
 	:;
  }
 "###;
-    snapshot_multi!(script, vec![vec!["prog", "--oa", "foo"],]);
+    snapshot_multi!(script, [vec!["prog", "--oa", "foo"],]);
 }
 
 #[test]
@@ -194,10 +194,7 @@ _choice_fn() {
 	fi
  }
 "###;
-    snapshot_multi!(
-        script,
-        vec![vec!["prog", "--fa", "foo"], vec!["prog", "foo"],]
-    );
+    snapshot_multi!(script, [vec!["prog", "--fa", "foo"], vec!["prog", "foo"],]);
 }
 
 #[test]
@@ -213,7 +210,7 @@ _choice_fn() {
     echo $1
 }
 "###;
-    snapshot_multi!(script, vec![vec!["prog", "cmd", "a\\b", "a\\b"],]);
+    snapshot_multi!(script, [vec!["prog", "cmd", "a\\b", "a\\b"],]);
 }
 
 #[test]
@@ -241,7 +238,7 @@ do_::bar() {
 "###;
     snapshot_multi!(
         script,
-        vec![
+        [
             vec!["prog", "--help"],
             vec!["prog", "cat", "--help"],
             vec!["prog", "cat"],

@@ -16,10 +16,7 @@ fn with_main2() {
 # @arg val
 main() { :; }
 "###;
-    snapshot_multi!(
-        script,
-        vec![vec!["prog"], vec!["prog", "abc", "--foo", "123"]]
-    );
+    snapshot_multi!(script, [vec!["prog"], vec!["prog", "abc", "--foo", "123"]]);
 }
 
 #[test]
@@ -74,7 +71,7 @@ cmd::foo() { :; }
 "###;
     snapshot_multi!(
         script,
-        vec![
+        [
             vec!["prog", "cmd"],
             vec!["prog", "cmd", "abc", "--foo", "123"]
         ]
