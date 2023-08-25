@@ -530,7 +530,7 @@ fn assing_option_value() {
 # @arg val[`_choice_fn`]
 _choice_fn() {
     echo __argc_filter=
-    ( set -o posix ; set ) | grep 'argc_\|ARGC_COMPGEN\|ARGC_FILTER\|ARGC_LAST_ARG\|ARGC_VARS' 
+    ( set -o posix ; set ) | grep 'argc_\|ARGC_COMPGEN\|ARGC_CWORD\|ARGC_LAST_ARG\|ARGC_VARS' 
 }
 ";
 
@@ -840,8 +840,8 @@ fn filter_quote() {
     let script = r#"
 # @arg args[`_choice_fn`]
 _choice_fn() {
-    echo "__argc_prefix=${ARGC_FILTER%%=*}="
-    echo "__argc_filter=${ARGC_FILTER#*=}"
+    echo "__argc_prefix=${ARGC_CWORD%%=*}="
+    echo "__argc_filter=${ARGC_CWORD#*=}"
     echo foo
     echo bar
     :;
