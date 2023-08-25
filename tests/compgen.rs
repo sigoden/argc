@@ -433,6 +433,25 @@ cmda() { :; }
 }
 
 #[test]
+fn dashes_at() {
+    let script = r###"
+# @arg val*[`_choice_fn`]
+_choice_fn() {
+    if [[ -z "$argc__dashes" ]]; then
+        echo -e "abc\ndef\nghi"
+    else
+        echo -e "v1\nv2"
+    fi
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        vec![vec!["prog", "abc", ""], vec!["prog", "abc", "--", ""],]
+    );
+}
+
+#[test]
 fn no_space() {
     let script = r###"
 # @option --oa*[`_choice_fn`]
@@ -520,7 +539,11 @@ _choice_fn() {
 
     snapshot_compgen!(
         script,
-        vec![vec!["prog", "--oa=abc"], vec!["prog", "oa=abc"],]
+        vec![
+            vec!["prog", "--oa=abc"],
+            vec!["prog", "oa=abc"],
+            vec!["prog", "--", "--oa=abc"]
+        ]
     );
 }
 

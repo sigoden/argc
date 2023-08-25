@@ -22,7 +22,7 @@ pub(crate) struct Matcher<'a, 'b> {
     args: &'b [String],
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
     positional_args: Vec<&'b str>,
-    dashes: Vec<usize>,
+    dashes: Option<usize>,
     arg_comp: ArgComp,
     choice_fns: HashSet<&'a str>,
     script_path: Option<String>,
@@ -69,7 +69,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut arg_index = 1;
         let mut flag_option_args = vec![vec![]];
         let mut positional_args = vec![];
-        let mut dashes = vec![];
+        let mut dashes = None;
         let mut split_last_arg_at = None;
         let mut arg_comp = ArgComp::Any;
         let mut choice_fns = HashSet::new();
@@ -77,7 +77,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         if root.delegated() {
             positional_args = args.iter().skip(1).map(|v| v.as_str()).collect();
         } else {
-            let mut is_rest_args_positional = false; // arg(like -f --foo) will be positional arg
+            let mut is_rest_args_positional = false; // option(e.g. -f --foo) will be treated as positional arg
             if let Some(arg) = args.last() {
                 if arg.starts_with('-') {
                     arg_comp = ArgComp::FlagOrOption;
@@ -89,7 +89,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 let cmd = cmds[cmd_level].1;
                 let arg = args[arg_index].as_str();
                 if arg == "--" {
-                    dashes.push(positional_args.len());
                     if is_rest_args_positional {
                         add_positional_arg(
                             &mut positional_args,
@@ -98,8 +97,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             cmd,
                         );
                     }
+                    if dashes.is_none() {
+                        dashes = Some(positional_args.len());
+                        if arg_index != args_len - 1 {
+                            is_rest_args_positional = true
+                        }
+                    }
                 } else if is_rest_args_positional
-                    || !dashes.is_empty()
                     || (cmd.no_flags_options_subcommands() && !KNOWN_OPTIONS.contains(&arg))
                 {
                     add_positional_arg(
@@ -267,11 +271,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
     pub(crate) fn to_arg_values_for_choice_fn(&self) -> Vec<ArgcValue> {
         let mut output: Vec<ArgcValue> = self.to_arg_values_base();
-        if !self.dashes.is_empty() {
-            output.push(ArgcValue::Multiple(
-                "_dashes".into(),
-                self.dashes.iter().map(|v| v.to_string()).collect(),
-            ));
+        if let Some(idx) = self.dashes {
+            output.push(ArgcValue::Single("_dashes".into(), idx.to_string()));
         }
         let last_cmd = self.cmds[self.cmds.len() - 1].1;
         if let Some(name) = &last_cmd.name {
@@ -627,13 +628,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
         while param_index < params_len && arg_index < args_len {
             let param = &cmd.positional_params[param_index];
             if param.multiple() {
-                let dash_idx = self.dashes.first().cloned().unwrap_or_default();
+                let dashes_at = self.dashes.unwrap_or_default();
                 let takes = if param_index == 0
-                    && dash_idx > 0
+                    && dashes_at > 0
                     && params_len == 2
                     && cmd.positional_params[1].multiple()
                 {
-                    dash_idx
+                    dashes_at
                 } else {
                     (args_len - arg_index).saturating_sub(params_len - param_index) + 1
                 };
