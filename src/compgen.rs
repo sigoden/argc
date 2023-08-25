@@ -510,11 +510,11 @@ impl Shell {
 
     fn need_escape_chars(&self) -> &str {
         match self {
-            Shell::Bash => r###"()<>"'` !#$&;\|"###,
-            Shell::Nushell => r###"()[]{}"'` #$;|"###,
-            Shell::Powershell => r###"()<>[]{}"'` #$&,;@|"###,
-            Shell::Xonsh => r###"()<>[]{}!"'` #&;|"###,
-            Shell::Zsh => r###"()<>[]"'` !#$&*:;?\|"###,
+            Shell::Bash => r#"()<>"'` !#$&;\|"#,
+            Shell::Nushell => r#"()[]{}"'` #$;|"#,
+            Shell::Powershell => r#"()<>[]{}"'` #$&,;@|"#,
+            Shell::Xonsh => r#"()<>[]{}!"'` #&;|"#,
+            Shell::Zsh => r#"()<>[]"'` !#$&*:;?\|"#,
             _ => "",
         }
     }
