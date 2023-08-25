@@ -12,6 +12,6 @@ argc_option_bar=bar
 argc_arg_foo=v1
 argc_arg_bar=( x1 x2 )
 argc__args=( prog --flag-foo --option-foo foo1 --option-foo foo2 --option-bar bar v1 x1 x2 )
-argc__index=0
+argc__cmd_arg_index=0
 argc__positionals=( v1 x1 x2 )
 

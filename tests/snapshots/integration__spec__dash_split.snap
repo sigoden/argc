@@ -10,7 +10,7 @@ argc_f=1
 argc_oa=a
 argc_v1=v1
 argc__args=( prog v1 -f --oa a )
-argc__index=0
+argc__cmd_arg_index=0
 argc__positionals=( v1 )
 
 ************ RUN ************
@@ -21,7 +21,7 @@ argc_f=1
 argc_v1=v1
 argc_v2=( --oa a )
 argc__args=( prog v1 -f -- --oa a )
-argc__index=0
+argc__cmd_arg_index=0
 argc__positionals=( v1 --oa a )
 
 
