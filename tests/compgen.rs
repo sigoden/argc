@@ -922,7 +922,7 @@ mod filedir {
     fn value_name_win() {
         snapshot_compgen!(
             VALUE_NAME_SCRIPT,
-            vec![
+            [
                 vec!["prog", "--oa", "src\\"],
                 vec!["prog", "--oa", "src\\p"],
                 vec!["prog", "--oa", ".\\src\\"],
@@ -979,7 +979,7 @@ choice_val() {
     fn cd_win() {
         snapshot_compgen!(
             CD_SCRIPT,
-            vec![
+            [
                 vec!["prog", "--oa", ""],
                 vec!["prog", "--ob", ""],
                 vec!["prog", "--oa="],
