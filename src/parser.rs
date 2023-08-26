@@ -350,7 +350,14 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
             |(mut arg, multi_char)| {
                 let modifier = match multi_char {
                     Some(c) => Modifier::MultiCharOptional(c),
-                    None => Modifier::MultipleOptional,
+                    None => {
+                        if let Some(name) = arg.name.strip_suffix('-') {
+                            arg.name = name.to_string();
+                            Modifier::Prefixed
+                        } else {
+                            Modifier::MultipleOptional
+                        }
+                    }
                 };
                 arg.modifer = modifier;
                 arg
@@ -367,13 +374,7 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
                 arg
             },
         ),
-        map(parse_param_name, |mut arg| {
-            if let Some(name) = arg.name.strip_suffix('-') {
-                arg.name = name.to_string();
-                arg.modifer = Modifier::Prefixed;
-            }
-            arg
-        }),
+        parse_param_name,
     ))(input)
 }
 
