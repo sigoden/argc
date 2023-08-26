@@ -291,6 +291,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             return vec![(
                 "__argc_value=path".into(),
                 String::new(),
+                false,
                 CompColor::of_value(),
             )];
         }
@@ -313,16 +314,29 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 let mut output: Vec<CompItem> = self
                     .comp_flag_options()
                     .iter()
-                    .filter_map(|(x, y, z)| {
-                        if x.len() == 2 && x != value {
-                            Some((format!("{value}{}", &x[1..]), y.to_string(), *z))
+                    .filter_map(|(v, description, nospace, comp_color)| {
+                        if v.len() == 2 && v != value {
+                            Some((
+                                format!("{value}{}", &v[1..]),
+                                description.to_string(),
+                                *nospace,
+                                *comp_color,
+                            ))
                         } else {
                             None
                         }
                     })
                     .collect();
                 if output.len() == 1 {
-                    output.insert(0, (value.to_string(), String::new(), CompColor::of_flag()));
+                    output.insert(
+                        0,
+                        (
+                            value.to_string(),
+                            String::new(),
+                            false,
+                            CompColor::of_flag(),
+                        ),
+                    );
                 }
                 output
             }
@@ -365,6 +379,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             output.push((
                 "__argc_value=path".into(),
                 String::new(),
+                false,
                 CompColor::of_value(),
             ));
         }
@@ -809,7 +824,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     CompColor::of_option()
                 };
                 for v in param.list_names() {
-                    output.push((v, describe.to_string(), kind))
+                    output.push((v, describe.to_string(), param.prefixed().is_some(), kind))
                 }
             }
         }
@@ -817,7 +832,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
     }
 }
 
-pub(crate) type CompItem = (String, String, CompColor);
+pub(crate) type CompItem = (String, String, bool, CompColor);
 
 fn find_subcommand<'a>(
     cmd: &'a Command,
@@ -1006,7 +1021,7 @@ fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
                 if !describe.is_empty() {
                     describe_help_subcmd = true
                 }
-                output.push((v, describe.to_string(), CompColor::of_command()))
+                output.push((v, describe.to_string(), false, CompColor::of_command()))
             }
         }
     }
@@ -1019,6 +1034,7 @@ fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
         output.push((
             "help".to_string(),
             describe.to_string(),
+            false,
             CompColor::of_command(),
         ))
     }
@@ -1050,17 +1066,18 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
         match choices {
             Either::Left(choices) => choices
                 .iter()
-                .map(|v| (v.to_string(), String::new(), CompColor::of_value()))
+                .map(|v| (v.to_string(), String::new(), false, CompColor::of_value()))
                 .collect(),
             Either::Right(choices_fn) => vec![(
                 format!("__argc_fn={}", choices_fn),
                 String::new(),
+                false,
                 CompColor::of_value(),
             )],
         }
     } else {
         let value = format!("__argc_value={}", value_name);
-        vec![(value, describe.into(), CompColor::of_value())]
+        vec![(value, describe.into(), false, CompColor::of_value())]
     };
     if let Some(ch) = data.multi_char() {
         output.insert(
@@ -1068,6 +1085,7 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
             (
                 format!("__argc_multi={}", ch),
                 String::new(),
+                false,
                 CompColor::of_value(),
             ),
         );
