@@ -61,7 +61,7 @@ pub fn compgen(
         last = right.to_string();
         mod_quote(&mut last, &mut prefix, &mut default_nospace);
     }
-    for (value, description, comp_color) in compgen_values {
+    for (value, description, nospace, comp_color) in compgen_values {
         if value.starts_with("__argc_") {
             if let Some(fn_name) = value.strip_prefix("__argc_fn=") {
                 argc_fn = Some(fn_name.to_string());
@@ -83,7 +83,10 @@ pub fn compgen(
                 }
             }
         } else if value.starts_with(&last) && !multi_values.contains(&value) {
-            candidates.insert(value.clone(), (description, default_nospace, comp_color));
+            candidates.insert(
+                value.clone(),
+                (description, nospace || default_nospace, comp_color),
+            );
         }
     }
     let mut argc_prefix = prefix.to_string();
