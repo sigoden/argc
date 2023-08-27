@@ -123,7 +123,13 @@ pub fn termwidth() -> Option<usize> {
 
 pub fn is_windows_path(value: &str) -> bool {
     let value = value.to_ascii_lowercase();
-    ('a'..='z').any(|v| value.starts_with(&format!("{v}:")))
+    ('a'..='z').any(|v| {
+        if value.len() == 2 {
+            value == format!("{v}:")
+        } else {
+            value.starts_with(&format!("{v}:/"))
+        }
+    })
 }
 
 pub fn get_current_dir() -> Option<String> {

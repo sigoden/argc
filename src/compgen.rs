@@ -13,6 +13,8 @@ use std::fs;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+const FILE_PROTO: &str = "file://";
+
 pub fn compgen(
     shell: Shell,
     script_path: &str,
@@ -749,12 +751,14 @@ impl ArgcPathValue {
         cd: &Option<String>,
         default_nospace: bool,
     ) -> Option<(String, String, Vec<CandidateValue>)> {
-        let (search_dir, filter, prefix) = self.resolve_path(shell, value, cd)?;
+        let is_windows_mode = shell.is_windows_mode();
+        let need_expand_tilde = shell.need_expand_tilde();
+        let is_file_proto = value.starts_with(FILE_PROTO);
+        let (search_dir, filter, prefix) =
+            self.resolve_path(value, cd, is_windows_mode, need_expand_tilde)?;
         if !search_dir.is_dir() {
             return None;
         }
-
-        let is_windows_mode = shell.is_windows_mode();
 
         let (value_prefix, path_sep) = if is_windows_mode {
             if !value.contains(&prefix) {
@@ -765,12 +769,13 @@ impl ArgcPathValue {
                         format!("{prefix}{filter}"),
                         "".into(),
                         true,
-                        CompColor::of_dir(),
+                        CompColor::of_value(),
                     )],
                 ));
             }
             let value_prefix = if prefix.is_empty() { ".\\" } else { "" };
-            (value_prefix, "\\")
+            let path_sep = if is_file_proto { "/" } else { "\\" };
+            (value_prefix, path_sep)
         } else {
             if value == "~" {
                 return Some((
@@ -868,25 +873,62 @@ impl ArgcPathValue {
 
     fn resolve_path(
         &self,
-        shell: Shell,
         value: &str,
         cd: &Option<String>,
+        is_windows_mode: bool,
+        need_expand_tilde: bool,
     ) -> Option<(PathBuf, String, String)> {
-        let is_windows_mode = shell.is_windows_mode();
-        let (value, sep, home_p, cwd_p) = if is_windows_mode {
+        let is_home = value == "~";
+        let is_file_proto = value.starts_with(FILE_PROTO);
+        let (value, sep, home_p, cwd_p) = if is_windows_mode && !is_file_proto {
             (value.replace('/', "\\"), "\\", "~\\", ".\\")
         } else {
             (value.to_string(), "/", "~/", "./")
         };
-        let (new_value, trims, prefix) = if value.starts_with(home_p) || value == "~" {
+        let (new_value, trims, prefix) = if let Some(value) = value.strip_prefix(FILE_PROTO) {
+            let value = value.replace('\\', "/");
+            if value.is_empty() {
+                if is_windows_mode {
+                    ("C:/".into(), 0, format!("{FILE_PROTO}/"))
+                } else {
+                    ("/".into(), 0, FILE_PROTO.into())
+                }
+            } else if let Some(trimed_value) = value.strip_prefix('/') {
+                if is_windows_mode {
+                    let new_value = if trimed_value.is_empty() {
+                        "C:/".into()
+                    } else if is_windows_path(trimed_value) {
+                        if trimed_value.len() == 2 {
+                            format!("{trimed_value}/")
+                        } else {
+                            trimed_value.into()
+                        }
+                    } else {
+                        trimed_value.into()
+                    };
+                    (new_value, 0, format!("{FILE_PROTO}/"))
+                } else {
+                    (value.to_string(), 0, FILE_PROTO.into())
+                }
+            } else {
+                let mut cwd = env::current_dir().ok()?;
+                if let Some(cd) = cd {
+                    cwd = cwd.join(cd).canonicalize().ok()?;
+                }
+                let cwd_s = cwd.to_string_lossy();
+                let trims = cwd_s.len() + 1;
+                let new_value = format!("{}{sep}{value}", cwd_s).replace('\\', "/");
+                (new_value, trims, FILE_PROTO.into())
+            }
+        } else if is_home || value.starts_with(home_p) {
             let home = home_dir()?;
             let home_s = home.to_string_lossy();
-            let path_s = if value == "~" {
+            let path_s = if is_home {
                 format!("{home_s}{sep}")
             } else {
                 format!("{home_s}{}", &value[1..])
             };
-            let (trims, prefix) = if shell.need_expand_tilde() {
+            let (trims, prefix) = if need_expand_tilde {
                 (0, "")
             } else {
                 (home_s.len(), "~")
@@ -923,7 +965,7 @@ impl ArgcPathValue {
         };
         let (path, filter) = if new_value.ends_with(sep) {
             (new_value, "".into())
-        } else if value == "~" {
+        } else if is_home {
             (format!("{new_value}{sep}"), "".into())
         } else {
             let (parent, filter) = new_value.rsplit_once(sep)?;
