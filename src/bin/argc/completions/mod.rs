@@ -49,9 +49,9 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
             format!(
                 r###"{NUSHELL_SCRIPT}
 if ('ARGC_SCRIPTS' in $env) {{
-    let-env ARGC_SCRIPTS = ($env.ARGC_SCRIPTS | append {cmds} | uniq)
+    $env.ARGC_SCRIPTS = ($env.ARGC_SCRIPTS | append {cmds} | uniq)
 }} else {{
-    let-env ARGC_SCRIPTS = {cmds} 
+    $env.ARGC_SCRIPTS = {cmds}
 }}
 
 let external_completer = {{|spans| 
