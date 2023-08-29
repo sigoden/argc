@@ -474,7 +474,10 @@ fn parse_zero_or_one_value_notation(input: &str) -> nom::IResult<&str, Option<&s
 
 // Parse '<FOO>'
 fn parse_value_notation(input: &str) -> nom::IResult<&str, &str> {
-    preceded(space0, delimited(char('<'), parse_notation_text, char('>')))(input)
+    preceded(
+        one_of(" "),
+        delimited(char('<'), parse_notation_text, char('>')),
+    )(input)
 }
 
 // Parse `a|b|c`

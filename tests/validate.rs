@@ -43,6 +43,16 @@ fn help_version_exist() {
 }
 
 #[test]
+fn help_notations() {
+    let script = r###"
+# @option -target <name>            <arch><sub>-<os>-<abi> see the targets command
+# @option -n <num>                  <num> volumes for input, '0' to prompt interactively
+# @option --merge <path1> <path2> <base> <result>  Perform a three-way merge by providing paths for two modified versions of a file, the common origin of both modified versions and the output file to save merge results.
+"###;
+    snapshot_multi!(script, [vec!["prog", "-h"]]);
+}
+
+#[test]
 fn arg_help_subcmd() {
     snapshot!(SCRIPT_ARGS, &["prog", "help", "cmdd"]);
 }
