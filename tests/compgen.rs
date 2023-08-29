@@ -596,6 +596,7 @@ fn option_prefixed() {
     let script = r###"
 # @option -D-*[`_choice_fn`]
 # @option -X --ox-*[`_choice_fn`]
+# @option -s-[`_choice_fn`]
 _choice_fn() {
     echo VAR1=value1 
     echo VAR2=value2
@@ -610,8 +611,11 @@ _choice_fn() {
             vec!["prog", "-DVAR1"],
             vec!["prog", "-X"],
             vec!["prog", "-XVAR1"],
+            vec!["prog", "-XVAR3", "-"],
             vec!["prog", "--ox"],
             vec!["prog", "--ox", "VAR1"],
+            vec!["prog", "-s"],
+            vec!["prog", "-sVAR3", "-"],
         ]
     );
 }
