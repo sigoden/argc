@@ -8,9 +8,9 @@ cmdb	/color:magenta
 help	/color:magenta
 
 ************ COMPGEN `prog cmdx ` ************
-__argc_value=path	/color:green
+__argc_value=path	/color:default
 
 ************ COMPGEN `prog cmdx cmd` ************
-__argc_value=path	/color:green
+__argc_value=path	/color:default
 
 

@@ -11,11 +11,11 @@ e1
 f1 (desc f1)
 
 ************ COMPGEN Elvish `prog ` ************
-a1	1	a1	desc a1	green
-b1	0	b1	desc b1	green
-c1	1	c1		green
-d1	0	d1		green
-e1	1	e1		green
+a1	1	a1	desc a1	default
+b1	0	b1	desc b1	default
+c1	1	c1		default
+d1	0	d1		default
+e1	1	e1		default
 f1	1	f1	desc f1	yellow
 
 ************ COMPGEN Fish `prog ` ************
@@ -35,11 +35,11 @@ e1
 f1 	desc f1
 
 ************ COMPGEN Powershell `prog ` ************
-a1	1	a1	desc a1	32
-b1	0	b1	desc b1	32
-c1	1	c1		32
-d1	0	d1		32
-e1	1	e1		32
+a1	1	a1	desc a1	39
+b1	0	b1	desc b1	39
+c1	1	c1		39
+d1	0	d1		39
+e1	1	e1		39
 f1	1	f1	desc f1	33
 
 ************ COMPGEN Xonsh `prog ` ************
@@ -51,11 +51,11 @@ e1	1	e1
 f1	1	f1	desc f1
 
 ************ COMPGEN Zsh `prog ` ************
-a1 	a1:desc a1	a1	32
-b1	b1:desc b1	b1	32
-c1 	c1	c1	32
-d1	d1	d1	32
-e1 	e1	e1	32
+a1 	a1:desc a1	a1	39
+b1	b1:desc b1	b1	39
+c1 	c1	c1	39
+d1	d1	d1	39
+e1 	e1	e1	39
 f1 	f1:desc f1	f1	33
 
 

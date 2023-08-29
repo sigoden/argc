@@ -3,14 +3,14 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --ob=` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog --oa --ob=` ************
-__argc_filter=	/color:green
-ok	/color:green
+__argc_filter=	/color:default
+ok	/color:default
 
 ************ COMPGEN `prog abc --ob=` ************
-__argc_filter=	/color:green
-ok	/color:green
+__argc_filter=	/color:default
+ok	/color:default
 
 

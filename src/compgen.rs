@@ -633,7 +633,7 @@ impl CompColor {
     }
 
     pub(crate) fn of_value() -> Self {
-        Self::new(ColorCode::Green, ColorStyle::Regular)
+        Self::new(ColorCode::Default, ColorStyle::Regular)
     }
 }
 

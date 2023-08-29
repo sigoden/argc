@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 cmd	/color:magenta
 help	/color:magenta
 
@@ -23,7 +23,7 @@ subb	/color:magenta
 suba	/color:magenta
 
 ************ COMPGEN `prog cmd suba ` ************
-__argc_value=path	/color:green
+__argc_value=path	/color:default
 
 ************ COMPGEN `prog cmd help ` ************
 suba	/color:magenta

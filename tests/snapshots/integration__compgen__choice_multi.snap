@@ -3,13 +3,13 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa ` ************
-abc	/color:green
-def	/color:green
-ghi	/color:green
+abc	/color:default
+def	/color:default
+ghi	/color:default
 
 ************ COMPGEN `prog --oa=` ************
-abc	/color:green
-def	/color:green
-ghi	/color:green
+abc	/color:default
+def	/color:default
+ghi	/color:default
 
 

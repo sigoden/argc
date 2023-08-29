@@ -6,10 +6,10 @@ expression: data
 abc:
 
 ************ COMPGEN Elvish `prog --oa=` ************
---oa=abc:def:xyz	1	abc:def:xyz		green
---oa=abc:def:tsr	1	abc:def:tsr		green
---oa=abc:ijk:abc	1	abc:ijk:abc		green
---oa=abc:ijk:xyz	1	abc:ijk:xyz		green
+--oa=abc:def:xyz	1	abc:def:xyz		default
+--oa=abc:def:tsr	1	abc:def:tsr		default
+--oa=abc:ijk:abc	1	abc:ijk:abc		default
+--oa=abc:ijk:xyz	1	abc:ijk:xyz		default
 
 ************ COMPGEN Fish `prog --oa=` ************
 --oa=abc:def:xyz
@@ -24,10 +24,10 @@ abc:
 --oa=abc:ijk:xyz 
 
 ************ COMPGEN Powershell `prog --oa=` ************
---oa=abc:def:xyz	1	abc:def:xyz		32
---oa=abc:def:tsr	1	abc:def:tsr		32
---oa=abc:ijk:abc	1	abc:ijk:abc		32
---oa=abc:ijk:xyz	1	abc:ijk:xyz		32
+--oa=abc:def:xyz	1	abc:def:xyz		39
+--oa=abc:def:tsr	1	abc:def:tsr		39
+--oa=abc:ijk:abc	1	abc:ijk:abc		39
+--oa=abc:ijk:xyz	1	abc:ijk:xyz		39
 
 ************ COMPGEN Xonsh `prog --oa=` ************
 --oa=abc:def:xyz	1	abc:def:xyz	
@@ -36,9 +36,9 @@ abc:
 --oa=abc:ijk:xyz	1	abc:ijk:xyz	
 
 ************ COMPGEN Zsh `prog --oa=` ************
---oa=abc\:def\:xyz 	abc\:def\:xyz	abc:def:xyz	32
---oa=abc\:def\:tsr 	abc\:def\:tsr	abc:def:tsr	32
---oa=abc\:ijk\:abc 	abc\:ijk\:abc	abc:ijk:abc	32
---oa=abc\:ijk\:xyz 	abc\:ijk\:xyz	abc:ijk:xyz	32
+--oa=abc\:def\:xyz 	abc\:def\:xyz	abc:def:xyz	39
+--oa=abc\:def\:tsr 	abc\:def\:tsr	abc:def:tsr	39
+--oa=abc\:ijk\:abc 	abc\:ijk\:abc	abc:ijk:abc	39
+--oa=abc\:ijk\:xyz 	abc\:ijk\:xyz	abc:ijk:xyz	39
 
 

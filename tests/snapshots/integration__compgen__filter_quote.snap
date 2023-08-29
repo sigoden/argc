@@ -7,8 +7,8 @@ foo
 bar
 
 ************ COMPGEN Elvish `prog v='` ************
-v='foo	0	foo		green
-v='bar	0	bar		green
+v='foo	0	foo		default
+v='bar	0	bar		default
 
 ************ COMPGEN Fish `prog v='` ************
 v='foo
@@ -19,15 +19,15 @@ v='foo
 v='bar
 
 ************ COMPGEN Powershell `prog v='` ************
-v='foo	0	foo		32
-v='bar	0	bar		32
+v='foo	0	foo		39
+v='bar	0	bar		39
 
 ************ COMPGEN Xonsh `prog v='` ************
 v='foo	0	foo	
 v='bar	0	bar	
 
 ************ COMPGEN Zsh `prog v='` ************
-v=foo	foo	foo	32
-v=bar	bar	bar	32
+v=foo	foo	foo	39
+v=bar	bar	bar	39
 
 
