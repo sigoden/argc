@@ -7,8 +7,8 @@ a:b>c
 d:e>f 
 
 ************ COMPGEN Elvish `prog --oa ` ************
-a:b>c	1	a:b>c		green
-d:e>f	1	d:e>f		green
+a:b>c	1	a:b>c		default
+d:e>f	1	d:e>f		default
 
 ************ COMPGEN Fish `prog --oa ` ************
 a:b>c
@@ -19,15 +19,15 @@ a:b>c
 d:e>f 
 
 ************ COMPGEN Powershell `prog --oa ` ************
-'a:b>c'	1	a:b>c		32
-'d:e>f'	1	d:e>f		32
+'a:b>c'	1	a:b>c		39
+'d:e>f'	1	d:e>f		39
 
 ************ COMPGEN Xonsh `prog --oa ` ************
 'a:b>c'	1	a:b>c	
 'd:e>f'	1	d:e>f	
 
 ************ COMPGEN Zsh `prog --oa ` ************
-a\:b\\>c 	a\:b>c	a:b\>c	32
-d\:e\\>f 	d\:e>f	d:e\>f	32
+a\:b\\>c 	a\:b>c	a:b\>c	39
+d\:e\\>f 	d\:e>f	d:e\>f	39
 
 

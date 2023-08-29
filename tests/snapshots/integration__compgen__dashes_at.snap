@@ -3,12 +3,12 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog abc ` ************
-abc	/color:green
-def	/color:green
-ghi	/color:green
+abc	/color:default
+def	/color:default
+ghi	/color:default
 
 ************ COMPGEN `prog abc -- ` ************
-v1	/color:green
-v2	/color:green
+v1	/color:default
+v2	/color:default
 
 

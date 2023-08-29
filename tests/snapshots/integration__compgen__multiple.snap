@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog -` ************
 --fc	/color:cyan
@@ -22,60 +22,60 @@ __argc_value=FILE	/color:green
 --od	/color:cyan,bold
 
 ************ COMPGEN `prog -- ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog -f ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog --fc ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog -o ` ************
-__argc_value=DIR	/color:green
+__argc_value=DIR	/color:default
 
 ************ COMPGEN `prog -o d1` ************
-__argc_value=DIR	/color:green
+__argc_value=DIR	/color:default
 
 ************ COMPGEN `prog -o d1 ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog -b ` ************
-__argc_value=CMD	/color:green
+__argc_value=CMD	/color:default
 
 ************ COMPGEN `prog -b d1` ************
-__argc_value=CMD	/color:green
+__argc_value=CMD	/color:default
 
 ************ COMPGEN `prog -b d1 ` ************
-__argc_value=DIR	/color:green
+__argc_value=DIR	/color:default
 
 ************ COMPGEN `prog -b d1 d2` ************
-__argc_value=DIR	/color:green
+__argc_value=DIR	/color:default
 
 ************ COMPGEN `prog -b d1 d2 ` ************
-__argc_value=DIR	/color:green
+__argc_value=DIR	/color:default
 
 ************ COMPGEN `prog -d d1` ************
-__argc_value=DIR	/color:green
+__argc_value=DIR	/color:default
 
 ************ COMPGEN `prog -d d1 ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog -d d1 d2` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog -d d1 d2 ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog v1` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog v1 ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog v1 v2` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog v1 v2 ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 

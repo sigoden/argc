@@ -3,7 +3,7 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog ` ************
-__argc_value=path	/color:green
+__argc_value=path	/color:default
 
 ************ COMPGEN `prog -` ************
 -a	/color:cyan
@@ -28,7 +28,7 @@ __argc_value=path	/color:green
 -ap	/color:cyan,bold
 
 ************ COMPGEN `prog -a ` ************
-__argc_value=path	/color:green
+__argc_value=path	/color:default
 
 ************ COMPGEN `prog -af` ************
 -afb	/color:cyan
@@ -37,19 +37,19 @@ __argc_value=path	/color:green
 -afp	/color:cyan,bold
 
 ************ COMPGEN `prog -af ` ************
-__argc_value=path	/color:green
+__argc_value=path	/color:default
 
 ************ COMPGEN `prog -ae` ************
 
 
 ************ COMPGEN `prog -ae ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog -abe` ************
 
 
 ************ COMPGEN `prog -abe ` ************
-__argc_value=FILE	/color:green
+__argc_value=FILE	/color:default
 
 ************ COMPGEN `prog -s` ************
 -sa	/color:cyan
@@ -58,6 +58,6 @@ __argc_value=FILE	/color:green
 -sa	/color:cyan
 
 ************ COMPGEN `prog -sa ` ************
-__argc_value=path	/color:green
+__argc_value=path	/color:default
 
 

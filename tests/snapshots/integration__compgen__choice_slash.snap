@@ -3,6 +3,6 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog cmd a\b ` ************
-a\b	/color:green
+a\b	/color:default
 
 
