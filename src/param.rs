@@ -246,7 +246,10 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn prefixed(&self) -> Option<String> {
-        if self.data.modifer != Modifier::Prefixed {
+        if !matches!(
+            self.data.modifer,
+            Modifier::Prefixed | Modifier::MultiPrefixed
+        ) {
             return None;
         }
 
@@ -570,6 +573,7 @@ pub(crate) enum Modifier {
     MultiCharRequired(char),
     Terminated,
     Prefixed,
+    MultiPrefixed,
 }
 
 impl Modifier {
@@ -582,7 +586,8 @@ impl Modifier {
             Self::MultiCharOptional(_) => true,
             Self::MultiCharRequired(_) => true,
             Self::Terminated => true,
-            Self::Prefixed => true,
+            Self::Prefixed => false,
+            Self::MultiPrefixed => true,
         }
     }
 
@@ -596,6 +601,7 @@ impl Modifier {
             Self::MultiCharRequired(_) => true,
             Self::Terminated => false,
             Self::Prefixed => false,
+            Self::MultiPrefixed => false,
         }
     }
 
@@ -609,6 +615,7 @@ impl Modifier {
             Self::MultiCharRequired(c) => format!("+{c}"),
             Self::Terminated => "~".to_string(),
             Self::Prefixed => "-".to_string(),
+            Self::MultiPrefixed => "-*".to_string(),
         }
     }
 }

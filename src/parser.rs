@@ -348,18 +348,17 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
         map(
             pair(parse_param_name, preceded(tag("*"), opt(parse_multi_char))),
             |(mut arg, multi_char)| {
-                let modifier = match multi_char {
-                    Some(c) => Modifier::MultiCharOptional(c),
+                match multi_char {
+                    Some(c) => arg.modifer = Modifier::MultiCharOptional(c),
                     None => {
                         if let Some(name) = arg.name.strip_suffix('-') {
                             arg.name = name.to_string();
-                            Modifier::Prefixed
+                            arg.modifer = Modifier::MultiPrefixed
                         } else {
-                            Modifier::MultipleOptional
+                            arg.modifer = Modifier::MultipleOptional
                         }
                     }
                 };
-                arg.modifer = modifier;
                 arg
             },
         ),
@@ -374,7 +373,13 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
                 arg
             },
         ),
-        parse_param_name,
+        map(parse_param_name, |mut arg| {
+            if let Some(name) = arg.name.strip_suffix('-') {
+                arg.name = name.to_string();
+                arg.modifer = Modifier::Prefixed;
+            }
+            arg
+        }),
     ))(input)
 }
 
@@ -740,6 +745,8 @@ mod tests {
         assert_parse_option_arg!("--foo+,");
         assert_parse_option_arg!("--foo*,");
         assert_parse_option_arg!("--foo!");
+        assert_parse_option_arg!("--foo-*");
+        assert_parse_option_arg!("--foo-");
         assert_parse_option_arg!("--foo=a");
         assert_parse_option_arg!("--foo=`_foo`");
         assert_parse_option_arg!("--foo[a|b]");
@@ -774,6 +781,8 @@ mod tests {
         assert_parse_option_arg!("-foo+");
         assert_parse_option_arg!("-foo*");
         assert_parse_option_arg!("-foo!");
+        assert_parse_option_arg!("-foo-*");
+        assert_parse_option_arg!("-foo-");
         assert_parse_option_arg!("-foo=a");
         assert_parse_option_arg!("-foo=`_foo`");
         assert_parse_option_arg!("-foo[a|b]");
