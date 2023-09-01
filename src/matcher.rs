@@ -1014,6 +1014,9 @@ fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
     for subcmd in cmd.subcommands.iter() {
         let describe = subcmd.describe_head();
         for v in subcmd.list_names() {
+            if v.len() < 2 {
+                continue;
+            }
             if (flag && v.starts_with('-')) || (!flag && !v.starts_with('-')) {
                 if !flag {
                     has_help_subcmd = true;

@@ -699,6 +699,17 @@ _choice_delegate() {
 }
 
 #[test]
+fn cmd_aliases() {
+    let script = r###"
+# @cmd
+# @alias a, ab
+abc() { :; }
+"###;
+
+    snapshot_compgen!(script, [vec!["prog", ""]], argc::Shell::Bash);
+}
+
+#[test]
 fn mult_char() {
     let script = r#"
 # @option --oa*,[`_choice_fn`]
