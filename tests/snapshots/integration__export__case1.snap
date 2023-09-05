@@ -7,6 +7,9 @@ expression: output
   "name": null,
   "author": "nobody <nobody@example.com>",
   "version": "1.0.0",
+  "metadatas": {
+    "combine-shorts": ""
+  },
   "options": [],
   "positionals": [],
   "aliases": [],
@@ -16,6 +19,7 @@ expression: output
       "name": "cmd",
       "author": null,
       "version": null,
+      "metadatas": {},
       "options": [
         {
           "name": "fa",
