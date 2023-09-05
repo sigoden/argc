@@ -229,6 +229,7 @@ bar() {
 #[test]
 fn cmd_combine_shorts() {
     let script = r###"
+# @meta combine-shorts
 # @cmd
 # @flag -B
 # @flag -C
