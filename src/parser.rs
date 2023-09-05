@@ -167,7 +167,7 @@ fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
 fn parse_tag_meta(input: &str) -> nom::IResult<&str, Option<EventData>> {
     preceded(
         tag("meta"),
-        map(parse_key_value, |kv| {
+        map(preceded(space1, parse_key_value), |kv| {
             kv.map(|(k, v)| EventData::Meta(k.to_string(), v.to_string()))
         }),
     )(input)
@@ -523,14 +523,16 @@ fn parse_tail(input: &str) -> nom::IResult<&str, &str> {
 }
 
 fn parse_key_value(input: &str) -> nom::IResult<&str, Option<(&str, &str)>> {
+    let input = input.trim_end();
     let key_value = alt((
         map(
-            separated_pair(parse_name, char('='), parse_default_value),
+            separated_pair(parse_name, char('='), terminated(parse_default_value, eof)),
             |(key, value)| Some((key, value)),
         ),
-        map(parse_name, |key| Some((key, ""))),
+        map(terminated(parse_name, eof), |key| Some((key, ""))),
     ));
-    preceded(space1, alt((key_value, success(None))))(input)
+
+    alt((key_value, success(None)))(input)
 }
 
 fn parse_name_list(input: &str) -> nom::IResult<&str, Vec<&str>> {
