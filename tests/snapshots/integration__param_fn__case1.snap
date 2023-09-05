@@ -19,6 +19,7 @@ argc_cc=''
 argc__args=( prog cmda --cc '' )
 argc__cmd_arg_index=1
 argc__cmd_fn=cmda
+argc__last_flag_option=cc
 argc__positionals=(  )
 _choice_fn;exit;
 
@@ -32,6 +33,7 @@ argc_cc=''
 argc__args=( prog cmda -a --oa oa --cc '' )
 argc__cmd_arg_index=1
 argc__cmd_fn=cmda
+argc__last_flag_option=cc
 argc__positionals=(  )
 _choice_fn;exit;
 
