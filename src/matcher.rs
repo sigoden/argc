@@ -65,6 +65,7 @@ pub(crate) enum MatchError {
 
 impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn new(root: &'a Command, args: &'b [String]) -> Self {
+        let combine_shorts = root.metadatas.contains_key("combine-shorts");
         let mut cmds: Vec<LevelCommand> = vec![(args[0].as_str(), root, args[0].clone(), 0)];
         let mut cmd_level = 0;
         let mut arg_index = 1;
@@ -149,6 +150,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             param,
                             &mut arg_comp,
                             &mut split_last_arg_at,
+                            combine_shorts,
                         );
                         last_flag_option = Some(param.name());
                     } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
@@ -175,7 +177,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         if arg_index == args_len - 1 && arg.len() == 2 {
                             arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
                         }
-                    } else if let Some((mut arr, maybe_subcmd)) = match_combine_shorts(cmd, arg) {
+                    } else if let Some((mut arr, maybe_subcmd)) =
+                        match_combine_shorts(cmd, arg, combine_shorts)
+                    {
                         let mut current_cmd = cmd;
                         if let Some(subcmd) = maybe_subcmd {
                             match_command(
@@ -199,6 +203,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             param,
                             &mut arg_comp,
                             &mut split_last_arg_at,
+                            combine_shorts,
                         );
                         last_flag_option = Some(param.name());
                     } else {
@@ -896,7 +901,11 @@ fn take_value_args(args: &[String], start: usize, len: usize) -> Vec<&str> {
 fn match_combine_shorts<'a, 'b>(
     cmd: &'a Command,
     arg: &'b str,
+    combine_shorts: bool,
 ) -> Option<(Vec<FlagOptionArg<'a, 'b>>, Option<&'a Command>)> {
+    if !combine_shorts {
+        return None;
+    }
     if arg.starts_with("--") || arg.len() <= 2 {
         return None;
     }
@@ -929,6 +938,7 @@ fn match_flag_option<'a, 'b>(
     param: &'a FlagOptionParam,
     arg_comp: &mut ArgComp,
     split_last_arg_at: &mut Option<usize>,
+    combine_shorts: bool,
 ) {
     if param.terminated() {
         let value_args: Vec<&str> = args[*arg_index + 1..].iter().map(|v| v.as_str()).collect();
@@ -958,7 +968,7 @@ fn match_flag_option<'a, 'b>(
                     *arg_comp = ArgComp::OptionValue(param.name().to_string(), 0);
                     *split_last_arg_at = Some(prefix.len());
                 }
-            } else if param.is_flag() && !(arg.len() > 2 && param.is_match(arg)) {
+            } else if combine_shorts && param.is_flag() && !(arg.len() > 2 && param.is_match(arg)) {
                 *arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
             }
         }

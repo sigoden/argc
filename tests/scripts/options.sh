@@ -1,3 +1,5 @@
+# @meta combine-shorts
+
 # @cmd
 # @flag   -a
 # @flag      --fa

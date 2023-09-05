@@ -42,6 +42,7 @@ fn multiple() {
 #[test]
 fn shorts() {
     const SCRIPT: &str = r###"
+# @meta combine-shorts
 # @flag   -a
 # @flag   -b --fb
 # @flag   -f --fc*
@@ -154,7 +155,6 @@ bar() {
             vec!["prog", "-"],
             vec!["prog", "-B"],
             vec!["prog", "-B", "-"],
-            vec!["prog", "-BC"],
             vec!["prog", "-G"],
         ]
     );
@@ -346,6 +346,7 @@ cmdb() { :; }
 #[test]
 fn one_combine_shorts() {
     let script = r###"
+# @meta combine-shorts
 # @flag -a
 # @flag -b
 "###;

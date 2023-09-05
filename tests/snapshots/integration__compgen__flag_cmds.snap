@@ -21,10 +21,6 @@ help	/color:magenta	Show help for a command
 -D	/color:cyan
 --fa	/color:cyan
 
-************ COMPGEN `prog -BC` ************
--BC	/color:cyan
--BCD	/color:cyan
-
 ************ COMPGEN `prog -G` ************
 -G	/color:cyan,bold
 
