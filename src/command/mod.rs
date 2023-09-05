@@ -12,6 +12,7 @@ use crate::utils::INTERNAL_MODE;
 use crate::Result;
 
 use anyhow::bail;
+use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -47,6 +48,7 @@ pub struct Command {
     pub(crate) names_checker: NamesChecker,
     pub(crate) root: Arc<RefCell<RootData>>,
     pub(crate) aliases: Vec<String>,
+    pub(crate) metadatas: IndexMap<String, (String, Position)>,
 }
 
 impl Command {
@@ -96,11 +98,17 @@ impl Command {
             .collect();
         let positional_params: Vec<serde_json::Value> =
             self.positional_params.iter().map(|v| v.to_json()).collect();
+        let mut metadatas = serde_json::Map::new();
+        for (k, (v, _)) in &self.metadatas {
+            metadatas.insert(k.to_string(), serde_json::Value::String(v.to_string()));
+        }
+        let metadatas = serde_json::Value::Object(metadatas);
         serde_json::json!({
             "describe": self.describe,
             "name": self.name,
             "author": self.author,
             "version": self.version,
+            "metadatas": metadatas,
             "options": flag_option_params,
             "positionals": positional_params,
             "aliases": self.aliases,
@@ -125,6 +133,18 @@ impl Command {
                 EventData::Author(value) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@author", position)?;
                     cmd.author = Some(value);
+                }
+                EventData::Meta(key, value) => {
+                    let cmd = Self::get_cmd(&mut root_cmd, "@meta", position)?;
+                    if let Some((_, pos)) = cmd.metadatas.get(&key) {
+                        bail!(
+                            "@meta(line {}) conflicts with '{}' at line {}",
+                            position,
+                            key,
+                            pos
+                        )
+                    }
+                    cmd.metadatas.insert(key, (value, position));
                 }
                 EventData::Cmd(value) => {
                     if root_data.borrow().scope == EventScope::CmdStart {

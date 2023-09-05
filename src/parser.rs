@@ -32,6 +32,8 @@ pub(crate) enum EventData {
     Version(String),
     /// Author info
     Author(String),
+    /// Metadata
+    Meta(String, String),
     /// Define a subcommand, e.g. `@cmd A sub command`
     Cmd(String),
     /// Define alias for a subcommand, e.g. `@alias t,tst`
@@ -135,6 +137,7 @@ fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
         tuple((many1(char('#')), space0, char('@'))),
         alt((
             parse_tag_text,
+            parse_tag_meta,
             parse_tag_param,
             parse_tag_alias,
             parse_tag_unknown,
@@ -158,6 +161,15 @@ fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
                 _ => unreachable!(),
             })
         },
+    )(input)
+}
+
+fn parse_tag_meta(input: &str) -> nom::IResult<&str, Option<EventData>> {
+    preceded(
+        tag("meta"),
+        map(preceded(space1, parse_key_value), |kv| {
+            kv.map(|(k, v)| EventData::Meta(k.to_string(), v.to_string()))
+        }),
     )(input)
 }
 
@@ -510,6 +522,19 @@ fn parse_tail(input: &str) -> nom::IResult<&str, &str> {
     ))(input)
 }
 
+fn parse_key_value(input: &str) -> nom::IResult<&str, Option<(&str, &str)>> {
+    let input = input.trim_end();
+    let key_value = alt((
+        map(
+            separated_pair(parse_name, char('='), terminated(parse_default_value, eof)),
+            |(key, value)| Some((key, value)),
+        ),
+        map(terminated(parse_name, eof), |key| Some((key, ""))),
+    ));
+
+    alt((key_value, success(None)))(input)
+}
+
 fn parse_name_list(input: &str) -> nom::IResult<&str, Vec<&str>> {
     separated_list1(char(','), delimited(space0, parse_name, space0))(input)
 }
@@ -694,6 +719,12 @@ mod tests {
             assert_eq!(
                 parse_line($comment).unwrap().1,
                 Some(Some(EventData::$kind($text.to_string())))
+            )
+        };
+        ($comment:literal, Meta, $key:expr, $value:expr) => {
+            assert_eq!(
+                parse_line($comment).unwrap().1,
+                Some(Some(EventData::Meta($key.to_string(), $value.to_string())))
             )
         };
     }
@@ -893,6 +924,8 @@ mod tests {
         assert_token!("# @describe A demo cli", Describe, "A demo cli");
         assert_token!("# @version 1.0.0", Version, "1.0.0");
         assert_token!("# @author Somebody", Author, "Somebody");
+        assert_token!("# @meta key", Meta, "key", "");
+        assert_token!("# @meta key=value", Meta, "key", "value");
         assert_token!("# @cmd A subcommand", Cmd, "A subcommand");
         assert_token!("# @alias tst", Aliases, ["tst"]);
         assert_token!("# @alias t,tst", Aliases, ["t", "tst"]);

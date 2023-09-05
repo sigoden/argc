@@ -6,6 +6,7 @@ fn case1() {
 # @describe Test argc
 # @version    1.0.0
 # @author     nobody <nobody@example.com>
+# @meta combine-shorts
 # @cmd
 # @alias a
 # @flag   -b --fa  A flag
