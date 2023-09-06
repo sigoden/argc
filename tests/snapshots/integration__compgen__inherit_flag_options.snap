@@ -1,0 +1,13 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog cmda --` ************
+--oa	/color:cyan
+--ob	/color:cyan,bold	desc 1
+
+************ COMPGEN `prog cmdb --` ************
+--oa	/color:cyan
+--ob	/color:cyan,bold	desc 2
+
+

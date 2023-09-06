@@ -48,13 +48,17 @@ pub struct Command {
     pub(crate) names_checker: NamesChecker,
     pub(crate) root: Arc<RefCell<RootData>>,
     pub(crate) aliases: Vec<String>,
-    pub(crate) metadatas: IndexMap<String, (String, Position)>,
+    pub(crate) metadata: IndexMap<String, (String, Position)>,
 }
 
 impl Command {
     pub fn new(source: &str) -> Result<Self> {
         let events = parse(source)?;
-        Command::new_from_events(&events)
+        let mut root = Command::new_from_events(&events)?;
+        if root.metadata.contains_key("inherit-flag-options") {
+            root.inherit_flag_options();
+        }
+        Ok(root)
     }
 
     pub fn eval(
@@ -98,17 +102,17 @@ impl Command {
             .collect();
         let positional_params: Vec<serde_json::Value> =
             self.positional_params.iter().map(|v| v.to_json()).collect();
-        let mut metadatas = serde_json::Map::new();
-        for (k, (v, _)) in &self.metadatas {
-            metadatas.insert(k.to_string(), serde_json::Value::String(v.to_string()));
+        let mut metadata = serde_json::Map::new();
+        for (k, (v, _)) in &self.metadata {
+            metadata.insert(k.to_string(), serde_json::Value::String(v.to_string()));
         }
-        let metadatas = serde_json::Value::Object(metadatas);
+        let metadata = serde_json::Value::Object(metadata);
         serde_json::json!({
             "describe": self.describe,
             "name": self.name,
             "author": self.author,
             "version": self.version,
-            "metadatas": metadatas,
+            "metadata": metadata,
             "options": flag_option_params,
             "positionals": positional_params,
             "aliases": self.aliases,
@@ -136,7 +140,7 @@ impl Command {
                 }
                 EventData::Meta(key, value) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@meta", position)?;
-                    if let Some((_, pos)) = cmd.metadatas.get(&key) {
+                    if let Some((_, pos)) = cmd.metadata.get(&key) {
                         bail!(
                             "@meta(line {}) conflicts with '{}' at line {}",
                             position,
@@ -144,7 +148,7 @@ impl Command {
                             pos
                         )
                     }
-                    cmd.metadatas.insert(key, (value, position));
+                    cmd.metadata.insert(key, (value, position));
                 }
                 EventData::Cmd(value) => {
                     if root_data.borrow().scope == EventScope::CmdStart {
@@ -535,6 +539,25 @@ impl Command {
         self.get_cmd_fn(cmd_paths)
             .map(|v| v.ends_with("main"))
             .unwrap_or_default()
+    }
+
+    fn inherit_flag_options(&mut self) {
+        for subcmd in self.subcommands.iter_mut() {
+            let mut inherited_flag_options = vec![];
+            for flag_option in &self.flag_option_params {
+                if subcmd.find_flag_option(flag_option.name()).is_none() {
+                    let mut flag_option = flag_option.clone();
+                    flag_option.inherit = true;
+                    inherited_flag_options.push(flag_option);
+                }
+            }
+            subcmd
+                .flag_option_params
+                .splice(..0, inherited_flag_options);
+        }
+        for subcmd in self.subcommands.iter_mut() {
+            subcmd.inherit_flag_options();
+        }
     }
 
     fn add_positional_param(&mut self, param: PositionalParam, pos: Position) -> Result<()> {

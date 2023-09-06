@@ -65,7 +65,7 @@ pub(crate) enum MatchError {
 
 impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn new(root: &'a Command, args: &'b [String]) -> Self {
-        let combine_shorts = root.metadatas.contains_key("combine-shorts");
+        let combine_shorts = root.metadata.contains_key("combine-shorts");
         let mut cmds: Vec<LevelCommand> = vec![(args[0].as_str(), root, args[0].clone(), 0)];
         let mut cmd_level = 0;
         let mut arg_index = 1;

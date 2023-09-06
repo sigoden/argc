@@ -15,6 +15,7 @@ pub(crate) struct FlagOptionParam {
     pub(crate) data: ParamData,
     pub(crate) value_names: Vec<String>,
     pub(crate) arg_value_names: Vec<String>,
+    pub(crate) inherit: bool,
 }
 
 impl FlagOptionParam {
@@ -41,6 +42,7 @@ impl FlagOptionParam {
             data: param,
             value_names,
             arg_value_names,
+            inherit: false,
         }
     }
 
