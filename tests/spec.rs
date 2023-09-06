@@ -249,3 +249,30 @@ fn name_with_special_chars() {
 "###;
     snapshot_multi!(script, [vec!["prog", "--fa:foo", "--fa.bar", "--fa_baz"]]);
 }
+
+#[test]
+fn inherit_flag_options() {
+    let script = r###"
+# @meta inherit-flag-options
+# @flag --oa
+# @option --ob[a|b]  desc 1
+
+# @cmd
+cmda() {
+    :;
+}
+
+# @cmd
+# @option --ob[x|y]  desc 2
+cmdb() {
+    :;
+}
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "cmda", "--ob", "a"],
+            vec!["prog", "cmdb", "--ob", "x"]
+        ]
+    );
+}

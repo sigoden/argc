@@ -450,6 +450,32 @@ _choice_fn() {
 }
 
 #[test]
+fn inherit_flag_options() {
+    let script = r###"
+# @meta inherit-flag-options
+# @flag --oa
+# @option --ob[a|b]  desc 1
+
+# @cmd
+cmda() {
+    :;
+}
+
+# @cmd
+# @option --ob[x|y]  desc 2
+cmdb() {
+    :;
+}
+"###;
+    snapshot_compgen!(
+        script,
+        [vec!["prog", "cmda", "--"], vec!["prog", "cmdb", "--"]]
+    );
+}
+
+// ------------ compgen shell -----------
+
+#[test]
 fn no_space() {
     let script = r#"
 # @option --oa*[`_choice_fn`]
