@@ -98,7 +98,6 @@ impl Command {
         let flag_option_params: Vec<serde_json::Value> = self
             .flag_option_params
             .iter()
-            .filter(|v| !v.inherit)
             .map(|v| v.to_json())
             .collect();
         let positional_params: Vec<serde_json::Value> =
