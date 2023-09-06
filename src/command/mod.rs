@@ -544,13 +544,17 @@ impl Command {
 
     fn inherit_flag_options(&mut self) {
         for subcmd in self.subcommands.iter_mut() {
+            let mut inherited_flag_options = vec![];
             for flag_option in &self.flag_option_params {
                 if subcmd.find_flag_option(flag_option.name()).is_none() {
                     let mut flag_option = flag_option.clone();
                     flag_option.inherit = true;
-                    subcmd.flag_option_params.push(flag_option)
+                    inherited_flag_options.push(flag_option);
                 }
             }
+            subcmd
+                .flag_option_params
+                .splice(..0, inherited_flag_options);
         }
         for subcmd in self.subcommands.iter_mut() {
             subcmd.inherit_flag_options();

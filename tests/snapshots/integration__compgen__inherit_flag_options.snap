@@ -7,7 +7,7 @@ expression: data
 --ob	/color:cyan,bold	desc 1
 
 ************ COMPGEN `prog cmdb --` ************
---ob	/color:cyan,bold	desc 2
 --oa	/color:cyan
+--ob	/color:cyan,bold	desc 2
 
 
