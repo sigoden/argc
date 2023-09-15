@@ -9,7 +9,7 @@ __argc_value=FILE	/color:default
 --fc	/color:cyan
 -f	/color:cyan
 --oa	/color:cyan,bold
--o	/color:cyan,bold
+-a	/color:cyan,bold
 --ob	/color:cyan,bold
 -b	/color:cyan,bold
 --od	/color:cyan,bold
@@ -30,13 +30,13 @@ __argc_value=FILE	/color:default
 ************ COMPGEN `prog --fc ` ************
 __argc_value=FILE	/color:default
 
-************ COMPGEN `prog -o ` ************
+************ COMPGEN `prog -a ` ************
 __argc_value=DIR	/color:default
 
-************ COMPGEN `prog -o d1` ************
+************ COMPGEN `prog -a d1` ************
 __argc_value=DIR	/color:default
 
-************ COMPGEN `prog -o d1 ` ************
+************ COMPGEN `prog -a d1 ` ************
 __argc_value=FILE	/color:default
 
 ************ COMPGEN `prog -b ` ************

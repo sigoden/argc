@@ -29,7 +29,9 @@ impl FlagOptionParam {
     ) -> Self {
         let name = param.name.clone();
         let value_names: Vec<String> = value_names.iter().map(|v| v.to_string()).collect();
-        let arg_value_names = if value_names.is_empty() {
+        let arg_value_names = if flag {
+            vec![]
+        } else if value_names.is_empty() {
             vec![to_cobol_case(&name)]
         } else {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
@@ -122,7 +124,7 @@ impl FlagOptionParam {
         format!("{}{}", self.render_hyphens(), self.name())
     }
 
-    pub(crate) fn render_single_value(&self) -> String {
+    pub(crate) fn render_first_value(&self) -> String {
         format!("<{}>", self.arg_value_names[0])
     }
 
@@ -169,7 +171,7 @@ impl FlagOptionParam {
             let name: &String = &self.arg_value_names[0];
             let value = match (self.required(), self.multiple()) {
                 (true, true) => format!("<{name}>..."),
-                (false, true) => format!("[<{name}>...]"),
+                (false, true) => format!("[{name}]..."),
                 (_, false) => format!("<{name}>"),
             };
             output.push_str(&value);
@@ -179,7 +181,7 @@ impl FlagOptionParam {
                 .iter()
                 .enumerate()
                 .map(|(i, v)| {
-                    if self.multiple() && i == self.arg_value_names.len() - 1 {
+                    if self.ellipsis() && i == self.arg_value_names.len() - 1 {
                         format!("<{v}>...")
                     } else {
                         format!("<{v}>")
@@ -232,7 +234,7 @@ impl FlagOptionParam {
                         .collect()
                 }
                 Some(ArgcValue::Multiple(name, values))
-            } else if self.values_size() > 1 {
+            } else if self.arg_value_names.len() > 1 {
                 Some(ArgcValue::Multiple(
                     name,
                     values[0].iter().map(|v| v.to_string()).collect(),
@@ -271,14 +273,12 @@ impl FlagOptionParam {
         output
     }
 
-    pub(crate) fn values_size(&self) -> usize {
-        if self.is_flag() {
-            0
-        } else if self.multiple() && self.arg_value_names.len() > 1 {
-            9999
-        } else {
-            self.arg_value_names.len()
-        }
+    pub(crate) fn multi_occurs(&self) -> bool {
+        self.multiple() && (self.flag || self.arg_value_names.len() == 1)
+    }
+
+    pub(crate) fn ellipsis(&self) -> bool {
+        self.terminated() || (self.multiple() && self.arg_value_names.len() > 1)
     }
 
     pub(crate) fn describe_head(&self) -> &str {
