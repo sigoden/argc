@@ -18,7 +18,7 @@ use indexmap::{IndexMap, IndexSet};
 const KNOWN_OPTIONS: [&str; 6] = ["-h", "-help", "--help", "-V", "-version", "--version"];
 
 pub(crate) struct Matcher<'a, 'b> {
-    cmds: Vec<(&'b str, &'a Command, String, usize)>,
+    cmds: Vec<LevelCommand<'a, 'b>>,
     args: &'b [String],
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
     positional_args: Vec<&'b str>,
@@ -31,8 +31,8 @@ pub(crate) struct Matcher<'a, 'b> {
     last_flag_option: Option<&'a str>,
 }
 
-type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>);
-type LevelCommand<'a, 'b> = (&'b str, &'a Command, String, usize);
+type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>); // key, values, param_name
+type LevelCommand<'a, 'b> = (&'b str, &'a Command, usize); // name, command, arg_index
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum ArgComp {
@@ -66,7 +66,7 @@ pub(crate) enum MatchError {
 impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn new(root: &'a Command, args: &'b [String]) -> Self {
         let combine_shorts = root.metadata.contains_key("combine-shorts");
-        let mut cmds: Vec<LevelCommand> = vec![(args[0].as_str(), root, args[0].clone(), 0)];
+        let mut cmds: Vec<LevelCommand> = vec![(args[0].as_str(), root, 0)];
         let mut cmd_level = 0;
         let mut arg_index = 1;
         let mut flag_option_args = vec![vec![]];
@@ -415,7 +415,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let cmds_len = self.cmds.len();
         let level = cmds_len - 1;
         let last_cmd = self.cmds[level].1;
-        let cmd_arg_index = self.cmds[level].3;
+        let cmd_arg_index = self.cmds[level].2;
         for level in 0..cmds_len {
             let args = &self.flag_option_args[level];
             let cmd = self.cmds[level].1;
@@ -583,19 +583,20 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         return Some(MatchError::NotMultipleArgument(level, param.render_name()));
                     }
                     for values in values_list.iter() {
-                        if values.len() != param.values_size() {
-                            if param.is_flag() {
-                                return Some(MatchError::NoMoreValue(
-                                    level,
-                                    param.render_name(),
-                                    values[0].to_string(),
-                                ));
-                            } else if !param.multiple() {
-                                return Some(MatchError::MismatchValues(
-                                    level,
-                                    param.render_name_values(),
-                                ));
-                            }
+                        if param.is_flag() && !values.is_empty() {
+                            return Some(MatchError::NoMoreValue(
+                                level,
+                                param.render_name(),
+                                values[0].to_string(),
+                            ));
+                        } else if (param.ellipsis()
+                            && values.len() + 1 < param.arg_value_names.len())
+                            || (!param.ellipsis() && values.len() != param.arg_value_names.len())
+                        {
+                            return Some(MatchError::MismatchValues(
+                                level,
+                                param.render_name_values(),
+                            ));
                         }
                         if let Some(choices) =
                             get_param_choice(&param.data.choice, &choices_fn_values)
@@ -605,7 +606,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                     return Some(MatchError::InvalidValue(
                                         level,
                                         value.to_string(),
-                                        param.render_single_value(),
+                                        param.render_first_value(),
                                         choices.clone(),
                                     ));
                                 }
@@ -813,12 +814,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
     fn get_cmd_and_paths(&self, level: usize) -> (&Command, Vec<&str>) {
         let cmd = self.cmds[level].1;
-        let cmd_paths: Vec<&str> = self
-            .cmds
-            .iter()
-            .take(level + 1)
-            .map(|v| v.2.as_str())
-            .collect();
+        let cmd_paths: Vec<&str> = self.cmds.iter().take(level + 1).map(|v| v.0).collect();
         (cmd, cmd_paths)
     }
 
@@ -836,7 +832,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             if !last.is_empty() && param.is_match(last) {
                 exist = false;
             }
-            if !exist || param.multiple() {
+            if !exist || param.multi_occurs() {
                 let describe = param.describe_head();
                 let kind = if param.is_flag() {
                     CompColor::of_flag()
@@ -950,7 +946,10 @@ fn match_flag_option<'a, 'b>(
         }
         flag_option_args.push((arg, value_args, Some(param.name())));
     } else {
-        let values_len = param.values_size();
+        let mut values_len = param.arg_value_names.len();
+        if param.ellipsis() {
+            values_len = usize::MAX / 2;
+        }
         let args_len = args.len();
         let value_args = take_value_args(args, *arg_index + 1, values_len);
         let arg = &args[*arg_index];
@@ -1004,7 +1003,7 @@ fn match_command<'a, 'b>(
     arg_index: usize,
 ) {
     *cmd_level += 1;
-    cmds.push((arg, subcmd, arg.to_string(), arg_index));
+    cmds.push((arg, subcmd, arg_index));
     flag_option_args.push(vec![]);
 }
 

@@ -189,7 +189,7 @@ fn option_to_variable() {
 #[test]
 fn option_terminated() {
     let script = r###"
-# @option --oa~ <SHELL> <SCRIPT> <ARGS...> 
+# @option --oa~ <SHELL> <SCRIPT> <ARGS>
 # @option --ob
 "###;
     snapshot!(script, &["prog", "--oa", "bash", "Argcfile.sh", "--ob"]);

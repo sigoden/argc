@@ -17,14 +17,14 @@ OPTIONS:
        -sb...
   -e <E>
       --oa <OA>
-      --ob [<OB>...]
+      --ob [OB]...
       --oc <DIR>
   -o, --od <FILE> <FILE>
-      --oe [<OE>...]
+      --oe [OE]...
       --ca <CA>           [possible values: x, y, z]
       --cc <CC>
       --cd <CD>
-      --ce [<CE>...]
+      --ce [CE]...
   -s,  -soa <SOA>
   -h,  -help              Print help
 
