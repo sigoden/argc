@@ -77,12 +77,12 @@ impl Command {
             } else {
                 &args[3..]
             };
-            let matcher = Matcher::new(self, new_args);
+            let matcher = Matcher::new(self, new_args, false);
             let mut arg_values = matcher.to_arg_values_for_choice_fn();
             arg_values.push(ArgcValue::ParamFn(args[2].clone()));
             return Ok(arg_values);
         }
-        let mut matcher = Matcher::new(self, args);
+        let mut matcher = Matcher::new(self, args, false);
         if let Some(script_path) = script_path {
             matcher.set_script_path(script_path)
         }

@@ -129,6 +129,7 @@ cmd::subb() { :; }
 #[test]
 fn flag_cmds() {
     const SCRIPT: &str = r###"
+# @meta combine-shorts
 # @option -G
 
 # @cmd Run --foo
