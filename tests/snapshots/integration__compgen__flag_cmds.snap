@@ -13,6 +13,7 @@ help	/color:magenta	Show help for a command
 -B	/color:magenta	Run bar
 
 ************ COMPGEN `prog -B` ************
+-B	/color:magenta	Run bar
 -BC	/color:cyan
 -BD	/color:cyan
 

@@ -8,6 +8,7 @@ cmd	/color:magenta
 help	/color:magenta
 
 ************ COMPGEN `prog cmd` ************
+__argc_value=FILE	/color:default
 cmd	/color:magenta
 
 ************ COMPGEN `prog cmd ` ************

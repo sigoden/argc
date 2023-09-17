@@ -48,7 +48,7 @@ pub fn compgen(
             })
             .collect()
     };
-    let matcher = Matcher::new(&cmd, &new_args);
+    let matcher = Matcher::new(&cmd, &new_args, true);
     let compgen_values = matcher.compgen(shell);
     let mut default_nospace = unbalance.is_some();
     let mut prefix = unbalance.map(|v| v.to_string()).unwrap_or_default();

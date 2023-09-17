@@ -16,6 +16,7 @@ cmdb	/color:magenta
 cmdbc	/color:magenta
 
 ************ COMPGEN `prog cmda` ************
+__argc_value=FILE	/color:default
 cmda	/color:magenta
 
 ************ COMPGEN `prog cmda ` ************
