@@ -7,7 +7,7 @@
 # @option    --od*                  multiple 
 # @option    --oe+                  required + multiple
 # @option    --ona <PATH>           value notation
-# @option    --onb <FILE> <FILE>    multiple value notations
+# @option    --onb <NAME> <FILE>    multiple value notations
 # @option    --oda=a                default
 # @option    --odb=`_default_fn`    default from fn
 # @option    --oca[a|b]             choice
@@ -17,6 +17,7 @@
 # @option    --ofa[`_choice_fn`]    choice from fn
 # @option    --ofb[?`_choice_fn`]   choice from fn + no validation
 # @option    --ofc*[`_choice_fn`]   multiple + choice from fn
+# @option    --ox~                  capture all remaing args
 options() {
     :;
 }
