@@ -199,7 +199,7 @@ COMMANDS:
   test  Run tests [aliases: t, tst]
 ```
 
-### Meta
+### @describe @version @author
 
 - @describe: Sets the cli’s description. 
 - @version: Sets cli's version.
@@ -226,6 +226,21 @@ USAGE: test.sh <COMMAND>
 COMMANDS:
   test  Run test
 ```
+
+### @meta
+
+```
+@meta <key> [value]
+```
+
+Add metadata
+
+#### Builtin Metadata
+
+| syntax               | scope | description                                               |
+| -------------------- | ----- | --------------------------------------------------------- |
+| combine-shorts       | root  | Short flags can be combined, e.g. `-xf => -x -f `         |
+| inherit-flag-options | root  | All subcommands inherit flag/options from parent command. |
 
 ### Value Notation
 

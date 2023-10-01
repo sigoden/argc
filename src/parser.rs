@@ -524,13 +524,9 @@ fn parse_tail(input: &str) -> nom::IResult<&str, &str> {
 
 fn parse_key_value(input: &str) -> nom::IResult<&str, Option<(&str, &str)>> {
     let input = input.trim_end();
-    let key_value = alt((
-        map(
-            separated_pair(parse_name, char('='), terminated(parse_default_value, eof)),
-            |(key, value)| Some((key, value)),
-        ),
-        map(terminated(parse_name, eof), |key| Some((key, ""))),
-    ));
+    let key_value = map(pair(parse_name, parse_tail), |(key, value)| {
+        Some((key, value))
+    });
 
     alt((key_value, success(None)))(input)
 }
@@ -925,7 +921,7 @@ mod tests {
         assert_token!("# @version 1.0.0", Version, "1.0.0");
         assert_token!("# @author Somebody", Author, "Somebody");
         assert_token!("# @meta key", Meta, "key", "");
-        assert_token!("# @meta key=value", Meta, "key", "value");
+        assert_token!("# @meta key value", Meta, "key", "value");
         assert_token!("# @cmd A subcommand", Cmd, "A subcommand");
         assert_token!("# @alias tst", Aliases, ["tst"]);
         assert_token!("# @alias t,tst", Aliases, ["t", "tst"]);
