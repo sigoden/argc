@@ -196,6 +196,18 @@ fn option_terminated() {
 }
 
 #[test]
+fn arg_terminated() {
+    let script = r###"
+# @cmd
+# @arg args~
+cmda() {
+    :;
+}
+"###;
+    snapshot!(script, &["prog", "cmda", "-h"]);
+}
+
+#[test]
 fn option_prefixed() {
     let script = r###"
 # @option -o-

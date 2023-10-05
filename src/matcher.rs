@@ -182,6 +182,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             subcmd,
                             arg,
                             arg_index,
+                            &mut is_rest_args_positional,
                         );
                     } else if let Some((mut arr, maybe_subcmd)) =
                         match_combine_shorts(cmd, arg, combine_shorts)
@@ -195,6 +196,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 subcmd,
                                 arg,
                                 arg_index,
+                                &mut is_rest_args_positional,
                             );
                             current_cmd = subcmd;
                         }
@@ -239,6 +241,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         subcmd,
                         arg,
                         arg_index,
+                        &mut is_rest_args_positional,
                     );
                 } else {
                     add_positional_arg(
@@ -1019,7 +1022,11 @@ fn match_command<'a, 'b>(
     subcmd: &'a Command,
     arg: &'b str,
     arg_index: usize,
+    is_rest_args_positional: &mut bool,
 ) {
+    if subcmd.delegated() {
+        *is_rest_args_positional = true;
+    }
     *cmd_level += 1;
     cmds.push((arg, subcmd, arg_index));
     flag_option_args.push(vec![]);

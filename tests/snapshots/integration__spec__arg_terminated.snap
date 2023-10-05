@@ -1,0 +1,15 @@
+---
+source: tests/spec.rs
+expression: data
+---
+RUN
+prog cmda -h
+
+OUTPUT
+argc_args=( -h )
+argc__args=( prog cmda -h )
+argc__cmd_arg_index=1
+argc__fn=cmda
+argc__positionals=( -h )
+cmda -h
+
