@@ -12,10 +12,10 @@ USAGE: prog [OPTIONS]
 OPTIONS:
   -f, --fc...
   -a, --oa [DIR]...
-  -b, --ob <CMD> <DIR…>
-  -c, --oc <DIR…>
+  -b, --ob <CMD> <DIR+>
+  -c, --oc <DIR+>
   -d, --od <DIR> <FILE>
-  -e, --oe [DIR…]...
+  -e, --oe [DIR+]...
   -h, --help
 
 EOF

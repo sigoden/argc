@@ -193,12 +193,12 @@ impl FlagOptionParam {
             .iter()
             .enumerate()
             .map(|(i, v)| {
-                let ellipsis = self.unlimited_args() && i == self.arg_value_names.len() - 1;
-                let ellipsis = if ellipsis { "…" } else { "" };
+                let unlimited = self.unlimited_args() && i == self.arg_value_names.len() - 1;
+                let marker = if unlimited { "+" } else { "" };
                 if self.multi_occurs() {
-                    format!("{v}{ellipsis}")
+                    format!("{v}{marker}")
                 } else {
-                    format!("<{v}{ellipsis}>")
+                    format!("<{v}{marker}>")
                 }
             })
             .collect::<Vec<String>>()
