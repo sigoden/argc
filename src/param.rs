@@ -15,6 +15,7 @@ pub(crate) struct FlagOptionParam {
     pub(crate) data: ParamData,
     pub(crate) value_names: Vec<String>,
     pub(crate) arg_value_names: Vec<String>,
+    pub(crate) ellipsis: bool,
     pub(crate) inherit: bool,
 }
 
@@ -26,6 +27,7 @@ impl FlagOptionParam {
         flag: bool,
         single_hyphen: bool,
         value_names: &[&str],
+        ellipsis: bool,
     ) -> Self {
         let name = param.name.clone();
         let value_names: Vec<String> = value_names.iter().map(|v| v.to_string()).collect();
@@ -44,6 +46,7 @@ impl FlagOptionParam {
             data: param,
             value_names,
             arg_value_names,
+            ellipsis,
             inherit: false,
         }
     }
@@ -69,7 +72,19 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn multiple(&self) -> bool {
-        self.data.multiple()
+        self.multi_occurs() || self.multi_values()
+    }
+
+    pub(crate) fn multi_occurs(&self) -> bool {
+        self.data.multi_occurs()
+    }
+
+    pub(crate) fn multi_values(&self) -> bool {
+        self.unlimited_args() || self.arg_value_names.len() > 1
+    }
+
+    pub(crate) fn unlimited_args(&self) -> bool {
+        self.ellipsis || self.terminated()
     }
 
     pub(crate) fn required(&self) -> bool {
@@ -106,6 +121,9 @@ impl FlagOptionParam {
         for value_name in &self.value_names {
             output.push(format!("<{}>", value_name));
         }
+        if self.ellipsis {
+            output.push("...".into());
+        }
         if !self.describe.is_empty() {
             output.push(self.describe.clone());
         }
@@ -130,7 +148,10 @@ impl FlagOptionParam {
 
     pub(crate) fn render_name_values(&self) -> String {
         let mut output = self.render_name();
-        output.push_str(&self.render_arg_values());
+        if !self.is_flag() {
+            output.push(' ');
+            output.push_str(&self.render_arg_values());
+        }
         output
     }
 
@@ -153,10 +174,11 @@ impl FlagOptionParam {
         }
 
         if self.is_flag() {
-            if self.multiple() {
+            if self.multi_occurs() {
                 output.push_str("...")
             }
         } else {
+            output.push(' ');
             output.push_str(&self.render_arg_values());
         }
         output
@@ -166,31 +188,27 @@ impl FlagOptionParam {
         if self.is_flag() {
             return String::new();
         }
-        let mut output = " ".to_string();
-        if self.arg_value_names.len() == 1 {
-            let name: &String = &self.arg_value_names[0];
-            let value = match (self.required(), self.multiple()) {
-                (true, true) => format!("<{name}>..."),
-                (false, true) => format!("[{name}]..."),
-                (_, false) => format!("<{name}>"),
-            };
-            output.push_str(&value);
+        let output = self
+            .arg_value_names
+            .iter()
+            .enumerate()
+            .map(|(i, v)| {
+                let ellipsis = self.unlimited_args() && i == self.arg_value_names.len() - 1;
+                let ellipsis = if ellipsis { "…" } else { "" };
+                if self.multi_occurs() {
+                    format!("{v}{ellipsis}")
+                } else {
+                    format!("<{v}{ellipsis}>")
+                }
+            })
+            .collect::<Vec<String>>()
+            .join(" ");
+
+        if self.multi_occurs() {
+            format!("[{output}]...")
         } else {
-            let values = self
-                .arg_value_names
-                .iter()
-                .enumerate()
-                .map(|(i, v)| {
-                    if self.ellipsis() && i == self.arg_value_names.len() - 1 {
-                        format!("<{v}>...")
-                    } else {
-                        format!("<{v}>")
-                    }
-                })
-                .collect::<Vec<String>>();
-            output.push_str(&values.join(" "));
+            output
         }
-        output
     }
 
     pub(crate) fn render_describe(&self) -> String {
@@ -273,14 +291,6 @@ impl FlagOptionParam {
         output
     }
 
-    pub(crate) fn multi_occurs(&self) -> bool {
-        self.multiple() && (self.flag || self.arg_value_names.len() == 1)
-    }
-
-    pub(crate) fn ellipsis(&self) -> bool {
-        self.terminated() || (self.multiple() && self.arg_value_names.len() > 1)
-    }
-
     pub(crate) fn describe_head(&self) -> &str {
         match self.describe.split_once('\n') {
             Some((v, _)) => v,
@@ -296,6 +306,7 @@ impl FlagOptionParam {
             "flag": self.flag,
             "option_names": option_names,
             "value_names": self.value_names,
+            "ellipsis": self.ellipsis,
             "modifier": self.data.modifer,
             "choices": self.data.choice_values(),
             "default": self.data.defualt_value(),
@@ -334,7 +345,7 @@ impl PositionalParam {
     }
 
     pub(crate) fn multiple(&self) -> bool {
-        self.data.multiple()
+        self.data.multi_occurs() || self.terminated()
     }
 
     pub(crate) fn required(&self) -> bool {
@@ -451,8 +462,8 @@ impl ParamData {
         }
     }
 
-    pub(crate) fn multiple(&self) -> bool {
-        self.modifer.multiple()
+    pub(crate) fn multi_occurs(&self) -> bool {
+        self.modifer.multi_occurs()
     }
 
     pub(crate) fn required(&self) -> bool {
@@ -579,7 +590,7 @@ pub(crate) enum Modifier {
 }
 
 impl Modifier {
-    pub(crate) fn multiple(&self) -> bool {
+    pub(crate) fn multi_occurs(&self) -> bool {
         match self {
             Self::Optional => false,
             Self::Required => false,
@@ -587,7 +598,7 @@ impl Modifier {
             Self::MultipleRequired => true,
             Self::MultiCharOptional(_) => true,
             Self::MultiCharRequired(_) => true,
-            Self::Terminated => true,
+            Self::Terminated => false,
             Self::Prefixed => false,
             Self::MultiPrefixed => true,
         }

@@ -1,0 +1,87 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog -h
+
+OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog [OPTIONS]
+
+OPTIONS:
+  -f, --fc...
+  -a, --oa [DIR]...
+  -b, --ob <CMD> <DIR…>
+  -c, --oc <DIR…>
+  -d, --od <DIR> <FILE>
+  -e, --oe [DIR…]...
+  -h, --help
+
+EOF
+exit 0
+
+************ RUN ************
+prog -f -f
+
+OUTPUT
+argc_fc=2
+argc__args=( prog -f -f )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog -a dir1 dir2
+
+OUTPUT
+argc_oa=( dir1 )
+argc__args=( prog -a dir1 dir2 )
+argc__cmd_arg_index=0
+argc__positionals=( dir2 )
+
+************ RUN ************
+prog -a dir1 -a dir2
+
+OUTPUT
+argc_oa=( dir1 dir2 )
+argc__args=( prog -a dir1 -a dir2 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog -b vim dir1 dir2
+
+OUTPUT
+argc_ob=( vim dir1 dir2 )
+argc__args=( prog -b vim dir1 dir2 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog -c dir1 dir2
+
+OUTPUT
+argc_oc=( dir1 dir2 )
+argc__args=( prog -c dir1 dir2 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog -d dir1 file1 file2
+
+OUTPUT
+argc_od=( dir1 file1 )
+argc__args=( prog -d dir1 file1 file2 )
+argc__cmd_arg_index=0
+argc__positionals=( file2 )
+
+************ RUN ************
+prog -e dir1 -e dir2 dir3
+
+OUTPUT
+argc_oe=( dir1 dir2 dir3 )
+argc__args=( prog -e dir1 -e dir2 dir3 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+

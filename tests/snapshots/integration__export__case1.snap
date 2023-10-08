@@ -30,6 +30,7 @@ expression: output
             "-b"
           ],
           "value_names": [],
+          "ellipsis": false,
           "modifier": {
             "type": "Optional"
           },
@@ -45,6 +46,7 @@ expression: output
             "-o"
           ],
           "value_names": [],
+          "ellipsis": false,
           "modifier": {
             "type": "Optional"
           },
@@ -59,6 +61,7 @@ expression: output
             "--ob"
           ],
           "value_names": [],
+          "ellipsis": false,
           "modifier": {
             "type": "MultipleOptional"
           },
@@ -73,9 +76,40 @@ expression: output
             "--oc"
           ],
           "value_names": [],
+          "ellipsis": false,
           "modifier": {
             "type": "MultiCharOptional",
             "value": ","
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "od",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--od"
+          ],
+          "value_names": [],
+          "ellipsis": true,
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oe",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oe"
+          ],
+          "value_names": [],
+          "ellipsis": false,
+          "modifier": {
+            "type": "Terminated"
           },
           "choices": null,
           "default": null

@@ -13,6 +13,8 @@ fn case1() {
 # @option -o --oa  A option
 # @option    --ob*
 # @option    --oc*,
+# @option    --od ...
+# @option    --oe~
 # @arg var
 cmd() { :; }
 "###;

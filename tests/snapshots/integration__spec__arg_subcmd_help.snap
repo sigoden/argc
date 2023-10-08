@@ -237,4 +237,15 @@ ARGS:
 EOF
 exit 0
 
+************ RUN ************
+prog cmds -h
+
+OUTPUT
+argc_vals=( -h )
+argc__args=( prog cmds -h )
+argc__cmd_arg_index=1
+argc__fn=cmds
+argc__positionals=( -h )
+cmds -h
+
 

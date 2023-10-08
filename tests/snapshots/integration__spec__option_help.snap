@@ -36,15 +36,15 @@ prog cmdb -h
 
 OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog cmdb --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
+USAGE: prog cmdb --oa <OA> --ob [OB]... --oc [OC]... --oca <OCA> --ocb [OCB]... --occ [OCC]...
 
 OPTIONS:
   -a, --oa <OA>
-      --ob <OB>...
-      --oc <OC>...
+      --ob [OB]...
+      --oc [OC]...
       --oca <OCA>
-      --ocb <OCB>...
-      --occ <OCC>...
+      --ocb [OCB]...
+      --occ [OCC]...
   -h, --help
 
 EOF
@@ -62,6 +62,38 @@ OPTIONS:
       --of <OF>
       --cb <CB>  [default: x] [possible values: x, y, z]
   -h, --help     Print help
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmdd -h
+
+OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog cmdd [OPTIONS]
+
+OPTIONS:
+      --oa <OA…>
+  -h, --help
+
+EOF
+exit 0
+
+************ RUN ************
+prog cmde -h
+
+OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog cmde [OPTIONS]
+
+OPTIONS:
+      --oa <OA…>
+      --ob <DIR…>
+      --oc <CMD> <DIR…>
+      --od [OD…]...
+      --oe [DIR…]...
+  -h, --help
 
 EOF
 exit 0

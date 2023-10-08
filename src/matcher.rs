@@ -600,7 +600,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 if let Some(param) = cmd.flag_option_params.iter().find(|v| v.name() == name) {
                     let values_list: Vec<&[&str]> =
                         indexes.iter().map(|v| args[*v].1.as_slice()).collect();
-                    if !param.multiple() && values_list.len() > 1 {
+                    if !param.multi_occurs() && values_list.len() > 1 {
                         return Some(MatchError::NotMultipleArgument(level, param.render_name()));
                     }
                     for values in values_list.iter() {
@@ -610,9 +610,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 param.render_name(),
                                 values[0].to_string(),
                             ));
-                        } else if (param.ellipsis()
+                        } else if (param.unlimited_args()
                             && values.len() + 1 < param.arg_value_names.len())
-                            || (!param.ellipsis() && values.len() != param.arg_value_names.len())
+                            || (!param.unlimited_args()
+                                && values.len() != param.arg_value_names.len())
                         {
                             return Some(MatchError::MismatchValues(
                                 level,
@@ -968,7 +969,7 @@ fn match_flag_option<'a, 'b>(
         flag_option_args.push((arg, value_args, Some(param.name())));
     } else {
         let mut values_len = param.arg_value_names.len();
-        if param.ellipsis() {
+        if param.unlimited_args() {
             values_len = usize::MAX / 2;
         }
         let args_len = args.len();
