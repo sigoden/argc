@@ -610,8 +610,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 param.render_name(),
                                 values[0].to_string(),
                             ));
-                        } else if !param.validate_args_len(values.len())
-                        {
+                        } else if !param.validate_args_len(values.len()) {
                             return Some(MatchError::MismatchValues(
                                 level,
                                 param.render_name_values(),

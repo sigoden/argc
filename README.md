@@ -133,7 +133,7 @@ Define a positional argument.
 ### @option
 
 ```
-@option [short] <long>[modifier|default|modifier+choices] [value-notations] [...] [help-string]
+@option [short] <long>[modifier|default|modifier+choices] [value-notations] [help-string]
 ```
 
 Define a option.

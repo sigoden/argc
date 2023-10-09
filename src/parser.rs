@@ -265,14 +265,7 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             parse_tail,
         )),
         |(arg, value_names, describe)| {
-            FlagOptionParam::new(
-                arg,
-                describe,
-                None,
-                false,
-                true,
-                &value_names,
-            )
+            FlagOptionParam::new(arg, describe, None, false, true, &value_names)
         },
     )(input)
 }

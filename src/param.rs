@@ -38,9 +38,7 @@ impl FlagOptionParam {
         };
         if param.terminated() {
             let last_arg = arg_value_names.last_mut().unwrap();
-            if !last_arg.ends_with("*") && !last_arg.ends_with("+") {
-                last_arg.push('~')
-            }
+            last_arg.push('~')
         }
         Self {
             describe: describe.to_string(),
@@ -106,10 +104,10 @@ impl FlagOptionParam {
 
     pub(crate) fn notation_modifer(&self) -> NotationModifier {
         if let Some(notation) = self.arg_value_names.last() {
-            if notation.ends_with("*") {
-                return NotationModifier::Asterisk
-            } else if notation.ends_with("+") {
-                return NotationModifier::Plus
+            if notation.ends_with('*') {
+                return NotationModifier::Asterisk;
+            } else if notation.ends_with('+') {
+                return NotationModifier::Plus;
             }
         }
         NotationModifier::None
@@ -218,7 +216,7 @@ impl FlagOptionParam {
             .iter()
             .map(|v| {
                 if self.multi_occurs() {
-                    format!("{v}")
+                    v.to_string()
                 } else {
                     format!("<{v}>")
                 }
@@ -334,7 +332,6 @@ impl FlagOptionParam {
         })
     }
 }
-
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct PositionalParam {
@@ -602,7 +599,7 @@ impl ParamData {
 pub(crate) enum NotationModifier {
     None,
     Plus,
-    Asterisk
+    Asterisk,
 }
 
 impl NotationModifier {
