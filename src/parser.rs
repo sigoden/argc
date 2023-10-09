@@ -228,10 +228,9 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
                 parse_param_modifer,
             )),
             parse_zero_or_many_value_notations,
-            parse_zero_or_one_ellipsis,
             parse_tail,
         )),
-        |(short, hyphens, arg, value_names, ellipsis, describe)| {
+        |(short, hyphens, arg, value_names, describe)| {
             FlagOptionParam::new(
                 arg,
                 describe,
@@ -239,7 +238,6 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
                 false,
                 hyphens.len() == 1,
                 &value_names,
-                ellipsis.is_some(),
             )
         },
     )(input)
@@ -264,10 +262,9 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
                 ),
             ),
             parse_zero_or_many_value_notations,
-            parse_zero_or_one_ellipsis,
             parse_tail,
         )),
-        |(arg, value_names, ellipsis, describe)| {
+        |(arg, value_names, describe)| {
             FlagOptionParam::new(
                 arg,
                 describe,
@@ -275,7 +272,6 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
                 false,
                 true,
                 &value_names,
-                ellipsis.is_some(),
             )
         },
     )(input)
@@ -315,7 +311,7 @@ fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             parse_tail,
         )),
         |(short, hyphens, arg, describe)| {
-            FlagOptionParam::new(arg, describe, short, true, hyphens.len() == 1, &[], false)
+            FlagOptionParam::new(arg, describe, short, true, hyphens.len() == 1, &[])
         },
     )(input)
 }
@@ -327,7 +323,7 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> 
             preceded(pair(space0, tag("-")), parse_short_flag_and_asterisk),
             parse_tail,
         )),
-        |(arg, describe)| FlagOptionParam::new(arg, describe, None, true, true, &[], false),
+        |(arg, describe)| FlagOptionParam::new(arg, describe, None, true, true, &[]),
     )(input)
 }
 
@@ -501,10 +497,6 @@ fn parse_value_notation(input: &str) -> nom::IResult<&str, &str> {
         char(' '),
         delimited(char('<'), parse_notation_text, char('>')),
     )(input)
-}
-
-fn parse_zero_or_one_ellipsis(input: &str) -> nom::IResult<&str, Option<&str>> {
-    opt(delimited(char(' '), tag("..."), peek(alt((space1, eof)))))(input)
 }
 
 // Parse `a|b|c`
@@ -817,9 +809,6 @@ mod tests {
         assert_parse_option_arg!("--foo <>");
         assert_parse_option_arg!("--foo <abc def>");
         assert_parse_option_arg!("--foo <<abc def>>");
-        assert_parse_option_arg!("--foo ...");
-        assert_parse_option_arg!("--foo <abc> ...");
-        assert_parse_option_arg!("--foo <abc> <def> ...");
     }
 
     #[test]
@@ -854,9 +843,6 @@ mod tests {
         assert_parse_option_arg!("-foo <>");
         assert_parse_option_arg!("-foo <abc def>");
         assert_parse_option_arg!("-foo <<abc def>>");
-        assert_parse_option_arg!("-foo ...");
-        assert_parse_option_arg!("-foo <abc> ...");
-        assert_parse_option_arg!("-foo <abc> <def> ...");
     }
 
     #[test]

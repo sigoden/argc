@@ -74,7 +74,7 @@ command cat >&2 <<-'EOF'
 USAGE: prog cmdd [OPTIONS]
 
 OPTIONS:
-      --oa <OA+>
+      --oa <OA~>
   -h, --help
 
 EOF
@@ -88,11 +88,9 @@ command cat >&2 <<-'EOF'
 USAGE: prog cmde [OPTIONS]
 
 OPTIONS:
-      --oa <OA+>
-      --ob <DIR+>
-      --oc <CMD> <DIR+>
-      --od [OD+]...
-      --oe [DIR+]...
+      --oa <DIR+>
+      --ob <CMD> <DIR+>
+      --oc [DIR+]...
   -h, --help
 
 EOF

@@ -15,7 +15,6 @@ pub(crate) struct FlagOptionParam {
     pub(crate) data: ParamData,
     pub(crate) value_names: Vec<String>,
     pub(crate) arg_value_names: Vec<String>,
-    pub(crate) ellipsis: bool,
     pub(crate) inherit: bool,
 }
 
@@ -27,17 +26,22 @@ impl FlagOptionParam {
         flag: bool,
         single_hyphen: bool,
         value_names: &[&str],
-        ellipsis: bool,
     ) -> Self {
         let name = param.name.clone();
         let value_names: Vec<String> = value_names.iter().map(|v| v.to_string()).collect();
-        let arg_value_names = if flag {
+        let mut arg_value_names = if flag {
             vec![]
         } else if value_names.is_empty() {
             vec![to_cobol_case(&name)]
         } else {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
+        if param.terminated() {
+            let last_arg = arg_value_names.last_mut().unwrap();
+            if !last_arg.ends_with("*") && !last_arg.ends_with("+") {
+                last_arg.push('~')
+            }
+        }
         Self {
             describe: describe.to_string(),
             short,
@@ -46,7 +50,6 @@ impl FlagOptionParam {
             data: param,
             value_names,
             arg_value_names,
-            ellipsis,
             inherit: false,
         }
     }
@@ -84,7 +87,32 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn unlimited_args(&self) -> bool {
-        self.ellipsis || self.terminated()
+        self.terminated() || !self.notation_modifer().is_none()
+    }
+
+    pub(crate) fn validate_args_len(&self, num: usize) -> bool {
+        let len = self.arg_value_names.len();
+        if self.unlimited_args() {
+            let min = if len > 1 && self.notation_modifer() == NotationModifier::Asterisk {
+                len - 1
+            } else {
+                len
+            };
+            num >= min
+        } else {
+            num == len
+        }
+    }
+
+    pub(crate) fn notation_modifer(&self) -> NotationModifier {
+        if let Some(notation) = self.arg_value_names.last() {
+            if notation.ends_with("*") {
+                return NotationModifier::Asterisk
+            } else if notation.ends_with("+") {
+                return NotationModifier::Plus
+            }
+        }
+        NotationModifier::None
     }
 
     pub(crate) fn required(&self) -> bool {
@@ -120,9 +148,6 @@ impl FlagOptionParam {
         ));
         for value_name in &self.value_names {
             output.push(format!("<{}>", value_name));
-        }
-        if self.ellipsis {
-            output.push("...".into());
         }
         if !self.describe.is_empty() {
             output.push(self.describe.clone());
@@ -191,14 +216,11 @@ impl FlagOptionParam {
         let output = self
             .arg_value_names
             .iter()
-            .enumerate()
-            .map(|(i, v)| {
-                let unlimited = self.unlimited_args() && i == self.arg_value_names.len() - 1;
-                let marker = if unlimited { "+" } else { "" };
+            .map(|v| {
                 if self.multi_occurs() {
-                    format!("{v}{marker}")
+                    format!("{v}")
                 } else {
-                    format!("<{v}{marker}>")
+                    format!("<{v}>")
                 }
             })
             .collect::<Vec<String>>()
@@ -306,13 +328,13 @@ impl FlagOptionParam {
             "flag": self.flag,
             "option_names": option_names,
             "value_names": self.value_names,
-            "ellipsis": self.ellipsis,
             "modifier": self.data.modifer,
             "choices": self.data.choice_values(),
             "default": self.data.defualt_value(),
         })
     }
 }
+
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct PositionalParam {
@@ -572,6 +594,20 @@ impl ParamData {
         } else {
             value.to_string()
         }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[serde(tag = "type", content = "value")]
+pub(crate) enum NotationModifier {
+    None,
+    Plus,
+    Asterisk
+}
+
+impl NotationModifier {
+    pub(crate) fn is_none(&self) -> bool {
+        self == &NotationModifier::None
     }
 }
 

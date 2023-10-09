@@ -5,10 +5,10 @@ fn multiple() {
     let script = r###"
 # @flag   -f --fc*
 # @option -a --oa* <DIR>
-# @option -b --ob <CMD> <DIR> ...
-# @option -c --oc <DIR> ...
+# @option -b --ob <CMD> <DIR+>
+# @option -c --oc <DIR+>
 # @option -d --od <DIR> <FILE>
-# @option -e --oe* <DIR> ...
+# @option -e --oe* <DIR+>
 # @arg var* <FILE>
 "###;
 

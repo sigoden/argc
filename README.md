@@ -145,10 +145,9 @@ Define a option.
 # @option    --oc!                  required
 # @option    --od*                  multi-occurs
 # @option    --oe+                  required + multi-occurs
-# @option    --of ...               multi-args
 # @option    --ona <PATH>           value notation
 # @option    --onb <CMD> <FILE>     two-args value notations
-# @option    --onc <CMD> <FILE> ... multi-args value notations
+# @option    --onc <CMD> <FILE+>    unlimited-args value notations
 # @option    --oda=a                default
 # @option    --odb=`_default_fn`    default from fn
 # @option    --oca[a|b]             choice
