@@ -152,11 +152,28 @@ fn same_option_positional() {
 }
 
 #[test]
-fn option_multi_vals() {
+fn option_multiple() {
     let script = r###"
-# @option --oa* <DIR> <FILE>
+# @flag   -f --fc*
+# @option -a --oa* <DIR>
+# @option -b --ob <CMD> <DIR+>
+# @option -c --oc <DIR+>
+# @option -d --od <DIR> <FILE>
+# @option -e --oe* <DIR+>
 "###;
-    snapshot!(script, &["prog", "-h"]);
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "-h"],
+            vec!["prog", "-f", "-f"],
+            vec!["prog", "-a", "dir1", "dir2"],
+            vec!["prog", "-a", "dir1", "-a", "dir2"],
+            vec!["prog", "-b", "vim", "dir1", "dir2"],
+            vec!["prog", "-c", "dir1", "dir2"],
+            vec!["prog", "-d", "dir1", "file1", "file2"],
+            vec!["prog", "-e", "dir1", "-e", "dir2", "dir3"],
+        ]
+    );
 }
 
 #[test]

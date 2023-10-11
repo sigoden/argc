@@ -5,8 +5,10 @@ fn multiple() {
     let script = r###"
 # @flag   -f --fc*
 # @option -a --oa* <DIR>
-# @option -b --ob* <CMD> <DIR>
+# @option -b --ob <CMD> <DIR+>
+# @option -c --oc <DIR+>
 # @option -d --od <DIR> <FILE>
+# @option -e --oe* <DIR+>
 # @arg var* <FILE>
 "###;
 
@@ -27,10 +29,15 @@ fn multiple() {
             vec!["prog", "-b", "d1", ""],
             vec!["prog", "-b", "d1", "d2"],
             vec!["prog", "-b", "d1", "d2", ""],
+            vec!["prog", "-c", ""],
+            vec!["prog", "-c", "d1"],
+            vec!["prog", "-c", "d1", ""],
             vec!["prog", "-d", "d1"],
             vec!["prog", "-d", "d1", ""],
             vec!["prog", "-d", "d1", "d2"],
             vec!["prog", "-d", "d1", "d2", ""],
+            vec!["prog", "-e", "d1", ""],
+            vec!["prog", "-a", "d1", "-c", "d2", "-"],
             vec!["prog", "v1"],
             vec!["prog", "v1", ""],
             vec!["prog", "v1", "v2"],
@@ -284,21 +291,6 @@ _choice_fn() {
 }
 "###;
     snapshot_compgen!(script, [vec!["prog", "cmd", "a\\b", ""],]);
-}
-
-#[test]
-fn option_multi_vals() {
-    let script = r###"
-# @option --oa* <DIR> <FILE>
-"###;
-    snapshot_compgen!(
-        script,
-        [
-            vec!["prog", "--oa", ""],
-            vec!["prog", "--oa", "bash", ""],
-            vec!["prog", "--oa", "bash", "cmd1", ""],
-        ]
-    );
 }
 
 #[test]

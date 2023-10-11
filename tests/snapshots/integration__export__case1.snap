@@ -3,10 +3,10 @@ source: tests/export.rs
 expression: output
 ---
 {
-  "describe": "Test argc",
+  "describe": "",
   "name": null,
-  "author": "nobody <nobody@example.com>",
-  "version": "1.0.0",
+  "author": null,
+  "version": null,
   "metadata": {
     "combine-shorts": ""
   },
@@ -16,18 +16,88 @@ expression: output
   "subcommands": [
     {
       "describe": "",
-      "name": "cmd",
+      "name": "cmda",
       "author": null,
       "version": null,
       "metadata": {},
       "options": [
         {
-          "name": "fa",
-          "describe": "A flag",
+          "name": "a",
+          "describe": "",
           "flag": true,
           "option_names": [
-            "--fa",
-            "-b"
+            "-a"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fa",
+          "describe": "",
+          "flag": true,
+          "option_names": [
+            "--fa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fb",
+          "describe": "",
+          "flag": true,
+          "option_names": [
+            "--fb",
+            "-f"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "sa",
+          "describe": "",
+          "flag": true,
+          "option_names": [
+            "-sa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "sb",
+          "describe": "",
+          "flag": true,
+          "option_names": [
+            "-sb"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "e",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "-e"
           ],
           "value_names": [],
           "modifier": {
@@ -38,11 +108,10 @@ expression: output
         },
         {
           "name": "oa",
-          "describe": "A option",
+          "describe": "",
           "flag": false,
           "option_names": [
-            "--oa",
-            "-o"
+            "--oa"
           ],
           "value_names": [],
           "modifier": {
@@ -72,6 +141,40 @@ expression: output
           "option_names": [
             "--oc"
           ],
+          "value_names": [
+            "DIR"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "od",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--od",
+            "-o"
+          ],
+          "value_names": [
+            "FILE",
+            "FILE"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oe",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oe"
+          ],
           "value_names": [],
           "modifier": {
             "type": "MultiCharOptional",
@@ -79,12 +182,76 @@ expression: output
           },
           "choices": null,
           "default": null
-        }
-      ],
-      "positionals": [
+        },
         {
-          "name": "var",
+          "name": "ca",
           "describe": "",
+          "flag": false,
+          "option_names": [
+            "--ca"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": [
+            "x",
+            "y",
+            "z"
+          ],
+          "default": null
+        },
+        {
+          "name": "cc",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--cc"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "cd",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--cd"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ce",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--ce"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "soa",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "-soa",
+            "-s"
+          ],
+          "value_names": [],
           "modifier": {
             "type": "Optional"
           },
@@ -92,9 +259,252 @@ expression: output
           "default": null
         }
       ],
-      "aliases": [
-        "a"
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "",
+      "name": "cmdb",
+      "author": null,
+      "version": null,
+      "metadata": {},
+      "options": [
+        {
+          "name": "oa",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oa",
+            "-a"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Required"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ob",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--ob"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleRequired"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oc",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oc"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultiCharRequired",
+            "value": ","
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oca",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oca"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Required"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ocb",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--ocb"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleRequired"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "occ",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--occ"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultiCharRequired",
+            "value": ","
+          },
+          "choices": null,
+          "default": null
+        }
       ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "",
+      "name": "cmdc",
+      "author": null,
+      "version": null,
+      "metadata": {},
+      "options": [
+        {
+          "name": "oe",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oe"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": "val"
+        },
+        {
+          "name": "of",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--of"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "cb",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--cb"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": [
+            "x",
+            "y",
+            "z"
+          ],
+          "default": "x"
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "",
+      "name": "cmdd",
+      "author": null,
+      "version": null,
+      "metadata": {},
+      "options": [
+        {
+          "name": "oa",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Terminated"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "",
+      "name": "cmde",
+      "author": null,
+      "version": null,
+      "metadata": {},
+      "options": [
+        {
+          "name": "oa",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oa"
+          ],
+          "value_names": [
+            "DIR+"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ob",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--ob"
+          ],
+          "value_names": [
+            "CMD",
+            "DIR+"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oc",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oc"
+          ],
+          "value_names": [
+            "DIR+"
+          ],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
       "subcommands": []
     }
   ]

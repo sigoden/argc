@@ -34,6 +34,16 @@ cmdb() { :; }
 # @option    --cb[=x|y|z]
 cmdc() { :; }
 
+# @cmd
+# @option    --oa~
+cmdd() { :; }
+
+# @cmd
+# @option     --oa <DIR+>
+# @option     --ob <CMD> <DIR+>
+# @option     --oc* <DIR+>
+cmde() { :; }
+
 _default_fn() {
 	echo abc
 }

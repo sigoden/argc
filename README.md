@@ -133,7 +133,7 @@ Define a positional argument.
 ### @option
 
 ```
-@option [short] <long>[modifier|default|modifier+choices] [value-notation]... [help-string]
+@option [short] <long>[modifier|default|modifier+choices] [value-notations] [help-string]
 ```
 
 Define a option.
@@ -143,20 +143,21 @@ Define a option.
 # @option -b --ob                   short
 # @option -c                        short only
 # @option    --oc!                  required
-# @option    --od*                  multiple
-# @option    --oe+                  required + multiple
+# @option    --od*                  multi-occurs
+# @option    --oe+                  required + multi-occurs
 # @option    --ona <PATH>           value notation
-# @option    --onb <NAME> <FILE>    multiple value notations
+# @option    --onb <CMD> <FILE>     two-args value notations
+# @option    --onc <CMD> <FILE+>    unlimited-args value notations
 # @option    --oda=a                default
 # @option    --odb=`_default_fn`    default from fn
 # @option    --oca[a|b]             choice
 # @option    --ocb[=a|b]            choice + default
-# @option    --occ*[a|b]            multiple + choice
-# @option    --ocd+[a|b]            required + multiple + choice
+# @option    --occ*[a|b]            multi-occurs + choice
+# @option    --ocd+[a|b]            required + multi-occurs + choice
 # @option    --ofa[`_choice_fn`]    choice from fn
 # @option    --ofb[?`_choice_fn`]   choice from fn + no validation
-# @option    --ofc*[`_choice_fn`]   multiple + choice from fn
-# @option    --ox~                  capture all remaing args
+# @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
+# @option    --oxa~                 capture all remaing args
 ```
 
 ### @flag
@@ -172,8 +173,8 @@ Define a flag. A flag is an option of boolean type, and is always false by defau
 # @flag     --fa 
 # @flag  -b --fb         shoft
 # @flag  -c              shoft only
-# @flag     --fd*        multiple
-# @flag  -e --fe*        short + multiple
+# @flag     --fd*        multi-occurs
+# @flag  -e --fe*        short + multi-occurs
 ```
 
 ### @alias

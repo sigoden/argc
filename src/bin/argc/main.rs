@@ -88,14 +88,14 @@ fn run() -> Result<i32> {
             "--argc-completions" => {
                 let shell: Shell = match args.get(2) {
                     Some(v) => v.parse()?,
-                    None => bail!("Usage: argc --argc-completions <SHELL> [CMDS...]"),
+                    None => bail!("Usage: argc --argc-completions <SHELL> [CMDS]..."),
                 };
                 let script = crate::completions::generate(shell, &args[3..])?;
                 println!("{}", script);
             }
             "--argc-parallel" => {
                 if args.len() <= 3 {
-                    bail!("Usage: argc --argc-parallel <SCRIPT> <ARGS...>");
+                    bail!("Usage: argc --argc-parallel <SCRIPT> <ARGS>...");
                 }
                 let shell = get_shell_path().ok_or_else(|| anyhow!("Shell not found"))?;
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
@@ -222,12 +222,12 @@ fn get_argc_help() -> String {
         r###"{about}
 
 USAGE:
-    argc --argc-eval <SCRIPT> [ARGS...]             Use `eval "$(argc --argc-eval "$0" "$@")"`
-    argc --argc-create [TASKS...]                   Create a boilerplate argcfile
-    argc --argc-completions <SHELL> [CMDS...]       Generate completion scripts for bash,elvish,fish,nushell,powershell,xsh,zsh
-    argc --argc-compgen <SHELL> <SCRIPT> <ARGS...>  Generate dynamic completion word
+    argc --argc-eval <SCRIPT> [ARGS]...             Use `eval "$(argc --argc-eval "$0" "$@")"`
+    argc --argc-create [TASKS]...                   Create a boilerplate argcfile
+    argc --argc-completions <SHELL> [CMDS]...       Generate completion scripts for bash,elvish,fish,nushell,powershell,xsh,zsh
+    argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Generate dynamic completion word
     argc --argc-export <SCRIPT>                     Export command line definitions as json
-    argc --argc-parallel <SCRIPT> <ARGS...>         Execute argc functions in parallel
+    argc --argc-parallel <SCRIPT> <ARGS>...         Execute argc functions in parallel
     argc --argc-script-path                         Print current argcfile path
     argc --argc-help                                Print help information
     argc --argc-version                             Print version information

@@ -29,13 +29,17 @@ impl FlagOptionParam {
     ) -> Self {
         let name = param.name.clone();
         let value_names: Vec<String> = value_names.iter().map(|v| v.to_string()).collect();
-        let arg_value_names = if flag {
+        let mut arg_value_names = if flag {
             vec![]
         } else if value_names.is_empty() {
             vec![to_cobol_case(&name)]
         } else {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
+        if param.terminated() {
+            let last_arg = arg_value_names.last_mut().unwrap();
+            last_arg.push('~')
+        }
         Self {
             describe: describe.to_string(),
             short,
@@ -69,7 +73,44 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn multiple(&self) -> bool {
-        self.data.multiple()
+        self.multi_occurs() || self.multi_values()
+    }
+
+    pub(crate) fn multi_occurs(&self) -> bool {
+        self.data.multi_occurs()
+    }
+
+    pub(crate) fn multi_values(&self) -> bool {
+        self.unlimited_args() || self.arg_value_names.len() > 1
+    }
+
+    pub(crate) fn unlimited_args(&self) -> bool {
+        self.terminated() || !self.notation_modifer().is_none()
+    }
+
+    pub(crate) fn validate_args_len(&self, num: usize) -> bool {
+        let len = self.arg_value_names.len();
+        if self.unlimited_args() {
+            let min = if len > 1 && self.notation_modifer() == NotationModifier::Asterisk {
+                len - 1
+            } else {
+                len
+            };
+            num >= min
+        } else {
+            num == len
+        }
+    }
+
+    pub(crate) fn notation_modifer(&self) -> NotationModifier {
+        if let Some(notation) = self.arg_value_names.last() {
+            if notation.ends_with('*') {
+                return NotationModifier::Asterisk;
+            } else if notation.ends_with('+') {
+                return NotationModifier::Plus;
+            }
+        }
+        NotationModifier::None
     }
 
     pub(crate) fn required(&self) -> bool {
@@ -130,7 +171,10 @@ impl FlagOptionParam {
 
     pub(crate) fn render_name_values(&self) -> String {
         let mut output = self.render_name();
-        output.push_str(&self.render_arg_values());
+        if !self.is_flag() {
+            output.push(' ');
+            output.push_str(&self.render_arg_values());
+        }
         output
     }
 
@@ -153,10 +197,11 @@ impl FlagOptionParam {
         }
 
         if self.is_flag() {
-            if self.multiple() {
+            if self.multi_occurs() {
                 output.push_str("...")
             }
         } else {
+            output.push(' ');
             output.push_str(&self.render_arg_values());
         }
         output
@@ -166,31 +211,24 @@ impl FlagOptionParam {
         if self.is_flag() {
             return String::new();
         }
-        let mut output = " ".to_string();
-        if self.arg_value_names.len() == 1 {
-            let name: &String = &self.arg_value_names[0];
-            let value = match (self.required(), self.multiple()) {
-                (true, true) => format!("<{name}>..."),
-                (false, true) => format!("[{name}]..."),
-                (_, false) => format!("<{name}>"),
-            };
-            output.push_str(&value);
+        let output = self
+            .arg_value_names
+            .iter()
+            .map(|v| {
+                if self.multi_occurs() {
+                    v.to_string()
+                } else {
+                    format!("<{v}>")
+                }
+            })
+            .collect::<Vec<String>>()
+            .join(" ");
+
+        if self.multi_occurs() {
+            format!("[{output}]...")
         } else {
-            let values = self
-                .arg_value_names
-                .iter()
-                .enumerate()
-                .map(|(i, v)| {
-                    if self.ellipsis() && i == self.arg_value_names.len() - 1 {
-                        format!("<{v}>...")
-                    } else {
-                        format!("<{v}>")
-                    }
-                })
-                .collect::<Vec<String>>();
-            output.push_str(&values.join(" "));
+            output
         }
-        output
     }
 
     pub(crate) fn render_describe(&self) -> String {
@@ -273,14 +311,6 @@ impl FlagOptionParam {
         output
     }
 
-    pub(crate) fn multi_occurs(&self) -> bool {
-        self.multiple() && (self.flag || self.arg_value_names.len() == 1)
-    }
-
-    pub(crate) fn ellipsis(&self) -> bool {
-        self.terminated() || (self.multiple() && self.arg_value_names.len() > 1)
-    }
-
     pub(crate) fn describe_head(&self) -> &str {
         match self.describe.split_once('\n') {
             Some((v, _)) => v,
@@ -334,7 +364,7 @@ impl PositionalParam {
     }
 
     pub(crate) fn multiple(&self) -> bool {
-        self.data.multiple()
+        self.data.multi_occurs() || self.terminated()
     }
 
     pub(crate) fn required(&self) -> bool {
@@ -451,8 +481,8 @@ impl ParamData {
         }
     }
 
-    pub(crate) fn multiple(&self) -> bool {
-        self.modifer.multiple()
+    pub(crate) fn multi_occurs(&self) -> bool {
+        self.modifer.multi_occurs()
     }
 
     pub(crate) fn required(&self) -> bool {
@@ -566,6 +596,20 @@ impl ParamData {
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 #[serde(tag = "type", content = "value")]
+pub(crate) enum NotationModifier {
+    None,
+    Plus,
+    Asterisk,
+}
+
+impl NotationModifier {
+    pub(crate) fn is_none(&self) -> bool {
+        self == &NotationModifier::None
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[serde(tag = "type", content = "value")]
 pub(crate) enum Modifier {
     Optional,
     Required,
@@ -579,7 +623,7 @@ pub(crate) enum Modifier {
 }
 
 impl Modifier {
-    pub(crate) fn multiple(&self) -> bool {
+    pub(crate) fn multi_occurs(&self) -> bool {
         match self {
             Self::Optional => false,
             Self::Required => false,
@@ -587,7 +631,7 @@ impl Modifier {
             Self::MultipleRequired => true,
             Self::MultiCharOptional(_) => true,
             Self::MultiCharRequired(_) => true,
-            Self::Terminated => true,
+            Self::Terminated => false,
             Self::Prefixed => false,
             Self::MultiPrefixed => true,
         }

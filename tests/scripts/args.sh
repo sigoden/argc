@@ -74,6 +74,10 @@ cmdq() { :; }
 # @arg val3!
 cmdr() { :; }
 
+# @cmd
+# @arg vals~
+cmds() { :; }
+
 _default_fn() {
 	echo abc
 }
