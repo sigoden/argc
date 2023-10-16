@@ -211,24 +211,24 @@ impl FlagOptionParam {
         if self.is_flag() {
             return String::new();
         }
-        let output = self
-            .arg_value_names
-            .iter()
-            .map(|v| {
-                if self.multi_occurs() {
-                    v.to_string()
-                } else {
-                    format!("<{v}>")
-                }
-            })
-            .collect::<Vec<String>>()
-            .join(" ");
-
-        if self.multi_occurs() {
-            format!("[{output}]...")
+        let mut output = String::new();
+        if self.arg_value_names.len() == 1 {
+            let name: &String = &self.arg_value_names[0];
+            let value = match (self.required(), self.multi_occurs()) {
+                (true, true) => format!("<{name}>..."),
+                (false, true) => format!("[{name}]..."),
+                (_, false) => format!("<{name}>"),
+            };
+            output.push_str(&value);
         } else {
-            output
+            let values = self
+                .arg_value_names
+                .iter()
+                .map(|v| format!("<{v}>"))
+                .collect::<Vec<String>>();
+            output.push_str(&values.join(" "));
         }
+        output
     }
 
     pub(crate) fn render_describe(&self) -> String {
