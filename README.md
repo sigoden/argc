@@ -114,7 +114,7 @@ Define a positional argument.
 
 ```sh
 # @arg va
-# @arg vb!                 requird
+# @arg vb!                 required
 # @arg vc*                 multiple
 # @arg vd+                 required + multiple
 # @arg vna <PATH>          value notation
@@ -127,7 +127,7 @@ Define a positional argument.
 # @arg vfa[`_choice_fn`]   choice from fn
 # @arg vfb[?`_choice_fn`]  choice from fn + no validation
 # @arg vfc*[`_choice_fn`]  multiple + choice from fn
-# @arg vx~                 capture all remaing args
+# @arg vx~                 capture all remaining args
 ```
 
 ### @option
@@ -157,7 +157,7 @@ Define a option.
 # @option    --ofa[`_choice_fn`]    choice from fn
 # @option    --ofb[?`_choice_fn`]   choice from fn + no validation
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
-# @option    --oxa~                 capture all remaing args
+# @option    --oxa~                 capture all remaining args
 ```
 
 ### @flag
@@ -171,8 +171,8 @@ Define a flag. A flag is an option of boolean type, and is always false by defau
 
 ```sh
 # @flag     --fa 
-# @flag  -b --fb         shoft
-# @flag  -c              shoft only
+# @flag  -b --fb         short
+# @flag  -c              short only
 # @flag     --fd*        multi-occurs
 # @flag  -e --fe*        short + multi-occurs
 ```
@@ -291,7 +291,7 @@ Argc can be used as multiple shell completion engine. see [argc-completions](htt
 
 ## Argcscript
 
-Argc will automatically find and run `Argcfile.sh` unless `--argc-*` options are used to change this behaviour.
+Argc will automatically find and run `Argcfile.sh` unless `--argc-*` options are used to change this behavior.
 
 Argcfile is to argc what Makefile is to make.
 
@@ -302,7 +302,7 @@ what is the benefit?
 - As a centralized entrypoint/document for executing the project's bash scripts.
 - Serves as a script for a task runner.
 
-You can use `argc --argc-create` to quickly create boilerplate Argcscripts. For example:
+You can use `argc --argc-create` to quickly create a boilerplate argcscript. For example:
 
 ```
 argc --argc-create test build run
@@ -318,7 +318,7 @@ argc provides features for running commands/functions in parallel.
 argc --argc-parallel "$0" cmd1 arg1 arg2 ::: cmd2
 ```
 
-The above command will run `cmd1 arg1 arg2` and `cmd2` in parellel. Functions running in parallel mode can still access the `argc_*` variable.
+The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel. Functions running in parallel mode can still access the `argc_*` variable.
 
 ## Windows Only
 

@@ -805,7 +805,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
                 let usage = cmd.render_usage(&cmd_paths);
                 format!(
-                    r###"error: invalid values for `{value}`
+                    r###"error: invalid value for `{value}`
 
 {usage}
 

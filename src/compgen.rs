@@ -172,12 +172,12 @@ pub fn compgen(
     }
 
     if !argc_variables.is_empty() {
-        let mut prepend_candicates: IndexMap<String, (String, bool, CompColor)> = argc_variables
+        let mut prepend_candidates: IndexMap<String, (String, bool, CompColor)> = argc_variables
             .into_iter()
             .map(|value| (value, (String::new(), false, CompColor::of_value())))
             .collect();
-        prepend_candicates.extend(candidates);
-        candidates = prepend_candicates;
+        prepend_candidates.extend(candidates);
+        candidates = prepend_candidates;
     }
 
     let mut candidates: Vec<CandidateValue> = candidates
@@ -567,7 +567,7 @@ impl CompColor {
         Self { code, style }
     }
 
-    pub(crate) fn deser(s: &str) -> Result<Self> {
+    pub(crate) fn parse(s: &str) -> Result<Self> {
         if let Some((code, style)) = s.split_once(',') {
             if let (Ok(code), Ok(style)) = (code.parse(), style.parse()) {
                 return Ok(Self::new(code, style));
@@ -1013,7 +1013,7 @@ fn parse_candidate_value(input: &str) -> CandidateValue {
     if parts_len >= 2 {
         if let Some(color) = parts[1]
             .strip_prefix("/color:")
-            .and_then(|v| CompColor::deser(v).ok())
+            .and_then(|v| CompColor::parse(v).ok())
         {
             comp_color = color;
             description = parts[2..].join("\t");

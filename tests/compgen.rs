@@ -730,7 +730,7 @@ abc() { :; }
 }
 
 #[test]
-fn mult_char() {
+fn multi_char() {
     let script = r#"
 # @option --oa*,[`_choice_fn`]
 _choice_fn() {
@@ -742,7 +742,7 @@ _choice_fn() {
 }
 
 #[test]
-fn mult_char2() {
+fn multi_char2() {
     let script = r#"
 # @option --oa*,[`_choice_fn`]
 _choice_fn() {

@@ -328,7 +328,7 @@ impl FlagOptionParam {
             "value_names": self.value_names,
             "modifier": self.data.modifer,
             "choices": self.data.choice_values(),
-            "default": self.data.defualt_value(),
+            "default": self.data.default_value(),
         })
     }
 }
@@ -459,7 +459,7 @@ impl PositionalParam {
             "describe": self.describe,
             "modifier": self.data.modifer,
             "choices": self.data.choice_values(),
-            "default": self.data.defualt_value(),
+            "default": self.data.default_value(),
         })
     }
 }
@@ -521,7 +521,7 @@ impl ParamData {
         }
     }
 
-    pub(crate) fn defualt_value(&self) -> Option<&String> {
+    pub(crate) fn default_value(&self) -> Option<&String> {
         match &self.default {
             Some(DefaultData::Value(v)) => Some(v),
             _ => None,

@@ -18,7 +18,7 @@
 # @option    --ofa[`_choice_fn`]    choice from fn
 # @option    --ofb[?`_choice_fn`]   choice from fn + no validation
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
-# @option    --oxa~                 capture all remaing args
+# @option    --oxa~                 capture all remaining args
 options() {
     :;
 }
@@ -26,8 +26,8 @@ options() {
 # @cmd
 # @describe   All kind of flags
 # @flag     --fa 
-# @flag  -b --fb         shoft
-# @flag  -c              shoft only
+# @flag  -b --fb         short
+# @flag  -c              short only
 # @flag     --fd*        multi-occurs
 # @flag  -e --fe*        short + multi-occurs
 flags() {
