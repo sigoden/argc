@@ -33,8 +33,8 @@ ijk
 --oa='ijk	0	ijk	
 
 ************ COMPGEN Zsh `prog --oa='` ************
---oa=abc	abc	abc	39
---oa=def	def	def	39
---oa=ijk	ijk	ijk	39
+--oa='abc	abc	abc	39
+--oa='def	def	def	39
+--oa='ijk	ijk	ijk	39
 
 
