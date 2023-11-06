@@ -26,6 +26,10 @@ pub fn is_choice_value_terminate(c: char) -> bool {
     c == '|' || c == ']'
 }
 
+pub fn is_quote_char(c: char) -> bool {
+    c == '\'' || c == '"'
+}
+
 pub fn is_default_value_terminate(c: char) -> bool {
     c.is_whitespace()
 }

@@ -1,6 +1,8 @@
 use crate::command::Command;
 use crate::matcher::Matcher;
-use crate::utils::{escape_shell_words, get_current_dir, is_windows_path, run_param_fns};
+use crate::utils::{
+    escape_shell_words, get_current_dir, is_quote_char, is_windows_path, run_param_fns,
+};
 use crate::Result;
 
 use anyhow::bail;
@@ -27,7 +29,9 @@ pub fn compgen(
     }
     let last_arg = args[args.len() - 1].as_str();
     let (mut last, unbalance) = {
-        if last_arg.starts_with(is_quote) && last_arg.chars().skip(1).all(|v| !is_quote(v)) {
+        if last_arg.starts_with(is_quote_char)
+            && last_arg.chars().skip(1).all(|v| !is_quote_char(v))
+        {
             (last_arg[1..].to_string(), last_arg.chars().next())
         } else {
             (last_arg.to_string(), None)
@@ -206,7 +210,7 @@ pub fn compgen(
         }
     }
 
-    let break_chars = shell.need_break_chars();
+    let break_chars = shell.need_break_chars(&argc_prefix);
     if !break_chars.is_empty() {
         let prefix_quote = unbalance_quote(&argc_prefix);
         if let Some((i, _)) = (match prefix_quote {
@@ -347,7 +351,11 @@ impl Shell {
                     .into_iter()
                     .enumerate()
                     .map(|(i, (value, description, nospace, _comp_color))| {
-                        let mut new_value = value;
+                        let mut new_value = if prefix_unbalance.is_none() {
+                            self.escape(&value)
+                        } else {
+                            value
+                        };
                         if i == 0 && add_space_to_first_candidate {
                             new_value = format!(" {}", new_value)
                         };
@@ -426,23 +434,26 @@ impl Shell {
             Shell::Zsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace, comp_color)| {
-                    let prefix = if let Some((_, i)) = unbalance_quote(prefix) {
-                        prefix
-                            .char_indices()
-                            .filter(|(v, _)| *v != i)
-                            .map(|(_, v)| v)
-                            .collect()
+                    let new_value = if let Some((ch, i)) = unbalance_quote(prefix) {
+                        if i == 0 {
+                            format!("{}{value}", &prefix[1..])
+                        } else {
+                            format!(
+                                "{}{ch}{}{value}",
+                                self.escape(&prefix[0..i]),
+                                &prefix[i + 1..]
+                            )
+                        }
                     } else {
-                        prefix.to_string()
+                        self.escape(&format!("{prefix}{value}"))
                     };
-                    let new_value = self.escape(&format!("{prefix}{value}"));
-                    let match_value =
-                        escape_chars(&value, self.need_escape_chars(), "\\").replace("\\:", ":");
+
+                    let new_value = new_value.replace(':', "\\:");
                     let display = value.replace(':', "\\:");
                     let description = self.comp_description(&description, ":", "");
                     let color = self.color(comp_color, no_color);
                     let space = if nospace { "" } else { " " };
-                    format!("{new_value}{space}\t{display}{description}\t{match_value}\t{color}")
+                    format!("{new_value}{space}\t{display}{description}\t{value}\t{color}")
                 })
                 .collect::<Vec<String>>(),
         }
@@ -469,9 +480,7 @@ impl Shell {
                     value.into()
                 }
             }
-            Shell::Zsh => {
-                escape_chars(value, self.need_escape_chars(), "\\\\").replace("\\\\:", "\\:")
-            }
+            Shell::Zsh => escape_chars(value, self.need_escape_chars(), "\\\\"),
             _ => value.into(),
         }
     }
@@ -519,17 +528,23 @@ impl Shell {
             Shell::Nushell => r#"()[]{}"'` #$;|"#,
             Shell::Powershell => r#"()<>[]{}"'` #$&,;@|"#,
             Shell::Xonsh => r#"()<>[]{}!"'` #&;|"#,
-            Shell::Zsh => r#"()<>[]"'` !#$&*:;?\|"#,
+            Shell::Zsh => r#"()<>[]"'` !#$&*;?\|"#,
             _ => "",
         }
     }
 
-    fn need_break_chars(&self) -> Vec<char> {
+    fn need_break_chars(&self, last_arg: &str) -> Vec<char> {
+        if last_arg.starts_with(is_quote_char) {
+            return vec![];
+        }
         match self {
-            Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
-                Ok(v) => v.chars().collect(),
-                Err(_) => vec!['=', ':', '|', ';', '\'', '"'],
-            },
+            Shell::Bash => {
+                let chars = [':', '='];
+                match std::env::var("COMP_WORDBREAKS") {
+                    Ok(v) => chars.into_iter().filter(|c| v.contains(*c)).collect(),
+                    Err(_) => chars.to_vec(),
+                }
+            }
             Shell::Powershell => vec![','],
             _ => vec![],
         }
@@ -1050,12 +1065,12 @@ fn truncate_description(description: &str) -> String {
 }
 
 fn unbalance_quote(value: &str) -> Option<(char, usize)> {
-    if value.starts_with(is_quote) {
+    if value.starts_with(is_quote_char) {
         let ch = value.chars().next()?;
         if value.chars().filter(|c| *c == ch).count() % 2 == 1 {
             return Some((ch, 0));
         }
-    } else if value.ends_with(is_quote) {
+    } else if value.ends_with(is_quote_char) {
         let ch = value.chars().next_back()?;
         if value.chars().filter(|c| *c == ch).count() % 2 == 1 {
             return Some((ch, value.len() - 1));
@@ -1101,20 +1116,16 @@ fn escape_chars(value: &str, need_escape: &str, for_escape: &str) -> String {
 }
 
 fn mod_quote(filter: &mut String, prefix: &mut String, default_nospace: &mut bool) {
-    if filter.starts_with(is_quote) {
+    if filter.starts_with(is_quote_char) {
         prefix.push_str(&filter[0..1]);
         *default_nospace = true;
     }
-    *filter = filter.trim_matches(is_quote).to_string();
+    *filter = filter.trim_matches(is_quote_char).to_string();
 }
 
 fn contains_chars(value: &str, chars: &str) -> bool {
     let value_chars: Vec<char> = value.chars().collect();
     chars.chars().any(|v| value_chars.contains(&v))
-}
-
-fn is_quote(c: char) -> bool {
-    c == '\'' || c == '"'
 }
 
 #[cfg(test)]

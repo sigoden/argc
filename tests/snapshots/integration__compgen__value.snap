@@ -1,0 +1,61 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN Bash `prog --oa abc` ************
+abc\ def 
+abc\ xyz 
+abc:def 
+abc:xyz 
+abc\>def 
+abc\>xyz 
+
+************ COMPGEN Elvish `prog --oa abc` ************
+abc def	1	abc def		default
+abc xyz	1	abc xyz		default
+abc:def	1	abc:def		default
+abc:xyz	1	abc:xyz		default
+abc>def	1	abc>def		default
+abc>xyz	1	abc>xyz		default
+
+************ COMPGEN Fish `prog --oa abc` ************
+abc def
+abc xyz
+abc:def
+abc:xyz
+abc>def
+abc>xyz
+
+************ COMPGEN Nushell `prog --oa abc` ************
+'abc def' 
+'abc xyz' 
+abc:def 
+abc:xyz 
+abc>def 
+abc>xyz 
+
+************ COMPGEN Powershell `prog --oa abc` ************
+'abc def'	1	abc def		39
+'abc xyz'	1	abc xyz		39
+abc:def	1	abc:def		39
+abc:xyz	1	abc:xyz		39
+'abc>def'	1	abc>def		39
+'abc>xyz'	1	abc>xyz		39
+
+************ COMPGEN Xonsh `prog --oa abc` ************
+'abc def'	1	abc def	
+'abc xyz'	1	abc xyz	
+abc:def	1	abc:def	
+abc:xyz	1	abc:xyz	
+'abc>def'	1	abc>def	
+'abc>xyz'	1	abc>xyz	
+
+************ COMPGEN Zsh `prog --oa abc` ************
+abc\\ def 	abc def	abc def	39
+abc\\ xyz 	abc xyz	abc xyz	39
+abc\:def 	abc\:def	abc:def	39
+abc\:xyz 	abc\:xyz	abc:xyz	39
+abc\\>def 	abc>def	abc>def	39
+abc\\>xyz 	abc>xyz	abc>xyz	39
+
+

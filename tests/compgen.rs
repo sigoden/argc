@@ -498,6 +498,23 @@ _choice_fn() {
 }
 
 #[test]
+fn value() {
+    let script = r#"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    echo "abc def"
+    echo "abc xyz"
+    echo "abc:def"
+    echo "abc:xyz"
+    echo "abc>def"
+    echo "abc>xyz"
+}
+"#;
+
+    snapshot_compgen_shells!(script, ["prog", "--oa", "abc"]);
+}
+
+#[test]
 fn value_display() {
     let script = r#"
 # @option --oa*[`_choice_fn`]
