@@ -109,6 +109,11 @@ pub(crate) fn parse(source: &str) -> Result<Vec<Event>> {
     Ok(result)
 }
 
+pub(crate) fn parse_symbol(input: &str) -> Option<(char, &str, Option<&str>)> {
+    let input = input.trim();
+    parse_symbol_data(input).map(|(_, v)| v).ok()
+}
+
 fn parse_line(line: &str) -> nom::IResult<&str, Option<Option<EventData>>> {
     alt((map(alt((parse_tag, parse_fn)), Some), success(None)))(line)
 }
@@ -621,6 +626,20 @@ fn parse_normal_comment(input: &str) -> nom::IResult<&str, &str> {
     ))(input)
 }
 
+fn parse_symbol_data(input: &str) -> nom::IResult<&str, (char, &str, Option<&str>)> {
+    map(
+        terminated(
+            tuple((
+                alt((char('@'), char('+'))),
+                parse_name,
+                opt(delimited(char('['), parse_value_fn, char(']'))),
+            )),
+            eof,
+        ),
+        |(symbol, name, choice_fn)| (symbol, name, choice_fn),
+    )(input)
+}
+
 fn notation_text(input: &str, balances: usize) -> nom::IResult<&str, usize> {
     let (i1, c1) = anychar(input)?;
     match c1 {
@@ -970,5 +989,17 @@ mod tests {
         assert_token!("function foo@bar", Func, "foo@bar");
         assert_token!("foo=bar", Ignore);
         assert_token!("#!/bin/bash", Ignore);
+    }
+
+    #[test]
+    fn test_parse_symbol() {
+        assert_eq!(
+            parse_symbol("+toolchain").unwrap(),
+            ('+', "toolchain", None)
+        );
+        assert_eq!(
+            parse_symbol("+toolchain[`_choice_toolchain`]").unwrap(),
+            ('+', "toolchain", Some("_choice_toolchain"))
+        );
     }
 }

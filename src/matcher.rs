@@ -5,7 +5,7 @@ use std::{
 };
 
 use crate::{
-    command::Command,
+    command::{Command, SymbolParam},
     compgen::CompColor,
     param::{ChoiceData, FlagOptionParam, ParamData, PositionalParam},
     utils::run_param_fns,
@@ -22,6 +22,7 @@ pub(crate) struct Matcher<'a, 'b> {
     args: &'b [String],
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
     positional_args: Vec<&'b str>,
+    symbol_args: Vec<SymbolArg<'a, 'b>>,
     dashes: Option<usize>,
     arg_comp: ArgComp,
     choice_fns: HashSet<&'a str>,
@@ -32,6 +33,7 @@ pub(crate) struct Matcher<'a, 'b> {
 }
 
 type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>); // key, values, param_name
+type SymbolArg<'a, 'b> = (&'b str, &'a SymbolParam);
 type LevelCommand<'a, 'b> = (&'b str, &'a Command, usize); // name, command, arg_index
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -40,6 +42,7 @@ pub(crate) enum ArgComp {
     FlagOrOptionCombine(String),
     CommandOrPositional,
     OptionValue(String, usize),
+    Symbol(char),
     Any,
 }
 
@@ -65,12 +68,13 @@ pub(crate) enum MatchError {
 
 impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn new(root: &'a Command, args: &'b [String], compgen: bool) -> Self {
-        let combine_shorts = root.metadata.contains_key("combine-shorts");
+        let combine_shorts = root.has_metadata("combine-shorts");
         let mut cmds: Vec<LevelCommand> = vec![(args[0].as_str(), root, 0)];
         let mut cmd_level = 0;
         let mut arg_index = 1;
         let mut flag_option_args = vec![vec![]];
         let mut positional_args = vec![];
+        let mut symbol_args = vec![];
         let mut dashes = None;
         let mut split_last_arg_at = None;
         let mut arg_comp = ArgComp::Any;
@@ -243,6 +247,15 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         arg_index,
                         &mut is_rest_args_positional,
                     );
+                } else if let Some((ch, symbol_param)) = find_symbol(cmd, arg) {
+                    if let Some(choice_fn) = &symbol_param.1 {
+                        choice_fns.insert(choice_fn);
+                    }
+                    symbol_args.push((&arg[1..], symbol_param));
+                    if is_last_arg {
+                        arg_comp = ArgComp::Symbol(ch);
+                        split_last_arg_at = Some(1);
+                    }
                 } else {
                     add_positional_arg(
                         &mut positional_args,
@@ -273,6 +286,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             args,
             flag_option_args,
             positional_args,
+            symbol_args,
             dashes,
             arg_comp,
             choice_fns,
@@ -405,6 +419,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     vec![]
                 }
             }
+            ArgComp::Symbol(ch) => comp_symbol(last_cmd, *ch),
             ArgComp::Any => {
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
                     return comp_subcomands(last_cmd, false);
@@ -437,6 +452,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let level = cmds_len - 1;
         let last_cmd = self.cmds[level].1;
         let cmd_arg_index = self.cmds[level].2;
+
+        for (arg, (name, _)) in self.symbol_args.iter() {
+            output.push(ArgcValue::Single(name.to_string(), arg.to_string()));
+        }
+
         for level in 0..cmds_len {
             let args = &self.flag_option_args[level];
             let cmd = self.cmds[level].1;
@@ -866,6 +886,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
     }
 }
 
+/// (value, description, nospace, color)
 pub(crate) type CompItem = (String, String, bool, CompColor);
 
 fn find_subcommand<'a>(
@@ -880,6 +901,15 @@ fn find_subcommand<'a>(
             None
         }
     })
+}
+
+fn find_symbol<'a>(cmd: &'a Command, arg: &str) -> Option<(char, &'a SymbolParam)> {
+    for (ch, param) in cmd.symbols.iter() {
+        if arg.starts_with(*ch) {
+            return Some((*ch, param));
+        }
+    }
+    None
 }
 
 fn add_positional_arg<'a>(
@@ -1088,6 +1118,31 @@ fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
         ))
     }
     output
+}
+
+fn comp_symbol(cmd: &Command, ch: char) -> Vec<CompItem> {
+    if let Some((name, choices_fn)) = cmd.symbols.get(&ch) {
+        match choices_fn {
+            Some(choices_fn) => {
+                vec![(
+                    format!("__argc_fn={}", choices_fn),
+                    String::new(),
+                    false,
+                    CompColor::of_value(),
+                )]
+            }
+            None => {
+                vec![(
+                    format!("__argc_value={}", name),
+                    String::new(),
+                    false,
+                    CompColor::of_value(),
+                )]
+            }
+        }
+    } else {
+        vec![]
+    }
 }
 
 fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {

@@ -305,3 +305,12 @@ cmdb() {
         ]
     );
 }
+
+#[test]
+fn symbol() {
+    let script = r###"
+# @meta symbol +toolchain
+# @option --oa
+"###;
+    snapshot_multi!(script, [vec!["prog", "+nightly"]]);
+}

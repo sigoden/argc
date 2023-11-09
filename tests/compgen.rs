@@ -80,6 +80,25 @@ fn shorts() {
 }
 
 #[test]
+fn symbol() {
+    let script = r###"
+# @meta symbol +toolchain[`_choice_fn`]
+# @meta symbol @file
+# @option --oa
+
+_choice_fn() {
+    echo stable
+    echo beta
+    echo nightly
+}
+"###;
+    snapshot_compgen!(
+        script,
+        [vec!["prog", "+"], vec!["prog", "@"], vec!["prog", "+s"]]
+    );
+}
+
+#[test]
 fn subcmds() {
     const SCRIPT: &str = r###"
 # @arg file
