@@ -7,11 +7,11 @@ use self::root_data::RootData;
 use crate::argc_value::ArgcValue;
 use crate::matcher::Matcher;
 use crate::param::{FlagOptionParam, PositionalParam};
-use crate::parser::{parse, Event, EventData, EventScope, Position};
+use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::utils::INTERNAL_MODE;
 use crate::Result;
 
-use anyhow::bail;
+use anyhow::{anyhow, bail};
 use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -48,14 +48,15 @@ pub struct Command {
     pub(crate) names_checker: NamesChecker,
     pub(crate) root: Arc<RefCell<RootData>>,
     pub(crate) aliases: Vec<String>,
-    pub(crate) metadata: IndexMap<String, (String, Position)>,
+    pub(crate) metadata: Vec<(String, String, Position)>,
+    pub(crate) symbols: IndexMap<char, SymbolParam>,
 }
 
 impl Command {
     pub fn new(source: &str) -> Result<Self> {
         let events = parse(source)?;
         let mut root = Command::new_from_events(&events)?;
-        if root.metadata.contains_key("inherit-flag-options") {
+        if root.has_metadata("inherit-flag-options") {
             root.inherit_flag_options();
         }
         Ok(root)
@@ -102,11 +103,8 @@ impl Command {
             .collect();
         let positional_params: Vec<serde_json::Value> =
             self.positional_params.iter().map(|v| v.to_json()).collect();
-        let mut metadata = serde_json::Map::new();
-        for (k, (v, _)) in &self.metadata {
-            metadata.insert(k.to_string(), serde_json::Value::String(v.to_string()));
-        }
-        let metadata = serde_json::Value::Object(metadata);
+        let metadata: Vec<Vec<&String>> =
+            self.metadata.iter().map(|(k, v, _)| vec![k, v]).collect();
         serde_json::json!({
             "describe": self.describe,
             "name": self.name,
@@ -140,15 +138,14 @@ impl Command {
                 }
                 EventData::Meta(key, value) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@meta", position)?;
-                    if let Some((_, pos)) = cmd.metadata.get(&key) {
-                        bail!(
-                            "@meta(line {}) conflicts with '{}' at line {}",
-                            position,
-                            key,
-                            pos
-                        )
+                    if key == "symbol" {
+                        let (ch, name, choice_fn) = parse_symbol(&value).ok_or_else(|| {
+                            anyhow!("@meta(line {}) invalid symbol value", position)
+                        })?;
+                        cmd.symbols
+                            .insert(ch, (name.to_string(), choice_fn.map(|v| v.to_string())));
                     }
-                    cmd.metadata.insert(key, (value, position));
+                    cmd.metadata.push((key, value, position));
                 }
                 EventData::Cmd(value) => {
                     if root_data.borrow().scope == EventScope::CmdStart {
@@ -268,6 +265,10 @@ impl Command {
         }
         root_cmd.root.borrow().check_param_fn()?;
         Ok(root_cmd)
+    }
+
+    pub(crate) fn has_metadata(&self, key: &str) -> bool {
+        self.metadata.iter().any(|(k, _, _)| k == key)
     }
 
     pub(crate) fn render_help(&self, cmd_paths: &[&str], term_width: Option<usize>) -> String {
@@ -643,6 +644,8 @@ impl Command {
         ));
     }
 }
+
+pub(crate) type SymbolParam = (String, Option<String>);
 
 fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[String]) -> Option<&'a mut Command> {
     if cmd_paths.is_empty() {

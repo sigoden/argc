@@ -7,9 +7,12 @@ expression: output
   "name": null,
   "author": null,
   "version": null,
-  "metadata": {
-    "combine-shorts": ""
-  },
+  "metadata": [
+    [
+      "combine-shorts",
+      ""
+    ]
+  ],
   "options": [],
   "positionals": [],
   "aliases": [],
@@ -19,7 +22,7 @@ expression: output
       "name": "cmda",
       "author": null,
       "version": null,
-      "metadata": {},
+      "metadata": [],
       "options": [
         {
           "name": "a",
@@ -268,7 +271,7 @@ expression: output
       "name": "cmdb",
       "author": null,
       "version": null,
-      "metadata": {},
+      "metadata": [],
       "options": [
         {
           "name": "oa",
@@ -367,7 +370,7 @@ expression: output
       "name": "cmdc",
       "author": null,
       "version": null,
-      "metadata": {},
+      "metadata": [],
       "options": [
         {
           "name": "oe",
@@ -425,7 +428,7 @@ expression: output
       "name": "cmdd",
       "author": null,
       "version": null,
-      "metadata": {},
+      "metadata": [],
       "options": [
         {
           "name": "oa",
@@ -451,7 +454,7 @@ expression: output
       "name": "cmde",
       "author": null,
       "version": null,
-      "metadata": {},
+      "metadata": [],
       "options": [
         {
           "name": "oa",

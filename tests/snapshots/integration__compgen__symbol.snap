@@ -1,0 +1,16 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog +` ************
+stable	/color:default
+beta	/color:default
+nightly	/color:default
+
+************ COMPGEN `prog @` ************
+__argc_value=file	/color:default
+
+************ COMPGEN `prog +s` ************
+stable	/color:default
+
+
