@@ -728,13 +728,21 @@ mod tests {
     macro_rules! assert_parse_option_arg {
         ($data:literal, $expect:literal) => {
             assert_eq!(
-                parse_option_param($data).unwrap().1.render().as_str(),
+                parse_option_param($data)
+                    .unwrap()
+                    .1
+                    .render_source()
+                    .as_str(),
                 $expect
             );
         };
         ($data:literal) => {
             assert_eq!(
-                parse_option_param($data).unwrap().1.render().as_str(),
+                parse_option_param($data)
+                    .unwrap()
+                    .1
+                    .render_source()
+                    .as_str(),
                 $data
             );
         };
@@ -742,23 +750,37 @@ mod tests {
 
     macro_rules! assert_parse_flag_arg {
         ($data:literal, $expect:literal) => {
-            assert_eq!(parse_flag_arg($data).unwrap().1.render().as_str(), $expect);
+            assert_eq!(
+                parse_flag_arg($data).unwrap().1.render_source().as_str(),
+                $expect
+            );
         };
         ($data:literal) => {
-            assert_eq!(parse_flag_param($data).unwrap().1.render().as_str(), $data);
+            assert_eq!(
+                parse_flag_param($data).unwrap().1.render_source().as_str(),
+                $data
+            );
         };
     }
 
     macro_rules! assert_parse_positional_arg {
         ($data:literal, $expect:literal) => {
             assert_eq!(
-                parse_positional_param($data).unwrap().1.render().as_str(),
+                parse_positional_param($data)
+                    .unwrap()
+                    .1
+                    .render_source()
+                    .as_str(),
                 $expect
             );
         };
         ($data:literal) => {
             assert_eq!(
-                parse_positional_param($data).unwrap().1.render().as_str(),
+                parse_positional_param($data)
+                    .unwrap()
+                    .1
+                    .render_source()
+                    .as_str(),
                 $data
             );
         };
