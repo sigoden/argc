@@ -140,7 +140,7 @@ impl Command {
                     let cmd = Self::get_cmd(&mut root_cmd, "@meta", position)?;
                     if key == "symbol" {
                         let (ch, name, choice_fn) = parse_symbol(&value).ok_or_else(|| {
-                            anyhow!("@meta(line {}) invalid symbol '{}'", position, value,)
+                            anyhow!("@meta(line {}) invalid symbol value", position)
                         })?;
                         cmd.symbols
                             .insert(ch, (name.to_string(), choice_fn.map(|v| v.to_string())));
