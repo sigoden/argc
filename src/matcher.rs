@@ -592,7 +592,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             if !missing_flag_options.is_empty() {
                 let missing_flag_options: Vec<String> = missing_flag_options
                     .iter()
-                    .filter_map(|v| cmd.find_flag_option(v).map(|v| v.render_name_values()))
+                    .filter_map(|v| cmd.find_flag_option(v).map(|v| v.render_name_notations()))
                     .collect();
                 missing_params.extend(missing_flag_options)
             }
@@ -613,7 +613,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         } else if !param.validate_args_len(values.len()) {
                             return Some(MatchError::MismatchValues(
                                 level,
-                                param.render_name_values(),
+                                param.render_name_notations(),
                             ));
                         }
                         if let Some(choices) =
@@ -624,7 +624,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                     return Some(MatchError::InvalidValue(
                                         level,
                                         value.to_string(),
-                                        param.render_first_value(),
+                                        param.render_first_notation(),
                                         choices.clone(),
                                     ));
                                 }
@@ -851,7 +851,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 exist = false;
             }
             if !exist || param.multi_occurs() {
-                let describe = param.describe_head();
+                let describe = param.describe_oneline();
                 let kind = if param.is_flag() {
                     CompColor::of_flag()
                 } else {
@@ -1058,7 +1058,7 @@ fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
     let mut has_help_subcmd = false;
     let mut describe_help_subcmd = false;
     for subcmd in cmd.subcommands.iter() {
-        let describe = subcmd.describe_head();
+        let describe = subcmd.describe_oneline();
         for (i, v) in subcmd.list_names().into_iter().enumerate() {
             if i > 0 && v.len() < 2 {
                 continue;
@@ -1096,11 +1096,11 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
         .get(index)
         .map(|v| v.as_str())
         .unwrap_or_else(|| param.arg_value_names.last().unwrap());
-    comp_param(param.describe_head(), value_name, &param.data)
+    comp_param(param.describe_oneline(), value_name, &param.data)
 }
 
 fn comp_positional(param: &PositionalParam) -> Vec<CompItem> {
-    comp_param(param.describe_head(), &param.arg_value_name, &param.data)
+    comp_param(param.describe_oneline(), &param.arg_value_name, &param.data)
 }
 
 fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompItem> {

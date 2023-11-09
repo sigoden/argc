@@ -134,7 +134,7 @@ impl FlagOptionParam {
     }
 
     #[allow(unused)]
-    pub(crate) fn render(&self) -> String {
+    pub(crate) fn render_source(&self) -> String {
         let mut output = vec![];
         if let Some(ch) = self.short {
             output.push(format!("-{}", ch));
@@ -165,15 +165,15 @@ impl FlagOptionParam {
         format!("{}{}", self.render_hyphens(), self.name())
     }
 
-    pub(crate) fn render_first_value(&self) -> String {
+    pub(crate) fn render_first_notation(&self) -> String {
         format!("<{}>", self.arg_value_names[0])
     }
 
-    pub(crate) fn render_name_values(&self) -> String {
+    pub(crate) fn render_name_notations(&self) -> String {
         let mut output = self.render_name();
         if !self.is_flag() {
             output.push(' ');
-            output.push_str(&self.render_arg_values());
+            output.push_str(&self.render_notations());
         }
         output
     }
@@ -202,12 +202,12 @@ impl FlagOptionParam {
             }
         } else {
             output.push(' ');
-            output.push_str(&self.render_arg_values());
+            output.push_str(&self.render_notations());
         }
         output
     }
 
-    pub(crate) fn render_arg_values(&self) -> String {
+    pub(crate) fn render_notations(&self) -> String {
         if self.is_flag() {
             return String::new();
         }
@@ -311,7 +311,7 @@ impl FlagOptionParam {
         output
     }
 
-    pub(crate) fn describe_head(&self) -> &str {
+    pub(crate) fn describe_oneline(&self) -> &str {
         match self.describe.split_once('\n') {
             Some((v, _)) => v,
             None => self.describe.as_str(),
@@ -388,7 +388,7 @@ impl PositionalParam {
     }
 
     #[allow(unused)]
-    pub(crate) fn render(&self) -> String {
+    pub(crate) fn render_source(&self) -> String {
         let mut output = vec![];
         output.push(self.data.render_name_value());
         if let Some(value_name) = self.value_name.as_ref() {
@@ -446,7 +446,7 @@ impl PositionalParam {
         }
     }
 
-    pub(crate) fn describe_head(&self) -> &str {
+    pub(crate) fn describe_oneline(&self) -> &str {
         match self.describe.split_once('\n') {
             Some((v, _)) => v,
             None => self.describe.as_str(),
@@ -463,6 +463,7 @@ impl PositionalParam {
         })
     }
 }
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct ParamData {
     pub(crate) name: String,

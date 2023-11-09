@@ -310,7 +310,7 @@ impl Command {
             .flag_option_params
             .iter()
             .filter(|v| v.required())
-            .map(|v| v.render_name_values())
+            .map(|v| v.render_name_notations())
             .collect();
         if self.flag_option_params.len() != required_options.len() {
             output.push("[OPTIONS]".to_string());
@@ -424,7 +424,7 @@ impl Command {
     }
 
     pub(crate) fn render_subcommand_describe(&self) -> String {
-        let mut output = self.describe_head().to_string();
+        let mut output = self.describe_oneline().to_string();
         if self.aliases.is_empty() {
             return output;
         } else {
@@ -436,7 +436,7 @@ impl Command {
         output
     }
 
-    pub(crate) fn describe_head(&self) -> &str {
+    pub(crate) fn describe_oneline(&self) -> &str {
         match self.describe.split_once('\n') {
             Some((v, _)) => v,
             None => self.describe.as_str(),
