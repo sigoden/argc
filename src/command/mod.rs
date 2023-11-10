@@ -271,6 +271,14 @@ impl Command {
         self.metadata.iter().any(|(k, _, _)| k == key)
     }
 
+    pub(crate) fn flag_option_signs(&self) -> &str {
+        if self.flag_option_params.iter().any(|v| v.sign == '+') {
+            "+-"
+        } else {
+            "-"
+        }
+    }
+
     pub(crate) fn render_help(&self, cmd_paths: &[&str], term_width: Option<usize>) -> String {
         let mut output = vec![];
         if self.version.is_some() {

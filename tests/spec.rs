@@ -314,3 +314,16 @@ fn symbol() {
 "###;
     snapshot_multi!(script, [vec!["prog", "+nightly"]]);
 }
+
+#[test]
+fn plus_sign() {
+    let script = r###"
+# @flag +a
+# @option +fb
+# @option +c +fc*
+"###;
+    snapshot_multi!(
+        script,
+        [vec!["prog", "+a", "+fb", "fb", "+c", "fc1", "+fc", "fc2"]]
+    );
+}

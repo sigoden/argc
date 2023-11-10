@@ -1,0 +1,16 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog +a +fb fb +c fc1 +fc fc2
+
+OUTPUT
+argc_plus_a=1
+argc_plus_fb=fb
+argc_plus_fc=( fc1 fc2 )
+argc__args=( prog +a +fb fb +c fc1 +fc fc2 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+

@@ -1,3 +1,5 @@
+#![allow(clippy::too_many_arguments)]
+
 use std::{
     collections::{HashMap, HashSet},
     env,
@@ -86,7 +88,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         } else {
             let mut is_rest_args_positional = false; // option(e.g. -f --foo) will be treated as positional arg
             if let Some(arg) = args.last() {
-                if arg.starts_with('-') {
+                if arg.starts_with(|c| root.flag_option_signs().contains(c)) {
                     arg_comp = ArgComp::FlagOrOption;
                 } else if !arg.is_empty() {
                     arg_comp = ArgComp::CommandOrPositional;
@@ -94,6 +96,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             while arg_index < args_len {
                 let cmd = cmds[cmd_level].1;
+                let signs = cmd.flag_option_signs();
                 let arg = args[arg_index].as_str();
                 let is_last_arg = arg_index == args_len - 1;
                 last_flag_option = None;
@@ -121,7 +124,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         &mut is_rest_args_positional,
                         cmd,
                     );
-                } else if arg.starts_with('-') {
+                } else if arg.starts_with(|c| signs.contains(c)) {
                     if let Some((k, v)) = arg.split_once('=') {
                         if let Some(param) = cmd.find_flag_option(k) {
                             add_param_choice_fn(&mut choice_fns, param);
@@ -156,6 +159,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             &mut arg_comp,
                             &mut split_last_arg_at,
                             combine_shorts,
+                            signs,
                         );
                         last_flag_option = Some(param.var_name());
                     } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
@@ -223,8 +227,18 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 &mut arg_comp,
                                 &mut split_last_arg_at,
                                 combine_shorts,
+                                signs,
                             );
                             last_flag_option = Some(param.var_name());
+                        }
+                    } else if let Some((ch, symbol_param)) = find_symbol(cmd, arg) {
+                        if let Some(choice_fn) = &symbol_param.1 {
+                            choice_fns.insert(choice_fn);
+                        }
+                        symbol_args.push((&arg[1..], symbol_param));
+                        if is_last_arg {
+                            arg_comp = ArgComp::Symbol(ch);
+                            split_last_arg_at = Some(1);
                         }
                     } else {
                         flag_option_args[cmd_level].push((arg, vec![], None));
@@ -927,14 +941,14 @@ fn add_positional_arg<'a>(
     }
 }
 
-fn take_value_args(args: &[String], start: usize, len: usize) -> Vec<&str> {
+fn take_value_args<'a>(args: &'a [String], start: usize, len: usize, signs: &str) -> Vec<&'a str> {
     let mut output = vec![];
     if len == 0 {
         return output;
     }
     let end = (start + len).min(args.len());
     for arg in args.iter().take(end).skip(start) {
-        if arg.starts_with('-') {
+        if arg.starts_with(|c| signs.contains(c)) {
             break;
         }
         output.push(arg.as_str());
@@ -983,6 +997,7 @@ fn match_flag_option<'a, 'b>(
     arg_comp: &mut ArgComp,
     split_last_arg_at: &mut Option<usize>,
     combine_shorts: bool,
+    signs: &str,
 ) {
     if param.terminated() {
         let value_args: Vec<&str> = args[*arg_index + 1..].iter().map(|v| v.as_str()).collect();
@@ -1001,7 +1016,7 @@ fn match_flag_option<'a, 'b>(
             values_len = usize::MAX / 2;
         }
         let args_len = args.len();
-        let value_args = take_value_args(args, *arg_index + 1, values_len);
+        let value_args = take_value_args(args, *arg_index + 1, values_len, signs);
         let arg = &args[*arg_index];
         *arg_index += value_args.len();
         if *arg_index == args_len - 1 {
@@ -1089,13 +1104,16 @@ fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
     let mut output = vec![];
     let mut has_help_subcmd = false;
     let mut describe_help_subcmd = false;
+    let signs = cmd.flag_option_signs();
     for subcmd in cmd.subcommands.iter() {
         let describe = subcmd.describe_oneline();
         for (i, v) in subcmd.list_names().into_iter().enumerate() {
             if i > 0 && v.len() < 2 {
                 continue;
             }
-            if (flag && v.starts_with('-')) || (!flag && !v.starts_with('-')) {
+            if (flag && v.starts_with(|c| signs.contains(c)))
+                || (!flag && !v.starts_with(|c| signs.contains(c)))
+            {
                 if !flag {
                     has_help_subcmd = true;
                 }
