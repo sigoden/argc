@@ -331,3 +331,11 @@ fn plus_sign() {
         ]
     );
 }
+
+#[test]
+fn zero_or_one() {
+    let script = r###"
+# @option --oa <VALUE?>
+"###;
+    snapshot_multi!(script, [vec!["prog", "--oa"], vec!["prog", "--oa", "v1"]]);
+}
