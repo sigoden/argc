@@ -92,32 +92,37 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn unlimited_args(&self) -> bool {
-        self.terminated() || !self.notation_modifer().is_none()
+        self.terminated()
+            || self
+                .notation_modifer()
+                .map(|v| "*+".contains(v))
+                .unwrap_or_default()
     }
 
     pub(crate) fn validate_args_len(&self, num: usize) -> bool {
         let len = self.arg_value_names.len();
         if self.unlimited_args() {
-            let min = if len > 1 && self.notation_modifer() == NotationModifier::Asterisk {
+            let min = if len > 1 && self.notation_modifer() == Some('*') {
                 len - 1
             } else {
                 len
             };
             num >= min
+        } else if self.allow_empty() {
+            num == 1 || num == 0
         } else {
             num == len
         }
     }
 
-    pub(crate) fn notation_modifer(&self) -> NotationModifier {
-        if let Some(notation) = self.arg_value_names.last() {
-            if notation.ends_with('*') {
-                return NotationModifier::Asterisk;
-            } else if notation.ends_with('+') {
-                return NotationModifier::Plus;
-            }
-        }
-        NotationModifier::None
+    pub(crate) fn allow_empty(&self) -> bool {
+        !self.multiple() && self.notation_modifer() == Some('?')
+    }
+
+    pub(crate) fn notation_modifer(&self) -> Option<char> {
+        self.arg_value_names
+            .last()
+            .and_then(|name| ['*', '+', '?'].into_iter().find(|v| name.ends_with(*v)))
     }
 
     pub(crate) fn required(&self) -> bool {
@@ -272,6 +277,8 @@ impl FlagOptionParam {
                     var_name,
                     values[0].iter().map(|v| v.to_string()).collect(),
                 ))
+            } else if self.allow_empty() && values[0].is_empty() {
+                Some(ArgcValue::Single(var_name, "1".to_string()))
             } else {
                 Some(ArgcValue::Single(var_name, must_get_first(values[0])))
             }
@@ -587,20 +594,6 @@ impl ParamData {
         } else {
             value.to_string()
         }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
-#[serde(tag = "type", content = "value")]
-pub(crate) enum NotationModifier {
-    None,
-    Plus,
-    Asterisk,
-}
-
-impl NotationModifier {
-    pub(crate) fn is_none(&self) -> bool {
-        self == &NotationModifier::None
     }
 }
 
