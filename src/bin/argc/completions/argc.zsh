@@ -1,12 +1,12 @@
 _argc_completer() {
-    local words2 cword
-    _argc_reassemble_words
+    local new_words
+    _argc_completer_reassemble_words
 
     local candidates=() values=() displays=() colors display_value
     while IFS=$'\n' read -r line; do
         if [[ "$line" == "" ]]; then line=$'\0'; fi
         candidates+=( "$line" )
-    done < <(argc --argc-compgen zsh $'\0' $words2 2>/dev/null)
+    done < <(argc --argc-compgen zsh $'\0' $new_words 2>/dev/null)
     for candidate in ${candidates[@]}; do
         IFS=$'\t' read -r value display color_key color <<< "$candidate"
         colors="$colors:=(#b)($color_key)( * -- *)=0=$color=2;37:=(#b)($color_key)()=0=$color=2;37"
@@ -17,13 +17,13 @@ _argc_completer() {
     _describe "" displays values -Q -S '' -o nosort
 }
 
-_argc_reassemble_words() {
-    local i
-    words2=()
+_argc_completer_reassemble_words() {
+    local i cword
+    new_words=()
     for ((i=1; i<=$CURRENT; i++)); do
         cword="$words[$i]"
         if [[ "$cword" == "" ]]; then
-            words2+=( $'\0' )
+            new_words+=( $'\0' )
         else
             if [[ "$cword" == *"\\"* ]]; then
                 local j char next_char cword_len word
@@ -42,7 +42,7 @@ _argc_reassemble_words() {
                 done
                 cword="$word"
             fi
-            words2+=( "$cword" )
+            new_words+=( "$cword" )
         fi
     done
 }

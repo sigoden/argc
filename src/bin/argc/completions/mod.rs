@@ -17,82 +17,79 @@ const NUSHELL_SCRIPT: &str = include_str!("argc.nu");
 const XONSH_SCRIPT: &str = include_str!("argc.xsh");
 
 pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
-    let mut cmds = vec!["argc"];
-    cmds.extend(args.iter().map(|v| v.as_str()));
-    let output = match shell {
+    let mut cmds = args.to_vec();
+    let completion_shell = format!("ARGC_COMPLETION_{}", shell.name().to_uppercase());
+    let exist_completion = std::env::var(&completion_shell).ok().unwrap_or_default();
+    let append_mode = exist_completion == "1";
+    if !append_mode {
+        cmds.insert(0, "argc".to_string());
+    }
+    let mut share_script = String::new();
+    let mut cmds_code = String::new();
+    match shell {
         Shell::Bash => {
-            let code = format!(
+            share_script = format!("{BASH_SCRIPT}\nexport {completion_shell}=1\n");
+            cmds_code = format!(
                 "complete -F _argc_completer -o nospace -o nosort {}",
                 cmds.join(" ")
             );
-            format!("{BASH_SCRIPT}\n{code}\n",)
         }
         Shell::Elvish => {
-            let lines: Vec<String> = cmds
+            share_script = format!("{ELVISH_SCRIPT}\nset E:{completion_shell} = 1\n");
+            cmds_code = cmds
                 .iter()
-                .map(|v| format!(r#"set edit:completion:arg-completer[{v}] = $argc-completer~"#))
-                .collect();
-            let code = lines.join("\n");
-            format!("{ELVISH_SCRIPT}\n{code}\n",)
+                .map(|v| {
+                    if append_mode {
+                        format!("set edit:completion:arg-completer[{v}] = $edit:completion:arg-completer[argc]")
+                    } else {
+                        format!("set edit:completion:arg-completer[{v}] = $argc-completer~")
+                    }
+                })
+                .collect::<Vec<String>>()
+                .join("\n");
         }
         Shell::Fish => {
-            let lines: Vec<String> = cmds
+            share_script = format!("{FISH_SCRIPT}\nset -gx {completion_shell} 1\n");
+            cmds_code = cmds
                 .iter()
-                .map(|v| format!(r###"complete -x -k -c {v} -a "(_argc_completer)""###))
-                .collect();
-            let code = lines.join("\n");
-            format!("{FISH_SCRIPT}\n{code}\n",)
+                .map(|v| format!("complete -x -k -c {v} -a \"(_argc_completer)\""))
+                .collect::<Vec<String>>()
+                .join("\n");
         }
-        Shell::Generic => String::new(),
+        Shell::Generic => {}
         Shell::Nushell => {
-            let cmds = format!("{cmds:?}");
-            format!(
-                r###"{NUSHELL_SCRIPT}
-if ('ARGC_SCRIPTS' in $env) {{
-    $env.ARGC_SCRIPTS = ($env.ARGC_SCRIPTS | append {cmds} | uniq)
-}} else {{
-    $env.ARGC_SCRIPTS = {cmds}
-}}
-
-let external_completer = {{|spans| 
-    if (not ($env.ARGC_SCRIPTS | find $spans.0 | is-empty)) {{
-        _argc_completer $spans
-    }} else {{
-        # default completer
-    }}
-}}
-
-$env.config.completions.external = {{
-    enable: true
-    max_results: 100
-    completer: $external_completer
-}}
-"###,
-            )
+            share_script = format!("{NUSHELL_SCRIPT}\n$env.{completion_shell} = 1\n");
+            if append_mode {
+                cmds_code = format!("$env.ARGC_SCRIPTS = $env.ARGC_SCRIPTS ++ {cmds:?}");
+            } else {
+                cmds_code = format!("$env.ARGC_SCRIPTS = {cmds:?}");
+            }
         }
         Shell::Powershell => {
-            let lines: Vec<String> = cmds.iter().map(|v| format!("Register-ArgumentCompleter -Native -ScriptBlock $_argc_completer -CommandName {v} ")).collect();
-            let code = lines.join("\n");
-            format!("{POWERSHELL_SCRIPT}\n{code}\n",)
+            share_script = format!("{POWERSHELL_SCRIPT}\n$env:{completion_shell} = 1\n");
+            cmds_code = cmds.iter().map(|v| format!("Register-ArgumentCompleter -Native -ScriptBlock $_argc_completer -CommandName {v}")).collect::<Vec<String>>().join("\n");
         }
         Shell::Xonsh => {
-            let cmds = format!("{cmds:?}");
-            format!(
-                r###"{XONSH_SCRIPT}
-if 'ARGC_SCRIPTS' in globals():
-    ARGC_SCRIPTS.extend(item for item in {cmds} 
-        if item not in ARGC_SCRIPTS)
-else:
-    ARGC_SCRIPTS = {cmds} 
-"###,
-            )
+            share_script = format!("{XONSH_SCRIPT}\n${completion_shell} = 1\n");
+            if append_mode {
+                cmds_code = format!("ARGC_SCRIPTS.extend({cmds:?})");
+            } else {
+                cmds_code = format!("ARGC_SCRIPTS = {cmds:?}");
+            }
         }
         Shell::Zsh => {
-            let code = format!("compdef _argc_completer {}", cmds.join(" "));
-            format!("{ZSH_SCRIPT}\n{code}\n",)
+            share_script = format!("{ZSH_SCRIPT}\nexport {completion_shell}=1\n");
+            cmds_code = format!("compdef _argc_completer {}", cmds.join(" "));
         }
     };
-    Ok(output)
+    if append_mode {
+        if cmds.is_empty() {
+            return Ok(String::new());
+        }
+        Ok(cmds_code.to_string())
+    } else {
+        Ok(format!("{share_script}{cmds_code}"))
+    }
 }
 
 #[test]
