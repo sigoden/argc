@@ -5,7 +5,7 @@ set -e
 # @cmd Test the project
 # @alias t
 test() {
-    cargo test $@
+    cargo test "$@"
 }
 
 # @cmd Check the project
@@ -28,42 +28,13 @@ fix() {
 # @arg cmds* any other scripts based on argc
 setup-shell() {
     case $argc_shell in
-     bash)
-        cat <<EOF
-source <(argc --argc-completions bash ${argc_cmds[@]})
-EOF
-     ;;
-     elvish)
-        cat <<EOF
-eval (argc --argc-completions elvish ${argc_cmds[@]} | slurp)
-EOF
-     ;;
-     fish)
-        cat <<EOF
-argc --argc-completions fish ${argc_cmds[@]} | source
-EOF
-     ;;
-     nushell)
-        cat <<EOF
-argc --argc-completions nushell ${argc_cmds[@]} | save -f /tmp/argc.nu
-source /tmp/argc.nu
-EOF
-     ;;
-     powershell)
-        cat <<EOF
-argc --argc-completions powershell ${argc_cmds[@]} | Out-String | Invoke-Expression
-EOF
-     ;;
-     xonsh)
-        cat <<EOF
-exec(\$(argc --argc-completions xonsh ${argc_cmds[@]}))
-EOF
-     ;;
-     zsh)
-        cat <<EOF
-source <(argc --argc-completions zsh ${argc_cmds[@]})
-EOF
-     ;;
+     bash) echo "source <(argc --argc-completions bash ${argc_cmds[@]})" ;;
+     elvish) echo "eval (argc --argc-completions elvish ${argc_cmds[@]} | slurp)" ;;
+     fish) echo "argc --argc-completions fish ${argc_cmds[@]} | source" ;;
+     nushell) echo "argc --argc-completions nushell ${argc_cmds[@]} | save -f /tmp/argc.nu"$'\n'"source /tmp/argc.nu" ;;
+     powershell) echo "argc --argc-completions powershell ${argc_cmds[@]} | Out-String | Invoke-Expression" ;;
+     xonsh) echo "exec(\$(argc --argc-completions xonsh ${argc_cmds[@]}))" ;;
+     zsh) echo "source <(argc --argc-completions zsh ${argc_cmds[@]})" ;;
     esac
 }
 

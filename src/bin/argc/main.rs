@@ -91,7 +91,9 @@ fn run() -> Result<i32> {
                     None => bail!("Usage: argc --argc-completions <SHELL> [CMDS]..."),
                 };
                 let script = crate::completions::generate(shell, &args[3..])?;
-                println!("{}", script);
+                if !script.is_empty() {
+                    println!("{}", script);
+                }
             }
             "--argc-parallel" => {
                 if args.len() <= 3 {

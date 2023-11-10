@@ -1,6 +1,6 @@
 _argc_completer() {
-    local words cword
-    _argc_parse_comp_line
+    local words
+    _argc_completer_parse_line
 
     export COMP_WORDBREAKS
     while IFS=$'\n' read -r line; do
@@ -8,7 +8,7 @@ _argc_completer() {
     done < <(argc --argc-compgen bash "" "${words[@]}" 2>/dev/null)
 }
 
-_argc_parse_comp_line() {
+_argc_completer_parse_line() {
     local line len i char prev_char word unbalance word_index
     word_index=0
     line="${COMP_LINE:0:$COMP_POINT}"
@@ -41,5 +41,4 @@ _argc_parse_comp_line() {
         prev_char="$char"
     done
     words[$word_index]="$word"
-    cword="$word"
 }

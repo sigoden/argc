@@ -3,7 +3,6 @@
 use std::{
     collections::{HashMap, HashSet},
     env,
-    path::MAIN_SEPARATOR,
 };
 
 use crate::{
@@ -687,7 +686,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let fns: Vec<&str> = self.choice_fns.iter().copied().collect();
         let mut envs = HashMap::new();
         envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
-        envs.insert("ARGC_PATH_SEP".into(), MAIN_SEPARATOR.into());
         let outputs = run_param_fns(script_path, &fns, self.args, envs)?;
         for (i, output) in outputs.into_iter().enumerate() {
             let choices = output
