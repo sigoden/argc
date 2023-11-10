@@ -1,0 +1,27 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog +` ************
++a	/color:cyan
++fb	/color:cyan,bold
++fc	/color:cyan,bold
++c	/color:cyan,bold
++d	/color:cyan,bold
+
+************ COMPGEN `prog +fb=` ************
+abc	/color:default
+def	/color:default
+ijk	/color:default
+
+************ COMPGEN `prog +fc ` ************
+abc	/color:default
+def	/color:default
+ghi	/color:default
+
+************ COMPGEN `prog -fd ` ************
+abc	/color:default
+def	/color:default
+ghi	/color:default
+
+

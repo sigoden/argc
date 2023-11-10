@@ -99,6 +99,28 @@ _choice_fn() {
 }
 
 #[test]
+fn plus_sign() {
+    let script = r#"
+# @flag +a
+# @option +fb[abc|def|ijk]
+# @option +c +fc*[`_choice_fn`]
+# @option +d -fd*[`_choice_fn`]
+_choice_fn() {
+	echo -e "abc\ndef\nghi"
+}
+"#;
+    snapshot_compgen!(
+        script,
+        [
+            vec!["prog", "+"],
+            vec!["prog", "+fb="],
+            vec!["prog", "+fc", ""],
+            vec!["prog", "-fd", ""],
+        ]
+    );
+}
+
+#[test]
 fn subcmds() {
     const SCRIPT: &str = r###"
 # @arg file

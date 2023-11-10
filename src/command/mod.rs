@@ -14,7 +14,7 @@ use crate::Result;
 use anyhow::{anyhow, bail};
 use indexmap::IndexMap;
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 pub fn eval(
@@ -271,6 +271,18 @@ impl Command {
         self.metadata.iter().any(|(k, _, _)| k == key)
     }
 
+    pub(crate) fn flag_option_signs(&self) -> String {
+        let mut signs = HashSet::new();
+        signs.insert('-');
+        for param in &self.flag_option_params {
+            if let Some(short) = &param.short {
+                signs.extend(short.chars().take(1))
+            }
+            signs.extend(param.long_prefix.chars())
+        }
+        signs.into_iter().collect()
+    }
+
     pub(crate) fn render_help(&self, cmd_paths: &[&str], term_width: Option<usize>) -> String {
         let mut output = vec![];
         if self.version.is_some() {
@@ -361,10 +373,10 @@ impl Command {
         }
         let mut list = vec![];
         let mut any_describe = false;
-        let mut single_hyphen = false;
+        let mut single = false;
         for param in self.flag_option_params.iter() {
-            if param.single_hyphen {
-                single_hyphen = true;
+            if param.long_prefix.len() == 1 {
+                single = true;
             }
             let value = param.render_body();
             let describe = param.render_describe();
@@ -373,8 +385,8 @@ impl Command {
             }
             list.push((value, describe));
         }
-        self.add_help_flag(&mut list, single_hyphen, any_describe);
-        self.add_version_flag(&mut list, single_hyphen, any_describe);
+        self.add_help_flag(&mut list, single, any_describe);
+        self.add_version_flag(&mut list, single, any_describe);
         output.push("OPTIONS:".to_string());
         let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
         for (value, describe) in list {
@@ -471,7 +483,7 @@ impl Command {
     pub(crate) fn find_flag_option(&self, name: &str) -> Option<&FlagOptionParam> {
         self.flag_option_params
             .iter()
-            .find(|v| v.name() == name || v.is_match(name))
+            .find(|v| v.var_name() == name || v.is_match(name))
     }
 
     pub(crate) fn find_prefixed_option(&self, name: &str) -> Option<(&FlagOptionParam, String)> {
@@ -487,14 +499,14 @@ impl Command {
 
     pub(crate) fn match_version_short_name(&self) -> bool {
         match self.find_flag_option("-V") {
-            Some(param) => param.name() == "version",
+            Some(param) => param.var_name() == "version",
             None => true,
         }
     }
 
     pub(crate) fn match_help_short_name(&self) -> bool {
         match self.find_flag_option("-h") {
-            Some(param) => param.name() == "help",
+            Some(param) => param.var_name() == "help",
             None => true,
         }
     }
@@ -546,7 +558,7 @@ impl Command {
         for subcmd in self.subcommands.iter_mut() {
             let mut inherited_flag_options = vec![];
             for flag_option in &self.flag_option_params {
-                if subcmd.find_flag_option(flag_option.name()).is_none() {
+                if subcmd.find_flag_option(flag_option.var_name()).is_none() {
                     let mut flag_option = flag_option.clone();
                     flag_option.inherit = true;
                     inherited_flag_options.push(flag_option);
@@ -593,16 +605,11 @@ impl Command {
         self.subcommands.last_mut().unwrap()
     }
 
-    fn add_help_flag(
-        &self,
-        list: &mut Vec<(String, String)>,
-        single_hyphen: bool,
-        any_describe: bool,
-    ) {
+    fn add_help_flag(&self, list: &mut Vec<(String, String)>, single: bool, any_describe: bool) {
         if self.find_flag_option("help").is_some() {
             return;
         }
-        let hyphens = if single_hyphen { " -" } else { "--" };
+        let hyphens = if single { " -" } else { "--" };
         list.push((
             if self.match_help_short_name() {
                 format!("-h, {}help", hyphens)
@@ -617,19 +624,14 @@ impl Command {
         ));
     }
 
-    fn add_version_flag(
-        &self,
-        list: &mut Vec<(String, String)>,
-        single_hyphen: bool,
-        any_describe: bool,
-    ) {
+    fn add_version_flag(&self, list: &mut Vec<(String, String)>, single: bool, any_describe: bool) {
         if self.version.is_none() {
             return;
         }
         if self.find_flag_option("version").is_some() {
             return;
         }
-        let hyphens = if single_hyphen { " -" } else { "--" };
+        let hyphens = if single { " -" } else { "--" };
         list.push((
             if self.match_version_short_name() {
                 format!("-V, {}version", hyphens)
