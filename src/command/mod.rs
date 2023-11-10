@@ -471,7 +471,7 @@ impl Command {
     pub(crate) fn find_flag_option(&self, name: &str) -> Option<&FlagOptionParam> {
         self.flag_option_params
             .iter()
-            .find(|v| v.name() == name || v.is_match(name))
+            .find(|v| v.var_name() == name || v.is_match(name))
     }
 
     pub(crate) fn find_prefixed_option(&self, name: &str) -> Option<(&FlagOptionParam, String)> {
@@ -487,14 +487,14 @@ impl Command {
 
     pub(crate) fn match_version_short_name(&self) -> bool {
         match self.find_flag_option("-V") {
-            Some(param) => param.name() == "version",
+            Some(param) => param.var_name() == "version",
             None => true,
         }
     }
 
     pub(crate) fn match_help_short_name(&self) -> bool {
         match self.find_flag_option("-h") {
-            Some(param) => param.name() == "help",
+            Some(param) => param.var_name() == "help",
             None => true,
         }
     }
@@ -546,7 +546,7 @@ impl Command {
         for subcmd in self.subcommands.iter_mut() {
             let mut inherited_flag_options = vec![];
             for flag_option in &self.flag_option_params {
-                if subcmd.find_flag_option(flag_option.name()).is_none() {
+                if subcmd.find_flag_option(flag_option.var_name()).is_none() {
                     let mut flag_option = flag_option.clone();
                     flag_option.inherit = true;
                     inherited_flag_options.push(flag_option);

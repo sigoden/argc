@@ -14,6 +14,7 @@ pub(crate) struct FlagOptionParam {
     pub(crate) sign: char,
     pub(crate) single: bool,
     pub(crate) data: ParamData,
+    pub(crate) var_name: String,
     pub(crate) value_names: Vec<String>,
     pub(crate) arg_value_names: Vec<String>,
     pub(crate) inherit: bool,
@@ -29,12 +30,17 @@ impl FlagOptionParam {
         single: bool,
         value_names: &[&str],
     ) -> Self {
-        let name = param.name.clone();
+        let param_name = param.name.clone();
+        let var_name = if sign == '+' {
+            format!("plus_{}", param_name)
+        } else {
+            param_name.clone()
+        };
         let value_names: Vec<String> = value_names.iter().map(|v| v.to_string()).collect();
         let mut arg_value_names = if flag {
             vec![]
         } else if value_names.is_empty() {
-            vec![to_cobol_case(&name)]
+            vec![to_cobol_case(&param_name)]
         } else {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
@@ -49,14 +55,15 @@ impl FlagOptionParam {
             sign,
             single,
             data: param,
+            var_name,
             value_names,
             arg_value_names,
             inherit: false,
         }
     }
 
-    pub(crate) fn name(&self) -> &str {
-        self.data.name.as_str()
+    pub(crate) fn var_name(&self) -> &str {
+        &self.var_name
     }
 
     pub(crate) fn is_flag(&self) -> bool {
@@ -169,7 +176,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_name(&self) -> String {
-        format!("{}{}", self.render_long_prefix(), self.name())
+        format!("{}{}", self.render_long_prefix(), self.data.name)
     }
 
     pub(crate) fn render_first_notation(&self) -> String {
@@ -188,8 +195,8 @@ impl FlagOptionParam {
     pub(crate) fn render_body(&self) -> String {
         let mut output = String::new();
         let sign = self.sign;
-        if self.single && self.short.is_none() && self.name().len() == 1 {
-            output.push_str(&format!("{sign}{}", self.name()));
+        if self.single && self.short.is_none() && self.data.name.len() == 1 {
+            output.push_str(&format!("{sign}{}", self.data.name));
         } else {
             if let Some(ch) = self.short {
                 output.push_str(&format!("{sign}{ch}, "))
@@ -197,7 +204,7 @@ impl FlagOptionParam {
                 output.push_str("    ")
             };
             output.push_str(&format!("{:>2}", self.render_long_prefix()));
-            output.push_str(self.name());
+            output.push_str(&self.data.name);
         }
 
         if self.is_flag() {
@@ -240,24 +247,21 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&[&str]]) -> Option<ArgcValue> {
-        let mut name = self.name().to_string();
-        if self.sign == '+' {
-            name = format!("plus_{name}")
-        }
+        let var_name = self.var_name().to_string();
         if self.flag {
             if values.is_empty() {
                 None
             } else {
-                Some(ArgcValue::Single(name, values.len().to_string()))
+                Some(ArgcValue::Single(var_name, values.len().to_string()))
             }
         } else {
             if values.is_empty() {
                 match &self.data.default {
                     Some(DefaultData::Value(value)) => {
-                        return Some(ArgcValue::Single(name, value.clone()));
+                        return Some(ArgcValue::Single(var_name, value.clone()));
                     }
                     Some(DefaultData::Fn(f)) => {
-                        return Some(ArgcValue::SingleFn(name, f.clone()));
+                        return Some(ArgcValue::SingleFn(var_name, f.clone()));
                     }
                     None => return None,
                 }
@@ -278,20 +282,20 @@ impl FlagOptionParam {
                         })
                         .collect()
                 }
-                Some(ArgcValue::Multiple(name, values))
+                Some(ArgcValue::Multiple(var_name, values))
             } else if self.arg_value_names.len() > 1 {
                 Some(ArgcValue::Multiple(
-                    name,
+                    var_name,
                     values[0].iter().map(|v| v.to_string()).collect(),
                 ))
             } else {
-                Some(ArgcValue::Single(name, must_get_first(values[0])))
+                Some(ArgcValue::Single(var_name, must_get_first(values[0])))
             }
         }
     }
 
     pub(crate) fn is_match(&self, name: &str) -> bool {
-        self.list_names().iter().any(|v| v == name)
+        self.list_option_names().iter().any(|v| v == name)
     }
 
     pub(crate) fn prefixed(&self) -> Option<String> {
@@ -309,9 +313,9 @@ impl FlagOptionParam {
         Some(self.render_name())
     }
 
-    pub(crate) fn list_names(&self) -> Vec<String> {
+    pub(crate) fn list_option_names(&self) -> Vec<String> {
         let mut output = vec![];
-        output.push(format!("{}{}", self.render_long_prefix(), self.name()));
+        output.push(format!("{}{}", self.render_long_prefix(), self.data.name));
         if let Some(short) = self.short {
             output.push(format!("{}{}", self.sign, short));
         }
@@ -326,9 +330,9 @@ impl FlagOptionParam {
     }
 
     pub fn to_json(&self) -> serde_json::Value {
-        let option_names = self.list_names();
+        let option_names = self.list_option_names();
         json!({
-            "name": self.name(),
+            "name": self.data.name,
             "describe": self.describe,
             "flag": self.flag,
             "option_names": option_names,
@@ -362,7 +366,7 @@ impl PositionalParam {
         }
     }
 
-    pub(crate) fn name(&self) -> &str {
+    pub(crate) fn var_name(&self) -> &str {
         &self.data.name
     }
 
@@ -422,7 +426,7 @@ impl PositionalParam {
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&str]) -> Option<ArgcValue> {
-        let name = self.name().to_string();
+        let name = self.var_name().to_string();
         if values.is_empty() {
             match &self.data.default {
                 Some(DefaultData::Value(value)) => {
@@ -462,7 +466,7 @@ impl PositionalParam {
 
     pub fn to_json(&self) -> serde_json::Value {
         json!({
-            "name": self.name(),
+            "name": self.var_name(),
             "describe": self.describe,
             "modifier": self.data.modifer,
             "choices": self.data.choice_values(),
