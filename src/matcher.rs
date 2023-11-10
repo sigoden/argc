@@ -159,7 +159,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             &mut arg_comp,
                             &mut split_last_arg_at,
                             combine_shorts,
-                            signs,
+                            &signs,
                         );
                         last_flag_option = Some(param.var_name());
                     } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
@@ -227,7 +227,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 &mut arg_comp,
                                 &mut split_last_arg_at,
                                 combine_shorts,
-                                signs,
+                                &signs,
                             );
                             last_flag_option = Some(param.var_name());
                         }

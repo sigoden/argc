@@ -9,10 +9,9 @@ use serde_json::json;
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct FlagOptionParam {
     pub(crate) describe: String,
-    pub(crate) short: Option<char>,
     pub(crate) flag: bool,
-    pub(crate) sign: char,
-    pub(crate) single: bool,
+    pub(crate) short: Option<String>,
+    pub(crate) long_prefix: String,
     pub(crate) data: ParamData,
     pub(crate) var_name: String,
     pub(crate) value_names: Vec<String>,
@@ -24,14 +23,13 @@ impl FlagOptionParam {
     pub(crate) fn new(
         param: ParamData,
         describe: &str,
-        short: Option<char>,
         flag: bool,
-        sign: char,
-        single: bool,
+        short: Option<&str>,
+        long_prefix: &str,
         value_names: &[&str],
     ) -> Self {
         let param_name = param.name.clone();
-        let var_name = if sign == '+' {
+        let var_name = if long_prefix.starts_with('+') {
             format!("plus_{}", param_name)
         } else {
             param_name.clone()
@@ -50,10 +48,9 @@ impl FlagOptionParam {
         }
         Self {
             describe: describe.to_string(),
-            short,
             flag,
-            sign,
-            single,
+            short: short.map(|v| v.to_string()),
+            long_prefix: long_prefix.to_string(),
             data: param,
             var_name,
             value_names,
@@ -146,12 +143,12 @@ impl FlagOptionParam {
     #[allow(unused)]
     pub(crate) fn render_source(&self) -> String {
         let mut output = vec![];
-        if let Some(ch) = self.short {
-            output.push(format!("{}{}", self.sign, ch));
+        if let Some(short) = &self.short {
+            output.push(short.to_string());
         };
         output.push(format!(
             "{}{}",
-            self.render_long_prefix(),
+            self.long_prefix,
             self.data.render_name_value()
         ));
         for value_name in &self.value_names {
@@ -163,20 +160,8 @@ impl FlagOptionParam {
         output.join(" ")
     }
 
-    pub(crate) fn render_long_prefix(&self) -> &str {
-        if self.single {
-            if self.sign == '+' {
-                "+"
-            } else {
-                "-"
-            }
-        } else {
-            "--"
-        }
-    }
-
     pub(crate) fn render_name(&self) -> String {
-        format!("{}{}", self.render_long_prefix(), self.data.name)
+        format!("{}{}", self.long_prefix, self.data.name)
     }
 
     pub(crate) fn render_first_notation(&self) -> String {
@@ -194,16 +179,15 @@ impl FlagOptionParam {
 
     pub(crate) fn render_body(&self) -> String {
         let mut output = String::new();
-        let sign = self.sign;
-        if self.single && self.short.is_none() && self.data.name.len() == 1 {
-            output.push_str(&format!("{sign}{}", self.data.name));
+        if self.short.is_none() && self.long_prefix.len() == 1 && self.data.name.len() == 1 {
+            output.push_str(&self.render_name());
         } else {
-            if let Some(ch) = self.short {
-                output.push_str(&format!("{sign}{ch}, "))
+            if let Some(short) = &self.short {
+                output.push_str(&format!("{short}, "))
             } else {
                 output.push_str("    ")
             };
-            output.push_str(&format!("{:>2}", self.render_long_prefix()));
+            output.push_str(&format!("{:>2}", self.long_prefix));
             output.push_str(&self.data.name);
         }
 
@@ -306,8 +290,8 @@ impl FlagOptionParam {
             return None;
         }
 
-        if let Some(ch) = self.short {
-            return Some(format!("{}{ch}", self.sign));
+        if let Some(short) = &self.short {
+            return Some(short.clone());
         }
 
         Some(self.render_name())
@@ -315,9 +299,9 @@ impl FlagOptionParam {
 
     pub(crate) fn list_option_names(&self) -> Vec<String> {
         let mut output = vec![];
-        output.push(format!("{}{}", self.render_long_prefix(), self.data.name));
-        if let Some(short) = self.short {
-            output.push(format!("{}{}", self.sign, short));
+        output.push(self.render_name());
+        if let Some(short) = &self.short {
+            output.push(short.clone());
         }
         output
     }

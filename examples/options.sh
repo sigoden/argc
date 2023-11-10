@@ -1,5 +1,4 @@
-# @cmd
-# @describe    All kind of options
+# @cmd All kind of options
 # @option    --oa                   
 # @option -b --ob                   short
 # @option -c                        short only
@@ -23,8 +22,7 @@ options() {
     :;
 }
 
-# @cmd
-# @describe   All kind of flags
+# @cmd All kind of flags
 # @flag     --fa 
 # @flag  -b --fb         short
 # @flag  -c              short only
@@ -34,8 +32,7 @@ flags() {
     :;
 }
 
-# @cmd
-# @describe  Flags or options with single dash
+# @cmd Flags or options with single dash
 # @flag    -fa
 # @flag -b -fb
 # @flag    -fd*
@@ -49,8 +46,7 @@ flags() {
 }
 
 
-# @cmd
-# @describe    All kind of options
+# @cmd All kind of options
 # @option     +oa                   
 # @option +b  +ob                   short
 # @option +c                        short only
@@ -75,8 +71,7 @@ plus_options() {
 }
 
 
-# @cmd
-# @describe   All kind of flags
+# @cmd All kind of flags
 # @flag      +fa 
 # @flag  +b  +fb         short
 # @flag  +c              short only
@@ -86,8 +81,7 @@ plus_flags() {
     :;
 }
 
-# @cmd
-# @describe  Flags or options with single dash
+# @cmd Flags or options with single dash
 # @flag    +fa
 # @flag +b +fb
 # @flag    +fd*
@@ -97,6 +91,13 @@ plus_flags() {
 # @option  +oca[a|b]
 # @option  +ofa[`_choice_fn`]
 plus_1dash() {
+    :;
+}
+
+
+# @cmd Mixed `-` and `+` options
+# @option +b --ob
+mix_options() {
     :;
 }
 

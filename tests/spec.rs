@@ -321,9 +321,13 @@ fn plus_sign() {
 # @flag +a
 # @option +fb
 # @option +c +fc*
+# @option +d -fd*
 "###;
     snapshot_multi!(
         script,
-        [vec!["prog", "+a", "+fb", "fb", "+c", "fc1", "+fc", "fc2"]]
+        [
+            vec!["prog", "+a", "+fb", "fb", "+c", "fc1", "+fc", "fc2"],
+            vec!["prog", "+d", "fd1", "-fd", "fd2"],
+        ]
     );
 }

@@ -104,6 +104,7 @@ fn plus_sign() {
 # @flag +a
 # @option +fb[abc|def|ijk]
 # @option +c +fc*[`_choice_fn`]
+# @option +d -fd*[`_choice_fn`]
 _choice_fn() {
 	echo -e "abc\ndef\nghi"
 }
@@ -114,6 +115,7 @@ _choice_fn() {
             vec!["prog", "+"],
             vec!["prog", "+fb="],
             vec!["prog", "+fc", ""],
+            vec!["prog", "-fd", ""],
         ]
     );
 }

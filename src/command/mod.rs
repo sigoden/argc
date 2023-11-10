@@ -14,7 +14,7 @@ use crate::Result;
 use anyhow::{anyhow, bail};
 use indexmap::IndexMap;
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 pub fn eval(
@@ -271,12 +271,16 @@ impl Command {
         self.metadata.iter().any(|(k, _, _)| k == key)
     }
 
-    pub(crate) fn flag_option_signs(&self) -> &str {
-        if self.flag_option_params.iter().any(|v| v.sign == '+') {
-            "+-"
-        } else {
-            "-"
+    pub(crate) fn flag_option_signs(&self) -> String {
+        let mut signs = HashSet::new();
+        signs.insert('-');
+        for param in &self.flag_option_params {
+            if let Some(short) = &param.short {
+                signs.extend(short.chars().take(1))
+            }
+            signs.extend(param.long_prefix.chars())
         }
+        signs.into_iter().collect()
     }
 
     pub(crate) fn render_help(&self, cmd_paths: &[&str], term_width: Option<usize>) -> String {
@@ -371,7 +375,7 @@ impl Command {
         let mut any_describe = false;
         let mut single = false;
         for param in self.flag_option_params.iter() {
-            if param.single {
+            if param.long_prefix.len() == 1 {
                 single = true;
             }
             let value = param.render_body();
