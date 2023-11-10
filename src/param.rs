@@ -11,7 +11,8 @@ pub(crate) struct FlagOptionParam {
     pub(crate) describe: String,
     pub(crate) short: Option<char>,
     pub(crate) flag: bool,
-    pub(crate) single_hyphen: bool,
+    pub(crate) sign: char,
+    pub(crate) single: bool,
     pub(crate) data: ParamData,
     pub(crate) value_names: Vec<String>,
     pub(crate) arg_value_names: Vec<String>,
@@ -24,7 +25,8 @@ impl FlagOptionParam {
         describe: &str,
         short: Option<char>,
         flag: bool,
-        single_hyphen: bool,
+        sign: char,
+        single: bool,
         value_names: &[&str],
     ) -> Self {
         let name = param.name.clone();
@@ -44,7 +46,8 @@ impl FlagOptionParam {
             describe: describe.to_string(),
             short,
             flag,
-            single_hyphen,
+            sign,
+            single,
             data: param,
             value_names,
             arg_value_names,
@@ -137,11 +140,11 @@ impl FlagOptionParam {
     pub(crate) fn render_source(&self) -> String {
         let mut output = vec![];
         if let Some(ch) = self.short {
-            output.push(format!("-{}", ch));
+            output.push(format!("{}{}", self.sign, ch));
         };
         output.push(format!(
             "{}{}",
-            self.render_hyphens(),
+            self.render_long_prefix(),
             self.data.render_name_value()
         ));
         for value_name in &self.value_names {
@@ -153,16 +156,20 @@ impl FlagOptionParam {
         output.join(" ")
     }
 
-    pub(crate) fn render_hyphens(&self) -> &str {
-        if self.single_hyphen {
-            "-"
+    pub(crate) fn render_long_prefix(&self) -> &str {
+        if self.single {
+            if self.sign == '+' {
+                "+"
+            } else {
+                "-"
+            }
         } else {
             "--"
         }
     }
 
     pub(crate) fn render_name(&self) -> String {
-        format!("{}{}", self.render_hyphens(), self.name())
+        format!("{}{}", self.render_long_prefix(), self.name())
     }
 
     pub(crate) fn render_first_notation(&self) -> String {
@@ -180,19 +187,16 @@ impl FlagOptionParam {
 
     pub(crate) fn render_body(&self) -> String {
         let mut output = String::new();
-        if self.single_hyphen && self.short.is_none() && self.name().len() == 1 {
-            output.push_str(&format!("-{}", self.name()));
+        let sign = self.sign;
+        if self.single && self.short.is_none() && self.name().len() == 1 {
+            output.push_str(&format!("{sign}{}", self.name()));
         } else {
             if let Some(ch) = self.short {
-                output.push_str(&format!("-{ch}, "))
+                output.push_str(&format!("{sign}{ch}, "))
             } else {
                 output.push_str("    ")
             };
-            if self.single_hyphen {
-                output.push_str(" -")
-            } else {
-                output.push_str("--")
-            }
+            output.push_str(&format!("{:>2}", self.render_long_prefix()));
             output.push_str(self.name());
         }
 
@@ -236,7 +240,10 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&[&str]]) -> Option<ArgcValue> {
-        let name = self.name().to_string();
+        let mut name = self.name().to_string();
+        if self.sign == '+' {
+            name = format!("plus_{name}")
+        }
         if self.flag {
             if values.is_empty() {
                 None
@@ -296,7 +303,7 @@ impl FlagOptionParam {
         }
 
         if let Some(ch) = self.short {
-            return Some(format!("-{ch}"));
+            return Some(format!("{}{ch}", self.sign));
         }
 
         Some(self.render_name())
@@ -304,9 +311,9 @@ impl FlagOptionParam {
 
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![];
-        output.push(format!("{}{}", self.render_hyphens(), self.name()));
+        output.push(format!("{}{}", self.render_long_prefix(), self.name()));
         if let Some(short) = self.short {
-            output.push(format!("-{}", short));
+            output.push(format!("{}{}", self.sign, short));
         }
         output
     }
@@ -540,8 +547,8 @@ impl ParamData {
                 result.push_str(&format!("[={}]", Self::render_choice_values(values)));
             }
             (Some(ChoiceData::Fn(f, validate)), _) => {
-                let sign = if *validate { "" } else { "?" };
-                result.push_str(&format!("[{sign}`{f}`]"));
+                let prefix = if *validate { "" } else { "?" };
+                result.push_str(&format!("[{prefix}`{f}`]"));
             }
             (None, Some(DefaultData::Value(value))) => {
                 result.push_str(&format!("={}", Self::render_default_value(value)));

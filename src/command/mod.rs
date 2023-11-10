@@ -361,10 +361,10 @@ impl Command {
         }
         let mut list = vec![];
         let mut any_describe = false;
-        let mut single_hyphen = false;
+        let mut single = false;
         for param in self.flag_option_params.iter() {
-            if param.single_hyphen {
-                single_hyphen = true;
+            if param.single {
+                single = true;
             }
             let value = param.render_body();
             let describe = param.render_describe();
@@ -373,8 +373,8 @@ impl Command {
             }
             list.push((value, describe));
         }
-        self.add_help_flag(&mut list, single_hyphen, any_describe);
-        self.add_version_flag(&mut list, single_hyphen, any_describe);
+        self.add_help_flag(&mut list, single, any_describe);
+        self.add_version_flag(&mut list, single, any_describe);
         output.push("OPTIONS:".to_string());
         let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
         for (value, describe) in list {
@@ -593,16 +593,11 @@ impl Command {
         self.subcommands.last_mut().unwrap()
     }
 
-    fn add_help_flag(
-        &self,
-        list: &mut Vec<(String, String)>,
-        single_hyphen: bool,
-        any_describe: bool,
-    ) {
+    fn add_help_flag(&self, list: &mut Vec<(String, String)>, single: bool, any_describe: bool) {
         if self.find_flag_option("help").is_some() {
             return;
         }
-        let hyphens = if single_hyphen { " -" } else { "--" };
+        let hyphens = if single { " -" } else { "--" };
         list.push((
             if self.match_help_short_name() {
                 format!("-h, {}help", hyphens)
@@ -617,19 +612,14 @@ impl Command {
         ));
     }
 
-    fn add_version_flag(
-        &self,
-        list: &mut Vec<(String, String)>,
-        single_hyphen: bool,
-        any_describe: bool,
-    ) {
+    fn add_version_flag(&self, list: &mut Vec<(String, String)>, single: bool, any_describe: bool) {
         if self.version.is_none() {
             return;
         }
         if self.find_flag_option("version").is_some() {
             return;
         }
-        let hyphens = if single_hyphen { " -" } else { "--" };
+        let hyphens = if single { " -" } else { "--" };
         list.push((
             if self.match_version_short_name() {
                 format!("-V, {}version", hyphens)
