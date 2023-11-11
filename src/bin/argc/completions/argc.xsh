@@ -9,7 +9,7 @@ def _argc_completer(context):
     args = [v.value for v in context.args[0:context.arg_index]]
     args.append(context.raw_prefix)
 
-    if args[0] not in ARGC_SCRIPTS:
+    if args[0] not in __xonsh__.env['ARGC_SCRIPTS']:
         return
 
     output, _ = Popen(['argc', '--argc-compgen', 'xonsh', '', *args], stdout=PIPE, stderr=PIPE).communicate()
