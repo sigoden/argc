@@ -70,11 +70,11 @@ pub fn generate(shell: Shell, args: &[String]) -> Result<String> {
             cmds_code = cmds.iter().map(|v| format!("Register-ArgumentCompleter -Native -ScriptBlock $_argc_completer -CommandName {v}")).collect::<Vec<String>>().join("\n");
         }
         Shell::Xonsh => {
-            share_script = format!("{XONSH_SCRIPT}\n${completion_shell} = 1\n");
+            share_script = format!("{XONSH_SCRIPT}\n__xonsh__.env['{completion_shell}'] = 1\n");
             if append_mode {
-                cmds_code = format!("ARGC_SCRIPTS.extend({cmds:?})");
+                cmds_code = format!("__xonsh__.env['ARGC_SCRIPTS'].extend({cmds:?})");
             } else {
-                cmds_code = format!("ARGC_SCRIPTS = {cmds:?}");
+                cmds_code = format!("__xonsh__.env['ARGC_SCRIPTS'] = {cmds:?}");
             }
         }
         Shell::Zsh => {
