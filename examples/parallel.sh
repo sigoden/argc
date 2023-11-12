@@ -21,19 +21,19 @@ cmd2() {
 # @cmd
 # @option --oa
 foo() {
-    argc --argc-parallel "$0" cmd1 abc ::: _fn ::: cmd2 
+    argc --argc-parallel "$0" cmd1 abc ::: func ::: cmd2 
 }
 
 # @cmd
 # @option --oa
 bar() {
     cmd1 abc
-    _fn
+    func
     cmd2
 }
 
-_fn() {
-    echo fn
+func() {
+    echo func
 }
 
 eval "$(argc --argc-eval "$0" "$@")"

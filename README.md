@@ -119,14 +119,8 @@ Define a positional argument.
 # @arg vd+                 required + multiple
 # @arg vna <PATH>          value notation
 # @arg vda=a               default
-# @arg vdb=`_default_fn`   default from fn
 # @arg vca[a|b]            choice
 # @arg vcb[=a|b]           choice + default
-# @arg vcc*[a|b]           multiple + choice
-# @arg vcd+[a|b]           required + multiple + choice
-# @arg vfa[`_choice_fn`]   choice from fn
-# @arg vfb[?`_choice_fn`]  choice from fn + no validation
-# @arg vfc*[`_choice_fn`]  multiple + choice from fn
 # @arg vx~                 capture all remaining args
 ```
 
@@ -147,16 +141,9 @@ Define a option.
 # @option    --oe+                  required + multi-occurs
 # @option    --ona <PATH>           value notation
 # @option    --onb <CMD> <FILE>     two-args value notations
-# @option    --onc <CMD> <FILE+>    unlimited-args value notations
 # @option    --oda=a                default
-# @option    --odb=`_default_fn`    default from fn
 # @option    --oca[a|b]             choice
 # @option    --ocb[=a|b]            choice + default
-# @option    --occ*[a|b]            multi-occurs + choice
-# @option    --ocd+[a|b]            required + multi-occurs + choice
-# @option    --ofa[`_choice_fn`]    choice from fn
-# @option    --ofb[?`_choice_fn`]   choice from fn + no validation
-# @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
 # @option    --oxa~                 capture all remaining args
 ```
 
@@ -174,7 +161,6 @@ Define a flag. A flag is an option of boolean type, and is always false by defau
 # @flag  -b --fb         short
 # @flag  -c              short only
 # @flag     --fd*        multi-occurs
-# @flag  -e --fe*        short + multi-occurs
 ```
 
 ### @alias

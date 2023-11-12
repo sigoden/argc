@@ -17,6 +17,7 @@
 # @option    --ofa[`_choice_fn`]    choice from fn
 # @option    --ofb[?`_choice_fn`]   choice from fn + no validation
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
+# @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma separated list
 # @option    --oxa~                 capture all remaining args
 options() {
     :;
@@ -32,7 +33,7 @@ flags() {
     :;
 }
 
-# @cmd Flags or options with single dash
+# @cmd Flags or options with single hyphen
 # @flag    -fa
 # @flag -b -fb
 # @flag    -fd*
@@ -41,10 +42,20 @@ flags() {
 # @option  -ona <PATH>
 # @option  -oca[a|b]
 # @option  -ofa[`_choice_fn`]
-1dash() {
+single-hyphen() {
     :;
 }
 
+# @cmd All kinds of value noataion
+# @option --oa  <FILE>             one file value
+# @option --ob  <DIR>              one dir value
+# @option --oc  <PATH>             one path value
+# @option --oe  <VALUE*>           multi values, zero or more
+# @option --of  <VALUE+>           multi values, one or more
+# @option --og  <VALUE?>           zero or one
+value-notation() {
+    :;
+}
 
 # @cmd All kind of options
 # @option     +oa                   
@@ -65,11 +76,11 @@ flags() {
 # @option     +ofa[`_choice_fn`]    choice from fn
 # @option     +ofb[?`_choice_fn`]   choice from fn + no validation
 # @option     +ofc*[`_choice_fn`]   multi-occurs + choice from fn
+# @option     +ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma separated list
 # @option     +oxa~                 capture all remaining args
-plus_options() {
+plus-options() {
     :;
 }
-
 
 # @cmd All kind of flags
 # @flag      +fa 
@@ -77,27 +88,22 @@ plus_options() {
 # @flag  +c              short only
 # @flag      +fd*        multi-occurs
 # @flag  +e  +fe*        short + multi-occurs
-plus_flags() {
+plus-flags() {
     :;
 }
-
-# @cmd Flags or options with single dash
-# @flag    +fa
-# @flag +b +fb
-# @flag    +fd*
-# @option  +oa
-# @option  +od*
-# @option  +ona <PATH>
-# @option  +oca[a|b]
-# @option  +ofa[`_choice_fn`]
-plus_1dash() {
-    :;
-}
-
 
 # @cmd Mixed `-` and `+` options
-# @option +b --ob
-mix_options() {
+# @option +a -a
+# @option -b +b
+# @option +c --c
+mix-options() {
+    :;
+}
+
+# @cmd Prefixed option
+# @option -X-*[`_choice_fn`]       prefixied + multi-occurs + choice from fn
+# @option +X-*[`_choice_fn`]       prefixied + multi-occurs + choice from fn
+prefixed-option() {
     :;
 }
 
