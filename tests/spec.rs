@@ -333,9 +333,24 @@ fn plus_sign() {
 }
 
 #[test]
-fn zero_or_one() {
+fn notation_modifier() {
     let script = r###"
-# @option --oa <VALUE?>
+# @option --oa <VALUE*>           multi values, zero or more
+# @option --ob <VALUE+>           multi values, one or more
+# @option --oc <VALUE?>           zero or one
 "###;
-    snapshot_multi!(script, [vec!["prog", "--oa"], vec!["prog", "--oa", "v1"]]);
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "--oa"],
+            vec!["prog", "--oa", "v1"],
+            vec!["prog", "--oa", "v1", "v2"],
+            vec!["prog", "--ob"],
+            vec!["prog", "--ob", "v1"],
+            vec!["prog", "--ob", "v1", "v2"],
+            vec!["prog", "--oc"],
+            vec!["prog", "--oc", "v1"],
+            vec!["prog", "--oc", "v1", "v2"],
+        ]
+    );
 }

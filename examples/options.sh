@@ -46,15 +46,12 @@ single-hyphen() {
     :;
 }
 
-# @cmd All kinds of value noataion
-# @option --oa  <FILE>             one file value
-# @option --ob  <DIR>              one dir value
-# @option --oc  <PATH>             one path value
-# @option --oe  <VALUE*>           multi values, zero or more
-# @option --of  <VALUE+>           multi values, one or more
-# @option --og  <VALUE?>           zero or one
-value-notation() {
-    :;
+# @cmd Value notation modifier
+# @option --oa <VALUE*>           multi values, zero or more
+# @option --ob <VALUE+>           multi values, one or more
+# @option --oc <VALUE?>           zero or one
+notation-modifier() {
+    (set -o posix; set) | grep argc_
 }
 
 # @cmd All kind of options
