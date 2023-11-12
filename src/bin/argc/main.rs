@@ -167,21 +167,17 @@ fn run_compgen(mut args: Vec<String>) -> Option<()> {
             args[3] = script_file.to_string_lossy().to_string();
         } else if let Ok(script_file) = which(&args[4]) {
             args[3] = script_file.to_string_lossy().to_string();
-        } else {
-            return None;
         }
     }
-    let no_color = if let Ok(v) = std::env::var("NO_COLOR") {
-        v == "true" || v == "1"
-    } else {
-        false
-    };
-    let output = if args.len() >= 6
-        && &args[4] == "argc"
-        && (args[3].is_empty() || args[5].starts_with("--argc"))
-    {
+    let no_color = std::env::var("NO_COLOR")
+        .map(|v| v == "true" || v == "1")
+        .unwrap_or_default();
+    let output = if &args[4] == "argc" && (args[3].is_empty() || args[5].starts_with("--argc")) {
         let cmd_args = &args[4..];
         argc::compgen(shell, "", COMPLETION_SCRIPT, cmd_args, no_color).ok()?
+    } else if args[3].is_empty() {
+        let cmd_args = &args[4..];
+        argc::compgen(shell, "", "# @arg path*", cmd_args, no_color).ok()?
     } else {
         let (source, cmd_args) = parse_script_args(&args[3..]).ok()?;
         argc::compgen(shell, &args[3], &source, &cmd_args[1..], no_color).ok()?
