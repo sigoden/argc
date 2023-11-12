@@ -102,21 +102,17 @@ impl FlagOptionParam {
     pub(crate) fn validate_args_len(&self, num: usize) -> bool {
         let len = self.arg_value_names.len();
         if self.unlimited_args() {
-            let min = if len > 1 && self.notation_modifer() == Some('*') {
+            let min = if self.notation_modifer() == Some('*') {
                 len - 1
             } else {
                 len
             };
             num >= min
-        } else if self.allow_empty() {
-            num == 1 || num == 0
+        } else if self.notation_modifer() == Some('?') {
+            num == len || num == len - 1
         } else {
             num == len
         }
-    }
-
-    pub(crate) fn allow_empty(&self) -> bool {
-        !self.multiple() && self.notation_modifer() == Some('?')
     }
 
     pub(crate) fn notation_modifer(&self) -> Option<char> {
@@ -277,8 +273,6 @@ impl FlagOptionParam {
                     var_name,
                     values[0].iter().map(|v| v.to_string()).collect(),
                 ))
-            } else if self.allow_empty() && values[0].is_empty() {
-                Some(ArgcValue::Single(var_name, "1".to_string()))
             } else {
                 Some(ArgcValue::Single(var_name, must_get_first(values[0])))
             }

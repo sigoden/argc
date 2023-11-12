@@ -1,0 +1,91 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog --oa
+
+OUTPUT
+argc_oa=(  )
+argc__args=( prog --oa )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog --oa v1
+
+OUTPUT
+argc_oa=( v1 )
+argc__args=( prog --oa v1 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog --oa v1 v2
+
+OUTPUT
+argc_oa=( v1 v2 )
+argc__args=( prog --oa v1 v2 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog --ob
+
+OUTPUT
+command cat >&2 <<-'EOF' 
+error: invalid value for `--ob <VALUE+>`
+
+USAGE: prog [OPTIONS]
+
+For more information, try '--help'.
+
+EOF
+exit 1
+
+************ RUN ************
+prog --ob v1
+
+OUTPUT
+argc_ob=( v1 )
+argc__args=( prog --ob v1 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog --ob v1 v2
+
+OUTPUT
+argc_ob=( v1 v2 )
+argc__args=( prog --ob v1 v2 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog --oc
+
+OUTPUT
+argc_oc=''
+argc__args=( prog --oc )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog --oc v1
+
+OUTPUT
+argc_oc=v1
+argc__args=( prog --oc v1 )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+
+************ RUN ************
+prog --oc v1 v2
+
+OUTPUT
+argc_oc=v1
+argc__args=( prog --oc v1 v2 )
+argc__cmd_arg_index=0
+argc__positionals=( v2 )
+
+
