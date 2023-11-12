@@ -85,3 +85,67 @@ pub fn candidate_script_names() -> Vec<String> {
     names.extend(ARGC_SCRIPT_NAMES.into_iter().map(|v| v.to_string()));
     names
 }
+
+pub fn search_completion_script(args: &mut Vec<String>) -> Option<PathBuf> {
+    let search_paths = std::env::var("ARGC_COMPLETIONS_PATH").ok()?;
+    let cmd = Path::new(&args[4])
+        .file_stem()
+        .and_then(|v| v.to_str())?
+        .to_string();
+    let subcmd = if args.len() >= 7
+        && args[5]
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '-'))
+    {
+        Some(args[5].clone())
+    } else {
+        None
+    };
+    let mut handlers = vec![];
+    for path in search_paths
+        .split(':')
+        .filter(|v| !v.is_empty() && *v != ":")
+    {
+        let path = path.to_string();
+        let cmd = cmd.to_string();
+        let subcmd = subcmd.clone();
+        let handler = std::thread::spawn(move || {
+            if let Some(subcmd) = subcmd {
+                let mut search_path = PathBuf::from(path.clone());
+                search_path.push(cmd.clone());
+                search_path.push(format!("{subcmd}.sh"));
+                if search_path.exists() {
+                    return Some((search_path, true));
+                }
+            }
+            let mut search_path = PathBuf::from(path);
+            search_path.push(format!("{cmd}.sh"));
+            if search_path.exists() {
+                return Some((search_path, false));
+            }
+            None
+        });
+        handlers.push(handler);
+    }
+    let mut subcmd_script_path = None;
+    let mut cmd_script_path = None;
+    for handler in handlers {
+        if let Ok(Some((path, is_subcmd))) = handler.join() {
+            if is_subcmd {
+                subcmd_script_path = Some(path);
+                break;
+            } else if cmd_script_path.is_none() {
+                cmd_script_path = Some(path);
+            }
+        }
+    }
+    if let (Some(path), Some(subcmd)) = (subcmd_script_path, subcmd) {
+        args.remove(4);
+        args[4] = format!("{cmd}-{subcmd}");
+        return Some(path);
+    }
+    if let Some(path) = cmd_script_path {
+        return Some(path);
+    }
+    None
+}

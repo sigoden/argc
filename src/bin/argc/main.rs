@@ -160,11 +160,13 @@ fn run_compgen(mut args: Vec<String>) -> Option<()> {
     let shell: Shell = args.get(2).and_then(|v| v.parse().ok())?;
     if args[3].is_empty() {
         if args[4] == "argc" {
-            if let Some((_, script_file_)) = get_script_path(true) {
-                args[3] = script_file_.to_string_lossy().to_string();
+            if let Some((_, script_file)) = get_script_path(true) {
+                args[3] = script_file.to_string_lossy().to_string();
             }
-        } else if let Ok(script_file_) = which(&args[4]) {
-            args[3] = script_file_.to_string_lossy().to_string();
+        } else if let Some(script_file) = search_completion_script(&mut args) {
+            args[3] = script_file.to_string_lossy().to_string();
+        } else if let Ok(script_file) = which(&args[4]) {
+            args[3] = script_file.to_string_lossy().to_string();
         } else {
             return None;
         }
