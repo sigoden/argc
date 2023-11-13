@@ -78,10 +78,6 @@ OPTIONS:
 
 ### @cmd
 
-```
-@cmd [string]
-```
-
 Define a subcommand
 
 ```sh
@@ -106,10 +102,6 @@ COMMANDS:
 
 ### @arg
 
-```
-@arg <name>[modifier|default|modifer+choices] [zero-or-one value notation] [help-string]
-```
-
 Define a positional argument.
 
 ```sh
@@ -125,10 +117,6 @@ Define a positional argument.
 ```
 
 ### @option
-
-```
-@option [short] <long>[modifier|default|modifier+choices] [value-notations] [help-string]
-```
 
 Define a option.
 
@@ -149,10 +137,6 @@ Define a option.
 
 ### @flag
 
-```
-@flag [short] <long>[*] [help string]
-```
-
 Define a flag. A flag is an option of boolean type, and is always false by default (e.g. --verbose, --quiet, --all, --long, etc).
 
 
@@ -164,10 +148,6 @@ Define a flag. A flag is an option of boolean type, and is always false by defau
 ```
 
 ### @alias
-
-```
-@alias <name...>
-```
 
 Add aliases for subcommand.
 
@@ -186,11 +166,7 @@ COMMANDS:
   test  Run tests [aliases: t, tst]
 ```
 
-### @describe @version @author
-
-- @describe: Sets the cli’s description. 
-- @version: Sets cli's version.
-- @author: Sets cli's author.
+### @describe / @version / @author
 
 ```sh
 # @describe A demo cli
@@ -214,15 +190,14 @@ COMMANDS:
   test  Run test
 ```
 
-### @meta
-
-```
-@meta <key> [value]
-```
+## @meta
 
 Add metadata
 
-#### Builtin Metadata
+```sh
+# @meta combine-shorts
+# @meta inherit-flag-options
+```
 
 | syntax               | scope | description                                               |
 | -------------------- | ----- | --------------------------------------------------------- |
