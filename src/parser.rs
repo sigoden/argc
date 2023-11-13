@@ -674,14 +674,32 @@ fn create_err(input: &str, kind: ErrorKind) -> nom::Err<nom::error::Error<&str>>
 }
 
 fn is_name_char(c: char) -> bool {
-    c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | ':')
+    c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | ':' | '@')
 }
 
 fn is_short_char(c: char) -> bool {
-    c.is_ascii_graphic()
-        || !matches!(
+    c.is_ascii_alphanumeric()
+        || matches!(
             c,
-            '"' | '&' | '\'' | '(' | ')' | '-' | ';' | '<' | '>' | '\\' | '`' | '|'
+            '!' | '#'
+                | '$'
+                | '%'
+                | '*'
+                | '+'
+                | ','
+                | '.'
+                | '/'
+                | ':'
+                | '='
+                | '?'
+                | '@'
+                | '['
+                | ']'
+                | '^'
+                | '_'
+                | '{'
+                | '}'
+                | '~'
         )
 }
 
