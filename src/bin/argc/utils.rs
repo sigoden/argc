@@ -102,9 +102,13 @@ pub fn search_completion_script(args: &mut Vec<String>) -> Option<PathBuf> {
         None
     };
     let mut handlers = vec![];
+    #[cfg(not(target_os = "windows"))]
+    let sep = ":";
+    #[cfg(target_os = "windows")]
+    let sep = ";";
     for path in search_paths
-        .split(':')
-        .filter(|v| !v.is_empty() && *v != ":")
+        .split(sep)
+        .filter(|v| !v.is_empty() && *v != sep)
     {
         let path = path.to_string();
         let cmd = cmd.to_string();
