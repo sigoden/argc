@@ -107,12 +107,12 @@ Define a positional argument.
 ```sh
 # @arg va
 # @arg vb!                 required
-# @arg vc*                 multiple
-# @arg vd+                 required + multiple
+# @arg vc*                 multi-values
+# @arg vd+                 multi-values + required
 # @arg vna <PATH>          value notation
 # @arg vda=a               default
-# @arg vca[a|b]            choice
-# @arg vcb[=a|b]           choice + default
+# @arg vca[a|b]            choices
+# @arg vcb[=a|b]           choices + default
 # @arg vx~                 capture all remaining args
 ```
 
@@ -126,12 +126,12 @@ Define a option.
 # @option -c                        short only
 # @option    --oc!                  required
 # @option    --od*                  multi-occurs
-# @option    --oe+                  required + multi-occurs
+# @option    --oe+                  multi-occurs + required
 # @option    --ona <PATH>           value notation
-# @option    --onb <CMD> <FILE>     two-args value notations
+# @option    --onb <FILE> <FILE>    two-args value notations
 # @option    --oda=a                default
-# @option    --oca[a|b]             choice
-# @option    --ocb[=a|b]            choice + default
+# @option    --oca[a|b]             choices
+# @option    --ocb[=a|b]            choices + default
 # @option    --oxa~                 capture all remaining args
 ```
 

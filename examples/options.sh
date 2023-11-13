@@ -6,7 +6,7 @@
 # @option    --od*                  multi-occurs
 # @option    --oe+                  required + multi-occurs
 # @option    --ona <PATH>           value notation
-# @option    --onb <CMD> <FILE>     two-args value notations
+# @option    --onb <FILE> <FILE>    two-args value notations
 # @option    --onc <CMD> <FILE+>    unlimited-args value notations
 # @option    --oda=a                default
 # @option    --odb=`_default_fn`    default from fn
@@ -17,7 +17,7 @@
 # @option    --ofa[`_choice_fn`]    choice from fn
 # @option    --ofb[?`_choice_fn`]   choice from fn + no validation
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
-# @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma separated list
+# @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option    --oxa~                 capture all remaining args
 options() {
     :;
@@ -51,7 +51,7 @@ single-hyphen() {
 # @option --ob <VALUE+>           multi values, one or more
 # @option --oc <VALUE?>           zero or one
 notation-modifier() {
-    (set -o posix; set) | grep argc_
+    :;
 }
 
 # @cmd All kind of options
@@ -62,7 +62,7 @@ notation-modifier() {
 # @option     +od*                  multi-occurs
 # @option     +oe+                  required + multi-occurs
 # @option     +ona <PATH>           value notation
-# @option     +onb <CMD> <FILE>     two-args value notations
+# @option     +onb <FILE> <FILE>    two-args value notations
 # @option     +onc <CMD> <FILE+>    unlimited-args value notations
 # @option     +oda=a                default
 # @option     +odb=`_default_fn`    default from fn
@@ -73,7 +73,7 @@ notation-modifier() {
 # @option     +ofa[`_choice_fn`]    choice from fn
 # @option     +ofb[?`_choice_fn`]   choice from fn + no validation
 # @option     +ofc*[`_choice_fn`]   multi-occurs + choice from fn
-# @option     +ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma separated list
+# @option     +ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option     +oxa~                 capture all remaining args
 plus-options() {
     :;

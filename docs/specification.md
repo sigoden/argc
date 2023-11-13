@@ -1,14 +1,17 @@
 # Specification
 
 ## @describe
+
 > **<sup>Syntax</sup>**\
 > `@describe` string
 
 ## @version
+
 > **<sup>Syntax</sup>**\
 > `@version` string
 
 ## @author
+
 > **<sup>Syntax</sup>**\
 > `@author` string
 
@@ -42,7 +45,6 @@
 >   [_notations_]<sup>?</sup>
 >   string<sup>?</sup>
 
-
 ## @arg
 
 > **<sup>Syntax</sup>**\
@@ -69,8 +71,8 @@
 > &nbsp; `!` \
 > | `*` \
 > | `+` \
-> | `*` [_list-char_] \
-> | `+` [_list-char_]
+> | `*` [_seperate-char_] \
+> | `+` [_seperate-char_]
 
 ## param-value
 
@@ -90,7 +92,7 @@
 ## notations
 
 > **<sup>Syntax</sup>**\
-> ([_notation_] )<sup>\*</sup>  [_notation_] [_notation-modifier_]<sup>?</sup>
+> ([_notation_] )<sup>\*</sup>  [_notation-last_] 
 
 
 ## notation
@@ -98,10 +100,15 @@
 > **<sup>Syntax</sup>**\
 > `<` value `>`
 
+## notation-last
+
+> **<sup>Syntax</sup>**\
+> `<` value [_notation-modifier_]<sup>?</sup> `>`
+
 ## notation-modifier
 
 > **<sup>Syntax</sup>**\
-> &nbsp;&nbsp; `*` \
+> &nbsp; `*` \
 > | `+` \
 > | `?`
 
@@ -109,7 +116,7 @@
 
 A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` `{` `}` `~`
 
-## list-char
+## seperate-char
 
 `,` `:` `@` `|` `/`
 
@@ -121,7 +128,8 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
 [_choices_]: #choices
 [_notations_]: #notations
 [_notation_]: #notation
+[_notation-last_]: #notation-last
 [_notation-modifier_]: #notation-modifier
 [_short-char_]: #short-char
-[_list-char_]: #list-char
+[_seperate-char_]: #seperate-char
 [_long-name_]: #long-name 
