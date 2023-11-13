@@ -8,7 +8,7 @@ use argc::{
     Shell,
 };
 use base64::{engine::general_purpose, Engine as _};
-use std::{collections::HashMap, env, fs, process};
+use std::{collections::HashMap, env, fs, path::Path, process};
 use utils::*;
 use which::which;
 
@@ -56,15 +56,11 @@ fn run() -> Result<i32> {
                     code.push_str(&cmds.join(" "));
                     println!("{code}")
                 } else {
-                    let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())
-                        .map_err(|err| anyhow!("error: {err}"))?;
-                    let export_pwd = match env::var("ARGC_PWD").ok().or_else(get_current_dir) {
-                        Some(v) => format!("export ARGC_PWD={v}\n"),
-                        None => String::new(),
-                    };
+                    let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())?;
+                    let dir_vars = export_dir_vars(&args[2]);
                     let code = argc::ArgcValue::to_shell(&values);
                     let export_vars = export_argc_variables(&code);
-                    println!("{export_pwd}{export_vars}{code}")
+                    println!("{dir_vars}{export_vars}{code}")
                 }
             }
             "--argc-create" => {
@@ -239,4 +235,29 @@ fn get_argc_version() -> String {
     let name = env!("CARGO_CRATE_NAME");
     let version = env!("CARGO_PKG_VERSION");
     format!("{name} {version}")
+}
+
+fn export_dir_vars(path: &str) -> String {
+    if let (Some(argc_script_dir), Some(cwd)) = (
+        get_argc_script_dir(path),
+        env::var("ARGC_PWD").ok().or_else(get_current_dir),
+    ) {
+        let cd = if argc_script_dir != cwd {
+            format!("cd {}\n", escape_shell_words(&argc_script_dir))
+        } else {
+            String::new()
+        };
+        format!("{}export ARGC_PWD={}\n", cd, escape_shell_words(&cwd))
+    } else {
+        String::new()
+    }
+}
+
+fn get_argc_script_dir(path: &str) -> Option<String> {
+    if candidate_script_names().iter().all(|v| !path.ends_with(v)) {
+        return None;
+    }
+    let script_file = fs::canonicalize(Path::new(path)).ok()?;
+    let script_dir = script_file.parent()?;
+    Some(script_dir.display().to_string())
 }

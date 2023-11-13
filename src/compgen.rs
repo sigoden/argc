@@ -1,8 +1,6 @@
 use crate::command::Command;
 use crate::matcher::Matcher;
-use crate::utils::{
-    escape_shell_words, get_current_dir, is_quote_char, is_windows_path, run_param_fns,
-};
+use crate::utils::{is_quote_char, is_windows_path, run_param_fns};
 use crate::Result;
 
 use anyhow::bail;
@@ -121,9 +119,6 @@ pub fn compgen(
             envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
             envs.insert("ARGC_CWORD".into(), argc_filter.clone());
             envs.insert("ARGC_LAST_ARG".into(), last_arg.to_string());
-            if let Some(cwd) = get_current_dir() {
-                envs.insert("ARGC_PWD".into(), escape_shell_words(&cwd));
-            }
             run_param_fns(script_path, &[fn_name.as_str()], &new_args, envs)
                 .map(|output| output[0].clone())
         };
