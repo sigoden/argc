@@ -42,3 +42,6 @@ _argc_completer_parse_line() {
     done
     words[$word_index]="$word"
 }
+
+complete -F _argc_completer -o nospace -o nosort \
+    __COMMANDS__

@@ -31,7 +31,7 @@ setup-shell() {
      bash) echo "source <(argc --argc-completions bash ${argc_cmds[@]})" ;;
      elvish) echo "eval (argc --argc-completions elvish ${argc_cmds[@]} | slurp)" ;;
      fish) echo "argc --argc-completions fish ${argc_cmds[@]} | source" ;;
-     nushell) echo "argc --argc-completions nushell ${argc_cmds[@]} | save -f argc.nu"$'\n'"source argc.nu" ;;
+     nushell) echo "argc --argc-completions nushell | save -f argc.nu"$'\n'"source argc.nu" ;;
      powershell) echo "argc --argc-completions powershell ${argc_cmds[@]} | Out-String | Invoke-Expression" ;;
      xonsh) echo "exec(\$(argc --argc-completions xonsh ${argc_cmds[@]}))" ;;
      zsh) echo "source <(argc --argc-completions zsh ${argc_cmds[@]})" ;;

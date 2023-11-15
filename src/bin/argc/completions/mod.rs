@@ -16,59 +16,52 @@ const NUSHELL_SCRIPT: &str = include_str!("argc.nu");
 const XONSH_SCRIPT: &str = include_str!("argc.xsh");
 
 pub fn generate(shell: Shell, args: &[String]) -> String {
-    let mut cmds = vec!["argc".to_string()];
-    cmds.extend(args.to_vec());
-
     match shell {
         Shell::Bash => {
-            let code = format!(
-                "complete -F _argc_completer -o nospace -o nosort {}",
-                cmds.join(" ")
-            );
-            format!("{BASH_SCRIPT}\n{code}")
+            let commands = [vec!["argc".to_string()], args.to_vec()].concat();
+            let commands = commands.join(" ");
+            BASH_SCRIPT.replace("__COMMANDS__", &commands)
         }
         Shell::Elvish => {
-            let code = cmds
-                .iter()
-                .map(|v| format!("set edit:completion:arg-completer[{v}] = $argc-completer~"))
-                .collect::<Vec<String>>()
-                .join("\n");
-            format!("{ELVISH_SCRIPT}\n{code}")
+            let commands = [vec!["argc".to_string()], args.to_vec()].concat();
+            let commands = commands
+                .into_iter()
+                .map(|v| format!("\"{v}\""))
+                .collect::<Vec<_>>()
+                .join(" ");
+            ELVISH_SCRIPT.replace("__COMMANDS__", &commands)
         }
         Shell::Fish => {
-            let code = cmds
-                .iter()
-                .map(|v| format!("complete -x -k -c {v} -a \"(_argc_completer)\""))
-                .collect::<Vec<String>>()
-                .join("\n");
-            format!("{FISH_SCRIPT}\n{code}")
+            let commands = [vec!["argc".to_string()], args.to_vec()].concat();
+            let commands = commands.join(" ");
+            FISH_SCRIPT.replace("__COMMANDS__", &commands)
         }
         Shell::Generic => String::new(),
-        Shell::Nushell => {
-            let scripts_env_var = "ARGC_NUSHELL_SCRIPTS";
-            let code = if env::var(scripts_env_var).is_ok() {
-                format!("$env.{scripts_env_var} = $env.{scripts_env_var} ++ {cmds:?}")
-            } else {
-                format!("$env.{scripts_env_var} = {cmds:?}")
-            };
-            format!("{NUSHELL_SCRIPT}\n{code}")
-        }
+        Shell::Nushell => NUSHELL_SCRIPT.to_string(),
         Shell::Powershell => {
-            let code = cmds.iter().map(|v| format!("Register-ArgumentCompleter -Native -ScriptBlock $_argc_completer -CommandName {v}")).collect::<Vec<String>>().join("\n");
-            format!("{POWERSHELL_SCRIPT}\n{code}")
+            let commands = [vec!["argc".to_string()], args.to_vec()].concat();
+            let commands = commands
+                .into_iter()
+                .map(|v| format!("\"{v}\""))
+                .collect::<Vec<_>>()
+                .join(",");
+            POWERSHELL_SCRIPT.replace("__COMMANDS__", &commands)
         }
         Shell::Xonsh => {
+            let mut cmds = args.to_vec();
             let scripts_env_var = "ARGC_XONSH_SCRIPTS";
-            let code = if env::var(scripts_env_var).is_ok() {
+            if env::var(scripts_env_var).is_ok() {
                 format!("__xonsh__.env['{scripts_env_var}'].extend({cmds:?})")
             } else {
-                format!("__xonsh__.env['{scripts_env_var}'] = {cmds:?}")
-            };
-            format!("{XONSH_SCRIPT}\n{code}")
+                cmds.insert(0, "argc".to_string());
+                let code = format!("__xonsh__.env['{scripts_env_var}'] = {cmds:?}");
+                format!("{XONSH_SCRIPT}\n{code}")
+            }
         }
         Shell::Zsh => {
-            let code = format!("compdef _argc_completer {}", cmds.join(" "));
-            format!("{ZSH_SCRIPT}\n{code}")
+            let commands = [vec!["argc".to_string()], args.to_vec()].concat();
+            let commands = commands.join(" ");
+            ZSH_SCRIPT.replace("__COMMANDS__", &commands)
         }
     }
 }
