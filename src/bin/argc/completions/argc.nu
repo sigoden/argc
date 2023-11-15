@@ -5,12 +5,8 @@ def _argc_completer [args: list<string>] {
 }
 
 let external_completer = {|spans| 
-    if (not ($env.ARGC_SCRIPTS | find $spans.0 | is-empty)) {
-        _argc_completer $spans
-    } else {
-        # default completer
-    }
+    _argc_completer $spans
 }
 
-$env.config.completions.external.enable = true;
-$env.config.completions.external.completer = $external_completer;
+$env.config.completions.external.enable = true
+$env.config.completions.external.completer = $external_completer

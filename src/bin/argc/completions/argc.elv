@@ -13,3 +13,6 @@ fn argc-completer {|@args|
         edit:complex-candidate $parts[0] &display=$display &code-suffix=$code-suffix
     }
 }
+
+all [__COMMANDS__] | 
+    each {|cmd| set edit:completion:arg-completer[$cmd] = $argc-completer~ }

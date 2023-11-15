@@ -46,3 +46,6 @@ _argc_completer_reassemble_words() {
         fi
     done
 }
+
+compdef _argc_completer \
+    __COMMANDS__

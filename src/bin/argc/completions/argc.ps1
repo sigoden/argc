@@ -29,3 +29,8 @@ $_argc_completer = {
         [CompletionResult]::new($value, $description, [CompletionResultType]::ParameterValue, " ")
     }
 }
+
+@(__COMMANDS__) | 
+    ForEach-Object {
+        Register-ArgumentCompleter -Native -ScriptBlock $_argc_completer -CommandName $_
+    }
