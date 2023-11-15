@@ -86,10 +86,8 @@ fn run() -> Result<i32> {
                     Some(v) => v.parse()?,
                     None => bail!("Usage: argc --argc-completions <SHELL> [CMDS]..."),
                 };
-                let script = crate::completions::generate(shell, &args[3..])?;
-                if !script.is_empty() {
-                    println!("{}", script);
-                }
+                let script = crate::completions::generate(shell, &args[3..]);
+                println!("{}", script);
             }
             "--argc-parallel" => {
                 if args.len() <= 3 {
