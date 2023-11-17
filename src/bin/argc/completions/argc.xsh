@@ -4,13 +4,13 @@ from xonsh.completers._aliases import _add_one_completer
 
 @contextual_command_completer
 def _argc_completer(context):
+    """
+    Argc based completer
+    """
     if len(context.args) == 0:
         return
     args = [v.value for v in context.args[0:context.arg_index]]
     args.append(context.raw_prefix)
-
-    if args[0] not in __xonsh__.env['ARGC_XONSH_SCRIPTS']:
-        return
 
     output, _ = Popen(['argc', '--argc-compgen', 'xonsh', '', *args], stdout=PIPE, stderr=PIPE).communicate()
     candidates = output.decode().split('\n')
@@ -30,4 +30,5 @@ def _argc_completer(context):
         
     return result
 
-_add_one_completer('argc', _argc_completer, 'start')
+for cmd in [__COMMANDS__]:
+    _add_one_completer(cmd, _argc_completer, 'start')

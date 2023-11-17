@@ -1,5 +1,4 @@
 use argc::Shell;
-use std::env;
 
 const BASH_SCRIPT: &str = include_str!("argc.bash");
 
@@ -48,15 +47,13 @@ pub fn generate(shell: Shell, args: &[String]) -> String {
             POWERSHELL_SCRIPT.replace("__COMMANDS__", &commands)
         }
         Shell::Xonsh => {
-            let mut cmds = args.to_vec();
-            let scripts_env_var = "ARGC_XONSH_SCRIPTS";
-            if env::var(scripts_env_var).is_ok() {
-                format!("__xonsh__.env['{scripts_env_var}'].extend({cmds:?})")
-            } else {
-                cmds.insert(0, "argc".to_string());
-                let code = format!("__xonsh__.env['{scripts_env_var}'] = {cmds:?}");
-                format!("{XONSH_SCRIPT}\n{code}")
-            }
+            let commands = [vec!["argc".to_string()], args.to_vec()].concat();
+            let commands = commands
+                .into_iter()
+                .map(|v| format!("\"{v}\""))
+                .collect::<Vec<_>>()
+                .join(",");
+            XONSH_SCRIPT.replace("__COMMANDS__", &commands)
         }
         Shell::Zsh => {
             let commands = [vec!["argc".to_string()], args.to_vec()].concat();
