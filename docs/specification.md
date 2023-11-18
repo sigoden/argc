@@ -71,8 +71,8 @@
 > &nbsp; `!` \
 > | `*` \
 > | `+` \
-> | `*` [_seperate-char_] \
-> | `+` [_seperate-char_]
+> | `*` [_separate-char_] \
+> | `+` [_separate-char_]
 
 ## param-value
 
@@ -116,7 +116,7 @@
 
 A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` `{` `}` `~`
 
-## seperate-char
+## separate-char
 
 `,` `:` `@` `|` `/`
 
@@ -131,5 +131,5 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
 [_notation-last_]: #notation-last
 [_notation-modifier_]: #notation-modifier
 [_short-char_]: #short-char
-[_seperate-char_]: #seperate-char
+[_separate-char_]: #separate-char
 [_long-name_]: #long-name 
