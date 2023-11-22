@@ -34,15 +34,20 @@ pub fn is_default_value_terminate(c: char) -> bool {
     c.is_whitespace()
 }
 
-pub fn get_shell_path() -> Option<PathBuf> {
-    let shell = match env::var("ARGC_SHELL_PATH") {
-        Ok(v) => Path::new(&v).to_path_buf(),
-        Err(_) => get_bash_path()?,
-    };
-    if !shell.exists() {
-        return None;
+pub fn get_shell_path() -> anyhow::Result<PathBuf> {
+    match env::var("ARGC_SHELL_PATH") {
+        Ok(v) => {
+            let shell_path = Path::new(&v).to_path_buf();
+            if !shell_path.exists() {
+                anyhow::bail!(
+                    "Invalid ARGC_SHELL_PATH, '{}' does not exist",
+                    shell_path.display()
+                );
+            }
+            Ok(shell_path)
+        }
+        Err(_) => get_bash_path().ok_or_else(|| anyhow::anyhow!("Shell not found")),
     }
-    Some(shell)
 }
 
 pub fn get_shell_args(shell_path: &Path) -> Vec<String> {
@@ -61,12 +66,21 @@ pub fn get_shell_args(shell_path: &Path) -> Vec<String> {
 
 #[cfg(windows)]
 pub fn get_bash_path() -> Option<PathBuf> {
-    let git_bash_path = PathBuf::from("C:\\Program Files\\Git\\bin\\bash.exe");
-    if git_bash_path.exists() {
-        return Some(git_bash_path);
+    let bash_path = PathBuf::from("C:\\Program Files\\Git\\bin\\bash.exe");
+    if bash_path.exists() {
+        return Some(bash_path);
     }
     let git = which("git").ok()?;
-    Some(git.parent()?.parent()?.join("bin").join("bash.exe"))
+    let parent = git.parent()?;
+    let bash_path = parent.parent()?.join("bin").join("bash.exe");
+    if bash_path.exists() {
+        return Some(bash_path);
+    }
+    let bash_path = parent.join("bash.exe");
+    if bash_path.exists() {
+        return Some(bash_path);
+    }
+    None
 }
 
 #[cfg(not(windows))]
@@ -80,7 +94,7 @@ pub fn run_param_fns(
     args: &[String],
     envs: HashMap<String, String>,
 ) -> Option<Vec<String>> {
-    let shell = get_shell_path()?;
+    let shell = get_shell_path().ok()?;
     let shell_extra_args = get_shell_args(&shell);
     let path_env = path_env_with_exe();
     let handles: Vec<_> = param_fns
