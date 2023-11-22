@@ -93,7 +93,7 @@ fn run() -> Result<i32> {
                 if args.len() <= 3 {
                     bail!("Usage: argc --argc-parallel <SCRIPT> <ARGS>...");
                 }
-                let shell = get_shell_path().ok_or_else(|| anyhow!("Shell not found"))?;
+                let shell = get_shell_path()?;
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
                 if !source.contains("--argc-eval") {
                     bail!("Parallel only available for argc based scripts.")
@@ -118,7 +118,7 @@ fn run() -> Result<i32> {
         }
         Ok(0)
     } else {
-        let shell = get_shell_path().ok_or_else(|| anyhow!("Shell not found"))?;
+        let shell = get_shell_path()?;
         let (script_dir, script_file) = get_script_path(true)
             .ok_or_else(|| anyhow!("Argcfile not found, try `argc --argc-help` for help."))?;
         let mut envs = HashMap::new();
