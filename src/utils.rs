@@ -39,7 +39,10 @@ pub fn get_shell_path() -> anyhow::Result<PathBuf> {
         Ok(v) => {
             let shell_path = Path::new(&v).to_path_buf();
             if !shell_path.exists() {
-                anyhow::bail!("Invalid ARGC_SHELL_PATH, '{}' does not exist", shell_path.display());
+                anyhow::bail!(
+                    "Invalid ARGC_SHELL_PATH, '{}' does not exist",
+                    shell_path.display()
+                );
             }
             Ok(shell_path)
         }
