@@ -247,6 +247,7 @@ pub enum Shell {
     Powershell,
     Xonsh,
     Zsh,
+    Tcsh,
 }
 
 impl FromStr for Shell {
@@ -262,6 +263,7 @@ impl FromStr for Shell {
             "powershell" => Ok(Self::Powershell),
             "xonsh" => Ok(Self::Xonsh),
             "zsh" => Ok(Self::Zsh),
+            "tcsh" => Ok(Self::Tcsh),
             _ => bail!(
                 "The provided shell is either invalid or missing, must be one of {}",
                 Shell::list_names(),
@@ -273,7 +275,7 @@ impl FromStr for Shell {
 pub(crate) type CandidateValue = (String, String, bool, CompColor); // value, description, nospace, comp_color
 
 impl Shell {
-    pub fn list() -> [Shell; 7] {
+    pub fn list() -> [Shell; 8] {
         [
             Shell::Bash,
             Shell::Elvish,
@@ -282,6 +284,7 @@ impl Shell {
             Shell::Powershell,
             Shell::Xonsh,
             Shell::Zsh,
+            Shell::Tcsh,
         ]
     }
 
@@ -303,6 +306,7 @@ impl Shell {
             Shell::Powershell => "powershell",
             Shell::Xonsh => "xonsh",
             Shell::Zsh => "zsh",
+            Shell::Tcsh => "tcsh",
         }
     }
 
@@ -451,6 +455,22 @@ impl Shell {
                     format!("{new_value}{space}\t{display}{description}\t{value}\t{color}")
                 })
                 .collect::<Vec<String>>(),
+            Shell::Tcsh => {
+                if candidates.len() == 1 {
+                    let new_value =
+                        sanitizie_tcsh_value(&self.combine_value(prefix, &candidates[0].0));
+                    return vec![new_value];
+                }
+                candidates
+                    .into_iter()
+                    .map(|(value, description, _, _)| {
+                        let new_value = sanitizie_tcsh_value(&self.combine_value(prefix, &value));
+                        let description = self.comp_description(&description, " (", ")");
+                        let description = description.replace(' ', "⠀");
+                        format!("{new_value}{description}")
+                    })
+                    .collect::<Vec<String>>()
+            }
         }
     }
 
@@ -506,7 +526,7 @@ impl Shell {
     }
 
     fn is_unix_only(&self) -> bool {
-        matches!(self, Shell::Bash | Shell::Fish | Shell::Zsh)
+        matches!(self, Shell::Bash | Shell::Fish | Shell::Zsh | Shell::Tcsh)
     }
 
     fn is_windows_mode(&self) -> bool {
@@ -564,6 +584,10 @@ impl Shell {
             format!("{prefix}{}{suffix}", truncate_description(description))
         }
     }
+}
+
+fn sanitizie_tcsh_value(value: &str) -> String {
+    value.replace(' ', "⠀")
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

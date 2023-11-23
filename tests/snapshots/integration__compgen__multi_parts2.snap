@@ -37,4 +37,9 @@ A/B/ 			39
 A/B/C 	C	C	39
 A/B/D 	D	D	39
 
+************ COMPGEN Tcsh `prog --oa A/B/` ************
+A/B/
+A/B/C
+A/B/D
+
 

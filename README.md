@@ -244,6 +244,9 @@ exec($(argc --argc-completions xonsh mycmd1 mycmd2))
 
 # zsh (~/.zshrc)
 source <(argc --argc-completions zsh mycmd1 mycmd2)
+
+# tcsh (~/.tcshrc)
+eval `argc --argc-completions tcsh mycmd1 mycmd2`
 ```
 
 **Replace `mycmd1 mycmd2` with your argc scripts**.

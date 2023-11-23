@@ -41,4 +41,10 @@ abc:
 --oa=abc\:ijk\:abc 	abc\:ijk\:abc	abc:ijk:abc	39
 --oa=abc\:ijk\:xyz 	abc\:ijk\:xyz	abc:ijk:xyz	39
 
+************ COMPGEN Tcsh `prog --oa=` ************
+--oa=abc:def:xyz
+--oa=abc:def:tsr
+--oa=abc:ijk:abc
+--oa=abc:ijk:xyz
+
 

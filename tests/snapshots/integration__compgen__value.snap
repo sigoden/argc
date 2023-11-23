@@ -58,4 +58,12 @@ abc\:xyz 	abc\:xyz	abc:xyz	39
 abc\\>def 	abc>def	abc>def	39
 abc\\>xyz 	abc>xyz	abc>xyz	39
 
+************ COMPGEN Tcsh `prog --oa abc` ************
+abc⠀def
+abc⠀xyz
+abc:def
+abc:xyz
+abc>def
+abc>xyz
+
 

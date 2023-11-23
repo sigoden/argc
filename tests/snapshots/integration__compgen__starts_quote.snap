@@ -37,4 +37,9 @@ ijk
 --oa='def	def	def	39
 --oa='ijk	ijk	ijk	39
 
+************ COMPGEN Tcsh `prog --oa='` ************
+--oa='abc
+--oa='def
+--oa='ijk
+
 

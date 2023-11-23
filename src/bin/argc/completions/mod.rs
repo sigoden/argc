@@ -2,18 +2,12 @@ use argc::Shell;
 use std::env;
 
 const BASH_SCRIPT: &str = include_str!("argc.bash");
-
-const ZSH_SCRIPT: &str = include_str!("argc.zsh");
-
-const POWERSHELL_SCRIPT: &str = include_str!("argc.ps1");
-
-const FISH_SCRIPT: &str = include_str!("argc.fish");
-
 const ELVISH_SCRIPT: &str = include_str!("argc.elv");
-
+const FISH_SCRIPT: &str = include_str!("argc.fish");
 const NUSHELL_SCRIPT: &str = include_str!("argc.nu");
-
+const POWERSHELL_SCRIPT: &str = include_str!("argc.ps1");
 const XONSH_SCRIPT: &str = include_str!("argc.xsh");
+const ZSH_SCRIPT: &str = include_str!("argc.zsh");
 
 pub fn generate(shell: Shell, args: &[String]) -> String {
     match shell {
@@ -62,6 +56,13 @@ pub fn generate(shell: Shell, args: &[String]) -> String {
             let commands = [vec!["argc".to_string()], args.to_vec()].concat();
             let commands = commands.join(" ");
             ZSH_SCRIPT.replace("__COMMANDS__", &commands)
+        }
+        Shell::Tcsh => {
+            let commands = [vec!["argc".to_string()], args.to_vec()].concat();
+            commands
+                .into_iter()
+                .map(|v| format!(r#"complete {v} 'p@*@`echo "$COMMAND_LINE'"''"'" | xargs argc --argc-compgen tcsh ""`@@';{}"#, "\n"))
+                .collect::<Vec<String>>().join("")
         }
     }
 }
