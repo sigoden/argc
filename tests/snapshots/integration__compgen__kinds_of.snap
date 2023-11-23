@@ -58,4 +58,12 @@ d1	d1	d1	39
 e1 	e1	e1	39
 f1 	f1:desc f1	f1	33
 
+************ COMPGEN Tcsh `prog ` ************
+a1⠀(desc⠀a1)
+b1⠀(desc⠀b1)
+c1
+d1
+e1
+f1⠀(desc⠀f1)
+
 

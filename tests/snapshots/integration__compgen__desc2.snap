@@ -23,4 +23,7 @@ abc	1	abc	desc1
 ************ COMPGEN Zsh `prog --oa a` ************
 abc 	abc:desc1	abc	39
 
+************ COMPGEN Tcsh `prog --oa a` ************
+abc
+
 

@@ -30,4 +30,8 @@ abc,ijk	0	ijk
 abc,def	def	def	39
 abc,ijk	ijk	ijk	39
 
+************ COMPGEN Tcsh `prog --oa abc,` ************
+abc,def
+abc,ijk
+
 

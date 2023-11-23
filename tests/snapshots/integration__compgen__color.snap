@@ -198,4 +198,32 @@ colorWhiteBold	colorWhiteBold	colorWhiteBold	1;37
 colorDefault	colorDefault	colorDefault	39
 colorDefaultBold	colorDefaultBold	colorDefaultBold	1;39
 
+************ COMPGEN Tcsh `prog ` ************
+kindFlag
+kindOption
+kindCommand
+kindDir
+kindFile
+kindFileExe
+kindSymlink
+kindValue
+colorBlack
+colorBlackBold
+colorRed
+colorRedBold
+colorGreen
+colorGreenBold
+colorYellow
+colorYellowBold
+colorBlue
+colorBlueBold
+colorMagenta
+colorMagentaBold
+colorCyan
+colorCyanBold
+colorWhite
+colorWhiteBold
+colorDefault
+colorDefaultBold
+
 

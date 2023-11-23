@@ -37,4 +37,9 @@ abc 	abc	abc	39
 def	def	def	39
 ghk 	ghk:hello world	ghk	39
 
+************ COMPGEN Tcsh `prog --oa ` ************
+abc
+def
+ghk⠀(hello⠀world)
+
 

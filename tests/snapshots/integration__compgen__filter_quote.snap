@@ -30,4 +30,8 @@ v='bar	0	bar
 v='foo	foo	foo	39
 v='bar	bar	bar	39
 
+************ COMPGEN Tcsh `prog v='` ************
+v='foo
+v='bar
+
 
