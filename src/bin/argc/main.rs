@@ -218,8 +218,8 @@ fn get_argc_help() -> String {
 USAGE:
     argc --argc-eval <SCRIPT> [ARGS]...             Use `eval "$(argc --argc-eval "$0" "$@")"`
     argc --argc-create [TASKS]...                   Create a boilerplate argcfile
-    argc --argc-completions <SHELL> [CMDS]...       Generate completion scripts for bash,elvish,fish,nushell,powershell,xsh,zsh
-    argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Generate dynamic completion word
+    argc --argc-completions <SHELL> [CMDS]...       Generate shell completion scripts
+    argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Dynamically generating completion candidates
     argc --argc-export <SCRIPT>                     Export command line definitions as json
     argc --argc-parallel <SCRIPT> <ARGS>...         Execute argc functions in parallel
     argc --argc-script-path                         Print current argcfile path
