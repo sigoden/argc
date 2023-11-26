@@ -4,18 +4,18 @@ Argc can be used as a task runner.
 
 Benefits:
   - Supports Linux/macOS/Windows
-  - PowerShell shell auto-completion
-  - No need to learn new technology, just Bash
-  - Feel free to use GNU tools such as awk, sed, grep, find, etc.
+  - Autocomplete tasks names, task's options and positional parameters.
+  - No need to learn new technology, simply use bash.
+  - Feel free to use GNU tools such as awk/sed/grep/find/head...
 
-## use boilerplate
+## Use boilerplate
 
 ```
 $ argc --argc-create build test lint
 Argcfile.sh has been successfully created.
 ```
 
-Created boilerplate Argcfile.sh content as follows
+The contents of Argcfile.sh:
 
 ```sh
 #!/usr/bin/env bash
@@ -40,7 +40,9 @@ lint() {
 eval "$(argc --argc-eval "$0" "$@")"
 ```
 
-## function is task
+## Define task
+
+A task is a regular shell function with a `# @cmd` tag above it.
 
 ```sh
 # @cmd
@@ -59,7 +61,7 @@ lint() {
 }
 
 func() {
-  echo "Plain function other than a task"
+  echo "without '# @cmd', the function will no longer be treated a task."
 }
 
 eval "$(argc --argc-eval "$0" "$@")"
@@ -76,13 +78,13 @@ COMMANDS:
 
 ```
 
-## use positional variables
+## Use regular shell variables
 
 ```sh
 # @cmd
 build() {
   echo $1 $2
-  echo $@
+  echo "$@"
 }
 ```
 
@@ -92,7 +94,7 @@ foo bar
 foo bar
 ```
 
-## use `argc_*` variables
+## Use `argc_*` variables
 
 ```sh
 # @cmd  A simple task
@@ -126,7 +128,7 @@ option:  foo
 arg:     README.md
 ```
 
-## task alias
+## Add task aliases
 
 ```sh
 # @cmd
@@ -139,9 +141,9 @@ test() {
 $ argc t
 ```
 
-## semantic group
+## Use semantic grouping
 
-Tasks can be grouped using symbols, common forms are `foo:bar` `foo.bar` `foo@bar`.
+common forms are `foo:bar` `foo.bar` `foo-bar` `foo@bar`.
 
 ```sh
 # @cmd
@@ -152,32 +154,32 @@ test:unit() { :; }
 test:bin() { :; }
 ```
 
-## task dependencies
+## Manage task dependencies
 
 ```sh
 # @cmd
-foo() {
-  echo foo
+current() { before;
+  echo current
+after; }
+
+# @cmd
+before() {
+  echo before
 }
 
 # @cmd
-bar() { foo;
-  echo bar
-baz; }
-
-# @cmd
-baz() { 
-  echo baz
+after() { 
+  echo after
 }
 ```
 ```
-$ argc bar
-foo
-bar
-baz
+$ argc current
+before
+current
+after
 ```
 
-## default task
+## Set the default task
 
 If the task name is not specified when calling, the `main` function is executed by default.
 
@@ -202,9 +204,9 @@ foo
 bar
 ```
 
-## locate project root
+## Align the project's rootdir
 
-Argc automatically cds into the directory of the Argcfile.sh it finds in the parent hierarchy; 
+Argc automatically cds into the directory of the Argcfile.sh it finds in the parent hierarchy.
 
 Project directory structure as follows:
 
