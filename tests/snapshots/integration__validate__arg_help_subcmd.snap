@@ -3,11 +3,11 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog help cmdd
+prog help cmd_required_multi_arg
 
 OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog cmdd <VAL>...
+USAGE: prog cmd_required_multi_arg <VAL>...
 
 ARGS:
   <VAL>...

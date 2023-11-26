@@ -3,62 +3,62 @@ source: tests/spec.rs
 expression: data
 ---
 ************ RUN ************
-prog cmdp a b c
+prog cmd_two_multi_args a b c
 
 OUTPUT
 argc_val1=( a b )
 argc_val2=( c )
-argc__args=( prog cmdp a b c )
+argc__args=( prog cmd_two_multi_args a b c )
 argc__cmd_arg_index=1
-argc__fn=cmdp
+argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
-cmdp a b c
+cmd_two_multi_args a b c
 
 ************ RUN ************
-prog cmdp -- a b c
+prog cmd_two_multi_args -- a b c
 
 OUTPUT
 argc_val1=( a b )
 argc_val2=( c )
-argc__args=( prog cmdp -- a b c )
+argc__args=( prog cmd_two_multi_args -- a b c )
 argc__cmd_arg_index=1
-argc__fn=cmdp
+argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
-cmdp a b c
+cmd_two_multi_args a b c
 
 ************ RUN ************
-prog cmdp a -- b c
+prog cmd_two_multi_args a -- b c
 
 OUTPUT
 argc_val1=( a )
 argc_val2=( b c )
-argc__args=( prog cmdp a -- b c )
+argc__args=( prog cmd_two_multi_args a -- b c )
 argc__cmd_arg_index=1
-argc__fn=cmdp
+argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
-cmdp a b c
+cmd_two_multi_args a b c
 
 ************ RUN ************
-prog cmdp a b -- c
+prog cmd_two_multi_args a b -- c
 
 OUTPUT
 argc_val1=( a b )
 argc_val2=( c )
-argc__args=( prog cmdp a b -- c )
+argc__args=( prog cmd_two_multi_args a b -- c )
 argc__cmd_arg_index=1
-argc__fn=cmdp
+argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
-cmdp a b c
+cmd_two_multi_args a b c
 
 ************ RUN ************
-prog cmdp a b c --
+prog cmd_two_multi_args a b c --
 
 OUTPUT
 argc_val1=( a b c )
-argc__args=( prog cmdp a b c -- )
+argc__args=( prog cmd_two_multi_args a b c -- )
 argc__cmd_arg_index=1
-argc__fn=cmdp
+argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
-cmdp a b c
+cmd_two_multi_args a b c
 
 

@@ -3,13 +3,13 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmda -a=3
+prog test1 -a=3
 
 OUTPUT
 command cat >&2 <<-'EOF' 
 error: unexpected value `3` for `-a` found; no more were expected 
 
-USAGE: prog cmda [OPTIONS]
+USAGE: prog test1 [OPTIONS]
 
 For more information, try '--help'.
 

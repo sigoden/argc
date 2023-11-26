@@ -1,7 +1,7 @@
 mod fixtures;
 
-pub const SCRIPT_OPTIONS: &str = include_str!("scripts/options.sh");
-pub const SCRIPT_ARGS: &str = include_str!("scripts/args.sh");
+pub const SCRIPT_OPTIONS: &str = include_str!("../examples/options.sh");
+pub const SCRIPT_ARGS: &str = include_str!("../examples/args.sh");
 
 pub use fixtures::locate_script;
 

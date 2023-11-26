@@ -3,13 +3,13 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmdb v1 v2
+prog cmd_arg v1 v2
 
 OUTPUT
 command cat >&2 <<-'EOF' 
 error: unexpected argument `v2` found
 
-USAGE: prog cmdb [VAL]
+USAGE: prog cmd_arg [VAL]
 
 For more information, try '--help'.
 

@@ -3,13 +3,13 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmda --unknown
+prog test1 --unknown
 
 OUTPUT
 command cat >&2 <<-'EOF' 
 error: unexpected argument `--unknown` found
 
-USAGE: prog cmda [OPTIONS]
+USAGE: prog test1 [OPTIONS]
 
 For more information, try '--help'.
 

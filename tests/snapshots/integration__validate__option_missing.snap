@@ -3,7 +3,7 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmdb
+prog test2
 
 OUTPUT
 command cat >&2 <<-'EOF' 
@@ -15,7 +15,7 @@ error: the following required arguments were not provided:
   --ocb <OCB>...
   --occ <OCC>...
 
-USAGE: prog cmdb --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
+USAGE: prog test2 --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
 
 For more information, try '--help'.
 

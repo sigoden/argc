@@ -3,117 +3,117 @@ source: tests/spec.rs
 expression: data
 ---
 ************ RUN ************
-prog cmdb v1
+prog cmd_arg v1
 
 OUTPUT
 argc_val=v1
-argc__args=( prog cmdb v1 )
+argc__args=( prog cmd_arg v1 )
 argc__cmd_arg_index=1
-argc__fn=cmdb
+argc__fn=cmd_arg
 argc__positionals=( v1 )
-cmdb v1
+cmd_arg v1
 
 ************ RUN ************
-prog cmdc v1 v2
+prog cmd_multi_arg v1 v2
 
 OUTPUT
 argc_val=( v1 v2 )
-argc__args=( prog cmdc v1 v2 )
+argc__args=( prog cmd_multi_arg v1 v2 )
 argc__cmd_arg_index=1
-argc__fn=cmdc
+argc__fn=cmd_multi_arg
 argc__positionals=( v1 v2 )
-cmdc v1 v2
+cmd_multi_arg v1 v2
 
 ************ RUN ************
-prog cmdf
+prog cmd_arg_with_default
 
 OUTPUT
 argc_val=xyz
-argc__args=( prog cmdf )
+argc__args=( prog cmd_arg_with_default )
 argc__cmd_arg_index=1
-argc__fn=cmdf
+argc__fn=cmd_arg_with_default
 argc__positionals=( xyz )
-cmdf xyz
+cmd_arg_with_default xyz
 
 ************ RUN ************
-prog cmdf v1
+prog cmd_arg_with_default v1
 
 OUTPUT
 argc_val=v1
-argc__args=( prog cmdf v1 )
+argc__args=( prog cmd_arg_with_default v1 )
 argc__cmd_arg_index=1
-argc__fn=cmdf
+argc__fn=cmd_arg_with_default
 argc__positionals=( v1 )
-cmdf v1
+cmd_arg_with_default v1
 
 ************ RUN ************
-prog cmdg
+prog cmd_arg_with_default_fn
 
 OUTPUT
 argc_val=`_default_fn`
-argc__args=( prog cmdg )
+argc__args=( prog cmd_arg_with_default_fn )
 argc__cmd_arg_index=1
-argc__fn=cmdg
+argc__fn=cmd_arg_with_default_fn
 argc__positionals=( `_default_fn` )
-cmdg `_default_fn`
+cmd_arg_with_default_fn `_default_fn`
 
 ************ RUN ************
-prog cmdh x
+prog cmd_arg_with_choices x
 
 OUTPUT
 argc_val=x
-argc__args=( prog cmdh x )
+argc__args=( prog cmd_arg_with_choices x )
 argc__cmd_arg_index=1
-argc__fn=cmdh
+argc__fn=cmd_arg_with_choices
 argc__positionals=( x )
-cmdh x
+cmd_arg_with_choices x
 
 ************ RUN ************
-prog cmdj abc
+prog cmd_arg_with_choice_fn abc
 
 OUTPUT
 argc_val=abc
-argc__args=( prog cmdj abc )
+argc__args=( prog cmd_arg_with_choice_fn abc )
 argc__cmd_arg_index=1
-argc__fn=cmdj
+argc__fn=cmd_arg_with_choice_fn
 argc__positionals=( abc )
-cmdj abc
+cmd_arg_with_choice_fn abc
 
 ************ RUN ************
-prog cmdp v1 v2
+prog cmd_two_multi_args v1 v2
 
 OUTPUT
 argc_val1=( v1 )
 argc_val2=( v2 )
-argc__args=( prog cmdp v1 v2 )
+argc__args=( prog cmd_two_multi_args v1 v2 )
 argc__cmd_arg_index=1
-argc__fn=cmdp
+argc__fn=cmd_two_multi_args
 argc__positionals=( v1 v2 )
-cmdp v1 v2
+cmd_two_multi_args v1 v2
 
 ************ RUN ************
-prog cmdp v1 v2 v3
+prog cmd_two_multi_args v1 v2 v3
 
 OUTPUT
 argc_val1=( v1 v2 )
 argc_val2=( v3 )
-argc__args=( prog cmdp v1 v2 v3 )
+argc__args=( prog cmd_two_multi_args v1 v2 v3 )
 argc__cmd_arg_index=1
-argc__fn=cmdp
+argc__fn=cmd_two_multi_args
 argc__positionals=( v1 v2 v3 )
-cmdp v1 v2 v3
+cmd_two_multi_args v1 v2 v3
 
 ************ RUN ************
-prog cmdr v1 v2 v3
+prog cmd_three_required_args v1 v2 v3
 
 OUTPUT
 argc_val1=v1
 argc_val2=v2
 argc_val3=v3
-argc__args=( prog cmdr v1 v2 v3 )
+argc__args=( prog cmd_three_required_args v1 v2 v3 )
 argc__cmd_arg_index=1
-argc__fn=cmdr
+argc__fn=cmd_three_required_args
 argc__positionals=( v1 v2 v3 )
-cmdr v1 v2 v3
+cmd_three_required_args v1 v2 v3
 
 

@@ -11,7 +11,7 @@ fn case1() {
                 "___internal___",
                 "_choice_fn",
                 "prog",
-                "cmda",
+                "test1",
                 "--cc",
                 ""
             ],
@@ -20,7 +20,7 @@ fn case1() {
                 "___internal___",
                 "_choice_fn",
                 "prog",
-                "cmda",
+                "test1",
                 "-a",
                 "--oa",
                 "oa",
@@ -37,14 +37,28 @@ fn case2() {
         SCRIPT_ARGS,
         [
             vec!["prog", "___internal___", "_choice_fn"],
-            vec!["prog", "___internal___", "_choice_fn", "prog", "cmdl", ""],
-            vec!["prog", "___internal___", "_choice_fn", "prog", "cmdl", "v1"],
             vec![
                 "prog",
                 "___internal___",
                 "_choice_fn",
                 "prog",
-                "cmdl",
+                "cmd_multi_arg_with_choice_fn",
+                ""
+            ],
+            vec![
+                "prog",
+                "___internal___",
+                "_choice_fn",
+                "prog",
+                "cmd_multi_arg_with_choice_fn",
+                "v1"
+            ],
+            vec![
+                "prog",
+                "___internal___",
+                "_choice_fn",
+                "prog",
+                "cmd_multi_arg_with_choice_fn",
                 "v1",
                 ""
             ],
@@ -53,7 +67,7 @@ fn case2() {
                 "___internal___",
                 "_choice_fn",
                 "prog",
-                "cmdl",
+                "cmd_multi_arg_with_choice_fn",
                 "v1",
                 "v2"
             ],
@@ -62,7 +76,7 @@ fn case2() {
                 "___internal___",
                 "_choice_fn",
                 "prog",
-                "cmdl",
+                "cmd_multi_arg_with_choice_fn",
                 "v1",
                 "v2",
                 ""

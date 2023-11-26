@@ -54,7 +54,7 @@ fn help_notations() {
 
 #[test]
 fn arg_help_subcmd() {
-    snapshot!(SCRIPT_ARGS, &["prog", "help", "cmdd"]);
+    snapshot!(SCRIPT_ARGS, &["prog", "help", "cmd_required_multi_arg"]);
 }
 
 #[test]
@@ -70,95 +70,111 @@ cmdb() { :; }
 
 #[test]
 fn arg_missing() {
-    snapshot!(SCRIPT_ARGS, &["prog", "cmdd"]);
+    snapshot!(SCRIPT_ARGS, &["prog", "cmd_required_multi_arg"]);
 }
 
 #[test]
 fn arg_choice() {
-    snapshot!(SCRIPT_ARGS, &["prog", "cmdh", "val"]);
+    snapshot!(SCRIPT_ARGS, &["prog", "cmd_arg_with_choices", "val"]);
 }
 
 #[test]
 fn arg_choice_fn() {
-    snapshot!(SCRIPT_ARGS, &["prog", "cmdj", "val"]);
+    snapshot!(SCRIPT_ARGS, &["prog", "cmd_arg_with_choice_fn", "val"]);
 }
 
 #[test]
 fn arg_choice_fn_pass() {
-    snapshot!(SCRIPT_ARGS, &["prog", "cmdj", "val"], None, None);
+    snapshot!(
+        SCRIPT_ARGS,
+        &["prog", "cmd_arg_with_choice_fn", "val"],
+        None,
+        None
+    );
 }
 
 #[test]
 fn arg_choice_fn_skip() {
-    snapshot!(SCRIPT_ARGS, &["prog", "cmdk", "abc"]);
+    snapshot!(
+        SCRIPT_ARGS,
+        &["prog", "cmd_arg_with_choice_fn_and_skip_check", "abc"]
+    );
 }
 
 #[test]
 fn arg_choice_multi() {
-    snapshot!(SCRIPT_ARGS, &["prog", "cmdl", "abc", "val"]);
+    snapshot!(
+        SCRIPT_ARGS,
+        &["prog", "cmd_multi_arg_with_choice_fn", "abc", "val"]
+    );
 }
 
 #[test]
 fn arg_unknown() {
-    snapshot!(SCRIPT_ARGS, &["prog", "cmdb", "v1", "v2"]);
+    snapshot!(SCRIPT_ARGS, &["prog", "cmd_arg", "v1", "v2"]);
 }
 
 #[test]
 fn flag_with_value() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "-a=3"]);
+    snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "-a=3"]);
 }
 
 #[test]
 fn flag_not_multiple() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "-a", "-a"]);
+    snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "-a", "-a"]);
 }
 
 #[test]
 fn option_unknown() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--unknown"]);
+    snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "--unknown"]);
 }
 
 #[test]
 fn option_not_multiple() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "-e", "-e"]);
+    snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "-e", "-e"]);
 }
 
 #[test]
 fn option_mismatch_values() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "-o", "file1"]);
+    snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "-o", "file1"]);
 }
 
 #[test]
 fn option_choice() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--ca", "val"]);
+    snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "--ca", "val"]);
 }
 
 #[test]
 fn option_choice_fn() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--cc", "val"]);
+    snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "--cc", "val"]);
 }
 
 #[test]
 fn option_choice_fn_pass() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--cc", "val"], None, None);
+    snapshot!(
+        SCRIPT_OPTIONS,
+        &["prog", "test1", "--cc", "val"],
+        None,
+        None
+    );
 }
 
 #[test]
 fn option_choice_fn_skip() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmda", "--cd", "val"]);
+    snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "--cd", "val"]);
 }
 
 #[test]
 fn option_choice_multi() {
     snapshot!(
         SCRIPT_OPTIONS,
-        &["prog", "cmda", "--ce", "abc", "--ce", "val"]
+        &["prog", "test1", "--ce", "abc", "--ce", "val"]
     );
 }
 
 #[test]
 fn option_missing() {
-    snapshot!(SCRIPT_OPTIONS, &["prog", "cmdb"]);
+    snapshot!(SCRIPT_OPTIONS, &["prog", "test2"]);
 }
 
 #[test]

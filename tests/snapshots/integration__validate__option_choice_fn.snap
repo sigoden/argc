@@ -3,7 +3,7 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmda --cc val
+prog test1 --cc val
 
 OUTPUT
 command cat >&2 <<-'EOF' 

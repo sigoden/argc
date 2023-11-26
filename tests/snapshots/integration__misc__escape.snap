@@ -3,16 +3,16 @@ source: tests/misc.rs
 expression: data
 ---
 RUN
-prog cmda $foo `pwd` $(pwd) ' \1  
+prog cmd $foo `pwd` $(pwd) ' \1  
  世界  
 
 OUTPUT
-argc__args=( prog cmda '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
+argc__args=( prog cmd '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
 ' 世界 ' ' )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=cmd
 argc__positionals=( '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
 ' 世界 ' ' )
-cmda '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
+cmd '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
 ' 世界 ' '
 

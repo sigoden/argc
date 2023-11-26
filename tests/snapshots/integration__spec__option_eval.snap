@@ -3,164 +3,164 @@ source: tests/spec.rs
 expression: data
 ---
 ************ RUN ************
-prog cmda
+prog test1
 
 OUTPUT
-argc__args=( prog cmda )
+argc__args=( prog test1 )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda -a
+prog test1 -a
 
 OUTPUT
 argc_a=1
-argc__args=( prog cmda -a )
+argc__args=( prog test1 -a )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda -f -f
+prog test1 -f -f
 
 OUTPUT
 argc_fb=2
-argc__args=( prog cmda -f -f )
+argc__args=( prog test1 -f -f )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda -e e
+prog test1 -e e
 
 OUTPUT
 argc_e=e
-argc__args=( prog cmda -e e )
+argc__args=( prog test1 -e e )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda --oa oa
+prog test1 --oa oa
 
 OUTPUT
 argc_oa=oa
-argc__args=( prog cmda --oa oa )
+argc__args=( prog test1 --oa oa )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda --ob ob1 --ob ob2
+prog test1 --ob ob1 --ob ob2
 
 OUTPUT
 argc_ob=( ob1 ob2 )
-argc__args=( prog cmda --ob ob1 --ob ob2 )
+argc__args=( prog test1 --ob ob1 --ob ob2 )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda --oe ob1,ob2 --oe ob3
+prog test1 --oe ob1,ob2 --oe ob3
 
 OUTPUT
 argc_oe=( ob1 ob2 ob3 )
-argc__args=( prog cmda --oe ob1,ob2 --oe ob3 )
+argc__args=( prog test1 --oe ob1,ob2 --oe ob3 )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda -o ob1 ob2
+prog test1 -o ob1 ob2
 
 OUTPUT
 argc_od=( ob1 ob2 )
-argc__args=( prog cmda -o ob1 ob2 )
+argc__args=( prog test1 -o ob1 ob2 )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda --cc abc
+prog test1 --cc abc
 
 OUTPUT
 argc_cc=abc
-argc__args=( prog cmda --cc abc )
+argc__args=( prog test1 --cc abc )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda -soa soa
+prog test1 -soa soa
 
 OUTPUT
 argc_soa=soa
-argc__args=( prog cmda -soa soa )
+argc__args=( prog test1 -soa soa )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmdc
+prog test3
 
 OUTPUT
 argc_oe=val
 argc_of=`_default_fn`
 argc_cb=x
-argc__args=( prog cmdc )
+argc__args=( prog test3 )
 argc__cmd_arg_index=1
-argc__fn=cmdc
+argc__fn=test3
 argc__positionals=(  )
-cmdc
+test3
 
 ************ RUN ************
-prog cmdc --oe oe
+prog test3 --oe oe
 
 OUTPUT
 argc_oe=oe
 argc_of=`_default_fn`
 argc_cb=x
-argc__args=( prog cmdc --oe oe )
+argc__args=( prog test3 --oe oe )
 argc__cmd_arg_index=1
-argc__fn=cmdc
+argc__fn=test3
 argc__positionals=(  )
-cmdc
+test3
 
 ************ RUN ************
-prog cmdc --of of
+prog test3 --of of
 
 OUTPUT
 argc_oe=val
 argc_of=of
 argc_cb=x
-argc__args=( prog cmdc --of of )
+argc__args=( prog test3 --of of )
 argc__cmd_arg_index=1
-argc__fn=cmdc
+argc__fn=test3
 argc__positionals=(  )
-cmdc
+test3
 
 ************ RUN ************
-prog cmdc --cb y
+prog test3 --cb y
 
 OUTPUT
 argc_oe=val
 argc_of=`_default_fn`
 argc_cb=y
-argc__args=( prog cmdc --cb y )
+argc__args=( prog test3 --cb y )
 argc__cmd_arg_index=1
-argc__fn=cmdc
+argc__fn=test3
 argc__positionals=(  )
-cmdc
+test3
 
 

@@ -27,15 +27,31 @@ fn help() {
 }
 
 #[test]
-fn compgen() {
-    let path = locate_script("args.sh");
+fn compgen_args() {
+    let path = locate_script("examples/args.sh");
     let path_env_var = get_path_env_var();
     Command::cargo_bin("argc")
         .unwrap()
         .arg("--argc-compgen")
         .arg("fish")
         .arg(path)
-        .args(["args", "cmdj", ""])
+        .args(["args", "cmd_arg_with_choice_fn", ""])
+        .env("PATH", path_env_var)
+        .assert()
+        .stdout(predicates::str::contains("abc\ndef\nghi"))
+        .success();
+}
+
+#[test]
+fn compgen_options() {
+    let path = locate_script("examples/options.sh");
+    let path_env_var = get_path_env_var();
+    Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-compgen")
+        .arg("fish")
+        .arg(path)
+        .args(["args", "test1", "--cc", ""])
         .env("PATH", path_env_var)
         .assert()
         .stdout(predicates::str::contains("abc\ndef\nghi"))

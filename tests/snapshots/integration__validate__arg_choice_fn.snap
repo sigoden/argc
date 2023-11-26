@@ -3,7 +3,7 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmdj val
+prog cmd_arg_with_choice_fn val
 
 OUTPUT
 command cat >&2 <<-'EOF' 

@@ -2,13 +2,11 @@ use crate::*;
 
 #[test]
 fn option_help() {
-    let mut names = vec![];
-    for c in 'a'..='z' {
-        let name = format!("cmd{c}");
-        if SCRIPT_OPTIONS.contains(&name) {
-            names.push(name);
-        }
-    }
+    let names: Vec<String> = SCRIPT_OPTIONS
+        .lines()
+        .filter(|v| v.contains("() {") && !v.starts_with('_'))
+        .map(|v| v.split_once('(').unwrap().0.to_string())
+        .collect();
     let matrix: Vec<Vec<&str>> = names
         .iter()
         .map(|v| vec!["prog", v.as_str(), "-h"])
@@ -21,20 +19,20 @@ fn option_eval() {
     snapshot_multi!(
         SCRIPT_OPTIONS,
         [
-            vec!["prog", "cmda"],
-            vec!["prog", "cmda", "-a"],
-            vec!["prog", "cmda", "-f", "-f"],
-            vec!["prog", "cmda", "-e", "e"],
-            vec!["prog", "cmda", "--oa", "oa"],
-            vec!["prog", "cmda", "--ob", "ob1", "--ob", "ob2"],
-            vec!["prog", "cmda", "--oe", "ob1,ob2", "--oe", "ob3"],
-            vec!["prog", "cmda", "-o", "ob1", "ob2"],
-            vec!["prog", "cmda", "--cc", "abc"],
-            vec!["prog", "cmda", "-soa", "soa"],
-            vec!["prog", "cmdc"],
-            vec!["prog", "cmdc", "--oe", "oe"],
-            vec!["prog", "cmdc", "--of", "of"],
-            vec!["prog", "cmdc", "--cb", "y"],
+            vec!["prog", "test1"],
+            vec!["prog", "test1", "-a"],
+            vec!["prog", "test1", "-f", "-f"],
+            vec!["prog", "test1", "-e", "e"],
+            vec!["prog", "test1", "--oa", "oa"],
+            vec!["prog", "test1", "--ob", "ob1", "--ob", "ob2"],
+            vec!["prog", "test1", "--oe", "ob1,ob2", "--oe", "ob3"],
+            vec!["prog", "test1", "-o", "ob1", "ob2"],
+            vec!["prog", "test1", "--cc", "abc"],
+            vec!["prog", "test1", "-soa", "soa"],
+            vec!["prog", "test3"],
+            vec!["prog", "test3", "--oe", "oe"],
+            vec!["prog", "test3", "--of", "of"],
+            vec!["prog", "test3", "--cb", "y"],
         ]
     );
 }
@@ -44,10 +42,10 @@ fn option_shorts() {
     snapshot_multi!(
         SCRIPT_OPTIONS,
         [
-            vec!["prog", "cmda", "-af"],
-            vec!["prog", "cmda", "-ae", "e"],
-            vec!["prog", "cmda", "-afe", "e"],
-            vec!["prog", "cmda", "-ao", "v1", "v2"],
+            vec!["prog", "test1", "-af"],
+            vec!["prog", "test1", "-ae", "e"],
+            vec!["prog", "test1", "-afe", "e"],
+            vec!["prog", "test1", "-ao", "v1", "v2"],
         ]
     );
 }
@@ -57,29 +55,28 @@ fn arg_eval() {
     snapshot_multi!(
         SCRIPT_ARGS,
         [
-            vec!["prog", "cmdb", "v1"],
-            vec!["prog", "cmdc", "v1", "v2"],
-            vec!["prog", "cmdf"],
-            vec!["prog", "cmdf", "v1"],
-            vec!["prog", "cmdg"],
-            vec!["prog", "cmdh", "x"],
-            vec!["prog", "cmdj", "abc"],
-            vec!["prog", "cmdp", "v1", "v2"],
-            vec!["prog", "cmdp", "v1", "v2", "v3"],
-            vec!["prog", "cmdr", "v1", "v2", "v3"],
+            vec!["prog", "cmd_arg", "v1"],
+            vec!["prog", "cmd_multi_arg", "v1", "v2"],
+            vec!["prog", "cmd_arg_with_default"],
+            vec!["prog", "cmd_arg_with_default", "v1"],
+            vec!["prog", "cmd_arg_with_default_fn"],
+            vec!["prog", "cmd_arg_with_choices", "x"],
+            vec!["prog", "cmd_arg_with_choice_fn", "abc"],
+            vec!["prog", "cmd_two_multi_args", "v1", "v2"],
+            vec!["prog", "cmd_two_multi_args", "v1", "v2", "v3"],
+            vec!["prog", "cmd_three_required_args", "v1", "v2", "v3"],
         ]
     );
 }
 
 #[test]
 fn arg_subcmd_help() {
-    let mut names = vec![];
-    for c in 'a'..='z' {
-        let name = format!("cmd{c}");
-        if SCRIPT_ARGS.contains(&name) {
-            names.push(name);
-        }
-    }
+    let names: Vec<String> = SCRIPT_ARGS
+        .lines()
+        .filter(|v| v.starts_with("cmd") && v.contains("() {"))
+        .map(|v| v.split_once('(').unwrap().0.to_string())
+        .collect();
+
     let matrix: Vec<Vec<&str>> = names
         .iter()
         .map(|v| vec!["prog", v.as_str(), "-h"])
@@ -92,15 +89,15 @@ fn arg_no_param() {
     snapshot_multi!(
         SCRIPT_ARGS,
         [
-            vec!["prog", "cmda", "v1", "v2"],
-            vec!["prog", "cmda", "--o1", "-o2", "-3"]
+            vec!["prog", "cmd", "v1", "v2"],
+            vec!["prog", "cmd", "--o1", "-o2", "-3"]
         ]
     );
 }
 
 #[test]
 fn arg_no_option() {
-    snapshot!(SCRIPT_ARGS, &["prog", "cmdc", "--o1", "-o2", "-3"]);
+    snapshot!(SCRIPT_ARGS, &["prog", "cmd_multi_arg", "--o1", "-o2", "-3"]);
 }
 
 #[test]
@@ -108,11 +105,11 @@ fn arg_two_multi() {
     snapshot_multi!(
         SCRIPT_ARGS,
         [
-            vec!["prog", "cmdp", "a", "b", "c"],
-            vec!["prog", "cmdp", "--", "a", "b", "c"],
-            vec!["prog", "cmdp", "a", "--", "b", "c"],
-            vec!["prog", "cmdp", "a", "b", "--", "c"],
-            vec!["prog", "cmdp", "a", "b", "c", "--"],
+            vec!["prog", "cmd_two_multi_args", "a", "b", "c"],
+            vec!["prog", "cmd_two_multi_args", "--", "a", "b", "c"],
+            vec!["prog", "cmd_two_multi_args", "a", "--", "b", "c"],
+            vec!["prog", "cmd_two_multi_args", "a", "b", "--", "c"],
+            vec!["prog", "cmd_two_multi_args", "a", "b", "c", "--"],
         ]
     );
 }
