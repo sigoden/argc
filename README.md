@@ -266,13 +266,9 @@ what is the benefit?
 - As a centralized entrypoint/document for executing the project's bash scripts.
 - Serves as a script for a task runner.
 
-You can use `argc --argc-create` to quickly create a boilerplate argcscript. For example:
+You can use `argc --argc-create` to quickly create a boilerplate argcscript.
 
-```
-argc --argc-create test build run
-```
-
-The above command will create an `Argcfile.sh` in the current directory containing the commands: `test`, `build` and `run`.
+![argcscript](https://github.com/sigoden/argc/assets/4012553/5130d9c5-90ff-478e-8404-3db6f55ba1d0)
 
 ## Parallel
 
@@ -286,11 +282,9 @@ The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel. Functions ru
 
 ## Windows Only
 
-Argc requires bash to run scripts. [git](https://git-scm.com/)'s built-in bash is good enough for argc.
+Argc requires bash to run scripts. [git](https://gitforwindows.org/)'s built-in bash is good enough for argc.
 
-If you want to use another bash, please specify it via `ARGC_SHELL_PATH` environment variable.
-
-If you want to run the bash script directly, you can add the following configuration to Windows Registry.
+If you want to run a `.sh` script file directly like a `.cmd` or `.exe` file, execute the following code in PowerShell.
 
 ```ps1
 # Add .sh to PATHEXT
@@ -299,6 +293,8 @@ If you want to run the bash script directly, you can add the following configura
 New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\command' `
   -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
 ```
+
+![image](https://github.com/sigoden/argc/assets/4012553/16af2b13-8c20-4954-bf58-ccdf1bbe23ef)
 
 ## License
 
