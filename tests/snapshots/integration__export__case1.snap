@@ -18,8 +18,1091 @@ expression: output
   "aliases": [],
   "subcommands": [
     {
+      "describe": "All kind of options",
+      "name": "options",
+      "author": null,
+      "version": null,
+      "metadata": [],
+      "options": [
+        {
+          "name": "oa",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--oa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ob",
+          "describe": "short",
+          "flag": false,
+          "option_names": [
+            "--ob",
+            "-b"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "c",
+          "describe": "short only",
+          "flag": false,
+          "option_names": [
+            "-c"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oc",
+          "describe": "required",
+          "flag": false,
+          "option_names": [
+            "--oc"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Required"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "od",
+          "describe": "multi-occurs",
+          "flag": false,
+          "option_names": [
+            "--od"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oe",
+          "describe": "required + multi-occurs",
+          "flag": false,
+          "option_names": [
+            "--oe"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleRequired"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ona",
+          "describe": "value notation",
+          "flag": false,
+          "option_names": [
+            "--ona"
+          ],
+          "value_names": [
+            "PATH"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "onb",
+          "describe": "two-args value notations",
+          "flag": false,
+          "option_names": [
+            "--onb"
+          ],
+          "value_names": [
+            "FILE",
+            "FILE"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "onc",
+          "describe": "unlimited-args value notations",
+          "flag": false,
+          "option_names": [
+            "--onc"
+          ],
+          "value_names": [
+            "CMD",
+            "FILE+"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oda",
+          "describe": "default",
+          "flag": false,
+          "option_names": [
+            "--oda"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": "a"
+        },
+        {
+          "name": "odb",
+          "describe": "default from fn",
+          "flag": false,
+          "option_names": [
+            "--odb"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oca",
+          "describe": "choice",
+          "flag": false,
+          "option_names": [
+            "--oca"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": [
+            "a",
+            "b"
+          ],
+          "default": null
+        },
+        {
+          "name": "ocb",
+          "describe": "choice + default",
+          "flag": false,
+          "option_names": [
+            "--ocb"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": [
+            "a",
+            "b"
+          ],
+          "default": "a"
+        },
+        {
+          "name": "occ",
+          "describe": "multi-occurs + choice",
+          "flag": false,
+          "option_names": [
+            "--occ"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": [
+            "a",
+            "b"
+          ],
+          "default": null
+        },
+        {
+          "name": "ocd",
+          "describe": "required + multi-occurs + choice",
+          "flag": false,
+          "option_names": [
+            "--ocd"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleRequired"
+          },
+          "choices": [
+            "a",
+            "b"
+          ],
+          "default": null
+        },
+        {
+          "name": "ofa",
+          "describe": "choice from fn",
+          "flag": false,
+          "option_names": [
+            "--ofa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ofb",
+          "describe": "choice from fn + no validation",
+          "flag": false,
+          "option_names": [
+            "--ofb"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ofc",
+          "describe": "multi-occurs + choice from fn",
+          "flag": false,
+          "option_names": [
+            "--ofc"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ofd",
+          "describe": "multi-occurs + choice from fn + comma-separated list",
+          "flag": false,
+          "option_names": [
+            "--ofd"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultiCharOptional",
+            "value": ","
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oxa",
+          "describe": "capture all remaining args",
+          "flag": false,
+          "option_names": [
+            "--oxa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Terminated"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "All kind of flags",
+      "name": "flags",
+      "author": null,
+      "version": null,
+      "metadata": [],
+      "options": [
+        {
+          "name": "fa",
+          "describe": "",
+          "flag": true,
+          "option_names": [
+            "--fa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fb",
+          "describe": "short",
+          "flag": true,
+          "option_names": [
+            "--fb",
+            "-b"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "c",
+          "describe": "short only",
+          "flag": true,
+          "option_names": [
+            "-c"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fd",
+          "describe": "multi-occurs",
+          "flag": true,
+          "option_names": [
+            "--fd"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fe",
+          "describe": "short + multi-occurs",
+          "flag": true,
+          "option_names": [
+            "--fe",
+            "-e"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "Flags or options with single hyphen",
+      "name": "options-one-hyphen",
+      "author": null,
+      "version": null,
+      "metadata": [],
+      "options": [
+        {
+          "name": "fa",
+          "describe": "",
+          "flag": true,
+          "option_names": [
+            "-fa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fb",
+          "describe": "",
+          "flag": true,
+          "option_names": [
+            "-fb",
+            "-b"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fd",
+          "describe": "",
+          "flag": true,
+          "option_names": [
+            "-fd"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oa",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "-oa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "od",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "-od"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ona",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "-ona"
+          ],
+          "value_names": [
+            "PATH"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oca",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "-oca"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": [
+            "a",
+            "b"
+          ],
+          "default": null
+        },
+        {
+          "name": "ofa",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "-ofa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "Value notation modifier",
+      "name": "options-notation-modifier",
+      "author": null,
+      "version": null,
+      "metadata": [],
+      "options": [
+        {
+          "name": "oa",
+          "describe": "multi values, zero or more",
+          "flag": false,
+          "option_names": [
+            "--oa"
+          ],
+          "value_names": [
+            "VALUE*"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ob",
+          "describe": "multi values, one or more",
+          "flag": false,
+          "option_names": [
+            "--ob"
+          ],
+          "value_names": [
+            "VALUE+"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oc",
+          "describe": "zero or one",
+          "flag": false,
+          "option_names": [
+            "--oc"
+          ],
+          "value_names": [
+            "VALUE?"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "All kind of options",
+      "name": "options-plus",
+      "author": null,
+      "version": null,
+      "metadata": [],
+      "options": [
+        {
+          "name": "oa",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "+oa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ob",
+          "describe": "short",
+          "flag": false,
+          "option_names": [
+            "+ob",
+            "+b"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "c",
+          "describe": "short only",
+          "flag": false,
+          "option_names": [
+            "+c"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oc",
+          "describe": "required",
+          "flag": false,
+          "option_names": [
+            "+oc"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Required"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "od",
+          "describe": "multi-occurs",
+          "flag": false,
+          "option_names": [
+            "+od"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oe",
+          "describe": "required + multi-occurs",
+          "flag": false,
+          "option_names": [
+            "+oe"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleRequired"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ona",
+          "describe": "value notation",
+          "flag": false,
+          "option_names": [
+            "+ona"
+          ],
+          "value_names": [
+            "PATH"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "onb",
+          "describe": "two-args value notations",
+          "flag": false,
+          "option_names": [
+            "+onb"
+          ],
+          "value_names": [
+            "FILE",
+            "FILE"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "onc",
+          "describe": "unlimited-args value notations",
+          "flag": false,
+          "option_names": [
+            "+onc"
+          ],
+          "value_names": [
+            "CMD",
+            "FILE+"
+          ],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oda",
+          "describe": "default",
+          "flag": false,
+          "option_names": [
+            "+oda"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": "a"
+        },
+        {
+          "name": "odb",
+          "describe": "default from fn",
+          "flag": false,
+          "option_names": [
+            "+odb"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oca",
+          "describe": "choice",
+          "flag": false,
+          "option_names": [
+            "+oca"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": [
+            "a",
+            "b"
+          ],
+          "default": null
+        },
+        {
+          "name": "ocb",
+          "describe": "choice + default",
+          "flag": false,
+          "option_names": [
+            "+ocb"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": [
+            "a",
+            "b"
+          ],
+          "default": "a"
+        },
+        {
+          "name": "occ",
+          "describe": "multi-occurs + choice",
+          "flag": false,
+          "option_names": [
+            "+occ"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": [
+            "a",
+            "b"
+          ],
+          "default": null
+        },
+        {
+          "name": "ocd",
+          "describe": "required + multi-occurs + choice",
+          "flag": false,
+          "option_names": [
+            "+ocd"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleRequired"
+          },
+          "choices": [
+            "a",
+            "b"
+          ],
+          "default": null
+        },
+        {
+          "name": "ofa",
+          "describe": "choice from fn",
+          "flag": false,
+          "option_names": [
+            "+ofa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ofb",
+          "describe": "choice from fn + no validation",
+          "flag": false,
+          "option_names": [
+            "+ofb"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ofc",
+          "describe": "multi-occurs + choice from fn",
+          "flag": false,
+          "option_names": [
+            "+ofc"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "ofd",
+          "describe": "multi-occurs + choice from fn + comma-separated list",
+          "flag": false,
+          "option_names": [
+            "+ofd"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultiCharOptional",
+            "value": ","
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "oxa",
+          "describe": "capture all remaining args",
+          "flag": false,
+          "option_names": [
+            "+oxa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Terminated"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "All kind of flags",
+      "name": "flags-plus",
+      "author": null,
+      "version": null,
+      "metadata": [],
+      "options": [
+        {
+          "name": "fa",
+          "describe": "",
+          "flag": true,
+          "option_names": [
+            "+fa"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fb",
+          "describe": "short",
+          "flag": true,
+          "option_names": [
+            "+fb",
+            "+b"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "c",
+          "describe": "short only",
+          "flag": true,
+          "option_names": [
+            "+c"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fd",
+          "describe": "multi-occurs",
+          "flag": true,
+          "option_names": [
+            "+fd"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "fe",
+          "describe": "short + multi-occurs",
+          "flag": true,
+          "option_names": [
+            "+fe",
+            "+e"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultipleOptional"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "Mixed `-` and `+` options",
+      "name": "options-mixed",
+      "author": null,
+      "version": null,
+      "metadata": [],
+      "options": [
+        {
+          "name": "a",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "-a",
+            "+a"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "b",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "+b",
+            "-b"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "c",
+          "describe": "",
+          "flag": false,
+          "option_names": [
+            "--c",
+            "+c"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "Optional"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
+      "describe": "Prefixed option",
+      "name": "options-prefixed",
+      "author": null,
+      "version": null,
+      "metadata": [],
+      "options": [
+        {
+          "name": "X",
+          "describe": "prefixied + multi-occurs + choice from fn",
+          "flag": false,
+          "option_names": [
+            "-X"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultiPrefixed"
+          },
+          "choices": null,
+          "default": null
+        },
+        {
+          "name": "X",
+          "describe": "prefixied + multi-occurs + choice from fn",
+          "flag": false,
+          "option_names": [
+            "+X"
+          ],
+          "value_names": [],
+          "modifier": {
+            "type": "MultiPrefixed"
+          },
+          "choices": null,
+          "default": null
+        }
+      ],
+      "positionals": [],
+      "aliases": [],
+      "subcommands": []
+    },
+    {
       "describe": "",
-      "name": "cmda",
+      "name": "test1",
       "author": null,
       "version": null,
       "metadata": [],
@@ -268,7 +1351,7 @@ expression: output
     },
     {
       "describe": "",
-      "name": "cmdb",
+      "name": "test2",
       "author": null,
       "version": null,
       "metadata": [],
@@ -367,7 +1450,7 @@ expression: output
     },
     {
       "describe": "",
-      "name": "cmdc",
+      "name": "test3",
       "author": null,
       "version": null,
       "metadata": [],
@@ -417,93 +1500,6 @@ expression: output
             "z"
           ],
           "default": "x"
-        }
-      ],
-      "positionals": [],
-      "aliases": [],
-      "subcommands": []
-    },
-    {
-      "describe": "",
-      "name": "cmdd",
-      "author": null,
-      "version": null,
-      "metadata": [],
-      "options": [
-        {
-          "name": "oa",
-          "describe": "",
-          "flag": false,
-          "option_names": [
-            "--oa"
-          ],
-          "value_names": [],
-          "modifier": {
-            "type": "Terminated"
-          },
-          "choices": null,
-          "default": null
-        }
-      ],
-      "positionals": [],
-      "aliases": [],
-      "subcommands": []
-    },
-    {
-      "describe": "",
-      "name": "cmde",
-      "author": null,
-      "version": null,
-      "metadata": [],
-      "options": [
-        {
-          "name": "oa",
-          "describe": "",
-          "flag": false,
-          "option_names": [
-            "--oa"
-          ],
-          "value_names": [
-            "DIR+"
-          ],
-          "modifier": {
-            "type": "Optional"
-          },
-          "choices": null,
-          "default": null
-        },
-        {
-          "name": "ob",
-          "describe": "",
-          "flag": false,
-          "option_names": [
-            "--ob"
-          ],
-          "value_names": [
-            "CMD",
-            "DIR+"
-          ],
-          "modifier": {
-            "type": "Optional"
-          },
-          "choices": null,
-          "default": null
-        },
-        {
-          "name": "oc",
-          "describe": "",
-          "flag": false,
-          "option_names": [
-            "--oc"
-          ],
-          "value_names": [
-            "DIR+"
-          ],
-          "modifier": {
-            "type": "MultipleOptional"
-          },
-          "choices": null,
-          "default": null
         }
       ],
       "positionals": [],

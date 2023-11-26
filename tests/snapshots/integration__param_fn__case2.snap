@@ -12,57 +12,57 @@ argc__positionals=(  )
 _choice_fn;exit;
 
 ************ RUN ************
-prog ___internal___ _choice_fn prog cmdl 
+prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn 
 
 OUTPUT
 argc_val=( '' )
-argc__args=( prog cmdl '' )
+argc__args=( prog cmd_multi_arg_with_choice_fn '' )
 argc__cmd_arg_index=1
-argc__cmd_fn=cmdl
+argc__cmd_fn=cmd_multi_arg_with_choice_fn
 argc__positionals=( '' )
 _choice_fn '';exit;
 
 ************ RUN ************
-prog ___internal___ _choice_fn prog cmdl v1
+prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1
 
 OUTPUT
 argc_val=( v1 )
-argc__args=( prog cmdl v1 )
+argc__args=( prog cmd_multi_arg_with_choice_fn v1 )
 argc__cmd_arg_index=1
-argc__cmd_fn=cmdl
+argc__cmd_fn=cmd_multi_arg_with_choice_fn
 argc__positionals=( v1 )
 _choice_fn v1;exit;
 
 ************ RUN ************
-prog ___internal___ _choice_fn prog cmdl v1 
+prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1 
 
 OUTPUT
 argc_val=( v1 '' )
-argc__args=( prog cmdl v1 '' )
+argc__args=( prog cmd_multi_arg_with_choice_fn v1 '' )
 argc__cmd_arg_index=1
-argc__cmd_fn=cmdl
+argc__cmd_fn=cmd_multi_arg_with_choice_fn
 argc__positionals=( v1 '' )
 _choice_fn v1 '';exit;
 
 ************ RUN ************
-prog ___internal___ _choice_fn prog cmdl v1 v2
+prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1 v2
 
 OUTPUT
 argc_val=( v1 v2 )
-argc__args=( prog cmdl v1 v2 )
+argc__args=( prog cmd_multi_arg_with_choice_fn v1 v2 )
 argc__cmd_arg_index=1
-argc__cmd_fn=cmdl
+argc__cmd_fn=cmd_multi_arg_with_choice_fn
 argc__positionals=( v1 v2 )
 _choice_fn v1 v2;exit;
 
 ************ RUN ************
-prog ___internal___ _choice_fn prog cmdl v1 v2 
+prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1 v2 
 
 OUTPUT
 argc_val=( v1 v2 '' )
-argc__args=( prog cmdl v1 v2 '' )
+argc__args=( prog cmd_multi_arg_with_choice_fn v1 v2 '' )
 argc__cmd_arg_index=1
-argc__cmd_fn=cmdl
+argc__cmd_fn=cmd_multi_arg_with_choice_fn
 argc__positionals=( v1 v2 '' )
 _choice_fn v1 v2 '';exit;
 

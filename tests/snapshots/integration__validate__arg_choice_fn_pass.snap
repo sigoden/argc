@@ -3,13 +3,13 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmdj val
+prog cmd_arg_with_choice_fn val
 
 OUTPUT
 argc_val=val
-argc__args=( prog cmdj val )
+argc__args=( prog cmd_arg_with_choice_fn val )
 argc__cmd_arg_index=1
-argc__fn=cmdj
+argc__fn=cmd_arg_with_choice_fn
 argc__positionals=( val )
-cmdj val
+cmd_arg_with_choice_fn val
 

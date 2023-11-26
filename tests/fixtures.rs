@@ -17,11 +17,9 @@ pub const SCRIPT_PATHS: [&str; 8] = [
     "dir6/ARGCFILE",
 ];
 
-pub fn locate_script(script_name: &str) -> String {
+pub fn locate_script(script_path: &str) -> String {
     let mut spec_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    spec_path.push("tests");
-    spec_path.push("scripts");
-    spec_path.push(script_name);
+    spec_path.push(script_path);
     spec_path.display().to_string()
 }
 

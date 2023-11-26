@@ -1,12 +1,18 @@
+# @describe docker cli
+
 # @cmd
-cmd() { :; }
+builder() { :; }
 # @cmd
-cmd::foo() { :; }
+builder::ls() { :; }
 # @cmd
-cmd::bar() { :; }
+builder::prune() { :; }
 # @cmd
-cmd::bar::baz() { :; }
+builder::rm() { :; }
 # @cmd
-cmd::bar::qux() { :; }
+builder::imagetools() { :; }
+# @cmd
+builder::imagetools::create() { :; }
+# @cmd
+builder::imagetools::inspect() { :; }
 
 eval "$(argc --argc-eval "$0" "$@")"

@@ -3,52 +3,52 @@ source: tests/spec.rs
 expression: data
 ---
 ************ RUN ************
-prog cmda -af
+prog test1 -af
 
 OUTPUT
 argc_a=1
 argc_fb=1
-argc__args=( prog cmda -af )
+argc__args=( prog test1 -af )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda -ae e
+prog test1 -ae e
 
 OUTPUT
 argc_a=1
 argc_e=e
-argc__args=( prog cmda -ae e )
+argc__args=( prog test1 -ae e )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda -afe e
+prog test1 -afe e
 
 OUTPUT
 argc_a=1
 argc_fb=1
 argc_e=e
-argc__args=( prog cmda -afe e )
+argc__args=( prog test1 -afe e )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 ************ RUN ************
-prog cmda -ao v1 v2
+prog test1 -ao v1 v2
 
 OUTPUT
 argc_a=1
 argc_od=( v1 v2 )
-argc__args=( prog cmda -ao v1 v2 )
+argc__args=( prog test1 -ao v1 v2 )
 argc__cmd_arg_index=1
-argc__fn=cmda
+argc__fn=test1
 argc__positionals=(  )
-cmda
+test1
 
 

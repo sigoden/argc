@@ -3,13 +3,13 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmda -a -a
+prog test1 -a -a
 
 OUTPUT
 command cat >&2 <<-'EOF' 
 error: the argument `-a` cannot be used multiple times
 
-USAGE: prog cmda [OPTIONS]
+USAGE: prog test1 [OPTIONS]
 
 For more information, try '--help'.
 

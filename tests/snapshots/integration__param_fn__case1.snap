@@ -12,27 +12,27 @@ argc__positionals=(  )
 _choice_fn;exit;
 
 ************ RUN ************
-prog ___internal___ _choice_fn prog cmda --cc 
+prog ___internal___ _choice_fn prog test1 --cc 
 
 OUTPUT
 argc_cc=''
-argc__args=( prog cmda --cc '' )
+argc__args=( prog test1 --cc '' )
 argc__cmd_arg_index=1
-argc__cmd_fn=cmda
+argc__cmd_fn=test1
 argc__last_flag_option=cc
 argc__positionals=(  )
 _choice_fn;exit;
 
 ************ RUN ************
-prog ___internal___ _choice_fn prog cmda -a --oa oa --cc 
+prog ___internal___ _choice_fn prog test1 -a --oa oa --cc 
 
 OUTPUT
 argc_a=1
 argc_oa=oa
 argc_cc=''
-argc__args=( prog cmda -a --oa oa --cc '' )
+argc__args=( prog test1 -a --oa oa --cc '' )
 argc__cmd_arg_index=1
-argc__cmd_fn=cmda
+argc__cmd_fn=test1
 argc__last_flag_option=cc
 argc__positionals=(  )
 _choice_fn;exit;

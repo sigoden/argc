@@ -3,13 +3,13 @@ source: tests/validate.rs
 expression: data
 ---
 RUN
-prog cmda -o file1
+prog test1 -o file1
 
 OUTPUT
 command cat >&2 <<-'EOF' 
 error: invalid value for `--od <FILE> <FILE>`
 
-USAGE: prog cmda [OPTIONS]
+USAGE: prog test1 [OPTIONS]
 
 For more information, try '--help'.
 
