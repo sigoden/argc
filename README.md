@@ -3,7 +3,13 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-An elegant command-line options, arguments and sub-commands parser for bash.
+You define cli through comments, and argc takes care of the remaining tasks:
+
+* Parse options/positionals/subcommands
+* Validate user input
+* Output comprehensive help text
+* Initialize intuitive variables for arguments
+* Provide tab-completion
 
 ![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
 
