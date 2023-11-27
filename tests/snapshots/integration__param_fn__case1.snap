@@ -19,7 +19,7 @@ argc_cc=''
 argc__args=( prog test1 --cc '' )
 argc__cmd_arg_index=1
 argc__cmd_fn=test1
-argc__last_flag_option=cc
+argc__option=argc_cc
 argc__positionals=(  )
 _choice_fn;exit;
 
@@ -33,7 +33,7 @@ argc_cc=''
 argc__args=( prog test1 -a --oa oa --cc '' )
 argc__cmd_arg_index=1
 argc__cmd_fn=test1
-argc__last_flag_option=cc
+argc__option=argc_cc
 argc__positionals=(  )
 _choice_fn;exit;
 

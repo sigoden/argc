@@ -27,7 +27,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
-                        sanitize_name(name),
+                        sanitize_arg_name(name),
                         escape_shell_words(value)
                     ));
                 }
@@ -35,7 +35,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}=`{}`",
                         VARIABLE_PREFIX,
-                        sanitize_name(name),
+                        sanitize_arg_name(name),
                         fn_name,
                     ));
                 }
@@ -43,7 +43,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
-                        sanitize_name(name),
+                        sanitize_arg_name(name),
                         values
                             .iter()
                             .map(|v| escape_shell_words(v))
@@ -56,7 +56,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}={}",
                         VARIABLE_PREFIX,
-                        sanitize_name(name),
+                        sanitize_arg_name(name),
                         &value
                     ));
                     positional_args.push(value);
@@ -65,7 +65,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}=`{}`",
                         VARIABLE_PREFIX,
-                        sanitize_name(name),
+                        sanitize_arg_name(name),
                         &fn_name
                     ));
                     positional_args.push(format!("`{}`", fn_name));
@@ -78,7 +78,7 @@ impl ArgcValue {
                     output.push(format!(
                         "{}_{}=( {} )",
                         VARIABLE_PREFIX,
-                        sanitize_name(name),
+                        sanitize_arg_name(name),
                         values.join(" ")
                     ));
                     positional_args.extend(values);
@@ -125,6 +125,6 @@ impl ArgcValue {
     }
 }
 
-fn sanitize_name(name: &str) -> String {
+pub fn sanitize_arg_name(name: &str) -> String {
     name.replace(['-', '.', ':'], "_")
 }
