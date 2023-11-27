@@ -6,11 +6,12 @@ use std::{
 };
 
 use crate::{
+    argc_value::{sanitize_arg_name, ArgcValue},
     command::{Command, SymbolParam},
     compgen::CompColor,
     param::{ChoiceData, FlagOptionParam, ParamData, PositionalParam},
     utils::run_param_fns,
-    ArgcValue, Shell,
+    Shell, VARIABLE_PREFIX,
 };
 
 use either::Either;
@@ -30,7 +31,7 @@ pub(crate) struct Matcher<'a, 'b> {
     script_path: Option<String>,
     term_width: Option<usize>,
     split_last_arg_at: Option<usize>,
-    last_flag_option: Option<&'a str>,
+    comp_option: Option<&'a str>,
 }
 
 type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>); // key, values, param_name
@@ -80,7 +81,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut split_last_arg_at = None;
         let mut arg_comp = ArgComp::Any;
         let mut choice_fns = HashSet::new();
-        let mut last_flag_option = None;
+        let mut comp_option = None;
         let args_len = args.len();
         if root.delegated() {
             positional_args = args.iter().skip(1).map(|v| v.as_str()).collect();
@@ -98,7 +99,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 let signs = cmd.flag_option_signs();
                 let arg = args[arg_index].as_str();
                 let is_last_arg = arg_index == args_len - 1;
-                last_flag_option = None;
+                comp_option = None;
                 if arg == "--" {
                     if is_rest_args_positional {
                         add_positional_arg(
@@ -132,7 +133,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 split_last_arg_at = Some(k.len() + 1);
                             }
                             flag_option_args[cmd_level].push((k, vec![v], Some(param.var_name())));
-                            last_flag_option = Some(param.var_name());
+                            comp_option = Some(param.var_name());
                         } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
                             add_param_choice_fn(&mut choice_fns, param);
                             match_prefix_option(
@@ -144,7 +145,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 &mut split_last_arg_at,
                                 &prefix,
                             );
-                            last_flag_option = Some(param.var_name());
+                            comp_option = Some(param.var_name());
                         } else {
                             flag_option_args[cmd_level].push((k, vec![v], None));
                         }
@@ -160,7 +161,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             combine_shorts,
                             &signs,
                         );
-                        last_flag_option = Some(param.var_name());
+                        comp_option = Some(param.var_name());
                     } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
                         add_param_choice_fn(&mut choice_fns, param);
                         match_prefix_option(
@@ -172,7 +173,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             &mut split_last_arg_at,
                             &prefix,
                         );
-                        last_flag_option = Some(param.var_name());
+                        comp_option = Some(param.var_name());
                     } else if let Some(subcmd) = find_subcommand(cmd, arg, &positional_args)
                         .and_then(|v| {
                             if is_last_arg && compgen {
@@ -228,7 +229,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 combine_shorts,
                                 &signs,
                             );
-                            last_flag_option = Some(param.var_name());
+                            comp_option = Some(param.var_name());
                         }
                     } else if let Some((ch, symbol_param)) = find_symbol(cmd, arg) {
                         if let Some(choice_fn) = &symbol_param.1 {
@@ -306,7 +307,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             script_path: None,
             term_width: None,
             split_last_arg_at,
-            last_flag_option,
+            comp_option,
         }
     }
 
@@ -344,10 +345,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
         if let Some(name) = &last_cmd.name {
             output.push(ArgcValue::Single("_cmd_fn".into(), name.to_string()));
         }
-        if let Some(name) = self.last_flag_option {
+        if let Some(name) = self.comp_option {
             output.push(ArgcValue::Single(
-                "_last_flag_option".into(),
-                name.to_string(),
+                "_option".into(),
+                format!("{}_{}", VARIABLE_PREFIX, sanitize_arg_name(name)),
             ));
         }
         output

@@ -7,10 +7,10 @@ __argc_filter=	/color:default
 ARGC_COMPGEN=1	/color:default
 ARGC_CWORD=abc	/color:default
 ARGC_LAST_ARG=--oa=abc	/color:default
-ARGC_VARS=YXJnY19vYT1hYmM7YXJnY19fYXJncz0oIHByb2cgJy0tb2E9YWJjJyApO2FyZ2NfX2NtZF9hcmdfaW5kZXg9MDthcmdjX19sYXN0X2ZsYWdfb3B0aW9uPW9hO2FyZ2NfX3Bvc2l0aW9uYWxzPSggICk7	/color:default
+ARGC_VARS=YXJnY19vYT1hYmM7YXJnY19fYXJncz0oIHByb2cgJy0tb2E9YWJjJyApO2FyZ2NfX2NtZF9hcmdfaW5kZXg9MDthcmdjX19vcHRpb249YXJnY19vYTthcmdjX19wb3NpdGlvbmFscz0oICApOw==	/color:default
 argc__args=([0]="prog" [1]="--oa=abc")	/color:default
 argc__cmd_arg_index=0	/color:default
-argc__last_flag_option=oa	/color:default
+argc__option=argc_oa	/color:default
 argc__positionals=()	/color:default
 argc_oa=abc	/color:default
 
