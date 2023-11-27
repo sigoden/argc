@@ -54,7 +54,7 @@ It will print:
 - `argc__args`:  The command line args
 - `argc__cmd_arg_index`: The index of the command arg in `argc__args`
 - `argc__cmd_fn`: The name of argc command func
-- `argc__option`: The option that is being completed
+- `argc__option`: The variable name of the option that is currently being completed.
 - `argc__positionals`: The positional args
 
 Run command
