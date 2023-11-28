@@ -458,13 +458,13 @@ impl Shell {
             Shell::Tcsh => {
                 if candidates.len() == 1 {
                     let new_value =
-                        sanitizie_tcsh_value(&self.combine_value(prefix, &candidates[0].0));
+                        sanitize_tcsh_value(&self.combine_value(prefix, &candidates[0].0));
                     return vec![new_value];
                 }
                 candidates
                     .into_iter()
                     .map(|(value, description, _, _)| {
-                        let new_value = sanitizie_tcsh_value(&self.combine_value(prefix, &value));
+                        let new_value = sanitize_tcsh_value(&self.combine_value(prefix, &value));
                         let description = self.comp_description(&description, " (", ")");
                         let description = description.replace(' ', "⠀");
                         format!("{new_value}{description}")
@@ -586,7 +586,7 @@ impl Shell {
     }
 }
 
-fn sanitizie_tcsh_value(value: &str) -> String {
+fn sanitize_tcsh_value(value: &str) -> String {
     value.replace(' ', "⠀")
 }
 
