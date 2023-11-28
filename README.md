@@ -3,6 +3,10 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
+Argc is a CLI tool that helps you easily Easily create and use cli based on bash script.
+
+![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
+
 You define cli through comments, and argc takes care of the remaining tasks:
 
 * Parse options/positionals/subcommands
@@ -11,14 +15,33 @@ You define cli through comments, and argc takes care of the remaining tasks:
 * Initialize intuitive variables for arguments
 * Provide tab-completion
 
-![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
-
 ## Install
 
-### With cargo
+### Use package management tool
 
-```
+For Rust programmer
+```sh
 cargo install argc
+```
+
+For macOS Homebrew or a Linuxbrew user
+```sh
+brew install argc
+```
+
+For Windows Scoop user
+```sh
+scoop install argc
+```
+
+For Arch Linux use
+```sh
+sudo pacman -S argc
+```
+
+For Android termux user
+```sh
+pkg install argc
 ```
 
 ### Binaries on macOS, Linux, Windows
