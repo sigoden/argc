@@ -66,7 +66,7 @@ bar: xyz
 baz: a b c
 ```
 
-Run `./example.sh -h`, argc wll print help information for you.
+Run `./example.sh -h`, argc will print help information for you.
 
 ```
 USAGE: example.sh [OPTIONS] [BAZ]...

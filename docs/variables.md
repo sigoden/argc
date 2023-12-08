@@ -93,7 +93,7 @@ argc__positionals=([0]=".")
 - `ARGC_SCRIPT_NAME`: Specify the script filename to override the default `Argcfile.sh`. e.g. `Taskfile.sh`
 - `ARGC_COMPGEN_DESCRIPTION`: If value is 0 or false, the generated completion candidates do not contain descriptions.
 - `ARGC_COMPLETIONS_PATH`: Argc-based completion script searching path.
-                           Colon-seperated in non-windows OS. Semicolon-seperated in Windows.
+                           Colon-seperated in non-windows OS. Semicolon-separated in Windows.
                            Only if the arc-based completion script for the `<command>` is under the `ARGC_COMPLETIONS_PATH` or `PATH`, can it enable completion by sourcing `argc --argc-completions bash <command>`.
 
 ### Argc injected into Argcfile.sh
