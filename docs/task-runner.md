@@ -141,6 +141,12 @@ test() {
 $ argc t
 ```
 
+## Load dotenv
+
+```sh
+[ -f .env ] && set -o allexport && source .env && set +o allexport
+```
+
 ## Use semantic grouping
 
 common forms are `foo:bar` `foo.bar` `foo-bar` `foo@bar`.
