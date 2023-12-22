@@ -20,6 +20,15 @@ main() { :; }
 }
 
 #[test]
+fn hook_only_before() {
+    let script = r###"
+_argc_before() { :; }
+main() { :; }
+"###;
+    snapshot!(script, &["prog"]);
+}
+
+#[test]
 fn hook_with_subcmd() {
     let script = r###"
 _argc_before() { :; }
