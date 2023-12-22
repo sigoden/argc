@@ -330,6 +330,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
             ));
         }
+        let (before, after) = cmd.exist_hook_fns();
+        output.push(ArgcValue::HookFns((before, after)));
         if let Some(cmd_fn) = cmd.get_cmd_fn(&cmd_paths) {
             output.push(ArgcValue::CmdFn(cmd_fn));
         }

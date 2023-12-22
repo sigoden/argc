@@ -13,6 +13,7 @@ mod compgen;
 mod create;
 mod export;
 mod fail;
+mod hook_fn;
 mod main_fn;
 mod misc;
 mod parallel;

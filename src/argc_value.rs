@@ -1,6 +1,8 @@
 use crate::utils::escape_shell_words;
 
 pub const VARIABLE_PREFIX: &str = "argc";
+pub const BEFORE_HOOK: &str = "_argc_before";
+pub const AFTER_HOOK: &str = "_argc_after";
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ArgcValue {
@@ -13,6 +15,7 @@ pub enum ArgcValue {
     ExtraPositionalMultiple(Vec<String>),
     CmdFn(String),
     ParamFn(String),
+    HookFns((bool, bool)),
     Error((String, i32)),
 }
 
@@ -21,6 +24,7 @@ impl ArgcValue {
         let mut output = vec![];
         let mut last = String::new();
         let mut positional_args = vec![];
+        let (mut before_hook, mut after_hook) = (false, false);
         for value in values {
             match value {
                 ArgcValue::Single(name, value) => {
@@ -90,6 +94,14 @@ impl ArgcValue {
                         .collect::<Vec<String>>();
                     positional_args.extend(values);
                 }
+                ArgcValue::HookFns((before, after)) => {
+                    if *before {
+                        before_hook = *before;
+                    }
+                    if *after {
+                        after_hook = *after;
+                    }
+                }
                 ArgcValue::CmdFn(name) => {
                     if positional_args.is_empty() {
                         last = name.to_string();
@@ -116,11 +128,15 @@ impl ArgcValue {
             VARIABLE_PREFIX,
             positional_args.join(" ")
         ));
-
+        if before_hook {
+            output.push(BEFORE_HOOK.to_string())
+        }
         if !last.is_empty() {
             output.push(last);
+            if after_hook {
+                output.push(AFTER_HOOK.to_string())
+            }
         }
-
         output.join("\n")
     }
 }
