@@ -330,20 +330,24 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
             ));
         }
-        let (before, after) = cmd.exist_hook_fns();
-        output.push(ArgcValue::HookFns((before, after)));
+        if cmd.exist_before_hook() {
+            output.push(ArgcValue::HookBefore);
+        }
         if let Some(cmd_fn) = cmd.get_cmd_fn(&cmd_paths) {
             output.push(ArgcValue::CmdFn(cmd_fn));
         }
         output
     }
 
-    pub(crate) fn to_arg_values_for_choice_fn(&self) -> Vec<ArgcValue> {
+    pub(crate) fn to_arg_values_for_param_fn(&self) -> Vec<ArgcValue> {
         let mut output: Vec<ArgcValue> = self.to_arg_values_base();
         if let Some(idx) = self.dashes {
             output.push(ArgcValue::Single("_dashes".into(), idx.to_string()));
         }
         let last_cmd = self.cmds[self.cmds.len() - 1].1;
+        if last_cmd.exist_before_hook() {
+            output.push(ArgcValue::HookBefore);
+        }
         if let Some(name) = &last_cmd.name {
             output.push(ArgcValue::Single("_cmd_fn".into(), name.to_string()));
         }

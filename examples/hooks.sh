@@ -9,10 +9,6 @@ _argc_before() {
   echo before
 }
 
-_argc_after() {
-  echo after
-}
-
 main() {
   echo main
 }

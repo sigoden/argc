@@ -1,9 +1,6 @@
 # Hooks
 
-Argc supports two kinds of hooks:
-
-- `_argc_before`: call before performing any operation
-- `_argc_before`: call after running the command function
+If the function `_argc_before` exists, argc will automatically execute it after initializing variables.
 
 ## Example
 
@@ -13,10 +10,6 @@ Argc supports two kinds of hooks:
 
 _argc_before() {
   echo before
-}
-
-_argc_after() {
-  echo after
 }
 
 main() {
@@ -30,5 +23,4 @@ eval "$(argc --argc-eval "$0" "$@")"
 $ prog
 before
 main
-after
 ```

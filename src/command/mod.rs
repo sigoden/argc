@@ -4,7 +4,7 @@ mod root_data;
 use self::names_checker::NamesChecker;
 use self::root_data::RootData;
 
-use crate::argc_value::{ArgcValue, AFTER_HOOK, BEFORE_HOOK};
+use crate::argc_value::{ArgcValue, BEFORE_HOOK};
 use crate::matcher::Matcher;
 use crate::param::{FlagOptionParam, PositionalParam};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
@@ -79,7 +79,7 @@ impl Command {
                 &args[3..]
             };
             let matcher = Matcher::new(self, new_args, false);
-            let mut arg_values = matcher.to_arg_values_for_choice_fn();
+            let mut arg_values = matcher.to_arg_values_for_param_fn();
             arg_values.push(ArgcValue::ParamFn(args[2].clone()));
             return Ok(arg_values);
         }
@@ -537,9 +537,8 @@ impl Command {
         }
     }
 
-    pub(crate) fn exist_hook_fns(&self) -> (bool, bool) {
-        let fns = &self.root.borrow().fns;
-        (fns.contains_key(BEFORE_HOOK), fns.contains_key(AFTER_HOOK))
+    pub(crate) fn exist_before_hook(&self) -> bool {
+        self.root.borrow().fns.contains_key(BEFORE_HOOK)
     }
 
     pub(crate) fn delegated(&self) -> bool {
