@@ -98,11 +98,7 @@ impl ArgcValue {
                     init_hook = true;
                 }
                 ArgcValue::Dotenv(value) => {
-                    let value = if value.is_empty() {
-                        ".env".to_string()
-                    } else {
-                        escape_shell_words(value)
-                    };
+                    let value = if value.is_empty() { ".env" } else { value };
                     output.push(format!(
                         "[ -f {value} ] && set -o allexport && source {value} && set +o allexport"
                     ))
