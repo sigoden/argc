@@ -1,0 +1,13 @@
+---
+source: tests/meta.rs
+expression: data
+---
+RUN
+prog
+
+OUTPUT
+[ -f .env.local ] && set -o allexport && source .env.local && set +o allexport
+argc__args=( prog )
+argc__cmd_arg_index=0
+argc__positionals=(  )
+

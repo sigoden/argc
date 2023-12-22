@@ -271,6 +271,13 @@ impl Command {
         self.metadata.iter().any(|(k, _, _)| k == key)
     }
 
+    pub(crate) fn get_metadata(&self, key: &str) -> Option<&String> {
+        self.metadata
+            .iter()
+            .find(|(k, _, _)| k == key)
+            .map(|(_, v, _)| v)
+    }
+
     pub(crate) fn flag_option_signs(&self) -> String {
         let mut signs = HashSet::new();
         signs.insert('-');
@@ -537,7 +544,7 @@ impl Command {
         }
     }
 
-    pub(crate) fn exist_before_hook(&self) -> bool {
+    pub(crate) fn exist_init_hook(&self) -> bool {
         self.root.borrow().fns.contains_key(INIT_HOOK)
     }
 
