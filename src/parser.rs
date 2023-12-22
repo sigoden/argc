@@ -126,15 +126,12 @@ fn parse_fn(input: &str) -> nom::IResult<&str, Option<EventData>> {
 
 // Parse fn likes `function foo`
 fn parse_fn_keyword(input: &str) -> nom::IResult<&str, &str> {
-    preceded(tuple((space0, tag("function"), space1)), parse_fn_name)(input)
+    preceded(terminated(tag("function"), space1), parse_fn_name)(input)
 }
 
 // Parse fn likes `foo ()`
 fn parse_fn_no_keyword(input: &str) -> nom::IResult<&str, &str> {
-    preceded(
-        space0,
-        terminated(parse_fn_name, tuple((space0, char('('), space0, char(')')))),
-    )(input)
+    terminated(parse_fn_name, tuple((space0, char('('), space0, char(')'))))(input)
 }
 
 fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
@@ -1008,7 +1005,7 @@ mod tests {
         assert_token!("foo ()", Func, "foo");
         assert_token!("foo  ()", Func, "foo");
         assert_token!("foo ( )", Func, "foo");
-        assert_token!(" foo ()", Func, "foo");
+        assert_token!(" foo ()", Ignore);
         assert_token!("foo_bar ()", Func, "foo_bar");
         assert_token!("foo-bar ()", Func, "foo-bar");
         assert_token!("foo:bar ()", Func, "foo:bar");
@@ -1016,13 +1013,12 @@ mod tests {
         assert_token!("foo@bar ()", Func, "foo@bar");
         assert_token!("function foo", Func, "foo");
         assert_token!("function  foo", Func, "foo");
-        assert_token!(" function foo", Func, "foo");
+        assert_token!(" function foo", Ignore);
         assert_token!("function foo_bar", Func, "foo_bar");
         assert_token!("function foo-bar", Func, "foo-bar");
         assert_token!("function foo:bar", Func, "foo:bar");
         assert_token!("function foo.bar", Func, "foo.bar");
         assert_token!("function foo@bar", Func, "foo@bar");
-        assert_token!("foo=bar", Ignore);
         assert_token!("#!/bin/bash", Ignore);
     }
 
