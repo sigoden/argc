@@ -198,20 +198,6 @@ COMMANDS:
   test  Run test
 ```
 
-## @meta
-
-Add metadata
-
-```sh
-# @meta combine-shorts
-# @meta inherit-flag-options
-```
-
-| syntax               | scope | description                                               |
-| -------------------- | ----- | --------------------------------------------------------- |
-| combine-shorts       | root  | Short flags can be combined, e.g. `-xf => -x -f `         |
-| inherit-flag-options | root  | All subcommands inherit flag/options from parent command. |
-
 ### Value Notation
 
 Value notation is used to describe value type of options and positional parameters.
