@@ -2,15 +2,8 @@
 
 set -e
 
-# @flag --foo
-# @option --bar
-
-_argc_before() {
-  echo before
-}
-
-_argc_after() {
-  echo after
+_argc_init() {
+  echo init
 }
 
 main() {

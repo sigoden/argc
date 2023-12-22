@@ -10,7 +10,6 @@ argc__args=( prog cmd )
 argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=(  )
-_argc_before
+_argc_init
 cmd
-_argc_after
 
