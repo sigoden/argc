@@ -1,7 +1,7 @@
 use crate::utils::escape_shell_words;
 
 pub const VARIABLE_PREFIX: &str = "argc";
-pub const BEFORE_HOOK: &str = "_argc_before";
+pub const INIT_HOOK: &str = "_argc_init";
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ArgcValue {
@@ -12,7 +12,7 @@ pub enum ArgcValue {
     PositionalSingleFn(String, String),
     PositionalMultiple(String, Vec<String>),
     ExtraPositionalMultiple(Vec<String>),
-    HookBefore,
+    InitHook,
     CmdFn(String),
     ParamFn(String),
     Error((String, i32)),
@@ -23,7 +23,7 @@ impl ArgcValue {
         let mut output = vec![];
         let mut last = String::new();
         let mut positional_args = vec![];
-        let mut hook_before = false;
+        let mut init_hook = false;
         for value in values {
             match value {
                 ArgcValue::Single(name, value) => {
@@ -93,8 +93,8 @@ impl ArgcValue {
                         .collect::<Vec<String>>();
                     positional_args.extend(values);
                 }
-                ArgcValue::HookBefore => {
-                    hook_before = true;
+                ArgcValue::InitHook => {
+                    init_hook = true;
                 }
                 ArgcValue::CmdFn(name) => {
                     if positional_args.is_empty() {
@@ -122,8 +122,8 @@ impl ArgcValue {
             VARIABLE_PREFIX,
             positional_args.join(" ")
         ));
-        if hook_before {
-            output.push(BEFORE_HOOK.to_string())
+        if init_hook {
+            output.push(INIT_HOOK.to_string())
         }
         if !last.is_empty() {
             output.push(last);

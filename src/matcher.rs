@@ -331,7 +331,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             ));
         }
         if cmd.exist_before_hook() {
-            output.push(ArgcValue::HookBefore);
+            output.push(ArgcValue::InitHook);
         }
         if let Some(cmd_fn) = cmd.get_cmd_fn(&cmd_paths) {
             output.push(ArgcValue::CmdFn(cmd_fn));
@@ -346,7 +346,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         }
         let last_cmd = self.cmds[self.cmds.len() - 1].1;
         if last_cmd.exist_before_hook() {
-            output.push(ArgcValue::HookBefore);
+            output.push(ArgcValue::InitHook);
         }
         if let Some(name) = &last_cmd.name {
             output.push(ArgcValue::Single("_cmd_fn".into(), name.to_string()));
