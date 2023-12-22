@@ -330,7 +330,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
             ));
         }
-        if cmd.exist_before_hook() {
+        if cmd.exist_init_hook() {
             output.push(ArgcValue::InitHook);
         }
         if let Some(cmd_fn) = cmd.get_cmd_fn(&cmd_paths) {
@@ -345,9 +345,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
             output.push(ArgcValue::Single("_dashes".into(), idx.to_string()));
         }
         let last_cmd = self.cmds[self.cmds.len() - 1].1;
-        if last_cmd.exist_before_hook() {
-            output.push(ArgcValue::InitHook);
-        }
         if let Some(name) = &last_cmd.name {
             output.push(ArgcValue::Single("_cmd_fn".into(), name.to_string()));
         }
@@ -356,6 +353,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 "_option".into(),
                 format!("{}_{}", VARIABLE_PREFIX, sanitize_arg_name(name)),
             ));
+        }
+        if last_cmd.exist_init_hook() {
+            output.push(ArgcValue::InitHook);
         }
         output
     }
@@ -472,6 +472,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let level = cmds_len - 1;
         let last_cmd = self.cmds[level].1;
         let cmd_arg_index = self.cmds[level].2;
+
+        if let Some(value) = self.cmds[0].1.get_metadata("dotenv") {
+            output.push(ArgcValue::Dotenv(value.to_string()))
+        }
 
         for (arg, (name, _)) in self.symbol_args.iter() {
             output.push(ArgcValue::Single(name.to_string(), arg.to_string()));

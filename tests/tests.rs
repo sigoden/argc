@@ -15,6 +15,7 @@ mod export;
 mod fail;
 mod hook_fn;
 mod main_fn;
+mod meta;
 mod misc;
 mod parallel;
 mod param_fn;

@@ -13,6 +13,7 @@ pub enum ArgcValue {
     PositionalMultiple(String, Vec<String>),
     ExtraPositionalMultiple(Vec<String>),
     InitHook,
+    Dotenv(String),
     CmdFn(String),
     ParamFn(String),
     Error((String, i32)),
@@ -95,6 +96,16 @@ impl ArgcValue {
                 }
                 ArgcValue::InitHook => {
                     init_hook = true;
+                }
+                ArgcValue::Dotenv(value) => {
+                    let value = if value.is_empty() {
+                        ".env".to_string()
+                    } else {
+                        escape_shell_words(value)
+                    };
+                    output.push(format!(
+                        "[ -f {value} ] && set -o allexport && source {value} && set +o allexport"
+                    ))
                 }
                 ArgcValue::CmdFn(name) => {
                     if positional_args.is_empty() {

@@ -2,12 +2,8 @@
 
 Add metadata
 
-```sh
-# @meta combine-shorts
-# @meta inherit-flag-options
-```
-
-| syntax               | scope | description                                                 |
-| -------------------- | ----- | ----------------------------------------------------------- |
-| combine-shorts       | root  | Short flags can be combined, e.g. `prog -xf => prog -x -f ` |
-| inherit-flag-options | root  | All subcommands inherit flag/options from parent command.   |
+| usage                        | description                                                  |
+| ---------------------------- | ------------------------------------------------------------ |
+| `@meta combine-shorts`       | Short flags can be combined, e.g. `prog -xf => prog -x -f `  |
+| `@meta inherit-flag-options` | All subcommands inherit the flags/options from their parent. |
+| `@meta dotenv [<path>]`      | Load dotenv, accept an optional path.                        |
