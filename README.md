@@ -295,6 +295,8 @@ New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\co
 
 ## License
 
+Copyright (c) 2023-2024 aichat-developers.
+
 argc is made available under the terms of either the MIT License or the Apache License 2.0, at your option.
 
 See the LICENSE-APACHE and LICENSE-MIT files for license details.
