@@ -1,4 +1,5 @@
 use argc::Shell;
+use semver::Version;
 use std::env;
 
 const BASH_SCRIPT: &str = include_str!("argc.bash");
@@ -31,7 +32,19 @@ pub fn generate(shell: Shell, args: &[String]) -> String {
             FISH_SCRIPT.replace("__COMMANDS__", &commands)
         }
         Shell::Generic => String::new(),
-        Shell::Nushell => NUSHELL_SCRIPT.to_string(),
+        Shell::Nushell => {
+            if env::var("NU_VERSION")
+                .ok()
+                .and_then(|v| Version::parse(&v).ok())
+                .map(|v| v < Version::new(0, 89, 0))
+                .unwrap_or_default()
+            {
+                // https://github.com/nushell/nushell/pull/11289
+                NUSHELL_SCRIPT.replace("...$args", "$args")
+            } else {
+                NUSHELL_SCRIPT.to_string()
+            }
+        }
         Shell::Powershell => {
             let commands = [vec!["argc".to_string()], args.to_vec()].concat();
             let commands = commands
@@ -65,9 +78,4 @@ pub fn generate(shell: Shell, args: &[String]) -> String {
                 .collect::<Vec<String>>().join("")
         }
     }
-}
-
-#[test]
-fn feature() {
-    format!("{:?}", vec!["a", "b"]);
 }
