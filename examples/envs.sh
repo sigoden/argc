@@ -22,7 +22,7 @@ _debug() {
 }
 
 _default_fn() {
-    whoami
+    echo argc
 }
 
 _choice_fn() {
