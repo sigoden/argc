@@ -2,6 +2,7 @@ mod fixtures;
 
 pub const SCRIPT_OPTIONS: &str = include_str!("../examples/options.sh");
 pub const SCRIPT_ARGS: &str = include_str!("../examples/args.sh");
+pub const SCRIPT_ENVS: &str = include_str!("../examples/envs.sh");
 
 pub use fixtures::locate_script;
 
@@ -11,6 +12,7 @@ mod argcfile;
 mod cli;
 mod compgen;
 mod create;
+mod env;
 mod export;
 mod fail;
 mod hook_fn;

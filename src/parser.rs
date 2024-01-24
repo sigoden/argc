@@ -1,5 +1,5 @@
 use crate::param::{
-    ChoiceData, DefaultData, FlagOptionParam, Modifier, ParamData, PositionalParam,
+    ChoiceData, DefaultData, EnvParam, FlagOptionParam, Modifier, ParamData, PositionalParam,
 };
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
@@ -38,6 +38,8 @@ pub(crate) enum EventData {
     Cmd(String),
     /// Define alias for a subcommand, e.g. `@alias t,tst`
     Aliases(Vec<String>),
+    /// Define a env param
+    Env(EnvParam),
     /// Define a flag or option parameter
     FlagOption(FlagOptionParam),
     /// Define a positional parameter
@@ -81,6 +83,11 @@ pub(crate) fn parse(source: &str) -> Result<Vec<Event>> {
                             EventData::Cmd(mut text) => {
                                 line_idx += take_comment_lines(&lines, line_idx + 1, &mut text);
                                 EventData::Cmd(text)
+                            }
+                            EventData::Env(mut param) => {
+                                line_idx +=
+                                    take_comment_lines(&lines, line_idx + 1, &mut param.describe);
+                                EventData::Env(param)
                             }
                             EventData::FlagOption(mut param) => {
                                 line_idx +=
@@ -176,7 +183,7 @@ fn parse_tag_meta(input: &str) -> nom::IResult<&str, Option<EventData>> {
 }
 
 fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
-    let check = peek(alt((tag("option"), tag("flag"), tag("arg"))));
+    let check = peek(alt((tag("option"), tag("flag"), tag("arg"), tag("env"))));
     let arg = alt((
         map(
             preceded(pair(tag("flag"), space1), parse_flag_param),
@@ -185,6 +192,10 @@ fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
         map(
             preceded(pair(tag("option"), space1), parse_option_param),
             |param| Some(EventData::FlagOption(param)),
+        ),
+        map(
+            preceded(pair(tag("env"), space1), parse_env_param),
+            |param| Some(EventData::Env(param)),
         ),
         map(
             preceded(pair(tag("arg"), space1), parse_positional_param),
@@ -259,6 +270,24 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
         |(long_prefix, arg, value_names, describe)| {
             FlagOptionParam::new(arg, describe, false, None, long_prefix, &value_names)
         },
+    )(input)
+}
+
+// Parse `@env`
+fn parse_env_param(input: &str) -> nom::IResult<&str, EnvParam> {
+    map(
+        pair(
+            alt((
+                parse_param_modifer_choices_default,
+                parse_param_modifer_choices_fn,
+                parse_param_modifer_choices,
+                parse_param_assign_fn,
+                parse_param_assign,
+                parse_param_modifer,
+            )),
+            parse_tail,
+        ),
+        |(arg, describe)| EnvParam::new(arg, describe),
     )(input)
 }
 
@@ -469,7 +498,6 @@ fn parse_param_modifer_choices_fn(input: &str) -> nom::IResult<&str, ParamData> 
     )(input)
 }
 
-// Parse `str`
 fn parse_param_name(input: &str) -> nom::IResult<&str, ParamData> {
     map(parse_name, ParamData::new)(input)
 }
@@ -718,6 +746,8 @@ fn take_comment_lines(lines: &[&str], idx: usize, output: &mut String) -> usize 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use crate::param::Param;
 
     macro_rules! assert_token {
         ($comment:literal, Ignore) => {

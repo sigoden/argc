@@ -174,6 +174,15 @@ COMMANDS:
   test  Run tests [aliases: t, tst]
 ```
 
+### @env
+
+Define a environment
+
+```sh
+# @env FOO
+# @env BAR!         required
+```
+
 ### @describe / @version / @author
 
 ```sh

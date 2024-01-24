@@ -1,4 +1,4 @@
-use crate::param::{FlagOptionParam, PositionalParam};
+use crate::param::{EnvParam, FlagOptionParam, Param, PositionalParam};
 use crate::parser::Position;
 
 use anyhow::{bail, Result};
@@ -7,6 +7,7 @@ use std::collections::HashMap;
 #[derive(Debug, Default, Clone)]
 pub(crate) struct NamesChecker {
     pub(crate) flag_options: HashMap<String, (Position, String)>,
+    pub(crate) envs: HashMap<String, Position>,
     pub(crate) positionals: HashMap<String, Position>,
 }
 
@@ -25,6 +26,18 @@ impl NamesChecker {
             self.flag_options
                 .insert(name.to_string(), (pos, format!("{} {}", tag_name, name)));
         }
+        Ok(())
+    }
+
+    pub(crate) fn check_env(&mut self, param: &EnvParam, pos: Position) -> Result<()> {
+        let name = param.var_name();
+        if let Some(exist_pos) = self.envs.get(name) {
+            bail!(
+                "{}",
+                Self::conflict_error(param.tag_name(), pos, name, *exist_pos)
+            );
+        }
+        self.envs.insert(name.to_string(), pos);
         Ok(())
     }
 

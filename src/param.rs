@@ -6,6 +6,52 @@ use crate::ArgcValue;
 use serde::Serialize;
 use serde_json::json;
 
+pub(crate) trait Param {
+    fn data(&self) -> &ParamData;
+    fn describe(&self) -> &str;
+    fn var_name(&self) -> &str;
+    fn tag_name(&self) -> &str;
+    fn multiple(&self) -> bool;
+    fn to_json(&self) -> serde_json::Value;
+    #[allow(unused)]
+    fn render_source(&self) -> String;
+
+    fn required(&self) -> bool {
+        self.data().required()
+    }
+
+    fn terminated(&self) -> bool {
+        self.data().terminated()
+    }
+
+    fn multi_occurs(&self) -> bool {
+        self.data().multi_occurs()
+    }
+
+    fn multi_char(&self) -> Option<char> {
+        self.data().multi_char()
+    }
+
+    fn choice_fn(&self) -> Option<(&String, &bool)> {
+        self.data().choice_fn()
+    }
+
+    fn default_fn(&self) -> Option<&String> {
+        self.data().default_fn()
+    }
+
+    fn describe_oneline(&self) -> &str {
+        match self.describe().split_once('\n') {
+            Some((v, _)) => v,
+            None => self.describe(),
+        }
+    }
+
+    fn render_describe(&self) -> String {
+        self.data().render_describe(self.describe())
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct FlagOptionParam {
     pub(crate) describe: String,
@@ -17,6 +63,66 @@ pub(crate) struct FlagOptionParam {
     pub(crate) value_names: Vec<String>,
     pub(crate) arg_value_names: Vec<String>,
     pub(crate) inherit: bool,
+}
+
+impl Param for FlagOptionParam {
+    fn data(&self) -> &ParamData {
+        &self.data
+    }
+
+    fn describe(&self) -> &str {
+        &self.describe
+    }
+
+    fn var_name(&self) -> &str {
+        &self.var_name
+    }
+
+    fn tag_name(&self) -> &str {
+        if self.is_flag() {
+            "@flag"
+        } else {
+            "@option"
+        }
+    }
+
+    fn multiple(&self) -> bool {
+        self.multi_occurs() || self.unlimited_args() || self.arg_value_names.len() > 1
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        let option_names = self.list_option_names();
+        json!({
+            "name": self.data.name,
+            "describe": self.describe,
+            "flag": self.flag,
+            "option_names": option_names,
+            "value_names": self.value_names,
+            "modifier": self.data.modifer,
+            "choices": self.data.choice_values(),
+            "default": self.data.default_value(),
+            "inherit": self.inherit,
+        })
+    }
+
+    fn render_source(&self) -> String {
+        let mut output = vec![];
+        if let Some(short) = &self.short {
+            output.push(short.to_string());
+        };
+        output.push(format!(
+            "{}{}",
+            self.long_prefix,
+            self.data.render_name_value()
+        ));
+        for value_name in &self.value_names {
+            output.push(format!("<{}>", value_name));
+        }
+        if !self.describe.is_empty() {
+            output.push(self.describe.clone());
+        }
+        output.join(" ")
+    }
 }
 
 impl FlagOptionParam {
@@ -59,36 +165,12 @@ impl FlagOptionParam {
         }
     }
 
-    pub(crate) fn var_name(&self) -> &str {
-        &self.var_name
-    }
-
     pub(crate) fn is_flag(&self) -> bool {
         self.flag
     }
 
     pub(crate) fn is_option(&self) -> bool {
         !self.is_flag()
-    }
-
-    pub(crate) fn tag_name(&self) -> &str {
-        if self.is_flag() {
-            "@flag"
-        } else {
-            "@option"
-        }
-    }
-
-    pub(crate) fn multiple(&self) -> bool {
-        self.multi_occurs() || self.multi_values()
-    }
-
-    pub(crate) fn multi_occurs(&self) -> bool {
-        self.data.multi_occurs()
-    }
-
-    pub(crate) fn multi_values(&self) -> bool {
-        self.unlimited_args() || self.arg_value_names.len() > 1
     }
 
     pub(crate) fn unlimited_args(&self) -> bool {
@@ -119,46 +201,6 @@ impl FlagOptionParam {
         self.arg_value_names
             .last()
             .and_then(|name| ['*', '+', '?'].into_iter().find(|v| name.ends_with(*v)))
-    }
-
-    pub(crate) fn required(&self) -> bool {
-        self.data.required()
-    }
-
-    pub(crate) fn terminated(&self) -> bool {
-        self.data.terminated()
-    }
-
-    pub(crate) fn multi_char(&self) -> Option<char> {
-        self.data.multi_char()
-    }
-
-    pub(crate) fn choice_fn(&self) -> Option<(&String, &bool)> {
-        self.data.choice_fn()
-    }
-
-    pub(crate) fn default_fn(&self) -> Option<&String> {
-        self.data.default_fn()
-    }
-
-    #[allow(unused)]
-    pub(crate) fn render_source(&self) -> String {
-        let mut output = vec![];
-        if let Some(short) = &self.short {
-            output.push(short.to_string());
-        };
-        output.push(format!(
-            "{}{}",
-            self.long_prefix,
-            self.data.render_name_value()
-        ));
-        for value_name in &self.value_names {
-            output.push(format!("<{}>", value_name));
-        }
-        if !self.describe.is_empty() {
-            output.push(self.describe.clone());
-        }
-        output.join(" ")
     }
 
     pub(crate) fn render_name(&self) -> String {
@@ -227,10 +269,6 @@ impl FlagOptionParam {
         output
     }
 
-    pub(crate) fn render_describe(&self) -> String {
-        self.data.render_describe(&self.describe)
-    }
-
     pub(crate) fn get_arg_value(&self, values: &[&[&str]]) -> Option<ArgcValue> {
         let var_name = self.var_name().to_string();
         if self.flag {
@@ -280,7 +318,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn is_match(&self, name: &str) -> bool {
-        self.list_option_names().iter().any(|v| v == name)
+        self.var_name() == name || self.list_option_names().iter().any(|v| v == name)
     }
 
     pub(crate) fn prefixed(&self) -> Option<String> {
@@ -306,27 +344,6 @@ impl FlagOptionParam {
         }
         output
     }
-
-    pub(crate) fn describe_oneline(&self) -> &str {
-        match self.describe.split_once('\n') {
-            Some((v, _)) => v,
-            None => self.describe.as_str(),
-        }
-    }
-
-    pub fn to_json(&self) -> serde_json::Value {
-        let option_names = self.list_option_names();
-        json!({
-            "name": self.data.name,
-            "describe": self.describe,
-            "flag": self.flag,
-            "option_names": option_names,
-            "value_names": self.value_names,
-            "modifier": self.data.modifer,
-            "choices": self.data.choice_values(),
-            "default": self.data.default_value(),
-        })
-    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -335,6 +352,50 @@ pub(crate) struct PositionalParam {
     pub(crate) data: ParamData,
     pub(crate) value_name: Option<String>,
     pub(crate) arg_value_name: String,
+}
+
+impl Param for PositionalParam {
+    fn data(&self) -> &ParamData {
+        &self.data
+    }
+
+    fn describe(&self) -> &str {
+        &self.describe
+    }
+
+    fn var_name(&self) -> &str {
+        &self.data.name
+    }
+
+    fn tag_name(&self) -> &str {
+        "@arg"
+    }
+
+    fn multiple(&self) -> bool {
+        self.multi_occurs() || self.terminated()
+    }
+
+    fn to_json(&self) -> serde_json::Value {
+        json!({
+            "name": self.var_name(),
+            "describe": self.describe,
+            "modifier": self.data.modifer,
+            "choices": self.data.choice_values(),
+            "default": self.data.default_value(),
+        })
+    }
+
+    fn render_source(&self) -> String {
+        let mut output = vec![];
+        output.push(self.data.render_name_value());
+        if let Some(value_name) = self.value_name.as_ref() {
+            output.push(format!("<{}>", value_name));
+        }
+        if !self.describe.is_empty() {
+            output.push(self.describe.clone());
+        }
+        output.join(" ")
+    }
 }
 
 impl PositionalParam {
@@ -351,51 +412,6 @@ impl PositionalParam {
         }
     }
 
-    pub(crate) fn var_name(&self) -> &str {
-        &self.data.name
-    }
-
-    pub(crate) fn tag_name(&self) -> &str {
-        "@arg"
-    }
-
-    pub(crate) fn multiple(&self) -> bool {
-        self.data.multi_occurs() || self.terminated()
-    }
-
-    pub(crate) fn required(&self) -> bool {
-        self.data.required()
-    }
-
-    pub(crate) fn terminated(&self) -> bool {
-        self.data.terminated()
-    }
-
-    pub(crate) fn multi_char(&self) -> Option<char> {
-        self.data.multi_char()
-    }
-
-    pub(crate) fn choice_fn(&self) -> Option<(&String, &bool)> {
-        self.data.choice_fn()
-    }
-
-    pub(crate) fn default_fn(&self) -> Option<&String> {
-        self.data.default_fn()
-    }
-
-    #[allow(unused)]
-    pub(crate) fn render_source(&self) -> String {
-        let mut output = vec![];
-        output.push(self.data.render_name_value());
-        if let Some(value_name) = self.value_name.as_ref() {
-            output.push(format!("<{}>", value_name));
-        }
-        if !self.describe.is_empty() {
-            output.push(self.describe.clone());
-        }
-        output.join(" ")
-    }
-
     pub(crate) fn render_value(&self) -> String {
         let name: &String = &self.arg_value_name;
         match (self.required(), self.multiple()) {
@@ -404,10 +420,6 @@ impl PositionalParam {
             (false, true) => format!("[{name}]..."),
             (false, false) => format!("[{name}]"),
         }
-    }
-
-    pub(crate) fn render_describe(&self) -> String {
-        self.data.render_describe(&self.describe)
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&str]) -> Option<ArgcValue> {
@@ -441,15 +453,37 @@ impl PositionalParam {
             Some(ArgcValue::PositionalSingle(name, must_get_first(values)))
         }
     }
+}
 
-    pub(crate) fn describe_oneline(&self) -> &str {
-        match self.describe.split_once('\n') {
-            Some((v, _)) => v,
-            None => self.describe.as_str(),
-        }
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub(crate) struct EnvParam {
+    pub(crate) describe: String,
+    pub(crate) data: ParamData,
+    pub(crate) inherit: bool,
+}
+
+impl Param for EnvParam {
+    fn data(&self) -> &ParamData {
+        &self.data
     }
 
-    pub fn to_json(&self) -> serde_json::Value {
+    fn describe(&self) -> &str {
+        &self.describe
+    }
+
+    fn var_name(&self) -> &str {
+        &self.data.name
+    }
+
+    fn tag_name(&self) -> &str {
+        "@env"
+    }
+
+    fn multiple(&self) -> bool {
+        false
+    }
+
+    fn to_json(&self) -> serde_json::Value {
         json!({
             "name": self.var_name(),
             "describe": self.describe,
@@ -457,6 +491,40 @@ impl PositionalParam {
             "choices": self.data.choice_values(),
             "default": self.data.default_value(),
         })
+    }
+
+    fn render_source(&self) -> String {
+        let mut output = vec![];
+        output.push(self.data.render_name_value());
+        if !self.describe.is_empty() {
+            output.push(self.describe.clone());
+        }
+        output.join(" ")
+    }
+}
+
+impl EnvParam {
+    pub(crate) fn new(param: ParamData, describe: &str) -> Self {
+        Self {
+            describe: describe.to_string(),
+            data: param,
+            inherit: false,
+        }
+    }
+
+    pub(crate) fn render_body(&self) -> String {
+        let marker = if self.required() { "*" } else { "" };
+        format!("{}{}", self.var_name(), marker)
+    }
+
+    pub(crate) fn get_env_value(&self) -> Option<ArgcValue> {
+        let name = self.var_name().to_string();
+        let default = self.data.default.clone()?;
+        let value = match default {
+            DefaultData::Value(value) => ArgcValue::Env(name, value),
+            DefaultData::Fn(value) => ArgcValue::EnvFn(name, value),
+        };
+        Some(value)
     }
 }
 

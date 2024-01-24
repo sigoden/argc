@@ -1,0 +1,16 @@
+---
+source: tests/env.rs
+expression: "format!(r#\"\nSTDOUT\n{stdout}\n\nSTDERR\n{stderr}\n\"#)"
+---
+
+STDOUT
+
+
+STDERR
+error: the following required environments were not provided:
+  TEST_EB
+
+For more information, try '--help'.
+
+
+

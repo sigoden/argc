@@ -23,7 +23,7 @@
 ## @cmd
 
 > **<sup>Syntax</sup>**\
-> `@cmd` string
+> `@cmd` description<sup>?</sup>
 
 
 ## @alias
@@ -35,22 +35,28 @@
 ## @flag
 
 > **<sup>Syntax</sup>**\
-> `@flag` [_short_]<sup>?</sup>[_long_] [`*`] <sup>?</sup>
->   string<sup>?</sup>
+> `@flag` [_short_]<sup>?</sup>[_long_] `*`<sup>?</sup>
+>   description<sup>?</sup>
 
 ## @option
 
 > **<sup>Syntax</sup>**\
 > `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
 >   [_notations_]<sup>?</sup>
->   string<sup>?</sup>
+>   description<sup>?</sup>
+
+## @env
+> **<sup>Syntax</sup>**\
+> `@arg` env-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
+>   [_notation_]<sup>?</sup>
+>   description<sup>?</sup>
 
 ## @arg
 
 > **<sup>Syntax</sup>**\
 > `@arg` arg-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
 >   [_notation_]<sup>?</sup>
->   string<sup>?</sup>
+>   description<sup>?</sup>
 
 ## short
 
