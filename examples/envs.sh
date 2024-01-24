@@ -18,7 +18,7 @@ main() {
 }
 
 _debug() {
-    printenv | grep TEST_
+    printenv | grep ^TEST_
 }
 
 _default_fn() {
