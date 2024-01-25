@@ -176,7 +176,7 @@ COMMANDS:
 
 ### @env
 
-Define a environment
+Define an environment
 
 ```sh
 # @env EA                 optional

@@ -3,13 +3,13 @@ source: tests/hook_fn.rs
 expression: data
 ---
 RUN
-prog ___internal___ _choice_fn
+prog
 
 OUTPUT
 argc__args=( prog )
 argc__cmd_arg_index=0
+argc__fn=main
 argc__positionals=(  )
 _argc_before
-_choice_fn;exit;
-_argc_after
+main
 
