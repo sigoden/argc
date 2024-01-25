@@ -12,6 +12,8 @@ pub enum ArgcValue {
     PositionalSingleFn(String, String),
     PositionalMultiple(String, Vec<String>),
     ExtraPositionalMultiple(Vec<String>),
+    Env(String, String),
+    EnvFn(String, String),
     InitHook,
     Dotenv(String),
     CmdFn(String),
@@ -93,6 +95,12 @@ impl ArgcValue {
                         .map(|v| escape_shell_words(v))
                         .collect::<Vec<String>>();
                     positional_args.extend(values);
+                }
+                ArgcValue::Env(name, value) => {
+                    output.push(format!("export {}={}", name, escape_shell_words(value)));
+                }
+                ArgcValue::EnvFn(name, fn_name) => {
+                    output.push(format!("export {}=`{}`", name, fn_name,));
                 }
                 ArgcValue::InitHook => {
                     init_hook = true;

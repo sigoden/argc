@@ -1,0 +1,15 @@
+---
+source: tests/env.rs
+expression: "format!(r#\"\nSTDOUT\n{stdout}\n\nSTDERR\n{stderr}\n\"#)"
+---
+
+STDOUT
+TEST_EB=1
+TEST_ECB=a
+TEST_EDA=a
+TEST_EDB=argc
+
+
+STDERR
+
+

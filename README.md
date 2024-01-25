@@ -174,6 +174,18 @@ COMMANDS:
   test  Run tests [aliases: t, tst]
 ```
 
+### @env
+
+Define a environment
+
+```sh
+# @env EA                 optional
+# @env EB!                required
+# @env EC=true            default
+# @env EDA[dev|prod]      choices
+# @env EDB[=dev|prod]     choices + default
+```
+
 ### @describe / @version / @author
 
 ```sh

@@ -6,7 +6,7 @@ use self::root_data::RootData;
 
 use crate::argc_value::{ArgcValue, INIT_HOOK};
 use crate::matcher::Matcher;
-use crate::param::{FlagOptionParam, PositionalParam};
+use crate::param::{EnvParam, FlagOptionParam, Param, PositionalParam};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::utils::INTERNAL_MODE;
 use crate::Result;
@@ -39,7 +39,7 @@ pub struct Command {
     pub(crate) describe: String,
     pub(crate) flag_option_params: Vec<FlagOptionParam>,
     pub(crate) positional_params: Vec<PositionalParam>,
-    pub(crate) positional_pos: Vec<Position>,
+    pub(crate) env_params: Vec<EnvParam>,
     pub(crate) subcommands: Vec<Command>,
     pub(crate) author: Option<String>,
     pub(crate) version: Option<String>,
@@ -58,6 +58,9 @@ impl Command {
         let mut root = Command::new_from_events(&events)?;
         if root.has_metadata("inherit-flag-options") {
             root.inherit_flag_options();
+        }
+        if !root.has_metadata("no-inherit-env") {
+            root.inherit_envs();
         }
         Ok(root)
     }
@@ -105,6 +108,8 @@ impl Command {
             self.positional_params.iter().map(|v| v.to_json()).collect();
         let metadata: Vec<Vec<&String>> =
             self.metadata.iter().map(|(k, v, _)| vec![k, v]).collect();
+        let env_params: Vec<serde_json::Value> =
+            self.env_params.iter().map(|v| v.to_json()).collect();
         serde_json::json!({
             "describe": self.describe,
             "name": self.name,
@@ -115,6 +120,7 @@ impl Command {
             "positionals": positional_params,
             "aliases": self.aliases,
             "subcommands": subcommands,
+            "envs": env_params,
         })
     }
 
@@ -177,6 +183,16 @@ impl Command {
                     }
                     cmd.names_checker.check_flag_option(&param, position)?;
                     cmd.flag_option_params.push(param);
+                }
+                EventData::Env(param) => {
+                    let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
+                    root_data.borrow_mut().add_param_fn(
+                        position,
+                        param.default_fn(),
+                        param.choice_fn(),
+                    );
+                    cmd.names_checker.check_env(&param, position)?;
+                    cmd.env_params.push(param);
                 }
                 EventData::Positional(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
@@ -309,6 +325,7 @@ impl Command {
         output.extend(self.render_positionals(term_width));
         output.extend(self.render_flag_options(term_width));
         output.extend(self.render_subcommands(term_width));
+        output.extend(self.render_envs(term_width));
         if output.is_empty() {
             return "\n".to_string();
         }
@@ -456,6 +473,35 @@ impl Command {
         output
     }
 
+    pub(crate) fn render_envs(&self, term_width: Option<usize>) -> Vec<String> {
+        let mut output = vec![];
+        if self.env_params.is_empty() {
+            return output;
+        }
+        let mut list = vec![];
+        for param in self.env_params.iter() {
+            let value = param.render_body();
+            let describe = param.render_describe();
+            list.push((value, describe));
+        }
+        output.push("ENVIRONMENTS:".to_string());
+        let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
+        for (value, describe) in list {
+            if describe.is_empty() {
+                output.push(format!("  {value}"));
+            } else {
+                let spaces = " ".repeat(value_size - value.len());
+                output.push(wrap_render_block(
+                    &format!("  {value}{spaces}"),
+                    &describe,
+                    term_width,
+                ));
+            }
+        }
+        output.push("".to_string());
+        output
+    }
+
     pub(crate) fn describe_oneline(&self) -> &str {
         match self.describe.split_once('\n') {
             Some((v, _)) => v,
@@ -488,9 +534,7 @@ impl Command {
     }
 
     pub(crate) fn find_flag_option(&self, name: &str) -> Option<&FlagOptionParam> {
-        self.flag_option_params
-            .iter()
-            .find(|v| v.var_name() == name || v.is_match(name))
+        self.flag_option_params.iter().find(|v| v.is_match(name))
     }
 
     pub(crate) fn find_prefixed_option(&self, name: &str) -> Option<(&FlagOptionParam, String)> {
@@ -502,6 +546,10 @@ impl Command {
             }
         }
         None
+    }
+
+    pub(crate) fn find_env(&self, name: &str) -> Option<&EnvParam> {
+        self.env_params.iter().find(|v| v.var_name() == name)
     }
 
     pub(crate) fn match_version_short_name(&self) -> bool {
@@ -584,10 +632,26 @@ impl Command {
         }
     }
 
+    fn inherit_envs(&mut self) {
+        for subcmd in self.subcommands.iter_mut() {
+            let mut inherited_envs = vec![];
+            for env_param in &self.env_params {
+                if subcmd.find_env(env_param.var_name()).is_none() {
+                    let mut env_param = env_param.clone();
+                    env_param.inherit = true;
+                    inherited_envs.push(env_param);
+                }
+            }
+            subcmd.env_params.splice(..0, inherited_envs);
+        }
+        for subcmd in self.subcommands.iter_mut() {
+            subcmd.inherit_envs();
+        }
+    }
+
     fn add_positional_param(&mut self, param: PositionalParam, pos: Position) -> Result<()> {
         self.names_checker.check_positional(&param, pos)?;
         self.positional_params.push(param);
-        self.positional_pos.push(pos);
         Ok(())
     }
 

@@ -1,0 +1,16 @@
+---
+source: tests/env.rs
+expression: "format!(r#\"\nSTDOUT\n{stdout}\n\nSTDERR\n{stderr}\n\"#)"
+---
+
+STDOUT
+
+
+STDERR
+error: invalid value `val` for env `TEST_EFA`
+  [possible values: abc, def, ghi]
+
+For more information, try '--help'.
+
+
+

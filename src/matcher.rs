@@ -9,7 +9,7 @@ use crate::{
     argc_value::{sanitize_arg_name, ArgcValue},
     command::{Command, SymbolParam},
     compgen::CompColor,
-    param::{ChoiceData, FlagOptionParam, ParamData, PositionalParam},
+    param::{ChoiceData, FlagOptionParam, Param, ParamData, PositionalParam},
     utils::run_param_fns,
     Shell, VARIABLE_PREFIX,
 };
@@ -29,6 +29,7 @@ pub(crate) struct Matcher<'a, 'b> {
     arg_comp: ArgComp,
     choice_fns: HashSet<&'a str>,
     script_path: Option<String>,
+    envs: HashMap<&'a str, String>,
     term_width: Option<usize>,
     split_last_arg_at: Option<usize>,
     comp_option: Option<&'a str>,
@@ -61,9 +62,11 @@ pub(crate) enum MatchError {
     DisplayVersion,
     InvalidSubcommand,
     UnknownArgument(usize, String),
-    MissingRequiredArgument(usize, Vec<String>),
+    MissingRequiredArguments(usize, Vec<String>),
+    MissingRequiredEnvironments(Vec<String>),
     NotMultipleArgument(usize, String),
     InvalidValue(usize, String, String, Vec<String>),
+    InvalidEnvValue(usize, String, String, Vec<String>),
     MismatchValues(usize, String),
     NoMoreValue(usize, String, String),
 }
@@ -286,15 +289,20 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
 
             let last_cmd = cmds.last().unwrap().1;
-            choice_fns.extend(last_cmd.positional_params.iter().filter_map(|v| {
-                if let Some((choice_fn, validate)) = v.choice_fn() {
-                    if *validate {
-                        return Some(choice_fn.as_str());
-                    }
-                }
-                None
-            }));
+            for param in &last_cmd.positional_params {
+                add_param_choice_fn(&mut choice_fns, param)
+            }
         }
+
+        let mut envs = HashMap::new();
+        let last_cmd = cmds.last().unwrap().1;
+        for param in &last_cmd.env_params {
+            if let Ok(value) = std::env::var(param.var_name()) {
+                envs.insert(param.var_name(), value);
+            }
+            add_param_choice_fn(&mut choice_fns, param)
+        }
+
         Self {
             cmds,
             args,
@@ -308,6 +316,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             term_width: None,
             split_last_arg_at,
             comp_option,
+            envs,
         }
     }
 
@@ -475,6 +484,14 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
         if let Some(value) = self.cmds[0].1.get_metadata("dotenv") {
             output.push(ArgcValue::Dotenv(value.to_string()))
+        }
+
+        for param in &last_cmd.env_params {
+            if !self.envs.contains_key(&param.var_name()) {
+                if let Some(value) = param.get_env_value() {
+                    output.push(value);
+                }
+            }
         }
 
         for (arg, (name, _)) in self.symbol_args.iter() {
@@ -683,11 +700,38 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
         if !missing_params.is_empty() {
-            return Some(MatchError::MissingRequiredArgument(
+            return Some(MatchError::MissingRequiredArguments(
                 missing_level,
                 missing_params,
             ));
         }
+
+        let mut missing_envs = vec![];
+        for param in &last_cmd.env_params {
+            if param.required() && !self.envs.contains_key(param.var_name()) {
+                missing_envs.push(param.var_name().to_string());
+            }
+        }
+        if !missing_envs.is_empty() {
+            return Some(MatchError::MissingRequiredEnvironments(missing_envs));
+        }
+
+        for param in &last_cmd.env_params {
+            if let (Some(choices), Some(value)) = (
+                get_param_choice(&param.data.choice, &choices_fn_values),
+                self.envs.get(param.var_name()),
+            ) {
+                if !choices.contains(&value.to_string()) {
+                    return Some(MatchError::InvalidEnvValue(
+                        level,
+                        value.to_string(),
+                        param.var_name().to_string(),
+                        choices.clone(),
+                    ));
+                }
+            }
+        }
+
         None
     }
 
@@ -800,7 +844,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
 "###
                 )
             }
-            MatchError::MissingRequiredArgument(level, values) => {
+            MatchError::MissingRequiredArguments(level, values) => {
                 exit = 1;
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
                 let usage = cmd.render_usage(&cmd_paths);
@@ -814,6 +858,21 @@ impl<'a, 'b> Matcher<'a, 'b> {
 {list}
 
 {usage}
+
+{footer}
+"###
+                )
+            }
+            MatchError::MissingRequiredEnvironments(values) => {
+                exit = 1;
+                let list = values
+                    .iter()
+                    .map(|v| format!("  {v}"))
+                    .collect::<Vec<String>>()
+                    .join("\n");
+                format!(
+                    r###"error: the following required environments were not provided:
+{list}
 
 {footer}
 "###
@@ -837,6 +896,17 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 let list = choices.join(", ");
                 format!(
                     r###"error: invalid value `{value}` for `{name}`
+  [possible values: {list}]
+
+{footer}
+"###
+                )
+            }
+            MatchError::InvalidEnvValue(_level, value, name, choices) => {
+                exit = 1;
+                let list = choices.join(", ");
+                format!(
+                    r###"error: invalid value `{value}` for env `{name}`
   [possible values: {list}]
 
 {footer}
@@ -1085,7 +1155,7 @@ fn match_command<'a, 'b>(
     flag_option_args.push(vec![]);
 }
 
-fn add_param_choice_fn<'a>(choice_fns: &mut HashSet<&'a str>, param: &'a FlagOptionParam) {
+fn add_param_choice_fn<'a>(choice_fns: &mut HashSet<&'a str>, param: &'a impl Param) {
     if let Some((choice_fn, validate)) = param.choice_fn() {
         if *validate {
             choice_fns.insert(choice_fn.as_str());

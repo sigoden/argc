@@ -36,7 +36,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ob",
@@ -51,7 +52,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "c",
@@ -65,7 +67,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oc",
@@ -79,7 +82,8 @@ expression: output
             "type": "Required"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "od",
@@ -93,7 +97,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oe",
@@ -107,7 +112,8 @@ expression: output
             "type": "MultipleRequired"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ona",
@@ -123,7 +129,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "onb",
@@ -140,7 +147,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "onc",
@@ -157,7 +165,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oda",
@@ -171,7 +180,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": "a"
+          "default": "a",
+          "inherit": false
         },
         {
           "name": "odb",
@@ -185,7 +195,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oca",
@@ -202,7 +213,8 @@ expression: output
             "a",
             "b"
           ],
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ocb",
@@ -219,7 +231,8 @@ expression: output
             "a",
             "b"
           ],
-          "default": "a"
+          "default": "a",
+          "inherit": false
         },
         {
           "name": "occ",
@@ -236,7 +249,8 @@ expression: output
             "a",
             "b"
           ],
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ocd",
@@ -253,7 +267,8 @@ expression: output
             "a",
             "b"
           ],
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ofa",
@@ -267,7 +282,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ofb",
@@ -281,7 +297,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ofc",
@@ -295,7 +312,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ofd",
@@ -310,7 +328,8 @@ expression: output
             "value": ","
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oxa",
@@ -324,12 +343,14 @@ expression: output
             "type": "Terminated"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "All kind of flags",
@@ -350,7 +371,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fb",
@@ -365,7 +387,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "c",
@@ -379,7 +402,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fd",
@@ -393,7 +417,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fe",
@@ -408,12 +433,14 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "Flags or options with single hyphen",
@@ -434,7 +461,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fb",
@@ -449,7 +477,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fd",
@@ -463,7 +492,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oa",
@@ -477,7 +507,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "od",
@@ -491,7 +522,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ona",
@@ -507,7 +539,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oca",
@@ -524,7 +557,8 @@ expression: output
             "a",
             "b"
           ],
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ofa",
@@ -538,12 +572,14 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "Value notation modifier",
@@ -566,7 +602,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ob",
@@ -582,7 +619,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oc",
@@ -598,12 +636,14 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "All kind of options",
@@ -624,7 +664,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ob",
@@ -639,7 +680,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "c",
@@ -653,7 +695,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oc",
@@ -667,7 +710,8 @@ expression: output
             "type": "Required"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "od",
@@ -681,7 +725,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oe",
@@ -695,7 +740,8 @@ expression: output
             "type": "MultipleRequired"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ona",
@@ -711,7 +757,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "onb",
@@ -728,7 +775,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "onc",
@@ -745,7 +793,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oda",
@@ -759,7 +808,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": "a"
+          "default": "a",
+          "inherit": false
         },
         {
           "name": "odb",
@@ -773,7 +823,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oca",
@@ -790,7 +841,8 @@ expression: output
             "a",
             "b"
           ],
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ocb",
@@ -807,7 +859,8 @@ expression: output
             "a",
             "b"
           ],
-          "default": "a"
+          "default": "a",
+          "inherit": false
         },
         {
           "name": "occ",
@@ -824,7 +877,8 @@ expression: output
             "a",
             "b"
           ],
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ocd",
@@ -841,7 +895,8 @@ expression: output
             "a",
             "b"
           ],
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ofa",
@@ -855,7 +910,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ofb",
@@ -869,7 +925,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ofc",
@@ -883,7 +940,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ofd",
@@ -898,7 +956,8 @@ expression: output
             "value": ","
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oxa",
@@ -912,12 +971,14 @@ expression: output
             "type": "Terminated"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "All kind of flags",
@@ -938,7 +999,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fb",
@@ -953,7 +1015,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "c",
@@ -967,7 +1030,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fd",
@@ -981,7 +1045,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fe",
@@ -996,12 +1061,14 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "Mixed `-` and `+` options",
@@ -1023,7 +1090,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "b",
@@ -1038,7 +1106,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "c",
@@ -1053,12 +1122,14 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "Prefixed option",
@@ -1079,7 +1150,8 @@ expression: output
             "type": "MultiPrefixed"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "X",
@@ -1093,12 +1165,14 @@ expression: output
             "type": "MultiPrefixed"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "",
@@ -1119,7 +1193,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fa",
@@ -1133,7 +1208,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "fb",
@@ -1148,7 +1224,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "sa",
@@ -1162,7 +1239,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "sb",
@@ -1176,7 +1254,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "e",
@@ -1190,7 +1269,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oa",
@@ -1204,7 +1284,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ob",
@@ -1218,7 +1299,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oc",
@@ -1234,7 +1316,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "od",
@@ -1252,7 +1335,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oe",
@@ -1267,7 +1351,8 @@ expression: output
             "value": ","
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ca",
@@ -1285,7 +1370,8 @@ expression: output
             "y",
             "z"
           ],
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "cc",
@@ -1299,7 +1385,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "cd",
@@ -1313,7 +1400,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ce",
@@ -1327,7 +1415,8 @@ expression: output
             "type": "MultipleOptional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "soa",
@@ -1342,12 +1431,14 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "",
@@ -1369,7 +1460,8 @@ expression: output
             "type": "Required"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ob",
@@ -1383,7 +1475,8 @@ expression: output
             "type": "MultipleRequired"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oc",
@@ -1398,7 +1491,8 @@ expression: output
             "value": ","
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "oca",
@@ -1412,7 +1506,8 @@ expression: output
             "type": "Required"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "ocb",
@@ -1426,7 +1521,8 @@ expression: output
             "type": "MultipleRequired"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "occ",
@@ -1441,12 +1537,14 @@ expression: output
             "value": ","
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     },
     {
       "describe": "",
@@ -1467,7 +1565,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": "val"
+          "default": "val",
+          "inherit": false
         },
         {
           "name": "of",
@@ -1481,7 +1580,8 @@ expression: output
             "type": "Optional"
           },
           "choices": null,
-          "default": null
+          "default": null,
+          "inherit": false
         },
         {
           "name": "cb",
@@ -1499,12 +1599,15 @@ expression: output
             "y",
             "z"
           ],
-          "default": "x"
+          "default": "x",
+          "inherit": false
         }
       ],
       "positionals": [],
       "aliases": [],
-      "subcommands": []
+      "subcommands": [],
+      "envs": []
     }
-  ]
+  ],
+  "envs": []
 }
