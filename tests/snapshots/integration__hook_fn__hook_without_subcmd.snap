@@ -9,5 +9,5 @@ OUTPUT
 argc__args=( prog )
 argc__cmd_arg_index=0
 argc__positionals=(  )
-_argc_init
+_argc_before
 

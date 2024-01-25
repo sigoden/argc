@@ -339,9 +339,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
             ));
         }
-        if cmd.exist_init_hook() {
-            output.push(ArgcValue::InitHook);
-        }
         if let Some(cmd_fn) = cmd.get_cmd_fn(&cmd_paths) {
             output.push(ArgcValue::CmdFn(cmd_fn));
         }
@@ -362,9 +359,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 "_option".into(),
                 format!("{}_{}", VARIABLE_PREFIX, sanitize_arg_name(name)),
             ));
-        }
-        if last_cmd.exist_init_hook() {
-            output.push(ArgcValue::InitHook);
         }
         output
     }
@@ -492,6 +486,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     output.push(value);
                 }
             }
+        }
+
+        if let Some((before, after)) = last_cmd.exist_hooks() {
+            output.push(ArgcValue::Hook((before, after)));
         }
 
         for (arg, (name, _)) in self.symbol_args.iter() {

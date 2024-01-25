@@ -2,8 +2,12 @@
 
 set -e
 
-_argc_init() {
-  echo init
+_argc_before() {
+  echo before
+}
+
+_argc_after() {
+  echo after
 }
 
 main() {

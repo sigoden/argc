@@ -4,7 +4,7 @@ mod root_data;
 use self::names_checker::NamesChecker;
 use self::root_data::RootData;
 
-use crate::argc_value::{ArgcValue, INIT_HOOK};
+use crate::argc_value::{ArgcValue, AFTER_HOOK, BEFORE_HOOK};
 use crate::matcher::Matcher;
 use crate::param::{EnvParam, FlagOptionParam, Param, PositionalParam};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
@@ -592,8 +592,14 @@ impl Command {
         }
     }
 
-    pub(crate) fn exist_init_hook(&self) -> bool {
-        self.root.borrow().fns.contains_key(INIT_HOOK)
+    pub(crate) fn exist_hooks(&self) -> Option<(bool, bool)> {
+        let fns = &self.root.borrow().fns;
+        let before_hook = fns.contains_key(BEFORE_HOOK);
+        let after_hook = fns.contains_key(AFTER_HOOK);
+        if !before_hook && !after_hook {
+            return None;
+        }
+        Some((before_hook, after_hook))
     }
 
     pub(crate) fn delegated(&self) -> bool {
