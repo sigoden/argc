@@ -1,0 +1,52 @@
+---
+source: tests/details.rs
+expression: data
+---
+RUN
+prog foo -h
+
+OUTPUT
+command cat >&2 <<-'EOF' 
+Multi-line auto-wrapped help text
+
+Extra lines after the @cmd or @describe, which don't start with an @, are
+treated as the long description. A line which is not a comment ends
+the block.
+
+USAGE: prog [OPTIONS] [TARGET] <COMMAND>
+
+ARGS:
+  [TARGET]  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Sed
+            viverra tellus in hac habitasse platea.
+            Use '-' for standard input.
+            
+
+
+OPTIONS:
+      --foo <FOO>  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                   sed do eiusmod tempor incididunt ut labore et dolore magna
+                   aliqua. Neque laoreet suspendisse libero id.
+                    * default: enables recommended style components.
+                    * full: enables all available components.
+                    * auto: same as 'default', unless the output is piped.
+                   
+                   [default: default]
+                   [possible values: default, full, auto]
+
+      --bar <BAR>  Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                   sed do eiusmod tempor incididunt ut labore et dolore magna
+                   aliqua. Neque laoreet suspendisse libero id.
+
+  -h, --help       Print help
+
+
+COMMANDS:
+  cmd  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+       tempor incididunt ut labore et dolore magna aliqua. Arcu cursus euismod
+       quis viverra.
+
+
+EOF
+exit 0
+
