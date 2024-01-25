@@ -286,25 +286,6 @@ argc --argc-parallel "$0" cmd1 arg1 arg2 ::: cmd2
 
 The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel. Functions running in parallel mode can still access the `argc_*` variable.
 
-## Windows Only
-
-Argc requires bash to run scripts. [git](https://gitforwindows.org/)'s built-in bash is good enough for argc.
-
-If you want to run a `.sh` script file directly like a `.cmd` or `.exe` file, execute the following code in PowerShell.
-
-```ps1
-# Add .sh to PATHEXT
-[Environment]::SetEnvironmentVariable("PATHEXT", [Environment]::GetEnvironmentVariable("PATHEXT", "Machine") + ";.SH", "Machine")
-
-# Associate the .sh file extension with Git Bash
-New-Item -LiteralPath Registry::HKEY_CLASSES_ROOT\.sh -Force
-New-ItemProperty -LiteralPath Registry::HKEY_CLASSES_ROOT\.sh -Name "(Default)" -Value "sh_auto_file" -PropertyType String -Force
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\command' `
-  -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
-```
-
-![image](https://github.com/sigoden/argc/assets/4012553/16af2b13-8c20-4954-bf58-ccdf1bbe23ef)
-
 ## License
 
 Copyright (c) 2023-2024 aichat-developers.
