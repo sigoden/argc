@@ -374,19 +374,7 @@ impl Command {
         }
         output.push("ARGS:".to_string());
         value_size += 2;
-        for (value, describe) in list {
-            if describe.is_empty() {
-                output.push(format!("  {value}"));
-            } else {
-                let spaces = " ".repeat(value_size - value.len());
-                output.push(wrap_render_block(
-                    &format!("  {value}{spaces}"),
-                    &describe,
-                    term_width,
-                ));
-            }
-        }
-        output.push("".to_string());
+        render_list(&mut output, list, value_size, term_width);
         output
     }
 
@@ -413,19 +401,7 @@ impl Command {
         self.add_version_flag(&mut list, single, any_describe);
         output.push("OPTIONS:".to_string());
         let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
-        for (value, describe) in list {
-            if describe.is_empty() {
-                output.push(format!("  {value}"));
-            } else {
-                let spaces = " ".repeat(value_size - value.len());
-                output.push(wrap_render_block(
-                    &format!("  {value}{spaces}"),
-                    &describe,
-                    term_width,
-                ));
-            }
-        }
-        output.push("".to_string());
+        render_list(&mut output, list, value_size, term_width);
         output
     }
 
@@ -444,19 +420,7 @@ impl Command {
         }
         output.push("COMMANDS:".to_string());
         value_size += 2;
-        for (value, describe) in list {
-            if describe.is_empty() {
-                output.push(format!("  {value}"));
-            } else {
-                let spaces = " ".repeat(value_size - value.len());
-                output.push(wrap_render_block(
-                    &format!("  {value}{spaces}"),
-                    &describe,
-                    term_width,
-                ));
-            }
-        }
-        output.push("".to_string());
+        render_list(&mut output, list, value_size, term_width);
         output
     }
 
@@ -486,18 +450,7 @@ impl Command {
         }
         output.push("ENVIRONMENTS:".to_string());
         let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
-        for (value, describe) in list {
-            if describe.is_empty() {
-                output.push(format!("  {value}"));
-            } else {
-                let spaces = " ".repeat(value_size - value.len());
-                output.push(wrap_render_block(
-                    &format!("  {value}{spaces}"),
-                    &describe,
-                    term_width,
-                ));
-            }
-        }
+        render_list(&mut output, list, value_size, term_width);
         output.push("".to_string());
         output
     }
@@ -743,6 +696,35 @@ fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[String]) -> Option<&'a mut
 
 fn sanitize_cmd_name(name: &str) -> String {
     name.trim_end_matches('_').to_string()
+}
+
+fn render_list(
+    output: &mut Vec<String>,
+    list: Vec<(String, String)>,
+    value_size: usize,
+    term_width: Option<usize>,
+) {
+    let mut new_list = vec![];
+    let mut multiline = false;
+    for (value, describe) in list {
+        let item = if describe.is_empty() {
+            format!("  {value}")
+        } else {
+            let spaces = " ".repeat(value_size - value.len());
+            wrap_render_block(&format!("  {value}{spaces}"), &describe, term_width)
+        };
+        if item.contains('\n') {
+            multiline = true;
+        }
+        new_list.push(item);
+    }
+    for item in new_list {
+        output.push(item);
+        if multiline {
+            output.push("".to_string());
+        }
+    }
+    output.push("".to_string());
 }
 
 fn wrap_render_block(name: &str, describe: &str, term_width: Option<usize>) -> String {

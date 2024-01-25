@@ -620,15 +620,20 @@ impl ParamData {
 
     pub(crate) fn render_describe(&self, describe: &str) -> String {
         let mut output = describe.to_string();
+        let multiline = output.contains('\n');
+        let sep = if multiline { '\n' } else { ' ' };
+        if multiline {
+            output.push('\n');
+        }
         if let Some(DefaultData::Value(value)) = &self.default {
             if !output.is_empty() {
-                output.push(' ')
+                output.push(sep)
             }
             output.push_str(&format!("[default: {}]", escape_shell_words(value)));
         }
         if let Some(ChoiceData::Values(values)) = &self.choice {
             if !output.is_empty() {
-                output.push(' ')
+                output.push(sep)
             }
             let values: Vec<String> = values.iter().map(|v| escape_shell_words(v)).collect();
             output.push_str(&format!("[possible values: {}]", values.join(", ")));
