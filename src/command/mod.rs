@@ -59,7 +59,9 @@ impl Command {
         if root.has_metadata("inherit-flag-options") {
             root.inherit_flag_options();
         }
-        root.inherit_envs();
+        if !root.has_metadata("no-inherit-env") {
+            root.inherit_envs();
+        }
         Ok(root)
     }
 

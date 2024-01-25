@@ -179,8 +179,11 @@ COMMANDS:
 Define a environment
 
 ```sh
-# @env FOO
-# @env BAR!         required
+# @env EA                 optional
+# @env EB!                required
+# @env EC=true            default
+# @env EDA[dev|prod]      choices
+# @env EDB[=dev|prod]     choices + default
 ```
 
 ### @describe / @version / @author
