@@ -6,7 +6,7 @@ RUN
 prog
 
 OUTPUT
-[ -f .env ] && set -o allexport && source .env && set +o allexport
+[ -f .env ] && set -o allexport && . .env && set +o allexport
 argc__args=( prog )
 argc__cmd_arg_index=0
 argc__positionals=(  )

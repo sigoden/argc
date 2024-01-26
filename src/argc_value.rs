@@ -114,7 +114,7 @@ impl ArgcValue {
                 ArgcValue::Dotenv(value) => {
                     let value = if value.is_empty() { ".env" } else { value };
                     output.push(format!(
-                        "[ -f {value} ] && set -o allexport && source {value} && set +o allexport"
+                        "[ -f {value} ] && set -o allexport && . {value} && set +o allexport"
                     ))
                 }
                 ArgcValue::CmdFn(name) => {
