@@ -1,6 +1,6 @@
 use crate::utils::escape_shell_words;
 
-pub const VARIABLE_PREFIX: &str = "argc";
+pub const VARIABLE_PREFIX: &str = "argc_";
 pub const BEFORE_HOOK: &str = "_argc_before";
 pub const AFTER_HOOK: &str = "_argc_after";
 
@@ -32,7 +32,7 @@ impl ArgcValue {
             match value {
                 ArgcValue::Single(name, value) => {
                     output.push(format!(
-                        "{}_{}={}",
+                        "{}{}={}",
                         VARIABLE_PREFIX,
                         sanitize_arg_name(name),
                         escape_shell_words(value)
@@ -40,7 +40,7 @@ impl ArgcValue {
                 }
                 ArgcValue::SingleFn(name, fn_name) => {
                     output.push(format!(
-                        "{}_{}=`{}`",
+                        "{}{}=`{}`",
                         VARIABLE_PREFIX,
                         sanitize_arg_name(name),
                         fn_name,
@@ -48,7 +48,7 @@ impl ArgcValue {
                 }
                 ArgcValue::Multiple(name, values) => {
                     output.push(format!(
-                        "{}_{}=( {} )",
+                        "{}{}=( {} )",
                         VARIABLE_PREFIX,
                         sanitize_arg_name(name),
                         values
@@ -61,7 +61,7 @@ impl ArgcValue {
                 ArgcValue::PositionalSingle(name, value) => {
                     let value = escape_shell_words(value);
                     output.push(format!(
-                        "{}_{}={}",
+                        "{}{}={}",
                         VARIABLE_PREFIX,
                         sanitize_arg_name(name),
                         &value
@@ -70,7 +70,7 @@ impl ArgcValue {
                 }
                 ArgcValue::PositionalSingleFn(name, fn_name) => {
                     output.push(format!(
-                        "{}_{}=`{}`",
+                        "{}{}=`{}`",
                         VARIABLE_PREFIX,
                         sanitize_arg_name(name),
                         &fn_name
@@ -83,7 +83,7 @@ impl ArgcValue {
                         .map(|v| escape_shell_words(v))
                         .collect::<Vec<String>>();
                     output.push(format!(
-                        "{}_{}=( {} )",
+                        "{}{}=( {} )",
                         VARIABLE_PREFIX,
                         sanitize_arg_name(name),
                         values.join(" ")
@@ -123,7 +123,7 @@ impl ArgcValue {
                     } else {
                         last = format!("{} {}", name, positional_args.join(" "));
                     }
-                    output.push(format!("{}__fn={}", VARIABLE_PREFIX, name));
+                    output.push(format!("{}_fn={}", VARIABLE_PREFIX, name));
                 }
                 ArgcValue::ParamFn(name) => {
                     if positional_args.is_empty() {
@@ -139,7 +139,7 @@ impl ArgcValue {
         }
 
         output.push(format!(
-            "{}__positionals=( {} )",
+            "{}_positionals=( {} )",
             VARIABLE_PREFIX,
             positional_args.join(" ")
         ));

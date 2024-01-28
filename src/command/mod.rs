@@ -8,7 +8,7 @@ use crate::argc_value::{ArgcValue, AFTER_HOOK, BEFORE_HOOK};
 use crate::matcher::Matcher;
 use crate::param::{EnvParam, FlagOptionParam, Param, PositionalParam};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
-use crate::utils::INTERNAL_MODE;
+use crate::utils::INTERNAL_SYMBOL;
 use crate::Result;
 
 use anyhow::{anyhow, bail};
@@ -33,7 +33,7 @@ pub fn export(source: &str) -> Result<serde_json::Value> {
 }
 
 #[derive(Debug, Default)]
-pub struct Command {
+pub(crate) struct Command {
     pub(crate) name: Option<String>,
     pub(crate) fn_name: Option<String>,
     pub(crate) describe: String,
@@ -53,7 +53,7 @@ pub struct Command {
 }
 
 impl Command {
-    pub fn new(source: &str) -> Result<Self> {
+    pub(crate) fn new(source: &str) -> Result<Self> {
         let events = parse(source)?;
         let mut root = Command::new_from_events(&events)?;
         if root.has_metadata("inherit-flag-options") {
@@ -65,7 +65,7 @@ impl Command {
         Ok(root)
     }
 
-    pub fn eval(
+    pub(crate) fn eval(
         &mut self,
         args: &[String],
         script_path: Option<&str>,
@@ -74,7 +74,7 @@ impl Command {
         if args.is_empty() {
             bail!("Invalid args");
         }
-        if args.len() >= 3 && args[1] == INTERNAL_MODE {
+        if args.len() >= 3 && args[1] == INTERNAL_SYMBOL {
             let fallback_args = vec!["prog".to_string()];
             let new_args = if args.len() == 3 {
                 &fallback_args
@@ -96,7 +96,7 @@ impl Command {
         Ok(matcher.to_arg_values())
     }
 
-    pub fn to_json(&self) -> serde_json::Value {
+    pub(crate) fn to_json(&self) -> serde_json::Value {
         let subcommands: Vec<serde_json::Value> =
             self.subcommands.iter().map(|v| v.to_json()).collect();
         let flag_option_params: Vec<serde_json::Value> = self

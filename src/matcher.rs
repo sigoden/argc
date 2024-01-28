@@ -357,7 +357,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         if let Some(name) = self.comp_option {
             output.push(ArgcValue::Single(
                 "_option".into(),
-                format!("{}_{}", VARIABLE_PREFIX, sanitize_arg_name(name)),
+                format!("{}{}", VARIABLE_PREFIX, sanitize_arg_name(name)),
             ));
         }
         output

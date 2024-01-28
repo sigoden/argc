@@ -7,9 +7,8 @@ use std::{
 };
 use which::which;
 
-pub const INTERNAL_MODE: &str = "___internal___";
+pub const INTERNAL_SYMBOL: &str = "___internal___";
 
-/// Transform into upper case string with an underscore between words. `foo-bar` => `FOO-BAR`
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()
         .set_pattern(Pattern::Uppercase)
@@ -111,7 +110,7 @@ pub fn run_param_fns(
                 process::Command::new(shell)
                     .args(shell_extra_args)
                     .arg(&script_file)
-                    .arg(INTERNAL_MODE)
+                    .arg(INTERNAL_SYMBOL)
                     .arg(&param_fn)
                     .args(args)
                     .envs(envs)
