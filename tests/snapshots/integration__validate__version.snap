@@ -3,29 +3,26 @@ source: tests/validate.rs
 expression: data
 ---
 ************ RUN ************
-prog -h
+prog --version
 
 OUTPUT
 command cat >&2 <<-'EOF' 
-prog 1.0.0
-Test argc
-
-USAGE: prog [OPTIONS]
-
-OPTIONS:
-  -h, --help
-  -V, --version
-
+prog 0.0.0
 EOF
 exit 0
 
 ************ RUN ************
-prog -V
+prog cmd --version
 
 OUTPUT
 command cat >&2 <<-'EOF' 
-prog 1.0.0
+error: unexpected argument `--version` found
+
+USAGE: prog cmd
+
+For more information, try '--help'.
+
 EOF
-exit 0
+exit 1
 
 
