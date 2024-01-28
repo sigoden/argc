@@ -36,10 +36,13 @@ fn help_version_shadow() {
 #[test]
 fn help_version_exist() {
     let script = r###"
+# @describe Test argc
+# @version    1.0.0
+
 # @flag -h --help
 # @flag -V --version
 "###;
-    snapshot_multi!(script, [vec!["prog", "-h"]]);
+    snapshot_multi!(script, [vec!["prog", "-h"], vec!["prog", "-V"]]);
 }
 
 #[test]
@@ -50,6 +53,18 @@ fn help_notations() {
 # @option --merge <path1> <path2> <base> <result>  Perform a three-way merge by providing paths for two modified versions of a file, the common origin of both modified versions and the output file to save merge results.
 "###;
     snapshot_multi!(script, [vec!["prog", "-h"]]);
+}
+
+#[test]
+fn version() {
+    let script = r###"
+# @cmd
+cmd() {:;}
+"###;
+    snapshot_multi!(
+        script,
+        [vec!["prog", "--version"], vec!["prog", "cmd", "--version"]]
+    );
 }
 
 #[test]

@@ -544,15 +544,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 Some("help") => return Some(MatchError::DisplayHelp),
                 Some("version") => return Some(MatchError::DisplayVersion),
                 None => {
-                    if *key == "--help"
-                        || *key == "-help"
-                        || (last_cmd.match_help_short_name() && *key == "-h")
-                    {
+                    if last_cmd.match_help(key) {
                         return Some(MatchError::DisplayHelp);
-                    } else if *key == "--version"
-                        || *key == "-version"
-                        || (last_cmd.match_version_short_name() && *key == "-V")
-                    {
+                    } else if last_cmd.match_version(key) {
                         return Some(MatchError::DisplayVersion);
                     }
                 }

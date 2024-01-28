@@ -36,18 +36,18 @@ pub fn export(source: &str) -> Result<serde_json::Value> {
 pub(crate) struct Command {
     pub(crate) name: Option<String>,
     pub(crate) fn_name: Option<String>,
+    pub(crate) level: usize,
     pub(crate) describe: String,
     pub(crate) flag_option_params: Vec<FlagOptionParam>,
     pub(crate) positional_params: Vec<PositionalParam>,
     pub(crate) env_params: Vec<EnvParam>,
     pub(crate) subcommands: Vec<Command>,
+    pub(crate) aliases: Option<(Vec<String>, Position)>,
     pub(crate) author: Option<String>,
     pub(crate) version: Option<String>,
     pub(crate) subcommand_fns: HashMap<String, Position>,
-    pub(crate) alias_pos: usize,
     pub(crate) names_checker: NamesChecker,
     pub(crate) root: Arc<RefCell<RootData>>,
-    pub(crate) aliases: Vec<String>,
     pub(crate) metadata: Vec<(String, String, Position)>,
     pub(crate) symbols: IndexMap<char, SymbolParam>,
 }
@@ -108,6 +108,7 @@ impl Command {
             self.positional_params.iter().map(|v| v.to_json()).collect();
         let metadata: Vec<Vec<&String>> =
             self.metadata.iter().map(|(k, v, _)| vec![k, v]).collect();
+        let aliases = self.list_aliases();
         let env_params: Vec<serde_json::Value> =
             self.env_params.iter().map(|v| v.to_json()).collect();
         serde_json::json!({
@@ -118,7 +119,7 @@ impl Command {
             "metadata": metadata,
             "options": flag_option_params,
             "positionals": positional_params,
-            "aliases": self.aliases,
+            "aliases": aliases,
             "subcommands": subcommands,
             "envs": env_params,
         })
@@ -169,8 +170,7 @@ impl Command {
                 }
                 EventData::Aliases(values) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@alias", position)?;
-                    cmd.alias_pos = position;
-                    cmd.aliases = values.to_vec();
+                    cmd.aliases = Some((values.to_vec(), position));
                 }
                 EventData::FlagOption(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
@@ -227,18 +227,21 @@ impl Command {
                             let cmd = root_cmd.subcommands.last_mut().unwrap();
                             cmd.name = Some(sanitize_cmd_name(&name));
                             cmd.fn_name = Some(name.to_string());
-                            for name in &cmd.aliases {
-                                if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
-                                    bail!(
-                                        "@alias(line {}) conflicts with cmd or alias at line {}",
-                                        cmd.alias_pos,
-                                        pos
-                                    );
+                            cmd.level = 1;
+                            if let Some((aliases, aliases_pos)) = &cmd.aliases {
+                                for name in aliases {
+                                    if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
+                                        bail!(
+                                            "@alias(line {}) conflicts with cmd or alias at line {}",
+                                            aliases_pos,
+                                            pos
+                                        );
+                                    }
+                                    root_data
+                                        .borrow_mut()
+                                        .cmd_fns
+                                        .insert(name.clone(), *aliases_pos);
                                 }
-                                root_data
-                                    .borrow_mut()
-                                    .cmd_fns
-                                    .insert(name.clone(), cmd.alias_pos);
                             }
                         } else {
                             let mut cmd = root_cmd.subcommands.pop().unwrap();
@@ -247,22 +250,25 @@ impl Command {
                                 parents.iter().map(|v| sanitize_cmd_name(v)).collect();
                             cmd.name = Some(sanitize_cmd_name(child));
                             cmd.fn_name = Some(name.to_string());
+                            cmd.level = parents.len() + 1;
                             match retrive_cmd(&mut root_cmd, &parents) {
                                 Some(parent_cmd) => {
                                     parent_cmd
                                         .subcommand_fns
                                         .insert(child.to_string(), position);
-                                    for name in &cmd.aliases {
-                                        if let Some(pos) = parent_cmd.subcommand_fns.get(name) {
-                                            bail!(
+                                    if let Some((aliases, aliases_pos)) = &cmd.aliases {
+                                        for name in aliases {
+                                            if let Some(pos) = parent_cmd.subcommand_fns.get(name) {
+                                                bail!(
 												"@alias(line {}) conflicts with cmd or alias at line {}",
-												cmd.alias_pos,
+												aliases_pos,
 												pos
 											);
+                                            }
+                                            parent_cmd
+                                                .subcommand_fns
+                                                .insert(name.clone(), *aliases_pos);
                                         }
-                                        parent_cmd
-                                            .subcommand_fns
-                                            .insert(name.clone(), cmd.alias_pos);
                                     }
                                     parent_cmd.subcommands.push(cmd);
                                 }
@@ -426,14 +432,12 @@ impl Command {
 
     pub(crate) fn render_subcommand_describe(&self) -> String {
         let mut output = self.describe_oneline().to_string();
-        if self.aliases.is_empty() {
-            return output;
-        } else {
+        if let Some((aliases, _)) = &self.aliases {
             if !output.is_empty() {
                 output.push(' ')
             }
-            output.push_str(&format!("[aliases: {}]", self.aliases.join(", ")));
-        };
+            output.push_str(&format!("[aliases: {}]", aliases.join(", ")));
+        }
         output
     }
 
@@ -464,8 +468,15 @@ impl Command {
 
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output: Vec<String> = self.name.clone().into_iter().collect();
-        output.extend(self.aliases.to_vec());
+        output.extend(self.list_aliases());
         output
+    }
+
+    pub(crate) fn list_aliases(&self) -> Vec<String> {
+        match &self.aliases {
+            Some((v, _)) => v.clone(),
+            None => vec![],
+        }
     }
 
     pub(crate) fn list_subcommand_names(&self) -> Vec<String> {
@@ -482,7 +493,7 @@ impl Command {
                     return true;
                 }
             }
-            return subcmd.aliases.iter().any(|v| v == name);
+            return subcmd.list_aliases().iter().any(|v| v == name);
         })
     }
 
@@ -505,16 +516,24 @@ impl Command {
         self.env_params.iter().find(|v| v.var_name() == name)
     }
 
-    pub(crate) fn match_version_short_name(&self) -> bool {
-        match self.find_flag_option("-V") {
-            Some(param) => param.var_name() == "version",
-            None => true,
-        }
+    pub(crate) fn match_help(&self, key: &str) -> bool {
+        ["--help", "-help", "-h"]
+            .into_iter()
+            .any(|v| v == key && self.is_flag_option_miss_or_match(v, "help"))
     }
 
-    pub(crate) fn match_help_short_name(&self) -> bool {
-        match self.find_flag_option("-h") {
-            Some(param) => param.var_name() == "help",
+    pub(crate) fn match_version(&self, key: &str) -> bool {
+        if self.version.is_none() && self.level > 0 {
+            return false;
+        }
+        ["--version", "-version", "-V"]
+            .into_iter()
+            .any(|v| v == key && self.is_flag_option_miss_or_match(v, "version"))
+    }
+
+    pub(crate) fn is_flag_option_miss_or_match(&self, key: &str, var_name: &str) -> bool {
+        match self.find_flag_option(key) {
+            Some(param) => param.var_name() == var_name,
             None => true,
         }
     }
@@ -645,7 +664,7 @@ impl Command {
         }
         let hyphens = if single { " -" } else { "--" };
         list.push((
-            if self.match_help_short_name() {
+            if self.is_flag_option_miss_or_match("-h", "help") {
                 format!("-h, {}help", hyphens)
             } else {
                 format!("    {}help", hyphens)
@@ -667,7 +686,7 @@ impl Command {
         }
         let hyphens = if single { " -" } else { "--" };
         list.push((
-            if self.match_version_short_name() {
+            if self.is_flag_option_miss_or_match("-V", "version") {
                 format!("-V, {}version", hyphens)
             } else {
                 format!("    {}version", hyphens)
