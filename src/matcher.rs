@@ -9,7 +9,7 @@ use crate::{
     argc_value::{sanitize_arg_name, ArgcValue},
     command::{Command, SymbolParam},
     compgen::CompColor,
-    param::{ChoiceData, FlagOptionParam, Param, ParamData, PositionalParam},
+    param::{ChoiceValue, FlagOptionParam, Param, ParamData, PositionalParam},
     utils::run_param_fns,
     Shell, VARIABLE_PREFIX,
 };
@@ -654,7 +654,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 if let Some(param) = cmd.flag_option_params.iter().find(|v| v.var_name() == name) {
                     let values_list: Vec<&[&str]> =
                         indexes.iter().map(|v| args[*v].1.as_slice()).collect();
-                    if !param.multi_occurs() && values_list.len() > 1 {
+                    if !param.multiple_occurs() && values_list.len() > 1 {
                         return Some(MatchError::NotMultipleArgument(level, param.render_name()));
                     }
                     for values in values_list.iter() {
@@ -764,12 +764,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut param_index = 0;
         while param_index < params_len && arg_index < args_len {
             let param = &cmd.positional_params[param_index];
-            if param.multiple() {
+            if param.multiple_values() {
                 let dashes_at = self.dashes.unwrap_or_default();
                 let takes = if param_index == 0
                     && dashes_at > 0
                     && params_len == 2
-                    && cmd.positional_params[1].multiple()
+                    && cmd.positional_params[1].multiple_values()
                 {
                     dashes_at
                 } else {
@@ -956,7 +956,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             if !last.is_empty() && param.is_match(last) {
                 exist = false;
             }
-            if !exist || param.multi_occurs() {
+            if !exist || param.multiple_occurs() {
                 let describe = param.describe_oneline();
                 let kind = if param.is_flag() {
                     CompColor::of_flag()
@@ -1083,7 +1083,7 @@ fn match_flag_option<'a, 'b>(
         }
         flag_option_args.push((arg, value_args, Some(param.var_name())));
     } else {
-        let mut values_len = param.arg_value_names.len();
+        let mut values_len = param.notations.len();
         if param.unlimited_args() {
             values_len = usize::MAX / 2;
         }
@@ -1239,15 +1239,15 @@ fn comp_symbol(cmd: &Command, ch: char) -> Vec<CompItem> {
 
 fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
     let value_name = param
-        .arg_value_names
+        .notations
         .get(index)
         .map(|v| v.as_str())
-        .unwrap_or_else(|| param.arg_value_names.last().unwrap());
+        .unwrap_or_else(|| param.notations.last().unwrap());
     comp_param(param.describe_oneline(), value_name, &param.data)
 }
 
 fn comp_positional(param: &PositionalParam) -> Vec<CompItem> {
-    comp_param(param.describe_oneline(), &param.arg_value_name, &param.data)
+    comp_param(param.describe_oneline(), &param.notation, &param.data)
 }
 
 fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompItem> {
@@ -1275,7 +1275,7 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
         let value = format!("__argc_value={}", value_name);
         vec![(value, describe.into(), false, CompColor::of_value())]
     };
-    if let Some(ch) = data.multi_char() {
+    if let Some(ch) = data.value_delimiter() {
         output.insert(
             0,
             (
@@ -1290,12 +1290,12 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
 }
 
 fn get_param_choice<'a, 'b: 'a>(
-    choice: &'a Option<ChoiceData>,
+    choice: &'a Option<ChoiceValue>,
     choices_fn_values: &'a HashMap<&str, Vec<String>>,
 ) -> Option<&'a Vec<String>> {
     match choice {
-        Some(ChoiceData::Values(v)) => Some(v),
-        Some(ChoiceData::Fn(choice_fn, validate)) => {
+        Some(ChoiceValue::Values(v)) => Some(v),
+        Some(ChoiceValue::Fn(choice_fn, validate)) => {
             if *validate {
                 choices_fn_values.get(choice_fn.as_str())
             } else {

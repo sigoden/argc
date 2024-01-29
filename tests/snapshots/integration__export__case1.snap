@@ -3,7 +3,7 @@ source: tests/export.rs
 expression: output
 ---
 {
-  "name": null,
+  "name": "",
   "describe": "",
   "author": null,
   "version": null,
@@ -25,19 +25,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oa",
-          "value_names": [
+          "notations": [
             "OA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--ob",
@@ -45,19 +44,18 @@ expression: output
           "describe": "short",
           "flag": false,
           "var_name": "ob",
-          "value_names": [
+          "notations": [
             "OB"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-c",
@@ -65,19 +63,18 @@ expression: output
           "describe": "short only",
           "flag": false,
           "var_name": "c",
-          "value_names": [
+          "notations": [
             "C"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oc",
@@ -85,19 +82,18 @@ expression: output
           "describe": "required",
           "flag": false,
           "var_name": "oc",
-          "value_names": [
+          "notations": [
             "OC"
           ],
           "required": true,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--od",
@@ -105,19 +101,18 @@ expression: output
           "describe": "multi-occurs",
           "flag": false,
           "var_name": "od",
-          "value_names": [
+          "notations": [
             "OD"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oe",
@@ -125,19 +120,18 @@ expression: output
           "describe": "required + multi-occurs",
           "flag": false,
           "var_name": "oe",
-          "value_names": [
+          "notations": [
             "OE"
           ],
           "required": true,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--ona",
@@ -145,19 +139,18 @@ expression: output
           "describe": "value notation",
           "flag": false,
           "var_name": "ona",
-          "value_names": [
+          "notations": [
             "PATH"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--onb",
@@ -165,20 +158,19 @@ expression: output
           "describe": "two-args value notations",
           "flag": false,
           "var_name": "onb",
-          "value_names": [
+          "notations": [
             "FILE",
             "FILE"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--onc",
@@ -186,20 +178,19 @@ expression: output
           "describe": "unlimited-args value notations",
           "flag": false,
           "var_name": "onc",
-          "value_names": [
+          "notations": [
             "CMD",
             "FILE+"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oda",
@@ -207,19 +198,21 @@ expression: output
           "describe": "default",
           "flag": false,
           "var_name": "oda",
-          "value_names": [
+          "notations": [
             "ODA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": "a",
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": {
+            "type": "Value",
+            "value": "a"
+          },
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--odb",
@@ -227,19 +220,21 @@ expression: output
           "describe": "default from fn",
           "flag": false,
           "var_name": "odb",
-          "value_names": [
+          "notations": [
             "ODB"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": "_default_fn",
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": {
+            "type": "Fn",
+            "value": "_default_fn"
+          },
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oca",
@@ -247,22 +242,24 @@ expression: output
           "describe": "choice",
           "flag": false,
           "var_name": "oca",
-          "value_names": [
+          "notations": [
             "OCA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": [
-            "a",
-            "b"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--ocb",
@@ -270,22 +267,27 @@ expression: output
           "describe": "choice + default",
           "flag": false,
           "var_name": "ocb",
-          "value_names": [
+          "notations": [
             "OCB"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": "a",
-          "default_fn": null,
-          "choice_values": [
-            "a",
-            "b"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": {
+            "type": "Value",
+            "value": "a"
+          },
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--occ",
@@ -293,22 +295,24 @@ expression: output
           "describe": "multi-occurs + choice",
           "flag": false,
           "var_name": "occ",
-          "value_names": [
+          "notations": [
             "OCC"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": [
-            "a",
-            "b"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--ocd",
@@ -316,22 +320,24 @@ expression: output
           "describe": "required + multi-occurs + choice",
           "flag": false,
           "var_name": "ocd",
-          "value_names": [
+          "notations": [
             "OCD"
           ],
           "required": true,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": [
-            "a",
-            "b"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--ofa",
@@ -339,19 +345,24 @@ expression: output
           "describe": "choice from fn",
           "flag": false,
           "var_name": "ofa",
-          "value_names": [
+          "notations": [
             "OFA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--ofb",
@@ -359,19 +370,24 @@ expression: output
           "describe": "choice from fn + no validation",
           "flag": false,
           "var_name": "ofb",
-          "value_names": [
+          "notations": [
             "OFB"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": false
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              false
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--ofc",
@@ -379,19 +395,24 @@ expression: output
           "describe": "multi-occurs + choice from fn",
           "flag": false,
           "var_name": "ofc",
-          "value_names": [
+          "notations": [
             "OFC"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--ofd",
@@ -399,19 +420,24 @@ expression: output
           "describe": "multi-occurs + choice from fn + comma-separated list",
           "flag": false,
           "var_name": "ofd",
-          "value_names": [
+          "notations": [
             "OFD"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": ",",
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": ",",
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--oxa",
@@ -419,25 +445,24 @@ expression: output
           "describe": "capture all remaining args",
           "flag": false,
           "var_name": "oxa",
-          "value_names": [
+          "notations": [
             "OXA~"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": true,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "flags",
@@ -452,17 +477,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "fa",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--fb",
@@ -470,17 +494,16 @@ expression: output
           "describe": "short",
           "flag": true,
           "var_name": "fb",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-c",
@@ -488,17 +511,16 @@ expression: output
           "describe": "short only",
           "flag": true,
           "var_name": "c",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--fd",
@@ -506,17 +528,16 @@ expression: output
           "describe": "multi-occurs",
           "flag": true,
           "var_name": "fd",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--fe",
@@ -524,23 +545,22 @@ expression: output
           "describe": "short + multi-occurs",
           "flag": true,
           "var_name": "fe",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "options-one-hyphen",
@@ -555,17 +575,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "fa",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-fb",
@@ -573,17 +592,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "fb",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-fd",
@@ -591,17 +609,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "fd",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-oa",
@@ -609,19 +626,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oa",
-          "value_names": [
+          "notations": [
             "OA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-od",
@@ -629,19 +645,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "od",
-          "value_names": [
+          "notations": [
             "OD"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-ona",
@@ -649,19 +664,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "ona",
-          "value_names": [
+          "notations": [
             "PATH"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-oca",
@@ -669,22 +683,24 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oca",
-          "value_names": [
+          "notations": [
             "OCA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": [
-            "a",
-            "b"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "-ofa",
@@ -692,25 +708,30 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "ofa",
-          "value_names": [
+          "notations": [
             "OFA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "options-notation-modifier",
@@ -725,19 +746,18 @@ expression: output
           "describe": "multi values, zero or more",
           "flag": false,
           "var_name": "oa",
-          "value_names": [
+          "notations": [
             "VALUE*"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--ob",
@@ -745,19 +765,18 @@ expression: output
           "describe": "multi values, one or more",
           "flag": false,
           "var_name": "ob",
-          "value_names": [
+          "notations": [
             "VALUE+"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oc",
@@ -765,25 +784,24 @@ expression: output
           "describe": "zero or one",
           "flag": false,
           "var_name": "oc",
-          "value_names": [
+          "notations": [
             "VALUE?"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "options-plus",
@@ -798,19 +816,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "plus_oa",
-          "value_names": [
+          "notations": [
             "OA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+ob",
@@ -818,19 +835,18 @@ expression: output
           "describe": "short",
           "flag": false,
           "var_name": "plus_ob",
-          "value_names": [
+          "notations": [
             "OB"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+c",
@@ -838,19 +854,18 @@ expression: output
           "describe": "short only",
           "flag": false,
           "var_name": "plus_c",
-          "value_names": [
+          "notations": [
             "C"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+oc",
@@ -858,19 +873,18 @@ expression: output
           "describe": "required",
           "flag": false,
           "var_name": "plus_oc",
-          "value_names": [
+          "notations": [
             "OC"
           ],
           "required": true,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+od",
@@ -878,19 +892,18 @@ expression: output
           "describe": "multi-occurs",
           "flag": false,
           "var_name": "plus_od",
-          "value_names": [
+          "notations": [
             "OD"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+oe",
@@ -898,19 +911,18 @@ expression: output
           "describe": "required + multi-occurs",
           "flag": false,
           "var_name": "plus_oe",
-          "value_names": [
+          "notations": [
             "OE"
           ],
           "required": true,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+ona",
@@ -918,19 +930,18 @@ expression: output
           "describe": "value notation",
           "flag": false,
           "var_name": "plus_ona",
-          "value_names": [
+          "notations": [
             "PATH"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+onb",
@@ -938,20 +949,19 @@ expression: output
           "describe": "two-args value notations",
           "flag": false,
           "var_name": "plus_onb",
-          "value_names": [
+          "notations": [
             "FILE",
             "FILE"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+onc",
@@ -959,20 +969,19 @@ expression: output
           "describe": "unlimited-args value notations",
           "flag": false,
           "var_name": "plus_onc",
-          "value_names": [
+          "notations": [
             "CMD",
             "FILE+"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+oda",
@@ -980,19 +989,21 @@ expression: output
           "describe": "default",
           "flag": false,
           "var_name": "plus_oda",
-          "value_names": [
+          "notations": [
             "ODA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": "a",
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": {
+            "type": "Value",
+            "value": "a"
+          },
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+odb",
@@ -1000,19 +1011,21 @@ expression: output
           "describe": "default from fn",
           "flag": false,
           "var_name": "plus_odb",
-          "value_names": [
+          "notations": [
             "ODB"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": "_default_fn",
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": {
+            "type": "Fn",
+            "value": "_default_fn"
+          },
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+oca",
@@ -1020,22 +1033,24 @@ expression: output
           "describe": "choice",
           "flag": false,
           "var_name": "plus_oca",
-          "value_names": [
+          "notations": [
             "OCA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": [
-            "a",
-            "b"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "+ocb",
@@ -1043,22 +1058,27 @@ expression: output
           "describe": "choice + default",
           "flag": false,
           "var_name": "plus_ocb",
-          "value_names": [
+          "notations": [
             "OCB"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": "a",
-          "default_fn": null,
-          "choice_values": [
-            "a",
-            "b"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": {
+            "type": "Value",
+            "value": "a"
+          },
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "+occ",
@@ -1066,22 +1086,24 @@ expression: output
           "describe": "multi-occurs + choice",
           "flag": false,
           "var_name": "plus_occ",
-          "value_names": [
+          "notations": [
             "OCC"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": [
-            "a",
-            "b"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "+ocd",
@@ -1089,22 +1111,24 @@ expression: output
           "describe": "required + multi-occurs + choice",
           "flag": false,
           "var_name": "plus_ocd",
-          "value_names": [
+          "notations": [
             "OCD"
           ],
           "required": true,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": [
-            "a",
-            "b"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "+ofa",
@@ -1112,19 +1136,24 @@ expression: output
           "describe": "choice from fn",
           "flag": false,
           "var_name": "plus_ofa",
-          "value_names": [
+          "notations": [
             "OFA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "+ofb",
@@ -1132,19 +1161,24 @@ expression: output
           "describe": "choice from fn + no validation",
           "flag": false,
           "var_name": "plus_ofb",
-          "value_names": [
+          "notations": [
             "OFB"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": false
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              false
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "+ofc",
@@ -1152,19 +1186,24 @@ expression: output
           "describe": "multi-occurs + choice from fn",
           "flag": false,
           "var_name": "plus_ofc",
-          "value_names": [
+          "notations": [
             "OFC"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "+ofd",
@@ -1172,19 +1211,24 @@ expression: output
           "describe": "multi-occurs + choice from fn + comma-separated list",
           "flag": false,
           "var_name": "plus_ofd",
-          "value_names": [
+          "notations": [
             "OFD"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": ",",
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": ",",
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "+oxa",
@@ -1192,25 +1236,24 @@ expression: output
           "describe": "capture all remaining args",
           "flag": false,
           "var_name": "plus_oxa",
-          "value_names": [
+          "notations": [
             "OXA~"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": true,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "flags-plus",
@@ -1225,17 +1268,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "plus_fa",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+fb",
@@ -1243,17 +1285,16 @@ expression: output
           "describe": "short",
           "flag": true,
           "var_name": "plus_fb",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+c",
@@ -1261,17 +1302,16 @@ expression: output
           "describe": "short only",
           "flag": true,
           "var_name": "plus_c",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+fd",
@@ -1279,17 +1319,16 @@ expression: output
           "describe": "multi-occurs",
           "flag": true,
           "var_name": "plus_fd",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+fe",
@@ -1297,23 +1336,22 @@ expression: output
           "describe": "short + multi-occurs",
           "flag": true,
           "var_name": "plus_fe",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "options-mixed",
@@ -1328,19 +1366,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "a",
-          "value_names": [
+          "notations": [
             "A"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "+b",
@@ -1348,19 +1385,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "plus_b",
-          "value_names": [
+          "notations": [
             "B"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--c",
@@ -1368,25 +1404,24 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "c",
-          "value_names": [
+          "notations": [
             "C"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "options-prefixed",
@@ -1401,19 +1436,24 @@ expression: output
           "describe": "prefixied + multi-occurs + choice from fn",
           "flag": false,
           "var_name": "X",
-          "value_names": [
+          "notations": [
             "X"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": true,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "+X",
@@ -1421,25 +1461,30 @@ expression: output
           "describe": "prefixied + multi-occurs + choice from fn",
           "flag": false,
           "var_name": "plus_X",
-          "value_names": [
+          "notations": [
             "X"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": true,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "test1",
@@ -1454,17 +1499,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "a",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--fa",
@@ -1472,17 +1516,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "fa",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--fb",
@@ -1490,17 +1533,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "fb",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-sa",
@@ -1508,17 +1550,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "sa",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-sb",
@@ -1526,17 +1567,16 @@ expression: output
           "describe": "",
           "flag": true,
           "var_name": "sb",
-          "value_names": [],
+          "notations": [],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "-e",
@@ -1544,19 +1584,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "e",
-          "value_names": [
+          "notations": [
             "E"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oa",
@@ -1564,19 +1603,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oa",
-          "value_names": [
+          "notations": [
             "OA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--ob",
@@ -1584,19 +1622,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "ob",
-          "value_names": [
+          "notations": [
             "OB"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oc",
@@ -1604,19 +1641,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oc",
-          "value_names": [
+          "notations": [
             "DIR"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--od",
@@ -1624,20 +1660,19 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "od",
-          "value_names": [
+          "notations": [
             "FILE",
             "FILE"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oe",
@@ -1645,19 +1680,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oe",
-          "value_names": [
+          "notations": [
             "OE"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": ",",
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": ",",
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--ca",
@@ -1665,23 +1699,25 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "ca",
-          "value_names": [
+          "notations": [
             "CA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": [
-            "x",
-            "y",
-            "z"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": {
+            "type": "Values",
+            "data": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--cc",
@@ -1689,19 +1725,24 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "cc",
-          "value_names": [
+          "notations": [
             "CC"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--cd",
@@ -1709,19 +1750,24 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "cd",
-          "value_names": [
+          "notations": [
             "CD"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": false
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              false
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--ce",
@@ -1729,19 +1775,24 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "ce",
-          "value_names": [
+          "notations": [
             "CE"
           ],
           "required": false,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "-soa",
@@ -1749,25 +1800,24 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "soa",
-          "value_names": [
+          "notations": [
             "SOA"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "test2",
@@ -1782,19 +1832,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oa",
-          "value_names": [
+          "notations": [
             "OA"
           ],
           "required": true,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--ob",
@@ -1802,19 +1851,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "ob",
-          "value_names": [
+          "notations": [
             "OB"
           ],
           "required": true,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oc",
@@ -1822,19 +1870,18 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oc",
-          "value_names": [
+          "notations": [
             "OC"
           ],
           "required": true,
-          "multi_occurs": true,
-          "multi_char": ",",
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": ",",
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": null,
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--oca",
@@ -1842,19 +1889,24 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oca",
-          "value_names": [
+          "notations": [
             "OCA"
           ],
           "required": true,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--ocb",
@@ -1862,19 +1914,24 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "ocb",
-          "value_names": [
+          "notations": [
             "OCB"
           ],
           "required": true,
-          "multi_occurs": true,
-          "multi_char": null,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         },
         {
           "long_name": "--occ",
@@ -1882,25 +1939,30 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "occ",
-          "value_names": [
+          "notations": [
             "OCC"
           ],
           "required": true,
-          "multi_occurs": true,
-          "multi_char": ",",
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "value_delimiter": ",",
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": "_choice_fn",
-          "choice_fn_validate": true
+          "default": null,
+          "choice": {
+            "type": "Fn",
+            "data": [
+              "_choice_fn",
+              true
+            ]
+          },
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     },
     {
       "name": "test3",
@@ -1915,19 +1977,21 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "oe",
-          "value_names": [
+          "notations": [
             "OE"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": "val",
-          "default_fn": null,
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": {
+            "type": "Value",
+            "value": "val"
+          },
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--of",
@@ -1935,19 +1999,21 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "of",
-          "value_names": [
+          "notations": [
             "OF"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": null,
-          "default_fn": "_default_fn",
-          "choice_values": null,
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": {
+            "type": "Fn",
+            "value": "_default_fn"
+          },
+          "choice": null,
+          "inherit": false
         },
         {
           "long_name": "--cb",
@@ -1955,34 +2021,41 @@ expression: output
           "describe": "",
           "flag": false,
           "var_name": "cb",
-          "value_names": [
+          "notations": [
             "CB"
           ],
           "required": false,
-          "multi_occurs": false,
-          "multi_char": null,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
-          "default_value": "x",
-          "default_fn": null,
-          "choice_values": [
-            "x",
-            "y",
-            "z"
-          ],
-          "choice_fn": null,
-          "choice_fn_validate": null
+          "default": {
+            "type": "Value",
+            "value": "x"
+          },
+          "choice": {
+            "type": "Values",
+            "data": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "inherit": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "root": null
+      "global": null
     }
   ],
-  "root": {
+  "global": {
     "dotenv": null,
-    "before_hook": false,
-    "after_hook": false
+    "hooks": [
+      false,
+      false
+    ]
   }
 }

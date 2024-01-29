@@ -6,14 +6,16 @@ use self::root_data::RootData;
 
 use crate::argc_value::{ArgcValue, AFTER_HOOK, BEFORE_HOOK};
 use crate::matcher::Matcher;
-use crate::param::{EnvParam, FlagOptionParam, Param, PositionalParam};
+use crate::param::{
+    EnvParam, EnvValue, FlagOptionParam, FlagOptionValue, Param, PositionalParam, PositionalValue,
+};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::utils::INTERNAL_SYMBOL;
 use crate::Result;
 
 use anyhow::{anyhow, bail};
 use indexmap::IndexMap;
-use serde_json::json;
+use serde::Serialize;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -82,20 +84,9 @@ impl Command {
         Ok(matcher.to_arg_values())
     }
 
-    pub(crate) fn to_json(&self) -> serde_json::Value {
-        let aliases = self.list_aliases();
-        let flag_option_params: Vec<serde_json::Value> = self
-            .flag_option_params
-            .iter()
-            .map(|v| v.to_json())
-            .collect();
-        let positional_params: Vec<serde_json::Value> =
-            self.positional_params.iter().map(|v| v.to_json()).collect();
-        let env_params: Vec<serde_json::Value> =
-            self.env_params.iter().map(|v| v.to_json()).collect();
-        let subcommands: Vec<serde_json::Value> =
-            self.subcommands.iter().map(|v| v.to_json()).collect();
-        let root = if self.level == 0 {
+    pub(crate) fn export(&self) -> CommandValue {
+        let mut global = None;
+        if self.level == 0 {
             let dotenv = self.get_metadata("dotenv").map(|v| {
                 if v.is_empty() {
                     ".env".to_string()
@@ -103,28 +94,21 @@ impl Command {
                     v.to_string()
                 }
             });
-            let (before_hook, after_hook) = self.exist_hooks();
-            let root = json!({
-                "dotenv": dotenv,
-                "before_hook": before_hook,
-                "after_hook": after_hook,
-            });
-            Some(root)
-        } else {
-            None
-        };
-        serde_json::json!({
-            "name": self.name,
-            "describe": self.describe,
-            "author": self.author,
-            "version": self.version,
-            "aliases": aliases,
-            "flag_options": flag_option_params,
-            "positionals": positional_params,
-            "envs": env_params,
-            "subcommands": subcommands,
-            "root": root,
-        })
+            let hooks = self.exist_hooks();
+            global = Some(GlobalValue { dotenv, hooks })
+        }
+        CommandValue {
+            name: self.name.clone().unwrap_or_default(),
+            describe: self.describe.clone(),
+            author: self.author.clone(),
+            version: self.version.clone(),
+            aliases: self.list_aliases().clone(),
+            flag_options: self.flag_option_params.iter().map(|v| v.export()).collect(),
+            positionals: self.positional_params.iter().map(|v| v.export()).collect(),
+            envs: self.env_params.iter().map(|v| v.export()).collect(),
+            subcommands: self.subcommands.iter().map(|v| v.export()).collect(),
+            global,
+        }
     }
 
     pub(crate) fn new_from_events(events: &[Event]) -> Result<Self> {
@@ -697,6 +681,26 @@ impl Command {
             },
         ));
     }
+}
+
+#[derive(Debug, Serialize)]
+pub struct CommandValue {
+    name: String,
+    describe: String,
+    author: Option<String>,
+    version: Option<String>,
+    aliases: Vec<String>,
+    flag_options: Vec<FlagOptionValue>,
+    positionals: Vec<PositionalValue>,
+    envs: Vec<EnvValue>,
+    subcommands: Vec<CommandValue>,
+    global: Option<GlobalValue>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GlobalValue {
+    dotenv: Option<String>,
+    hooks: (bool, bool),
 }
 
 pub(crate) type SymbolParam = (String, Option<String>);

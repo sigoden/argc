@@ -8,7 +8,9 @@ pub mod utils;
 
 use anyhow::Result;
 pub use argc_value::{ArgcValue, VARIABLE_PREFIX};
+pub use command::{CommandValue, GlobalValue};
 pub use compgen::{compgen, Shell};
+pub use param::{ChoiceValue, DefaultValue, EnvValue, FlagOptionValue, PositionalValue};
 
 pub fn eval(
     script_content: &str,
@@ -20,7 +22,7 @@ pub fn eval(
     cmd.eval(args, script_path, term_width)
 }
 
-pub fn export(source: &str) -> Result<serde_json::Value> {
+pub fn export(source: &str) -> Result<CommandValue> {
     let cmd = command::Command::new(source)?;
-    Ok(cmd.to_json())
+    Ok(cmd.export())
 }
