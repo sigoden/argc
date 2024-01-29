@@ -1,5 +1,5 @@
 use crate::param::{
-    ChoiceData, DefaultData, EnvParam, FlagOptionParam, Modifier, ParamData, PositionalParam,
+    ChoiceData, DefaultData, EnvParam, FlagOptionParam, Modifier, Param, ParamData, PositionalParam,
 };
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
@@ -183,7 +183,7 @@ fn parse_tag_meta(input: &str) -> nom::IResult<&str, Option<EventData>> {
 }
 
 fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
-    let check = peek(alt((tag("option"), tag("flag"), tag("arg"), tag("env"))));
+    let check = peek(alt((tag("option"), tag("flag"), tag("env"), tag("arg"))));
     let arg = alt((
         map(
             preceded(pair(tag("flag"), space1), parse_flag_param),
@@ -195,7 +195,16 @@ fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
         ),
         map(
             preceded(pair(tag("env"), space1), parse_env_param),
-            |param| Some(EventData::Env(param)),
+            |param| {
+                if matches!(
+                    param.data().modifer,
+                    Modifier::Optional | Modifier::Required
+                ) {
+                    Some(EventData::Env(param))
+                } else {
+                    None
+                }
+            },
         ),
         map(
             preceded(pair(tag("arg"), space1), parse_positional_param),

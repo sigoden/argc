@@ -13,24 +13,10 @@ use crate::Result;
 
 use anyhow::{anyhow, bail};
 use indexmap::IndexMap;
+use serde_json::json;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-
-pub fn eval(
-    script_content: &str,
-    args: &[String],
-    script_path: Option<&str>,
-    term_width: Option<usize>,
-) -> Result<Vec<ArgcValue>> {
-    let mut cmd = Command::new(script_content)?;
-    cmd.eval(args, script_path, term_width)
-}
-
-pub fn export(source: &str) -> Result<serde_json::Value> {
-    let cmd = Command::new(source)?;
-    Ok(cmd.to_json())
-}
 
 #[derive(Debug, Default)]
 pub(crate) struct Command {
@@ -97,8 +83,7 @@ impl Command {
     }
 
     pub(crate) fn to_json(&self) -> serde_json::Value {
-        let subcommands: Vec<serde_json::Value> =
-            self.subcommands.iter().map(|v| v.to_json()).collect();
+        let aliases = self.list_aliases();
         let flag_option_params: Vec<serde_json::Value> = self
             .flag_option_params
             .iter()
@@ -106,22 +91,39 @@ impl Command {
             .collect();
         let positional_params: Vec<serde_json::Value> =
             self.positional_params.iter().map(|v| v.to_json()).collect();
-        let metadata: Vec<Vec<&String>> =
-            self.metadata.iter().map(|(k, v, _)| vec![k, v]).collect();
-        let aliases = self.list_aliases();
         let env_params: Vec<serde_json::Value> =
             self.env_params.iter().map(|v| v.to_json()).collect();
+        let subcommands: Vec<serde_json::Value> =
+            self.subcommands.iter().map(|v| v.to_json()).collect();
+        let root = if self.level == 0 {
+            let dotenv = self.get_metadata("dotenv").map(|v| {
+                if v.is_empty() {
+                    ".env".to_string()
+                } else {
+                    v.to_string()
+                }
+            });
+            let (before_hook, after_hook) = self.exist_hooks();
+            let root = json!({
+                "dotenv": dotenv,
+                "before_hook": before_hook,
+                "after_hook": after_hook,
+            });
+            Some(root)
+        } else {
+            None
+        };
         serde_json::json!({
-            "describe": self.describe,
             "name": self.name,
+            "describe": self.describe,
             "author": self.author,
             "version": self.version,
-            "metadata": metadata,
-            "options": flag_option_params,
-            "positionals": positional_params,
             "aliases": aliases,
-            "subcommands": subcommands,
+            "flag_options": flag_option_params,
+            "positionals": positional_params,
             "envs": env_params,
+            "subcommands": subcommands,
+            "root": root,
         })
     }
 
@@ -418,9 +420,9 @@ impl Command {
         }
         let mut list = vec![];
         let mut value_size = 0;
-        for cmd in self.subcommands.iter() {
-            let value = cmd.name.clone().unwrap_or_default();
-            let describe = cmd.render_subcommand_describe();
+        for subcmd in self.subcommands.iter() {
+            let value = subcmd.name.clone().unwrap_or_default();
+            let describe = subcmd.render_subcommand_describe();
             value_size = value_size.max(value.len());
             list.push((value, describe));
         }
@@ -503,8 +505,8 @@ impl Command {
 
     pub(crate) fn find_prefixed_option(&self, name: &str) -> Option<(&FlagOptionParam, String)> {
         for param in self.flag_option_params.iter() {
-            if let Some(prefix) = param.prefixed() {
-                if name.starts_with(&prefix) {
+            if param.prefixed() {
+                if let Some(prefix) = param.list_names().into_iter().find(|v| name.starts_with(v)) {
                     return Some((param, prefix));
                 }
             }
@@ -564,14 +566,11 @@ impl Command {
         }
     }
 
-    pub(crate) fn exist_hooks(&self) -> Option<(bool, bool)> {
+    pub(crate) fn exist_hooks(&self) -> (bool, bool) {
         let fns = &self.root.borrow().fns;
         let before_hook = fns.contains_key(BEFORE_HOOK);
         let after_hook = fns.contains_key(AFTER_HOOK);
-        if !before_hook && !after_hook {
-            return None;
-        }
-        Some((before_hook, after_hook))
+        (before_hook, after_hook)
     }
 
     pub(crate) fn delegated(&self) -> bool {

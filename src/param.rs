@@ -15,50 +15,46 @@ pub(crate) trait Param {
     fn to_json(&self) -> serde_json::Value;
     #[allow(unused)]
     fn render_source(&self) -> String;
-
-    fn required(&self) -> bool {
-        self.data().required()
-    }
-
-    fn terminated(&self) -> bool {
-        self.data().terminated()
-    }
-
-    fn multi_occurs(&self) -> bool {
-        self.data().multi_occurs()
-    }
-
-    fn multi_char(&self) -> Option<char> {
-        self.data().multi_char()
-    }
-
-    fn choice_fn(&self) -> Option<(&String, &bool)> {
-        self.data().choice_fn()
-    }
-
-    fn default_fn(&self) -> Option<&String> {
-        self.data().default_fn()
-    }
-
     fn describe_oneline(&self) -> &str {
         match self.describe().split_once('\n') {
             Some((v, _)) => v,
             None => self.describe(),
         }
     }
-
     fn render_describe(&self) -> String {
         self.data().render_describe(self.describe())
+    }
+
+    fn required(&self) -> bool {
+        self.data().required()
+    }
+    fn multi_occurs(&self) -> bool {
+        self.data().multi_occurs()
+    }
+    fn multi_char(&self) -> Option<char> {
+        self.data().multi_char()
+    }
+    fn terminated(&self) -> bool {
+        self.data().terminated()
+    }
+    fn prefixed(&self) -> bool {
+        self.data().prefixed()
+    }
+    fn choice_fn(&self) -> Option<(&String, &bool)> {
+        self.data().choice_fn()
+    }
+    fn default_fn(&self) -> Option<&String> {
+        self.data().default_fn()
     }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct FlagOptionParam {
+    pub(crate) data: ParamData,
     pub(crate) describe: String,
     pub(crate) flag: bool,
     pub(crate) short: Option<String>,
     pub(crate) long_prefix: String,
-    pub(crate) data: ParamData,
     pub(crate) var_name: String,
     pub(crate) value_names: Vec<String>,
     pub(crate) arg_value_names: Vec<String>,
@@ -91,18 +87,18 @@ impl Param for FlagOptionParam {
     }
 
     fn to_json(&self) -> serde_json::Value {
-        let option_names = self.list_option_names();
-        json!({
-            "name": self.data.name,
+        let mut output = json!({
+            "long_name": self.render_name(),
+            "short_name": self.short,
             "describe": self.describe,
             "flag": self.flag,
-            "option_names": option_names,
-            "value_names": self.value_names,
-            "modifier": self.data.modifer,
-            "choices": self.data.choice_values(),
-            "default": self.data.default_value(),
-            "inherit": self.inherit,
-        })
+            "var_name": self.var_name(),
+            "value_names": self.arg_value_names,
+        });
+        if let Some(map) = output.as_object_mut() {
+            self.data().merge_json(map);
+        }
+        output
     }
 
     fn render_source(&self) -> String {
@@ -127,28 +123,28 @@ impl Param for FlagOptionParam {
 
 impl FlagOptionParam {
     pub(crate) fn new(
-        param: ParamData,
+        data: ParamData,
         describe: &str,
         flag: bool,
         short: Option<&str>,
         long_prefix: &str,
         value_names: &[&str],
     ) -> Self {
-        let param_name = param.name.clone();
+        let base_name = data.name.clone();
         let var_name = if long_prefix.starts_with('+') {
-            format!("plus_{}", param_name)
+            format!("plus_{}", base_name)
         } else {
-            param_name.clone()
+            base_name.clone()
         };
         let value_names: Vec<String> = value_names.iter().map(|v| v.to_string()).collect();
         let mut arg_value_names = if flag {
             vec![]
         } else if value_names.is_empty() {
-            vec![to_cobol_case(&param_name)]
+            vec![to_cobol_case(&base_name)]
         } else {
             value_names.iter().map(|v| to_cobol_case(v)).collect()
         };
-        if param.terminated() {
+        if data.terminated() {
             let last_arg = arg_value_names.last_mut().unwrap();
             last_arg.push('~')
         }
@@ -157,7 +153,7 @@ impl FlagOptionParam {
             flag,
             short: short.map(|v| v.to_string()),
             long_prefix: long_prefix.to_string(),
-            data: param,
+            data,
             var_name,
             value_names,
             arg_value_names,
@@ -318,25 +314,10 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn is_match(&self, name: &str) -> bool {
-        self.var_name() == name || self.list_option_names().iter().any(|v| v == name)
+        self.var_name() == name || self.list_names().iter().any(|v| v == name)
     }
 
-    pub(crate) fn prefixed(&self) -> Option<String> {
-        if !matches!(
-            self.data.modifer,
-            Modifier::Prefixed | Modifier::MultiPrefixed
-        ) {
-            return None;
-        }
-
-        if let Some(short) = &self.short {
-            return Some(short.clone());
-        }
-
-        Some(self.render_name())
-    }
-
-    pub(crate) fn list_option_names(&self) -> Vec<String> {
+    pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![];
         output.push(self.render_name());
         if let Some(short) = &self.short {
@@ -348,8 +329,8 @@ impl FlagOptionParam {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct PositionalParam {
-    pub(crate) describe: String,
     pub(crate) data: ParamData,
+    pub(crate) describe: String,
     pub(crate) value_name: Option<String>,
     pub(crate) arg_value_name: String,
 }
@@ -376,13 +357,14 @@ impl Param for PositionalParam {
     }
 
     fn to_json(&self) -> serde_json::Value {
-        json!({
+        let mut output = json!({
             "name": self.var_name(),
             "describe": self.describe,
-            "modifier": self.data.modifer,
-            "choices": self.data.choice_values(),
-            "default": self.data.default_value(),
-        })
+        });
+        if let Some(map) = output.as_object_mut() {
+            self.data().merge_json(map);
+        }
+        output
     }
 
     fn render_source(&self) -> String {
@@ -399,11 +381,11 @@ impl Param for PositionalParam {
 }
 
 impl PositionalParam {
-    pub(crate) fn new(param: ParamData, describe: &str, value_name: Option<&str>) -> Self {
-        let name = param.name.clone();
+    pub(crate) fn new(data: ParamData, describe: &str, value_name: Option<&str>) -> Self {
+        let name = data.name.clone();
         PositionalParam {
+            data,
             describe: describe.to_string(),
-            data: param,
             value_name: value_name.map(|v| v.to_string()),
             arg_value_name: value_name
                 .or(Some(&name))
@@ -457,8 +439,8 @@ impl PositionalParam {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct EnvParam {
-    pub(crate) describe: String,
     pub(crate) data: ParamData,
+    pub(crate) describe: String,
     pub(crate) inherit: bool,
 }
 
@@ -484,13 +466,14 @@ impl Param for EnvParam {
     }
 
     fn to_json(&self) -> serde_json::Value {
-        json!({
+        let mut output = json!({
             "name": self.var_name(),
             "describe": self.describe,
-            "modifier": self.data.modifer,
-            "choices": self.data.choice_values(),
-            "default": self.data.default_value(),
-        })
+        });
+        if let Some(map) = output.as_object_mut() {
+            self.data().merge_json(map);
+        }
+        output
     }
 
     fn render_source(&self) -> String {
@@ -504,10 +487,10 @@ impl Param for EnvParam {
 }
 
 impl EnvParam {
-    pub(crate) fn new(param: ParamData, describe: &str) -> Self {
+    pub(crate) fn new(data: ParamData, describe: &str) -> Self {
         Self {
             describe: describe.to_string(),
-            data: param,
+            data,
             inherit: false,
         }
     }
@@ -546,12 +529,12 @@ impl ParamData {
         }
     }
 
-    pub(crate) fn multi_occurs(&self) -> bool {
-        self.modifer.multi_occurs()
-    }
-
     pub(crate) fn required(&self) -> bool {
         self.modifer.required() && self.default.is_none()
+    }
+
+    pub(crate) fn multi_occurs(&self) -> bool {
+        self.modifer.multi_occurs()
     }
 
     pub(crate) fn multi_char(&self) -> Option<char> {
@@ -563,6 +546,10 @@ impl ParamData {
 
     pub(crate) fn terminated(&self) -> bool {
         matches!(self.modifer, Modifier::Terminated)
+    }
+
+    pub(crate) fn prefixed(&self) -> bool {
+        matches!(self.modifer, Modifier::Prefixed | Modifier::MultiPrefixed)
     }
 
     pub(crate) fn choice_fn(&self) -> Option<(&String, &bool)> {
@@ -639,6 +626,28 @@ impl ParamData {
             output.push_str(&format!("[possible values: {}]", values.join(", ")));
         }
         output
+    }
+
+    pub(crate) fn merge_json(&self, map: &mut serde_json::Map<String, serde_json::Value>) {
+        map.insert("required".into(), self.required().into());
+        map.insert("multi_occurs".into(), self.multi_occurs().into());
+        map.insert(
+            "multi_char".into(),
+            self.multi_char().map(|v| v.to_string()).into(),
+        );
+        map.insert("terminated".into(), self.terminated().into());
+        map.insert("prefixed".into(), self.prefixed().into());
+        map.insert("default_value".into(), self.default_value().cloned().into());
+        map.insert("default_fn".into(), self.default_fn().cloned().into());
+        map.insert("choice_values".into(), self.choice_values().cloned().into());
+        map.insert(
+            "choice_fn".into(),
+            self.choice_fn().map(|v| v.0.to_string()).into(),
+        );
+        map.insert(
+            "choice_fn_validate".into(),
+            self.choice_fn().map(|v| *v.1).into(),
+        );
     }
 
     fn render_choice_values(values: &[String]) -> String {

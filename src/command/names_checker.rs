@@ -18,7 +18,7 @@ impl NamesChecker {
         pos: Position,
     ) -> Result<()> {
         let tag_name = param.tag_name();
-        let names = param.list_option_names();
+        let names = param.list_names();
         for name in names.iter() {
             if let Some((exist_pos, _)) = self.flag_options.get(name) {
                 bail!("{}", Self::conflict_error(tag_name, pos, name, *exist_pos));

@@ -488,8 +488,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
 
-        if let Some((before, after)) = last_cmd.exist_hooks() {
-            output.push(ArgcValue::Hook((before, after)));
+        let (before_hook, after_hook) = last_cmd.exist_hooks();
+        if before_hook || after_hook {
+            output.push(ArgcValue::Hook((before_hook, after_hook)));
         }
 
         for (arg, (name, _)) in self.symbol_args.iter() {
@@ -962,8 +963,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 } else {
                     CompColor::of_option()
                 };
-                for v in param.list_option_names() {
-                    output.push((v, describe.to_string(), param.prefixed().is_some(), kind))
+                for v in param.list_names() {
+                    output.push((v, describe.to_string(), param.prefixed(), kind))
                 }
             }
         }
@@ -1098,8 +1099,8 @@ fn match_flag_option<'a, 'b>(
                         value_args.len().saturating_sub(1),
                     );
                 }
-            } else if let Some(prefix) = param.prefixed() {
-                if arg.starts_with(&prefix) {
+            } else if param.prefixed() {
+                if let Some(prefix) = param.list_names().into_iter().find(|v| arg.starts_with(v)) {
                     *arg_comp = ArgComp::OptionValue(param.var_name().to_string(), 0);
                     *split_last_arg_at = Some(prefix.len());
                 }
