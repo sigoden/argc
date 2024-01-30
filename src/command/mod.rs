@@ -312,13 +312,12 @@ impl Command {
     }
 
     pub(crate) fn flag_option_signs(&self) -> String {
-        let mut signs = HashSet::new();
-        signs.insert('-');
+        let mut signs: HashSet<char> = ['-'].into();
         for param in &self.flag_option_params {
             if let Some(short) = &param.short {
                 signs.extend(short.chars().take(1))
             }
-            signs.extend(param.long_prefix.chars())
+            signs.extend(param.long_prefix.chars().take(1))
         }
         signs.into_iter().collect()
     }
