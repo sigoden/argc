@@ -606,6 +606,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "options",
       "global": null
     },
     {
@@ -745,6 +746,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "flags",
       "global": null
     },
     {
@@ -969,6 +971,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "options-one-hyphen",
       "global": null
     },
     {
@@ -1072,6 +1075,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "options-notation-modifier",
       "global": null
     },
     {
@@ -1625,6 +1629,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "options-plus",
       "global": null
     },
     {
@@ -1764,6 +1769,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "flags-plus",
       "global": null
     },
     {
@@ -1867,6 +1873,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "options-mixed",
       "global": null
     },
     {
@@ -1959,6 +1966,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "options-prefixed",
       "global": null
     },
     {
@@ -2377,6 +2385,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "test1",
       "global": null
     },
     {
@@ -2567,6 +2576,7 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "test2",
       "global": null
     },
     {
@@ -2686,9 +2696,11 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
+      "command_fn": "test3",
       "global": null
     }
   ],
+  "command_fn": null,
   "global": {
     "dotenv": null,
     "hooks": [

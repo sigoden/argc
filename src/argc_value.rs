@@ -13,7 +13,7 @@ pub enum ArgcValue {
     EnvFn(String, String),
     Hook((bool, bool)),
     Dotenv(String),
-    CmdFn(String),
+    CommandFn(String),
     ParamFn(String),
     Error((String, i32)),
 }
@@ -113,7 +113,7 @@ impl ArgcValue {
                         "[ -f {value} ] && set -o allexport && . {value} && set +o allexport"
                     ))
                 }
-                ArgcValue::CmdFn(name) => {
+                ArgcValue::CommandFn(name) => {
                     if positional_args.is_empty() {
                         last = name.to_string();
                     } else {

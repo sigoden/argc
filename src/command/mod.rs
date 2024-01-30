@@ -24,7 +24,8 @@ use std::sync::Arc;
 #[derive(Debug, Default)]
 pub(crate) struct Command {
     pub(crate) name: Option<String>,
-    pub(crate) fn_name: Option<String>,
+    pub(crate) match_fn: Option<String>,
+    pub(crate) command_fn: Option<String>,
     pub(crate) level: usize,
     pub(crate) describe: String,
     pub(crate) flag_option_params: Vec<FlagOptionParam>,
@@ -45,6 +46,7 @@ impl Command {
     pub(crate) fn new(source: &str) -> Result<Self> {
         let events = parse(source)?;
         let mut root = Command::new_from_events(&events)?;
+        root.init_command_fn(vec![]);
         if root.has_metadata("inherit-flag-options") {
             root.inherit_flag_options();
         }
@@ -132,6 +134,7 @@ impl Command {
             positionals: self.positional_params.iter().map(|v| v.export()).collect(),
             envs: self.env_params.iter().map(|v| v.export()).collect(),
             subcommands: self.subcommands.iter().map(|v| v.export()).collect(),
+            command_fn: self.command_fn.clone(),
             global,
         }
     }
@@ -237,7 +240,7 @@ impl Command {
                         } else if parts_len == 1 {
                             let cmd = root_cmd.subcommands.last_mut().unwrap();
                             cmd.name = Some(sanitize_cmd_name(&name));
-                            cmd.fn_name = Some(name.to_string());
+                            cmd.match_fn = Some(name.to_string());
                             cmd.level = 1;
                             if let Some((aliases, aliases_pos)) = &cmd.aliases {
                                 for name in aliases {
@@ -260,7 +263,7 @@ impl Command {
                             let parents: Vec<String> =
                                 parents.iter().map(|v| sanitize_cmd_name(v)).collect();
                             cmd.name = Some(sanitize_cmd_name(child));
-                            cmd.fn_name = Some(name.to_string());
+                            cmd.match_fn = Some(name.to_string());
                             cmd.level = parents.len() + 1;
                             match retrive_cmd(&mut root_cmd, &parents) {
                                 Some(parent_cmd) => {
@@ -552,28 +555,6 @@ impl Command {
         self.flag_option_params.is_empty() && self.subcommands.is_empty()
     }
 
-    pub(crate) fn get_cmd_fn(&self, cmd_paths: &[&str]) -> Option<String> {
-        let main = "main".to_string();
-        if cmd_paths.len() < 2 {
-            if self.root.borrow().fns.contains_key(&main) {
-                Some(main)
-            } else {
-                None
-            }
-        } else if self.subcommands.is_empty() {
-            self.fn_name.clone()
-        } else {
-            let mut parts: Vec<String> = cmd_paths.iter().skip(1).map(|v| v.to_string()).collect();
-            parts.push(main);
-            let name = parts.join("::");
-            if self.root.borrow().fns.contains_key(&name) {
-                Some(name)
-            } else {
-                None
-            }
-        }
-    }
-
     pub(crate) fn exist_hooks(&self) -> (bool, bool) {
         let fns = &self.root.borrow().fns;
         let before_hook = fns.contains_key(BEFORE_HOOK);
@@ -596,10 +577,27 @@ impl Command {
                 .unwrap_or_default()
     }
 
-    pub(crate) fn exist_main_fn(&self, cmd_paths: &[&str]) -> bool {
-        self.get_cmd_fn(cmd_paths)
-            .map(|v| v.ends_with("main"))
-            .unwrap_or_default()
+    fn init_command_fn(&mut self, parents: Vec<String>) {
+        let main = "main";
+        if self.level == 0 {
+            if self.root.borrow().fns.contains_key(main) {
+                self.command_fn = Some(main.to_string())
+            }
+        } else if self.subcommands.is_empty() {
+            self.command_fn = self.match_fn.clone();
+        } else {
+            let command_fn = [parents.as_slice(), [main.to_string()].as_slice()]
+                .concat()
+                .join("::");
+            if self.root.borrow().fns.contains_key(&command_fn) {
+                self.command_fn = Some(command_fn)
+            }
+        }
+        for subcmd in self.subcommands.iter_mut() {
+            let mut parents = parents.clone();
+            parents.push(subcmd.name.clone().unwrap_or_default());
+            subcmd.init_command_fn(parents);
+        }
     }
 
     fn inherit_flag_options(&mut self) {
@@ -724,6 +722,7 @@ pub struct CommandValue {
     pub positionals: Vec<PositionalValue>,
     pub envs: Vec<EnvValue>,
     pub subcommands: Vec<CommandValue>,
+    pub command_fn: Option<String>,
     pub global: Option<GlobalValue>,
 }
 

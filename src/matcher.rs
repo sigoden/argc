@@ -332,15 +332,15 @@ impl<'a, 'b> Matcher<'a, 'b> {
         if let Some(err) = self.validate() {
             return vec![ArgcValue::Error(self.stringify_match_error(&err))];
         }
-        let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
+        let last_cmd = self.cmds[self.cmds.len() - 1].1;
         let mut output = self.to_arg_values_base();
-        if cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
+        if last_cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
             output.push(ArgcValue::ExtraPositionalMultiple(
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
             ));
         }
-        if let Some(cmd_fn) = cmd.get_cmd_fn(&cmd_paths) {
-            output.push(ArgcValue::CmdFn(cmd_fn));
+        if let Some(command_fn) = &last_cmd.command_fn {
+            output.push(ArgcValue::CommandFn(command_fn.clone()));
         }
         output
     }
@@ -538,7 +538,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
     fn validate(&self) -> Option<MatchError> {
         let cmds_len = self.cmds.len();
         let level = cmds_len - 1;
-        let (last_cmd, cmd_paths) = self.get_cmd_and_paths(level);
+        let (last_cmd, _cmd_paths) = self.get_cmd_and_paths(level);
         let last_args = &self.flag_option_args[level];
         for (key, _, name) in last_args {
             match (*key, name) {
@@ -572,7 +572,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
         if !last_cmd.subcommands.is_empty() {
-            if !last_cmd.exist_main_fn(&cmd_paths) {
+            if last_cmd.command_fn.is_none() {
                 if self.positional_args.is_empty() && last_args.is_empty() {
                     return Some(MatchError::DisplayHelp);
                 } else {
