@@ -763,12 +763,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut param_index = 0;
         while param_index < params_len && arg_index < args_len {
             let param = &cmd.positional_params[param_index];
-            if param.multiple_values() {
+            if param.multiple_args() {
                 let dashes_at = self.dashes.unwrap_or_default();
                 let takes = if param_index == 0
                     && dashes_at > 0
                     && params_len == 2
-                    && cmd.positional_params[1].multiple_values()
+                    && cmd.positional_params[1].multiple_args()
                 {
                     dashes_at
                 } else {
@@ -1274,7 +1274,7 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
         let value = format!("__argc_value={}", value_name);
         vec![(value, describe.into(), false, CompColor::of_value())]
     };
-    if let Some(ch) = data.value_delimiter() {
+    if let Some(ch) = data.args_delimiter() {
         output.insert(
             0,
             (

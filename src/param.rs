@@ -10,7 +10,7 @@ pub(crate) trait Param {
     fn describe(&self) -> &str;
     fn var_name(&self) -> &str;
     fn tag_name(&self) -> &str;
-    fn multiple_values(&self) -> bool;
+    fn multiple_args(&self) -> bool;
     fn render_source(&self) -> String;
 
     fn describe_oneline(&self) -> &str {
@@ -29,8 +29,8 @@ pub(crate) trait Param {
     fn multiple_occurs(&self) -> bool {
         self.data().multiple_occurs()
     }
-    fn value_delimiter(&self) -> Option<char> {
-        self.data().value_delimiter()
+    fn args_delimiter(&self) -> Option<char> {
+        self.data().args_delimiter()
     }
     fn terminated(&self) -> bool {
         self.data().terminated()
@@ -83,7 +83,7 @@ impl Param for FlagOptionParam {
         }
     }
 
-    fn multiple_values(&self) -> bool {
+    fn multiple_args(&self) -> bool {
         self.multiple_occurs() || self.unlimited_args() || self.notations.len() > 1
     }
 
@@ -156,9 +156,10 @@ impl FlagOptionParam {
             var_name: self.var_name().to_string(),
             notations: self.notations.clone(),
             required: self.required(),
-            multiple_values: self.multiple_values(),
+            multiple_args: self.multiple_args(),
             multiple_occurs: self.multiple_occurs(),
-            value_delimiter: self.value_delimiter(),
+            args_range: self.args_range(),
+            args_delimiter: self.args_delimiter(),
             terminated: self.terminated(),
             prefixed: self.prefixed(),
             default: self.data().default.clone(),
@@ -179,11 +180,16 @@ impl FlagOptionParam {
         self.terminated()
             || self
                 .notation_modifer()
-                .map(|v| "*+".contains(v))
+                .map(|v| matches!(v, '*' | '+'))
                 .unwrap_or_default()
     }
 
     pub(crate) fn validate_args_len(&self, num: usize) -> bool {
+        let (min, max) = self.args_range();
+        num >= min && num <= max
+    }
+
+    pub(crate) fn args_range(&self) -> (usize, usize) {
         let len = self.notations.len();
         if self.unlimited_args() {
             let min = if self.notation_modifer() == Some('*') {
@@ -191,11 +197,11 @@ impl FlagOptionParam {
             } else {
                 len
             };
-            num >= min
+            (min, 999999)
         } else if self.notation_modifer() == Some('?') {
-            num == len || num == len - 1
+            (len - 1, len)
         } else {
-            num == len
+            (len, len)
         }
     }
 
@@ -291,12 +297,12 @@ impl FlagOptionParam {
                     None => return None,
                 }
             }
-            if self.multiple_values() {
+            if self.multiple_args() {
                 let mut values: Vec<String> = values
                     .iter()
                     .flat_map(|v| v.iter().map(|v| v.to_string()))
                     .collect();
-                if let Some(c) = self.value_delimiter() {
+                if let Some(c) = self.args_delimiter() {
                     values = values
                         .into_iter()
                         .flat_map(|v| {
@@ -342,9 +348,10 @@ pub struct FlagOptionValue {
     pub var_name: String,
     pub notations: Vec<String>,
     pub required: bool,
-    pub multiple_values: bool,
+    pub multiple_args: bool,
     pub multiple_occurs: bool,
-    pub value_delimiter: Option<char>,
+    pub args_range: (usize, usize),
+    pub args_delimiter: Option<char>,
     pub terminated: bool,
     pub prefixed: bool,
     pub default: Option<DefaultValue>,
@@ -377,7 +384,7 @@ impl Param for PositionalParam {
         "@arg"
     }
 
-    fn multiple_values(&self) -> bool {
+    fn multiple_args(&self) -> bool {
         self.multiple_occurs() || self.terminated()
     }
 
@@ -414,9 +421,9 @@ impl PositionalParam {
             var_name: self.var_name().to_string(),
             notation: self.notation.clone(),
             required: self.required(),
-            multiple_values: self.multiple_values(),
+            multiple_args: self.multiple_args(),
             multiple_occurs: self.multiple_occurs(),
-            value_delimiter: self.value_delimiter(),
+            args_delimiter: self.args_delimiter(),
             terminated: self.terminated(),
             prefixed: self.prefixed(),
             default: self.data().default.clone(),
@@ -426,7 +433,7 @@ impl PositionalParam {
 
     pub(crate) fn render_value(&self) -> String {
         let name: &String = &self.notation;
-        match (self.required(), self.multiple_values()) {
+        match (self.required(), self.multiple_args()) {
             (true, true) => format!("<{name}>..."),
             (true, false) => format!("<{name}>"),
             (false, true) => format!("[{name}]..."),
@@ -447,9 +454,9 @@ impl PositionalParam {
                 None => return None,
             }
         }
-        if self.multiple_values() {
+        if self.multiple_args() {
             let mut values: Vec<String> = values.iter().map(|v| v.to_string()).collect();
-            if let Some(c) = self.value_delimiter() {
+            if let Some(c) = self.args_delimiter() {
                 values = values
                     .into_iter()
                     .flat_map(|v| {
@@ -473,9 +480,9 @@ pub struct PositionalValue {
     pub var_name: String,
     pub notation: String,
     pub required: bool,
-    pub multiple_values: bool,
+    pub multiple_args: bool,
     pub multiple_occurs: bool,
-    pub value_delimiter: Option<char>,
+    pub args_delimiter: Option<char>,
     pub terminated: bool,
     pub prefixed: bool,
     pub default: Option<DefaultValue>,
@@ -506,7 +513,7 @@ impl Param for EnvParam {
         "@env"
     }
 
-    fn multiple_values(&self) -> bool {
+    fn multiple_args(&self) -> bool {
         false
     }
 
@@ -592,7 +599,7 @@ impl ParamData {
         self.modifer.multiple_occurs()
     }
 
-    pub(crate) fn value_delimiter(&self) -> Option<char> {
+    pub(crate) fn args_delimiter(&self) -> Option<char> {
         match &self.modifer {
             Modifier::DelimiterRequired(c) | Modifier::DelimiterOptional(c) => Some(*c),
             _ => None,
