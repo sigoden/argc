@@ -68,7 +68,7 @@ pub(crate) enum MatchError {
     InvalidValue(usize, String, String, Vec<String>),
     InvalidEnvValue(usize, String, String, Vec<String>),
     MismatchValues(usize, String),
-    NoMoreValue(usize, String, String),
+    NoFlagValue(usize, String),
 }
 
 impl<'a, 'b> Matcher<'a, 'b> {
@@ -656,14 +656,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     if !param.multiple_occurs() && values_list.len() > 1 {
                         return Some(MatchError::NotMultipleArgument(level, param.render_name()));
                     }
+                    let (min, max) = param.args_range();
                     for values in values_list.iter() {
                         if param.is_flag() && !values.is_empty() {
-                            return Some(MatchError::NoMoreValue(
-                                level,
-                                param.render_name(),
-                                values[0].to_string(),
-                            ));
-                        } else if !param.validate_args_len(values.len()) {
+                            return Some(MatchError::NoFlagValue(level, param.render_name()));
+                        } else if values.len() < min || values.len() > max {
                             return Some(MatchError::MismatchValues(
                                 level,
                                 param.render_name_notations(),
@@ -763,12 +760,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut param_index = 0;
         while param_index < params_len && arg_index < args_len {
             let param = &cmd.positional_params[param_index];
-            if param.multiple_args() {
+            if param.multiple_values() {
                 let dashes_at = self.dashes.unwrap_or_default();
                 let takes = if param_index == 0
                     && dashes_at > 0
                     && params_len == 2
-                    && cmd.positional_params[1].multiple_args()
+                    && cmd.positional_params[1].multiple_values()
                 {
                     dashes_at
                 } else {
@@ -918,12 +915,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
 "###
                 )
             }
-            MatchError::NoMoreValue(level, name, value) => {
+            MatchError::NoFlagValue(level, name) => {
                 exit = 1;
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
                 let usage = cmd.render_usage(&cmd_paths);
                 format!(
-                    r###"error: unexpected value `{value}` for `{name}` found; no more were expected 
+                    r###"error: unexpected value for `{name}` flag
 
 {usage}
 
@@ -1082,17 +1079,14 @@ fn match_flag_option<'a, 'b>(
         }
         flag_option_args.push((arg, value_args, Some(param.var_name())));
     } else {
-        let mut values_len = param.notations.len();
-        if param.unlimited_args() {
-            values_len = usize::MAX / 2;
-        }
+        let values_max = param.args_range().1;
         let args_len = args.len();
-        let value_args = take_value_args(args, *arg_index + 1, values_len, signs);
+        let value_args = take_value_args(args, *arg_index + 1, values_max, signs);
         let arg = &args[*arg_index];
         *arg_index += value_args.len();
         if *arg_index == args_len - 1 {
             if *arg_comp != ArgComp::FlagOrOption {
-                if param.is_option() && value_args.len() <= values_len {
+                if param.is_option() && value_args.len() <= values_max {
                     *arg_comp = ArgComp::OptionValue(
                         param.var_name().to_string(),
                         value_args.len().saturating_sub(1),
