@@ -26,7 +26,7 @@ pub(crate) struct Command {
     pub(crate) name: Option<String>,
     pub(crate) match_fn: Option<String>,
     pub(crate) command_fn: Option<String>,
-    pub(crate) level: usize,
+    pub(crate) paths: Vec<String>,
     pub(crate) describe: String,
     pub(crate) flag_option_params: Vec<FlagOptionParam>,
     pub(crate) positional_params: Vec<PositionalParam>,
@@ -46,7 +46,7 @@ impl Command {
     pub(crate) fn new(source: &str) -> Result<Self> {
         let events = parse(source)?;
         let mut root = Command::new_from_events(&events)?;
-        root.init_command_fn(vec![]);
+        root.inherit(vec![]);
         if root.has_metadata("inherit-flag-options") {
             root.inherit_flag_options();
         }
@@ -88,17 +88,26 @@ impl Command {
     }
 
     pub(crate) fn export(&self) -> CommandValue {
-        let mut global = None;
-        if self.level == 0 {
-            let dotenv = self.get_metadata("dotenv").map(|v| {
-                if v.is_empty() {
+        let mut extra: IndexMap<String, serde_json::Value> = IndexMap::new();
+        if self.paths.is_empty() {
+            if self.get_metadata("combine-shorts").is_some() {
+                extra.insert("combine_shorts".into(), true.into());
+            }
+            if let Some(dotenv) = self.get_metadata("dotenv") {
+                let dotenv = if dotenv.is_empty() {
                     ".env".to_string()
                 } else {
-                    v.to_string()
-                }
-            });
-            let hooks = self.exist_hooks();
-            global = Some(GlobalValue { dotenv, hooks })
+                    dotenv.clone()
+                };
+                extra.insert("dotenv".into(), dotenv.into());
+            }
+            let (before_hook, after_hook) = self.exist_hooks();
+            if before_hook {
+                extra.insert("before_hook".into(), BEFORE_HOOK.into());
+            }
+            if after_hook {
+                extra.insert("after_hook".into(), AFTER_HOOK.into());
+            }
         }
         let flag_options: Vec<FlagOptionValue> = {
             let mut describe = false;
@@ -134,9 +143,9 @@ impl Command {
             positionals: self.positional_params.iter().map(|v| v.export()).collect(),
             envs: self.env_params.iter().map(|v| v.export()).collect(),
             subcommands: self.subcommands.iter().map(|v| v.export()).collect(),
+            paths: self.paths.clone(),
             command_fn: self.command_fn.clone(),
-            flag_option_signs: self.flag_option_signs(),
-            global,
+            extra,
         }
     }
 
@@ -242,7 +251,6 @@ impl Command {
                             let cmd = root_cmd.subcommands.last_mut().unwrap();
                             cmd.name = Some(sanitize_cmd_name(&name));
                             cmd.match_fn = Some(name.to_string());
-                            cmd.level = 1;
                             if let Some((aliases, aliases_pos)) = &cmd.aliases {
                                 for name in aliases {
                                     if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
@@ -265,7 +273,6 @@ impl Command {
                                 parents.iter().map(|v| sanitize_cmd_name(v)).collect();
                             cmd.name = Some(sanitize_cmd_name(child));
                             cmd.match_fn = Some(name.to_string());
-                            cmd.level = parents.len() + 1;
                             match retrive_cmd(&mut root_cmd, &parents) {
                                 Some(parent_cmd) => {
                                     parent_cmd
@@ -564,7 +571,7 @@ impl Command {
     }
 
     pub(crate) fn exist_version(&self) -> bool {
-        self.version.is_some() || self.level == 0
+        self.version.is_some() || self.paths.is_empty()
     }
 
     pub(crate) fn delegated(&self) -> bool {
@@ -578,16 +585,17 @@ impl Command {
                 .unwrap_or_default()
     }
 
-    fn init_command_fn(&mut self, parents: Vec<String>) {
+    fn inherit(&mut self, paths: Vec<String>) {
+        self.paths = paths.clone();
         let main = "main";
-        if self.level == 0 {
+        if paths.is_empty() {
             if self.root.borrow().fns.contains_key(main) {
                 self.command_fn = Some(main.to_string())
             }
         } else if self.subcommands.is_empty() {
             self.command_fn = self.match_fn.clone();
         } else {
-            let command_fn = [parents.as_slice(), [main.to_string()].as_slice()]
+            let command_fn = [paths.as_slice(), [main.to_string()].as_slice()]
                 .concat()
                 .join("::");
             if self.root.borrow().fns.contains_key(&command_fn) {
@@ -595,9 +603,9 @@ impl Command {
             }
         }
         for subcmd in self.subcommands.iter_mut() {
-            let mut parents = parents.clone();
+            let mut parents = paths.clone();
             parents.push(subcmd.name.clone().unwrap_or_default());
-            subcmd.init_command_fn(parents);
+            subcmd.inherit(parents);
         }
     }
 
@@ -723,15 +731,10 @@ pub struct CommandValue {
     pub positionals: Vec<PositionalValue>,
     pub envs: Vec<EnvValue>,
     pub subcommands: Vec<CommandValue>,
+    pub paths: Vec<String>,
     pub command_fn: Option<String>,
-    pub flag_option_signs: String,
-    pub global: Option<GlobalValue>,
-}
-
-#[derive(Debug, Serialize)]
-pub struct GlobalValue {
-    dotenv: Option<String>,
-    hooks: (bool, bool),
+    #[serde(flatten)]
+    pub extra: IndexMap<String, serde_json::Value>,
 }
 
 pub(crate) type SymbolParam = (String, Option<String>);

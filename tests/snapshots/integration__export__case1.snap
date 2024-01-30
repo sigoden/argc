@@ -606,9 +606,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "options",
-      "flag_option_signs": "-",
-      "global": null
+      "paths": [
+        "options"
+      ],
+      "command_fn": "options"
     },
     {
       "name": "flags",
@@ -747,9 +748,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "flags",
-      "flag_option_signs": "-",
-      "global": null
+      "paths": [
+        "flags"
+      ],
+      "command_fn": "flags"
     },
     {
       "name": "options-one-hyphen",
@@ -973,9 +975,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "options-one-hyphen",
-      "flag_option_signs": "-",
-      "global": null
+      "paths": [
+        "options-one-hyphen"
+      ],
+      "command_fn": "options-one-hyphen"
     },
     {
       "name": "options-notation-modifier",
@@ -1078,9 +1081,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "options-notation-modifier",
-      "flag_option_signs": "-",
-      "global": null
+      "paths": [
+        "options-notation-modifier"
+      ],
+      "command_fn": "options-notation-modifier"
     },
     {
       "name": "options-plus",
@@ -1633,9 +1637,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "options-plus",
-      "flag_option_signs": "-+",
-      "global": null
+      "paths": [
+        "options-plus"
+      ],
+      "command_fn": "options-plus"
     },
     {
       "name": "flags-plus",
@@ -1774,9 +1779,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "flags-plus",
-      "flag_option_signs": "-+",
-      "global": null
+      "paths": [
+        "flags-plus"
+      ],
+      "command_fn": "flags-plus"
     },
     {
       "name": "options-mixed",
@@ -1879,9 +1885,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "options-mixed",
-      "flag_option_signs": "-+",
-      "global": null
+      "paths": [
+        "options-mixed"
+      ],
+      "command_fn": "options-mixed"
     },
     {
       "name": "options-prefixed",
@@ -1973,9 +1980,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "options-prefixed",
-      "flag_option_signs": "-+",
-      "global": null
+      "paths": [
+        "options-prefixed"
+      ],
+      "command_fn": "options-prefixed"
     },
     {
       "name": "test1",
@@ -2393,9 +2401,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "test1",
-      "flag_option_signs": "-",
-      "global": null
+      "paths": [
+        "test1"
+      ],
+      "command_fn": "test1"
     },
     {
       "name": "test2",
@@ -2585,9 +2594,10 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "test2",
-      "flag_option_signs": "-",
-      "global": null
+      "paths": [
+        "test2"
+      ],
+      "command_fn": "test2"
     },
     {
       "name": "test3",
@@ -2706,18 +2716,13 @@ expression: output
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "command_fn": "test3",
-      "flag_option_signs": "-",
-      "global": null
+      "paths": [
+        "test3"
+      ],
+      "command_fn": "test3"
     }
   ],
+  "paths": [],
   "command_fn": null,
-  "flag_option_signs": "-",
-  "global": {
-    "dotenv": null,
-    "hooks": [
-      false,
-      false
-    ]
-  }
+  "combine_shorts": true
 }
