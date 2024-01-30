@@ -12,6 +12,7 @@ pub(crate) trait Param {
     fn tag_name(&self) -> &str;
     fn multiple_values(&self) -> bool;
     fn render_source(&self) -> String;
+
     fn describe_oneline(&self) -> &str {
         match self.describe().split_once('\n') {
             Some((v, _)) => v,
@@ -40,7 +41,7 @@ pub(crate) trait Param {
     fn choice_fn(&self) -> Option<(&String, &bool)> {
         self.data().choice_fn()
     }
-    fn default_vlaue(&self) -> Option<&String> {
+    fn default_value(&self) -> Option<&String> {
         self.data().default_value()
     }
     fn default_fn(&self) -> Option<&String> {
@@ -593,7 +594,7 @@ impl ParamData {
 
     pub(crate) fn value_delimiter(&self) -> Option<char> {
         match &self.modifer {
-            Modifier::DelimieterRequired(c) | Modifier::DelimiterOptional(c) => Some(*c),
+            Modifier::DelimiterRequired(c) | Modifier::DelimiterOptional(c) => Some(*c),
             _ => None,
         }
     }
@@ -714,7 +715,7 @@ pub(crate) enum Modifier {
     MultipleOptional,
     MultipleRequired,
     DelimiterOptional(char),
-    DelimieterRequired(char),
+    DelimiterRequired(char),
     Terminated,
     Prefixed,
     MultiPrefixed,
@@ -728,7 +729,7 @@ impl Modifier {
             Self::MultipleOptional => true,
             Self::MultipleRequired => true,
             Self::DelimiterOptional(_) => true,
-            Self::DelimieterRequired(_) => true,
+            Self::DelimiterRequired(_) => true,
             Self::Terminated => false,
             Self::Prefixed => false,
             Self::MultiPrefixed => true,
@@ -742,7 +743,7 @@ impl Modifier {
             Self::MultipleOptional => false,
             Self::MultipleRequired => true,
             Self::DelimiterOptional(_) => false,
-            Self::DelimieterRequired(_) => true,
+            Self::DelimiterRequired(_) => true,
             Self::Terminated => false,
             Self::Prefixed => false,
             Self::MultiPrefixed => false,
@@ -756,7 +757,7 @@ impl Modifier {
             Self::MultipleOptional => "*".into(),
             Self::MultipleRequired => "+".into(),
             Self::DelimiterOptional(c) => format!("*{c}"),
-            Self::DelimieterRequired(c) => format!("+{c}"),
+            Self::DelimiterRequired(c) => format!("+{c}"),
             Self::Terminated => "~".to_string(),
             Self::Prefixed => "-".to_string(),
             Self::MultiPrefixed => "-*".to_string(),

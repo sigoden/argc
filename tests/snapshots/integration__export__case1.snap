@@ -8,7 +8,42 @@ expression: output
   "author": null,
   "version": null,
   "aliases": [],
-  "flag_options": [],
+  "flag_options": [
+    {
+      "long_name": "--help",
+      "short_name": "-h",
+      "describe": "",
+      "flag": true,
+      "var_name": "help",
+      "notations": [],
+      "required": false,
+      "multiple_values": false,
+      "multiple_occurs": false,
+      "value_delimiter": null,
+      "terminated": false,
+      "prefixed": false,
+      "default": null,
+      "choice": null,
+      "inherit": false
+    },
+    {
+      "long_name": "--version",
+      "short_name": "-V",
+      "describe": "",
+      "flag": true,
+      "var_name": "version",
+      "notations": [],
+      "required": false,
+      "multiple_values": false,
+      "multiple_occurs": false,
+      "value_delimiter": null,
+      "terminated": false,
+      "prefixed": false,
+      "default": null,
+      "choice": null,
+      "inherit": false
+    }
+  ],
   "positionals": [],
   "envs": [],
   "subcommands": [
@@ -457,6 +492,23 @@ expression: output
           "default": null,
           "choice": null,
           "inherit": false
+        },
+        {
+          "long_name": "-help",
+          "short_name": "-h",
+          "describe": "Print help",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
@@ -549,6 +601,23 @@ expression: output
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
+        },
+        {
+          "long_name": "-help",
+          "short_name": "-h",
+          "describe": "Print help",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
           "value_delimiter": null,
           "terminated": false,
           "prefixed": false,
@@ -726,6 +795,23 @@ expression: output
             ]
           },
           "inherit": false
+        },
+        {
+          "long_name": "-help",
+          "short_name": "-h",
+          "describe": "",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
@@ -787,6 +873,23 @@ expression: output
           "notations": [
             "VALUE?"
           ],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
+        },
+        {
+          "long_name": "--help",
+          "short_name": "-h",
+          "describe": "Print help",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
@@ -1248,6 +1351,23 @@ expression: output
           "default": null,
           "choice": null,
           "inherit": false
+        },
+        {
+          "long_name": "-help",
+          "short_name": "-h",
+          "describe": "Print help",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
@@ -1346,6 +1466,23 @@ expression: output
           "default": null,
           "choice": null,
           "inherit": false
+        },
+        {
+          "long_name": "-help",
+          "short_name": "-h",
+          "describe": "Print help",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
@@ -1407,6 +1544,23 @@ expression: output
           "notations": [
             "C"
           ],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
+        },
+        {
+          "long_name": "-help",
+          "short_name": "-h",
+          "describe": "",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
@@ -1478,6 +1632,23 @@ expression: output
               true
             ]
           },
+          "inherit": false
+        },
+        {
+          "long_name": "-help",
+          "short_name": "-h",
+          "describe": "Print help",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
           "inherit": false
         }
       ],
@@ -1812,6 +1983,23 @@ expression: output
           "default": null,
           "choice": null,
           "inherit": false
+        },
+        {
+          "long_name": "-help",
+          "short_name": "-h",
+          "describe": "",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
@@ -1957,6 +2145,23 @@ expression: output
             ]
           },
           "inherit": false
+        },
+        {
+          "long_name": "--help",
+          "short_name": "-h",
+          "describe": "",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
         }
       ],
       "positionals": [],
@@ -2042,6 +2247,23 @@ expression: output
               "z"
             ]
           },
+          "inherit": false
+        },
+        {
+          "long_name": "--help",
+          "short_name": "-h",
+          "describe": "",
+          "flag": true,
+          "var_name": "help",
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "value_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "default": null,
+          "choice": null,
           "inherit": false
         }
       ],

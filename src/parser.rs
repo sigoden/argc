@@ -423,7 +423,7 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
             pair(parse_param_name, preceded(tag("+"), opt(parse_multi_char))),
             |(mut arg, multi_char)| {
                 let modifier = match multi_char {
-                    Some(c) => Modifier::DelimieterRequired(c),
+                    Some(c) => Modifier::DelimiterRequired(c),
                     None => Modifier::MultipleRequired,
                 };
                 arg.modifer = modifier;

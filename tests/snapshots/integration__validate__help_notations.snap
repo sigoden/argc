@@ -14,6 +14,7 @@ OPTIONS:
   -n <NUM>                                     <num> volumes for input, '0' to prompt interactively
       --merge <PATH1> <PATH2> <BASE> <RESULT>  Perform a three-way merge by providing paths for two modified versions of a file, the common origin of both modified versions and the output file to save merge results.
   -h,  -help                                   Print help
+  -V,  -version                                Print version
 
 EOF
 exit 0

@@ -15,6 +15,7 @@ ARGS:
 OPTIONS:
       --url <URL>
   -h, --help
+  -V, --version
 
 EOF
 exit 0

@@ -40,6 +40,8 @@ OPTIONS:
 
   -h, --help       Print help
 
+  -V, --version    Print version
+
 
 COMMANDS:
   cmd  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod

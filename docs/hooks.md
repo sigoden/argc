@@ -1,6 +1,6 @@
 # Hooks
 
-- `_argc_before`: call before runining any operation
+- `_argc_before`: call before running any operation
 - `_argc_after`: call after running the command
 
 ## Example

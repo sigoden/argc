@@ -541,15 +541,14 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let (last_cmd, cmd_paths) = self.get_cmd_and_paths(level);
         let last_args = &self.flag_option_args[level];
         for (key, _, name) in last_args {
-            match name {
-                Some("help") => return Some(MatchError::DisplayHelp),
-                Some("version") => return Some(MatchError::DisplayVersion),
-                None => {
-                    if last_cmd.match_help(key) {
-                        return Some(MatchError::DisplayHelp);
-                    } else if last_cmd.match_version(key) {
-                        return Some(MatchError::DisplayVersion);
-                    }
+            match (*key, name) {
+                ("--help", _) | ("-help", _) | ("-h", None) | (_, Some("help")) => {
+                    return Some(MatchError::DisplayHelp)
+                }
+                ("--version", _) | ("-version", _) | ("-V", None) | (_, Some("version"))
+                    if last_cmd.exist_version() =>
+                {
+                    return Some(MatchError::DisplayVersion)
                 }
                 _ => {}
             }
