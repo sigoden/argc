@@ -4,14 +4,14 @@ mod root_data;
 use self::names_checker::NamesChecker;
 use self::root_data::RootData;
 
-use crate::argc_value::{ArgcValue, AFTER_HOOK, BEFORE_HOOK};
+use crate::argc_value::ArgcValue;
 use crate::matcher::Matcher;
 use crate::param::{
     EnvParam, EnvValue, FlagOptionParam, FlagOptionValue, Param, ParamData, PositionalParam,
     PositionalValue,
 };
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
-use crate::utils::INTERNAL_SYMBOL;
+use crate::utils::{AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL};
 use crate::Result;
 
 use anyhow::{anyhow, bail};

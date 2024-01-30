@@ -10,8 +10,8 @@ use crate::{
     command::{Command, SymbolParam},
     compgen::CompColor,
     param::{ChoiceValue, FlagOptionParam, Param, ParamData, PositionalParam},
-    utils::run_param_fns,
-    Shell, VARIABLE_PREFIX,
+    utils::{run_param_fns, VARIABLE_PREFIX},
+    Shell,
 };
 
 use either::Either;

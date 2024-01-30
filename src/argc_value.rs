@@ -1,8 +1,4 @@
-use crate::utils::escape_shell_words;
-
-pub const VARIABLE_PREFIX: &str = "argc_";
-pub const BEFORE_HOOK: &str = "_argc_before";
-pub const AFTER_HOOK: &str = "_argc_after";
+use crate::utils::{escape_shell_words, AFTER_HOOK, BEFORE_HOOK, VARIABLE_PREFIX};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ArgcValue {

@@ -7,7 +7,7 @@ mod parser;
 pub mod utils;
 
 use anyhow::Result;
-pub use argc_value::{ArgcValue, VARIABLE_PREFIX};
+pub use argc_value::ArgcValue;
 pub use command::{CommandValue, GlobalValue};
 pub use compgen::{compgen, Shell};
 pub use param::{ChoiceValue, DefaultValue, EnvValue, FlagOptionValue, PositionalValue};

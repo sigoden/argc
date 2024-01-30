@@ -185,7 +185,7 @@ fn run_compgen(mut args: Vec<String>) -> Option<()> {
 fn export_argc_variables(code: &str) -> String {
     let mut value = code
         .split('\n')
-        .filter(|line| line.starts_with(argc::VARIABLE_PREFIX))
+        .filter(|line| line.starts_with(argc::utils::VARIABLE_PREFIX))
         .map(|v| v.to_string())
         .collect::<Vec<String>>()
         .join(";");
