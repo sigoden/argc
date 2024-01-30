@@ -538,7 +538,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
     fn validate(&self) -> Option<MatchError> {
         let cmds_len = self.cmds.len();
         let level = cmds_len - 1;
-        let (last_cmd, _cmd_paths) = self.get_cmd_and_paths(level);
+        let last_cmd = self.cmds[self.cmds.len() - 1].1;
         let last_args = &self.flag_option_args[level];
         for (key, _, name) in last_args {
             match (*key, name) {
@@ -941,13 +941,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
     fn comp_flag_options(&self) -> Vec<CompItem> {
         let mut output = vec![];
         let level = self.cmds.len() - 1;
-        let cmd = self.cmds[level].1;
+        let last_cmd = self.cmds[level].1;
         let args: HashSet<&str> = self.flag_option_args[level]
             .iter()
             .filter_map(|v| v.2)
             .collect();
         let last = self.args.last().map(|v| v.as_str()).unwrap_or_default();
-        for param in cmd.flag_option_params.iter() {
+        for param in last_cmd.flag_option_params.iter() {
             let mut exist = args.contains(param.var_name());
             if !last.is_empty() && param.is_match(last) {
                 exist = false;

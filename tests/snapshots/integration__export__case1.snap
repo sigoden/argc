@@ -607,6 +607,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "options",
+      "flag_option_signs": "-",
       "global": null
     },
     {
@@ -747,6 +748,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "flags",
+      "flag_option_signs": "-",
       "global": null
     },
     {
@@ -972,6 +974,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "options-one-hyphen",
+      "flag_option_signs": "-",
       "global": null
     },
     {
@@ -1076,6 +1079,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "options-notation-modifier",
+      "flag_option_signs": "-",
       "global": null
     },
     {
@@ -1630,6 +1634,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "options-plus",
+      "flag_option_signs": "-+",
       "global": null
     },
     {
@@ -1770,6 +1775,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "flags-plus",
+      "flag_option_signs": "-+",
       "global": null
     },
     {
@@ -1874,6 +1880,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "options-mixed",
+      "flag_option_signs": "-+",
       "global": null
     },
     {
@@ -1967,6 +1974,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "options-prefixed",
+      "flag_option_signs": "-+",
       "global": null
     },
     {
@@ -2386,6 +2394,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "test1",
+      "flag_option_signs": "-",
       "global": null
     },
     {
@@ -2577,6 +2586,7 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "test2",
+      "flag_option_signs": "-",
       "global": null
     },
     {
@@ -2697,10 +2707,12 @@ expression: output
       "envs": [],
       "subcommands": [],
       "command_fn": "test3",
+      "flag_option_signs": "-",
       "global": null
     }
   ],
   "command_fn": null,
+  "flag_option_signs": "-",
   "global": {
     "dotenv": null,
     "hooks": [

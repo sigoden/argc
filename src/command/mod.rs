@@ -15,10 +15,10 @@ use crate::utils::{AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL};
 use crate::Result;
 
 use anyhow::{anyhow, bail};
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
 use serde::Serialize;
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::Arc;
 
 #[derive(Debug, Default)]
@@ -135,6 +135,7 @@ impl Command {
             envs: self.env_params.iter().map(|v| v.export()).collect(),
             subcommands: self.subcommands.iter().map(|v| v.export()).collect(),
             command_fn: self.command_fn.clone(),
+            flag_option_signs: self.flag_option_signs(),
             global,
         }
     }
@@ -315,7 +316,7 @@ impl Command {
     }
 
     pub(crate) fn flag_option_signs(&self) -> String {
-        let mut signs: HashSet<char> = ['-'].into();
+        let mut signs: IndexSet<char> = ['-'].into();
         for param in &self.flag_option_params {
             if let Some(short) = &param.short {
                 signs.extend(short.chars().take(1))
@@ -723,6 +724,7 @@ pub struct CommandValue {
     pub envs: Vec<EnvValue>,
     pub subcommands: Vec<CommandValue>,
     pub command_fn: Option<String>,
+    pub flag_option_signs: String,
     pub global: Option<GlobalValue>,
 }
 
