@@ -9,7 +9,8 @@ OUTPUT
 argc__args=( prog )
 argc__cmd_arg_index=0
 argc__positionals=(  )
-_choice_fn;exit;
+_choice_fn
+exit
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog 
@@ -19,7 +20,8 @@ argc_v1=''
 argc__args=( prog '' )
 argc__cmd_arg_index=0
 argc__positionals=( '' )
-_choice_fn '';exit;
+_choice_fn ''
+exit
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog v1
@@ -29,7 +31,8 @@ argc_v1=v1
 argc__args=( prog v1 )
 argc__cmd_arg_index=0
 argc__positionals=( v1 )
-_choice_fn v1;exit;
+_choice_fn v1
+exit
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog v1 
@@ -40,7 +43,8 @@ argc_v2=''
 argc__args=( prog v1 '' )
 argc__cmd_arg_index=0
 argc__positionals=( v1 '' )
-_choice_fn v1 '';exit;
+_choice_fn v1 ''
+exit
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog v1 v2
@@ -51,7 +55,8 @@ argc_v2=v2
 argc__args=( prog v1 v2 )
 argc__cmd_arg_index=0
 argc__positionals=( v1 v2 )
-_choice_fn v1 v2;exit;
+_choice_fn v1 v2
+exit
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog v1 v2 
@@ -62,6 +67,7 @@ argc_v2=v2
 argc__args=( prog v1 v2 '' )
 argc__cmd_arg_index=0
 argc__positionals=( v1 v2 )
-_choice_fn v1 v2;exit;
+_choice_fn v1 v2
+exit
 
 

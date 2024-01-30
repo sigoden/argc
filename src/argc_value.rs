@@ -22,6 +22,7 @@ impl ArgcValue {
     pub fn to_shell(values: &[Self]) -> String {
         let mut output = vec![];
         let mut last = String::new();
+        let mut exit = false;
         let mut positional_args = vec![];
         let (mut before_hook, mut after_hook) = (false, false);
         for value in values {
@@ -123,10 +124,11 @@ impl ArgcValue {
                 }
                 ArgcValue::ParamFn(name) => {
                     if positional_args.is_empty() {
-                        last = format!("{name};exit;");
+                        last = name.clone();
                     } else {
-                        last = format!("{} {};exit;", name, positional_args.join(" "));
+                        last = format!("{} {}", name, positional_args.join(" "));
                     }
+                    exit = true;
                 }
                 ArgcValue::Error((error, exit)) => {
                     return format!("command cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit)
@@ -147,6 +149,9 @@ impl ArgcValue {
             if after_hook {
                 output.push(AFTER_HOOK.to_string())
             }
+        }
+        if exit {
+            output.push("exit".to_string());
         }
         output.join("\n")
     }
