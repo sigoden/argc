@@ -53,7 +53,7 @@ pub(crate) trait Param {
 pub(crate) struct FlagOptionParam {
     pub(crate) data: ParamData,
     pub(crate) describe: String,
-    pub(crate) flag: bool,
+    pub(crate) is_flag: bool,
     pub(crate) short: Option<String>,
     pub(crate) long_prefix: String,
     pub(crate) var_name: String,
@@ -111,7 +111,7 @@ impl FlagOptionParam {
     pub(crate) fn new(
         data: ParamData,
         describe: &str,
-        flag: bool,
+        is_flag: bool,
         short: Option<&str>,
         long_prefix: &str,
         row_notations: &[&str],
@@ -123,7 +123,7 @@ impl FlagOptionParam {
             base_name.clone()
         };
         let raw_notations: Vec<String> = row_notations.iter().map(|v| v.to_string()).collect();
-        let mut notations = if flag {
+        let mut notations = if is_flag {
             vec![]
         } else if raw_notations.is_empty() {
             vec![to_cobol_case(&base_name)]
@@ -136,7 +136,7 @@ impl FlagOptionParam {
         }
         Self {
             describe: describe.to_string(),
-            flag,
+            is_flag,
             short: short.map(|v| v.to_string()),
             long_prefix: long_prefix.to_string(),
             data,
@@ -152,7 +152,7 @@ impl FlagOptionParam {
             long_name: self.render_name(),
             short_name: self.short.clone(),
             describe: self.describe.clone(),
-            flag: self.flag,
+            is_flag: self.is_flag,
             var_name: self.var_name().to_string(),
             notations: self.notations.clone(),
             required: self.required(),
@@ -169,7 +169,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn is_flag(&self) -> bool {
-        self.flag
+        self.is_flag
     }
 
     pub(crate) fn is_option(&self) -> bool {
@@ -279,7 +279,7 @@ impl FlagOptionParam {
 
     pub(crate) fn get_arg_value(&self, values: &[&[&str]]) -> Option<ArgcValue> {
         let var_name = self.var_name().to_string();
-        if self.flag {
+        if self.is_flag {
             if values.is_empty() {
                 None
             } else {
@@ -344,7 +344,7 @@ pub struct FlagOptionValue {
     pub long_name: String,
     pub short_name: Option<String>,
     pub describe: String,
-    pub flag: bool,
+    pub is_flag: bool,
     pub var_name: String,
     pub notations: Vec<String>,
     pub required: bool,

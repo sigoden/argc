@@ -13,7 +13,7 @@ expression: output
       "long_name": "--help",
       "short_name": "-h",
       "describe": "",
-      "flag": true,
+      "is_flag": true,
       "var_name": "help",
       "notations": [],
       "required": false,
@@ -34,7 +34,7 @@ expression: output
       "long_name": "--version",
       "short_name": "-V",
       "describe": "",
-      "flag": true,
+      "is_flag": true,
       "var_name": "version",
       "notations": [],
       "required": false,
@@ -66,7 +66,7 @@ expression: output
           "long_name": "--oa",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oa",
           "notations": [
             "OA"
@@ -89,7 +89,7 @@ expression: output
           "long_name": "--ob",
           "short_name": "-b",
           "describe": "short",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ob",
           "notations": [
             "OB"
@@ -112,7 +112,7 @@ expression: output
           "long_name": "-c",
           "short_name": null,
           "describe": "short only",
-          "flag": false,
+          "is_flag": false,
           "var_name": "c",
           "notations": [
             "C"
@@ -135,7 +135,7 @@ expression: output
           "long_name": "--oc",
           "short_name": null,
           "describe": "required",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oc",
           "notations": [
             "OC"
@@ -158,7 +158,7 @@ expression: output
           "long_name": "--od",
           "short_name": null,
           "describe": "multi-occurs",
-          "flag": false,
+          "is_flag": false,
           "var_name": "od",
           "notations": [
             "OD"
@@ -181,7 +181,7 @@ expression: output
           "long_name": "--oe",
           "short_name": null,
           "describe": "required + multi-occurs",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oe",
           "notations": [
             "OE"
@@ -204,7 +204,7 @@ expression: output
           "long_name": "--ona",
           "short_name": null,
           "describe": "value notation",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ona",
           "notations": [
             "PATH"
@@ -227,7 +227,7 @@ expression: output
           "long_name": "--onb",
           "short_name": null,
           "describe": "two-args value notations",
-          "flag": false,
+          "is_flag": false,
           "var_name": "onb",
           "notations": [
             "FILE",
@@ -251,7 +251,7 @@ expression: output
           "long_name": "--onc",
           "short_name": null,
           "describe": "unlimited-args value notations",
-          "flag": false,
+          "is_flag": false,
           "var_name": "onc",
           "notations": [
             "CMD",
@@ -275,7 +275,7 @@ expression: output
           "long_name": "--oda",
           "short_name": null,
           "describe": "default",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oda",
           "notations": [
             "ODA"
@@ -301,7 +301,7 @@ expression: output
           "long_name": "--odb",
           "short_name": null,
           "describe": "default from fn",
-          "flag": false,
+          "is_flag": false,
           "var_name": "odb",
           "notations": [
             "ODB"
@@ -327,7 +327,7 @@ expression: output
           "long_name": "--oca",
           "short_name": null,
           "describe": "choice",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oca",
           "notations": [
             "OCA"
@@ -356,7 +356,7 @@ expression: output
           "long_name": "--ocb",
           "short_name": null,
           "describe": "choice + default",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ocb",
           "notations": [
             "OCB"
@@ -388,7 +388,7 @@ expression: output
           "long_name": "--occ",
           "short_name": null,
           "describe": "multi-occurs + choice",
-          "flag": false,
+          "is_flag": false,
           "var_name": "occ",
           "notations": [
             "OCC"
@@ -417,7 +417,7 @@ expression: output
           "long_name": "--ocd",
           "short_name": null,
           "describe": "required + multi-occurs + choice",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ocd",
           "notations": [
             "OCD"
@@ -446,7 +446,7 @@ expression: output
           "long_name": "--ofa",
           "short_name": null,
           "describe": "choice from fn",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ofa",
           "notations": [
             "OFA"
@@ -475,7 +475,7 @@ expression: output
           "long_name": "--ofb",
           "short_name": null,
           "describe": "choice from fn + no validation",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ofb",
           "notations": [
             "OFB"
@@ -504,7 +504,7 @@ expression: output
           "long_name": "--ofc",
           "short_name": null,
           "describe": "multi-occurs + choice from fn",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ofc",
           "notations": [
             "OFC"
@@ -533,7 +533,7 @@ expression: output
           "long_name": "--ofd",
           "short_name": null,
           "describe": "multi-occurs + choice from fn + comma-separated list",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ofd",
           "notations": [
             "OFD"
@@ -562,7 +562,7 @@ expression: output
           "long_name": "--oxa",
           "short_name": null,
           "describe": "capture all remaining args",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oxa",
           "notations": [
             "OXA~"
@@ -585,7 +585,7 @@ expression: output
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -619,7 +619,7 @@ expression: output
           "long_name": "--fa",
           "short_name": null,
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "fa",
           "notations": [],
           "required": false,
@@ -640,7 +640,7 @@ expression: output
           "long_name": "--fb",
           "short_name": "-b",
           "describe": "short",
-          "flag": true,
+          "is_flag": true,
           "var_name": "fb",
           "notations": [],
           "required": false,
@@ -661,7 +661,7 @@ expression: output
           "long_name": "-c",
           "short_name": null,
           "describe": "short only",
-          "flag": true,
+          "is_flag": true,
           "var_name": "c",
           "notations": [],
           "required": false,
@@ -682,7 +682,7 @@ expression: output
           "long_name": "--fd",
           "short_name": null,
           "describe": "multi-occurs",
-          "flag": true,
+          "is_flag": true,
           "var_name": "fd",
           "notations": [],
           "required": false,
@@ -703,7 +703,7 @@ expression: output
           "long_name": "--fe",
           "short_name": "-e",
           "describe": "short + multi-occurs",
-          "flag": true,
+          "is_flag": true,
           "var_name": "fe",
           "notations": [],
           "required": false,
@@ -724,7 +724,7 @@ expression: output
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -758,7 +758,7 @@ expression: output
           "long_name": "-fa",
           "short_name": null,
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "fa",
           "notations": [],
           "required": false,
@@ -779,7 +779,7 @@ expression: output
           "long_name": "-fb",
           "short_name": "-b",
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "fb",
           "notations": [],
           "required": false,
@@ -800,7 +800,7 @@ expression: output
           "long_name": "-fd",
           "short_name": null,
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "fd",
           "notations": [],
           "required": false,
@@ -821,7 +821,7 @@ expression: output
           "long_name": "-oa",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oa",
           "notations": [
             "OA"
@@ -844,7 +844,7 @@ expression: output
           "long_name": "-od",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "od",
           "notations": [
             "OD"
@@ -867,7 +867,7 @@ expression: output
           "long_name": "-ona",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ona",
           "notations": [
             "PATH"
@@ -890,7 +890,7 @@ expression: output
           "long_name": "-oca",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oca",
           "notations": [
             "OCA"
@@ -919,7 +919,7 @@ expression: output
           "long_name": "-ofa",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ofa",
           "notations": [
             "OFA"
@@ -948,7 +948,7 @@ expression: output
           "long_name": "-help",
           "short_name": "-h",
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -982,7 +982,7 @@ expression: output
           "long_name": "--oa",
           "short_name": null,
           "describe": "multi values, zero or more",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oa",
           "notations": [
             "VALUE*"
@@ -1005,7 +1005,7 @@ expression: output
           "long_name": "--ob",
           "short_name": null,
           "describe": "multi values, one or more",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ob",
           "notations": [
             "VALUE+"
@@ -1028,7 +1028,7 @@ expression: output
           "long_name": "--oc",
           "short_name": null,
           "describe": "zero or one",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oc",
           "notations": [
             "VALUE?"
@@ -1051,7 +1051,7 @@ expression: output
           "long_name": "--help",
           "short_name": "-h",
           "describe": "Print help",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -1085,7 +1085,7 @@ expression: output
           "long_name": "+oa",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_oa",
           "notations": [
             "OA"
@@ -1108,7 +1108,7 @@ expression: output
           "long_name": "+ob",
           "short_name": "+b",
           "describe": "short",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_ob",
           "notations": [
             "OB"
@@ -1131,7 +1131,7 @@ expression: output
           "long_name": "+c",
           "short_name": null,
           "describe": "short only",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_c",
           "notations": [
             "C"
@@ -1154,7 +1154,7 @@ expression: output
           "long_name": "+oc",
           "short_name": null,
           "describe": "required",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_oc",
           "notations": [
             "OC"
@@ -1177,7 +1177,7 @@ expression: output
           "long_name": "+od",
           "short_name": null,
           "describe": "multi-occurs",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_od",
           "notations": [
             "OD"
@@ -1200,7 +1200,7 @@ expression: output
           "long_name": "+oe",
           "short_name": null,
           "describe": "required + multi-occurs",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_oe",
           "notations": [
             "OE"
@@ -1223,7 +1223,7 @@ expression: output
           "long_name": "+ona",
           "short_name": null,
           "describe": "value notation",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_ona",
           "notations": [
             "PATH"
@@ -1246,7 +1246,7 @@ expression: output
           "long_name": "+onb",
           "short_name": null,
           "describe": "two-args value notations",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_onb",
           "notations": [
             "FILE",
@@ -1270,7 +1270,7 @@ expression: output
           "long_name": "+onc",
           "short_name": null,
           "describe": "unlimited-args value notations",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_onc",
           "notations": [
             "CMD",
@@ -1294,7 +1294,7 @@ expression: output
           "long_name": "+oda",
           "short_name": null,
           "describe": "default",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_oda",
           "notations": [
             "ODA"
@@ -1320,7 +1320,7 @@ expression: output
           "long_name": "+odb",
           "short_name": null,
           "describe": "default from fn",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_odb",
           "notations": [
             "ODB"
@@ -1346,7 +1346,7 @@ expression: output
           "long_name": "+oca",
           "short_name": null,
           "describe": "choice",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_oca",
           "notations": [
             "OCA"
@@ -1375,7 +1375,7 @@ expression: output
           "long_name": "+ocb",
           "short_name": null,
           "describe": "choice + default",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_ocb",
           "notations": [
             "OCB"
@@ -1407,7 +1407,7 @@ expression: output
           "long_name": "+occ",
           "short_name": null,
           "describe": "multi-occurs + choice",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_occ",
           "notations": [
             "OCC"
@@ -1436,7 +1436,7 @@ expression: output
           "long_name": "+ocd",
           "short_name": null,
           "describe": "required + multi-occurs + choice",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_ocd",
           "notations": [
             "OCD"
@@ -1465,7 +1465,7 @@ expression: output
           "long_name": "+ofa",
           "short_name": null,
           "describe": "choice from fn",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_ofa",
           "notations": [
             "OFA"
@@ -1494,7 +1494,7 @@ expression: output
           "long_name": "+ofb",
           "short_name": null,
           "describe": "choice from fn + no validation",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_ofb",
           "notations": [
             "OFB"
@@ -1523,7 +1523,7 @@ expression: output
           "long_name": "+ofc",
           "short_name": null,
           "describe": "multi-occurs + choice from fn",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_ofc",
           "notations": [
             "OFC"
@@ -1552,7 +1552,7 @@ expression: output
           "long_name": "+ofd",
           "short_name": null,
           "describe": "multi-occurs + choice from fn + comma-separated list",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_ofd",
           "notations": [
             "OFD"
@@ -1581,7 +1581,7 @@ expression: output
           "long_name": "+oxa",
           "short_name": null,
           "describe": "capture all remaining args",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_oxa",
           "notations": [
             "OXA~"
@@ -1604,7 +1604,7 @@ expression: output
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -1638,7 +1638,7 @@ expression: output
           "long_name": "+fa",
           "short_name": null,
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "plus_fa",
           "notations": [],
           "required": false,
@@ -1659,7 +1659,7 @@ expression: output
           "long_name": "+fb",
           "short_name": "+b",
           "describe": "short",
-          "flag": true,
+          "is_flag": true,
           "var_name": "plus_fb",
           "notations": [],
           "required": false,
@@ -1680,7 +1680,7 @@ expression: output
           "long_name": "+c",
           "short_name": null,
           "describe": "short only",
-          "flag": true,
+          "is_flag": true,
           "var_name": "plus_c",
           "notations": [],
           "required": false,
@@ -1701,7 +1701,7 @@ expression: output
           "long_name": "+fd",
           "short_name": null,
           "describe": "multi-occurs",
-          "flag": true,
+          "is_flag": true,
           "var_name": "plus_fd",
           "notations": [],
           "required": false,
@@ -1722,7 +1722,7 @@ expression: output
           "long_name": "+fe",
           "short_name": "+e",
           "describe": "short + multi-occurs",
-          "flag": true,
+          "is_flag": true,
           "var_name": "plus_fe",
           "notations": [],
           "required": false,
@@ -1743,7 +1743,7 @@ expression: output
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -1777,7 +1777,7 @@ expression: output
           "long_name": "-a",
           "short_name": "+a",
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "a",
           "notations": [
             "A"
@@ -1800,7 +1800,7 @@ expression: output
           "long_name": "+b",
           "short_name": "-b",
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_b",
           "notations": [
             "B"
@@ -1823,7 +1823,7 @@ expression: output
           "long_name": "--c",
           "short_name": "+c",
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "c",
           "notations": [
             "C"
@@ -1846,7 +1846,7 @@ expression: output
           "long_name": "-help",
           "short_name": "-h",
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -1880,7 +1880,7 @@ expression: output
           "long_name": "-X",
           "short_name": null,
           "describe": "prefixied + multi-occurs + choice from fn",
-          "flag": false,
+          "is_flag": false,
           "var_name": "X",
           "notations": [
             "X"
@@ -1909,7 +1909,7 @@ expression: output
           "long_name": "+X",
           "short_name": null,
           "describe": "prefixied + multi-occurs + choice from fn",
-          "flag": false,
+          "is_flag": false,
           "var_name": "plus_X",
           "notations": [
             "X"
@@ -1938,7 +1938,7 @@ expression: output
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -1972,7 +1972,7 @@ expression: output
           "long_name": "-a",
           "short_name": null,
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "a",
           "notations": [],
           "required": false,
@@ -1993,7 +1993,7 @@ expression: output
           "long_name": "--fa",
           "short_name": null,
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "fa",
           "notations": [],
           "required": false,
@@ -2014,7 +2014,7 @@ expression: output
           "long_name": "--fb",
           "short_name": "-f",
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "fb",
           "notations": [],
           "required": false,
@@ -2035,7 +2035,7 @@ expression: output
           "long_name": "-sa",
           "short_name": null,
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "sa",
           "notations": [],
           "required": false,
@@ -2056,7 +2056,7 @@ expression: output
           "long_name": "-sb",
           "short_name": null,
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "sb",
           "notations": [],
           "required": false,
@@ -2077,7 +2077,7 @@ expression: output
           "long_name": "-e",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "e",
           "notations": [
             "E"
@@ -2100,7 +2100,7 @@ expression: output
           "long_name": "--oa",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oa",
           "notations": [
             "OA"
@@ -2123,7 +2123,7 @@ expression: output
           "long_name": "--ob",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ob",
           "notations": [
             "OB"
@@ -2146,7 +2146,7 @@ expression: output
           "long_name": "--oc",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oc",
           "notations": [
             "DIR"
@@ -2169,7 +2169,7 @@ expression: output
           "long_name": "--od",
           "short_name": "-o",
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "od",
           "notations": [
             "FILE",
@@ -2193,7 +2193,7 @@ expression: output
           "long_name": "--oe",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oe",
           "notations": [
             "OE"
@@ -2216,7 +2216,7 @@ expression: output
           "long_name": "--ca",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ca",
           "notations": [
             "CA"
@@ -2246,7 +2246,7 @@ expression: output
           "long_name": "--cc",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "cc",
           "notations": [
             "CC"
@@ -2275,7 +2275,7 @@ expression: output
           "long_name": "--cd",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "cd",
           "notations": [
             "CD"
@@ -2304,7 +2304,7 @@ expression: output
           "long_name": "--ce",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ce",
           "notations": [
             "CE"
@@ -2333,7 +2333,7 @@ expression: output
           "long_name": "-soa",
           "short_name": "-s",
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "soa",
           "notations": [
             "SOA"
@@ -2356,7 +2356,7 @@ expression: output
           "long_name": "-help",
           "short_name": "-h",
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -2390,7 +2390,7 @@ expression: output
           "long_name": "--oa",
           "short_name": "-a",
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oa",
           "notations": [
             "OA"
@@ -2413,7 +2413,7 @@ expression: output
           "long_name": "--ob",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ob",
           "notations": [
             "OB"
@@ -2436,7 +2436,7 @@ expression: output
           "long_name": "--oc",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oc",
           "notations": [
             "OC"
@@ -2459,7 +2459,7 @@ expression: output
           "long_name": "--oca",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oca",
           "notations": [
             "OCA"
@@ -2488,7 +2488,7 @@ expression: output
           "long_name": "--ocb",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "ocb",
           "notations": [
             "OCB"
@@ -2517,7 +2517,7 @@ expression: output
           "long_name": "--occ",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "occ",
           "notations": [
             "OCC"
@@ -2546,7 +2546,7 @@ expression: output
           "long_name": "--help",
           "short_name": "-h",
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
@@ -2580,7 +2580,7 @@ expression: output
           "long_name": "--oe",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "oe",
           "notations": [
             "OE"
@@ -2606,7 +2606,7 @@ expression: output
           "long_name": "--of",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "of",
           "notations": [
             "OF"
@@ -2632,7 +2632,7 @@ expression: output
           "long_name": "--cb",
           "short_name": null,
           "describe": "",
-          "flag": false,
+          "is_flag": false,
           "var_name": "cb",
           "notations": [
             "CB"
@@ -2665,7 +2665,7 @@ expression: output
           "long_name": "--help",
           "short_name": "-h",
           "describe": "",
-          "flag": true,
+          "is_flag": true,
           "var_name": "help",
           "notations": [],
           "required": false,
