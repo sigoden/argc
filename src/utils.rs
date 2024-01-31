@@ -8,6 +8,9 @@ use std::{
 use which::which;
 
 pub const INTERNAL_SYMBOL: &str = "___internal___";
+pub const VARIABLE_PREFIX: &str = "argc_";
+pub const BEFORE_HOOK: &str = "_argc_before";
+pub const AFTER_HOOK: &str = "_argc_after";
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()

@@ -14,7 +14,7 @@ keywords = ["command-line", "shell-script", "argument-parser"]
 [dependencies]
 anyhow = "1"
 convert_case = "0.6"
-indexmap = "2.1"
+indexmap = { version = "2.1", features = ["serde"] }
 nom = "7.1"
 either = "1.8"
 serde = { version = "1.0", features = ["derive"] }

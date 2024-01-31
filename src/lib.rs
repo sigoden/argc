@@ -6,9 +6,23 @@ mod param;
 mod parser;
 pub mod utils;
 
-use anyhow::Error;
-pub use argc_value::{ArgcValue, VARIABLE_PREFIX};
-pub use command::{eval, export};
+use anyhow::Result;
+pub use argc_value::ArgcValue;
+pub use command::CommandValue;
 pub use compgen::{compgen, Shell};
+pub use param::{ChoiceValue, DefaultValue, EnvValue, FlagOptionValue, PositionalValue};
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub fn eval(
+    script_content: &str,
+    args: &[String],
+    script_path: Option<&str>,
+    term_width: Option<usize>,
+) -> Result<Vec<ArgcValue>> {
+    let mut cmd = command::Command::new(script_content)?;
+    cmd.eval(args, script_path, term_width)
+}
+
+pub fn export(source: &str) -> Result<CommandValue> {
+    let cmd = command::Command::new(source)?;
+    Ok(cmd.export())
+}

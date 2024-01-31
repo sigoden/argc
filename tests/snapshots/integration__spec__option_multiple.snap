@@ -17,6 +17,7 @@ OPTIONS:
   -d, --od <DIR> <FILE>
   -e, --oe [DIR+]...
   -h, --help
+  -V, --version
 
 EOF
 exit 0

@@ -75,7 +75,7 @@ OPTIONS:
        -ona <PATH>
        -oca <OCA>   [possible values: a, b]
        -ofa <OFA>
-  -h,  -help        Print help
+  -h,  -help
 
 EOF
 exit 0
@@ -212,7 +212,7 @@ OPTIONS:
       --cd <CD>
       --ce [CE]...
   -s,  -soa <SOA>
-  -h,  -help              Print help
+  -h,  -help
 
 EOF
 exit 0
@@ -247,7 +247,7 @@ OPTIONS:
       --oe <OE>  [default: val]
       --of <OF>
       --cb <CB>  [default: x] [possible values: x, y, z]
-  -h, --help     Print help
+  -h, --help
 
 EOF
 exit 0

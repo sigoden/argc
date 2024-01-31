@@ -1,8 +1,4 @@
-use crate::utils::escape_shell_words;
-
-pub const VARIABLE_PREFIX: &str = "argc_";
-pub const BEFORE_HOOK: &str = "_argc_before";
-pub const AFTER_HOOK: &str = "_argc_after";
+use crate::utils::{escape_shell_words, AFTER_HOOK, BEFORE_HOOK, VARIABLE_PREFIX};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ArgcValue {
@@ -17,7 +13,7 @@ pub enum ArgcValue {
     EnvFn(String, String),
     Hook((bool, bool)),
     Dotenv(String),
-    CmdFn(String),
+    CommandFn(String),
     ParamFn(String),
     Error((String, i32)),
 }
@@ -26,6 +22,7 @@ impl ArgcValue {
     pub fn to_shell(values: &[Self]) -> String {
         let mut output = vec![];
         let mut last = String::new();
+        let mut exit = false;
         let mut positional_args = vec![];
         let (mut before_hook, mut after_hook) = (false, false);
         for value in values {
@@ -117,7 +114,7 @@ impl ArgcValue {
                         "[ -f {value} ] && set -o allexport && . {value} && set +o allexport"
                     ))
                 }
-                ArgcValue::CmdFn(name) => {
+                ArgcValue::CommandFn(name) => {
                     if positional_args.is_empty() {
                         last = name.to_string();
                     } else {
@@ -127,10 +124,11 @@ impl ArgcValue {
                 }
                 ArgcValue::ParamFn(name) => {
                     if positional_args.is_empty() {
-                        last = format!("{name};exit;");
+                        last = name.clone();
                     } else {
-                        last = format!("{} {};exit;", name, positional_args.join(" "));
+                        last = format!("{} {}", name, positional_args.join(" "));
                     }
+                    exit = true;
                 }
                 ArgcValue::Error((error, exit)) => {
                     return format!("command cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit)
@@ -151,6 +149,9 @@ impl ArgcValue {
             if after_hook {
                 output.push(AFTER_HOOK.to_string())
             }
+        }
+        if exit {
+            output.push("exit".to_string());
         }
         output.join("\n")
     }

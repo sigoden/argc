@@ -1,5 +1,6 @@
 use crate::param::{
-    ChoiceData, DefaultData, EnvParam, FlagOptionParam, Modifier, ParamData, PositionalParam,
+    ChoiceValue, DefaultValue, EnvParam, FlagOptionParam, Modifier, Param, ParamData,
+    PositionalParam,
 };
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
@@ -183,7 +184,7 @@ fn parse_tag_meta(input: &str) -> nom::IResult<&str, Option<EventData>> {
 }
 
 fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
-    let check = peek(alt((tag("option"), tag("flag"), tag("arg"), tag("env"))));
+    let check = peek(alt((tag("option"), tag("flag"), tag("env"), tag("arg"))));
     let arg = alt((
         map(
             preceded(pair(tag("flag"), space1), parse_flag_param),
@@ -195,7 +196,16 @@ fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
         ),
         map(
             preceded(pair(tag("env"), space1), parse_env_param),
-            |param| Some(EventData::Env(param)),
+            |param| {
+                if matches!(
+                    param.data().modifer,
+                    Modifier::Optional | Modifier::Required
+                ) {
+                    Some(EventData::Env(param))
+                } else {
+                    None
+                }
+            },
         ),
         map(
             preceded(pair(tag("arg"), space1), parse_positional_param),
@@ -396,7 +406,7 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
             pair(parse_param_name, preceded(tag("*"), opt(parse_multi_char))),
             |(mut arg, multi_char)| {
                 match multi_char {
-                    Some(c) => arg.modifer = Modifier::MultiCharOptional(c),
+                    Some(c) => arg.modifer = Modifier::DelimiterOptional(c),
                     None => {
                         if let Some(name) = arg.name.strip_suffix('-') {
                             arg.name = name.to_string();
@@ -413,7 +423,7 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
             pair(parse_param_name, preceded(tag("+"), opt(parse_multi_char))),
             |(mut arg, multi_char)| {
                 let modifier = match multi_char {
-                    Some(c) => Modifier::MultiCharRequired(c),
+                    Some(c) => Modifier::DelimiterRequired(c),
                     None => Modifier::MultipleRequired,
                 };
                 arg.modifer = modifier;
@@ -435,7 +445,7 @@ fn parse_param_assign(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         separated_pair(parse_param_name, char('='), parse_default_value),
         |(mut arg, value)| {
-            arg.default = Some(DefaultData::Value(value.to_string()));
+            arg.default = Some(DefaultValue::Value(value.to_string()));
             arg
         },
     )(input)
@@ -446,7 +456,7 @@ fn parse_param_assign_fn(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         separated_pair(parse_param_name, char('='), parse_value_fn),
         |(mut arg, f)| {
-            arg.default = Some(DefaultData::Fn(f.to_string()));
+            arg.default = Some(DefaultValue::Fn(f.to_string()));
             arg
         },
     )(input)
@@ -459,11 +469,11 @@ fn parse_param_modifer_choices_default(input: &str) -> nom::IResult<&str, ParamD
             delimited(char('['), parse_choices_default, char(']')),
         ),
         |(mut arg, (values, default))| {
-            arg.choice = Some(ChoiceData::Values(
+            arg.choice = Some(ChoiceValue::Values(
                 values.iter().map(|v| v.to_string()).collect(),
             ));
             if let Some(value) = default {
-                arg.default = Some(DefaultData::Value(value.to_string()));
+                arg.default = Some(DefaultValue::Value(value.to_string()));
             }
             arg
         },
@@ -477,7 +487,7 @@ fn parse_param_modifer_choices(input: &str) -> nom::IResult<&str, ParamData> {
             delimited(char('['), parse_choices, char(']')),
         ),
         |(mut arg, values)| {
-            arg.choice = Some(ChoiceData::Values(
+            arg.choice = Some(ChoiceValue::Values(
                 values.iter().map(|v| v.to_string()).collect(),
             ));
             arg
@@ -492,7 +502,7 @@ fn parse_param_modifer_choices_fn(input: &str) -> nom::IResult<&str, ParamData> 
             delimited(char('['), pair(opt(char('?')), parse_value_fn), char(']')),
         ),
         |(mut arg, (validate, f))| {
-            arg.choice = Some(ChoiceData::Fn(f.into(), validate.is_none()));
+            arg.choice = Some(ChoiceValue::Fn(f.into(), validate.is_none()));
             arg
         },
     )(input)

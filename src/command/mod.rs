@@ -4,39 +4,29 @@ mod root_data;
 use self::names_checker::NamesChecker;
 use self::root_data::RootData;
 
-use crate::argc_value::{ArgcValue, AFTER_HOOK, BEFORE_HOOK};
+use crate::argc_value::ArgcValue;
 use crate::matcher::Matcher;
-use crate::param::{EnvParam, FlagOptionParam, Param, PositionalParam};
+use crate::param::{
+    EnvParam, EnvValue, FlagOptionParam, FlagOptionValue, Param, ParamData, PositionalParam,
+    PositionalValue,
+};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
-use crate::utils::INTERNAL_SYMBOL;
+use crate::utils::{AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL};
 use crate::Result;
 
 use anyhow::{anyhow, bail};
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
+use serde::Serialize;
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::Arc;
-
-pub fn eval(
-    script_content: &str,
-    args: &[String],
-    script_path: Option<&str>,
-    term_width: Option<usize>,
-) -> Result<Vec<ArgcValue>> {
-    let mut cmd = Command::new(script_content)?;
-    cmd.eval(args, script_path, term_width)
-}
-
-pub fn export(source: &str) -> Result<serde_json::Value> {
-    let cmd = Command::new(source)?;
-    Ok(cmd.to_json())
-}
 
 #[derive(Debug, Default)]
 pub(crate) struct Command {
     pub(crate) name: Option<String>,
-    pub(crate) fn_name: Option<String>,
-    pub(crate) level: usize,
+    pub(crate) match_fn: Option<String>,
+    pub(crate) command_fn: Option<String>,
+    pub(crate) paths: Vec<String>,
     pub(crate) describe: String,
     pub(crate) flag_option_params: Vec<FlagOptionParam>,
     pub(crate) positional_params: Vec<PositionalParam>,
@@ -56,6 +46,7 @@ impl Command {
     pub(crate) fn new(source: &str) -> Result<Self> {
         let events = parse(source)?;
         let mut root = Command::new_from_events(&events)?;
+        root.inherit(vec![]);
         if root.has_metadata("inherit-flag-options") {
             root.inherit_flag_options();
         }
@@ -96,33 +87,66 @@ impl Command {
         Ok(matcher.to_arg_values())
     }
 
-    pub(crate) fn to_json(&self) -> serde_json::Value {
-        let subcommands: Vec<serde_json::Value> =
-            self.subcommands.iter().map(|v| v.to_json()).collect();
-        let flag_option_params: Vec<serde_json::Value> = self
-            .flag_option_params
-            .iter()
-            .map(|v| v.to_json())
-            .collect();
-        let positional_params: Vec<serde_json::Value> =
-            self.positional_params.iter().map(|v| v.to_json()).collect();
-        let metadata: Vec<Vec<&String>> =
-            self.metadata.iter().map(|(k, v, _)| vec![k, v]).collect();
-        let aliases = self.list_aliases();
-        let env_params: Vec<serde_json::Value> =
-            self.env_params.iter().map(|v| v.to_json()).collect();
-        serde_json::json!({
-            "describe": self.describe,
-            "name": self.name,
-            "author": self.author,
-            "version": self.version,
-            "metadata": metadata,
-            "options": flag_option_params,
-            "positionals": positional_params,
-            "aliases": aliases,
-            "subcommands": subcommands,
-            "envs": env_params,
-        })
+    pub(crate) fn export(&self) -> CommandValue {
+        let mut extra: IndexMap<String, serde_json::Value> = IndexMap::new();
+        if self.paths.is_empty() {
+            if self.get_metadata("combine-shorts").is_some() {
+                extra.insert("combine_shorts".into(), true.into());
+            }
+            if let Some(dotenv) = self.get_metadata("dotenv") {
+                let dotenv = if dotenv.is_empty() {
+                    ".env".to_string()
+                } else {
+                    dotenv.clone()
+                };
+                extra.insert("dotenv".into(), dotenv.into());
+            }
+            let (before_hook, after_hook) = self.exist_hooks();
+            if before_hook {
+                extra.insert("before_hook".into(), BEFORE_HOOK.into());
+            }
+            if after_hook {
+                extra.insert("after_hook".into(), AFTER_HOOK.into());
+            }
+        }
+        let flag_options: Vec<FlagOptionValue> = {
+            let mut describe = false;
+            let mut single = false;
+            let mut params = vec![];
+            for param in self.flag_option_params.iter() {
+                if param.long_prefix.len() == 1 {
+                    single = true;
+                }
+                if !param.describe().is_empty() {
+                    describe = true;
+                }
+                params.push(param)
+            }
+            let long_prefix = if single { "-" } else { "--" };
+            let help_param = self.create_help_flag(describe, long_prefix);
+            let version_param = self.create_version_flag(describe, long_prefix);
+            if let Some(param) = &help_param {
+                params.push(param);
+            }
+            if let Some(param) = &version_param {
+                params.push(param);
+            }
+            params.into_iter().map(|v| v.export()).collect()
+        };
+        CommandValue {
+            name: self.name.clone().unwrap_or_default(),
+            describe: self.describe.clone(),
+            author: self.author.clone(),
+            version: self.version.clone(),
+            aliases: self.list_alias_names().clone(),
+            flag_options,
+            positionals: self.positional_params.iter().map(|v| v.export()).collect(),
+            envs: self.env_params.iter().map(|v| v.export()).collect(),
+            subcommands: self.subcommands.iter().map(|v| v.export()).collect(),
+            paths: self.paths.clone(),
+            command_fn: self.command_fn.clone(),
+            extra,
+        }
     }
 
     pub(crate) fn new_from_events(events: &[Event]) -> Result<Self> {
@@ -226,8 +250,7 @@ impl Command {
                         } else if parts_len == 1 {
                             let cmd = root_cmd.subcommands.last_mut().unwrap();
                             cmd.name = Some(sanitize_cmd_name(&name));
-                            cmd.fn_name = Some(name.to_string());
-                            cmd.level = 1;
+                            cmd.match_fn = Some(name.to_string());
                             if let Some((aliases, aliases_pos)) = &cmd.aliases {
                                 for name in aliases {
                                     if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
@@ -249,8 +272,7 @@ impl Command {
                             let parents: Vec<String> =
                                 parents.iter().map(|v| sanitize_cmd_name(v)).collect();
                             cmd.name = Some(sanitize_cmd_name(child));
-                            cmd.fn_name = Some(name.to_string());
-                            cmd.level = parents.len() + 1;
+                            cmd.match_fn = Some(name.to_string());
                             match retrive_cmd(&mut root_cmd, &parents) {
                                 Some(parent_cmd) => {
                                     parent_cmd
@@ -301,13 +323,12 @@ impl Command {
     }
 
     pub(crate) fn flag_option_signs(&self) -> String {
-        let mut signs = HashSet::new();
-        signs.insert('-');
+        let mut signs: IndexSet<char> = ['-'].into();
         for param in &self.flag_option_params {
             if let Some(short) = &param.short {
                 signs.extend(short.chars().take(1))
             }
-            signs.extend(param.long_prefix.chars())
+            signs.extend(param.long_prefix.chars().take(1))
         }
         signs.into_iter().collect()
     }
@@ -371,15 +392,18 @@ impl Command {
         if self.positional_params.is_empty() {
             return output;
         }
-        let mut list = vec![];
         let mut value_size = 0;
-        for param in self.positional_params.iter() {
-            let value = param.render_value();
-            value_size = value_size.max(value.len());
-            list.push((value, param.render_describe()));
-        }
-        output.push("ARGS:".to_string());
+        let list: Vec<_> = self
+            .positional_params
+            .iter()
+            .map(|param| {
+                let value = param.render_value();
+                value_size = value_size.max(value.len());
+                (value, param.render_describe())
+            })
+            .collect();
         value_size += 2;
+        output.push("ARGS:".to_string());
         render_list(&mut output, list, value_size, term_width);
         output
     }
@@ -389,24 +413,39 @@ impl Command {
         if self.flag_option_params.is_empty() {
             return output;
         }
-        let mut list = vec![];
-        let mut any_describe = false;
+        let mut describe = false;
         let mut single = false;
+        let mut params = vec![];
         for param in self.flag_option_params.iter() {
             if param.long_prefix.len() == 1 {
                 single = true;
             }
-            let value = param.render_body();
-            let describe = param.render_describe();
-            if !describe.is_empty() {
-                any_describe = true;
+            if !param.describe().is_empty() {
+                describe = true;
             }
-            list.push((value, describe));
+            params.push(param)
         }
-        self.add_help_flag(&mut list, single, any_describe);
-        self.add_version_flag(&mut list, single, any_describe);
+        let long_prefix = if single { "-" } else { "--" };
+        let help_param = self.create_help_flag(describe, long_prefix);
+        let version_param = self.create_version_flag(describe, long_prefix);
+        if let Some(param) = &help_param {
+            params.push(param);
+        }
+        if let Some(param) = &version_param {
+            params.push(param);
+        }
+        let mut value_size = 0;
+        let list: Vec<_> = params
+            .iter()
+            .map(|param| {
+                let value = param.render_body();
+                let describe = param.render_describe();
+                value_size = value_size.max(value.len());
+                (value, describe)
+            })
+            .collect();
+        value_size += 2;
         output.push("OPTIONS:".to_string());
-        let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
         render_list(&mut output, list, value_size, term_width);
         output
     }
@@ -416,16 +455,18 @@ impl Command {
         if self.subcommands.is_empty() {
             return output;
         }
-        let mut list = vec![];
         let mut value_size = 0;
-        for cmd in self.subcommands.iter() {
-            let value = cmd.name.clone().unwrap_or_default();
-            let describe = cmd.render_subcommand_describe();
-            value_size = value_size.max(value.len());
-            list.push((value, describe));
-        }
-        output.push("COMMANDS:".to_string());
+        let list: Vec<_> = self
+            .subcommands
+            .iter()
+            .map(|subcmd| {
+                let value = subcmd.name.clone().unwrap_or_default();
+                value_size = value_size.max(value.len());
+                (value, subcmd.render_subcommand_describe())
+            })
+            .collect();
         value_size += 2;
+        output.push("COMMANDS:".to_string());
         render_list(&mut output, list, value_size, term_width);
         output
     }
@@ -446,14 +487,18 @@ impl Command {
         if self.env_params.is_empty() {
             return output;
         }
-        let mut list = vec![];
-        for param in self.env_params.iter() {
-            let value = param.render_body();
-            let describe = param.render_describe();
-            list.push((value, describe));
-        }
+        let mut value_size = 0;
+        let list: Vec<_> = self
+            .env_params
+            .iter()
+            .map(|param| {
+                let value = param.render_body();
+                value_size = value_size.max(value.len());
+                (value, param.render_describe())
+            })
+            .collect();
+        value_size += 2;
         output.push("ENVIRONMENTS:".to_string());
-        let value_size = list.iter().map(|v| v.0.len()).max().unwrap_or_default() + 2;
         render_list(&mut output, list, value_size, term_width);
         output.push("".to_string());
         output
@@ -467,12 +512,15 @@ impl Command {
     }
 
     pub(crate) fn list_names(&self) -> Vec<String> {
-        let mut output: Vec<String> = self.name.clone().into_iter().collect();
-        output.extend(self.list_aliases());
+        let mut output: Vec<String> = match self.name.clone() {
+            Some(v) => vec![v],
+            None => vec![],
+        };
+        output.extend(self.list_alias_names());
         output
     }
 
-    pub(crate) fn list_aliases(&self) -> Vec<String> {
+    pub(crate) fn list_alias_names(&self) -> Vec<String> {
         match &self.aliases {
             Some((v, _)) => v.clone(),
             None => vec![],
@@ -488,12 +536,7 @@ impl Command {
 
     pub(crate) fn find_subcommand(&self, name: &str) -> Option<&Self> {
         self.subcommands.iter().find(|subcmd| {
-            if let Some(subcmd_name) = &subcmd.name {
-                if subcmd_name == name {
-                    return true;
-                }
-            }
-            return subcmd.list_aliases().iter().any(|v| v == name);
+            return subcmd.list_names().iter().any(|v| v == name);
         })
     }
 
@@ -503,8 +546,8 @@ impl Command {
 
     pub(crate) fn find_prefixed_option(&self, name: &str) -> Option<(&FlagOptionParam, String)> {
         for param in self.flag_option_params.iter() {
-            if let Some(prefix) = param.prefixed() {
-                if name.starts_with(&prefix) {
+            if param.prefixed() {
+                if let Some(prefix) = param.list_names().into_iter().find(|v| name.starts_with(v)) {
                     return Some((param, prefix));
                 }
             }
@@ -516,62 +559,19 @@ impl Command {
         self.env_params.iter().find(|v| v.var_name() == name)
     }
 
-    pub(crate) fn match_help(&self, key: &str) -> bool {
-        ["--help", "-help", "-h"]
-            .into_iter()
-            .any(|v| v == key && self.is_flag_option_miss_or_match(v, "help"))
-    }
-
-    pub(crate) fn match_version(&self, key: &str) -> bool {
-        if self.version.is_none() && self.level > 0 {
-            return false;
-        }
-        ["--version", "-version", "-V"]
-            .into_iter()
-            .any(|v| v == key && self.is_flag_option_miss_or_match(v, "version"))
-    }
-
-    pub(crate) fn is_flag_option_miss_or_match(&self, key: &str, var_name: &str) -> bool {
-        match self.find_flag_option(key) {
-            Some(param) => param.var_name() == var_name,
-            None => true,
-        }
-    }
-
     pub(crate) fn no_flags_options_subcommands(&self) -> bool {
         self.flag_option_params.is_empty() && self.subcommands.is_empty()
     }
 
-    pub(crate) fn get_cmd_fn(&self, cmd_paths: &[&str]) -> Option<String> {
-        let main = "main".to_string();
-        if cmd_paths.len() < 2 {
-            if self.root.borrow().fns.contains_key(&main) {
-                Some(main)
-            } else {
-                None
-            }
-        } else if self.subcommands.is_empty() {
-            self.fn_name.clone()
-        } else {
-            let mut parts: Vec<String> = cmd_paths.iter().skip(1).map(|v| v.to_string()).collect();
-            parts.push(main);
-            let name = parts.join("::");
-            if self.root.borrow().fns.contains_key(&name) {
-                Some(name)
-            } else {
-                None
-            }
-        }
-    }
-
-    pub(crate) fn exist_hooks(&self) -> Option<(bool, bool)> {
+    pub(crate) fn exist_hooks(&self) -> (bool, bool) {
         let fns = &self.root.borrow().fns;
         let before_hook = fns.contains_key(BEFORE_HOOK);
         let after_hook = fns.contains_key(AFTER_HOOK);
-        if !before_hook && !after_hook {
-            return None;
-        }
-        Some((before_hook, after_hook))
+        (before_hook, after_hook)
+    }
+
+    pub(crate) fn exist_version(&self) -> bool {
+        self.version.is_some() || self.paths.is_empty()
     }
 
     pub(crate) fn delegated(&self) -> bool {
@@ -585,10 +585,28 @@ impl Command {
                 .unwrap_or_default()
     }
 
-    pub(crate) fn exist_main_fn(&self, cmd_paths: &[&str]) -> bool {
-        self.get_cmd_fn(cmd_paths)
-            .map(|v| v.ends_with("main"))
-            .unwrap_or_default()
+    fn inherit(&mut self, paths: Vec<String>) {
+        self.paths = paths.clone();
+        let main = "main";
+        if paths.is_empty() {
+            if self.root.borrow().fns.contains_key(main) {
+                self.command_fn = Some(main.to_string())
+            }
+        } else if self.subcommands.is_empty() {
+            self.command_fn = self.match_fn.clone();
+        } else {
+            let command_fn = [paths.as_slice(), [main.to_string()].as_slice()]
+                .concat()
+                .join("::");
+            if self.root.borrow().fns.contains_key(&command_fn) {
+                self.command_fn = Some(command_fn)
+            }
+        }
+        for subcmd in self.subcommands.iter_mut() {
+            let mut parents = paths.clone();
+            parents.push(subcmd.name.clone().unwrap_or_default());
+            subcmd.inherit(parents);
+        }
     }
 
     fn inherit_flag_options(&mut self) {
@@ -658,46 +676,65 @@ impl Command {
         self.subcommands.last_mut().unwrap()
     }
 
-    fn add_help_flag(&self, list: &mut Vec<(String, String)>, single: bool, any_describe: bool) {
+    fn create_help_flag(&self, describe: bool, long_prefix: &str) -> Option<FlagOptionParam> {
         if self.find_flag_option("help").is_some() {
-            return;
+            return None;
         }
-        let hyphens = if single { " -" } else { "--" };
-        list.push((
-            if self.is_flag_option_miss_or_match("-h", "help") {
-                format!("-h, {}help", hyphens)
-            } else {
-                format!("    {}help", hyphens)
-            },
-            if any_describe {
-                "Print help".into()
-            } else {
-                "".into()
-            },
-        ));
+        let describe = if describe { "Print help" } else { "" };
+        let short = if self.find_flag_option("-h").is_none() {
+            Some("-h")
+        } else {
+            None
+        };
+        Some(FlagOptionParam::new(
+            ParamData::new("help"),
+            describe,
+            true,
+            short,
+            long_prefix,
+            &[],
+        ))
     }
 
-    fn add_version_flag(&self, list: &mut Vec<(String, String)>, single: bool, any_describe: bool) {
-        if self.version.is_none() {
-            return;
+    fn create_version_flag(&self, describe: bool, long_prefix: &str) -> Option<FlagOptionParam> {
+        if !self.exist_version() {
+            return None;
         }
         if self.find_flag_option("version").is_some() {
-            return;
+            return None;
         }
-        let hyphens = if single { " -" } else { "--" };
-        list.push((
-            if self.is_flag_option_miss_or_match("-V", "version") {
-                format!("-V, {}version", hyphens)
-            } else {
-                format!("    {}version", hyphens)
-            },
-            if any_describe {
-                "Print version".into()
-            } else {
-                "".into()
-            },
-        ));
+        let describe = if describe { "Print version" } else { "" };
+        let short = if self.find_flag_option("-V").is_none() {
+            Some("-V")
+        } else {
+            None
+        };
+        Some(FlagOptionParam::new(
+            ParamData::new("version"),
+            describe,
+            true,
+            short,
+            long_prefix,
+            &[],
+        ))
     }
+}
+
+#[derive(Debug, Serialize)]
+pub struct CommandValue {
+    pub name: String,
+    pub describe: String,
+    pub author: Option<String>,
+    pub version: Option<String>,
+    pub aliases: Vec<String>,
+    pub flag_options: Vec<FlagOptionValue>,
+    pub positionals: Vec<PositionalValue>,
+    pub envs: Vec<EnvValue>,
+    pub subcommands: Vec<CommandValue>,
+    pub paths: Vec<String>,
+    pub command_fn: Option<String>,
+    #[serde(flatten)]
+    pub extra: IndexMap<String, serde_json::Value>,
 }
 
 pub(crate) type SymbolParam = (String, Option<String>);

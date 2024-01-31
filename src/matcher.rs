@@ -9,9 +9,9 @@ use crate::{
     argc_value::{sanitize_arg_name, ArgcValue},
     command::{Command, SymbolParam},
     compgen::CompColor,
-    param::{ChoiceData, FlagOptionParam, Param, ParamData, PositionalParam},
-    utils::run_param_fns,
-    Shell, VARIABLE_PREFIX,
+    param::{ChoiceValue, FlagOptionParam, Param, ParamData, PositionalParam},
+    utils::{run_param_fns, VARIABLE_PREFIX},
+    Shell,
 };
 
 use either::Either;
@@ -68,7 +68,7 @@ pub(crate) enum MatchError {
     InvalidValue(usize, String, String, Vec<String>),
     InvalidEnvValue(usize, String, String, Vec<String>),
     MismatchValues(usize, String),
-    NoMoreValue(usize, String, String),
+    NoFlagValue(usize, String),
 }
 
 impl<'a, 'b> Matcher<'a, 'b> {
@@ -332,15 +332,15 @@ impl<'a, 'b> Matcher<'a, 'b> {
         if let Some(err) = self.validate() {
             return vec![ArgcValue::Error(self.stringify_match_error(&err))];
         }
-        let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
+        let last_cmd = self.cmds[self.cmds.len() - 1].1;
         let mut output = self.to_arg_values_base();
-        if cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
+        if last_cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
             output.push(ArgcValue::ExtraPositionalMultiple(
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
             ));
         }
-        if let Some(cmd_fn) = cmd.get_cmd_fn(&cmd_paths) {
-            output.push(ArgcValue::CmdFn(cmd_fn));
+        if let Some(command_fn) = &last_cmd.command_fn {
+            output.push(ArgcValue::CommandFn(command_fn.clone()));
         }
         output
     }
@@ -488,8 +488,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
 
-        if let Some((before, after)) = last_cmd.exist_hooks() {
-            output.push(ArgcValue::Hook((before, after)));
+        let (before_hook, after_hook) = last_cmd.exist_hooks();
+        if before_hook || after_hook {
+            output.push(ArgcValue::Hook((before_hook, after_hook)));
         }
 
         for (arg, (name, _)) in self.symbol_args.iter() {
@@ -537,18 +538,17 @@ impl<'a, 'b> Matcher<'a, 'b> {
     fn validate(&self) -> Option<MatchError> {
         let cmds_len = self.cmds.len();
         let level = cmds_len - 1;
-        let (last_cmd, cmd_paths) = self.get_cmd_and_paths(level);
+        let last_cmd = self.cmds[self.cmds.len() - 1].1;
         let last_args = &self.flag_option_args[level];
         for (key, _, name) in last_args {
-            match name {
-                Some("help") => return Some(MatchError::DisplayHelp),
-                Some("version") => return Some(MatchError::DisplayVersion),
-                None => {
-                    if last_cmd.match_help(key) {
-                        return Some(MatchError::DisplayHelp);
-                    } else if last_cmd.match_version(key) {
-                        return Some(MatchError::DisplayVersion);
-                    }
+            match (*key, name) {
+                ("--help", _) | ("-help", _) | ("-h", None) | (_, Some("help")) => {
+                    return Some(MatchError::DisplayHelp)
+                }
+                ("--version", _) | ("-version", _) | ("-V", None) | (_, Some("version"))
+                    if last_cmd.exist_version() =>
+                {
+                    return Some(MatchError::DisplayVersion)
                 }
                 _ => {}
             }
@@ -572,7 +572,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
         if !last_cmd.subcommands.is_empty() {
-            if !last_cmd.exist_main_fn(&cmd_paths) {
+            if last_cmd.command_fn.is_none() {
                 if self.positional_args.is_empty() && last_args.is_empty() {
                     return Some(MatchError::DisplayHelp);
                 } else {
@@ -653,17 +653,14 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 if let Some(param) = cmd.flag_option_params.iter().find(|v| v.var_name() == name) {
                     let values_list: Vec<&[&str]> =
                         indexes.iter().map(|v| args[*v].1.as_slice()).collect();
-                    if !param.multi_occurs() && values_list.len() > 1 {
+                    if !param.multiple_occurs() && values_list.len() > 1 {
                         return Some(MatchError::NotMultipleArgument(level, param.render_name()));
                     }
+                    let (min, max) = param.args_range();
                     for values in values_list.iter() {
                         if param.is_flag() && !values.is_empty() {
-                            return Some(MatchError::NoMoreValue(
-                                level,
-                                param.render_name(),
-                                values[0].to_string(),
-                            ));
-                        } else if !param.validate_args_len(values.len()) {
+                            return Some(MatchError::NoFlagValue(level, param.render_name()));
+                        } else if values.len() < min || values.len() > max {
                             return Some(MatchError::MismatchValues(
                                 level,
                                 param.render_name_notations(),
@@ -763,12 +760,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut param_index = 0;
         while param_index < params_len && arg_index < args_len {
             let param = &cmd.positional_params[param_index];
-            if param.multiple() {
+            if param.multiple_values() {
                 let dashes_at = self.dashes.unwrap_or_default();
                 let takes = if param_index == 0
                     && dashes_at > 0
                     && params_len == 2
-                    && cmd.positional_params[1].multiple()
+                    && cmd.positional_params[1].multiple_values()
                 {
                     dashes_at
                 } else {
@@ -918,12 +915,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
 "###
                 )
             }
-            MatchError::NoMoreValue(level, name, value) => {
+            MatchError::NoFlagValue(level, name) => {
                 exit = 1;
                 let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
                 let usage = cmd.render_usage(&cmd_paths);
                 format!(
-                    r###"error: unexpected value `{value}` for `{name}` found; no more were expected 
+                    r###"error: unexpected value for `{name}` flag
 
 {usage}
 
@@ -944,26 +941,26 @@ impl<'a, 'b> Matcher<'a, 'b> {
     fn comp_flag_options(&self) -> Vec<CompItem> {
         let mut output = vec![];
         let level = self.cmds.len() - 1;
-        let cmd = self.cmds[level].1;
+        let last_cmd = self.cmds[level].1;
         let args: HashSet<&str> = self.flag_option_args[level]
             .iter()
             .filter_map(|v| v.2)
             .collect();
         let last = self.args.last().map(|v| v.as_str()).unwrap_or_default();
-        for param in cmd.flag_option_params.iter() {
+        for param in last_cmd.flag_option_params.iter() {
             let mut exist = args.contains(param.var_name());
             if !last.is_empty() && param.is_match(last) {
                 exist = false;
             }
-            if !exist || param.multi_occurs() {
+            if !exist || param.multiple_occurs() {
                 let describe = param.describe_oneline();
                 let kind = if param.is_flag() {
                     CompColor::of_flag()
                 } else {
                     CompColor::of_option()
                 };
-                for v in param.list_option_names() {
-                    output.push((v, describe.to_string(), param.prefixed().is_some(), kind))
+                for v in param.list_names() {
+                    output.push((v, describe.to_string(), param.prefixed(), kind))
                 }
             }
         }
@@ -1082,24 +1079,21 @@ fn match_flag_option<'a, 'b>(
         }
         flag_option_args.push((arg, value_args, Some(param.var_name())));
     } else {
-        let mut values_len = param.arg_value_names.len();
-        if param.unlimited_args() {
-            values_len = usize::MAX / 2;
-        }
+        let values_max = param.args_range().1;
         let args_len = args.len();
-        let value_args = take_value_args(args, *arg_index + 1, values_len, signs);
+        let value_args = take_value_args(args, *arg_index + 1, values_max, signs);
         let arg = &args[*arg_index];
         *arg_index += value_args.len();
         if *arg_index == args_len - 1 {
             if *arg_comp != ArgComp::FlagOrOption {
-                if param.is_option() && value_args.len() <= values_len {
+                if param.is_option() && value_args.len() <= values_max {
                     *arg_comp = ArgComp::OptionValue(
                         param.var_name().to_string(),
                         value_args.len().saturating_sub(1),
                     );
                 }
-            } else if let Some(prefix) = param.prefixed() {
-                if arg.starts_with(&prefix) {
+            } else if param.prefixed() {
+                if let Some(prefix) = param.list_names().into_iter().find(|v| arg.starts_with(v)) {
                     *arg_comp = ArgComp::OptionValue(param.var_name().to_string(), 0);
                     *split_last_arg_at = Some(prefix.len());
                 }
@@ -1238,15 +1232,15 @@ fn comp_symbol(cmd: &Command, ch: char) -> Vec<CompItem> {
 
 fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
     let value_name = param
-        .arg_value_names
+        .notations
         .get(index)
         .map(|v| v.as_str())
-        .unwrap_or_else(|| param.arg_value_names.last().unwrap());
+        .unwrap_or_else(|| param.notations.last().unwrap());
     comp_param(param.describe_oneline(), value_name, &param.data)
 }
 
 fn comp_positional(param: &PositionalParam) -> Vec<CompItem> {
-    comp_param(param.describe_oneline(), &param.arg_value_name, &param.data)
+    comp_param(param.describe_oneline(), &param.notation, &param.data)
 }
 
 fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompItem> {
@@ -1274,7 +1268,7 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
         let value = format!("__argc_value={}", value_name);
         vec![(value, describe.into(), false, CompColor::of_value())]
     };
-    if let Some(ch) = data.multi_char() {
+    if let Some(ch) = data.args_delimiter() {
         output.insert(
             0,
             (
@@ -1289,12 +1283,12 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
 }
 
 fn get_param_choice<'a, 'b: 'a>(
-    choice: &'a Option<ChoiceData>,
+    choice: &'a Option<ChoiceValue>,
     choices_fn_values: &'a HashMap<&str, Vec<String>>,
 ) -> Option<&'a Vec<String>> {
     match choice {
-        Some(ChoiceData::Values(v)) => Some(v),
-        Some(ChoiceData::Fn(choice_fn, validate)) => {
+        Some(ChoiceValue::Values(v)) => Some(v),
+        Some(ChoiceValue::Fn(choice_fn, validate)) => {
             if *validate {
                 choices_fn_values.get(choice_fn.as_str())
             } else {
