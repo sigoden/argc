@@ -574,6 +574,21 @@ impl Command {
         self.version.is_some() || self.paths.is_empty()
     }
 
+    pub(crate) fn help_version_flags(&self) -> Vec<&'static str> {
+        let mut output = vec!["--help", "-help"];
+        if self.find_flag_option("-h").is_none() {
+            output.push("-h");
+        }
+        if self.exist_version() {
+            output.push("--version");
+            output.push("-version");
+            if self.find_flag_option("-V").is_none() {
+                output.push("-V");
+            }
+        }
+        output
+    }
+
     pub(crate) fn delegated(&self) -> bool {
         self.subcommands.is_empty()
             && self.flag_option_params.is_empty()
