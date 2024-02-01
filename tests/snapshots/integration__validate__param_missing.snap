@@ -8,7 +8,6 @@ prog
 OUTPUT
 command cat >&2 <<-'EOF' 
 error: the following required arguments were not provided:
-  <VAL>
   --ao <AO>
 
 USAGE: prog --ao <AO> <VAL>

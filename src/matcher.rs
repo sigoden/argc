@@ -17,8 +17,6 @@ use crate::{
 use either::Either;
 use indexmap::{IndexMap, IndexSet};
 
-const KNOWN_OPTIONS: [&str; 6] = ["-h", "-help", "--help", "-V", "-version", "--version"];
-
 pub(crate) struct Matcher<'a, 'b> {
     cmds: Vec<LevelCommand<'a, 'b>>,
     args: &'b [String],
@@ -66,7 +64,7 @@ pub(crate) enum MatchError {
     MissingRequiredEnvironments(Vec<String>),
     NotMultipleArgument(usize, String),
     InvalidValue(usize, String, String, Vec<String>),
-    InvalidEnvValue(usize, String, String, Vec<String>),
+    InvalidEnvironment(usize, String, String, Vec<String>),
     MismatchValues(usize, String),
     NoFlagValue(usize, String),
 }
@@ -119,7 +117,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         }
                     }
                 } else if is_rest_args_positional
-                    || (cmd.no_flags_options_subcommands() && !KNOWN_OPTIONS.contains(&arg))
+                    || (cmd.no_flags_options_subcommands()
+                        && !cmd.help_version_flags().contains(&arg))
                 {
                     add_positional_arg(
                         &mut positional_args,
@@ -537,22 +536,89 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
     fn validate(&self) -> Option<MatchError> {
         let cmds_len = self.cmds.len();
+        let choices_fn_values = self.run_choices_fns().unwrap_or_default();
+
+        for level in 0..cmds_len {
+            let flag_option_args = &self.flag_option_args[level];
+            let cmd = self.cmds[level].1;
+            let mut flag_option_map = IndexMap::new();
+            let mut missing_flag_options: IndexSet<&str> = cmd
+                .flag_option_params
+                .iter()
+                .filter(|v| v.required())
+                .map(|v| v.var_name())
+                .collect();
+            for (i, (key, _, name)) in flag_option_args.iter().enumerate() {
+                match (*key, name) {
+                    ("--help", _) | ("-help", _) | ("-h", None) | (_, Some("help")) => {
+                        return Some(MatchError::DisplayHelp)
+                    }
+                    ("--version", _) | ("-version", _) | ("-V", None) | (_, Some("version"))
+                        if cmd.exist_version() =>
+                    {
+                        return Some(MatchError::DisplayVersion)
+                    }
+                    _ => {}
+                }
+                match *name {
+                    Some(name) => {
+                        missing_flag_options.remove(name);
+                        flag_option_map.entry(name).or_insert(vec![]).push(i);
+                    }
+                    None => return Some(MatchError::UnknownArgument(level, key.to_string())),
+                }
+            }
+            for (name, indexes) in flag_option_map {
+                if let Some(param) = cmd.flag_option_params.iter().find(|v| v.var_name() == name) {
+                    let values_list: Vec<&[&str]> = indexes
+                        .iter()
+                        .map(|v| flag_option_args[*v].1.as_slice())
+                        .collect();
+                    if !param.multiple_occurs() && values_list.len() > 1 {
+                        return Some(MatchError::NotMultipleArgument(level, param.render_name()));
+                    }
+                    let (min, max) = param.args_range();
+                    for values in values_list.iter() {
+                        if param.is_flag() && !values.is_empty() {
+                            return Some(MatchError::NoFlagValue(level, param.render_name()));
+                        } else if values.len() < min || values.len() > max {
+                            return Some(MatchError::MismatchValues(
+                                level,
+                                param.render_name_notations(),
+                            ));
+                        }
+                        if let Some(choices) =
+                            get_param_choice(&param.data.choice, &choices_fn_values)
+                        {
+                            for value in values.iter() {
+                                if !choices.contains(&value.to_string()) {
+                                    return Some(MatchError::InvalidValue(
+                                        level,
+                                        value.to_string(),
+                                        param.render_first_notation(),
+                                        choices.clone(),
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if !missing_flag_options.is_empty() {
+                let missing_flag_options: Vec<String> = missing_flag_options
+                    .iter()
+                    .filter_map(|v| cmd.find_flag_option(v).map(|v| v.render_name_notations()))
+                    .collect();
+                return Some(MatchError::MissingRequiredArguments(
+                    level,
+                    missing_flag_options,
+                ));
+            }
+        }
+
         let level = cmds_len - 1;
         let last_cmd = self.cmds[self.cmds.len() - 1].1;
         let last_args = &self.flag_option_args[level];
-        for (key, _, name) in last_args {
-            match (*key, name) {
-                ("--help", _) | ("-help", _) | ("-h", None) | (_, Some("help")) => {
-                    return Some(MatchError::DisplayHelp)
-                }
-                ("--version", _) | ("-version", _) | ("-V", None) | (_, Some("version"))
-                    if last_cmd.exist_version() =>
-                {
-                    return Some(MatchError::DisplayVersion)
-                }
-                _ => {}
-            }
-        }
         if let Some(&"help") = self.positional_args.first() {
             if self.positional_args.len() < 2 {
                 return Some(MatchError::DisplayHelp);
@@ -593,18 +659,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 extra_args[0].to_string(),
             ));
         }
-        let mut missing_level = level;
-        let mut missing_params: Vec<String> = if positional_params_len > positional_values_len {
-            last_cmd.positional_params[positional_values_len..]
-                .iter()
-                .filter(|param| param.required())
-                .map(|v| v.render_value())
-                .collect()
-        } else {
-            vec![]
-        };
-
-        let choices_fn_values = self.run_choices_fns().unwrap_or_default();
 
         for (i, param) in last_cmd.positional_params.iter().enumerate() {
             if let (Some(values), Some(choices)) = (
@@ -623,76 +677,18 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 }
             }
         }
-        for level in (0..cmds_len).rev() {
-            let args = &self.flag_option_args[level];
-            let cmd = self.cmds[level].1;
-            let mut flag_option_map = IndexMap::new();
-            let mut missing_flag_options: IndexSet<&str> = cmd
-                .flag_option_params
+        if positional_params_len > positional_values_len {
+            let missing_positionals: Vec<_> = last_cmd.positional_params[positional_values_len..]
                 .iter()
-                .filter(|v| v.required())
-                .map(|v| v.var_name())
+                .filter(|param| param.required())
+                .map(|v| v.render_value())
                 .collect();
-            for (i, (key, _, name)) in args.iter().enumerate() {
-                match *name {
-                    Some(name) => {
-                        missing_flag_options.remove(name);
-                        flag_option_map.entry(name).or_insert(vec![]).push(i);
-                    }
-                    None => return Some(MatchError::UnknownArgument(level, key.to_string())),
-                }
+            if !missing_positionals.is_empty() {
+                return Some(MatchError::MissingRequiredArguments(
+                    level,
+                    missing_positionals,
+                ));
             }
-            if !missing_flag_options.is_empty() {
-                let missing_flag_options: Vec<String> = missing_flag_options
-                    .iter()
-                    .filter_map(|v| cmd.find_flag_option(v).map(|v| v.render_name_notations()))
-                    .collect();
-                missing_params.extend(missing_flag_options)
-            }
-            for (name, indexes) in flag_option_map {
-                if let Some(param) = cmd.flag_option_params.iter().find(|v| v.var_name() == name) {
-                    let values_list: Vec<&[&str]> =
-                        indexes.iter().map(|v| args[*v].1.as_slice()).collect();
-                    if !param.multiple_occurs() && values_list.len() > 1 {
-                        return Some(MatchError::NotMultipleArgument(level, param.render_name()));
-                    }
-                    let (min, max) = param.args_range();
-                    for values in values_list.iter() {
-                        if param.is_flag() && !values.is_empty() {
-                            return Some(MatchError::NoFlagValue(level, param.render_name()));
-                        } else if values.len() < min || values.len() > max {
-                            return Some(MatchError::MismatchValues(
-                                level,
-                                param.render_name_notations(),
-                            ));
-                        }
-                        if let Some(choices) =
-                            get_param_choice(&param.data.choice, &choices_fn_values)
-                        {
-                            for value in values.iter() {
-                                if !choices.contains(&value.to_string()) {
-                                    return Some(MatchError::InvalidValue(
-                                        level,
-                                        value.to_string(),
-                                        param.render_first_notation(),
-                                        choices.clone(),
-                                    ));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if !missing_params.is_empty() {
-                missing_level = level;
-                break;
-            }
-        }
-        if !missing_params.is_empty() {
-            return Some(MatchError::MissingRequiredArguments(
-                missing_level,
-                missing_params,
-            ));
         }
 
         let mut missing_envs = vec![];
@@ -711,7 +707,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 self.envs.get(param.var_name()),
             ) {
                 if !choices.contains(&value.to_string()) {
-                    return Some(MatchError::InvalidEnvValue(
+                    return Some(MatchError::InvalidEnvironment(
                         level,
                         value.to_string(),
                         param.var_name().to_string(),
@@ -891,7 +887,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
 "###
                 )
             }
-            MatchError::InvalidEnvValue(_level, value, name, choices) => {
+            MatchError::InvalidEnvironment(_level, value, name, choices) => {
                 exit = 1;
                 let list = choices.join(", ");
                 format!(
