@@ -18,11 +18,11 @@ pub fn eval(
     script_path: Option<&str>,
     term_width: Option<usize>,
 ) -> Result<Vec<ArgcValue>> {
-    let mut cmd = command::Command::new(script_content)?;
+    let mut cmd = command::Command::new(script_content, &args[0])?;
     cmd.eval(args, script_path, term_width)
 }
 
-pub fn export(source: &str) -> Result<CommandValue> {
-    let cmd = command::Command::new(source)?;
+pub fn export(source: &str, root_name: &str) -> Result<CommandValue> {
+    let cmd = command::Command::new(source, root_name)?;
     Ok(cmd.export())
 }

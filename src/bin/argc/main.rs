@@ -74,8 +74,8 @@ fn run() -> Result<i32> {
                 println!("{} has been successfully created.", &names[0]);
             }
             "--argc-export" => {
-                let (source, _) = parse_script_args(&args[2..])?;
-                let value = argc::export(&source)?;
+                let (source, args) = parse_script_args(&args[2..])?;
+                let value = argc::export(&source, &args[0])?;
                 println!("{}", serde_json::to_string_pretty(&value)?);
             }
             "--argc-compgen" => {

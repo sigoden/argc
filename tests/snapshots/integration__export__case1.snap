@@ -3,7 +3,7 @@ source: tests/export.rs
 expression: output
 ---
 {
-  "name": "",
+  "name": "prog",
   "describe": "",
   "author": null,
   "version": null,

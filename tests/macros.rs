@@ -159,7 +159,7 @@ macro_rules! snapshot_compgen_shells {
 #[macro_export]
 macro_rules! snapshot_export {
     ($source:expr) => {
-        let json = argc::export($source).unwrap();
+        let json = argc::export($source, "prog").unwrap();
         let output = serde_json::to_string_pretty(&json).unwrap();
         insta::assert_snapshot!(output);
     };

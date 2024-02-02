@@ -1,0 +1,27 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog cmd --oa abc,def
+
+OUTPUT
+argc_oa=( abc def )
+argc__args=( prog cmd --oa abc,def )
+argc__cmd_arg_index=1
+argc__fn=cmd
+argc__positionals=(  )
+cmd
+
+************ RUN ************
+prog cmd abc,def
+
+OUTPUT
+argc_val=( abc def )
+argc__args=( prog cmd abc,def )
+argc__cmd_arg_index=1
+argc__fn=cmd
+argc__positionals=( abc def )
+cmd abc def
+
+

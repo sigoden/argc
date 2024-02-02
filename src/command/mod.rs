@@ -1,8 +1,8 @@
 mod names_checker;
-mod root_data;
+mod share_data;
 
 use self::names_checker::NamesChecker;
-use self::root_data::RootData;
+use self::share_data::ShareData;
 
 use crate::argc_value::ArgcValue;
 use crate::matcher::Matcher;
@@ -11,7 +11,7 @@ use crate::param::{
     PositionalValue,
 };
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
-use crate::utils::{AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL};
+use crate::utils::{AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, ROOT_NAME};
 use crate::Result;
 
 use anyhow::{anyhow, bail};
@@ -37,23 +37,24 @@ pub(crate) struct Command {
     pub(crate) version: Option<String>,
     pub(crate) subcommand_fns: HashMap<String, Position>,
     pub(crate) names_checker: NamesChecker,
-    pub(crate) root: Arc<RefCell<RootData>>,
+    pub(crate) share: Arc<RefCell<ShareData>>,
     pub(crate) metadata: Vec<(String, String, Position)>,
     pub(crate) symbols: IndexMap<char, SymbolParam>,
 }
 
 impl Command {
-    pub(crate) fn new(source: &str) -> Result<Self> {
+    pub(crate) fn new(source: &str, root_name: &str) -> Result<Self> {
         let events = parse(source)?;
-        let mut root = Command::new_from_events(&events)?;
-        root.inherit(vec![]);
-        if root.has_metadata("inherit-flag-options") {
-            root.inherit_flag_options();
+        let mut cmd = Command::new_from_events(&events)?;
+        cmd.share.borrow_mut().name = Some(root_name.to_string());
+        cmd.inherit(vec![]);
+        if cmd.has_metadata("inherit-flag-options") {
+            cmd.inherit_flag_options();
         }
-        if !root.has_metadata("no-inherit-env") {
-            root.inherit_envs();
+        if !cmd.has_metadata("no-inherit-env") {
+            cmd.inherit_envs();
         }
-        Ok(root)
+        Ok(cmd)
     }
 
     pub(crate) fn eval(
@@ -66,7 +67,7 @@ impl Command {
             bail!("Invalid args");
         }
         if args.len() >= 3 && args[1] == INTERNAL_SYMBOL {
-            let fallback_args = vec!["prog".to_string()];
+            let fallback_args = vec![ROOT_NAME.to_string()];
             let new_args = if args.len() == 3 {
                 &fallback_args
             } else {
@@ -134,7 +135,7 @@ impl Command {
             params.into_iter().map(|v| v.export()).collect()
         };
         CommandValue {
-            name: self.name.clone().unwrap_or_default(),
+            name: self.cmd_name(),
             describe: self.describe.clone(),
             author: self.author.clone(),
             version: self.version.clone(),
@@ -151,7 +152,7 @@ impl Command {
 
     pub(crate) fn new_from_events(events: &[Event]) -> Result<Self> {
         let mut root_cmd = Command::default();
-        let root_data = root_cmd.root.clone();
+        let root_data = root_cmd.share.clone();
         for event in events {
             let Event { data, position } = event.clone();
             match data {
@@ -307,7 +308,7 @@ impl Command {
                 }
             }
         }
-        root_cmd.root.borrow().check_param_fn()?;
+        root_cmd.share.borrow().check_param_fn()?;
         Ok(root_cmd)
     }
 
@@ -333,10 +334,23 @@ impl Command {
         signs.into_iter().collect()
     }
 
-    pub(crate) fn render_help(&self, cmd_paths: &[&str], term_width: Option<usize>) -> String {
+    pub(crate) fn cmd_name(&self) -> String {
+        self.name
+            .clone()
+            .unwrap_or_else(|| self.share.borrow().name())
+    }
+
+    pub(crate) fn cmd_paths(&self) -> Vec<String> {
+        let root_name = self.share.borrow().name();
+        let mut paths = self.paths.clone();
+        paths.insert(0, root_name);
+        paths
+    }
+
+    pub(crate) fn render_help(&self, term_width: Option<usize>) -> String {
         let mut output = vec![];
         if self.version.is_some() {
-            output.push(self.render_version(cmd_paths));
+            output.push(self.render_version());
         }
         if let Some(author) = &self.author {
             output.push(author.to_string());
@@ -347,7 +361,7 @@ impl Command {
         if !output.is_empty() {
             output.push(String::new());
         }
-        output.push(self.render_usage(cmd_paths));
+        output.push(self.render_usage());
         output.push(String::new());
         output.extend(self.render_positionals(term_width));
         output.extend(self.render_flag_options(term_width));
@@ -359,17 +373,18 @@ impl Command {
         output.join("\n")
     }
 
-    pub(crate) fn render_version(&self, cmd_paths: &[&str]) -> String {
+    pub(crate) fn render_version(&self) -> String {
+        let cmd_paths = self.cmd_paths().join("-");
         format!(
             "{} {}",
-            cmd_paths.join("-"),
+            cmd_paths,
             self.version.clone().unwrap_or_else(|| "0.0.0".to_string())
         )
     }
 
-    pub(crate) fn render_usage(&self, cmd_paths: &[&str]) -> String {
+    pub(crate) fn render_usage(&self) -> String {
         let mut output = vec!["USAGE:".to_string()];
-        output.extend(cmd_paths.iter().map(|v| v.to_string()));
+        output.extend(self.cmd_paths());
         let required_options: Vec<String> = self
             .flag_option_params
             .iter()
@@ -460,7 +475,7 @@ impl Command {
             .subcommands
             .iter()
             .map(|subcmd| {
-                let value = subcmd.name.clone().unwrap_or_default();
+                let value = subcmd.cmd_name();
                 value_size = value_size.max(value.len());
                 (value, subcmd.render_subcommand_describe())
             })
@@ -564,7 +579,7 @@ impl Command {
     }
 
     pub(crate) fn exist_hooks(&self) -> (bool, bool) {
-        let fns = &self.root.borrow().fns;
+        let fns = &self.share.borrow().fns;
         let before_hook = fns.contains_key(BEFORE_HOOK);
         let after_hook = fns.contains_key(AFTER_HOOK);
         (before_hook, after_hook)
@@ -574,11 +589,16 @@ impl Command {
         self.version.is_some() || self.paths.is_empty()
     }
 
-    pub(crate) fn help_version_flags(&self) -> Vec<&'static str> {
+    pub(crate) fn help_flags(&self) -> Vec<&'static str> {
         let mut output = vec!["--help", "-help"];
         if self.find_flag_option("-h").is_none() {
             output.push("-h");
         }
+        output
+    }
+
+    pub(crate) fn version_flags(&self) -> Vec<&'static str> {
+        let mut output = vec![];
         if self.exist_version() {
             output.push("--version");
             output.push("-version");
@@ -604,7 +624,7 @@ impl Command {
         self.paths = paths.clone();
         let main = "main";
         if paths.is_empty() {
-            if self.root.borrow().fns.contains_key(main) {
+            if self.share.borrow().fns.contains_key(main) {
                 self.command_fn = Some(main.to_string())
             }
         } else if self.subcommands.is_empty() {
@@ -613,7 +633,7 @@ impl Command {
             let command_fn = [paths.as_slice(), [main.to_string()].as_slice()]
                 .concat()
                 .join("::");
-            if self.root.borrow().fns.contains_key(&command_fn) {
+            if self.share.borrow().fns.contains_key(&command_fn) {
                 self.command_fn = Some(command_fn)
             }
         }
@@ -667,7 +687,7 @@ impl Command {
     }
 
     fn get_cmd<'a>(cmd: &'a mut Self, tag_name: &str, position: usize) -> Result<&'a mut Self> {
-        if cmd.root.borrow().scope == EventScope::FnEnd {
+        if cmd.share.borrow().scope == EventScope::FnEnd {
             bail!(
                 "{}(line {}) shouldn't be here, @cmd is missing?",
                 tag_name,
@@ -683,7 +703,7 @@ impl Command {
 
     fn create_cmd(&mut self) -> &mut Self {
         let cmd = Command {
-            root: self.root.clone(),
+            share: self.share.clone(),
             names_checker: Default::default(),
             ..Default::default()
         };
@@ -754,15 +774,15 @@ pub struct CommandValue {
 
 pub(crate) type SymbolParam = (String, Option<String>);
 
-fn retrive_cmd<'a>(cmd: &'a mut Command, cmd_paths: &[String]) -> Option<&'a mut Command> {
-    if cmd_paths.is_empty() {
+fn retrive_cmd<'a>(cmd: &'a mut Command, paths: &[String]) -> Option<&'a mut Command> {
+    if paths.is_empty() {
         return Some(cmd);
     }
     let child = cmd
         .subcommands
         .iter_mut()
-        .find(|v| v.name.as_deref() == Some(cmd_paths[0].as_str()))?;
-    retrive_cmd(child, &cmd_paths[1..])
+        .find(|v| v.name.as_deref() == Some(paths[0].as_str()))?;
+    retrive_cmd(child, &paths[1..])
 }
 
 fn sanitize_cmd_name(name: &str) -> String {

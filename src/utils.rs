@@ -11,6 +11,7 @@ pub const INTERNAL_SYMBOL: &str = "___internal___";
 pub const VARIABLE_PREFIX: &str = "argc_";
 pub const BEFORE_HOOK: &str = "_argc_before";
 pub const AFTER_HOOK: &str = "_argc_after";
+pub const ROOT_NAME: &str = "prog";
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()
@@ -171,6 +172,11 @@ pub fn path_env_with_exe() -> String {
         }
     }
     path_env
+}
+
+pub fn expand_dotenv(value: &str) -> String {
+    let value = if value.is_empty() { ".env" } else { value };
+    format!("[ -f {value} ] && set -o allexport && . {value} && set +o allexport")
 }
 
 #[cfg(test)]

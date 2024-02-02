@@ -1,4 +1,4 @@
-use crate::utils::{escape_shell_words, AFTER_HOOK, BEFORE_HOOK, VARIABLE_PREFIX};
+use crate::utils::{escape_shell_words, expand_dotenv, AFTER_HOOK, BEFORE_HOOK, VARIABLE_PREFIX};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ArgcValue {
@@ -109,10 +109,7 @@ impl ArgcValue {
                     }
                 }
                 ArgcValue::Dotenv(value) => {
-                    let value = if value.is_empty() { ".env" } else { value };
-                    output.push(format!(
-                        "[ -f {value} ] && set -o allexport && . {value} && set +o allexport"
-                    ))
+                    output.push(expand_dotenv(value));
                 }
                 ArgcValue::CommandFn(name) => {
                     if positional_args.is_empty() {
