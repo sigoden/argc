@@ -18,7 +18,8 @@ use either::Either;
 use indexmap::{IndexMap, IndexSet};
 
 pub(crate) struct Matcher<'a, 'b> {
-    cmds: Vec<LevelCommand<'a, 'b>>,
+    cmds: Vec<&'a Command>,
+    cmd_arg_indexes: Vec<usize>,
     args: &'b [String],
     flag_option_args: Vec<Vec<FlagOptionArg<'a, 'b>>>,
     positional_args: Vec<&'b str>,
@@ -35,7 +36,6 @@ pub(crate) struct Matcher<'a, 'b> {
 
 type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>); // key, values, param_name
 type SymbolArg<'a, 'b> = (&'b str, &'a SymbolParam);
-type LevelCommand<'a, 'b> = (&'b str, &'a Command, usize); // name, command, arg_index
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum ArgComp {
@@ -72,8 +72,9 @@ pub(crate) enum MatchError {
 impl<'a, 'b> Matcher<'a, 'b> {
     pub(crate) fn new(root: &'a Command, args: &'b [String], compgen: bool) -> Self {
         let combine_shorts = root.has_metadata("combine-shorts");
-        let mut cmds: Vec<LevelCommand> = vec![(args[0].as_str(), root, 0)];
+        let mut cmds: Vec<&'a Command> = vec![root];
         let mut cmd_level = 0;
+        let mut cmd_arg_indexes = vec![0];
         let mut arg_index = 1;
         let mut flag_option_args = vec![vec![]];
         let mut positional_args = vec![];
@@ -96,7 +97,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 }
             }
             while arg_index < args_len {
-                let cmd = cmds[cmd_level].1;
+                let cmd = cmds[cmd_level];
                 let signs = cmd.flag_option_signs();
                 let arg = args[arg_index].as_str();
                 let is_last_arg = arg_index == args_len - 1;
@@ -118,7 +119,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     }
                 } else if is_rest_args_positional
                     || (cmd.no_flags_options_subcommands()
-                        && !cmd.help_version_flags().contains(&arg))
+                        && !cmd.help_flags().contains(&arg)
+                        && !cmd.version_flags().contains(&arg))
                 {
                     add_positional_arg(
                         &mut positional_args,
@@ -188,6 +190,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         match_command(
                             &mut cmds,
                             &mut cmd_level,
+                            &mut cmd_arg_indexes,
                             &mut flag_option_args,
                             subcmd,
                             arg,
@@ -202,6 +205,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             match_command(
                                 &mut cmds,
                                 &mut cmd_level,
+                                &mut cmd_arg_indexes,
                                 &mut flag_option_args,
                                 subcmd,
                                 arg,
@@ -257,6 +261,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     match_command(
                         &mut cmds,
                         &mut cmd_level,
+                        &mut cmd_arg_indexes,
                         &mut flag_option_args,
                         subcmd,
                         arg,
@@ -287,14 +292,14 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 arg_comp = ArgComp::CommandOrPositional;
             }
 
-            let last_cmd = cmds.last().unwrap().1;
+            let last_cmd = *cmds.last().unwrap();
             for param in &last_cmd.positional_params {
                 add_param_choice_fn(&mut choice_fns, param)
             }
         }
 
         let mut envs = HashMap::new();
-        let last_cmd = cmds.last().unwrap().1;
+        let last_cmd = *cmds.last().unwrap();
         for param in &last_cmd.env_params {
             if let Ok(value) = std::env::var(param.var_name()) {
                 envs.insert(param.var_name(), value);
@@ -304,6 +309,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
         Self {
             cmds,
+            cmd_arg_indexes,
             args,
             flag_option_args,
             positional_args,
@@ -331,7 +337,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         if let Some(err) = self.validate() {
             return vec![ArgcValue::Error(self.stringify_match_error(&err))];
         }
-        let last_cmd = self.cmds[self.cmds.len() - 1].1;
+        let last_cmd = self.last_cmd();
         let mut output = self.to_arg_values_base();
         if last_cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
             output.push(ArgcValue::ExtraPositionalMultiple(
@@ -349,7 +355,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         if let Some(idx) = self.dashes {
             output.push(ArgcValue::Single("_dashes".into(), idx.to_string()));
         }
-        let last_cmd = self.cmds[self.cmds.len() - 1].1;
+        let last_cmd = self.last_cmd();
         if let Some(name) = &last_cmd.name {
             output.push(ArgcValue::Single("_cmd_fn".into(), name.to_string()));
         }
@@ -377,7 +383,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             )];
         }
         let level = self.cmds.len() - 1;
-        let last_cmd = self.cmds[level].1;
+        let last_cmd = self.cmds[level];
         if last_cmd.delegated() {
             return last_cmd
                 .positional_params
@@ -393,8 +399,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             ArgComp::FlagOrOptionCombine(value) => {
                 let mut output: Vec<CompItem> = vec![];
-                if value.len() == 2 && self.cmds[level].0 == value {
-                    output.extend(comp_subcomands(self.cmds[level - 1].1, true));
+                if value.len() == 2 && &self.args[self.cmd_arg_indexes[level]] == value {
+                    output.extend(comp_subcomands(self.cmds[level - 1], true));
                 }
                 output.extend(self.comp_flag_options().iter().filter_map(
                     |(v, description, nospace, comp_color)| {
@@ -472,10 +478,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let mut output = vec![];
         let cmds_len = self.cmds.len();
         let level = cmds_len - 1;
-        let last_cmd = self.cmds[level].1;
-        let cmd_arg_index = self.cmds[level].2;
+        let last_cmd = self.cmds[level];
+        let cmd_arg_index = self.cmd_arg_indexes[level];
 
-        if let Some(value) = self.cmds[0].1.get_metadata("dotenv") {
+        if let Some(value) = self.cmds[0].get_metadata("dotenv") {
             output.push(ArgcValue::Dotenv(value.to_string()))
         }
 
@@ -498,7 +504,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
         for level in 0..cmds_len {
             let args = &self.flag_option_args[level];
-            let cmd = self.cmds[level].1;
+            let cmd = self.cmds[level];
             for param in cmd.flag_option_params.iter() {
                 let values: Vec<&[&str]> = args
                     .iter()
@@ -540,7 +546,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
         for level in 0..cmds_len {
             let flag_option_args = &self.flag_option_args[level];
-            let cmd = self.cmds[level].1;
+            let cmd = self.cmds[level];
             let mut flag_option_map = IndexMap::new();
             let mut missing_flag_options: IndexSet<&str> = cmd
                 .flag_option_params
@@ -575,18 +581,28 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         .map(|v| flag_option_args[*v].1.as_slice())
                         .collect();
                     if !param.multiple_occurs() && values_list.len() > 1 {
-                        return Some(MatchError::NotMultipleArgument(level, param.render_name()));
+                        return Some(MatchError::NotMultipleArgument(
+                            level,
+                            param.render_long_name(),
+                        ));
                     }
                     let (min, max) = param.args_range();
                     for values in values_list.iter() {
                         if param.is_flag() && !values.is_empty() {
-                            return Some(MatchError::NoFlagValue(level, param.render_name()));
+                            return Some(MatchError::NoFlagValue(level, param.render_long_name()));
                         } else if values.len() < min || values.len() > max {
                             return Some(MatchError::MismatchValues(
                                 level,
                                 param.render_name_notations(),
                             ));
                         }
+                        let values = match param.args_delimiter() {
+                            Some(delimiter) => values
+                                .iter()
+                                .flat_map(|v| v.split(delimiter).collect::<Vec<&str>>())
+                                .collect(),
+                            None => values.to_vec(),
+                        };
                         if let Some(choices) =
                             get_param_choice(&param.data.choice, &choices_fn_values)
                         {
@@ -617,7 +633,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         }
 
         let level = cmds_len - 1;
-        let last_cmd = self.cmds[self.cmds.len() - 1].1;
+        let last_cmd = self.cmds[level];
         let last_args = &self.flag_option_args[level];
         if let Some(&"help") = self.positional_args.first() {
             if self.positional_args.len() < 2 {
@@ -665,6 +681,13 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 positional_values.get(i),
                 get_param_choice(&param.data.choice, &choices_fn_values),
             ) {
+                let values = match param.args_delimiter() {
+                    Some(delimiter) => values
+                        .iter()
+                        .flat_map(|v| v.split(delimiter).collect::<Vec<&str>>())
+                        .collect(),
+                    None => values.to_vec(),
+                };
                 for value in values.iter() {
                     if !choices.contains(&value.to_string()) {
                         return Some(MatchError::InvalidValue(
@@ -750,30 +773,28 @@ impl<'a, 'b> Matcher<'a, 'b> {
         if args_len == 0 {
             return output;
         }
-        let cmd = self.cmds[self.cmds.len() - 1].1;
-        let params_len = cmd.positional_params.len();
+        let last_cmd = self.last_cmd();
+        let params_len = last_cmd.positional_params.len();
         let mut arg_index = 0;
         let mut param_index = 0;
         while param_index < params_len && arg_index < args_len {
-            let param = &cmd.positional_params[param_index];
-            if param.multiple_values() {
+            let param = &last_cmd.positional_params[param_index];
+            let takes = if param.multiple_values() {
                 let dashes_at = self.dashes.unwrap_or_default();
-                let takes = if param_index == 0
+                if param_index == 0
                     && dashes_at > 0
                     && params_len == 2
-                    && cmd.positional_params[1].multiple_values()
+                    && last_cmd.positional_params[1].multiple_values()
                 {
                     dashes_at
                 } else {
                     (args_len - arg_index).saturating_sub(params_len - param_index) + 1
-                };
-                output.push(self.positional_args[arg_index..(arg_index + takes)].to_vec());
-                arg_index += takes;
+                }
             } else {
-                let arg = self.positional_args[arg_index];
-                output.push(vec![arg]);
-                arg_index += 1;
-            }
+                1
+            };
+            output.push(self.positional_args[arg_index..(arg_index + takes)].to_vec());
+            arg_index += takes;
             param_index += 1;
         }
         if arg_index < args_len {
@@ -787,24 +808,23 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let footer = "For more information, try '--help'.";
         let message = match err {
             MatchError::DisplayHelp => {
-                let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
-                cmd.render_help(&cmd_paths, self.term_width)
+                let cmd = self.last_cmd();
+                cmd.render_help(self.term_width)
             }
             MatchError::DisplaySubcommandHelp(name) => {
-                let (cmd, mut cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
+                let cmd = self.last_cmd();
                 let cmd = cmd.find_subcommand(name).unwrap();
-                cmd_paths.push(name.as_str());
-                cmd.render_help(&cmd_paths, self.term_width)
+                cmd.render_help(self.term_width)
             }
             MatchError::DisplayVersion => {
-                let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
-                cmd.render_version(&cmd_paths)
+                let cmd = self.last_cmd();
+                cmd.render_version()
             }
             MatchError::InvalidSubcommand => {
                 exit = 1;
-                let (cmd, cmd_paths) = self.get_cmd_and_paths(self.cmds.len() - 1);
-                let cmd_str = cmd_paths.join("-");
-                let usage = cmd.render_usage(&cmd_paths);
+                let cmd = self.last_cmd();
+                let cmd_str = cmd.cmd_paths().join("-");
+                let usage = cmd.render_usage();
                 let names = cmd.list_subcommand_names().join(", ");
                 format!(
                     r###"error: `{cmd_str}` requires a subcommand but one was not provided
@@ -818,8 +838,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             MatchError::UnknownArgument(level, name) => {
                 exit = 1;
-                let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
-                let usage = cmd.render_usage(&cmd_paths);
+                let cmd = self.cmds[*level];
+                let usage = cmd.render_usage();
                 format!(
                     r###"error: unexpected argument `{name}` found
 
@@ -831,8 +851,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             MatchError::MissingRequiredArguments(level, values) => {
                 exit = 1;
-                let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
-                let usage = cmd.render_usage(&cmd_paths);
+                let cmd = self.cmds[*level];
+                let usage = cmd.render_usage();
                 let list = values
                     .iter()
                     .map(|v| format!("  {v}"))
@@ -865,8 +885,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             MatchError::NotMultipleArgument(level, name) => {
                 exit = 1;
-                let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
-                let usage = cmd.render_usage(&cmd_paths);
+                let cmd = self.cmds[*level];
+                let usage = cmd.render_usage();
                 format!(
                     r###"error: the argument `{name}` cannot be used multiple times
 
@@ -900,8 +920,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             MatchError::MismatchValues(level, value) => {
                 exit = 1;
-                let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
-                let usage = cmd.render_usage(&cmd_paths);
+                let cmd = self.cmds[*level];
+                let usage = cmd.render_usage();
                 format!(
                     r###"error: invalid value for `{value}`
 
@@ -913,8 +933,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             MatchError::NoFlagValue(level, name) => {
                 exit = 1;
-                let (cmd, cmd_paths) = self.get_cmd_and_paths(*level);
-                let usage = cmd.render_usage(&cmd_paths);
+                let cmd = self.cmds[*level];
+                let usage = cmd.render_usage();
                 format!(
                     r###"error: unexpected value for `{name}` flag
 
@@ -928,16 +948,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
         (message, exit)
     }
 
-    fn get_cmd_and_paths(&self, level: usize) -> (&Command, Vec<&str>) {
-        let cmd = self.cmds[level].1;
-        let cmd_paths: Vec<&str> = self.cmds.iter().take(level + 1).map(|v| v.0).collect();
-        (cmd, cmd_paths)
-    }
-
     fn comp_flag_options(&self) -> Vec<CompItem> {
         let mut output = vec![];
         let level = self.cmds.len() - 1;
-        let last_cmd = self.cmds[level].1;
+        let last_cmd = self.last_cmd();
         let args: HashSet<&str> = self.flag_option_args[level]
             .iter()
             .filter_map(|v| v.2)
@@ -961,6 +975,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
         output
+    }
+
+    fn last_cmd(&self) -> &Command {
+        self.cmds.last().unwrap()
     }
 }
 
@@ -1121,11 +1139,12 @@ fn match_prefix_option<'a, 'b>(
 }
 
 fn match_command<'a, 'b>(
-    cmds: &mut Vec<LevelCommand<'a, 'b>>,
+    cmds: &mut Vec<&'a Command>,
     cmd_level: &mut usize,
+    cmd_arg_indexes: &mut Vec<usize>,
     flag_option_args: &mut Vec<Vec<FlagOptionArg<'a, 'b>>>,
     subcmd: &'a Command,
-    arg: &'b str,
+    _arg: &'b str,
     arg_index: usize,
     is_rest_args_positional: &mut bool,
 ) {
@@ -1133,7 +1152,8 @@ fn match_command<'a, 'b>(
         *is_rest_args_positional = true;
     }
     *cmd_level += 1;
-    cmds.push((arg, subcmd, arg_index));
+    cmds.push(subcmd);
+    cmd_arg_indexes.push(arg_index);
     flag_option_args.push(vec![]);
 }
 

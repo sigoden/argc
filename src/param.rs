@@ -38,8 +38,17 @@ pub(crate) trait Param {
     fn prefixed(&self) -> bool {
         self.data().prefixed()
     }
+    fn choice(&self) -> Option<&ChoiceValue> {
+        self.data().choice.as_ref()
+    }
     fn choice_fn(&self) -> Option<(&String, &bool)> {
         self.data().choice_fn()
+    }
+    fn choice_values(&self) -> Option<&Vec<String>> {
+        self.data().choice_values()
+    }
+    fn default(&self) -> Option<&DefaultValue> {
+        self.data().default.as_ref()
     }
     fn default_value(&self) -> Option<&String> {
         self.data().default_value()
@@ -149,7 +158,7 @@ impl FlagOptionParam {
 
     pub(crate) fn export(&self) -> FlagOptionValue {
         FlagOptionValue {
-            long_name: self.render_name(),
+            long_name: self.render_long_name(),
             short_name: self.short.clone(),
             describe: self.describe.clone(),
             is_flag: self.is_flag,
@@ -203,7 +212,7 @@ impl FlagOptionParam {
             .and_then(|name| ['*', '+', '?'].into_iter().find(|v| name.ends_with(*v)))
     }
 
-    pub(crate) fn render_name(&self) -> String {
+    pub(crate) fn render_long_name(&self) -> String {
         format!("{}{}", self.long_prefix, self.data.name)
     }
 
@@ -212,7 +221,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_name_notations(&self) -> String {
-        let mut output = self.render_name();
+        let mut output = self.render_long_name();
         if !self.is_flag() {
             output.push(' ');
             output.push_str(&self.render_notations());
@@ -223,7 +232,7 @@ impl FlagOptionParam {
     pub(crate) fn render_body(&self) -> String {
         let mut output = String::new();
         if self.short.is_none() && self.long_prefix.len() == 1 && self.data.name.len() == 1 {
-            output.push_str(&self.render_name());
+            output.push_str(&self.render_long_name());
         } else {
             if let Some(short) = &self.short {
                 output.push_str(&format!("{short}, "))
@@ -323,7 +332,7 @@ impl FlagOptionParam {
 
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![];
-        output.push(self.render_name());
+        output.push(self.render_long_name());
         if let Some(short) = &self.short {
             output.push(short.clone());
         }

@@ -1,11 +1,15 @@
-use crate::parser::{EventScope, Position};
+use crate::{
+    parser::{EventScope, Position},
+    utils::ROOT_NAME,
+};
 
 use anyhow::{bail, Result};
 use std::collections::HashMap;
 
 #[derive(Default, Debug)]
-pub(crate) struct RootData {
+pub(crate) struct ShareData {
     pub(crate) scope: EventScope,
+    pub(crate) name: Option<String>,
     pub(crate) fns: HashMap<String, Position>,
     pub(crate) cmd_fns: HashMap<String, Position>,
     pub(crate) cmd_pos: usize,
@@ -13,7 +17,14 @@ pub(crate) struct RootData {
     pub(crate) choice_fns: Vec<(String, Position)>,
 }
 
-impl RootData {
+impl ShareData {
+    pub(crate) fn name(&self) -> String {
+        match &self.name {
+            Some(v) => v.clone(),
+            None => ROOT_NAME.to_string(),
+        }
+    }
+
     pub(crate) fn add_param_fn(
         &mut self,
         position: usize,

@@ -35,7 +35,7 @@ pub fn compgen(
             (last_arg.to_string(), None)
         }
     };
-    let cmd = Command::new(script_content)?;
+    let cmd = Command::new(script_content, &args[0])?;
     let new_args: Vec<String> = if cmd.delegated() {
         args.to_vec()
     } else {

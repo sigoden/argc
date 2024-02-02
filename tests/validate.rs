@@ -255,6 +255,27 @@ _choice_fn() {
 }
 
 #[test]
+fn choice_delimiter() {
+    let script = r###"
+# @cmd
+# @option --oa*,[`_choice_fn`]
+# @arg val*,[`_choice_fn`]
+cmd() { :; }
+
+_choice_fn() {
+    echo -e "abc\ndef\nijk"
+}
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "cmd", "--oa", "abc,def"],
+            vec!["prog", "cmd", "abc,def"]
+        ]
+    );
+}
+
+#[test]
 fn cmd_name_sanitize() {
     let script = r###"
 # @cmd
