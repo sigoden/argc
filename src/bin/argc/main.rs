@@ -73,6 +73,11 @@ fn run() -> Result<i32> {
                     .with_context(|| format!("Failed to create {}", &names[0]))?;
                 println!("{} has been successfully created.", &names[0]);
             }
+            "--argc-build" => {
+                let (source, args) = parse_script_args(&args[2..])?;
+                let output = argc::build(&source, &args[0])?;
+                print!("{}", output);
+            }
             "--argc-export" => {
                 let (source, args) = parse_script_args(&args[2..])?;
                 let value = argc::export(&source, &args[0])?;
@@ -218,6 +223,7 @@ fn get_argc_help() -> String {
 USAGE:
     argc --argc-eval <SCRIPT> [ARGS]...             Use `eval "$(argc --argc-eval "$0" "$@")"`
     argc --argc-create [TASKS]...                   Create a boilerplate argcfile
+    argc --argc-build <SCRIPT>                      Build pure bash script without depending on argc
     argc --argc-completions <SHELL> [CMDS]...       Generate shell completion scripts
     argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Dynamically generating completion candidates
     argc --argc-export <SCRIPT>                     Export command line definitions as json

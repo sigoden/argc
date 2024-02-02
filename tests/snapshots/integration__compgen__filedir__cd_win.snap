@@ -5,6 +5,7 @@ expression: data
 ************ COMPGEN `prog --oa ` ************
 .\argc_value.rs	1	.\argc_value.rs		39
 .\bin\	0	.\bin\		1;34
+.\build.rs	1	.\build.rs		39
 .\command\	0	.\command\		1;34
 .\compgen.rs	1	.\compgen.rs		39
 .\lib.rs	1	.\lib.rs		39
@@ -16,6 +17,7 @@ expression: data
 ************ COMPGEN `prog --ob ` ************
 .\argc_value.rs:	0	.\argc_value.rs:		39
 .\bin\	0	.\bin\		1;34
+.\build.rs:	0	.\build.rs:		39
 .\command\	0	.\command\		1;34
 .\compgen.rs:	0	.\compgen.rs:		39
 .\lib.rs:	0	.\lib.rs:		39
@@ -27,6 +29,7 @@ expression: data
 ************ COMPGEN `prog --oa=` ************
 --oa=.\argc_value.rs	1	.\argc_value.rs		39
 --oa=.\bin\	0	.\bin\		1;34
+--oa=.\build.rs	1	.\build.rs		39
 --oa=.\command\	0	.\command\		1;34
 --oa=.\compgen.rs	1	.\compgen.rs		39
 --oa=.\lib.rs	1	.\lib.rs		39
@@ -38,6 +41,7 @@ expression: data
 ************ COMPGEN `prog foo=` ************
 foo=.\argc_value.rs	1	.\argc_value.rs		39
 foo=.\bin\	0	.\bin\		1;34
+foo=.\build.rs	1	.\build.rs		39
 foo=.\command\	0	.\command\		1;34
 foo=.\compgen.rs	1	.\compgen.rs		39
 foo=.\lib.rs	1	.\lib.rs		39

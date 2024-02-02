@@ -5,6 +5,7 @@ expression: data
 ************ COMPGEN `prog --oa ` ************
 argc_value.rs	1	argc_value.rs		default
 bin/	0	bin/		blue bold
+build.rs	1	build.rs		default
 command/	0	command/		blue bold
 compgen.rs	1	compgen.rs		default
 lib.rs	1	lib.rs		default
@@ -16,6 +17,7 @@ utils.rs	1	utils.rs		default
 ************ COMPGEN `prog --oa=` ************
 --oa=argc_value.rs	1	argc_value.rs		default
 --oa=bin/	0	bin/		blue bold
+--oa=build.rs	1	build.rs		default
 --oa=command/	0	command/		blue bold
 --oa=compgen.rs	1	compgen.rs		default
 --oa=lib.rs	1	lib.rs		default
@@ -27,6 +29,7 @@ utils.rs	1	utils.rs		default
 ************ COMPGEN `prog --ob ` ************
 argc_value.rs:	0	argc_value.rs:		default
 bin/	0	bin/		blue bold
+build.rs:	0	build.rs:		default
 command/	0	command/		blue bold
 compgen.rs:	0	compgen.rs:		default
 lib.rs:	0	lib.rs:		default
@@ -38,6 +41,7 @@ utils.rs:	0	utils.rs:		default
 ************ COMPGEN `prog foo=` ************
 foo=argc_value.rs	1	argc_value.rs		default
 foo=bin/	0	bin/		blue bold
+foo=build.rs	1	build.rs		default
 foo=command/	0	command/		blue bold
 foo=compgen.rs	1	compgen.rs		default
 foo=lib.rs	1	lib.rs		default

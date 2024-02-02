@@ -5,6 +5,7 @@ expression: data
 ************ COMPGEN `prog --oa src/` ************
 src/argc_value.rs	1	argc_value.rs		default
 src/bin/	0	bin/		blue bold
+src/build.rs	1	build.rs		default
 src/command/	0	command/		blue bold
 src/compgen.rs	1	compgen.rs		default
 src/lib.rs	1	lib.rs		default
@@ -20,6 +21,7 @@ src/parser.rs	1	parser.rs		default
 ************ COMPGEN `prog --oa ./src/` ************
 ./src/argc_value.rs	1	argc_value.rs		default
 ./src/bin/	0	bin/		blue bold
+./src/build.rs	1	build.rs		default
 ./src/command/	0	command/		blue bold
 ./src/compgen.rs	1	compgen.rs		default
 ./src/lib.rs	1	lib.rs		default

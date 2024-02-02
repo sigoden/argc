@@ -15,7 +15,6 @@ mod compgen;
 mod create;
 mod details;
 mod env;
-mod export;
 mod fail;
 mod hook_fn;
 mod main_fn;

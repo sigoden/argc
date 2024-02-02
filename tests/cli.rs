@@ -67,3 +67,16 @@ fn compgen_argc() {
         .stdout(predicates::str::contains("zsh"))
         .success();
 }
+
+#[test]
+fn compgen_export() {
+    let path = locate_script("examples/options.sh");
+    let output = Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-export")
+        .arg(path)
+        .output()
+        .unwrap();
+    let stdout = std::str::from_utf8(&output.stdout).unwrap();
+    insta::assert_snapshot!(stdout);
+}

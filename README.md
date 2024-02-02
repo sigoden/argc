@@ -288,7 +288,7 @@ The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel. Functions ru
 
 ## License
 
-Copyright (c) 2023-2024 aichat-developers.
+Copyright (c) 2023-2024 argc developers.
 
 argc is made available under the terms of either the MIT License or the Apache License 2.0, at your option.
 

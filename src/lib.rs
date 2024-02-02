@@ -1,4 +1,5 @@
 mod argc_value;
+mod build;
 mod command;
 mod compgen;
 mod matcher;
@@ -8,6 +9,7 @@ pub mod utils;
 
 use anyhow::Result;
 pub use argc_value::ArgcValue;
+pub use build::build;
 pub use command::CommandValue;
 pub use compgen::{compgen, Shell};
 pub use param::{ChoiceValue, DefaultValue, EnvValue, FlagOptionValue, PositionalValue};
