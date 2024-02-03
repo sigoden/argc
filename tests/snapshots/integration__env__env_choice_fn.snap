@@ -10,6 +10,6 @@ error: invalid value `val` for environment variable `TEST_EFA`
 
 # BUILD_OUTPUT
 error: invalid value `val` for environment variable `TEST_EFA`
- [possible values: abc, def, ghi]
+  [possible values: abc, def, ghi]
 
 

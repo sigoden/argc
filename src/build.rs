@@ -153,7 +153,7 @@ _argc_validate_choices() {
             fi
         done
         if [[ $pass -ne 1 ]]; then
-            _argc_die "error: invalid value \`$item\` for $render_name"$'\n'" [possible values: $concated_choices]"
+            _argc_die "error: invalid value \`$item\` for $render_name"$'\n'"  [possible values: $concated_choices]"
         fi
     done
 }

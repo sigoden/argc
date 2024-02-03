@@ -14,7 +14,7 @@ exit 1
 
 # RUN_OUTPUT
 error: invalid value `foo` for `[VAL]`
- [possible values: abc]
+  [possible values: abc]
 
 ************ RUN ************
 prog foo
@@ -28,6 +28,6 @@ exit 1
 
 # RUN_OUTPUT
 error: invalid value `foo` for `[VAL]`
- [possible values: def]
+  [possible values: def]
 
 

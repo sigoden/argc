@@ -14,6 +14,6 @@ exit 1
 
 # BUILD_OUTPUT
 error: invalid value `val` for `<CE>`
- [possible values: abc, def, ghi]
+  [possible values: abc, def, ghi]
 
 

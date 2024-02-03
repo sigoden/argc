@@ -16,6 +16,6 @@ cmd 'a\b' 'a\b'
 
 # RUN_OUTPUT
 error: invalid value `a\b` for `[BAR]`
- [possible values: ]
+  [possible values: ]
 
 

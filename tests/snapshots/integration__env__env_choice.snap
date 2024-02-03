@@ -10,6 +10,6 @@ error: invalid value `val` for environment variable `TEST_ECA`
 
 # BUILD_OUTPUT
 error: invalid value `val` for environment variable `TEST_ECA`
- [possible values: a, b]
+  [possible values: a, b]
 
 
