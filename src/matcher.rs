@@ -866,7 +866,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 exit = 1;
                 let list = choices.join(", ");
                 format!(
-                    r###"error: invalid value `{value}` for env `{name}`
+                    r###"error: invalid value `{value}` for environment variable `{name}`
   [possible values: {list}]"###
                 )
             }

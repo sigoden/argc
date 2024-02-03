@@ -18,6 +18,12 @@ EOF
 exit 1
 
 # BUILD_OUTPUT
-error: the required argument `--oa <OA>` were not provided
+error: the following required arguments were not provided:
+  --oa <OA>
+  --ob <OB>...
+  --oc <OC>...
+  --oca <OCA>
+  --ocb <OCB>...
+  --occ <OCC>...
 
 

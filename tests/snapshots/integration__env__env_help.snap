@@ -1,12 +1,9 @@
 ---
 source: tests/env.rs
-expression: "format!(r#\"\nSTDOUT\n{stdout}\n\nSTDERR\n{stderr}\n\"#)"
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
 
-STDOUT
-
-
-STDERR
+# OUTPUT
 USAGE: envs <COMMAND>
 
 COMMANDS:
@@ -21,5 +18,22 @@ ENVIRONMENTS:
   TEST_ECB  choice + default [default: a] [possible values: a, b]
   TEST_EFA  choice from fn
 
+
+
+
+# BUILD_OUTPUT
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  run
+
+ENVIRONMENTS:
+  TEST_EA   optional
+  TEST_EB*  required
+  TEST_EDA  default [default: a]
+  TEST_EDB  default from fn
+  TEST_ECA  choice [possible values: a, b]
+  TEST_ECB  choice + default [default: a] [possible values: a, b]
+  TEST_EFA  choice from fn
 
 

@@ -13,6 +13,7 @@ EOF
 exit 1
 
 # BUILD_OUTPUT
-error: the required argument `--ao <AO>` were not provided
+error: the following required arguments were not provided:
+  --ao <AO>
 
 

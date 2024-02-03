@@ -8,19 +8,12 @@ use serde::Serialize;
 
 pub(crate) trait Param {
     fn data(&self) -> &ParamData;
+    fn id(&self) -> &str;
+    fn var_name(&self) -> String;
     fn describe(&self) -> &str;
     fn tag_name(&self) -> &str;
     fn multiple_values(&self) -> bool;
     fn render_source(&self) -> String;
-
-    fn id(&self) -> &str {
-        &self.data().name
-    }
-
-    fn var_name(&self) -> String {
-        argc_var_name(self.id())
-    }
-
     fn describe_oneline(&self) -> &str {
         match self.describe().split_once('\n') {
             Some((v, _)) => v,
@@ -84,12 +77,16 @@ impl Param for FlagOptionParam {
         &self.data
     }
 
-    fn describe(&self) -> &str {
-        &self.describe
-    }
-
     fn id(&self) -> &str {
         &self.id
+    }
+
+    fn var_name(&self) -> String {
+        argc_var_name(self.id())
+    }
+
+    fn describe(&self) -> &str {
+        &self.describe
     }
 
     fn tag_name(&self) -> &str {
@@ -381,6 +378,14 @@ impl Param for PositionalParam {
         &self.data
     }
 
+    fn id(&self) -> &str {
+        &self.data().name
+    }
+
+    fn var_name(&self) -> String {
+        argc_var_name(self.id())
+    }
+
     fn describe(&self) -> &str {
         &self.describe
     }
@@ -504,6 +509,14 @@ pub(crate) struct EnvParam {
 impl Param for EnvParam {
     fn data(&self) -> &ParamData {
         &self.data
+    }
+
+    fn id(&self) -> &str {
+        &self.data().name
+    }
+
+    fn var_name(&self) -> String {
+        self.id().to_string()
     }
 
     fn describe(&self) -> &str {

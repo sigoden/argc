@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use assert_cmd::cargo::cargo_bin;
@@ -105,12 +106,20 @@ pub fn build_script(script_dir: &TempDir, source: &str) -> PathBuf {
     script_file.path().to_path_buf()
 }
 
-pub fn run_script(script_path: &Path, args: &[String]) -> String {
+pub fn run_script<T: AsRef<Path>>(
+    script_path: T,
+    args: &[String],
+    envs: &[(&str, &str)],
+) -> String {
     let path_env_var = get_path_env_var();
-    let mut command = std::process::Command::new("bash");
-    command.arg(script_path).env("PATH", path_env_var.clone());
-    command.args(args);
-    let output = command.output().unwrap();
+    let envs: HashMap<&str, &str> = envs.iter().cloned().collect();
+    let output = std::process::Command::new("bash")
+        .arg(script_path.as_ref())
+        .args(args)
+        .env("PATH", path_env_var.clone())
+        .envs(envs)
+        .output()
+        .unwrap();
     let stdout = std::str::from_utf8(&output.stdout).unwrap();
     let stderr = std::str::from_utf8(&output.stderr).unwrap();
     format!("{stdout}{stderr}")
