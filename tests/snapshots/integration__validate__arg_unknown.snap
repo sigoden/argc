@@ -5,14 +5,13 @@ expression: data
 RUN
 prog cmd_arg v1 v2
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: unexpected argument `v2` found
-
-USAGE: prog cmd_arg [VAL]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: unexpected argument `v2` found
+
 

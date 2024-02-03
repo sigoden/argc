@@ -5,7 +5,7 @@ expression: data
 RUN
 prog test2
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: the following required arguments were not provided:
   --oa <OA>
@@ -14,11 +14,10 @@ error: the following required arguments were not provided:
   --oca <OCA>
   --ocb <OCB>...
   --occ <OCC>...
-
-USAGE: prog test2 --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: the required argument `--oa <OA>` were not provided
+
 

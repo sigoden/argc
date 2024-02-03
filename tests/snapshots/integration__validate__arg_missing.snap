@@ -5,15 +5,14 @@ expression: data
 RUN
 prog cmd_required_multi_arg
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: the following required arguments were not provided:
   <VAL>...
-
-USAGE: prog cmd_required_multi_arg <VAL>...
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: the required environments `<VAL>...` were not provided
+
 

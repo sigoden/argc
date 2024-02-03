@@ -5,10 +5,15 @@ expression: data
 ************ RUN ************
 prog +nightly
 
-OUTPUT
+# OUTPUT
 argc_toolchain=nightly
 argc__args=( prog +nightly )
 argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="+nightly")
+argc__cmd_arg_index=0
+argc__positionals=([0]="+nightly")
 
 

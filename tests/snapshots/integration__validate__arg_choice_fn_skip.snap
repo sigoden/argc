@@ -5,11 +5,20 @@ expression: data
 RUN
 prog cmd_arg_with_choice_fn_and_skip_check abc
 
-OUTPUT
+# OUTPUT
 argc_val=abc
 argc__args=( prog cmd_arg_with_choice_fn_and_skip_check abc )
 argc__cmd_arg_index=1
 argc__fn=cmd_arg_with_choice_fn_and_skip_check
 argc__positionals=( abc )
 cmd_arg_with_choice_fn_and_skip_check abc
+
+# BUILD_OUTPUT
+argc__args=([0]="prog" [1]="cmd_arg_with_choice_fn_and_skip_check" [2]="abc")
+argc__cmd_arg_index=1
+argc__fn=cmd_arg_with_choice_fn_and_skip_check
+argc__positionals=([0]="abc")
+argc_val=abc
+cmd_arg_with_choice_fn_and_skip_check abc
+
 

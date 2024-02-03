@@ -214,9 +214,7 @@ fn arg_terminated() {
     let script = r###"
 # @cmd
 # @arg args~
-cmda() {
-    :;
-}
+cmda() { :; }
 "###;
     snapshot!(script, &["prog", "cmda", "-h"]);
 }
@@ -235,16 +233,12 @@ fn cmd_with_hyphen() {
     let script = r###"
 # @cmd Run --foo
 # @flag --fa
---foo() {
-    :;
-}
+--foo() { :; }
 
 # @cmd Run bar
 # @alias -B
 # @flag --fa
-bar() {
-    :;
-}
+bar() { :; }
 "###;
     snapshot_multi!(
         script,
@@ -259,9 +253,7 @@ fn cmd_combine_shorts() {
 # @cmd
 # @flag -B
 # @flag -C
--A() {
-    :;
-}
+-A() { :; }
 "###;
     snapshot_multi!(script, [vec!["prog", "-A"], vec!["prog", "-AB"]]);
 }
@@ -284,15 +276,11 @@ fn inherit_flag_options() {
 # @option --ob[a|b]  desc 1
 
 # @cmd
-cmda() {
-    :;
-}
+cmda() { :; }
 
 # @cmd
 # @option --ob[x|y]  desc 2
-cmdb() {
-    :;
-}
+cmdb() { :; }
 "###;
     snapshot_multi!(
         script,

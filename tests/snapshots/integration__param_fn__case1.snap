@@ -5,17 +5,20 @@ expression: data
 ************ RUN ************
 prog ___internal___ _choice_fn
 
-OUTPUT
+# OUTPUT
 argc__args=( prog )
 argc__cmd_arg_index=0
 argc__positionals=(  )
 _choice_fn
 exit
 
+# RUN_OUTPUT
+error: no supported param
+
 ************ RUN ************
 prog ___internal___ _choice_fn prog test1 --cc 
 
-OUTPUT
+# OUTPUT
 argc_cc=''
 argc__args=( prog test1 --cc '' )
 argc__cmd_arg_index=1
@@ -25,10 +28,13 @@ argc__positionals=(  )
 _choice_fn
 exit
 
+# RUN_OUTPUT
+error: no supported param
+
 ************ RUN ************
 prog ___internal___ _choice_fn prog test1 -a --oa oa --cc 
 
-OUTPUT
+# OUTPUT
 argc_a=1
 argc_oa=oa
 argc_cc=''
@@ -39,5 +45,8 @@ argc__option=argc_cc
 argc__positionals=(  )
 _choice_fn
 exit
+
+# RUN_OUTPUT
+error: no supported param
 
 

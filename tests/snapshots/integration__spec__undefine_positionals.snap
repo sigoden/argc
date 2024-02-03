@@ -5,9 +5,16 @@ expression: data
 RUN
 prog --oa v1 v2
 
-OUTPUT
+# OUTPUT
 argc_oa=v1
 argc__args=( prog --oa v1 v2 )
 argc__cmd_arg_index=0
 argc__positionals=( v2 )
+
+# BUILD_OUTPUT
+argc__args=([0]="prog" [1]="--oa" [2]="v1" [3]="v2")
+argc__cmd_arg_index=0
+argc__positionals=([0]="v2")
+argc_oa=v1
+
 

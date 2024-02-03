@@ -1,4 +1,6 @@
-use crate::utils::{escape_shell_words, expand_dotenv, AFTER_HOOK, BEFORE_HOOK, VARIABLE_PREFIX};
+use crate::utils::{
+    argc_var_name, escape_shell_words, expand_dotenv, AFTER_HOOK, BEFORE_HOOK, VARIABLE_PREFIX,
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ArgcValue {
@@ -27,27 +29,20 @@ impl ArgcValue {
         let (mut before_hook, mut after_hook) = (false, false);
         for value in values {
             match value {
-                ArgcValue::Single(name, value) => {
+                ArgcValue::Single(id, value) => {
                     output.push(format!(
-                        "{}{}={}",
-                        VARIABLE_PREFIX,
-                        sanitize_arg_name(name),
+                        "{}={}",
+                        argc_var_name(id),
                         escape_shell_words(value)
                     ));
                 }
-                ArgcValue::SingleFn(name, fn_name) => {
-                    output.push(format!(
-                        "{}{}=`{}`",
-                        VARIABLE_PREFIX,
-                        sanitize_arg_name(name),
-                        fn_name,
-                    ));
+                ArgcValue::SingleFn(id, fn_name) => {
+                    output.push(format!("{}=`{}`", argc_var_name(id), fn_name,));
                 }
-                ArgcValue::Multiple(name, values) => {
+                ArgcValue::Multiple(id, values) => {
                     output.push(format!(
-                        "{}{}=( {} )",
-                        VARIABLE_PREFIX,
-                        sanitize_arg_name(name),
+                        "{}=( {} )",
+                        argc_var_name(id),
                         values
                             .iter()
                             .map(|v| escape_shell_words(v))
@@ -55,36 +50,21 @@ impl ArgcValue {
                             .join(" ")
                     ));
                 }
-                ArgcValue::PositionalSingle(name, value) => {
+                ArgcValue::PositionalSingle(id, value) => {
                     let value = escape_shell_words(value);
-                    output.push(format!(
-                        "{}{}={}",
-                        VARIABLE_PREFIX,
-                        sanitize_arg_name(name),
-                        &value
-                    ));
+                    output.push(format!("{}={}", argc_var_name(id), &value));
                     positional_args.push(value);
                 }
-                ArgcValue::PositionalSingleFn(name, fn_name) => {
-                    output.push(format!(
-                        "{}{}=`{}`",
-                        VARIABLE_PREFIX,
-                        sanitize_arg_name(name),
-                        &fn_name
-                    ));
+                ArgcValue::PositionalSingleFn(id, fn_name) => {
+                    output.push(format!("{}=`{}`", argc_var_name(id), &fn_name));
                     positional_args.push(format!("`{}`", fn_name));
                 }
-                ArgcValue::PositionalMultiple(name, values) => {
+                ArgcValue::PositionalMultiple(id, values) => {
                     let values = values
                         .iter()
                         .map(|v| escape_shell_words(v))
                         .collect::<Vec<String>>();
-                    output.push(format!(
-                        "{}{}=( {} )",
-                        VARIABLE_PREFIX,
-                        sanitize_arg_name(name),
-                        values.join(" ")
-                    ));
+                    output.push(format!("{}=( {} )", argc_var_name(id), values.join(" ")));
                     positional_args.extend(values);
                 }
                 ArgcValue::ExtraPositionalMultiple(values) => {
@@ -97,8 +77,8 @@ impl ArgcValue {
                 ArgcValue::Env(name, value) => {
                     output.push(format!("export {}={}", name, escape_shell_words(value)));
                 }
-                ArgcValue::EnvFn(name, fn_name) => {
-                    output.push(format!("export {}=`{}`", name, fn_name,));
+                ArgcValue::EnvFn(id, fn_name) => {
+                    output.push(format!("export {}=`{}`", id, fn_name,));
                 }
                 ArgcValue::Hook((before, after)) => {
                     if *before {
@@ -152,8 +132,4 @@ impl ArgcValue {
         }
         output.join("\n")
     }
-}
-
-pub fn sanitize_arg_name(name: &str) -> String {
-    name.replace(['-', '.', ':'], "_")
 }

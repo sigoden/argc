@@ -42,15 +42,21 @@ macro_rules! snapshot {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
         let values = argc::eval($source, &args, $path, $width).unwrap();
         let shell_code = argc::ArgcValue::to_shell(&values);
+        let build_script_dir = $crate::fixtures::tmpdir();
+        let build_script_path = $crate::fixtures::build_script(&build_script_dir, $source);
+        let build_output = $crate::fixtures::run_script(&build_script_path, &args[1..]);
         let args = $args.join(" ");
         let data = format!(
             r###"RUN
 {}
 
-OUTPUT
+# OUTPUT
+{}
+
+# BUILD_OUTPUT
 {}
 "###,
-            args, shell_code,
+            args, shell_code, build_output
         );
         insta::assert_snapshot!(data);
     };
@@ -65,21 +71,28 @@ macro_rules! snapshot_multi {
         let mut data = String::new();
         let (script_path, script_content, script_file) =
             $crate::fixtures::create_argc_script($source, "script.sh");
+
+        let build_script_dir = $crate::fixtures::tmpdir();
+        let build_script_path = $crate::fixtures::build_script(&build_script_dir, $source);
+
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
             let values =
                 argc::eval(&script_content, &args, Some(script_path.as_str()), None).unwrap();
+            let shell_code = argc::ArgcValue::to_shell(&values);
+            let build_output = $crate::fixtures::run_script(&build_script_path, &args[1..]);
             let args = args.join(" ");
             let piece = format!(
                 r###"************ RUN ************
 {}
 
-OUTPUT
+# OUTPUT
 {}
 
+# RUN_OUTPUT
+{}
 "###,
-                args,
-                argc::ArgcValue::to_shell(&values),
+                args, shell_code, build_output,
             );
             data.push_str(&piece);
         }

@@ -5,9 +5,16 @@ expression: data
 RUN
 prog --oa bash Argcfile.sh --ob
 
-OUTPUT
+# OUTPUT
 argc_oa=( bash Argcfile.sh --ob )
 argc__args=( prog --oa bash Argcfile.sh --ob )
 argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# BUILD_OUTPUT
+argc__args=([0]="prog" [1]="--oa" [2]="bash" [3]="Argcfile.sh" [4]="--ob")
+argc__cmd_arg_index=0
+argc__positionals=()
+argc_oa=([0]="bash" [1]="Argcfile.sh" [2]="--ob")
+
 

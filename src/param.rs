@@ -1,5 +1,6 @@
 use crate::utils::{
-    escape_shell_words, is_choice_value_terminate, is_default_value_terminate, to_cobol_case,
+    argc_var_name, escape_shell_words, is_choice_value_terminate, is_default_value_terminate,
+    to_cobol_case,
 };
 use crate::ArgcValue;
 
@@ -8,10 +9,17 @@ use serde::Serialize;
 pub(crate) trait Param {
     fn data(&self) -> &ParamData;
     fn describe(&self) -> &str;
-    fn var_name(&self) -> &str;
     fn tag_name(&self) -> &str;
     fn multiple_values(&self) -> bool;
     fn render_source(&self) -> String;
+
+    fn id(&self) -> &str {
+        &self.data().name
+    }
+
+    fn var_name(&self) -> String {
+        argc_var_name(self.id())
+    }
 
     fn describe_oneline(&self) -> &str {
         match self.describe().split_once('\n') {
@@ -65,7 +73,7 @@ pub(crate) struct FlagOptionParam {
     pub(crate) is_flag: bool,
     pub(crate) short: Option<String>,
     pub(crate) long_prefix: String,
-    pub(crate) var_name: String,
+    pub(crate) id: String,
     pub(crate) raw_notations: Vec<String>,
     pub(crate) notations: Vec<String>,
     pub(crate) inherit: bool,
@@ -80,8 +88,8 @@ impl Param for FlagOptionParam {
         &self.describe
     }
 
-    fn var_name(&self) -> &str {
-        &self.var_name
+    fn id(&self) -> &str {
+        &self.id
     }
 
     fn tag_name(&self) -> &str {
@@ -125,17 +133,17 @@ impl FlagOptionParam {
         long_prefix: &str,
         row_notations: &[&str],
     ) -> Self {
-        let base_name = data.name.clone();
-        let var_name = if long_prefix.starts_with('+') {
-            format!("plus_{}", base_name)
+        let name = data.name.clone();
+        let id = if long_prefix.starts_with('+') {
+            format!("plus_{}", name)
         } else {
-            base_name.clone()
+            name.clone()
         };
         let raw_notations: Vec<String> = row_notations.iter().map(|v| v.to_string()).collect();
         let mut notations = if is_flag {
             vec![]
         } else if raw_notations.is_empty() {
-            vec![to_cobol_case(&base_name)]
+            vec![to_cobol_case(&name)]
         } else {
             raw_notations.iter().map(|v| to_cobol_case(v)).collect()
         };
@@ -149,7 +157,7 @@ impl FlagOptionParam {
             short: short.map(|v| v.to_string()),
             long_prefix: long_prefix.to_string(),
             data,
-            var_name,
+            id,
             raw_notations,
             notations,
             inherit: false,
@@ -158,11 +166,11 @@ impl FlagOptionParam {
 
     pub(crate) fn export(&self) -> FlagOptionValue {
         FlagOptionValue {
+            id: self.id().to_string(),
             long_name: self.render_long_name(),
             short_name: self.short.clone(),
             describe: self.describe.clone(),
             is_flag: self.is_flag,
-            var_name: self.var_name().to_string(),
             notations: self.notations.clone(),
             required: self.required(),
             multiple_values: self.multiple_values(),
@@ -279,21 +287,21 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&[&str]]) -> Option<ArgcValue> {
-        let var_name = self.var_name().to_string();
+        let id = self.id().to_string();
         if self.is_flag {
             if values.is_empty() {
                 None
             } else {
-                Some(ArgcValue::Single(var_name, values.len().to_string()))
+                Some(ArgcValue::Single(id, values.len().to_string()))
             }
         } else {
             if values.is_empty() {
                 match &self.data.default {
                     Some(DefaultValue::Value(value)) => {
-                        return Some(ArgcValue::Single(var_name, value.clone()));
+                        return Some(ArgcValue::Single(id, value.clone()));
                     }
                     Some(DefaultValue::Fn(f)) => {
-                        return Some(ArgcValue::SingleFn(var_name, f.clone()));
+                        return Some(ArgcValue::SingleFn(id, f.clone()));
                     }
                     None => return None,
                 }
@@ -314,20 +322,20 @@ impl FlagOptionParam {
                         })
                         .collect()
                 }
-                Some(ArgcValue::Multiple(var_name, values))
+                Some(ArgcValue::Multiple(id, values))
             } else if self.notations.len() > 1 {
                 Some(ArgcValue::Multiple(
-                    var_name,
+                    id,
                     values[0].iter().map(|v| v.to_string()).collect(),
                 ))
             } else {
-                Some(ArgcValue::Single(var_name, must_get_first(values[0])))
+                Some(ArgcValue::Single(id, must_get_first(values[0])))
             }
         }
     }
 
     pub(crate) fn is_match(&self, name: &str) -> bool {
-        self.var_name() == name || self.list_names().iter().any(|v| v == name)
+        self.id() == name || self.list_names().iter().any(|v| v == name)
     }
 
     pub(crate) fn list_names(&self) -> Vec<String> {
@@ -342,11 +350,11 @@ impl FlagOptionParam {
 
 #[derive(Debug, Serialize)]
 pub struct FlagOptionValue {
+    pub id: String,
     pub long_name: String,
     pub short_name: Option<String>,
     pub describe: String,
     pub is_flag: bool,
-    pub var_name: String,
     pub notations: Vec<String>,
     pub required: bool,
     pub multiple_values: bool,
@@ -375,10 +383,6 @@ impl Param for PositionalParam {
 
     fn describe(&self) -> &str {
         &self.describe
-    }
-
-    fn var_name(&self) -> &str {
-        &self.data.name
     }
 
     fn tag_name(&self) -> &str {
@@ -418,8 +422,8 @@ impl PositionalParam {
 
     pub(crate) fn export(&self) -> PositionalValue {
         PositionalValue {
+            id: self.id().to_string(),
             describe: self.describe.clone(),
-            var_name: self.var_name().to_string(),
             notation: self.notation.clone(),
             required: self.required(),
             multiple_values: self.multiple_values(),
@@ -443,14 +447,14 @@ impl PositionalParam {
     }
 
     pub(crate) fn get_arg_value(&self, values: &[&str]) -> Option<ArgcValue> {
-        let name = self.var_name().to_string();
+        let id = self.id().to_string();
         if values.is_empty() {
             match &self.data.default {
                 Some(DefaultValue::Value(value)) => {
-                    return Some(ArgcValue::PositionalSingle(name, value.clone()));
+                    return Some(ArgcValue::PositionalSingle(id, value.clone()));
                 }
                 Some(DefaultValue::Fn(f)) => {
-                    return Some(ArgcValue::PositionalSingleFn(name, f.clone()));
+                    return Some(ArgcValue::PositionalSingleFn(id, f.clone()));
                 }
                 None => return None,
             }
@@ -468,17 +472,17 @@ impl PositionalParam {
                     })
                     .collect()
             }
-            Some(ArgcValue::PositionalMultiple(name, values))
+            Some(ArgcValue::PositionalMultiple(id, values))
         } else {
-            Some(ArgcValue::PositionalSingle(name, must_get_first(values)))
+            Some(ArgcValue::PositionalSingle(id, must_get_first(values)))
         }
     }
 }
 
 #[derive(Debug, Serialize)]
 pub struct PositionalValue {
+    pub id: String,
     pub describe: String,
-    pub var_name: String,
     pub notation: String,
     pub required: bool,
     pub multiple_values: bool,
@@ -504,10 +508,6 @@ impl Param for EnvParam {
 
     fn describe(&self) -> &str {
         &self.describe
-    }
-
-    fn var_name(&self) -> &str {
-        &self.data.name
     }
 
     fn tag_name(&self) -> &str {
@@ -539,8 +539,8 @@ impl EnvParam {
 
     pub(crate) fn export(&self) -> EnvValue {
         EnvValue {
+            id: self.id().to_string(),
             describe: self.describe.clone(),
-            var_name: self.var_name().to_string(),
             required: self.required(),
             default: self.data().default.clone(),
             choice: self.data().choice.clone(),
@@ -550,15 +550,15 @@ impl EnvParam {
 
     pub(crate) fn render_body(&self) -> String {
         let marker = if self.required() { "*" } else { "" };
-        format!("{}{}", self.var_name(), marker)
+        format!("{}{}", self.id(), marker)
     }
 
     pub(crate) fn get_env_value(&self) -> Option<ArgcValue> {
-        let name = self.var_name().to_string();
+        let id = self.id().to_string();
         let default = self.data.default.clone()?;
         let value = match default {
-            DefaultValue::Value(value) => ArgcValue::Env(name, value),
-            DefaultValue::Fn(value) => ArgcValue::EnvFn(name, value),
+            DefaultValue::Value(value) => ArgcValue::Env(id, value),
+            DefaultValue::Fn(value) => ArgcValue::EnvFn(id, value),
         };
         Some(value)
     }
@@ -566,8 +566,8 @@ impl EnvParam {
 
 #[derive(Debug, Serialize)]
 pub struct EnvValue {
+    pub id: String,
     pub describe: String,
-    pub var_name: String,
     pub required: bool,
     pub default: Option<DefaultValue>,
     pub choice: Option<ChoiceValue>,

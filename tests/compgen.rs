@@ -183,18 +183,14 @@ fn flag_cmds() {
 # @cmd Run --foo
 # @alias -F
 # @flag --fa
---foo() {
-    :;
-}
+--foo() { :; }
 
 # @cmd Run bar
 # @alias -B
 # @flag -C
 # @flag -D
 # @flag --fa
-bar() {
-    :;
-}
+bar() { :; }
 "###;
 
     snapshot_compgen!(
@@ -469,7 +465,7 @@ fn dashes_at() {
     let script = r#"
 # @arg val*[`_choice_fn`]
 _choice_fn() {
-    if [[ -z "$argc__dashes" ]]; then
+    if [[ -z "$argc__dash" ]]; then
         echo -e "abc\ndef\nghi"
     else
         echo -e "v1\nv2"
@@ -491,15 +487,11 @@ fn inherit_flag_options() {
 # @option --ob[a|b]  desc 1
 
 # @cmd
-cmda() {
-    :;
-}
+cmda() { :; }
 
 # @cmd
 # @option --ob[x|y]  desc 2
-cmdb() {
-    :;
-}
+cmdb() { :; }
 "###;
     snapshot_compgen!(
         script,
@@ -724,16 +716,12 @@ _choice_fn() {
 fn fallback_comp_file() {
     let script = r###"
 # @cmd
-args() {
-    :;
-}
+args() { :; }
 
 # @cmd
 # @option --file
 # @option --value
-cmd() {
-    :;
-}
+cmd() { :; }
 "###;
 
     snapshot_compgen!(

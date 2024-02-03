@@ -5,27 +5,33 @@ expression: data
 ************ RUN ************
 prog cmd -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd
 
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd
+
 ************ RUN ************
 prog cmd_alias -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_alias
 
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_alias
+
 ************ RUN ************
 prog cmd_arg -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_arg [VAL]
 
@@ -35,10 +41,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_arg [VAL]
+
+ARGS:
+  [VAL]
+
 ************ RUN ************
 prog cmd_multi_arg -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_multi_arg [VAL]...
 
@@ -48,10 +60,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_multi_arg [VAL]...
+
+ARGS:
+  [VAL]...
+
 ************ RUN ************
 prog cmd_required_multi_arg -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_required_multi_arg <VAL>...
 
@@ -61,10 +79,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_required_multi_arg <VAL>...
+
+ARGS:
+  <VAL>...
+
 ************ RUN ************
 prog cmd_required_arg -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_required_arg <VAL>
 
@@ -74,10 +98,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_required_arg <VAL>
+
+ARGS:
+  <VAL>
+
 ************ RUN ************
 prog cmd_arg_with_default -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_arg_with_default [VAL]
 
@@ -87,10 +117,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_arg_with_default [VAL]
+
+ARGS:
+  [VAL]  [default: xyz]
+
 ************ RUN ************
 prog cmd_arg_with_default_fn -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_arg_with_default_fn [VAL]
 
@@ -100,10 +136,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_arg_with_default_fn [VAL]
+
+ARGS:
+  [VAL]
+
 ************ RUN ************
 prog cmd_arg_with_choices -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_arg_with_choices [VAL]
 
@@ -113,10 +155,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_arg_with_choices [VAL]
+
+ARGS:
+  [VAL]  [possible values: x, y, z]
+
 ************ RUN ************
 prog cmd_arg_with_choices_and_default -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_arg_with_choices_and_default [VAL]
 
@@ -126,10 +174,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_arg_with_choices_and_default [VAL]
+
+ARGS:
+  [VAL]  [default: x] [possible values: x, y, z]
+
 ************ RUN ************
 prog cmd_multi_arg_with_choices -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_multi_arg_with_choices [VAL]...
 
@@ -139,10 +193,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_multi_arg_with_choices [VAL]...
+
+ARGS:
+  [VAL]...  [possible values: x, y, z]
+
 ************ RUN ************
 prog cmd_required_multi_arg_with_choices -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_required_multi_arg_with_choices <VAL>...
 
@@ -152,10 +212,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_required_multi_arg_with_choices <VAL>...
+
+ARGS:
+  <VAL>...  [possible values: x, y, z]
+
 ************ RUN ************
 prog cmd_arg_with_choice_fn -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_arg_with_choice_fn [VAL]
 
@@ -165,10 +231,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_arg_with_choice_fn [VAL]
+
+ARGS:
+  [VAL]
+
 ************ RUN ************
 prog cmd_arg_with_choice_fn_and_skip_check -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_arg_with_choice_fn_and_skip_check [VAL]
 
@@ -178,10 +250,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_arg_with_choice_fn_and_skip_check [VAL]
+
+ARGS:
+  [VAL]
+
 ************ RUN ************
 prog cmd_required_arg_with_choice_fn -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_required_arg_with_choice_fn <VAL>
 
@@ -191,10 +269,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_required_arg_with_choice_fn <VAL>
+
+ARGS:
+  <VAL>
+
 ************ RUN ************
 prog cmd_multi_arg_with_choice_fn -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_multi_arg_with_choice_fn [VAL]...
 
@@ -204,10 +288,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_multi_arg_with_choice_fn [VAL]...
+
+ARGS:
+  [VAL]...
+
 ************ RUN ************
 prog cmd_required_multi_arg_with_choice_fn -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_required_multi_arg_with_choice_fn <VAL>...
 
@@ -217,10 +307,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_required_multi_arg_with_choice_fn <VAL>...
+
+ARGS:
+  <VAL>...
+
 ************ RUN ************
 prog cmd_multi_arg_with_choice_fn_and_comma_sep -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_multi_arg_with_choice_fn_and_comma_sep [VAL]...
 
@@ -230,10 +326,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_multi_arg_with_choice_fn_and_comma_sep [VAL]...
+
+ARGS:
+  [VAL]...
+
 ************ RUN ************
 prog cmd_terminaled -h
 
-OUTPUT
+# OUTPUT
 argc_vals=( -h )
 argc__args=( prog cmd_terminaled -h )
 argc__cmd_arg_index=1
@@ -241,10 +343,18 @@ argc__fn=cmd_terminaled
 argc__positionals=( -h )
 cmd_terminaled -h
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_terminaled" [2]="-h")
+argc__cmd_arg_index=1
+argc__fn=cmd_terminaled
+argc__positionals=([0]="-h")
+argc_vals=([0]="-h")
+cmd_terminaled -h
+
 ************ RUN ************
 prog cmd_arg_with_notation -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_arg_with_notation [FILE]
 
@@ -254,10 +364,16 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_arg_with_notation [FILE]
+
+ARGS:
+  [FILE]
+
 ************ RUN ************
 prog cmd_two_multi_args -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_two_multi_args [VAL1]... [VAL2]...
 
@@ -268,10 +384,17 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_two_multi_args [VAL1]... [VAL2]...
+
+ARGS:
+  [VAL1]...
+  [VAL2]...
+
 ************ RUN ************
 prog cmd_one_required_second_required_multi -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_one_required_second_required_multi <VAL1> <VAL2>...
 
@@ -282,10 +405,17 @@ ARGS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cmd_one_required_second_required_multi <VAL1> <VAL2>...
+
+ARGS:
+  <VAL1>
+  <VAL2>...
+
 ************ RUN ************
 prog cmd_three_required_args -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_three_required_args <VAL1> <VAL2> <VAL3>
 
@@ -296,5 +426,13 @@ ARGS:
 
 EOF
 exit 0
+
+# RUN_OUTPUT
+USAGE: prog cmd_three_required_args <VAL1> <VAL2> <VAL3>
+
+ARGS:
+  <VAL1>
+  <VAL2>
+  <VAL3>
 
 

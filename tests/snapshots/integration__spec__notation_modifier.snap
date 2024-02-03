@@ -5,87 +5,133 @@ expression: data
 ************ RUN ************
 prog --oa
 
-OUTPUT
+# OUTPUT
 argc_oa=(  )
 argc__args=( prog --oa )
 argc__cmd_arg_index=0
 argc__positionals=(  )
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--oa")
+argc__cmd_arg_index=0
+argc__positionals=()
+argc_oa=()
+
 ************ RUN ************
 prog --oa v1
 
-OUTPUT
+# OUTPUT
 argc_oa=( v1 )
 argc__args=( prog --oa v1 )
 argc__cmd_arg_index=0
 argc__positionals=(  )
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--oa" [2]="v1")
+argc__cmd_arg_index=0
+argc__positionals=()
+argc_oa=([0]="v1")
+
 ************ RUN ************
 prog --oa v1 v2
 
-OUTPUT
+# OUTPUT
 argc_oa=( v1 v2 )
 argc__args=( prog --oa v1 v2 )
 argc__cmd_arg_index=0
 argc__positionals=(  )
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--oa" [2]="v1" [3]="v2")
+argc__cmd_arg_index=0
+argc__positionals=()
+argc_oa=([0]="v1" [1]="v2")
+
 ************ RUN ************
 prog --ob
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: invalid value for `--ob <VALUE+>`
-
-USAGE: prog [OPTIONS]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# RUN_OUTPUT
+error: invalid value for `--ob <VALUE+>`
 
 ************ RUN ************
 prog --ob v1
 
-OUTPUT
+# OUTPUT
 argc_ob=( v1 )
 argc__args=( prog --ob v1 )
 argc__cmd_arg_index=0
 argc__positionals=(  )
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--ob" [2]="v1")
+argc__cmd_arg_index=0
+argc__positionals=()
+argc_ob=([0]="v1")
+
 ************ RUN ************
 prog --ob v1 v2
 
-OUTPUT
+# OUTPUT
 argc_ob=( v1 v2 )
 argc__args=( prog --ob v1 v2 )
 argc__cmd_arg_index=0
 argc__positionals=(  )
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--ob" [2]="v1" [3]="v2")
+argc__cmd_arg_index=0
+argc__positionals=()
+argc_ob=([0]="v1" [1]="v2")
+
 ************ RUN ************
 prog --oc
 
-OUTPUT
+# OUTPUT
 argc_oc=''
 argc__args=( prog --oc )
 argc__cmd_arg_index=0
 argc__positionals=(  )
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--oc")
+argc__cmd_arg_index=0
+argc__positionals=()
+argc_oc=
+
 ************ RUN ************
 prog --oc v1
 
-OUTPUT
+# OUTPUT
 argc_oc=v1
 argc__args=( prog --oc v1 )
 argc__cmd_arg_index=0
 argc__positionals=(  )
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--oc" [2]="v1")
+argc__cmd_arg_index=0
+argc__positionals=()
+argc_oc=v1
+
 ************ RUN ************
 prog --oc v1 v2
 
-OUTPUT
+# OUTPUT
 argc_oc=v1
 argc__args=( prog --oc v1 v2 )
 argc__cmd_arg_index=0
 argc__positionals=( v2 )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--oc" [2]="v1" [3]="v2")
+argc__cmd_arg_index=0
+argc__positionals=([0]="v2")
+argc_oc=v1
 
 

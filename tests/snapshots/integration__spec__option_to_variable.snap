@@ -5,7 +5,7 @@ expression: data
 RUN
 prog --flag-foo --option-foo foo1 --option-foo foo2 --option-bar bar v1 x1 x2
 
-OUTPUT
+# OUTPUT
 argc_flag_foo=1
 argc_option_foo=( foo1 foo2 )
 argc_option_bar=bar
@@ -14,4 +14,15 @@ argc_arg_bar=( x1 x2 )
 argc__args=( prog --flag-foo --option-foo foo1 --option-foo foo2 --option-bar bar v1 x1 x2 )
 argc__cmd_arg_index=0
 argc__positionals=( v1 x1 x2 )
+
+# BUILD_OUTPUT
+argc__args=([0]="prog" [1]="--flag-foo" [2]="--option-foo" [3]="foo1" [4]="--option-foo" [5]="foo2" [6]="--option-bar" [7]="bar" [8]="v1" [9]="x1" [10]="x2")
+argc__cmd_arg_index=0
+argc__positionals=([0]="v1" [1]="x1" [2]="x2")
+argc_arg_bar=([0]="x1" [1]="x2")
+argc_arg_foo=v1
+argc_flag_foo=1
+argc_option_bar=bar
+argc_option_foo=([0]="foo1" [1]="foo2")
+
 

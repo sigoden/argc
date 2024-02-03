@@ -10,7 +10,4 @@ STDERR
 error: invalid value `val` for env `TEST_ECA`
   [possible values: a, b]
 
-For more information, try '--help'.
-
-
 

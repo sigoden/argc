@@ -5,14 +5,13 @@ expression: data
 RUN
 prog test1 -o file1
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: invalid value for `--od <FILE> <FILE>`
-
-USAGE: prog test1 [OPTIONS]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: invalid value for `--od <FILE> <FILE>`
+
 

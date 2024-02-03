@@ -30,7 +30,7 @@ impl NamesChecker {
     }
 
     pub(crate) fn check_env(&mut self, param: &EnvParam, pos: Position) -> Result<()> {
-        let name = param.var_name();
+        let name = param.id();
         if let Some(exist_pos) = self.envs.get(name) {
             bail!(
                 "{}",
@@ -46,7 +46,7 @@ impl NamesChecker {
         param: &PositionalParam,
         pos: Position,
     ) -> Result<()> {
-        let name = param.var_name();
+        let name = param.id();
         if let Some(exist_pos) = self.positionals.get(name) {
             bail!(
                 "{}",

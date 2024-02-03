@@ -10,7 +10,4 @@ STDERR
 error: the following required environments were not provided:
   TEST_EB
 
-For more information, try '--help'.
-
-
 

@@ -59,7 +59,7 @@ fn help_notations() {
 fn version() {
     let script = r###"
 # @cmd
-cmd() {:;}
+cmd() { :; }
 "###;
     snapshot_multi!(
         script,
@@ -279,24 +279,16 @@ _choice_fn() {
 fn cmd_name_sanitize() {
     let script = r###"
 # @cmd
-cat_() {
-    echo run cat_
-}
+cat_() { :; }
 
 # @cmd
-do_() {
-    echo run do_
-}
+do_() { :; }
 
 # @cmd
-do_::foo() {
-    echo run do_::foo
-}
+do_::foo() { :; }
 
 # @cmd
-do_::bar() {
-    echo run do_::bar
-}
+do_::bar() { :; }
 "###;
     snapshot_multi!(
         script,

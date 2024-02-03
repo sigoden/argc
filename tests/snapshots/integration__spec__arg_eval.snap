@@ -5,7 +5,7 @@ expression: data
 ************ RUN ************
 prog cmd_arg v1
 
-OUTPUT
+# OUTPUT
 argc_val=v1
 argc__args=( prog cmd_arg v1 )
 argc__cmd_arg_index=1
@@ -13,10 +13,18 @@ argc__fn=cmd_arg
 argc__positionals=( v1 )
 cmd_arg v1
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_arg" [2]="v1")
+argc__cmd_arg_index=1
+argc__fn=cmd_arg
+argc__positionals=([0]="v1")
+argc_val=v1
+cmd_arg v1
+
 ************ RUN ************
 prog cmd_multi_arg v1 v2
 
-OUTPUT
+# OUTPUT
 argc_val=( v1 v2 )
 argc__args=( prog cmd_multi_arg v1 v2 )
 argc__cmd_arg_index=1
@@ -24,10 +32,18 @@ argc__fn=cmd_multi_arg
 argc__positionals=( v1 v2 )
 cmd_multi_arg v1 v2
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_multi_arg" [2]="v1" [3]="v2")
+argc__cmd_arg_index=1
+argc__fn=cmd_multi_arg
+argc__positionals=([0]="v1" [1]="v2")
+argc_val=([0]="v1" [1]="v2")
+cmd_multi_arg v1 v2
+
 ************ RUN ************
 prog cmd_arg_with_default
 
-OUTPUT
+# OUTPUT
 argc_val=xyz
 argc__args=( prog cmd_arg_with_default )
 argc__cmd_arg_index=1
@@ -35,10 +51,18 @@ argc__fn=cmd_arg_with_default
 argc__positionals=( xyz )
 cmd_arg_with_default xyz
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_arg_with_default")
+argc__cmd_arg_index=1
+argc__fn=cmd_arg_with_default
+argc__positionals=([0]="xyz")
+argc_val=xyz
+cmd_arg_with_default xyz
+
 ************ RUN ************
 prog cmd_arg_with_default v1
 
-OUTPUT
+# OUTPUT
 argc_val=v1
 argc__args=( prog cmd_arg_with_default v1 )
 argc__cmd_arg_index=1
@@ -46,10 +70,18 @@ argc__fn=cmd_arg_with_default
 argc__positionals=( v1 )
 cmd_arg_with_default v1
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_arg_with_default" [2]="v1")
+argc__cmd_arg_index=1
+argc__fn=cmd_arg_with_default
+argc__positionals=([0]="v1")
+argc_val=v1
+cmd_arg_with_default v1
+
 ************ RUN ************
 prog cmd_arg_with_default_fn
 
-OUTPUT
+# OUTPUT
 argc_val=`_default_fn`
 argc__args=( prog cmd_arg_with_default_fn )
 argc__cmd_arg_index=1
@@ -57,10 +89,18 @@ argc__fn=cmd_arg_with_default_fn
 argc__positionals=( `_default_fn` )
 cmd_arg_with_default_fn `_default_fn`
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_arg_with_default_fn")
+argc__cmd_arg_index=1
+argc__fn=cmd_arg_with_default_fn
+argc__positionals=([0]="abc")
+argc_val=abc
+cmd_arg_with_default_fn abc
+
 ************ RUN ************
 prog cmd_arg_with_choices x
 
-OUTPUT
+# OUTPUT
 argc_val=x
 argc__args=( prog cmd_arg_with_choices x )
 argc__cmd_arg_index=1
@@ -68,10 +108,18 @@ argc__fn=cmd_arg_with_choices
 argc__positionals=( x )
 cmd_arg_with_choices x
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_arg_with_choices" [2]="x")
+argc__cmd_arg_index=1
+argc__fn=cmd_arg_with_choices
+argc__positionals=([0]="x")
+argc_val=x
+cmd_arg_with_choices x
+
 ************ RUN ************
 prog cmd_arg_with_choice_fn abc
 
-OUTPUT
+# OUTPUT
 argc_val=abc
 argc__args=( prog cmd_arg_with_choice_fn abc )
 argc__cmd_arg_index=1
@@ -79,10 +127,18 @@ argc__fn=cmd_arg_with_choice_fn
 argc__positionals=( abc )
 cmd_arg_with_choice_fn abc
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_arg_with_choice_fn" [2]="abc")
+argc__cmd_arg_index=1
+argc__fn=cmd_arg_with_choice_fn
+argc__positionals=([0]="abc")
+argc_val=abc
+cmd_arg_with_choice_fn abc
+
 ************ RUN ************
 prog cmd_two_multi_args v1 v2
 
-OUTPUT
+# OUTPUT
 argc_val1=( v1 )
 argc_val2=( v2 )
 argc__args=( prog cmd_two_multi_args v1 v2 )
@@ -91,10 +147,19 @@ argc__fn=cmd_two_multi_args
 argc__positionals=( v1 v2 )
 cmd_two_multi_args v1 v2
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_two_multi_args" [2]="v1" [3]="v2")
+argc__cmd_arg_index=1
+argc__fn=cmd_two_multi_args
+argc__positionals=([0]="v1" [1]="v2")
+argc_val1=([0]="v1")
+argc_val2=([0]="v2")
+cmd_two_multi_args v1 v2
+
 ************ RUN ************
 prog cmd_two_multi_args v1 v2 v3
 
-OUTPUT
+# OUTPUT
 argc_val1=( v1 v2 )
 argc_val2=( v3 )
 argc__args=( prog cmd_two_multi_args v1 v2 v3 )
@@ -103,10 +168,19 @@ argc__fn=cmd_two_multi_args
 argc__positionals=( v1 v2 v3 )
 cmd_two_multi_args v1 v2 v3
 
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_two_multi_args" [2]="v1" [3]="v2" [4]="v3")
+argc__cmd_arg_index=1
+argc__fn=cmd_two_multi_args
+argc__positionals=([0]="v1" [1]="v2" [2]="v3")
+argc_val1=([0]="v1" [1]="v2")
+argc_val2=([0]="v3")
+cmd_two_multi_args v1 v2 v3
+
 ************ RUN ************
 prog cmd_three_required_args v1 v2 v3
 
-OUTPUT
+# OUTPUT
 argc_val1=v1
 argc_val2=v2
 argc_val3=v3
@@ -114,6 +188,16 @@ argc__args=( prog cmd_three_required_args v1 v2 v3 )
 argc__cmd_arg_index=1
 argc__fn=cmd_three_required_args
 argc__positionals=( v1 v2 v3 )
+cmd_three_required_args v1 v2 v3
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_three_required_args" [2]="v1" [3]="v2" [4]="v3")
+argc__cmd_arg_index=1
+argc__fn=cmd_three_required_args
+argc__positionals=([0]="v1" [1]="v2" [2]="v3")
+argc_val1=v1
+argc_val2=v2
+argc_val3=v3
 cmd_three_required_args v1 v2 v3
 
 

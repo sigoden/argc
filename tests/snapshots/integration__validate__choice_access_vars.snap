@@ -5,27 +5,29 @@ expression: data
 ************ RUN ************
 prog --fa foo
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: invalid value `foo` for `[VAL]`
   [possible values: abc]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# RUN_OUTPUT
+error: invalid value `foo` for `[VAL]`
+ [possible values: abc]
 
 ************ RUN ************
 prog foo
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: invalid value `foo` for `[VAL]`
   [possible values: def]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# RUN_OUTPUT
+error: invalid value `foo` for `[VAL]`
+ [possible values: def]
 
 

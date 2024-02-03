@@ -152,7 +152,7 @@ impl Command {
 
     pub(crate) fn new_from_events(events: &[Event]) -> Result<Self> {
         let mut root_cmd = Command::default();
-        let root_data = root_cmd.share.clone();
+        let share_data = root_cmd.share.clone();
         for event in events {
             let Event { data, position } = event.clone();
             match data {
@@ -180,14 +180,14 @@ impl Command {
                     cmd.metadata.push((key, value, position));
                 }
                 EventData::Cmd(value) => {
-                    if root_data.borrow().scope == EventScope::CmdStart {
+                    if share_data.borrow().scope == EventScope::CmdStart {
                         bail!(
                             "@cmd(line {}) missing function?",
-                            root_data.borrow().cmd_pos
+                            share_data.borrow().cmd_pos
                         )
                     }
-                    root_data.borrow_mut().cmd_pos = position;
-                    root_data.borrow_mut().scope = EventScope::CmdStart;
+                    share_data.borrow_mut().cmd_pos = position;
+                    share_data.borrow_mut().scope = EventScope::CmdStart;
                     let subcmd = root_cmd.create_cmd();
                     if !value.is_empty() {
                         subcmd.describe = value.clone();
@@ -200,7 +200,7 @@ impl Command {
                 EventData::FlagOption(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
                     if param.is_option() {
-                        root_data.borrow_mut().add_param_fn(
+                        share_data.borrow_mut().add_param_fn(
                             position,
                             param.default_fn(),
                             param.choice_fn(),
@@ -211,7 +211,7 @@ impl Command {
                 }
                 EventData::Env(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
-                    root_data.borrow_mut().add_param_fn(
+                    share_data.borrow_mut().add_param_fn(
                         position,
                         param.default_fn(),
                         param.choice_fn(),
@@ -221,7 +221,7 @@ impl Command {
                 }
                 EventData::Positional(param) => {
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
-                    root_data.borrow_mut().add_param_fn(
+                    share_data.borrow_mut().add_param_fn(
                         position,
                         param.default_fn(),
                         param.choice_fn(),
@@ -229,7 +229,7 @@ impl Command {
                     cmd.add_positional_param(param, position)?;
                 }
                 EventData::Func(name) => {
-                    if let Some(pos) = root_data.borrow_mut().cmd_fns.get(&name) {
+                    if let Some(pos) = share_data.borrow_mut().cmd_fns.get(&name) {
                         bail!(
                             "{}(line {}) conflicts with cmd or alias at line {}",
                             name,
@@ -237,9 +237,9 @@ impl Command {
                             pos
                         )
                     }
-                    root_data.borrow_mut().fns.insert(name.clone(), position);
-                    if root_data.borrow().scope == EventScope::CmdStart {
-                        root_data
+                    share_data.borrow_mut().fns.insert(name.clone(), position);
+                    if share_data.borrow().scope == EventScope::CmdStart {
+                        share_data
                             .borrow_mut()
                             .cmd_fns
                             .insert(name.clone(), position);
@@ -254,14 +254,14 @@ impl Command {
                             cmd.match_fn = Some(name.to_string());
                             if let Some((aliases, aliases_pos)) = &cmd.aliases {
                                 for name in aliases {
-                                    if let Some(pos) = root_data.borrow().cmd_fns.get(name) {
+                                    if let Some(pos) = share_data.borrow().cmd_fns.get(name) {
                                         bail!(
                                             "@alias(line {}) conflicts with cmd or alias at line {}",
                                             aliases_pos,
                                             pos
                                         );
                                     }
-                                    root_data
+                                    share_data
                                         .borrow_mut()
                                         .cmd_fns
                                         .insert(name.clone(), *aliases_pos);
@@ -301,7 +301,7 @@ impl Command {
                             }
                         }
                     }
-                    root_data.borrow_mut().scope = EventScope::FnEnd;
+                    share_data.borrow_mut().scope = EventScope::FnEnd;
                 }
                 EventData::Unknown(name) => {
                     bail!("@{}(line {}) is unknown tag", name, position);
@@ -571,7 +571,7 @@ impl Command {
     }
 
     pub(crate) fn find_env(&self, name: &str) -> Option<&EnvParam> {
-        self.env_params.iter().find(|v| v.var_name() == name)
+        self.env_params.iter().find(|v| v.id() == name)
     }
 
     pub(crate) fn no_flags_options_subcommands(&self) -> bool {
@@ -591,7 +591,11 @@ impl Command {
 
     pub(crate) fn help_flags(&self) -> Vec<&'static str> {
         let mut output = vec!["--help", "-help"];
-        if self.find_flag_option("-h").is_none() {
+        let short = match self.find_flag_option("-h") {
+            Some(param) => param.id() == "help",
+            None => true,
+        };
+        if short {
             output.push("-h");
         }
         output
@@ -602,7 +606,11 @@ impl Command {
         if self.exist_version() {
             output.push("--version");
             output.push("-version");
-            if self.find_flag_option("-V").is_none() {
+            let short = match self.find_flag_option("-V") {
+                Some(param) => param.id() == "version",
+                None => true,
+            };
+            if short {
                 output.push("-V");
             }
         }
@@ -613,11 +621,7 @@ impl Command {
         self.subcommands.is_empty()
             && self.flag_option_params.is_empty()
             && self.positional_params.len() == 1
-            && self
-                .positional_params
-                .first()
-                .map(|v| v.terminated())
-                .unwrap_or_default()
+            && self.positional_params[0].terminated()
     }
 
     fn inherit(&mut self, paths: Vec<String>) {
@@ -648,7 +652,7 @@ impl Command {
         for subcmd in self.subcommands.iter_mut() {
             let mut inherited_flag_options = vec![];
             for flag_option in &self.flag_option_params {
-                if subcmd.find_flag_option(flag_option.var_name()).is_none() {
+                if subcmd.find_flag_option(flag_option.id()).is_none() {
                     let mut flag_option = flag_option.clone();
                     flag_option.inherit = true;
                     inherited_flag_options.push(flag_option);
@@ -667,7 +671,7 @@ impl Command {
         for subcmd in self.subcommands.iter_mut() {
             let mut inherited_envs = vec![];
             for env_param in &self.env_params {
-                if subcmd.find_env(env_param.var_name()).is_none() {
+                if subcmd.find_env(env_param.id()).is_none() {
                     let mut env_param = env_param.clone();
                     env_param.inherit = true;
                     inherited_envs.push(env_param);

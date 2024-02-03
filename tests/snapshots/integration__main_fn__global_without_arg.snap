@@ -5,15 +5,15 @@ expression: data
 RUN
 prog abc
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: `prog` requires a subcommand but one was not provided
   [subcommands: cmd]
-
-USAGE: prog <COMMAND>
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: `prog` requires a subcommand but one was not provided
+  [subcommands: cmd]
+
 
