@@ -7,14 +7,12 @@ prog
 
 # OUTPUT
 argc__args=( prog )
-argc__cmd_arg_index=0
 argc__fn=main
 argc__positionals=(  )
 main
 
 # BUILD_OUTPUT
 argc__args=([0]="prog")
-argc__cmd_arg_index=0
 argc__fn=main
 argc__positionals=()
 main

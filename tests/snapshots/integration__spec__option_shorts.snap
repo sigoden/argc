@@ -9,7 +9,6 @@ prog test1 -af
 argc_a=1
 argc_fb=1
 argc__args=( prog test1 -af )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
 test1
@@ -24,7 +23,6 @@ prog test1 -ae e
 argc_a=1
 argc_e=e
 argc__args=( prog test1 -ae e )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
 test1
@@ -40,7 +38,6 @@ argc_a=1
 argc_fb=1
 argc_e=e
 argc__args=( prog test1 -afe e )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
 test1
@@ -55,7 +52,6 @@ prog test1 -ao v1 v2
 argc_a=1
 argc_od=( v1 v2 )
 argc__args=( prog test1 -ao v1 v2 )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
 test1

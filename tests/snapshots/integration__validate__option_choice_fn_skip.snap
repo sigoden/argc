@@ -8,14 +8,12 @@ prog test1 --cd val
 # OUTPUT
 argc_cd=val
 argc__args=( prog test1 --cd val )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
 test1
 
 # BUILD_OUTPUT
 argc__args=([0]="prog" [1]="test1" [2]="--cd" [3]="val")
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=()
 argc_cd=val

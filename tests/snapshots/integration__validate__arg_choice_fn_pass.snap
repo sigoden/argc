@@ -8,7 +8,6 @@ prog cmd_arg_with_choice_fn val
 # OUTPUT
 argc_val=val
 argc__args=( prog cmd_arg_with_choice_fn val )
-argc__cmd_arg_index=1
 argc__fn=cmd_arg_with_choice_fn
 argc__positionals=( val )
 cmd_arg_with_choice_fn val

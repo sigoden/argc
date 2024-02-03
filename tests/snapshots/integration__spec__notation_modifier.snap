@@ -8,12 +8,10 @@ prog --oa
 # OUTPUT
 argc_oa=(  )
 argc__args=( prog --oa )
-argc__cmd_arg_index=0
 argc__positionals=(  )
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="--oa")
-argc__cmd_arg_index=0
 argc__positionals=()
 argc_oa=()
 
@@ -23,12 +21,10 @@ prog --oa v1
 # OUTPUT
 argc_oa=( v1 )
 argc__args=( prog --oa v1 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="--oa" [2]="v1")
-argc__cmd_arg_index=0
 argc__positionals=()
 argc_oa=([0]="v1")
 
@@ -38,12 +34,10 @@ prog --oa v1 v2
 # OUTPUT
 argc_oa=( v1 v2 )
 argc__args=( prog --oa v1 v2 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="--oa" [2]="v1" [3]="v2")
-argc__cmd_arg_index=0
 argc__positionals=()
 argc_oa=([0]="v1" [1]="v2")
 
@@ -65,12 +59,10 @@ prog --ob v1
 # OUTPUT
 argc_ob=( v1 )
 argc__args=( prog --ob v1 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="--ob" [2]="v1")
-argc__cmd_arg_index=0
 argc__positionals=()
 argc_ob=([0]="v1")
 
@@ -80,12 +72,10 @@ prog --ob v1 v2
 # OUTPUT
 argc_ob=( v1 v2 )
 argc__args=( prog --ob v1 v2 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="--ob" [2]="v1" [3]="v2")
-argc__cmd_arg_index=0
 argc__positionals=()
 argc_ob=([0]="v1" [1]="v2")
 
@@ -95,12 +85,10 @@ prog --oc
 # OUTPUT
 argc_oc=''
 argc__args=( prog --oc )
-argc__cmd_arg_index=0
 argc__positionals=(  )
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="--oc")
-argc__cmd_arg_index=0
 argc__positionals=()
 argc_oc=
 
@@ -110,12 +98,10 @@ prog --oc v1
 # OUTPUT
 argc_oc=v1
 argc__args=( prog --oc v1 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="--oc" [2]="v1")
-argc__cmd_arg_index=0
 argc__positionals=()
 argc_oc=v1
 
@@ -125,12 +111,10 @@ prog --oc v1 v2
 # OUTPUT
 argc_oc=v1
 argc__args=( prog --oc v1 v2 )
-argc__cmd_arg_index=0
 argc__positionals=( v2 )
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="--oc" [2]="v1" [3]="v2")
-argc__cmd_arg_index=0
 argc__positionals=([0]="v2")
 argc_oc=v1
 

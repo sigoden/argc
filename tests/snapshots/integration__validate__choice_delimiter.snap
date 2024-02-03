@@ -8,14 +8,12 @@ prog cmd --oa abc,def
 # OUTPUT
 argc_oa=( abc def )
 argc__args=( prog cmd --oa abc,def )
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=(  )
 cmd
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="cmd" [2]="--oa" [3]="abc,def")
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=()
 argc_oa=([0]="abc" [1]="def")
@@ -27,14 +25,12 @@ prog cmd abc,def
 # OUTPUT
 argc_val=( abc def )
 argc__args=( prog cmd abc,def )
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=( abc def )
 cmd abc def
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="cmd" [2]="abc,def")
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=([0]="abc" [1]="def")
 argc_val=([0]="abc" [1]="def")

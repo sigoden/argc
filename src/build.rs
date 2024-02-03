@@ -222,7 +222,6 @@ _argc_run() {{
         _argc_die "error: no supported param"
     fi
     argc__args=( "$(basename "$0" .sh)" "$@" )
-    argc__cmd_arg_index=0
     argc__positionals=()
     _argc_index=1
     _argc_len="${{#argc__args[@]}}"
@@ -361,7 +360,6 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
                 format!(
                     r#"
         {names})
-            argc__cmd_arg_index=$_argc_index
             _argc_index=$((_argc_index+1))
             _argc_action=_argc_parse_{paths}
             break

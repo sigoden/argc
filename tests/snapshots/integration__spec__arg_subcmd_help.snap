@@ -338,14 +338,12 @@ prog cmd_terminaled -h
 # OUTPUT
 argc_vals=( -h )
 argc__args=( prog cmd_terminaled -h )
-argc__cmd_arg_index=1
 argc__fn=cmd_terminaled
 argc__positionals=( -h )
 cmd_terminaled -h
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="cmd_terminaled" [2]="-h")
-argc__cmd_arg_index=1
 argc__fn=cmd_terminaled
 argc__positionals=([0]="-h")
 argc_vals=([0]="-h")

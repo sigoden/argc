@@ -352,12 +352,20 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
     pub(crate) fn to_arg_values_for_param_fn(&self) -> Vec<ArgcValue> {
         let mut output: Vec<ArgcValue> = self.to_arg_values_base();
+        let cmds_len = self.cmds.len();
+        let level = cmds_len - 1;
+        let last_cmd = self.cmds[level];
+        let cmd_arg_index = self.cmd_arg_indexes[level];
+
+        output.push(ArgcValue::Single(
+            "_cmd_arg_index".into(),
+            cmd_arg_index.to_string(),
+        ));
+        if let Some(name) = &last_cmd.match_fn {
+            output.push(ArgcValue::Single("_cmd_fn".into(), name.to_string()));
+        }
         if let Some(idx) = self.dash {
             output.push(ArgcValue::Single("_dash".into(), idx.to_string()));
-        }
-        let last_cmd = self.last_cmd();
-        if let Some(name) = &last_cmd.name {
-            output.push(ArgcValue::Single("_cmd_fn".into(), name.to_string()));
         }
         if let Some(name) = self.comp_option {
             output.push(ArgcValue::Single("_option".into(), argc_var_name(name)));
@@ -472,7 +480,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let cmds_len = self.cmds.len();
         let level = cmds_len - 1;
         let last_cmd = self.cmds[level];
-        let cmd_arg_index = self.cmd_arg_indexes[level];
 
         if let Some(value) = self.cmds[0].get_metadata("dotenv") {
             output.push(ArgcValue::Dotenv(value.to_string()))
@@ -526,10 +533,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
         output.push(ArgcValue::Multiple("_args".into(), self.args.to_vec()));
-        output.push(ArgcValue::Single(
-            "_cmd_arg_index".into(),
-            cmd_arg_index.to_string(),
-        ));
         output
     }
 

@@ -8,14 +8,12 @@ prog cmd_multi_arg --o1 -o2 -3
 # OUTPUT
 argc_val=( --o1 -o2 -3 )
 argc__args=( prog cmd_multi_arg --o1 -o2 -3 )
-argc__cmd_arg_index=1
 argc__fn=cmd_multi_arg
 argc__positionals=( --o1 -o2 -3 )
 cmd_multi_arg --o1 -o2 -3
 
 # BUILD_OUTPUT
 argc__args=([0]="prog" [1]="cmd_multi_arg" [2]="--o1" [3]="-o2" [4]="-3")
-argc__cmd_arg_index=1
 argc__fn=cmd_multi_arg
 argc__positionals=([0]="--o1" [1]="-o2" [2]="-3")
 argc_val=([0]="--o1" [1]="-o2" [2]="-3")

@@ -7,14 +7,12 @@ prog
 
 # OUTPUT
 argc__args=( prog )
-argc__cmd_arg_index=0
 argc__fn=main
 argc__positionals=(  )
 main
 
 # RUN_OUTPUT
 argc__args=([0]="prog")
-argc__cmd_arg_index=0
 argc__fn=main
 argc__positionals=()
 main
@@ -26,14 +24,12 @@ prog abc --foo 123
 argc_foo=123
 argc_val=abc
 argc__args=( prog abc --foo 123 )
-argc__cmd_arg_index=0
 argc__fn=main
 argc__positionals=( abc )
 main abc
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="abc" [2]="--foo" [3]="123")
-argc__cmd_arg_index=0
 argc__fn=main
 argc__positionals=([0]="abc")
 argc_foo=123

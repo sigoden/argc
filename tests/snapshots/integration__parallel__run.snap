@@ -7,20 +7,18 @@ ARGS: ["task2", "--oa", "3"]
 STDOUT:
 cmd1 abc
 argc__args=([0]="Argcfile" [1]="task2" [2]="--oa" [3]="3")
-argc__cmd_arg_index=1
 argc__fn=task2
 argc__positionals=()
 argc_oa=3
 ARGC_PARALLEL=1
-ARGC_VARS=YXJnY19vYT0zO2FyZ2NfX2FyZ3M9KCBBcmdjZmlsZSB0YXNrMiAtLW9hIDMgKTthcmdjX19jbWRfYXJnX2luZGV4PTE7YXJnY19fZm49dGFzazI7YXJnY19fcG9zaXRpb25hbHM9KCAgKTs=
+ARGC_VARS=YXJnY19vYT0zO2FyZ2NfX2FyZ3M9KCBBcmdjZmlsZSB0YXNrMiAtLW9hIDMgKTthcmdjX19mbj10YXNrMjthcmdjX19wb3NpdGlvbmFscz0oICApOw==
 cmd2
 argc__args=([0]="Argcfile" [1]="task2" [2]="--oa" [3]="3")
-argc__cmd_arg_index=1
 argc__fn=task2
 argc__positionals=()
 argc_oa=3
 ARGC_PARALLEL=1
-ARGC_VARS=YXJnY19vYT0zO2FyZ2NfX2FyZ3M9KCBBcmdjZmlsZSB0YXNrMiAtLW9hIDMgKTthcmdjX19jbWRfYXJnX2luZGV4PTE7YXJnY19fZm49dGFzazI7YXJnY19fcG9zaXRpb25hbHM9KCAgKTs=
+ARGC_VARS=YXJnY19vYT0zO2FyZ2NfX2FyZ3M9KCBBcmdjZmlsZSB0YXNrMiAtLW9hIDMgKTthcmdjX19mbj10YXNrMjthcmdjX19wb3NpdGlvbmFscz0oICApOw==
 
 
 STDERR:

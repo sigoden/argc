@@ -7,14 +7,12 @@ prog -A
 
 # OUTPUT
 argc__args=( prog -A )
-argc__cmd_arg_index=1
 argc__fn=-A
 argc__positionals=(  )
 -A
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="-A")
-argc__cmd_arg_index=1
 argc__fn=-A
 argc__positionals=()
 -A
@@ -25,7 +23,6 @@ prog -AB
 # OUTPUT
 argc_B=1
 argc__args=( prog -AB )
-argc__cmd_arg_index=1
 argc__fn=-A
 argc__positionals=(  )
 -A

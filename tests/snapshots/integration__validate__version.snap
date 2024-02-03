@@ -19,14 +19,12 @@ prog cmd --version
 
 # OUTPUT
 argc__args=( prog cmd --version )
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=( --version )
 cmd --version
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="cmd" [2]="--version")
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=([0]="--version")
 cmd --version

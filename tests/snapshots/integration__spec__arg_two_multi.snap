@@ -9,14 +9,12 @@ prog cmd_two_multi_args a b c
 argc_val1=( a b )
 argc_val2=( c )
 argc__args=( prog cmd_two_multi_args a b c )
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
 cmd_two_multi_args a b c
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="cmd_two_multi_args" [2]="a" [3]="b" [4]="c")
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=([0]="a" [1]="b" [2]="c")
 argc_val1=([0]="a" [1]="b")
@@ -30,14 +28,12 @@ prog cmd_two_multi_args -- a b c
 argc_val1=( a b )
 argc_val2=( c )
 argc__args=( prog cmd_two_multi_args -- a b c )
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
 cmd_two_multi_args a b c
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="cmd_two_multi_args" [2]="--" [3]="a" [4]="b" [5]="c")
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=([0]="a" [1]="b" [2]="c")
 argc_val1=([0]="a" [1]="b")
@@ -51,14 +47,12 @@ prog cmd_two_multi_args a -- b c
 argc_val1=( a )
 argc_val2=( b c )
 argc__args=( prog cmd_two_multi_args a -- b c )
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
 cmd_two_multi_args a b c
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="cmd_two_multi_args" [2]="a" [3]="--" [4]="b" [5]="c")
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=([0]="a" [1]="b" [2]="c")
 argc_val1=([0]="a")
@@ -72,14 +66,12 @@ prog cmd_two_multi_args a b -- c
 argc_val1=( a b )
 argc_val2=( c )
 argc__args=( prog cmd_two_multi_args a b -- c )
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
 cmd_two_multi_args a b c
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="cmd_two_multi_args" [2]="a" [3]="b" [4]="--" [5]="c")
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=([0]="a" [1]="b" [2]="c")
 argc_val1=([0]="a" [1]="b")
@@ -92,14 +84,12 @@ prog cmd_two_multi_args a b c --
 # OUTPUT
 argc_val1=( a b c )
 argc__args=( prog cmd_two_multi_args a b c -- )
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=( a b c )
 cmd_two_multi_args a b c
 
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="cmd_two_multi_args" [2]="a" [3]="b" [4]="c" [5]="--")
-argc__cmd_arg_index=1
 argc__fn=cmd_two_multi_args
 argc__positionals=([0]="a" [1]="b" [2]="c")
 argc_val1=([0]="a" [1]="b" [2]="c")
