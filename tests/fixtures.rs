@@ -114,7 +114,7 @@ pub fn run_script<T: AsRef<Path>>(
     let path_env_var = get_path_env_var();
     let envs: HashMap<&str, &str> = envs.iter().cloned().collect();
     let shell_path = argc::utils::get_shell_path().unwrap();
-    let output = std::process::Command::new(&shell_path)
+    let output = std::process::Command::new(shell_path)
         .arg(script_path.as_ref())
         .args(args)
         .env("PATH", path_env_var.clone())
