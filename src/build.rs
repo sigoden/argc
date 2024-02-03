@@ -169,9 +169,7 @@ pub fn build(source: &str, root_name: &str) -> Result<String> {
     let mut newlines = vec![];
     for line in source.split('\n') {
         let trimed_line = line.trim();
-        if !build_block
-            && trimed_line.starts_with("eval")
-            && trimed_line.contains("argc --argc-eval")
+        if !build_block && trimed_line.starts_with("eval") && trimed_line.contains(" --argc-eval ")
         {
             insert_at = Some(newlines.len());
         } else if !build_block && trimed_line.contains("# ARGC-BUILD {") {

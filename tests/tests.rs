@@ -19,6 +19,7 @@ mod fail;
 mod hook_fn;
 mod main_fn;
 mod meta;
+#[cfg(not(target_os = "windows"))]
 mod misc;
 mod parallel;
 mod param_fn;
