@@ -245,7 +245,7 @@ Here are some value notation that will affect the shell completion.
 Generate a single standalone bash script that requires no argc dependency and can be distributed to the public.
 
 ```
-argc --argc-build <SCRIPT>
+argc --argc-build <SCRIPT> [OUTPATH]
 ```
 
 ## Completion

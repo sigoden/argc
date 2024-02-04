@@ -1,6 +1,5 @@
 mod completions;
 mod parallel;
-mod utils;
 
 use anyhow::{anyhow, bail, Context, Result};
 use argc::{
@@ -8,11 +7,23 @@ use argc::{
     Shell,
 };
 use base64::{engine::general_purpose, Engine as _};
-use std::{collections::HashMap, env, fs, path::Path, process};
-use utils::*;
+use std::{
+    collections::HashMap,
+    env, fs,
+    path::{Path, PathBuf},
+    process,
+};
 use which::which;
 
 const COMPLETION_SCRIPT: &str = include_str!("completions/completion.sh");
+const ARGC_SCRIPT_NAMES: [&str; 6] = [
+    "Argcfile.sh",
+    "Argcfile",
+    "argcfile.sh",
+    "argcfile",
+    "ARGCFILE.sh",
+    "ARGCFILE",
+];
 
 fn main() {
     match run() {
@@ -74,9 +85,27 @@ fn run() -> Result<i32> {
                 println!("{} has been successfully created.", &names[0]);
             }
             "--argc-build" => {
+                let script_path = &args[2];
                 let (source, args) = parse_script_args(&args[2..])?;
-                let output = argc::build(&source, &args[0])?;
-                print!("{}", output);
+                let script = argc::build(&source, &args[0])?;
+                if let Some(outpath) = args.get(1) {
+                    let script_name = get_script_name(script_path)?;
+                    let (outpath, new) = ensure_outpath(outpath, script_name)
+                        .with_context(|| format!("Invalid output path '{outpath}'"))?;
+                    fs::write(&outpath, script).with_context(|| {
+                        format!("Failed to write script to '{}'", outpath.display())
+                    })?;
+                    if new {
+                        set_permissions(&outpath).with_context(|| {
+                            format!(
+                                "Failed to set execute permission to '{}'",
+                                outpath.display()
+                            )
+                        })?;
+                    }
+                } else {
+                    print!("{}", script);
+                }
             }
             "--argc-export" => {
                 let (source, args) = parse_script_args(&args[2..])?;
@@ -223,7 +252,7 @@ fn get_argc_help() -> String {
 USAGE:
     argc --argc-eval <SCRIPT> [ARGS]...             Use `eval "$(argc --argc-eval "$0" "$@")"`
     argc --argc-create [TASKS]...                   Create a boilerplate argcfile
-    argc --argc-build <SCRIPT>                      Build pure bash script without depending on argc
+    argc --argc-build <SCRIPT> [OUTPATH]            Build standalone bash script without depending on argc
     argc --argc-completions <SHELL> [CMDS]...       Generate shell completion scripts
     argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Dynamically generating completion candidates
     argc --argc-export <SCRIPT>                     Export command line definitions as json
@@ -264,4 +293,189 @@ fn get_argc_script_dir(path: &str) -> Option<String> {
     let script_file = fs::canonicalize(Path::new(path)).ok()?;
     let script_dir = script_file.parent()?;
     Some(script_dir.display().to_string())
+}
+
+fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
+    if args.is_empty() {
+        bail!("No script provided");
+    }
+    let script_file = args[0].as_str();
+    let args: Vec<String> = args[1..].to_vec();
+    let source = fs::read_to_string(script_file)
+        .with_context(|| format!("Failed to load script at '{}'", script_file))?;
+    let name = get_script_name(script_file)?;
+    let name = name.strip_suffix(".sh").unwrap_or(name);
+    let mut cmd_args = vec![name.to_string()];
+    cmd_args.extend(args);
+    Ok((source, cmd_args))
+}
+
+fn get_script_name(script_path: &str) -> Result<&str> {
+    Path::new(script_path)
+        .file_name()
+        .and_then(|v| v.to_str())
+        .ok_or_else(|| anyhow!("Failed to extract filename form '{}'", script_path))
+}
+
+fn generate_boilerplate(args: &[String]) -> String {
+    let tasks = args
+        .iter()
+        .map(|cmd| {
+            format!(
+                r#"
+# @cmd
+{cmd}() {{
+    echo To implement command: {cmd}
+}}
+"#
+            )
+        })
+        .collect::<Vec<String>>()
+        .join("");
+
+    format!(
+        r#"#!/usr/bin/env bash
+
+set -e
+{tasks}
+eval "$(argc --argc-eval "$0" "$@")"
+"#
+    )
+}
+
+fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
+    let candidates = candidate_script_names();
+    let mut dir = env::current_dir().ok()?;
+    loop {
+        for name in candidates.iter() {
+            let path = dir.join(name);
+            if path.exists() {
+                return Some((dir, path));
+            }
+        }
+        if !recursive {
+            return None;
+        }
+        dir = dir.parent()?.to_path_buf();
+    }
+}
+
+fn candidate_script_names() -> Vec<String> {
+    let mut names = vec![];
+    if let Ok(name) = env::var("ARGC_SCRIPT_NAME") {
+        names.push(name.clone());
+        if !name.ends_with(".sh") {
+            names.push(format!("{name}.sh"));
+        }
+    }
+    names.extend(ARGC_SCRIPT_NAMES.into_iter().map(|v| v.to_string()));
+    names
+}
+
+fn search_completion_script(args: &mut Vec<String>) -> Option<PathBuf> {
+    let search_paths = std::env::var("ARGC_COMPLETIONS_PATH").ok()?;
+    let cmd = Path::new(&args[4])
+        .file_stem()
+        .and_then(|v| v.to_str())?
+        .to_string();
+    let subcmd = if args.len() >= 7
+        && args[5]
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '-'))
+    {
+        Some(args[5].clone())
+    } else {
+        None
+    };
+    let mut handlers = vec![];
+    #[cfg(not(target_os = "windows"))]
+    let sep = ":";
+    #[cfg(target_os = "windows")]
+    let sep = ";";
+    for path in search_paths
+        .split(sep)
+        .filter(|v| !v.is_empty() && *v != sep)
+    {
+        let path = path.to_string();
+        let cmd = cmd.to_string();
+        let subcmd = subcmd.clone();
+        let handler = std::thread::spawn(move || {
+            if let Some(subcmd) = subcmd {
+                let mut search_path = PathBuf::from(path.clone());
+                search_path.push(cmd.clone());
+                search_path.push(format!("{subcmd}.sh"));
+                if search_path.exists() {
+                    return Some((search_path, true));
+                }
+            }
+            let mut search_path = PathBuf::from(path);
+            search_path.push(format!("{cmd}.sh"));
+            if search_path.exists() {
+                return Some((search_path, false));
+            }
+            None
+        });
+        handlers.push(handler);
+    }
+    let mut subcmd_script_path = None;
+    let mut cmd_script_path = None;
+    for handler in handlers {
+        if let Ok(Some((path, is_subcmd))) = handler.join() {
+            if is_subcmd {
+                subcmd_script_path = Some(path);
+                break;
+            } else if cmd_script_path.is_none() {
+                cmd_script_path = Some(path);
+            }
+        }
+    }
+    if let (Some(path), Some(subcmd)) = (subcmd_script_path, subcmd) {
+        args.remove(4);
+        args[4] = format!("{cmd}-{subcmd}");
+        return Some(path);
+    }
+    if let Some(path) = cmd_script_path {
+        return Some(path);
+    }
+    None
+}
+
+fn ensure_outpath(outpath: &str, script_name: &str) -> Result<(PathBuf, bool)> {
+    match fs::metadata(outpath) {
+        Ok(metadata) => {
+            let outpath = Path::new(outpath);
+            if metadata.is_dir() {
+                let outpath = outpath.join(script_name);
+                Ok((outpath, true))
+            } else {
+                Ok((outpath.to_path_buf(), false))
+            }
+        }
+        Err(_) => {
+            let is_dir = outpath.ends_with('/') || outpath.ends_with('\\');
+            let mut outpath = PathBuf::from(outpath);
+            if is_dir {
+                fs::create_dir_all(&outpath)?;
+                outpath.push(script_name);
+            } else if let Some(parent) = outpath.parent() {
+                fs::create_dir_all(parent)?;
+            };
+            Ok((outpath, true))
+        }
+    }
+}
+
+#[cfg(unix)]
+fn set_permissions<T: AsRef<Path>>(path: T) -> Result<()> {
+    use std::os::unix::fs::PermissionsExt;
+    let path = path.as_ref();
+    let mut permissions = fs::metadata(path)?.permissions();
+    permissions.set_mode(0o755);
+    fs::set_permissions(path, permissions)?;
+    Ok(())
+}
+
+#[cfg(not(unix))]
+fn set_permissions<T: AsRef<Path>>(path: T) -> Result<()> {
+    Ok(())
 }

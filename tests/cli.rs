@@ -1,7 +1,7 @@
 use assert_cmd::prelude::*;
 use std::process::Command;
 
-use crate::fixtures::{get_path_env_var, locate_script};
+use crate::fixtures::{get_path_env_var, locate_script, tmpdir};
 
 #[test]
 fn version() {
@@ -23,6 +23,47 @@ fn help() {
         .arg("--argc-help")
         .assert()
         .stdout(predicates::str::contains(env!("CARGO_PKG_DESCRIPTION")))
+        .success();
+}
+
+#[test]
+fn build_stdout() {
+    let path = locate_script("examples/demo.sh");
+    Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-build")
+        .arg(path)
+        .assert()
+        .stdout(predicates::str::contains("# ARGC-BUILD"))
+        .success();
+}
+
+#[test]
+fn build_outpath() {
+    let path = locate_script("examples/demo.sh");
+    let tmpdir = tmpdir();
+    let outpath = tmpdir.join("demo.sh");
+    Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-build")
+        .arg(&path)
+        .arg(&outpath)
+        .assert()
+        .success();
+    let script = std::fs::read_to_string(&outpath).unwrap();
+    assert!(script.contains("# ARGC-BUILD"));
+}
+
+#[test]
+fn completions() {
+    Command::cargo_bin("argc")
+        .unwrap()
+        .args(["--argc-completions", "bash", "mycmd1", "mycmd2"])
+        .assert()
+        .stdout(predicates::str::contains(
+            r#"complete -F _argc_completer -o nospace -o nosort \
+    argc mycmd1 mycmd2"#,
+        ))
         .success();
 }
 
@@ -69,7 +110,7 @@ fn compgen_argc() {
 }
 
 #[test]
-fn compgen_export() {
+fn export() {
     let path = locate_script("examples/options.sh");
     let output = Command::cargo_bin("argc")
         .unwrap()
