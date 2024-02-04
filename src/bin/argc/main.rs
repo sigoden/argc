@@ -476,6 +476,6 @@ fn set_permissions<T: AsRef<Path>>(path: T) -> Result<()> {
 }
 
 #[cfg(not(unix))]
-fn set_permissions<T: AsRef<Path>>(path: T) -> Result<()> {
+fn set_permissions<T: AsRef<Path>>(_path: T) -> Result<()> {
     Ok(())
 }
