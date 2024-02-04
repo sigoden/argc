@@ -1,4 +1,46 @@
-# Specification
+# Grammar
+
+## @cmd
+
+> **<sup>Syntax</sup>**\
+> `@cmd` description<sup>?</sup>
+
+
+## @alias
+
+> **<sup>Syntax</sup>**\
+> cmd-name (`,` cmd-name)<sup>\*</sup>
+
+## @arg
+
+> **<sup>Syntax</sup>**\
+> `@arg` arg-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
+>   [_notation_]<sup>?</sup>
+>   description<sup>?</sup>
+
+## @option
+
+> **<sup>Syntax</sup>**\
+> `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
+>   [_notations_]<sup>?</sup>
+>   description<sup>?</sup>
+
+## @flag
+
+> **<sup>Syntax</sup>**\
+> `@flag` [_short_]<sup>?</sup>[_long_] `*`<sup>?</sup>
+>   description<sup>?</sup>
+
+## @env
+> **<sup>Syntax</sup>**\
+> `@arg` env-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
+>   [_notation_]<sup>?</sup>
+>   description<sup>?</sup>
+
+## @meta
+
+> **<sup>Syntax</sup>**\
+> `@meta` meta-name meta-value<sup>?</sup>
 
 ## @describe
 
@@ -14,49 +56,6 @@
 
 > **<sup>Syntax</sup>**\
 > `@author` string
-
-## @meta
-
-> **<sup>Syntax</sup>**\
-> `@meta` meta-name meta-value<sup>?</sup>
-
-## @cmd
-
-> **<sup>Syntax</sup>**\
-> `@cmd` description<sup>?</sup>
-
-
-## @alias
-
-> **<sup>Syntax</sup>**\
-> cmd-name (`,` cmd-name)<sup>\*</sup>
-
-
-## @flag
-
-> **<sup>Syntax</sup>**\
-> `@flag` [_short_]<sup>?</sup>[_long_] `*`<sup>?</sup>
->   description<sup>?</sup>
-
-## @option
-
-> **<sup>Syntax</sup>**\
-> `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
->   [_notations_]<sup>?</sup>
->   description<sup>?</sup>
-
-## @env
-> **<sup>Syntax</sup>**\
-> `@arg` env-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
->   [_notation_]<sup>?</sup>
->   description<sup>?</sup>
-
-## @arg
-
-> **<sup>Syntax</sup>**\
-> `@arg` arg-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
->   [_notation_]<sup>?</sup>
->   description<sup>?</sup>
 
 ## short
 

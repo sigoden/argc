@@ -14,21 +14,21 @@ _argc_take_args() {
     _argc_take_args_values=()
     _argc_take_args_len=0
     local param="$1" min="$2" max="$3" signs="$4" delimiter="$5"
-    local _argc_take_index=$((_argc_index+1)) _argc_take_value
+    local _argc_take_index=$((_argc_index + 1)) _argc_take_value
     if [[ "$_argc_item" == *=* ]]; then
-        _argc_take_args_values=( "${_argc_item##*=}" )
+        _argc_take_args_values=("${_argc_item##*=}")
     else
         while [[ $_argc_take_index -lt $_argc_len ]]; do
             _argc_take_value="${argc__args[_argc_take_index]}"
             if [[ -n "$signs" ]] && [[ "$_argc_take_value" =~ ^["$signs"] ]]; then
                 break
             fi
-            _argc_take_args_values+=( "$_argc_take_value" )
-            _argc_take_args_len=$((_argc_take_args_len+1))
+            _argc_take_args_values+=("$_argc_take_value")
+            _argc_take_args_len=$((_argc_take_args_len + 1))
             if [[ "$_argc_take_args_len" -ge "$max" ]]; then
                 break
             fi
-            _argc_take_index=$((_argc_take_index+1))
+            _argc_take_index=$((_argc_take_index + 1))
         done
     fi
     if [[ "${#_argc_take_args_values[@]}" -lt "$min" ]] || [[ "${#_argc_take_args_values[@]}" -gt "$max" ]]; then
@@ -37,10 +37,10 @@ _argc_take_args() {
     if [[ -n "$delimiter" ]] && [[ "${#_argc_take_args_values[@]}" -gt 0 ]]; then
         local item values arr=()
         for item in "${_argc_take_args_values[@]}"; do
-            IFS="$delimiter" read -r -a values <<< "$item"
-            arr+=( "${values[@]}" )
+            IFS="$delimiter" read -r -a values <<<"$item"
+            arr+=("${values[@]}")
         done
-        _argc_take_args_values=( "${arr[@]}" )
+        _argc_take_args_values=("${arr[@]}")
     fi
 }
 "#,
@@ -51,8 +51,8 @@ _argc_take_args() {
 _argc_match_positionals() {
     _argc_match_positionals_values=()
     _argc_match_positionals_len=0
-    local params=( "$@" )
-    local args_len="${#argc__positionals[@]}" 
+    local params=("$@")
+    local args_len="${#argc__positionals[@]}"
     if [[ $args_len -eq 0 ]]; then
         return
     fi
@@ -60,14 +60,14 @@ _argc_match_positionals() {
     while [[ $param_index -lt $params_len && $arg_index -lt $args_len ]]; do
         local takes=0
         if [[ "${params[param_index]}" -eq 1 ]]; then
-            if [[ $param_index -eq 0 ]] \
-            && [[ $_argc_dash -gt 0 ]] \
-            && [[ $params_len -eq 2 ]] \
-            && [[ "${params[$((param_index+1))]}" -eq 1 ]] \
-            ; then
+            if [[ $param_index -eq 0 ]] &&
+                [[ $_argc_dash -gt 0 ]] &&
+                [[ $params_len -eq 2 ]] &&
+                [[ "${params[$((param_index + 1))]}" -eq 1 ]] \
+                ; then
                 takes=$_argc_dash
             else
-                local arg_diff=$((args_len-arg_index)) param_diff=$((params_len-param_index))
+                local arg_diff=$((args_len - arg_index)) param_diff=$((params_len - param_index))
                 if [[ $arg_diff -gt $param_diff ]]; then
                     takes=$((arg_diff - param_diff + 1))
                 else
@@ -77,12 +77,12 @@ _argc_match_positionals() {
         else
             takes=1
         fi
-        _argc_match_positionals_values+=( "$arg_index:$takes" )
-        arg_index=$((arg_index+takes))
-        param_index=$((param_index+1))
+        _argc_match_positionals_values+=("$arg_index:$takes")
+        arg_index=$((arg_index + takes))
+        param_index=$((param_index + 1))
     done
     if [[ $arg_index -lt $args_len ]]; then
-        _argc_match_positionals_values+=( "$arg_index:$((args_len-arg_index))" )
+        _argc_match_positionals_values+=("$arg_index:$((args_len - arg_index))")
     fi
     _argc_match_positionals_len=${#_argc_match_positionals_values[@]}
     if [[ $params_len -gt 0 ]] && [[ $_argc_match_positionals_len -gt $params_len ]]; then
@@ -98,19 +98,19 @@ _argc_match_positionals() {
 _argc_split_positionals() {
     _argc_split_positionals_values=()
     local values_index="$1" values_size="$2" delimiter="$3" item values
-    local split_values=( "${argc__positionals[@]:values_index:values_size}" )
+    local split_values=("${argc__positionals[@]:values_index:values_size}")
     for item in "${split_values[@]}"; do
-        IFS="$delimiter" read -r -a values <<< "$item"
-        _argc_split_positionals_values+=( "${values[@]}" )
+        IFS="$delimiter" read -r -a values <<<"$item"
+        _argc_split_positionals_values+=("${values[@]}")
     done
-    local heads=() tails=() tails_index=$((values_index+values_size))
+    local heads=() tails=() tails_index=$((values_index + values_size))
     if [[ $values_index -gt 0 ]]; then
-        heads=( "${argc__positionals[@]:0:values_index}" )
+        heads=("${argc__positionals[@]:0:values_index}")
     fi
     if [[ $tails_index -lt ${#argc__positionals[@]} ]]; then
-        tails=( "${argc__positionals[@]:tails_index}" )
+        tails=("${argc__positionals[@]:tails_index}")
     fi
-    argc__positionals=( "${heads[@]}" "${_argc_split_positionals_values[@]}" "${tails[@]}" )
+    argc__positionals=("${heads[@]}" "${_argc_split_positionals_values[@]}" "${tails[@]}")
 }
 "#,
     ),
@@ -137,7 +137,7 @@ _argc_require_params() {
         r#"
 _argc_validate_choices() {
     local render_name="$1" raw_choices="$2" choices item choice concated_choices
-    IFS=$'\n' read -d '' -r -a choices <<< "$raw_choices"
+    IFS=$'\n' read -d '' -r -a choices <<<"$raw_choices"
     for choice in "${choices[@]}"; do
         if [[ -z "$concated_choices" ]]; then
             concated_choices="$choice"
@@ -221,7 +221,7 @@ _argc_run() {{
     if [[ "$1" == "___internal___" ]]; then
         _argc_die "error: no supported param"
     fi
-    argc__args=( "$(basename "$0" .sh)" "$@" )
+    argc__args=("$(basename "$0" .sh)" "$@")
     argc__positionals=()
     _argc_index=1
     _argc_len="${{#argc__args[@]}}"
@@ -240,6 +240,7 @@ _argc_die() {{
 }}
 
 _argc_run "$@"
+
 # ARGC-BUILD }}"#
     )
 }
@@ -288,15 +289,12 @@ _argc_version{suffix}() {{
         .collect::<Vec<String>>()
         .join("");
 
-    format!(
-        r#"
-{usage}{version}{parse}{subcmds}"#
-    )
+    format!(r#"{usage}{version}{parse}{subcmds}"#)
 }
 
 fn build_parse(cmd: &Command, suffix: &str) -> String {
     let mut parse_help = {
-        let help_flags = cmd.help_flags().join("|");
+        let help_flags = cmd.help_flags().join(" | ");
         format!(
             r#"
         {help_flags})
@@ -305,7 +303,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         )
     };
     let parse_version = if cmd.exist_version() {
-        let version_flags = cmd.version_flags().join("|");
+        let version_flags = cmd.version_flags().join(" | ");
         format!(
             r#"
         {version_flags})
@@ -318,7 +316,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
     let mut parse_dash = r#"
         --)
             _argc_dash="${#argc__positionals[@]}"
-            argc__positionals+=( "${argc__args[@]:$((_argc_index+1))}" )
+            argc__positionals+=("${argc__args[@]:$((_argc_index + 1))}")
             _argc_index=$_argc_len
             break
             ;;"#
@@ -339,7 +337,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
             .chars()
             .map(|v| format!("{v}?*"))
             .collect::<Vec<String>>()
-            .join("|");
+            .join(" | ");
         format!(
             r#"
         {unknown_flags})
@@ -349,18 +347,17 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
     } else {
         String::new()
     };
-    let subcmd_names = cmd.list_subcommand_names().join(", ");
     let parse_subcommands = if !cmd.subcommands.is_empty() {
         let mut parses: Vec<String> = cmd
             .subcommands
             .iter()
             .map(|subcmd| {
                 let paths = subcmd.paths.join("_");
-                let names = subcmd.list_names().join("|");
+                let names = subcmd.list_names().join(" | ");
                 format!(
                     r#"
         {names})
-            _argc_index=$((_argc_index+1))
+            _argc_index=$((_argc_index + 1))
             _argc_action=_argc_parse_{paths}
             break
             ;;"#
@@ -372,7 +369,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
             .subcommands
             .iter()
             .map(|subcmd| {
-                let names = subcmd.list_names().join("|");
+                let names = subcmd.list_names().join(" | ");
                 let paths = subcmd.paths.join("_");
                 format!(
                     r#"
@@ -387,13 +384,13 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         parses.push(format!(
                 r#"
         help)
-            local help_arg="${{argc__args[$((_argc_index+1))]}}"
+            local help_arg="${{argc__args[$((_argc_index + 1))]}}"
             case "$help_arg" in{subcmd_usages}
             "")
                 _argc_usage{suffix}
                 ;;
             *)
-                _argc_die "error: invalid value \`$help_arg\` for \`<command>\`"$'\n'"  [possible values: $_argc_subcmd_names]"
+                _argc_die "error: invalid value \`$help_arg\` for \`<command>\`"$'\n'"  [possible values: $_argc_subcmds]"
                 ;;
             esac
             ;;"#
@@ -408,7 +405,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         format!(
             r#"
         *)
-            _argc_die "error: \`{cmd_paths}\` requires a subcommand but one was not provided"$'\n'"  [subcommands: $_argc_subcmd_names]"
+            _argc_die "error: \`{cmd_paths}\` requires a subcommand but one was not provided"$'\n'"  [subcommands: $_argc_subcmds]"
             ;;"#
         )
     } else {
@@ -417,7 +414,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
             format!(
                 r#"
             if [[ "${{#argc__positionals[@]}}" -ge {min} ]]; then
-                argc__positionals+=( "${{argc__args[@]:_argc_index}}" )
+                argc__positionals+=("${{argc__args[@]:_argc_index}}")
                 _argc_index=$_argc_len
             fi"#
             )
@@ -427,8 +424,8 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         format!(
             r#"
         *)
-            argc__positionals+=( "$_argc_item" )
-            _argc_index=$((_argc_index+1)){terminated}
+            argc__positionals+=("$_argc_item")
+            _argc_index=$((_argc_index + 1)){terminated}
             ;;"#
         )
     };
@@ -441,6 +438,8 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         parse_help = String::new();
         parse_dash = String::new();
     }
+
+    let joined_subcmd_names = cmd.list_subcommand_names().join(", ");
 
     let combined_case = [
         parse_help,
@@ -456,8 +455,8 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
     format!(
         r#"
 _argc_parse{suffix}() {{
-    local _argc_key
-    local _argc_action _argc_subcmd_names="{subcmd_names}"
+    local _argc_key _argc_action
+    local _argc_subcmds="{joined_subcmd_names}"
     while [[ $_argc_index -lt $_argc_len ]]; do
         _argc_item="${{argc__args[_argc_index]}}"
         _argc_key="${{_argc_item%%=*}}"
@@ -471,6 +470,76 @@ _argc_parse{suffix}() {{
 }}
 "#
     )
+}
+
+fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
+    let names = param.list_names().join(" | ");
+    let long_name = param.render_long_name();
+    let var_name = param.var_name();
+    if param.is_flag {
+        if param.id() == "help" || param.id() == "version" {
+            return String::new();
+        }
+        let variant = if param.multiple_occurs() {
+            format!("{var_name}=$(({var_name} + 1))")
+        } else {
+            format!(
+                r#"_argc_die "error: the argument \`{long_name}\` cannot be used multiple times""#
+            )
+        };
+
+        format!(
+            r#"
+        {names})
+            if [[ "$_argc_item" == *=* ]]; then
+                _argc_die "error: unexpected value for \`{long_name}\` flag"
+            fi
+            _argc_index=$((_argc_index + 1))
+            if [[ -n "${var_name}" ]]; then
+                {variant}
+            else
+                {var_name}=1
+            fi
+            ;;"#
+        )
+    } else {
+        let signs = if param.terminated() { "" } else { signs };
+        let delimiter = match param.args_delimiter() {
+            Some(v) => v.to_string(),
+            None => String::new(),
+        };
+        let render_name_notations = param.render_name_notations();
+        let render_first_notation = param.render_first_notation();
+        let choice = build_choice(
+            "{_argc_take_args_values[@]}",
+            &format!("`{render_first_notation}`"),
+            param.choice(),
+            3,
+        );
+        let variant = if param.multiple_values() {
+            format!(
+                r#"
+            {var_name}+=("${{_argc_take_args_values[@]}}")"#
+            )
+        } else {
+            format!(
+                r#"
+            if [[ -z "${var_name}" ]]; then
+                {var_name}="${{_argc_take_args_values[0]}}"
+            else
+                _argc_die "error: the argument \`{long_name}\` cannot be used multiple times"
+            fi"#
+            )
+        };
+        let (min, max) = param.args_range();
+        format!(
+            r#"
+        {names})
+            _argc_take_args "{render_name_notations}" {min} {max} "{signs}" "{delimiter}"
+            _argc_index=$((_argc_index + _argc_take_args_len + 1)){choice}{variant}
+            ;;"#
+        )
+    }
 }
 
 fn build_handle(cmd: &Command, suffix: &str) -> String {
@@ -512,76 +581,6 @@ fn build_handle(cmd: &Command, suffix: &str) -> String {
     }
 }
 
-fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
-    let names = param.list_names().join("|");
-    let long_name = param.render_long_name();
-    let var_name = param.var_name();
-    if param.is_flag {
-        if param.id() == "help" || param.id() == "version" {
-            return String::new();
-        }
-        let variant = if param.multiple_occurs() {
-            format!("{var_name}=$(({var_name}+1))")
-        } else {
-            format!(
-                r#"_argc_die "error: the argument \`{long_name}\` cannot be used multiple times""#
-            )
-        };
-
-        format!(
-            r#"
-        {names})
-            if [[ "$_argc_item" == *=* ]]; then
-                _argc_die "error: unexpected value for \`{long_name}\` flag"
-            fi
-            _argc_index=$((_argc_index+1))
-            if [[ -n "${var_name}" ]]; then
-                {variant}
-            else
-                {var_name}=1
-            fi
-            ;;"#
-        )
-    } else {
-        let signs = if param.terminated() { "" } else { signs };
-        let delimiter = match param.args_delimiter() {
-            Some(v) => v.to_string(),
-            None => String::new(),
-        };
-        let render_name_notations = param.render_name_notations();
-        let render_first_notation = param.render_first_notation();
-        let choice = build_choice(
-            "{_argc_take_args_values[@]}",
-            &format!("`{render_first_notation}`"),
-            param.choice(),
-            3,
-        );
-        let variant = if param.multiple_values() {
-            format!(
-                r#"
-            {var_name}+=( "${{_argc_take_args_values[@]}}" )"#
-            )
-        } else {
-            format!(
-                r#"
-            if [[ -z "${var_name}" ]]; then
-                {var_name}="${{_argc_take_args_values[0]}}"
-            else
-                _argc_die "error: the argument \`{long_name}\` cannot be used multiple times"
-            fi"#
-            )
-        };
-        let (min, max) = param.args_range();
-        format!(
-            r#"
-        {names})
-            _argc_take_args "{render_name_notations}" {min} {max} "{signs}" "{delimiter}"
-            _argc_index=$((_argc_index+_argc_take_args_len+1)){choice}{variant}
-            ;;"#
-        )
-    }
-}
-
 fn build_positionals(cmd: &Command) -> String {
     if cmd.positional_params.is_empty() {
         return String::new();
@@ -605,11 +604,11 @@ fn build_positionals(cmd: &Command) -> String {
                     Some(delimiter) => format!(
                         r#"
             _argc_split_positionals "$values_index" "$values_size" "{delimiter}"
-            {var_name}=( "${{_argc_split_positionals_values[@]}}" )"#
+            {var_name}=("${{_argc_split_positionals_values[@]}}")"#
                     ),
                     None => format!(
                         r#"
-            {var_name}=( "${{argc__positionals[@]:values_index:values_size}}" )"#
+            {var_name}=("${{argc__positionals[@]:values_index:values_size}}")"#
                     ),
                 }
             } else {
@@ -634,7 +633,7 @@ fn build_positionals(cmd: &Command) -> String {
                 let default = build_default(&var_name, param.default(), 3);
                 format!(
                     r#"{default}
-            argc__positionals+=( "${var_name}" )"#
+            argc__positionals+=("${var_name}")"#
                 )
             } else {
                 String::new()
@@ -693,7 +692,7 @@ fn build_required_flag_options(cmd: &Command) -> String {
         .join(" ");
     format!(
         r#"
-    _argc_require_params "error: the following required arguments were not provided:"\
+    _argc_require_params "error: the following required arguments were not provided:" \
         {values}"#
     )
 }

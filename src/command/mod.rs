@@ -45,16 +45,16 @@ pub(crate) struct Command {
 impl Command {
     pub(crate) fn new(source: &str, root_name: &str) -> Result<Self> {
         let events = parse(source)?;
-        let mut cmd = Command::new_from_events(&events)?;
-        cmd.share.borrow_mut().name = Some(root_name.to_string());
-        cmd.inherit(vec![]);
-        if cmd.has_metadata("inherit-flag-options") {
-            cmd.inherit_flag_options();
+        let mut root = Command::new_from_events(&events)?;
+        root.share.borrow_mut().name = Some(root_name.to_string());
+        root.inherit(vec![]);
+        if root.has_metadata("inherit-flag-options") {
+            root.inherit_flag_options();
         }
-        if !cmd.has_metadata("no-inherit-env") {
-            cmd.inherit_envs();
+        if !root.has_metadata("no-inherit-env") {
+            root.inherit_envs();
         }
-        Ok(cmd)
+        Ok(root)
     }
 
     pub(crate) fn eval(
