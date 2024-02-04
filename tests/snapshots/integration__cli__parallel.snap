@@ -1,5 +1,5 @@
 ---
-source: tests/parallel.rs
+source: tests/cli.rs
 expression: text
 ---
 ARGS: ["task2", "--oa", "3"]
