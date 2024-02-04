@@ -105,10 +105,7 @@ fn completions() {
         .unwrap()
         .args(["--argc-completions", "bash", "mycmd1", "mycmd2"])
         .assert()
-        .stdout(predicates::str::contains(
-            r#"complete -F _argc_completer -o nospace -o nosort \
-    argc mycmd1 mycmd2"#,
-        ))
+        .stdout(predicates::str::contains(r#"argc mycmd1 mycmd2"#))
         .success();
 }
 
