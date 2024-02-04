@@ -5,7 +5,7 @@ expression: data
 ************ RUN ************
 prog -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 prog 1.0.0
 Test argc
@@ -19,13 +19,26 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+prog 1.0.0
+Test argc
+
+USAGE: prog [OPTIONS]
+
+OPTIONS:
+  -h, --help
+  -V, --version
+
 ************ RUN ************
 prog -V
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 prog 1.0.0
 EOF
 exit 0
+
+# RUN_OUTPUT
+prog 1.0.0
 
 

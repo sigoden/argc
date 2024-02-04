@@ -5,162 +5,253 @@ expression: data
 ************ RUN ************
 prog test1
 
-OUTPUT
+# OUTPUT
 argc__args=( prog test1 )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1")
+argc__fn=test1
+argc__positionals=()
 test1
 
 ************ RUN ************
 prog test1 -a
 
-OUTPUT
+# OUTPUT
 argc_a=1
 argc__args=( prog test1 -a )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="-a")
+argc__fn=test1
+argc__positionals=()
+argc_a=1
 test1
 
 ************ RUN ************
 prog test1 -f -f
 
-OUTPUT
+# OUTPUT
 argc_fb=2
 argc__args=( prog test1 -f -f )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="-f" [3]="-f")
+argc__fn=test1
+argc__positionals=()
+argc_fb=2
 test1
 
 ************ RUN ************
 prog test1 -e e
 
-OUTPUT
+# OUTPUT
 argc_e=e
 argc__args=( prog test1 -e e )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="-e" [3]="e")
+argc__fn=test1
+argc__positionals=()
+argc_e=e
 test1
 
 ************ RUN ************
 prog test1 --oa oa
 
-OUTPUT
+# OUTPUT
 argc_oa=oa
 argc__args=( prog test1 --oa oa )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="--oa" [3]="oa")
+argc__fn=test1
+argc__positionals=()
+argc_oa=oa
 test1
 
 ************ RUN ************
 prog test1 --ob ob1 --ob ob2
 
-OUTPUT
+# OUTPUT
 argc_ob=( ob1 ob2 )
 argc__args=( prog test1 --ob ob1 --ob ob2 )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="--ob" [3]="ob1" [4]="--ob" [5]="ob2")
+argc__fn=test1
+argc__positionals=()
+argc_ob=([0]="ob1" [1]="ob2")
 test1
 
 ************ RUN ************
 prog test1 --oe ob1,ob2 --oe ob3
 
-OUTPUT
+# OUTPUT
 argc_oe=( ob1 ob2 ob3 )
 argc__args=( prog test1 --oe ob1,ob2 --oe ob3 )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="--oe" [3]="ob1,ob2" [4]="--oe" [5]="ob3")
+argc__fn=test1
+argc__positionals=()
+argc_oe=([0]="ob1" [1]="ob2" [2]="ob3")
 test1
 
 ************ RUN ************
 prog test1 -o ob1 ob2
 
-OUTPUT
+# OUTPUT
 argc_od=( ob1 ob2 )
 argc__args=( prog test1 -o ob1 ob2 )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="-o" [3]="ob1" [4]="ob2")
+argc__fn=test1
+argc__positionals=()
+argc_od=([0]="ob1" [1]="ob2")
 test1
 
 ************ RUN ************
 prog test1 --cc abc
 
-OUTPUT
+# OUTPUT
 argc_cc=abc
 argc__args=( prog test1 --cc abc )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="--cc" [3]="abc")
+argc__fn=test1
+argc__positionals=()
+argc_cc=abc
 test1
 
 ************ RUN ************
 prog test1 -soa soa
 
-OUTPUT
+# OUTPUT
 argc_soa=soa
 argc__args=( prog test1 -soa soa )
-argc__cmd_arg_index=1
 argc__fn=test1
 argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="-soa" [3]="soa")
+argc__fn=test1
+argc__positionals=()
+argc_soa=soa
 test1
 
 ************ RUN ************
 prog test3
 
-OUTPUT
+# OUTPUT
 argc_oe=val
 argc_of=`_default_fn`
 argc_cb=x
 argc__args=( prog test3 )
-argc__cmd_arg_index=1
 argc__fn=test3
 argc__positionals=(  )
+test3
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test3")
+argc__fn=test3
+argc__positionals=()
+argc_cb=x
+argc_oe=val
+argc_of=argc
 test3
 
 ************ RUN ************
 prog test3 --oe oe
 
-OUTPUT
+# OUTPUT
 argc_oe=oe
 argc_of=`_default_fn`
 argc_cb=x
 argc__args=( prog test3 --oe oe )
-argc__cmd_arg_index=1
 argc__fn=test3
 argc__positionals=(  )
+test3
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test3" [2]="--oe" [3]="oe")
+argc__fn=test3
+argc__positionals=()
+argc_cb=x
+argc_oe=oe
+argc_of=argc
 test3
 
 ************ RUN ************
 prog test3 --of of
 
-OUTPUT
+# OUTPUT
 argc_oe=val
 argc_of=of
 argc_cb=x
 argc__args=( prog test3 --of of )
-argc__cmd_arg_index=1
 argc__fn=test3
 argc__positionals=(  )
+test3
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test3" [2]="--of" [3]="of")
+argc__fn=test3
+argc__positionals=()
+argc_cb=x
+argc_oe=val
+argc_of=of
 test3
 
 ************ RUN ************
 prog test3 --cb y
 
-OUTPUT
+# OUTPUT
 argc_oe=val
 argc_of=`_default_fn`
 argc_cb=y
 argc__args=( prog test3 --cb y )
-argc__cmd_arg_index=1
 argc__fn=test3
 argc__positionals=(  )
+test3
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test3" [2]="--cb" [3]="y")
+argc__fn=test3
+argc__positionals=()
+argc_cb=y
+argc_oe=val
+argc_of=argc
 test3
 
 

@@ -5,7 +5,7 @@ expression: data
 RUN
 prog help cmd_required_multi_arg
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cmd_required_multi_arg <VAL>...
 
@@ -14,4 +14,11 @@ ARGS:
 
 EOF
 exit 0
+
+# BUILD_OUTPUT
+USAGE: prog cmd_required_multi_arg <VAL>...
+
+ARGS:
+  <VAL>...
+
 

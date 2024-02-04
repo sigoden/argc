@@ -48,7 +48,7 @@ To write a command-line program with argc, we only need to do two things:
 Write `example.sh`
 
 ```sh
-# @flag   --foo   Flag value
+# @flag --foo     Flag value
 # @option --bar   Option value
 # @arg baz*       Positional values
 
@@ -80,9 +80,11 @@ OPTIONS:
   -h, --help       Print help
 ```
 
-## Comment Tags
+## Comment Decorator
 
-`argc` parses cli definition from comment tags.
+`argc` uses comments with a `JsDoc` inspired syntax to add functionality to the scripts at runtime.
+This [grammar](./docs/grammar.md), known as a `comment decorator`, is a normal Bash comment followed by an `@` sign and a tag.
+It's how the argc parser identifies configuration.
 
 ### @cmd
 
@@ -101,11 +103,30 @@ download() {
 ```
 
 ```
-USAGE: test.sh <COMMAND>
+USAGE: prog <COMMAND>
 
 COMMANDS:
   upload    Upload a file
   download  Download a file
+```
+
+### @alias
+
+Add aliases for subcommand.
+
+```sh
+# @cmd Run tests
+# @alias t,tst
+test() {
+  echo Run test
+}
+```
+
+```
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  test  Run tests [aliases: t, tst]
 ```
 
 ### @arg
@@ -155,25 +176,6 @@ Define a flag. A flag is an option of boolean type, and is always false by defau
 # @flag     --fd*        multi-occurs
 ```
 
-### @alias
-
-Add aliases for subcommand.
-
-```sh
-# @cmd Run tests
-# @alias t,tst
-test() {
-  echo Run test
-}
-```
-
-```
-USAGE: test.sh <COMMAND>
-
-COMMANDS:
-  test  Run tests [aliases: t, tst]
-```
-
 ### @env
 
 Define an environment
@@ -186,31 +188,43 @@ Define an environment
 # @env EDB[=dev|prod]     choices + default
 ```
 
+### @meta
+
+Add a metadata.
+
+```sh
+# @meta key [value]
+```
+
+| usage                        | description                                                               |
+| ---------------------------- | ------------------------------------------------------------------------- |
+| `@meta dotenv [<path>]`      | Load a `.env` file from a custom path, if persent.                        |
+| `@meta combine-shorts`       | Short flags can be combined, e.g. `prog -xf => prog -x -f `               |
+| `@meta inherit-flag-options` | Subcommands will inherit the flags/options from their parent.             |
+| `@meta no-inherit-env`       | Subcommands will not inherit the environment variables from their parent. |
+| `@meta symbol <def>`         | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`          |
+
 ### @describe / @version / @author
 
 ```sh
 # @describe A demo cli
 # @version 2.17.1 
 # @author nobody <nobody@example.com>
-
-# @cmd Run test
-test() {
-  echo Run test
-}
 ```
 
 ```
-test.sh 2.17.1
+prog 2.17.1
 nobody <nobody@example.com>
 A demo cli
 
-USAGE: test.sh <COMMAND>
-
-COMMANDS:
-  test  Run test
+USAGE: prog
 ```
 
+<details>
+<summary>
+
 ### Value Notation
+</summary>
 
 Value notation is used to describe value type of options and positional parameters.
 
@@ -224,9 +238,23 @@ Here are some value notation that will affect the shell completion.
 - `FILE`/`PATH`: complete files
 - `DIR`: complete directories
 
-## Shell Completion
+</details>
+
+## Build
+
+Generate a single standalone bash script that requires no argc dependency and can be distributed to the public.
+
+```
+argc --argc-build <SCRIPT> [OUTPATH]
+```
+
+## Completion
 
 Argc provides shell completion for argc command and all the bash scripts powered by argc.
+
+```
+argc --argc-completions <SHELL> [CMDS]...
+```
 
 ```
 # bash (~/.bashrc)
@@ -274,6 +302,10 @@ what is the benefit?
 
 You can use `argc --argc-create` to quickly create a boilerplate argcscript.
 
+```
+argc --argc-create [TASKS]...
+```
+
 ![argcscript](https://github.com/sigoden/argc/assets/4012553/5130d9c5-90ff-478e-8404-3db6f55ba1d0)
 
 ## Parallel
@@ -288,7 +320,7 @@ The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel. Functions ru
 
 ## License
 
-Copyright (c) 2023-2024 aichat-developers.
+Copyright (c) 2023-2024 argc developers.
 
 argc is made available under the terms of either the MIT License or the Apache License 2.0, at your option.
 

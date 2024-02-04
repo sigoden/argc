@@ -5,15 +5,15 @@ expression: data
 RUN
 prog foo
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: the following required arguments were not provided:
   --ao <AO>
-
-USAGE: prog --ao <AO> <COMMAND>
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: the following required arguments were not provided:
+  --ao <AO>
+
 

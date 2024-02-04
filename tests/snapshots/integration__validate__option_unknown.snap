@@ -5,14 +5,13 @@ expression: data
 RUN
 prog test1 --unknown
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: unexpected argument `--unknown` found
-
-USAGE: prog test1 [OPTIONS]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: unexpected argument `--unknown` found
+
 

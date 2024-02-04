@@ -5,21 +5,31 @@ expression: data
 ************ RUN ************
 prog +a +fb fb +c fc1 +fc fc2
 
-OUTPUT
+# OUTPUT
 argc_plus_a=1
 argc_plus_fb=fb
 argc_plus_fc=( fc1 fc2 )
 argc__args=( prog +a +fb fb +c fc1 +fc fc2 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="+a" [2]="+fb" [3]="fb" [4]="+c" [5]="fc1" [6]="+fc" [7]="fc2")
+argc__positionals=()
+argc_plus_a=1
+argc_plus_fb=fb
+argc_plus_fc=([0]="fc1" [1]="fc2")
 
 ************ RUN ************
 prog +d fd1 -fd fd2
 
-OUTPUT
+# OUTPUT
 argc_fd=( fd1 fd2 )
 argc__args=( prog +d fd1 -fd fd2 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="+d" [2]="fd1" [3]="-fd" [4]="fd2")
+argc__positionals=()
+argc_fd=([0]="fd1" [1]="fd2")
 
 

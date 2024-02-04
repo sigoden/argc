@@ -5,7 +5,7 @@ expression: data
 RUN
 prog
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog <COMMAND>
 
@@ -14,4 +14,11 @@ COMMANDS:
 
 EOF
 exit 0
+
+# BUILD_OUTPUT
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  cmd
+
 

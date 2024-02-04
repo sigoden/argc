@@ -5,13 +5,15 @@ expression: data
 RUN
 prog test1 --ca val
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: invalid value `val` for `<CA>`
   [possible values: x, y, z]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: invalid value `val` for `<CA>`
+  [possible values: x, y, z]
+
 

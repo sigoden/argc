@@ -5,9 +5,13 @@ expression: data
 RUN
 prog
 
-OUTPUT
+# OUTPUT
 [ -f .env ] && set -o allexport && . .env && set +o allexport
 argc__args=( prog )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# BUILD_OUTPUT
+argc__args=([0]="prog")
+argc__positionals=()
+
 

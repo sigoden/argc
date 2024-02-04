@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+
 use assert_cmd::cargo::cargo_bin;
 use assert_fs::fixture::{ChildPath, TempDir};
 use assert_fs::prelude::*;
@@ -23,11 +26,16 @@ pub fn locate_script(script_path: &str) -> String {
     spec_path.display().to_string()
 }
 
+#[fixture]
+#[allow(dead_code)]
+pub fn tmpdir() -> TempDir {
+    assert_fs::TempDir::new().expect("Couldn't create a temp dir for tests")
+}
 /// Test fixture which creates a temporary directory with a few files and directories inside.
 /// The directories also contain files.
 #[fixture]
 #[allow(dead_code)]
-pub fn tmpdir() -> TempDir {
+pub fn tmpdir_argcfiles() -> TempDir {
     let tmpdir = assert_fs::TempDir::new().expect("Couldn't create a temp dir for tests");
     for path in SCRIPT_PATHS {
         let cp = tmpdir_path(&tmpdir, path);
@@ -38,12 +46,6 @@ pub fn tmpdir() -> TempDir {
         }
     }
     tmpdir
-}
-
-#[fixture]
-#[allow(dead_code)]
-pub fn tmpdir_bare() -> TempDir {
-    assert_fs::TempDir::new().expect("Couldn't create a temp dir for tests")
 }
 
 pub fn get_path_env_var() -> String {
@@ -83,6 +85,45 @@ eval "$({argc_path} --argc-eval "$0" "$@")"
 "###,
         )
     }
+}
+
+pub fn build_script(script_dir: &TempDir, source: &str) -> PathBuf {
+    let has_fn = source.contains("()");
+    let patched_source = source.replace(
+        "{ :; }",
+        r#"{
+    ( set -o posix ; set ) | grep ^argc_
+    echo "$argc__fn" "$@"
+}"#,
+    );
+    let mut output = argc::build(&patched_source, "prog").unwrap();
+    if !has_fn {
+        output.push_str("\n( set -o posix ; set ) | grep ^argc_");
+    }
+    let script_file = script_dir.child("prog.sh");
+
+    script_file.write_str(&output).unwrap();
+    script_file.path().to_path_buf()
+}
+
+pub fn run_script<T: AsRef<Path>>(
+    script_path: T,
+    args: &[String],
+    envs: &[(&str, &str)],
+) -> String {
+    let path_env_var = get_path_env_var();
+    let envs: HashMap<&str, &str> = envs.iter().cloned().collect();
+    let shell_path = argc::utils::get_shell_path().unwrap();
+    let output = std::process::Command::new(shell_path)
+        .arg(script_path.as_ref())
+        .args(args)
+        .env("PATH", path_env_var.clone())
+        .envs(envs)
+        .output()
+        .unwrap();
+    let stdout = std::str::from_utf8(&output.stdout).unwrap();
+    let stderr = std::str::from_utf8(&output.stderr).unwrap();
+    format!("{stdout}{stderr}")
 }
 
 fn get_argc_path() -> String {

@@ -1,15 +1,19 @@
 ---
 source: tests/env.rs
-expression: "format!(r#\"\nSTDOUT\n{stdout}\n\nSTDERR\n{stderr}\n\"#)"
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
 
-STDOUT
+# OUTPUT
 TEST_EB=1
 TEST_ECB=a
 TEST_EDA=a
 TEST_EDB=argc
 
 
-STDERR
+# BUILD_OUTPUT
+TEST_EB=1
+TEST_ECB=a
+TEST_EDA=a
+TEST_EDB=argc
 
 

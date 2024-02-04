@@ -30,10 +30,10 @@ __argc_filter=	/color:default
 ARGC_COMPGEN=1	/color:default
 ARGC_CWORD=--oa=abc	/color:default
 ARGC_LAST_ARG=--oa=abc	/color:default
-ARGC_VARS=YXJnY192YWw9Jy0tb2E9YWJjJzthcmdjX19hcmdzPSggcHJvZyAtLSAnLS1vYT1hYmMnICk7YXJnY19fY21kX2FyZ19pbmRleD0wO2FyZ2NfX2Rhc2hlcz0wO2FyZ2NfX3Bvc2l0aW9uYWxzPSggJy0tb2E9YWJjJyApOw==	/color:default
+ARGC_VARS=YXJnY192YWw9Jy0tb2E9YWJjJzthcmdjX19hcmdzPSggcHJvZyAtLSAnLS1vYT1hYmMnICk7YXJnY19fY21kX2FyZ19pbmRleD0wO2FyZ2NfX2Rhc2g9MDthcmdjX19wb3NpdGlvbmFscz0oICctLW9hPWFiYycgKTs=	/color:default
 argc__args=([0]="prog" [1]="--" [2]="--oa=abc")	/color:default
 argc__cmd_arg_index=0	/color:default
-argc__dashes=0	/color:default
+argc__dash=0	/color:default
 argc__positionals=([0]="--oa=abc")	/color:default
 argc_val=--oa=abc	/color:default
 

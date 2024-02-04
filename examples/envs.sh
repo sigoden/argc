@@ -1,3 +1,4 @@
+# @meta dotenv
 # @env TEST_EA                   optional
 # @env TEST_EB!                  required
 # @env TEST_EDA=a                default

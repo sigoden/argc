@@ -6,13 +6,20 @@ RUN
 prog cmd $foo `pwd` $(pwd) ' \1  
  世界  
 
-OUTPUT
+# OUTPUT
 argc__args=( prog cmd '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
 ' 世界 ' ' )
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=( '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
 ' 世界 ' ' )
 cmd '$foo' '`pwd`' '$(pwd)' ''\''' '\1' '' '
 ' 世界 ' '
+
+# BUILD_OUTPUT
+argc__args=([0]="prog" [1]="cmd" [2]="\$foo" [3]="\`pwd\`" [4]="\$(pwd)" [5]="'" [6]="\\1" [7]="" [8]=$'\n' [9]="世界" [10]=" ")
+argc__fn=cmd
+argc__positionals=([0]="\$foo" [1]="\`pwd\`" [2]="\$(pwd)" [3]="'" [4]="\\1" [5]="" [6]=$'\n' [7]="世界" [8]=" ")
+cmd $foo `pwd` $(pwd) ' \1  
+ 世界  
+
 

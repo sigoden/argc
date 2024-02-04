@@ -5,23 +5,35 @@ expression: data
 ************ RUN ************
 prog cmd
 
-OUTPUT
+# OUTPUT
 argc__args=( prog cmd )
-argc__cmd_arg_index=1
 argc__fn=cmd::main
 argc__positionals=(  )
+cmd::main
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd")
+argc__fn=cmd::main
+argc__positionals=()
 cmd::main
 
 ************ RUN ************
 prog cmd abc --foo 123
 
-OUTPUT
+# OUTPUT
 argc_foo=123
 argc_val=abc
 argc__args=( prog cmd abc --foo 123 )
-argc__cmd_arg_index=1
 argc__fn=cmd::main
 argc__positionals=( abc )
+cmd::main abc
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd" [2]="abc" [3]="--foo" [4]="123")
+argc__fn=cmd::main
+argc__positionals=([0]="abc")
+argc_foo=123
+argc_val=abc
 cmd::main abc
 
 

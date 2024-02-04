@@ -5,12 +5,18 @@ expression: data
 ************ RUN ************
 prog --fa:foo --fa.bar --fa_baz
 
-OUTPUT
+# OUTPUT
 argc_fa_foo=1
 argc_fa_bar=1
 argc_fa_baz=1
 argc__args=( prog --fa:foo --fa.bar --fa_baz )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--fa:foo" [2]="--fa.bar" [3]="--fa_baz")
+argc__positionals=()
+argc_fa_bar=1
+argc_fa_baz=1
+argc_fa_foo=1
 
 

@@ -49,13 +49,18 @@ It will print:
   va: bar baz
 ```
 
-### built-in variables
+### builtin variables
 
 - `argc__args`:  The command line args
-- `argc__cmd_arg_index`: The index of the command arg in `argc__args`
-- `argc__cmd_fn`: The name of argc command func
-- `argc__option`: The variable name of the option that is currently being completed.
 - `argc__positionals`: The positional args
+- `argc__fn`: The command function to be run
+
+#### param fn only (for completion)
+
+- `argc__cmd_arg_index`: The index of the command arg in `argc__args`
+- `argc__cmd_fn`: The name of command function
+- `argc__dash`:  The index of the first em-dash in the positionals array
+- `argc__option`: The variable name of the option that is currently being completed.
 
 Run command
 

@@ -5,13 +5,15 @@ expression: data
 RUN
 prog cmd_arg_with_choices val
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: invalid value `val` for `[VAL]`
   [possible values: x, y, z]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: invalid value `val` for `[VAL]`
+  [possible values: x, y, z]
+
 

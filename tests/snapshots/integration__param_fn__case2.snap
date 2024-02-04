@@ -5,17 +5,20 @@ expression: data
 ************ RUN ************
 prog ___internal___ _choice_fn
 
-OUTPUT
+# OUTPUT
 argc__args=( prog )
 argc__cmd_arg_index=0
 argc__positionals=(  )
 _choice_fn
 exit
 
+# RUN_OUTPUT
+error: no supported param
+
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn 
 
-OUTPUT
+# OUTPUT
 argc_val=( '' )
 argc__args=( prog cmd_multi_arg_with_choice_fn '' )
 argc__cmd_arg_index=1
@@ -24,10 +27,13 @@ argc__positionals=( '' )
 _choice_fn ''
 exit
 
+# RUN_OUTPUT
+error: no supported param
+
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1
 
-OUTPUT
+# OUTPUT
 argc_val=( v1 )
 argc__args=( prog cmd_multi_arg_with_choice_fn v1 )
 argc__cmd_arg_index=1
@@ -36,10 +42,13 @@ argc__positionals=( v1 )
 _choice_fn v1
 exit
 
+# RUN_OUTPUT
+error: no supported param
+
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1 
 
-OUTPUT
+# OUTPUT
 argc_val=( v1 '' )
 argc__args=( prog cmd_multi_arg_with_choice_fn v1 '' )
 argc__cmd_arg_index=1
@@ -48,10 +57,13 @@ argc__positionals=( v1 '' )
 _choice_fn v1 ''
 exit
 
+# RUN_OUTPUT
+error: no supported param
+
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1 v2
 
-OUTPUT
+# OUTPUT
 argc_val=( v1 v2 )
 argc__args=( prog cmd_multi_arg_with_choice_fn v1 v2 )
 argc__cmd_arg_index=1
@@ -60,10 +72,13 @@ argc__positionals=( v1 v2 )
 _choice_fn v1 v2
 exit
 
+# RUN_OUTPUT
+error: no supported param
+
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1 v2 
 
-OUTPUT
+# OUTPUT
 argc_val=( v1 v2 '' )
 argc__args=( prog cmd_multi_arg_with_choice_fn v1 v2 '' )
 argc__cmd_arg_index=1
@@ -71,5 +86,8 @@ argc__cmd_fn=cmd_multi_arg_with_choice_fn
 argc__positionals=( v1 v2 '' )
 _choice_fn v1 v2 ''
 exit
+
+# RUN_OUTPUT
+error: no supported param
 
 

@@ -148,13 +148,12 @@ test3() {
 }
 
 _debug() {
-    printenv | grep ARGC_
-    ( set -o posix ; set ) | grep argc_
-    echo "$@"
+    ( set -o posix ; set ) | grep ^argc_
+    echo "$argc__fn" "$@"
 }
 
 _default_fn() {
-    whoami
+    echo argc
 }
 
 _choice_fn() {

@@ -5,10 +5,13 @@ expression: data
 RUN
 prog -D v1 -Dv2=foo -o1
 
-OUTPUT
+# OUTPUT
 argc_o=1
 argc_D=( v1 'v2=foo' )
 argc__args=( prog -D v1 '-Dv2=foo' -o1 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# BUILD_OUTPUT
+error: unexpected argument `-Dv2` found
+
 

@@ -5,14 +5,13 @@ expression: data
 RUN
 prog test1 -e -e
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: the argument `-e` cannot be used multiple times
-
-USAGE: prog test1 [OPTIONS]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: invalid value for `-e <E>`
+
 

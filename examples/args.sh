@@ -143,9 +143,8 @@ cmd_three_required_args() {
 }
 
 _debug() {
-    printenv | grep ARGC_
-    ( set -o posix ; set ) | grep argc_
-    echo "$@"
+    ( set -o posix ; set ) | grep ^argc_
+    echo "$argc__fn" "$@"
 }
 
 _default_fn() {

@@ -1,20 +1,20 @@
 ---
-source: tests/export.rs
-expression: output
+source: tests/cli.rs
+expression: stdout
 ---
 {
-  "name": "prog",
+  "name": "options",
   "describe": "",
   "author": null,
   "version": null,
   "aliases": [],
   "flag_options": [
     {
+      "id": "help",
       "long_name": "--help",
       "short_name": "-h",
       "describe": "",
       "is_flag": true,
-      "var_name": "help",
       "notations": [],
       "required": false,
       "multiple_values": false,
@@ -31,11 +31,11 @@ expression: output
       "inherit": false
     },
     {
+      "id": "version",
       "long_name": "--version",
       "short_name": "-V",
       "describe": "",
       "is_flag": true,
-      "var_name": "version",
       "notations": [],
       "required": false,
       "multiple_values": false,
@@ -63,11 +63,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "oa",
           "long_name": "--oa",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "oa",
           "notations": [
             "OA"
           ],
@@ -86,11 +86,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ob",
           "long_name": "--ob",
           "short_name": "-b",
           "describe": "short",
           "is_flag": false,
-          "var_name": "ob",
           "notations": [
             "OB"
           ],
@@ -109,11 +109,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "c",
           "long_name": "-c",
           "short_name": null,
           "describe": "short only",
           "is_flag": false,
-          "var_name": "c",
           "notations": [
             "C"
           ],
@@ -132,11 +132,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oc",
           "long_name": "--oc",
           "short_name": null,
           "describe": "required",
           "is_flag": false,
-          "var_name": "oc",
           "notations": [
             "OC"
           ],
@@ -155,11 +155,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "od",
           "long_name": "--od",
           "short_name": null,
           "describe": "multi-occurs",
           "is_flag": false,
-          "var_name": "od",
           "notations": [
             "OD"
           ],
@@ -178,11 +178,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oe",
           "long_name": "--oe",
           "short_name": null,
           "describe": "required + multi-occurs",
           "is_flag": false,
-          "var_name": "oe",
           "notations": [
             "OE"
           ],
@@ -201,11 +201,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ona",
           "long_name": "--ona",
           "short_name": null,
           "describe": "value notation",
           "is_flag": false,
-          "var_name": "ona",
           "notations": [
             "PATH"
           ],
@@ -224,11 +224,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "onb",
           "long_name": "--onb",
           "short_name": null,
           "describe": "two-args value notations",
           "is_flag": false,
-          "var_name": "onb",
           "notations": [
             "FILE",
             "FILE"
@@ -248,11 +248,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "onc",
           "long_name": "--onc",
           "short_name": null,
           "describe": "unlimited-args value notations",
           "is_flag": false,
-          "var_name": "onc",
           "notations": [
             "CMD",
             "FILE+"
@@ -272,11 +272,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oda",
           "long_name": "--oda",
           "short_name": null,
           "describe": "default",
           "is_flag": false,
-          "var_name": "oda",
           "notations": [
             "ODA"
           ],
@@ -298,11 +298,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "odb",
           "long_name": "--odb",
           "short_name": null,
           "describe": "default from fn",
           "is_flag": false,
-          "var_name": "odb",
           "notations": [
             "ODB"
           ],
@@ -324,11 +324,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oca",
           "long_name": "--oca",
           "short_name": null,
           "describe": "choice",
           "is_flag": false,
-          "var_name": "oca",
           "notations": [
             "OCA"
           ],
@@ -353,11 +353,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ocb",
           "long_name": "--ocb",
           "short_name": null,
           "describe": "choice + default",
           "is_flag": false,
-          "var_name": "ocb",
           "notations": [
             "OCB"
           ],
@@ -385,11 +385,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "occ",
           "long_name": "--occ",
           "short_name": null,
           "describe": "multi-occurs + choice",
           "is_flag": false,
-          "var_name": "occ",
           "notations": [
             "OCC"
           ],
@@ -414,11 +414,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ocd",
           "long_name": "--ocd",
           "short_name": null,
           "describe": "required + multi-occurs + choice",
           "is_flag": false,
-          "var_name": "ocd",
           "notations": [
             "OCD"
           ],
@@ -443,11 +443,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ofa",
           "long_name": "--ofa",
           "short_name": null,
           "describe": "choice from fn",
           "is_flag": false,
-          "var_name": "ofa",
           "notations": [
             "OFA"
           ],
@@ -472,11 +472,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ofb",
           "long_name": "--ofb",
           "short_name": null,
           "describe": "choice from fn + no validation",
           "is_flag": false,
-          "var_name": "ofb",
           "notations": [
             "OFB"
           ],
@@ -501,11 +501,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ofc",
           "long_name": "--ofc",
           "short_name": null,
           "describe": "multi-occurs + choice from fn",
           "is_flag": false,
-          "var_name": "ofc",
           "notations": [
             "OFC"
           ],
@@ -530,11 +530,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ofd",
           "long_name": "--ofd",
           "short_name": null,
           "describe": "multi-occurs + choice from fn + comma-separated list",
           "is_flag": false,
-          "var_name": "ofd",
           "notations": [
             "OFD"
           ],
@@ -559,11 +559,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oxa",
           "long_name": "--oxa",
           "short_name": null,
           "describe": "capture all remaining args",
           "is_flag": false,
-          "var_name": "oxa",
           "notations": [
             "OXA~"
           ],
@@ -582,11 +582,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -619,11 +619,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "fa",
           "long_name": "--fa",
           "short_name": null,
           "describe": "",
           "is_flag": true,
-          "var_name": "fa",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -640,11 +640,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "fb",
           "long_name": "--fb",
           "short_name": "-b",
           "describe": "short",
           "is_flag": true,
-          "var_name": "fb",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -661,11 +661,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "c",
           "long_name": "-c",
           "short_name": null,
           "describe": "short only",
           "is_flag": true,
-          "var_name": "c",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -682,11 +682,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "fd",
           "long_name": "--fd",
           "short_name": null,
           "describe": "multi-occurs",
           "is_flag": true,
-          "var_name": "fd",
           "notations": [],
           "required": false,
           "multiple_values": true,
@@ -703,11 +703,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "fe",
           "long_name": "--fe",
           "short_name": "-e",
           "describe": "short + multi-occurs",
           "is_flag": true,
-          "var_name": "fe",
           "notations": [],
           "required": false,
           "multiple_values": true,
@@ -724,11 +724,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -761,11 +761,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "fa",
           "long_name": "-fa",
           "short_name": null,
           "describe": "",
           "is_flag": true,
-          "var_name": "fa",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -782,11 +782,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "fb",
           "long_name": "-fb",
           "short_name": "-b",
           "describe": "",
           "is_flag": true,
-          "var_name": "fb",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -803,11 +803,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "fd",
           "long_name": "-fd",
           "short_name": null,
           "describe": "",
           "is_flag": true,
-          "var_name": "fd",
           "notations": [],
           "required": false,
           "multiple_values": true,
@@ -824,11 +824,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oa",
           "long_name": "-oa",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "oa",
           "notations": [
             "OA"
           ],
@@ -847,11 +847,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "od",
           "long_name": "-od",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "od",
           "notations": [
             "OD"
           ],
@@ -870,11 +870,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ona",
           "long_name": "-ona",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "ona",
           "notations": [
             "PATH"
           ],
@@ -893,11 +893,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oca",
           "long_name": "-oca",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "oca",
           "notations": [
             "OCA"
           ],
@@ -922,11 +922,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ofa",
           "long_name": "-ofa",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "ofa",
           "notations": [
             "OFA"
           ],
@@ -951,11 +951,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -988,11 +988,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "oa",
           "long_name": "--oa",
           "short_name": null,
           "describe": "multi values, zero or more",
           "is_flag": false,
-          "var_name": "oa",
           "notations": [
             "VALUE*"
           ],
@@ -1011,11 +1011,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ob",
           "long_name": "--ob",
           "short_name": null,
           "describe": "multi values, one or more",
           "is_flag": false,
-          "var_name": "ob",
           "notations": [
             "VALUE+"
           ],
@@ -1034,11 +1034,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oc",
           "long_name": "--oc",
           "short_name": null,
           "describe": "zero or one",
           "is_flag": false,
-          "var_name": "oc",
           "notations": [
             "VALUE?"
           ],
@@ -1057,11 +1057,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "--help",
           "short_name": "-h",
           "describe": "Print help",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -1094,11 +1094,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "plus_oa",
           "long_name": "+oa",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "plus_oa",
           "notations": [
             "OA"
           ],
@@ -1117,11 +1117,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_ob",
           "long_name": "+ob",
           "short_name": "+b",
           "describe": "short",
           "is_flag": false,
-          "var_name": "plus_ob",
           "notations": [
             "OB"
           ],
@@ -1140,11 +1140,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_c",
           "long_name": "+c",
           "short_name": null,
           "describe": "short only",
           "is_flag": false,
-          "var_name": "plus_c",
           "notations": [
             "C"
           ],
@@ -1163,11 +1163,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_oc",
           "long_name": "+oc",
           "short_name": null,
           "describe": "required",
           "is_flag": false,
-          "var_name": "plus_oc",
           "notations": [
             "OC"
           ],
@@ -1186,11 +1186,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_od",
           "long_name": "+od",
           "short_name": null,
           "describe": "multi-occurs",
           "is_flag": false,
-          "var_name": "plus_od",
           "notations": [
             "OD"
           ],
@@ -1209,11 +1209,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_oe",
           "long_name": "+oe",
           "short_name": null,
           "describe": "required + multi-occurs",
           "is_flag": false,
-          "var_name": "plus_oe",
           "notations": [
             "OE"
           ],
@@ -1232,11 +1232,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_ona",
           "long_name": "+ona",
           "short_name": null,
           "describe": "value notation",
           "is_flag": false,
-          "var_name": "plus_ona",
           "notations": [
             "PATH"
           ],
@@ -1255,11 +1255,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_onb",
           "long_name": "+onb",
           "short_name": null,
           "describe": "two-args value notations",
           "is_flag": false,
-          "var_name": "plus_onb",
           "notations": [
             "FILE",
             "FILE"
@@ -1279,11 +1279,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_onc",
           "long_name": "+onc",
           "short_name": null,
           "describe": "unlimited-args value notations",
           "is_flag": false,
-          "var_name": "plus_onc",
           "notations": [
             "CMD",
             "FILE+"
@@ -1303,11 +1303,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_oda",
           "long_name": "+oda",
           "short_name": null,
           "describe": "default",
           "is_flag": false,
-          "var_name": "plus_oda",
           "notations": [
             "ODA"
           ],
@@ -1329,11 +1329,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_odb",
           "long_name": "+odb",
           "short_name": null,
           "describe": "default from fn",
           "is_flag": false,
-          "var_name": "plus_odb",
           "notations": [
             "ODB"
           ],
@@ -1355,11 +1355,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_oca",
           "long_name": "+oca",
           "short_name": null,
           "describe": "choice",
           "is_flag": false,
-          "var_name": "plus_oca",
           "notations": [
             "OCA"
           ],
@@ -1384,11 +1384,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_ocb",
           "long_name": "+ocb",
           "short_name": null,
           "describe": "choice + default",
           "is_flag": false,
-          "var_name": "plus_ocb",
           "notations": [
             "OCB"
           ],
@@ -1416,11 +1416,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_occ",
           "long_name": "+occ",
           "short_name": null,
           "describe": "multi-occurs + choice",
           "is_flag": false,
-          "var_name": "plus_occ",
           "notations": [
             "OCC"
           ],
@@ -1445,11 +1445,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_ocd",
           "long_name": "+ocd",
           "short_name": null,
           "describe": "required + multi-occurs + choice",
           "is_flag": false,
-          "var_name": "plus_ocd",
           "notations": [
             "OCD"
           ],
@@ -1474,11 +1474,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_ofa",
           "long_name": "+ofa",
           "short_name": null,
           "describe": "choice from fn",
           "is_flag": false,
-          "var_name": "plus_ofa",
           "notations": [
             "OFA"
           ],
@@ -1503,11 +1503,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_ofb",
           "long_name": "+ofb",
           "short_name": null,
           "describe": "choice from fn + no validation",
           "is_flag": false,
-          "var_name": "plus_ofb",
           "notations": [
             "OFB"
           ],
@@ -1532,11 +1532,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_ofc",
           "long_name": "+ofc",
           "short_name": null,
           "describe": "multi-occurs + choice from fn",
           "is_flag": false,
-          "var_name": "plus_ofc",
           "notations": [
             "OFC"
           ],
@@ -1561,11 +1561,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_ofd",
           "long_name": "+ofd",
           "short_name": null,
           "describe": "multi-occurs + choice from fn + comma-separated list",
           "is_flag": false,
-          "var_name": "plus_ofd",
           "notations": [
             "OFD"
           ],
@@ -1590,11 +1590,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_oxa",
           "long_name": "+oxa",
           "short_name": null,
           "describe": "capture all remaining args",
           "is_flag": false,
-          "var_name": "plus_oxa",
           "notations": [
             "OXA~"
           ],
@@ -1613,11 +1613,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -1650,11 +1650,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "plus_fa",
           "long_name": "+fa",
           "short_name": null,
           "describe": "",
           "is_flag": true,
-          "var_name": "plus_fa",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -1671,11 +1671,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_fb",
           "long_name": "+fb",
           "short_name": "+b",
           "describe": "short",
           "is_flag": true,
-          "var_name": "plus_fb",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -1692,11 +1692,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_c",
           "long_name": "+c",
           "short_name": null,
           "describe": "short only",
           "is_flag": true,
-          "var_name": "plus_c",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -1713,11 +1713,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_fd",
           "long_name": "+fd",
           "short_name": null,
           "describe": "multi-occurs",
           "is_flag": true,
-          "var_name": "plus_fd",
           "notations": [],
           "required": false,
           "multiple_values": true,
@@ -1734,11 +1734,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_fe",
           "long_name": "+fe",
           "short_name": "+e",
           "describe": "short + multi-occurs",
           "is_flag": true,
-          "var_name": "plus_fe",
           "notations": [],
           "required": false,
           "multiple_values": true,
@@ -1755,11 +1755,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -1792,11 +1792,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "a",
           "long_name": "-a",
           "short_name": "+a",
           "describe": "",
           "is_flag": false,
-          "var_name": "a",
           "notations": [
             "A"
           ],
@@ -1815,11 +1815,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_b",
           "long_name": "+b",
           "short_name": "-b",
           "describe": "",
           "is_flag": false,
-          "var_name": "plus_b",
           "notations": [
             "B"
           ],
@@ -1838,11 +1838,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "c",
           "long_name": "--c",
           "short_name": "+c",
           "describe": "",
           "is_flag": false,
-          "var_name": "c",
           "notations": [
             "C"
           ],
@@ -1861,11 +1861,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -1898,11 +1898,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "X",
           "long_name": "-X",
           "short_name": null,
           "describe": "prefixied + multi-occurs + choice from fn",
           "is_flag": false,
-          "var_name": "X",
           "notations": [
             "X"
           ],
@@ -1927,11 +1927,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "plus_X",
           "long_name": "+X",
           "short_name": null,
           "describe": "prefixied + multi-occurs + choice from fn",
           "is_flag": false,
-          "var_name": "plus_X",
           "notations": [
             "X"
           ],
@@ -1956,11 +1956,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -1993,11 +1993,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "a",
           "long_name": "-a",
           "short_name": null,
           "describe": "",
           "is_flag": true,
-          "var_name": "a",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -2014,11 +2014,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "fa",
           "long_name": "--fa",
           "short_name": null,
           "describe": "",
           "is_flag": true,
-          "var_name": "fa",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -2035,11 +2035,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "fb",
           "long_name": "--fb",
           "short_name": "-f",
           "describe": "",
           "is_flag": true,
-          "var_name": "fb",
           "notations": [],
           "required": false,
           "multiple_values": true,
@@ -2056,11 +2056,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "sa",
           "long_name": "-sa",
           "short_name": null,
           "describe": "",
           "is_flag": true,
-          "var_name": "sa",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -2077,11 +2077,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "sb",
           "long_name": "-sb",
           "short_name": null,
           "describe": "",
           "is_flag": true,
-          "var_name": "sb",
           "notations": [],
           "required": false,
           "multiple_values": true,
@@ -2098,11 +2098,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "e",
           "long_name": "-e",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "e",
           "notations": [
             "E"
           ],
@@ -2121,11 +2121,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oa",
           "long_name": "--oa",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "oa",
           "notations": [
             "OA"
           ],
@@ -2144,11 +2144,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ob",
           "long_name": "--ob",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "ob",
           "notations": [
             "OB"
           ],
@@ -2167,11 +2167,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oc",
           "long_name": "--oc",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "oc",
           "notations": [
             "DIR"
           ],
@@ -2190,11 +2190,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "od",
           "long_name": "--od",
           "short_name": "-o",
           "describe": "",
           "is_flag": false,
-          "var_name": "od",
           "notations": [
             "FILE",
             "FILE"
@@ -2214,11 +2214,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oe",
           "long_name": "--oe",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "oe",
           "notations": [
             "OE"
           ],
@@ -2237,11 +2237,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ca",
           "long_name": "--ca",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "ca",
           "notations": [
             "CA"
           ],
@@ -2267,11 +2267,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "cc",
           "long_name": "--cc",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "cc",
           "notations": [
             "CC"
           ],
@@ -2296,11 +2296,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "cd",
           "long_name": "--cd",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "cd",
           "notations": [
             "CD"
           ],
@@ -2325,11 +2325,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ce",
           "long_name": "--ce",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "ce",
           "notations": [
             "CE"
           ],
@@ -2354,11 +2354,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "soa",
           "long_name": "-soa",
           "short_name": "-s",
           "describe": "",
           "is_flag": false,
-          "var_name": "soa",
           "notations": [
             "SOA"
           ],
@@ -2377,11 +2377,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -2414,11 +2414,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "oa",
           "long_name": "--oa",
           "short_name": "-a",
           "describe": "",
           "is_flag": false,
-          "var_name": "oa",
           "notations": [
             "OA"
           ],
@@ -2437,11 +2437,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ob",
           "long_name": "--ob",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "ob",
           "notations": [
             "OB"
           ],
@@ -2460,11 +2460,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oc",
           "long_name": "--oc",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "oc",
           "notations": [
             "OC"
           ],
@@ -2483,11 +2483,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "oca",
           "long_name": "--oca",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "oca",
           "notations": [
             "OCA"
           ],
@@ -2512,11 +2512,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "ocb",
           "long_name": "--ocb",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "ocb",
           "notations": [
             "OCB"
           ],
@@ -2541,11 +2541,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "occ",
           "long_name": "--occ",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "occ",
           "notations": [
             "OCC"
           ],
@@ -2570,11 +2570,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "--help",
           "short_name": "-h",
           "describe": "",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -2607,11 +2607,11 @@ expression: output
       "aliases": [],
       "flag_options": [
         {
+          "id": "oe",
           "long_name": "--oe",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "oe",
           "notations": [
             "OE"
           ],
@@ -2633,11 +2633,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "of",
           "long_name": "--of",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "of",
           "notations": [
             "OF"
           ],
@@ -2659,11 +2659,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "cb",
           "long_name": "--cb",
           "short_name": null,
           "describe": "",
           "is_flag": false,
-          "var_name": "cb",
           "notations": [
             "CB"
           ],
@@ -2692,11 +2692,11 @@ expression: output
           "inherit": false
         },
         {
+          "id": "help",
           "long_name": "--help",
           "short_name": "-h",
           "describe": "",
           "is_flag": true,
-          "var_name": "help",
           "notations": [],
           "required": false,
           "multiple_values": false,
@@ -2726,3 +2726,4 @@ expression: output
   "command_fn": null,
   "combine_shorts": true
 }
+

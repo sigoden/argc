@@ -5,13 +5,15 @@ expression: data
 RUN
 prog test1 --ce abc --ce val
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: invalid value `val` for `<CE>`
   [possible values: abc, def, ghi]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# BUILD_OUTPUT
+error: invalid value `val` for `<CE>`
+  [possible values: abc, def, ghi]
+
 

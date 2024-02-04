@@ -5,23 +5,35 @@ expression: data
 ************ RUN ************
 prog v1 -f --oa a
 
-OUTPUT
+# OUTPUT
 argc_f=1
 argc_oa=a
 argc_v1=v1
 argc__args=( prog v1 -f --oa a )
-argc__cmd_arg_index=0
 argc__positionals=( v1 )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="v1" [2]="-f" [3]="--oa" [4]="a")
+argc__positionals=([0]="v1")
+argc_f=1
+argc_oa=a
+argc_v1=v1
 
 ************ RUN ************
 prog v1 -f -- --oa a
 
-OUTPUT
+# OUTPUT
 argc_f=1
 argc_v1=v1
 argc_v2=( --oa a )
 argc__args=( prog v1 -f -- --oa a )
-argc__cmd_arg_index=0
 argc__positionals=( v1 --oa a )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="v1" [2]="-f" [3]="--" [4]="--oa" [5]="a")
+argc__positionals=([0]="v1" [1]="--oa" [2]="a")
+argc_f=1
+argc_v1=v1
+argc_v2=([0]="--oa" [1]="a")
 
 

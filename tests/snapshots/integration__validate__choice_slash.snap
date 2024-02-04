@@ -5,13 +5,16 @@ expression: data
 ************ RUN ************
 prog cmd a\b a\b
 
-OUTPUT
+# OUTPUT
 argc_foo='a\b'
 argc_bar='a\b'
 argc__args=( prog cmd 'a\b' 'a\b' )
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=( 'a\b' 'a\b' )
 cmd 'a\b' 'a\b'
+
+# RUN_OUTPUT
+error: invalid value `a\b` for `[BAR]`
+  [possible values: ]
 
 

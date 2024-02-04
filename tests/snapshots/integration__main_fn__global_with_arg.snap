@@ -5,11 +5,18 @@ expression: data
 RUN
 prog abc
 
-OUTPUT
+# OUTPUT
 argc_val=abc
 argc__args=( prog abc )
-argc__cmd_arg_index=0
 argc__fn=main
 argc__positionals=( abc )
 main abc
+
+# BUILD_OUTPUT
+argc__args=([0]="prog" [1]="abc")
+argc__fn=main
+argc__positionals=([0]="abc")
+argc_val=abc
+main abc
+
 

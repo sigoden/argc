@@ -5,7 +5,7 @@ expression: data
 ************ RUN ************
 prog -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog [OPTIONS]
 
@@ -22,67 +22,108 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog [OPTIONS]
+
+OPTIONS:
+  -f, --fc...
+  -a, --oa [DIR]...
+  -b, --ob <CMD> <DIR+>
+  -c, --oc <DIR+>
+  -d, --od <DIR> <FILE>
+  -e, --oe [DIR+]...
+  -h, --help
+  -V, --version
+
 ************ RUN ************
 prog -f -f
 
-OUTPUT
+# OUTPUT
 argc_fc=2
 argc__args=( prog -f -f )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-f" [2]="-f")
+argc__positionals=()
+argc_fc=2
 
 ************ RUN ************
 prog -a dir1 dir2
 
-OUTPUT
+# OUTPUT
 argc_oa=( dir1 )
 argc__args=( prog -a dir1 dir2 )
-argc__cmd_arg_index=0
 argc__positionals=( dir2 )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-a" [2]="dir1" [3]="dir2")
+argc__positionals=([0]="dir2")
+argc_oa=([0]="dir1")
 
 ************ RUN ************
 prog -a dir1 -a dir2
 
-OUTPUT
+# OUTPUT
 argc_oa=( dir1 dir2 )
 argc__args=( prog -a dir1 -a dir2 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-a" [2]="dir1" [3]="-a" [4]="dir2")
+argc__positionals=()
+argc_oa=([0]="dir1" [1]="dir2")
 
 ************ RUN ************
 prog -b vim dir1 dir2
 
-OUTPUT
+# OUTPUT
 argc_ob=( vim dir1 dir2 )
 argc__args=( prog -b vim dir1 dir2 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-b" [2]="vim" [3]="dir1" [4]="dir2")
+argc__positionals=()
+argc_ob=([0]="vim" [1]="dir1" [2]="dir2")
 
 ************ RUN ************
 prog -c dir1 dir2
 
-OUTPUT
+# OUTPUT
 argc_oc=( dir1 dir2 )
 argc__args=( prog -c dir1 dir2 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-c" [2]="dir1" [3]="dir2")
+argc__positionals=()
+argc_oc=([0]="dir1" [1]="dir2")
 
 ************ RUN ************
 prog -d dir1 file1 file2
 
-OUTPUT
+# OUTPUT
 argc_od=( dir1 file1 )
 argc__args=( prog -d dir1 file1 file2 )
-argc__cmd_arg_index=0
 argc__positionals=( file2 )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-d" [2]="dir1" [3]="file1" [4]="file2")
+argc__positionals=([0]="file2")
+argc_od=([0]="dir1" [1]="file1")
 
 ************ RUN ************
 prog -e dir1 -e dir2 dir3
 
-OUTPUT
+# OUTPUT
 argc_oe=( dir1 dir2 dir3 )
 argc__args=( prog -e dir1 -e dir2 dir3 )
-argc__cmd_arg_index=0
 argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-e" [2]="dir1" [3]="-e" [4]="dir2" [5]="dir3")
+argc__positionals=()
+argc_oe=([0]="dir1" [1]="dir2" [2]="dir3")
 
 

@@ -5,7 +5,7 @@ expression: data
 ************ RUN ************
 prog help
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 prog 1.0.0
 nobody <nobody@example.com>
@@ -15,11 +15,18 @@ USAGE: prog
 
 EOF
 exit 0
+
+# RUN_OUTPUT
+prog 1.0.0
+nobody <nobody@example.com>
+Test argc
+
+USAGE: prog
 
 ************ RUN ************
 prog --help
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 prog 1.0.0
 nobody <nobody@example.com>
@@ -29,11 +36,18 @@ USAGE: prog
 
 EOF
 exit 0
+
+# RUN_OUTPUT
+prog 1.0.0
+nobody <nobody@example.com>
+Test argc
+
+USAGE: prog
 
 ************ RUN ************
 prog -help
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 prog 1.0.0
 nobody <nobody@example.com>
@@ -43,11 +57,18 @@ USAGE: prog
 
 EOF
 exit 0
+
+# RUN_OUTPUT
+prog 1.0.0
+nobody <nobody@example.com>
+Test argc
+
+USAGE: prog
 
 ************ RUN ************
 prog -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 prog 1.0.0
 nobody <nobody@example.com>
@@ -58,31 +79,47 @@ USAGE: prog
 EOF
 exit 0
 
+# RUN_OUTPUT
+prog 1.0.0
+nobody <nobody@example.com>
+Test argc
+
+USAGE: prog
+
 ************ RUN ************
 prog --version
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 prog 1.0.0
 EOF
 exit 0
+
+# RUN_OUTPUT
+prog 1.0.0
 
 ************ RUN ************
 prog -version
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 prog 1.0.0
 EOF
 exit 0
+
+# RUN_OUTPUT
+prog 1.0.0
 
 ************ RUN ************
 prog -V
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 prog 1.0.0
 EOF
 exit 0
+
+# RUN_OUTPUT
+prog 1.0.0
 
 

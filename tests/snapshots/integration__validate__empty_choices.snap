@@ -5,14 +5,15 @@ expression: data
 ************ RUN ************
 prog --oa foo
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 error: invalid value `foo` for `<OA>`
   [possible values: ]
-
-For more information, try '--help'.
-
 EOF
 exit 1
+
+# RUN_OUTPUT
+error: invalid value `foo` for `<OA>`
+  [possible values: ]
 
 

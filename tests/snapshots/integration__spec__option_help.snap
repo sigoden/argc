@@ -5,7 +5,7 @@ expression: data
 ************ RUN ************
 prog options -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 All kind of options
 
@@ -37,10 +37,38 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+All kind of options
+
+USAGE: prog options [OPTIONS] --oc <OC> --oe <OE>... --ocd <OCD>...
+
+OPTIONS:
+      --oa <OA>
+  -b, --ob <OB>            short
+  -c <C>                   short only
+      --oc <OC>            required
+      --od [OD]...         multi-occurs
+      --oe <OE>...         required + multi-occurs
+      --ona <PATH>         value notation
+      --onb <FILE> <FILE>  two-args value notations
+      --onc <CMD> <FILE+>  unlimited-args value notations
+      --oda <ODA>          default [default: a]
+      --odb <ODB>          default from fn
+      --oca <OCA>          choice [possible values: a, b]
+      --ocb <OCB>          choice + default [default: a] [possible values: a, b]
+      --occ [OCC]...       multi-occurs + choice [possible values: a, b]
+      --ocd <OCD>...       required + multi-occurs + choice [possible values: a, b]
+      --ofa <OFA>          choice from fn
+      --ofb <OFB>          choice from fn + no validation
+      --ofc [OFC]...       multi-occurs + choice from fn
+      --ofd [OFD]...       multi-occurs + choice from fn + comma-separated list
+      --oxa <OXA~>         capture all remaining args
+  -h,  -help               Print help
+
 ************ RUN ************
 prog flags -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 All kind of flags
 
@@ -57,10 +85,23 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+All kind of flags
+
+USAGE: prog flags [OPTIONS]
+
+OPTIONS:
+      --fa
+  -b, --fb     short
+  -c           short only
+      --fd...  multi-occurs
+  -e, --fe...  short + multi-occurs
+  -h,  -help   Print help
+
 ************ RUN ************
 prog options-one-hyphen -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 Flags or options with single hyphen
 
@@ -80,10 +121,26 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+Flags or options with single hyphen
+
+USAGE: prog options-one-hyphen [OPTIONS]
+
+OPTIONS:
+       -fa
+  -b,  -fb
+       -fd...
+       -oa <OA>
+       -od [OD]...
+       -ona <PATH>
+       -oca <OCA>   [possible values: a, b]
+       -ofa <OFA>
+  -h,  -help
+
 ************ RUN ************
 prog options-notation-modifier -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 Value notation modifier
 
@@ -98,10 +155,21 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+Value notation modifier
+
+USAGE: prog options-notation-modifier [OPTIONS]
+
+OPTIONS:
+      --oa <VALUE*>  multi values, zero or more
+      --ob <VALUE+>  multi values, one or more
+      --oc <VALUE?>  zero or one
+  -h, --help         Print help
+
 ************ RUN ************
 prog options-plus -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 All kind of options
 
@@ -133,10 +201,38 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+All kind of options
+
+USAGE: prog options-plus [OPTIONS] +oc <OC> +oe <OE>... +ocd <OCD>...
+
+OPTIONS:
+       +oa <OA>
+  +b,  +ob <OB>            short
+  +c <C>                   short only
+       +oc <OC>            required
+       +od [OD]...         multi-occurs
+       +oe <OE>...         required + multi-occurs
+       +ona <PATH>         value notation
+       +onb <FILE> <FILE>  two-args value notations
+       +onc <CMD> <FILE+>  unlimited-args value notations
+       +oda <ODA>          default [default: a]
+       +odb <ODB>          default from fn
+       +oca <OCA>          choice [possible values: a, b]
+       +ocb <OCB>          choice + default [default: a] [possible values: a, b]
+       +occ [OCC]...       multi-occurs + choice [possible values: a, b]
+       +ocd <OCD>...       required + multi-occurs + choice [possible values: a, b]
+       +ofa <OFA>          choice from fn
+       +ofb <OFB>          choice from fn + no validation
+       +ofc [OFC]...       multi-occurs + choice from fn
+       +ofd [OFD]...       multi-occurs + choice from fn + comma-separated list
+       +oxa <OXA~>         capture all remaining args
+  -h,  -help               Print help
+
 ************ RUN ************
 prog flags-plus -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 All kind of flags
 
@@ -153,10 +249,23 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+All kind of flags
+
+USAGE: prog flags-plus [OPTIONS]
+
+OPTIONS:
+       +fa
+  +b,  +fb     short
+  +c           short only
+       +fd...  multi-occurs
+  +e,  +fe...  short + multi-occurs
+  -h,  -help   Print help
+
 ************ RUN ************
 prog options-mixed -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 Mixed `-` and `+` options
 
@@ -171,10 +280,21 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+Mixed `-` and `+` options
+
+USAGE: prog options-mixed [OPTIONS]
+
+OPTIONS:
+  +a,  -a <A>
+  -b,  +b <B>
+  +c, --c <C>
+  -h,  -help
+
 ************ RUN ************
 prog options-prefixed -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 Prefixed option
 
@@ -188,10 +308,20 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+Prefixed option
+
+USAGE: prog options-prefixed [OPTIONS]
+
+OPTIONS:
+  -X [X]...   prefixied + multi-occurs + choice from fn
+  +X [X]...   prefixied + multi-occurs + choice from fn
+  -h,  -help  Print help
+
 ************ RUN ************
 prog test1 -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog test1 [OPTIONS]
 
@@ -217,10 +347,32 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog test1 [OPTIONS]
+
+OPTIONS:
+  -a
+      --fa
+  -f, --fb...
+       -sa
+       -sb...
+  -e <E>
+      --oa <OA>
+      --ob [OB]...
+      --oc <DIR>
+  -o, --od <FILE> <FILE>
+      --oe [OE]...
+      --ca <CA>           [possible values: x, y, z]
+      --cc <CC>
+      --cd <CD>
+      --ce [CE]...
+  -s,  -soa <SOA>
+  -h,  -help
+
 ************ RUN ************
 prog test2 -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog test2 --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
 
@@ -236,10 +388,22 @@ OPTIONS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog test2 --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
+
+OPTIONS:
+  -a, --oa <OA>
+      --ob <OB>...
+      --oc <OC>...
+      --oca <OCA>
+      --ocb <OCB>...
+      --occ <OCC>...
+  -h, --help
+
 ************ RUN ************
 prog test3 -h
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog test3 [OPTIONS]
 
@@ -251,5 +415,14 @@ OPTIONS:
 
 EOF
 exit 0
+
+# RUN_OUTPUT
+USAGE: prog test3 [OPTIONS]
+
+OPTIONS:
+      --oe <OE>  [default: val]
+      --of <OF>
+      --cb <CB>  [default: x] [possible values: x, y, z]
+  -h, --help
 
 

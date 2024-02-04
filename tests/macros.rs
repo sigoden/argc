@@ -42,15 +42,21 @@ macro_rules! snapshot {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
         let values = argc::eval($source, &args, $path, $width).unwrap();
         let shell_code = argc::ArgcValue::to_shell(&values);
+        let build_script_dir = $crate::fixtures::tmpdir();
+        let build_script_path = $crate::fixtures::build_script(&build_script_dir, $source);
+        let build_output = $crate::fixtures::run_script(&build_script_path, &args[1..], &[]);
         let args = $args.join(" ");
         let data = format!(
             r###"RUN
 {}
 
-OUTPUT
+# OUTPUT
+{}
+
+# BUILD_OUTPUT
 {}
 "###,
-            args, shell_code,
+            args, shell_code, build_output
         );
         insta::assert_snapshot!(data);
     };
@@ -65,21 +71,28 @@ macro_rules! snapshot_multi {
         let mut data = String::new();
         let (script_path, script_content, script_file) =
             $crate::fixtures::create_argc_script($source, "script.sh");
+
+        let build_script_dir = $crate::fixtures::tmpdir();
+        let build_script_path = $crate::fixtures::build_script(&build_script_dir, $source);
+
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
             let values =
                 argc::eval(&script_content, &args, Some(script_path.as_str()), None).unwrap();
+            let shell_code = argc::ArgcValue::to_shell(&values);
+            let build_output = $crate::fixtures::run_script(&build_script_path, &args[1..], &[]);
             let args = args.join(" ");
             let piece = format!(
                 r###"************ RUN ************
 {}
 
-OUTPUT
+# OUTPUT
 {}
 
+# RUN_OUTPUT
+{}
 "###,
-                args,
-                argc::ArgcValue::to_shell(&values),
+                args, shell_code, build_output,
             );
             data.push_str(&piece);
         }
@@ -156,11 +169,31 @@ macro_rules! snapshot_compgen_shells {
     };
 }
 
-#[macro_export]
-macro_rules! snapshot_export {
-    ($source:expr) => {
-        let json = argc::export($source, "prog").unwrap();
-        let output = serde_json::to_string_pretty(&json).unwrap();
-        insta::assert_snapshot!(output);
+macro_rules! snapshot_env {
+    (
+        args: [$($arg:literal),*],
+        envs: {$($key:literal : $value:literal),*}
+
+    ) => {
+        let script_path = $crate::fixtures::locate_script("examples/envs.sh");
+        let args: Vec<String> = vec![$($arg.to_string(),)*];
+        let envs: Vec<(&str, &str)> = [$(($key, $value),)*].into_iter().collect();
+
+        let output = $crate::fixtures::run_script(&script_path, &args, &envs);
+
+        let build_output = {
+            let build_script_dir = $crate::fixtures::tmpdir();
+            let source = std::fs::read_to_string(&script_path).unwrap();
+            let build_script_path = $crate::fixtures::build_script(&build_script_dir, &source);
+            $crate::fixtures::run_script(&build_script_path, &args, &envs)
+        };
+
+        insta::assert_snapshot!(format!(r#"
+# OUTPUT
+{output}
+
+# BUILD_OUTPUT
+{build_output}
+"#));
     };
 }

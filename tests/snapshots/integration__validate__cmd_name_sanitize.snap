@@ -5,7 +5,7 @@ expression: data
 ************ RUN ************
 prog --help
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog <COMMAND>
 
@@ -16,30 +16,45 @@ COMMANDS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  cat
+  do
+
 ************ RUN ************
 prog cat --help
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog cat
 
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog cat
+
 ************ RUN ************
 prog cat
 
-OUTPUT
+# OUTPUT
 argc__args=( prog cat )
-argc__cmd_arg_index=1
 argc__fn=cat_
 argc__positionals=(  )
+cat_
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cat")
+argc__fn=cat_
+argc__positionals=()
 cat_
 
 ************ RUN ************
 prog do --help
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog do <COMMAND>
 
@@ -49,11 +64,18 @@ COMMANDS:
 
 EOF
 exit 0
+
+# RUN_OUTPUT
+USAGE: prog do <COMMAND>
+
+COMMANDS:
+  foo
+  bar
 
 ************ RUN ************
 prog do
 
-OUTPUT
+# OUTPUT
 command cat >&2 <<-'EOF' 
 USAGE: prog do <COMMAND>
 
@@ -64,14 +86,26 @@ COMMANDS:
 EOF
 exit 0
 
+# RUN_OUTPUT
+USAGE: prog do <COMMAND>
+
+COMMANDS:
+  foo
+  bar
+
 ************ RUN ************
 prog do foo
 
-OUTPUT
+# OUTPUT
 argc__args=( prog do foo )
-argc__cmd_arg_index=2
 argc__fn=do_::foo
 argc__positionals=(  )
+do_::foo
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="do" [2]="foo")
+argc__fn=do_::foo
+argc__positionals=()
 do_::foo
 
 

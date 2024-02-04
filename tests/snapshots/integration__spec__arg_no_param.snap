@@ -5,21 +5,31 @@ expression: data
 ************ RUN ************
 prog cmd v1 v2
 
-OUTPUT
+# OUTPUT
 argc__args=( prog cmd v1 v2 )
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=( v1 v2 )
+cmd v1 v2
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd" [2]="v1" [3]="v2")
+argc__fn=cmd
+argc__positionals=([0]="v1" [1]="v2")
 cmd v1 v2
 
 ************ RUN ************
 prog cmd --o1 -o2 -3
 
-OUTPUT
+# OUTPUT
 argc__args=( prog cmd --o1 -o2 -3 )
-argc__cmd_arg_index=1
 argc__fn=cmd
 argc__positionals=( --o1 -o2 -3 )
+cmd --o1 -o2 -3
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd" [2]="--o1" [3]="-o2" [4]="-3")
+argc__fn=cmd
+argc__positionals=([0]="--o1" [1]="-o2" [2]="-3")
 cmd --o1 -o2 -3
 
 
