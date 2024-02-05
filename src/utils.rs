@@ -186,12 +186,12 @@ pub fn expand_dotenv(value: &str) -> String {
     format!("[ -f {value} ] && set -o allexport && . {value} && set +o allexport")
 }
 
-pub fn sanitize_var_name(name: &str) -> String {
-    name.replace(['-', '.', ':'], "_")
+pub fn sanitize_var_name(id: &str) -> String {
+    id.replace(['-', '.', ':'], "_")
 }
 
-pub fn argc_var_name(name: &str) -> String {
-    format!("{VARIABLE_PREFIX}{}", sanitize_var_name(name))
+pub fn argc_var_name(id: &str) -> String {
+    format!("{VARIABLE_PREFIX}{}", sanitize_var_name(id))
 }
 
 #[cfg(test)]

@@ -7,11 +7,11 @@ prog test1 -e -e
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-error: the argument `-e` cannot be used multiple times
+error: incorrect number of values for `-e <E>`
 EOF
 exit 1
 
 # BUILD_OUTPUT
-error: invalid value for `-e <E>`
+error: incorrect number of values for `-e <E>`
 
 

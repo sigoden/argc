@@ -255,7 +255,7 @@ _choice_fn() {
 }
 
 #[test]
-fn choice_delimiter() {
+fn delimiter() {
     let script = r###"
 # @cmd
 # @option --oa*,[`_choice_fn`]

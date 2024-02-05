@@ -34,8 +34,8 @@ pub(crate) struct Matcher<'a, 'b> {
     comp_option: Option<&'a str>,
 }
 
-type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>); // key, values, param_name
-type SymbolArg<'a, 'b> = (&'b str, &'a SymbolParam);
+pub(crate) type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>); // key, values, param_name
+pub(crate) type SymbolArg<'a, 'b> = (&'b str, &'a SymbolParam);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum ArgComp {
@@ -132,23 +132,17 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     if let Some((k, v)) = arg.split_once('=') {
                         if let Some(param) = cmd.find_flag_option(k) {
                             add_param_choice_fn(&mut choice_fns, param);
+                            let split_at = if let Some(prefix) = param.match_prefix(arg) {
+                                prefix.len()
+                            } else {
+                                k.len() + 1
+                            };
                             if is_last_arg {
                                 arg_comp = ArgComp::OptionValue(param.id().to_string(), 0);
-                                split_last_arg_at = Some(k.len() + 1);
+                                split_last_arg_at = Some(split_at);
                             }
-                            flag_option_args[cmd_level].push((k, vec![v], Some(param.id())));
-                            comp_option = Some(param.id());
-                        } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
-                            add_param_choice_fn(&mut choice_fns, param);
-                            match_prefix_option(
-                                &mut flag_option_args[cmd_level],
-                                args,
-                                &mut arg_index,
-                                param,
-                                &mut arg_comp,
-                                &mut split_last_arg_at,
-                                &prefix,
-                            );
+                            let values = delimit_arg_values(param, &[v]);
+                            flag_option_args[cmd_level].push((k, values, Some(param.id())));
                             comp_option = Some(param.id());
                         } else {
                             flag_option_args[cmd_level].push((k, vec![v], None));
@@ -164,18 +158,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             &mut split_last_arg_at,
                             combine_shorts,
                             &signs,
-                        );
-                        comp_option = Some(param.id());
-                    } else if let Some((param, prefix)) = cmd.find_prefixed_option(arg) {
-                        add_param_choice_fn(&mut choice_fns, param);
-                        match_prefix_option(
-                            &mut flag_option_args[cmd_level],
-                            args,
-                            &mut arg_index,
-                            param,
-                            &mut arg_comp,
-                            &mut split_last_arg_at,
-                            &prefix,
                         );
                         comp_option = Some(param.id());
                     } else if let Some(subcmd) = find_subcommand(cmd, arg, &positional_args)
@@ -519,17 +501,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let args = &self.flag_option_args[level];
             let cmd = self.cmds[level];
             for param in cmd.flag_option_params.iter() {
-                let values: Vec<&[&str]> = args
-                    .iter()
-                    .filter_map(|(_, value, name)| {
-                        if let Some(true) = name.map(|v| param.id() == v) {
-                            Some(value.as_slice())
-                        } else {
-                            None
-                        }
-                    })
-                    .collect();
-                if let Some(value) = param.get_arg_value(&values) {
+                if let Some(value) = param.to_argc_value(args) {
                     output.push(value);
                 }
             }
@@ -541,7 +513,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 .get(i)
                 .map(|v| v.as_slice())
                 .unwrap_or_default();
-            if let Some(value) = param.get_arg_value(values) {
+            if let Some(value) = param.to_argc_value(values) {
                 output.push(value);
             }
         }
@@ -589,29 +561,16 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         .iter()
                         .map(|v| flag_option_args[*v].1.as_slice())
                         .collect();
-                    if !param.multiple_occurs() && values_list.len() > 1 {
-                        return Some(MatchError::NotMultipleArgument(
-                            level,
-                            param.render_long_name(),
-                        ));
-                    }
-                    let (min, max) = param.args_range();
+                    let (min, _) = param.args_range();
                     for values in values_list.iter() {
                         if param.is_flag() && !values.is_empty() {
                             return Some(MatchError::NoFlagValue(level, param.render_long_name()));
-                        } else if values.len() < min || values.len() > max {
+                        } else if values.len() < min {
                             return Some(MatchError::MismatchValues(
                                 level,
                                 param.render_name_notations(),
                             ));
                         }
-                        let values = match param.args_delimiter() {
-                            Some(delimiter) => values
-                                .iter()
-                                .flat_map(|v| v.split(delimiter).collect::<Vec<&str>>())
-                                .collect(),
-                            None => values.to_vec(),
-                        };
                         if let Some(choices) =
                             get_param_choice(&param.data.choice, &choices_fn_values)
                         {
@@ -626,6 +585,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 }
                             }
                         }
+                    }
+                    if !param.multiple_occurs() && values_list.len() > 1 {
+                        return Some(MatchError::NotMultipleArgument(
+                            level,
+                            param.render_long_name(),
+                        ));
                     }
                 }
             }
@@ -690,13 +655,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 positional_values.get(i),
                 get_param_choice(&param.data.choice, &choices_fn_values),
             ) {
-                let values = match param.args_delimiter() {
-                    Some(delimiter) => values
-                        .iter()
-                        .flat_map(|v| v.split(delimiter).collect::<Vec<&str>>())
-                        .collect(),
-                    None => values.to_vec(),
-                };
                 for value in values.iter() {
                     if !choices.contains(&value.to_string()) {
                         return Some(MatchError::InvalidValue(
@@ -802,7 +760,9 @@ impl<'a, 'b> Matcher<'a, 'b> {
             } else {
                 1
             };
-            output.push(self.positional_args[arg_index..(arg_index + takes)].to_vec());
+            let values =
+                delimit_arg_values(param, &self.positional_args[arg_index..(arg_index + takes)]);
+            output.push(values);
             arg_index += takes;
             param_index += 1;
         }
@@ -888,11 +848,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
             MatchError::MismatchValues(_level, value) => {
                 exit = 1;
-                format!(r###"error: invalid value for `{value}`"###)
+                format!(r###"error: incorrect number of values for `{value}`"###)
             }
             MatchError::NoFlagValue(_level, name) => {
                 exit = 1;
-                format!(r###"error: unexpected value for `{name}` flag"###)
+                format!(r###"error: flag `{name}` don't accept any value"###)
             }
         };
         (message, exit)
@@ -1031,20 +991,33 @@ fn match_flag_option<'a, 'b>(
     combine_shorts: bool,
     signs: &str,
 ) {
+    let arg = &args[*arg_index];
     if param.terminated() {
         let value_args: Vec<&str> = args[*arg_index + 1..].iter().map(|v| v.as_str()).collect();
-        let arg = &args[*arg_index];
         *arg_index += value_args.len();
         if !value_args.is_empty() {
             *arg_comp =
                 ArgComp::OptionValue(param.id().to_string(), value_args.len().saturating_sub(1));
         }
         flag_option_args.push((arg, value_args, Some(param.id())));
+    } else if let Some(prefix) = param.match_prefix(arg) {
+        let args_len = args.len();
+        let prefix_len = prefix.len();
+        let value_args = take_value_args(args, *arg_index + 1, 1, signs);
+        let take_empty = value_args.is_empty();
+        *arg_index += value_args.len();
+        let values = if take_empty { vec!["1"] } else { value_args };
+        if *arg_index == args_len - 1 {
+            *arg_comp = ArgComp::OptionValue(param.id().to_string(), 0);
+            if take_empty {
+                *split_last_arg_at = Some(prefix_len);
+            }
+        }
+        flag_option_args.push((arg, values, Some(param.id())));
     } else {
         let values_max = param.args_range().1;
         let args_len = args.len();
         let value_args = take_value_args(args, *arg_index + 1, values_max, signs);
-        let arg = &args[*arg_index];
         *arg_index += value_args.len();
         if *arg_index == args_len - 1 {
             if *arg_comp != ArgComp::FlagOrOption {
@@ -1054,36 +1027,13 @@ fn match_flag_option<'a, 'b>(
                         value_args.len().saturating_sub(1),
                     );
                 }
-            } else if param.prefixed() {
-                if let Some(prefix) = param.list_names().into_iter().find(|v| arg.starts_with(v)) {
-                    *arg_comp = ArgComp::OptionValue(param.id().to_string(), 0);
-                    *split_last_arg_at = Some(prefix.len());
-                }
             } else if combine_shorts && param.is_flag() && !(arg.len() > 2 && param.is_match(arg)) {
                 *arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
             }
         }
-        flag_option_args.push((arg, value_args, Some(param.id())));
+        let values = delimit_arg_values(param, &value_args);
+        flag_option_args.push((arg, values, Some(param.id())));
     }
-}
-
-fn match_prefix_option<'a, 'b>(
-    flag_option_args: &mut Vec<FlagOptionArg<'a, 'b>>,
-    args: &'b [String],
-    arg_index: &mut usize,
-    param: &'a FlagOptionParam,
-    arg_comp: &mut ArgComp,
-    split_last_arg_at: &mut Option<usize>,
-    prefix: &str,
-) {
-    let prefix_len = prefix.len();
-    let args_len = args.len();
-    let arg = &args[*arg_index];
-    if *arg_index == args_len - 1 {
-        *arg_comp = ArgComp::OptionValue(param.id().to_string(), 0);
-        *split_last_arg_at = Some(prefix_len);
-    }
-    flag_option_args.push((arg, vec![&arg[prefix_len..]], Some(param.id())));
 }
 
 fn match_command<'a>(
@@ -1267,5 +1217,13 @@ fn get_param_choice<'a, 'b: 'a>(
             }
         }
         None => None,
+    }
+}
+
+fn delimit_arg_values<'b, T: Param>(param: &T, values: &[&'b str]) -> Vec<&'b str> {
+    if let Some(delimiter) = param.args_delimiter() {
+        values.iter().flat_map(|v| v.split(delimiter)).collect()
+    } else {
+        values.to_vec()
     }
 }

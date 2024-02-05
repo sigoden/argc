@@ -7,11 +7,11 @@ prog test1 -a=3
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-error: unexpected value for `-a` flag
+error: flag `-a` don't accept any value
 EOF
 exit 1
 
 # BUILD_OUTPUT
-error: unexpected value for `-a` flag
+error: flag `-a` don't accept any value
 
 
