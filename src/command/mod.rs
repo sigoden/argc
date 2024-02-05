@@ -579,17 +579,6 @@ impl Command {
         self.flag_option_params.iter().find(|v| v.is_match(name))
     }
 
-    pub(crate) fn find_prefixed_option(&self, name: &str) -> Option<(&FlagOptionParam, String)> {
-        for param in self.flag_option_params.iter() {
-            if param.prefixed() {
-                if let Some(prefix) = param.list_names().into_iter().find(|v| name.starts_with(v)) {
-                    return Some((param, prefix));
-                }
-            }
-        }
-        None
-    }
-
     pub(crate) fn find_env(&self, name: &str) -> Option<&EnvParam> {
         self.env_params.iter().find(|v| v.id() == name)
     }

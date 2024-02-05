@@ -349,7 +349,6 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> 
     )(input)
 }
 
-// Parse `str*` `str`
 fn parse_with_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
     alt((
         map(terminated(parse_param_name, tag("*")), |mut arg| {
@@ -360,7 +359,6 @@ fn parse_with_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
     ))(input)
 }
 
-// Parse 'ch*' or 'ch`
 fn parse_no_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
     fn parser(input: &str) -> nom::IResult<&str, ParamData> {
         map(satisfy(is_short_char), |ch| {

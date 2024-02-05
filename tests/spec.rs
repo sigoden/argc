@@ -225,7 +225,7 @@ fn option_prefixed() {
 # @option -o-
 # @option -D-*
 "###;
-    snapshot!(script, &["prog", "-D", "v1", "-Dv2=foo", "-o1"]);
+    snapshot!(script, &["prog", "-o1", "-Dv1=foo", "-Dv2", "bar"]);
 }
 
 #[test]

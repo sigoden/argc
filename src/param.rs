@@ -1,9 +1,11 @@
+use crate::matcher::FlagOptionArg;
 use crate::utils::{
     argc_var_name, escape_shell_words, is_choice_value_terminate, is_default_value_terminate,
     to_cobol_case,
 };
 use crate::ArgcValue;
 
+use indexmap::IndexMap;
 use serde::Serialize;
 
 pub(crate) trait Param {
@@ -283,56 +285,107 @@ impl FlagOptionParam {
         output
     }
 
-    pub(crate) fn get_arg_value(&self, values: &[&[&str]]) -> Option<ArgcValue> {
+    pub(crate) fn to_argc_value(&self, args: &[FlagOptionArg]) -> Option<ArgcValue> {
         let id = self.id().to_string();
-        if self.is_flag {
-            if values.is_empty() {
+        if self.prefixed() {
+            let mut map: IndexMap<String, Vec<String>> = IndexMap::new();
+            for (arg, value, name) in args.iter() {
+                if name == &Some(id.as_str()) {
+                    if let Some(arg_suffix) = self
+                        .list_names()
+                        .into_iter()
+                        .find_map(|v| arg.strip_prefix(&v))
+                    {
+                        let key = match arg_suffix.split_once('=') {
+                            Some((arg_suffix, _)) => arg_suffix,
+                            None => arg_suffix,
+                        };
+                        if let Some(values) = map.get_mut(key) {
+                            values.extend(value.iter().map(|v| v.to_string()));
+                        } else {
+                            map.insert(
+                                key.to_string(),
+                                value.iter().map(|v| v.to_string()).collect(),
+                            );
+                        }
+                    }
+                }
+            }
+            if map.is_empty() {
                 None
             } else {
-                Some(ArgcValue::Single(id, values.len().to_string()))
+                Some(ArgcValue::Map(id, map))
             }
         } else {
-            if values.is_empty() {
-                match &self.data.default {
-                    Some(DefaultValue::Value(value)) => {
-                        return Some(ArgcValue::Single(id, value.clone()));
+            let values: Vec<&[&str]> = args
+                .iter()
+                .filter_map(|(_, value, name)| {
+                    if name == &Some(self.id()) {
+                        Some(value.as_slice())
+                    } else {
+                        None
                     }
-                    Some(DefaultValue::Fn(f)) => {
-                        return Some(ArgcValue::SingleFn(id, f.clone()));
-                    }
-                    None => return None,
+                })
+                .collect();
+            if self.is_flag {
+                if values.is_empty() {
+                    None
+                } else {
+                    Some(ArgcValue::Single(id, values.len().to_string()))
                 }
-            }
-            if self.multiple_values() {
-                let mut values: Vec<String> = values
-                    .iter()
-                    .flat_map(|v| v.iter().map(|v| v.to_string()))
-                    .collect();
-                if let Some(c) = self.args_delimiter() {
-                    values = values
-                        .into_iter()
-                        .flat_map(|v| {
-                            v.split(c)
-                                .filter(|v| !v.is_empty())
-                                .map(|v| v.to_string())
-                                .collect::<Vec<String>>()
-                        })
-                        .collect()
-                }
-                Some(ArgcValue::Multiple(id, values))
-            } else if self.notations.len() > 1 {
-                Some(ArgcValue::Multiple(
-                    id,
-                    values[0].iter().map(|v| v.to_string()).collect(),
-                ))
             } else {
-                Some(ArgcValue::Single(id, must_get_first(values[0])))
+                if values.is_empty() {
+                    match &self.data.default {
+                        Some(DefaultValue::Value(value)) => {
+                            return Some(ArgcValue::Single(id, value.clone()));
+                        }
+                        Some(DefaultValue::Fn(f)) => {
+                            return Some(ArgcValue::SingleFn(id, f.clone()));
+                        }
+                        None => return None,
+                    }
+                }
+                if self.multiple_values() {
+                    let values: Vec<String> = values
+                        .iter()
+                        .flat_map(|v| v.iter().map(|v| v.to_string()))
+                        .collect();
+                    Some(ArgcValue::Multiple(id, values))
+                } else if self.notations.len() > 1 {
+                    Some(ArgcValue::Multiple(
+                        id,
+                        values[0].iter().map(|v| v.to_string()).collect(),
+                    ))
+                } else {
+                    Some(ArgcValue::Single(id, must_get_first(values[0])))
+                }
             }
         }
     }
 
+    pub(crate) fn match_prefix<'a>(&self, arg: &'a str) -> Option<&'a str> {
+        if self.prefixed() {
+            self.list_names().iter().find_map(|v| {
+                if arg.starts_with(v) {
+                    Some(&arg[..v.len()])
+                } else {
+                    None
+                }
+            })
+        } else {
+            None
+        }
+    }
+
     pub(crate) fn is_match(&self, name: &str) -> bool {
-        self.id() == name || self.list_names().iter().any(|v| v == name)
+        self.id() == name
+            || self.list_names().iter().any(|v| {
+                if self.prefixed() {
+                    name.starts_with(v)
+                } else {
+                    v == name
+                }
+            })
     }
 
     pub(crate) fn list_names(&self) -> Vec<String> {
@@ -451,7 +504,7 @@ impl PositionalParam {
         }
     }
 
-    pub(crate) fn get_arg_value(&self, values: &[&str]) -> Option<ArgcValue> {
+    pub(crate) fn to_argc_value(&self, values: &[&str]) -> Option<ArgcValue> {
         let id = self.id().to_string();
         if values.is_empty() {
             match &self.data.default {
@@ -465,18 +518,7 @@ impl PositionalParam {
             }
         }
         if self.multiple_values() {
-            let mut values: Vec<String> = values.iter().map(|v| v.to_string()).collect();
-            if let Some(c) = self.args_delimiter() {
-                values = values
-                    .into_iter()
-                    .flat_map(|v| {
-                        v.split(c)
-                            .filter(|v| !v.is_empty())
-                            .map(|v| v.to_string())
-                            .collect::<Vec<String>>()
-                    })
-                    .collect()
-            }
+            let values: Vec<String> = values.iter().map(|v| v.to_string()).collect();
             Some(ArgcValue::PositionalMultiple(id, values))
         } else {
             Some(ArgcValue::PositionalSingle(id, must_get_first(values)))

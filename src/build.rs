@@ -31,8 +31,8 @@ _argc_take_args() {
             _argc_take_index=$((_argc_take_index + 1))
         done
     fi
-    if [[ "${#_argc_take_args_values[@]}" -lt "$min" ]] || [[ "${#_argc_take_args_values[@]}" -gt "$max" ]]; then
-        _argc_die "error: invalid value for \`$param\`"
+    if [[ "${#_argc_take_args_values[@]}" -lt "$min" ]]; then
+        _argc_die "error: incorrect number of values for \`$param\`"
     fi
     if [[ -n "$delimiter" ]] && [[ "${#_argc_take_args_values[@]}" -gt 0 ]]; then
         local item values arr=()
@@ -506,7 +506,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
             r#"
         {names})
             if [[ "$_argc_item" == *=* ]]; then
-                _argc_die "error: unexpected value for \`{long_name}\` flag"
+                _argc_die "error: flag \`{long_name}\` don't accept any value"
             fi
             _argc_index=$((_argc_index + 1))
             if [[ -n "${var_name}" ]]; then

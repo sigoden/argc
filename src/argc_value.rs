@@ -1,3 +1,5 @@
+use indexmap::IndexMap;
+
 use crate::utils::{
     argc_var_name, escape_shell_words, expand_dotenv, AFTER_HOOK, BEFORE_HOOK, VARIABLE_PREFIX,
 };
@@ -7,6 +9,7 @@ pub enum ArgcValue {
     Single(String, String),
     SingleFn(String, String),
     Multiple(String, Vec<String>),
+    Map(String, IndexMap<String, Vec<String>>),
     PositionalSingle(String, String),
     PositionalSingleFn(String, String),
     PositionalMultiple(String, Vec<String>),
@@ -22,7 +25,7 @@ pub enum ArgcValue {
 
 impl ArgcValue {
     pub fn to_shell(values: &[Self]) -> String {
-        let mut output = vec![];
+        let mut list = vec![];
         let mut last = String::new();
         let mut exit = false;
         let mut positional_args = vec![];
@@ -30,17 +33,17 @@ impl ArgcValue {
         for value in values {
             match value {
                 ArgcValue::Single(id, value) => {
-                    output.push(format!(
+                    list.push(format!(
                         "{}={}",
                         argc_var_name(id),
                         escape_shell_words(value)
                     ));
                 }
                 ArgcValue::SingleFn(id, fn_name) => {
-                    output.push(format!("{}=`{}`", argc_var_name(id), fn_name,));
+                    list.push(format!("{}=`{}`", argc_var_name(id), fn_name,));
                 }
                 ArgcValue::Multiple(id, values) => {
-                    output.push(format!(
+                    list.push(format!(
                         "{}=( {} )",
                         argc_var_name(id),
                         values
@@ -50,13 +53,25 @@ impl ArgcValue {
                             .join(" ")
                     ));
                 }
+                ArgcValue::Map(id, map) => {
+                    let var_name = argc_var_name(id);
+                    list.push(format!("declare -A {var_name}"));
+                    list.extend(map.iter().map(|(k, v)| {
+                        let v = v
+                            .iter()
+                            .map(|x| escape_shell_words(x))
+                            .collect::<Vec<String>>()
+                            .join(" ");
+                        format!(r#"{var_name}["{k}"]=( {v} )"#)
+                    }));
+                }
                 ArgcValue::PositionalSingle(id, value) => {
                     let value = escape_shell_words(value);
-                    output.push(format!("{}={}", argc_var_name(id), &value));
+                    list.push(format!("{}={}", argc_var_name(id), &value));
                     positional_args.push(value);
                 }
                 ArgcValue::PositionalSingleFn(id, fn_name) => {
-                    output.push(format!("{}=`{}`", argc_var_name(id), &fn_name));
+                    list.push(format!("{}=`{}`", argc_var_name(id), &fn_name));
                     positional_args.push(format!("`{}`", fn_name));
                 }
                 ArgcValue::PositionalMultiple(id, values) => {
@@ -64,7 +79,7 @@ impl ArgcValue {
                         .iter()
                         .map(|v| escape_shell_words(v))
                         .collect::<Vec<String>>();
-                    output.push(format!("{}=( {} )", argc_var_name(id), values.join(" ")));
+                    list.push(format!("{}=( {} )", argc_var_name(id), values.join(" ")));
                     positional_args.extend(values);
                 }
                 ArgcValue::ExtraPositionalMultiple(values) => {
@@ -75,10 +90,10 @@ impl ArgcValue {
                     positional_args.extend(values);
                 }
                 ArgcValue::Env(name, value) => {
-                    output.push(format!("export {}={}", name, escape_shell_words(value)));
+                    list.push(format!("export {}={}", name, escape_shell_words(value)));
                 }
                 ArgcValue::EnvFn(id, fn_name) => {
-                    output.push(format!("export {}=`{}`", id, fn_name,));
+                    list.push(format!("export {}=`{}`", id, fn_name,));
                 }
                 ArgcValue::Hook((before, after)) => {
                     if *before {
@@ -89,7 +104,7 @@ impl ArgcValue {
                     }
                 }
                 ArgcValue::Dotenv(value) => {
-                    output.push(expand_dotenv(value));
+                    list.push(expand_dotenv(value));
                 }
                 ArgcValue::CommandFn(name) => {
                     if positional_args.is_empty() {
@@ -97,7 +112,7 @@ impl ArgcValue {
                     } else {
                         last = format!("{} {}", name, positional_args.join(" "));
                     }
-                    output.push(format!("{}_fn={}", VARIABLE_PREFIX, name));
+                    list.push(format!("{}_fn={}", VARIABLE_PREFIX, name));
                 }
                 ArgcValue::ParamFn(name) => {
                     if positional_args.is_empty() {
@@ -113,23 +128,23 @@ impl ArgcValue {
             }
         }
 
-        output.push(format!(
+        list.push(format!(
             "{}_positionals=( {} )",
             VARIABLE_PREFIX,
             positional_args.join(" ")
         ));
         if before_hook {
-            output.push(BEFORE_HOOK.to_string())
+            list.push(BEFORE_HOOK.to_string())
         }
         if !last.is_empty() {
-            output.push(last);
+            list.push(last);
             if after_hook {
-                output.push(AFTER_HOOK.to_string())
+                list.push(AFTER_HOOK.to_string())
             }
         }
         if exit {
-            output.push("exit".to_string());
+            list.push("exit".to_string());
         }
-        output.join("\n")
+        list.join("\n")
     }
 }
