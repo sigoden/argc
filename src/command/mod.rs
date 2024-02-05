@@ -11,7 +11,10 @@ use crate::param::{
     PositionalValue,
 };
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
-use crate::utils::{AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, ROOT_NAME};
+use crate::utils::{
+    AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, META_COMBINE_SHORTS, META_DEFAULT_SUBCOMMAND,
+    META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_NO_INHERIT_ENV, META_SYMBOL, ROOT_NAME,
+};
 use crate::Result;
 
 use anyhow::{anyhow, bail};
@@ -32,10 +35,11 @@ pub(crate) struct Command {
     pub(crate) positional_params: Vec<PositionalParam>,
     pub(crate) env_params: Vec<EnvParam>,
     pub(crate) subcommands: Vec<Command>,
+    pub(crate) subcommand_fns: HashMap<String, Position>,
+    pub(crate) default_subcommand: Option<(usize, Position)>,
     pub(crate) aliases: Option<(Vec<String>, Position)>,
     pub(crate) author: Option<String>,
     pub(crate) version: Option<String>,
-    pub(crate) subcommand_fns: HashMap<String, Position>,
     pub(crate) names_checker: NamesChecker,
     pub(crate) share: Arc<RefCell<ShareData>>,
     pub(crate) metadata: Vec<(String, String, Position)>,
@@ -47,11 +51,11 @@ impl Command {
         let events = parse(source)?;
         let mut root = Command::new_from_events(&events)?;
         root.share.borrow_mut().name = Some(root_name.to_string());
-        root.inherit(vec![]);
-        if root.has_metadata("inherit-flag-options") {
+        root.update_recursively(vec![]);
+        if root.has_metadata(META_INHERIT_FLAG_OPTIONS) {
             root.inherit_flag_options();
         }
-        if !root.has_metadata("no-inherit-env") {
+        if !root.has_metadata(META_NO_INHERIT_ENV) {
             root.inherit_envs();
         }
         Ok(root)
@@ -91,10 +95,10 @@ impl Command {
     pub(crate) fn export(&self) -> CommandValue {
         let mut extra: IndexMap<String, serde_json::Value> = IndexMap::new();
         if self.paths.is_empty() {
-            if self.get_metadata("combine-shorts").is_some() {
+            if self.get_metadata(META_COMBINE_SHORTS).is_some() {
                 extra.insert("combine_shorts".into(), true.into());
             }
-            if let Some(dotenv) = self.get_metadata("dotenv") {
+            if let Some(dotenv) = self.get_metadata(META_DOTENV) {
                 let dotenv = if dotenv.is_empty() {
                     ".env".to_string()
                 } else {
@@ -109,6 +113,8 @@ impl Command {
             if after_hook {
                 extra.insert("after_hook".into(), AFTER_HOOK.into());
             }
+        } else if let Some((idx, _)) = &self.default_subcommand {
+            extra.insert("default_subcommand".into(), (*idx).into());
         }
         let flag_options: Vec<FlagOptionValue> = {
             let mut describe = false;
@@ -170,7 +176,7 @@ impl Command {
                 }
                 EventData::Meta(key, value) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@meta", position)?;
-                    if key == "symbol" {
+                    if key == META_SYMBOL {
                         let (ch, name, choice_fn) = parse_symbol(&value).ok_or_else(|| {
                             anyhow!("@meta(line {}) invalid symbol value", position)
                         })?;
@@ -248,7 +254,8 @@ impl Command {
                         let parts_len = parts.len();
                         if parts_len == 0 {
                             bail!("{}(line {}) invalid command name", name, position);
-                        } else if parts_len == 1 {
+                        }
+                        if parts_len == 1 {
                             let cmd = root_cmd.subcommands.last_mut().unwrap();
                             cmd.name = Some(sanitize_cmd_name(&name));
                             cmd.match_fn = Some(name.to_string());
@@ -267,6 +274,7 @@ impl Command {
                                         .insert(name.clone(), *aliases_pos);
                                 }
                             }
+                            update_parent_cmd(&mut root_cmd)?;
                         } else {
                             let mut cmd = root_cmd.subcommands.pop().unwrap();
                             let (child, parents) = parts.split_last().unwrap();
@@ -294,6 +302,7 @@ impl Command {
                                         }
                                     }
                                     parent_cmd.subcommands.push(cmd);
+                                    update_parent_cmd(parent_cmd)?;
                                 }
                                 None => {
                                     bail!("{}(line {}) lack of parent command", name, position);
@@ -494,6 +503,12 @@ impl Command {
             }
             output.push_str(&format!("[aliases: {}]", aliases.join(", ")));
         }
+        if self.has_metadata(META_DEFAULT_SUBCOMMAND) {
+            if !output.is_empty() {
+                output.push(' ')
+            }
+            output.push_str("[default]");
+        }
         output
     }
 
@@ -553,6 +568,11 @@ impl Command {
         self.subcommands.iter().find(|subcmd| {
             return subcmd.list_names().iter().any(|v| v == name);
         })
+    }
+
+    pub(crate) fn find_default_subcommand(&self) -> Option<&Self> {
+        let (idx, _) = self.default_subcommand.as_ref()?;
+        Some(&self.subcommands[*idx])
     }
 
     pub(crate) fn find_flag_option(&self, name: &str) -> Option<&FlagOptionParam> {
@@ -624,7 +644,7 @@ impl Command {
             && self.positional_params[0].terminated()
     }
 
-    fn inherit(&mut self, paths: Vec<String>) {
+    fn update_recursively(&mut self, paths: Vec<String>) {
         self.paths = paths.clone();
         let main = "main";
         if paths.is_empty() {
@@ -644,7 +664,7 @@ impl Command {
         for subcmd in self.subcommands.iter_mut() {
             let mut parents = paths.clone();
             parents.push(subcmd.name.clone().unwrap_or_default());
-            subcmd.inherit(parents);
+            subcmd.update_recursively(parents);
         }
     }
 
@@ -787,6 +807,29 @@ fn retrive_cmd<'a>(cmd: &'a mut Command, paths: &[String]) -> Option<&'a mut Com
         .iter_mut()
         .find(|v| v.name.as_deref() == Some(paths[0].as_str()))?;
     retrive_cmd(child, &paths[1..])
+}
+
+fn update_parent_cmd(parent: &mut Command) -> Result<()> {
+    let index = parent.subcommands.len() - 1;
+    let subcmd = &parent.subcommands[index];
+    if let Some((_, _, meta_pos)) = subcmd
+        .metadata
+        .iter()
+        .find(|(k, _, _)| k == META_DEFAULT_SUBCOMMAND)
+    {
+        if !parent.positional_params.is_empty() {
+            bail!(
+                "@meta(line {}) can't be added since the parent command has positional parameters",
+                meta_pos
+            )
+        }
+        if let Some((_, exist_pos)) = &parent.default_subcommand {
+            bail!("@meta(line {}) conflicts with {}", meta_pos, exist_pos)
+        } else {
+            parent.default_subcommand = Some((index, *meta_pos))
+        }
+    }
+    Ok(())
 }
 
 fn sanitize_cmd_name(name: &str) -> String {

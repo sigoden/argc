@@ -1,4 +1,4 @@
-# @describe docker cli
+# @describe Docker CLI mocking
 
 # @cmd
 builder() { :; }

@@ -196,13 +196,14 @@ Add a metadata.
 # @meta key [value]
 ```
 
-| usage                        | description                                                               |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| `@meta dotenv [<path>]`      | Load a `.env` file from a custom path, if persent.                        |
-| `@meta combine-shorts`       | Short flags can be combined, e.g. `prog -xf => prog -x -f `               |
-| `@meta inherit-flag-options` | Subcommands will inherit the flags/options from their parent.             |
-| `@meta no-inherit-env`       | Subcommands will not inherit the environment variables from their parent. |
-| `@meta symbol <def>`         | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`          |
+| usage                        | scope  | description                                                            |
+| :--------------------------- | ------ | :--------------------------------------------------------------------- |
+| `@meta dotenv [<path>]`      | root   | Load a `.env` file from a custom path, if persent.                     |
+| `@meta default-subcommand`   | subcmd | Set the current subcommand as the default.                             |
+| `@meta inherit-flag-options` | root   | Subcommands will inherit the flags/options from their parent.          |
+| `@meta no-inherit-env`       | root   | Subcommands won't inherit the environment variables from their parent. |
+| `@meta symbol <param>`       | anycmd | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.      |
+| `@meta combine-shorts`       | root   | Short flags can be combined, e.g. `prog -xf => prog -x -f `.           |
 
 ### @describe / @version / @author
 

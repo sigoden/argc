@@ -339,3 +339,24 @@ fn notation_modifier() {
         ]
     );
 }
+
+#[test]
+fn default_subcommand() {
+    let script = r###"
+# @cmd
+# @meta default-subcommand
+cmda() { :; }
+
+# @cmd
+cmdb() { :; }
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "-h"],
+            vec!["prog", "v1"],
+            vec!["prog", "cmda", "v1"],
+            vec!["prog", "cmdb", "v1"],
+        ]
+    );
+}
