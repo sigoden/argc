@@ -7,10 +7,10 @@ prog -o1 -Dv1=foo -Dv2 bar
 
 # OUTPUT
 declare -A argc_o
-argc_o["1"]=( '' )
+argc_o["1"]=1
 declare -A argc_D
-argc_D["v1"]=( foo )
-argc_D["v2"]=( bar )
+argc_D["v1"]=foo
+argc_D["v2"]=bar
 argc__args=( prog -o1 '-Dv1=foo' -Dv2 bar )
 argc__positionals=(  )
 

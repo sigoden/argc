@@ -61,8 +61,8 @@ impl ArgcValue {
                             .iter()
                             .map(|x| escape_shell_words(x))
                             .collect::<Vec<String>>()
-                            .join(" ");
-                        format!(r#"{var_name}["{k}"]=( {v} )"#)
+                            .join("|");
+                        format!(r#"{var_name}["{k}"]={v}"#)
                     }));
                 }
                 ArgcValue::PositionalSingle(id, value) => {

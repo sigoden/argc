@@ -1006,7 +1006,7 @@ fn match_flag_option<'a, 'b>(
         let value_args = take_value_args(args, *arg_index + 1, 1, signs);
         let take_empty = value_args.is_empty();
         *arg_index += value_args.len();
-        let values = if take_empty { vec![""] } else { value_args };
+        let values = if take_empty { vec!["1"] } else { value_args };
         if *arg_index == args_len - 1 {
             *arg_comp = ArgComp::OptionValue(param.id().to_string(), 0);
             if take_empty {
