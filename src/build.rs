@@ -1,7 +1,7 @@
 use crate::{
     command::Command,
     param::{FlagOptionParam, Param},
-    utils::{escape_shell_words, expand_dotenv},
+    utils::{escape_shell_words, expand_dotenv, META_DOTENV},
     ChoiceValue, DefaultValue,
 };
 use anyhow::Result;
@@ -193,7 +193,7 @@ pub fn build(source: &str, root_name: &str) -> Result<String> {
 
 fn build_root(cmd: &Command) -> String {
     let command = build_command(cmd);
-    let dotenv = if let Some(value) = cmd.get_metadata("dotenv") {
+    let dotenv = if let Some(value) = cmd.get_metadata(META_DOTENV) {
         format!("\n    {}", expand_dotenv(value))
     } else {
         String::new()
@@ -229,7 +229,8 @@ _argc_run() {{
     if [ -n "$argc__fn" ]; then
         $argc__fn "${{argc__positionals[@]}}"{after_hook}
     fi
-}}{command}{util_fns}
+}}
+{command}{util_fns}
 _argc_die() {{
     if [[ $# -eq 0 ]]; then
         cat
@@ -402,12 +403,25 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
 
     let parse_fallback = if !cmd.subcommands.is_empty() && cmd.positional_params.is_empty() {
         let cmd_paths = cmd.cmd_paths().join("-");
-        format!(
-            r#"
+        if let Some(subcmd) = cmd.find_default_subcommand() {
+            let paths = subcmd.paths.join("_");
+            format!(
+                r#"
+        *)
+            if [[ "${{#argc__positionals[@]}}" -eq 0 ]]; then
+                _argc_action=_argc_parse_{paths}
+                break
+            fi
+            ;;"#
+            )
+        } else {
+            format!(
+                r#"
         *)
             _argc_die "error: \`{cmd_paths}\` requires a subcommand but one was not provided"$'\n'"  [subcommands: $_argc_subcmds]"
             ;;"#
-        )
+            )
+        }
     } else {
         let terminated = if cmd.positional_params.last().map(|v| v.terminated()) == Some(true) {
             let min = cmd.positional_params.len() - 1;

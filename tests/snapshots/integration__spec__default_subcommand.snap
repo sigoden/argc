@@ -1,0 +1,71 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog -h
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  cmda  [default]
+  cmdb
+
+EOF
+exit 0
+
+# RUN_OUTPUT
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  cmda  [default]
+  cmdb
+
+************ RUN ************
+prog v1
+
+# OUTPUT
+argc__args=( prog v1 )
+argc__fn=cmda
+argc__positionals=( v1 )
+cmda v1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="v1")
+argc__fn=cmda
+argc__positionals=([0]="v1")
+cmda v1
+
+************ RUN ************
+prog cmda v1
+
+# OUTPUT
+argc__args=( prog cmda v1 )
+argc__fn=cmda
+argc__positionals=( v1 )
+cmda v1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmda" [2]="v1")
+argc__fn=cmda
+argc__positionals=([0]="v1")
+cmda v1
+
+************ RUN ************
+prog cmdb v1
+
+# OUTPUT
+argc__args=( prog cmdb v1 )
+argc__fn=cmdb
+argc__positionals=( v1 )
+cmdb v1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmdb" [2]="v1")
+argc__fn=cmdb
+argc__positionals=([0]="v1")
+cmdb v1
+
+

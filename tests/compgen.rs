@@ -776,6 +776,25 @@ abc() { :; }
 }
 
 #[test]
+fn default_subcommand() {
+    let script = r###"
+# @cmd
+# @meta default-subcommand
+# @arg val*[`_choice_fn`]
+cmda() { :; }
+
+# @cmd
+cmdb() { :; }
+
+_choice_fn() {
+    echo -e "abc\ndef\nijk"
+}
+"###;
+
+    snapshot_compgen!(script, [vec!["prog", ""], vec!["prog", "abc", ""]]);
+}
+
+#[test]
 fn multi_char() {
     let script = r#"
 # @option --oa*,[`_choice_fn`]

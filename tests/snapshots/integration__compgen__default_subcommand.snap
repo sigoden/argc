@@ -1,0 +1,18 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog ` ************
+cmda	/color:magenta
+cmdb	/color:magenta
+help	/color:magenta
+abc	/color:default
+def	/color:default
+ijk	/color:default
+
+************ COMPGEN `prog abc ` ************
+abc	/color:default
+def	/color:default
+ijk	/color:default
+
+
