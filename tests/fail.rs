@@ -167,3 +167,39 @@ fn cmd_miss_fn() {
     "###;
     fail!(script, &["prog"], "@cmd(line 2) missing function?");
 }
+
+#[test]
+fn options_compbine_prefix_and_multi_notations() {
+    let script = r###"
+# @option -D-* <VAL1> <VAL2>
+    "###;
+    fail!(
+        script,
+        &["prog"],
+        "@option(line 2) is invalid, cannot combine prefix and multiple notations"
+    );
+}
+
+#[test]
+fn options_compbine_delimiter_and_multi_notations() {
+    let script = r###"
+# @option --oa*, <VAL1> <VAL2>
+    "###;
+    fail!(
+        script,
+        &["prog"],
+        "@option(line 2) is invalid, cannot combine delmiter and multiple notations"
+    );
+}
+
+#[test]
+fn invalid_envs() {
+    let script = r###"
+# @env VAR*
+    "###;
+    fail!(
+        script,
+        &["prog"],
+        "@env(line 2) is invalid, can only be a single value"
+    );
+}
