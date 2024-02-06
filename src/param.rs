@@ -1,10 +1,11 @@
 use crate::matcher::FlagOptionArg;
 use crate::utils::{
     argc_var_name, escape_shell_words, is_choice_value_terminate, is_default_value_terminate,
-    to_cobol_case,
+    to_cobol_case, MAX_ARGS,
 };
 use crate::ArgcValue;
 
+use anyhow::{bail, Result};
 use indexmap::IndexMap;
 use serde::Serialize;
 
@@ -14,6 +15,7 @@ pub(crate) trait Param {
     fn var_name(&self) -> String;
     fn describe(&self) -> &str;
     fn tag_name(&self) -> &str;
+    fn guard(&self) -> Result<()>;
     fn multiple_values(&self) -> bool;
     fn render_source(&self) -> String;
     fn describe_oneline(&self) -> &str {
@@ -97,6 +99,18 @@ impl Param for FlagOptionParam {
         } else {
             "@option"
         }
+    }
+
+    fn guard(&self) -> Result<()> {
+        if self.notations.len() > 1 {
+            if self.prefixed() {
+                bail!("cannot combine prefix and multiple notations")
+            }
+            if self.args_delimiter().is_some() {
+                bail!("cannot combine delmiter and multiple notations")
+            }
+        }
+        Ok(())
     }
 
     fn multiple_values(&self) -> bool {
@@ -205,7 +219,7 @@ impl FlagOptionParam {
             } else {
                 len
             };
-            (min, 999999)
+            (min, MAX_ARGS)
         } else if self.notation_modifer() == Some('?') {
             (len - 1, len)
         } else {
@@ -447,6 +461,10 @@ impl Param for PositionalParam {
         "@arg"
     }
 
+    fn guard(&self) -> Result<()> {
+        Ok(())
+    }
+
     fn multiple_values(&self) -> bool {
         self.multiple_occurs() || self.terminated()
     }
@@ -567,6 +585,13 @@ impl Param for EnvParam {
 
     fn tag_name(&self) -> &str {
         "@env"
+    }
+
+    fn guard(&self) -> Result<()> {
+        if !matches!(self.data().modifer, Modifier::Optional | Modifier::Required) {
+            bail!("can only be a single value")
+        }
+        Ok(())
     }
 
     fn multiple_values(&self) -> bool {
@@ -700,28 +725,28 @@ impl ParamData {
     }
 
     pub(crate) fn render_name_value(&self) -> String {
-        let mut result = self.name.to_string();
-        result.push_str(&self.modifer.render());
+        let mut output = self.name.to_string();
+        output.push_str(&self.modifer.render());
         match (&self.choice, &self.default) {
             (Some(ChoiceValue::Values(values)), None) => {
-                result.push_str(&format!("[{}]", Self::render_choice_values(values)));
+                output.push_str(&format!("[{}]", Self::render_choice_values(values)));
             }
             (Some(ChoiceValue::Values(values)), Some(DefaultValue::Value(_))) => {
-                result.push_str(&format!("[={}]", Self::render_choice_values(values)));
+                output.push_str(&format!("[={}]", Self::render_choice_values(values)));
             }
             (Some(ChoiceValue::Fn(f, validate)), _) => {
                 let prefix = if *validate { "" } else { "?" };
-                result.push_str(&format!("[{prefix}`{f}`]"));
+                output.push_str(&format!("[{prefix}`{f}`]"));
             }
             (None, Some(DefaultValue::Value(value))) => {
-                result.push_str(&format!("={}", Self::render_default_value(value)));
+                output.push_str(&format!("={}", Self::render_default_value(value)));
             }
             (None, Some(DefaultValue::Fn(f))) => {
-                result.push_str(&format!("=`{f}`"));
+                output.push_str(&format!("=`{f}`"));
             }
             _ => {}
         }
-        result
+        output
     }
 
     pub(crate) fn render_describe(&self, describe: &str) -> String {

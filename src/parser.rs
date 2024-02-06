@@ -1,6 +1,5 @@
 use crate::param::{
-    ChoiceValue, DefaultValue, EnvParam, FlagOptionParam, Modifier, Param, ParamData,
-    PositionalParam,
+    ChoiceValue, DefaultValue, EnvParam, FlagOptionParam, Modifier, ParamData, PositionalParam,
 };
 use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
 use crate::Result;
@@ -196,16 +195,7 @@ fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
         ),
         map(
             preceded(pair(tag("env"), space1), parse_env_param),
-            |param| {
-                if matches!(
-                    param.data().modifer,
-                    Modifier::Optional | Modifier::Required
-                ) {
-                    Some(EventData::Env(param))
-                } else {
-                    None
-                }
-            },
+            |param| Some(EventData::Env(param)),
         ),
         map(
             preceded(pair(tag("arg"), space1), parse_positional_param),

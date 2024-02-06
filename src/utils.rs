@@ -13,12 +13,14 @@ pub const BEFORE_HOOK: &str = "_argc_before";
 pub const AFTER_HOOK: &str = "_argc_after";
 pub const ROOT_NAME: &str = "prog";
 
-pub const META_DOTENV: &str = "dotenv";
-pub const META_DEFAULT_SUBCOMMAND: &str = "default-subcommand";
-pub const META_INHERIT_FLAG_OPTIONS: &str = "inherit-flag-options";
-pub const META_NO_INHERIT_ENV: &str = "no-inherit-env";
-pub const META_SYMBOL: &str = "symbol";
-pub const META_COMBINE_SHORTS: &str = "combine-shorts";
+pub(crate) const META_DOTENV: &str = "dotenv";
+pub(crate) const META_DEFAULT_SUBCOMMAND: &str = "default-subcommand";
+pub(crate) const META_INHERIT_FLAG_OPTIONS: &str = "inherit-flag-options";
+pub(crate) const META_NO_INHERIT_ENV: &str = "no-inherit-env";
+pub(crate) const META_SYMBOL: &str = "symbol";
+pub(crate) const META_COMBINE_SHORTS: &str = "combine-shorts";
+
+pub(crate) const MAX_ARGS: usize = 999999;
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()

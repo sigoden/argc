@@ -204,6 +204,9 @@ impl Command {
                     cmd.aliases = Some((values.to_vec(), position));
                 }
                 EventData::FlagOption(param) => {
+                    param.guard().map_err(|err| {
+                        anyhow!("{}(line {}) is invalid, {err}", param.tag_name(), position)
+                    })?;
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
                     if param.is_option() {
                         share_data.borrow_mut().add_param_fn(
@@ -216,6 +219,9 @@ impl Command {
                     cmd.flag_option_params.push(param);
                 }
                 EventData::Env(param) => {
+                    param.guard().map_err(|err| {
+                        anyhow!("{}(line {}) is invalid, {err}", param.tag_name(), position)
+                    })?;
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
                     share_data.borrow_mut().add_param_fn(
                         position,
@@ -226,6 +232,9 @@ impl Command {
                     cmd.env_params.push(param);
                 }
                 EventData::Positional(param) => {
+                    param.guard().map_err(|err| {
+                        anyhow!("{}(line {}) is invalid, {err}", param.tag_name(), position)
+                    })?;
                     let cmd = Self::get_cmd(&mut root_cmd, param.tag_name(), position)?;
                     share_data.borrow_mut().add_param_fn(
                         position,
