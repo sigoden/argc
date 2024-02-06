@@ -9,11 +9,19 @@ Argc helps you easily create and use cli that based on bashscript.
 
 You define cli through comments, and argc takes care of the remaining tasks:
 
-* Parse options/positionals/subcommands
-* Validate user input
-* Output comprehensive help text
-* Initialize intuitive variables for arguments
-* Provide tab-completion
+* Parse flags, options, positional arguments and subcommands.
+* Validate parameters and print error messages if necessary.
+* Output comprehensive help messages.
+* Initialize related variables.
+* Call the corresponding function.
+
+## Features
+
+- Comments are CLI definitions.
+- Code is documentation.
+- As a bash CLI framework and generator, like argbash/bashly
+- As a [task runner](./docs/task-runner.md), like make/just.
+- As a multi-shell auto-complete engine, see [argc-completions](https://github.com/sigoden/argc-completions)
 
 ## Install
 
@@ -82,8 +90,10 @@ OPTIONS:
 
 ## Comment Decorator
 
-`argc` uses comments with a `JsDoc` inspired syntax to add functionality to the scripts at runtime.
+Argc uses comments with a `JsDoc` inspired syntax to add functionality to the scripts at runtime.
+
 This [grammar](./docs/grammar.md), known as a `comment decorator`, is a normal Bash comment followed by an `@` sign and a tag.
+
 It's how the argc parser identifies configuration.
 
 ### @cmd
@@ -140,8 +150,10 @@ Define a positional argument.
 # @arg vd+                 multi-values + required
 # @arg vna <PATH>          value notation
 # @arg vda=a               default
+# @arg vdb=`_default_fn`   default from fn
 # @arg vca[a|b]            choices
 # @arg vcb[=a|b]           choices + default
+# @arg vcc[`_choice_fn`]   choices from fn
 # @arg vx~                 capture all remaining args
 ```
 
@@ -159,8 +171,10 @@ Define a option.
 # @option    --ona <PATH>           value notation
 # @option    --onb <FILE> <FILE>    two-args value notations
 # @option    --oda=a                default
+# @option    --odb=`_default_fn`    default from fn
 # @option    --oca[a|b]             choices
 # @option    --ocb[=a|b]            choices + default
+# @option    --occ[`_choice_fn`]    choices from fn
 # @option    --oxa~                 capture all remaining args
 ```
 
@@ -203,7 +217,7 @@ Add a metadata.
 | `@meta inherit-flag-options` | root   | Subcommands will inherit the flags/options from their parent.          |
 | `@meta no-inherit-env`       | root   | Subcommands won't inherit the environment variables from their parent. |
 | `@meta symbol <param>`       | anycmd | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.      |
-| `@meta combine-shorts`       | root   | Short flags can be combined, e.g. `prog -xf => prog -x -f `.           |
+| `@meta combine-shorts`       | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `.   |
 
 ### @describe / @version / @author
 
@@ -249,7 +263,7 @@ Generate a single standalone bash script that requires no argc dependency and ca
 argc --argc-build <SCRIPT> [OUTPATH]
 ```
 
-## Completion
+## Completions
 
 Argc provides shell completion for argc command and all the bash scripts powered by argc.
 
@@ -318,6 +332,33 @@ argc --argc-parallel "$0" cmd1 arg1 arg2 ::: cmd2
 ```
 
 The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel. Functions running in parallel mode can still access the `argc_*` variable.
+
+# Windows
+
+The only dependency of argc is bash. Developers under windows OS usually have [git](https://gitforwindows.org/) installed, and git has built-in bash. So you can safely use argc and gun tools (grep, sed, awk...) under windows OS.
+
+<details>
+<summary>
+
+## Make `.sh` file executable
+</summary>
+
+If you want to run a `.sh` script file directly like a `.cmd` or `.exe` file, execute the following code in PowerShell.
+
+```ps1
+# Add .sh to PATHEXT
+[Environment]::SetEnvironmentVariable("PATHEXT", [Environment]::GetEnvironmentVariable("PATHEXT", "Machine") + ";.SH", "Machine")
+
+# Associate the .sh file extension with Git Bash
+New-Item -LiteralPath Registry::HKEY_CLASSES_ROOT\.sh -Force
+New-ItemProperty -LiteralPath Registry::HKEY_CLASSES_ROOT\.sh -Name "(Default)" -Value "sh_auto_file" -PropertyType String -Force
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\command' `
+  -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
+```
+
+![image](https://github.com/sigoden/argc/assets/4012553/16af2b13-8c20-4954-bf58-ccdf1bbe23ef)
+
+</details>
 
 ## License
 

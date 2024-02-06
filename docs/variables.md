@@ -15,7 +15,7 @@ cmd() {
 
 ## Argc variables
 
-### options/flags/positional variables
+### options/flags/positionals variables
 
 Argc automatically generates variables for each option/flag/arg.
 
@@ -33,7 +33,7 @@ echo '--oa:' $argc_oa
 echo '--ob:' ${argc_ob[@]}
 echo '--fa:' $argc_fa
 echo '  va:' $argc_va
-echo '  va:' ${argc_vb[@]}
+echo '  vb:' ${argc_vb[@]}
 ```
 
 If we run the script:
@@ -46,7 +46,7 @@ It will print:
 --ob: b1 b2
 --fa: 1
   va: foo
-  va: bar baz
+  vb: bar baz
 ```
 
 ### builtin variables
@@ -105,7 +105,7 @@ argc__positionals=([0]=".")
 
 - `ARGC_PWD`: Current workdir. Only available in Argcfile.sh.
 
-### Argc injected into choice-fn
+### Argc injected into `_choice_*`
 
 - `ARGC_OS`: The OS type
 - `ARGC_COMPGEN`: If value is 1, the script is called to generate completion candidates.
