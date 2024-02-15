@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Argc helps you easily create and use cli that based on bashscript.
+Bash CLI framework and generator.
 
 ![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
 
@@ -17,11 +17,11 @@ You define cli through comments, and argc takes care of the remaining tasks:
 
 ## Features
 
-- Comments are CLI definitions.
-- Code is documentation.
-- As a bash CLI framework and generator, like argbash/bashly
+- Comments are CLI definitions/docs
+- As a command argument parser, like getopt/getopts
+- As a bash CLI generator, like argbash/bashly
 - As a [task runner](./docs/task-runner.md), like make/just.
-- As a multi-shell auto-complete engine, see [argc-completions](https://github.com/sigoden/argc-completions)
+- As a multi-shell autocompletion engine, see [argc-completions](https://github.com/sigoden/argc-completions)
 
 ## Install
 
@@ -257,7 +257,7 @@ Here are some value notation that will affect the shell completion.
 
 ## Build
 
-Generate a single standalone bash script that requires no argc dependency and can be distributed to the public.
+Generate a single standalone bash script without argc dependency.
 
 ```
 argc --argc-build <SCRIPT> [OUTPATH]
@@ -333,15 +333,16 @@ argc --argc-parallel "$0" cmd1 arg1 arg2 ::: cmd2
 
 The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel. Functions running in parallel mode can still access the `argc_*` variable.
 
-# Windows
-
-The only dependency of argc is bash. Developers under windows OS usually have [git](https://gitforwindows.org/) installed, and git has built-in bash. So you can safely use argc and gun tools (grep, sed, awk...) under windows OS.
-
 <details>
 <summary>
 
-## Make `.sh` file executable
+# Windows
+
+The only dependency of argc is bash. Developers under windows OS usually have [git](https://gitforwindows.org/) installed, and git has built-in bash. So you can safely use argc and GNU tools (grep, sed, awk...) under windows OS.
+
 </summary>
+
+## Make `.sh` file executable
 
 If you want to run a `.sh` script file directly like a `.cmd` or `.exe` file, execute the following code in PowerShell.
 
