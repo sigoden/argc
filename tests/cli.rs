@@ -215,6 +215,16 @@ fn script_path() {
 }
 
 #[test]
+fn shell_path() {
+    Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-shell-path")
+        .assert()
+        .stdout(predicates::str::contains("bash"))
+        .success();
+}
+
+#[test]
 fn run_argcfile() {
     let tmpdir = tmpdir_argcfiles();
     let path_env_var = get_path_env_var();

@@ -257,7 +257,7 @@ Here are some value notation that will affect the shell completion.
 
 ## Build
 
-Generate a single standalone bash script without argc dependency.
+Build a single standalone bash script without argc dependency.
 
 ```
 argc --argc-build <SCRIPT> [OUTPATH]

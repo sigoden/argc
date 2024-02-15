@@ -549,7 +549,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 }
                 match *name {
                     Some(name) => {
-                        missing_flag_options.remove(name);
+                        missing_flag_options.swap_remove(name);
                         flag_option_map.entry(name).or_insert(vec![]).push(i);
                     }
                     None => return Some(MatchError::UnknownArgument(level, key.to_string())),
