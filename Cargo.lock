@@ -25,7 +25,7 @@ checksum = "080e9890a082662b09c1ad45f567faeeb47f22b5fb23895fbe1e651e718e25ca"
 
 [[package]]
 name = "argc"
-version = "1.14.0"
+version = "1.15.0"
 dependencies = [
  "anyhow",
  "assert_cmd",

@@ -1,9 +1,9 @@
 [package]
 name = "argc"
-version = "1.14.0"
+version = "1.15.0"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "An elegant command-line options, arguments and sub-commands parser for bash."
+description = "An elegant command-line options, arguments and sub-commands parser."
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
