@@ -549,7 +549,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 }
                 match *name {
                     Some(name) => {
-                        missing_flag_options.remove(name);
+                        missing_flag_options.swap_remove(name);
                         flag_option_map.entry(name).or_insert(vec![]).push(i);
                     }
                     None => return Some(MatchError::UnknownArgument(level, key.to_string())),
@@ -898,7 +898,7 @@ pub(crate) type CompItem = (String, String, bool, CompColor);
 fn find_subcommand<'a>(
     cmd: &'a Command,
     arg: &str,
-    positional_args: &Vec<&str>,
+    positional_args: &[&str],
 ) -> Option<&'a Command> {
     cmd.find_subcommand(arg).and_then(|v| {
         if positional_args.is_empty() {

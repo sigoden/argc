@@ -138,7 +138,11 @@ fn run() -> Result<i32> {
             "--argc-script-path" => {
                 let (_, script_file) =
                     get_script_path(true).ok_or_else(|| anyhow!("Argcfile not found."))?;
-                print!("{}", script_file.display());
+                println!("{}", script_file.display());
+            }
+            "--argc-shell-path" => {
+                let shell = get_shell_path()?;
+                println!("{}", shell.display());
             }
             "--argc-help" => {
                 println!("{}", get_argc_help())
@@ -252,12 +256,13 @@ fn get_argc_help() -> String {
 USAGE:
     argc --argc-eval <SCRIPT> [ARGS]...             Use `eval "$(argc --argc-eval "$0" "$@")"`
     argc --argc-create [TASKS]...                   Create a boilerplate argcfile
-    argc --argc-build <SCRIPT> [OUTPATH]            Build standalone bash script without depending on argc
+    argc --argc-build <SCRIPT> [OUTPATH]            Build bash script without argc dependency
     argc --argc-completions <SHELL> [CMDS]...       Generate shell completion scripts
     argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Dynamically generating completion candidates
     argc --argc-export <SCRIPT>                     Export command line definitions as json
     argc --argc-parallel <SCRIPT> <ARGS>...         Execute argc functions in parallel
     argc --argc-script-path                         Print current argcfile path
+    argc --argc-shell-path                          Print current shell path
     argc --argc-help                                Print help information
     argc --argc-version                             Print version information
 "###
