@@ -3,7 +3,7 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Argc helps you create CLIs from comments and can also be used as a bash CLI generator, task runner, and multi-shell autocompleter.
+Argc helps you create CLIs with comments, also works as a bash CLI generator, task runner, and multi-shell autocompleter.
 
 ![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
 
@@ -17,9 +17,9 @@ You define cli through comments, and argc takes care of the remaining tasks:
 
 ## Features
 
-- Comments are CLI definitions/docs
-- As a command argument parser, like getopt/getopts
-- As a bash CLI generator, like [argbash](https://github.com/matejak/argbash)/[bashly](https://github.com/DannyBen/bashly)
+- Comments are CLI definitions/docs.
+- As a command argument parser, like getopt/getopts.
+- As a bash CLI generator, like [argbash](https://github.com/matejak/argbash)/[bashly](https://github.com/DannyBen/bashly).
 - As a [task runner](./docs/task-runner.md), like make/[just](https://github.com/casey/just)/[task](https://github.com/go-task/task).
 - As a multi-shell autocompleter, see [argc-completions](https://github.com/sigoden/argc-completions) for more details.
 
