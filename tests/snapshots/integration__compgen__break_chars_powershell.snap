@@ -1,0 +1,9 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog abc,` ************
+def	1	def		39
+ghi	1	ghi		39
+
+

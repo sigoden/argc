@@ -944,11 +944,48 @@ _choice_fn() {
     echo "__argc_filter=${ARGC_CWORD#*=}"
     echo foo
     echo bar
-    :;
 }
 "#;
 
     snapshot_compgen_shells!(script, ["prog", "v='"]);
+}
+
+#[test]
+fn break_chars_bash() {
+    let script = r#"
+# @arg args[`_choice_fn`]
+_choice_fn() {
+    echo abc:def
+    echo abc:ghi
+    echo abc=def
+    echo abc=ghi
+    echo abc@def
+    echo abc@ghi
+    echo abc,def
+    echo abc,ghi
+}
+"#;
+    snapshot_compgen!(
+        script,
+        [
+            vec!["prog", "abc:"],
+            vec!["prog", "abc="],
+            vec!["prog", "abc@"],
+        ],
+        argc::Shell::Bash
+    );
+}
+
+#[test]
+fn break_chars_powershell() {
+    let script = r#"
+# @arg args[`_choice_fn`]
+_choice_fn() {
+    echo abc,def
+    echo abc,ghi
+}
+"#;
+    snapshot_compgen!(script, [vec!["prog", "abc,"],], argc::Shell::Powershell);
 }
 
 #[test]

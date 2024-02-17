@@ -1,0 +1,17 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog abc:` ************
+def 
+ghi 
+
+************ COMPGEN `prog abc=` ************
+def 
+ghi 
+
+************ COMPGEN `prog abc@` ************
+@def 
+@ghi 
+
+

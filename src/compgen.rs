@@ -207,28 +207,33 @@ pub fn compgen(
 
     let break_chars = shell.need_break_chars(&argc_prefix);
     if !break_chars.is_empty() {
-        let prefix_quote = unbalance_quote(&argc_prefix);
-        if let Some((i, _)) = (match prefix_quote {
-            Some((_, idx)) => &argc_prefix[0..idx],
-            None => &argc_prefix,
-        })
-        .char_indices()
-        .rfind(|(_, c)| break_chars.contains(c))
+        let prefix = format!("{}{}", argc_prefix, argc_filter);
+        let prefix = match unbalance_quote(&prefix) {
+            Some((_, i)) => prefix.chars().take(i.saturating_sub(1)).collect(),
+            None => prefix,
+        };
+        if let Some((break_at, break_char)) = prefix
+            .char_indices()
+            .rfind(|(_, c)| break_chars.contains(c))
         {
-            argc_prefix = argc_prefix[i + 1..].to_string();
-        }
-        if last == argc_filter && prefix_quote.is_none() {
-            if let Some((i, _)) = argc_filter
-                .char_indices()
-                .rfind(|(_, c)| break_chars.contains(c))
-            {
+            let argc_prefix_len = argc_prefix.len();
+            let offset = if shell == Shell::Bash && break_char == '@' {
+                // I don't know why `@` (as a break char) is weird in bash
+                0
+            } else {
+                1
+            };
+
+            if break_at < argc_prefix_len {
+                argc_prefix = argc_prefix[break_at + offset..].to_string();
+            } else {
                 argc_prefix = String::new();
-                let idx = i + 1;
+                let idx = break_at - argc_prefix_len + offset;
                 argc_filter = argc_filter[idx..].to_string();
                 for (value, _, _, _) in candidates.iter_mut() {
                     *value = value[idx..].to_string()
                 }
-            };
+            }
         }
     }
 
@@ -541,7 +546,7 @@ impl Shell {
         match self {
             Shell::Bash => r#"()<>"'` !#$&;\|"#,
             Shell::Nushell => r#"()[]{}"'` #$;|"#,
-            Shell::Powershell => r#"()<>[]{}"'` #$&,;@|"#,
+            Shell::Powershell => r#"()<>[]{}"'` #$&;@|"#,
             Shell::Xonsh => r#"()<>[]{}!"'` #&;|"#,
             Shell::Zsh => r#"()<>[]"'` !#$&*;?\|"#,
             _ => "",
@@ -553,13 +558,10 @@ impl Shell {
             return vec![];
         }
         match self {
-            Shell::Bash => {
-                let chars = [':', '='];
-                match std::env::var("COMP_WORDBREAKS") {
-                    Ok(v) => chars.into_iter().filter(|c| v.contains(*c)).collect(),
-                    Err(_) => chars.to_vec(),
-                }
-            }
+            Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
+                Ok(v) => v.chars().collect(),
+                Err(_) => [':', '=', '@'].to_vec(),
+            },
             Shell::Powershell => vec![','],
             _ => vec![],
         }
@@ -1084,18 +1086,22 @@ fn truncate_description(description: &str) -> String {
 }
 
 fn unbalance_quote(value: &str) -> Option<(char, usize)> {
-    if value.starts_with(is_quote_char) {
-        let ch = value.chars().next()?;
-        if value.chars().filter(|c| *c == ch).count() % 2 == 1 {
-            return Some((ch, 0));
-        }
-    } else if value.ends_with(is_quote_char) {
-        let ch = value.chars().next_back()?;
-        if value.chars().filter(|c| *c == ch).count() % 2 == 1 {
-            return Some((ch, value.len() - 1));
+    let mut balance = None;
+    for (i, c) in value.chars().enumerate() {
+        match balance {
+            Some((c_, _)) => {
+                if c == c_ {
+                    balance = None
+                }
+            }
+            None => {
+                if is_quote_char(c) {
+                    balance = Some((c, i))
+                }
+            }
         }
     }
-    None
+    balance
 }
 
 fn common_prefix(strings: &[&str]) -> Option<String> {
