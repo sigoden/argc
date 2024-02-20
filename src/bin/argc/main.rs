@@ -110,7 +110,7 @@ fn run() -> Result<i32> {
             "--argc-mangen" => {
                 let (source, args) = parse_script_args(&args[2..])?;
                 let outdir = args.get(1).ok_or_else(|| anyhow!("No output dir"))?;
-                let pages = argc::mangen(&source, &args[0], "1")?;
+                let pages = argc::mangen(&source, &args[0])?;
                 let outdir = ensure_outdir(outdir).with_context(|| "Invalid output dir")?;
                 for (filename, page) in pages {
                     let outfile = outdir.join(filename);

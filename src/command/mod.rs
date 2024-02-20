@@ -104,7 +104,7 @@ impl Command {
                 let dotenv = if dotenv.is_empty() {
                     ".env".to_string()
                 } else {
-                    dotenv.clone()
+                    dotenv.to_string()
                 };
                 extra.insert("dotenv".into(), dotenv.into());
             }
@@ -313,11 +313,11 @@ impl Command {
         self.metadata.iter().any(|(k, _, _)| k == key)
     }
 
-    pub(crate) fn get_metadata(&self, key: &str) -> Option<&String> {
+    pub(crate) fn get_metadata(&self, key: &str) -> Option<&str> {
         self.metadata
             .iter()
             .find(|(k, _, _)| k == key)
-            .map(|(_, v, _)| v)
+            .map(|(_, v, _)| v.as_str())
     }
 
     pub(crate) fn flag_option_signs(&self) -> String {

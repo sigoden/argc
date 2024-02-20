@@ -219,6 +219,7 @@ Add a metadata.
 | `@meta no-inherit-env`       | root   | Subcommands won't inherit the environment variables from their parent. |
 | `@meta symbol <param>`       | anycmd | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.      |
 | `@meta combine-shorts`       | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `.   |
+| `@meta man-section <1-8>`    | root   | Override the default section the man page.                             |
 
 ### @describe / @version / @author
 
