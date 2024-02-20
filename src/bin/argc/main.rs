@@ -116,6 +116,7 @@ fn run() -> Result<i32> {
                     let outfile = outdir.join(filename);
                     fs::write(&outfile, page)
                         .with_context(|| format!("Failed to write '{}'", outfile.display()))?;
+                    println!("saved {}", outfile.display());
                 }
             }
             "--argc-completions" => {
