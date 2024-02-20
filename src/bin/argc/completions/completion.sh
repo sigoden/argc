@@ -5,7 +5,7 @@
 # @option --argc-eval~ <FILE> <ARGS>                                Use `eval "$(argc --argc-eval "$0" "$@")"`
 # @option --argc-create~ <TASKS>                                    Create a boilerplate argcfile
 # @option --argc-build <FILE> <OUTPATH?>                            Generate standalone bash script without argc dependency
-# @option --argc-mangen <FILE> <OUTDIR?>                            Generate man page
+# @option --argc-mangen <FILE> <OUTDIR>                             Generate man page
 # @option --argc-completions~[`_choice_completion`] <SHELL> <CMDS>  Generate shell completion scripts
 # @option --argc-compgen~[`_choice_compgen`] <SHELL> <FILE> <ARGS>  Generate completion candidates
 # @option --argc-export <FILE>                                      Export command line definitions as json
