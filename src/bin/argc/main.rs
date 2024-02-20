@@ -107,13 +107,17 @@ fn run() -> Result<i32> {
                     print!("{}", script);
                 }
             }
-            "--argc-export" => {
+            "--argc-mangen" => {
                 let (source, args) = parse_script_args(&args[2..])?;
-                let value = argc::export(&source, &args[0])?;
-                println!("{}", serde_json::to_string_pretty(&value)?);
-            }
-            "--argc-compgen" => {
-                run_compgen(args.to_vec());
+                let outdir = args.get(1).ok_or_else(|| anyhow!("No output dir"))?;
+                let pages = argc::mangen(&source, &args[0])?;
+                let outdir = ensure_outdir(outdir).with_context(|| "Invalid output dir")?;
+                for (filename, page) in pages {
+                    let outfile = outdir.join(filename);
+                    fs::write(&outfile, page)
+                        .with_context(|| format!("Failed to write '{}'", outfile.display()))?;
+                    println!("saved {}", outfile.display());
+                }
             }
             "--argc-completions" => {
                 let shell: Shell = match args.get(2) {
@@ -122,6 +126,14 @@ fn run() -> Result<i32> {
                 };
                 let script = crate::completions::generate(shell, &args[3..]);
                 print!("{}", script);
+            }
+            "--argc-compgen" => {
+                run_compgen(args.to_vec());
+            }
+            "--argc-export" => {
+                let (source, args) = parse_script_args(&args[2..])?;
+                let value = argc::export(&source, &args[0])?;
+                println!("{}", serde_json::to_string_pretty(&value)?);
             }
             "--argc-parallel" => {
                 if args.len() <= 3 {
@@ -256,9 +268,10 @@ fn get_argc_help() -> String {
 USAGE:
     argc --argc-eval <SCRIPT> [ARGS]...             Use `eval "$(argc --argc-eval "$0" "$@")"`
     argc --argc-create [TASKS]...                   Create a boilerplate argcfile
-    argc --argc-build <SCRIPT> [OUTPATH]            Build bash script without argc dependency
+    argc --argc-build <SCRIPT> [OUTPATH]            Generate bashscript without argc dependency
+    argc --argc-mangen <SCRIPT> <OUTDIR>            Generate man pages
     argc --argc-completions <SHELL> [CMDS]...       Generate shell completion scripts
-    argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Dynamically generating completion candidates
+    argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Generate completion candidates
     argc --argc-export <SCRIPT>                     Export command line definitions as json
     argc --argc-parallel <SCRIPT> <ARGS>...         Execute argc functions in parallel
     argc --argc-script-path                         Print current argcfile path
@@ -466,6 +479,22 @@ fn ensure_outpath(outpath: &str, script_name: &str) -> Result<(PathBuf, bool)> {
                 fs::create_dir_all(parent)?;
             };
             Ok((outpath, true))
+        }
+    }
+}
+
+fn ensure_outdir(outdir: &str) -> Result<PathBuf> {
+    match fs::metadata(outdir) {
+        Ok(metadata) => {
+            if metadata.is_dir() {
+                Ok(PathBuf::from(outdir))
+            } else {
+                bail!("Not an directory")
+            }
+        }
+        Err(_) => {
+            fs::create_dir_all(outdir)?;
+            Ok(PathBuf::from(outdir))
         }
     }
 }

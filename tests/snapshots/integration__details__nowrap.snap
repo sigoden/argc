@@ -13,7 +13,7 @@ Extra lines after the @cmd or @describe, which don't start with an @, are
 treated as the long description. A line which is not a comment ends
 the block.
 
-USAGE: prog [OPTIONS] [TARGET] <COMMAND>
+USAGE: prog [OPTIONS] <COMMAND>
 
 ARGS:
   [TARGET]  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sed viverra tellus in hac habitasse platea.
@@ -50,7 +50,7 @@ Extra lines after the @cmd or @describe, which don't start with an @, are
 treated as the long description. A line which is not a comment ends
 the block.
 
-USAGE: prog [OPTIONS] [TARGET] <COMMAND>
+USAGE: prog [OPTIONS] <COMMAND>
 
 ARGS:
   [TARGET]  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sed viverra tellus in hac habitasse platea.

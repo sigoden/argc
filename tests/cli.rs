@@ -100,6 +100,23 @@ fn build_outpath() {
 }
 
 #[test]
+fn mangen() {
+    let path = locate_script("examples/demo.sh");
+    let tmpdir = tmpdir();
+    let outdir = tmpdir.to_path_buf();
+    Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-mangen")
+        .arg(&path)
+        .arg(&outdir)
+        .assert()
+        .success();
+    let manpath = outdir.join("demo.1");
+    let script = std::fs::read_to_string(manpath).unwrap();
+    assert!(script.contains(".TH DEMO 1"));
+}
+
+#[test]
 fn completions() {
     Command::cargo_bin("argc")
         .unwrap()

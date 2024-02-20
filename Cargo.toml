@@ -3,7 +3,7 @@ name = "argc"
 version = "1.15.0"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "An elegant command-line options, arguments and sub-commands parser."
+description = "An elegant command-line argument parser."
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
@@ -27,7 +27,8 @@ num_cpus = "1.16"
 threadpool = "1.8"
 base64 = "0.21"
 natord = "1.0"
-semver = "1.0.21"
+semver = "1.0"
+roff = "0.2"
 
 [dev-dependencies]
 insta = "1.30"

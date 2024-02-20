@@ -12,8 +12,9 @@ use crate::param::{
 };
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::utils::{
-    AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, META_COMBINE_SHORTS, META_DEFAULT_SUBCOMMAND,
-    META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_NO_INHERIT_ENV, META_SYMBOL, ROOT_NAME,
+    AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, MAIN_NAME, META_COMBINE_SHORTS,
+    META_DEFAULT_SUBCOMMAND, META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_NO_INHERIT_ENV,
+    META_SYMBOL, ROOT_NAME,
 };
 use crate::Result;
 
@@ -32,6 +33,7 @@ pub(crate) struct Command {
     pub(crate) paths: Vec<String>,
     pub(crate) describe: String,
     pub(crate) flag_option_params: Vec<FlagOptionParam>,
+    pub(crate) derived_flag_option_params: Vec<FlagOptionParam>,
     pub(crate) positional_params: Vec<PositionalParam>,
     pub(crate) env_params: Vec<EnvParam>,
     pub(crate) subcommands: Vec<Command>,
@@ -102,7 +104,7 @@ impl Command {
                 let dotenv = if dotenv.is_empty() {
                     ".env".to_string()
                 } else {
-                    dotenv.clone()
+                    dotenv.to_string()
                 };
                 extra.insert("dotenv".into(), dotenv.into());
             }
@@ -116,30 +118,7 @@ impl Command {
         } else if let Some((idx, _)) = &self.default_subcommand {
             extra.insert("default_subcommand".into(), (*idx).into());
         }
-        let flag_options: Vec<FlagOptionValue> = {
-            let mut describe = false;
-            let mut single = false;
-            let mut params = vec![];
-            for param in self.flag_option_params.iter() {
-                if param.long_prefix.len() == 1 {
-                    single = true;
-                }
-                if !param.describe().is_empty() {
-                    describe = true;
-                }
-                params.push(param)
-            }
-            let long_prefix = if single { "-" } else { "--" };
-            let help_param = self.create_help_flag(describe, long_prefix);
-            let version_param = self.create_version_flag(describe, long_prefix);
-            if let Some(param) = &help_param {
-                params.push(param);
-            }
-            if let Some(param) = &version_param {
-                params.push(param);
-            }
-            params.into_iter().map(|v| v.export()).collect()
-        };
+        let flag_options = self.all_flag_options().iter().map(|v| v.export()).collect();
         CommandValue {
             name: self.cmd_name(),
             describe: self.describe.clone(),
@@ -334,11 +313,11 @@ impl Command {
         self.metadata.iter().any(|(k, _, _)| k == key)
     }
 
-    pub(crate) fn get_metadata(&self, key: &str) -> Option<&String> {
+    pub(crate) fn get_metadata(&self, key: &str) -> Option<&str> {
         self.metadata
             .iter()
             .find(|(k, _, _)| k == key)
-            .map(|(_, v, _)| v)
+            .map(|(_, v, _)| v.as_str())
     }
 
     pub(crate) fn flag_option_signs(&self) -> String {
@@ -363,6 +342,10 @@ impl Command {
         let mut paths = self.paths.clone();
         paths.insert(0, root_name);
         paths
+    }
+
+    pub(crate) fn full_name(&self) -> String {
+        self.cmd_paths().join("-")
     }
 
     pub(crate) fn render_help(&self, term_width: Option<usize>) -> String {
@@ -392,10 +375,9 @@ impl Command {
     }
 
     pub(crate) fn render_version(&self) -> String {
-        let cmd_paths = self.cmd_paths().join("-");
         format!(
             "{} {}",
-            cmd_paths,
+            self.full_name(),
             self.version.clone().unwrap_or_else(|| "0.0.0".to_string())
         )
     }
@@ -413,9 +395,10 @@ impl Command {
             output.push("[OPTIONS]".to_string());
         }
         output.extend(required_options);
-        output.extend(self.positional_params.iter().map(|v| v.render_value()));
         if !self.subcommands.is_empty() {
             output.push("<COMMAND>".to_string());
+        } else {
+            output.extend(self.positional_params.iter().map(|v| v.render_notation()));
         }
         output.join(" ")
     }
@@ -430,7 +413,7 @@ impl Command {
             .positional_params
             .iter()
             .map(|param| {
-                let value = param.render_value();
+                let value = param.render_notation();
                 value_size = value_size.max(value.len());
                 (value, param.render_describe())
             })
@@ -446,30 +429,10 @@ impl Command {
         if self.flag_option_params.is_empty() {
             return output;
         }
-        let mut describe = false;
-        let mut single = false;
-        let mut params = vec![];
-        for param in self.flag_option_params.iter() {
-            if param.long_prefix.len() == 1 {
-                single = true;
-            }
-            if !param.describe().is_empty() {
-                describe = true;
-            }
-            params.push(param)
-        }
-        let long_prefix = if single { "-" } else { "--" };
-        let help_param = self.create_help_flag(describe, long_prefix);
-        let version_param = self.create_version_flag(describe, long_prefix);
-        if let Some(param) = &help_param {
-            params.push(param);
-        }
-        if let Some(param) = &version_param {
-            params.push(param);
-        }
         let mut value_size = 0;
-        let list: Vec<_> = params
-            .iter()
+        let list: Vec<_> = self
+            .all_flag_options()
+            .into_iter()
             .map(|param| {
                 let value = param.render_body();
                 let describe = param.render_describe();
@@ -592,7 +555,13 @@ impl Command {
         self.env_params.iter().find(|v| v.id() == name)
     }
 
-    pub(crate) fn no_flags_options_subcommands(&self) -> bool {
+    pub(crate) fn all_flag_options(&self) -> Vec<&FlagOptionParam> {
+        let mut list: Vec<&FlagOptionParam> = self.flag_option_params.iter().collect();
+        list.extend(self.derived_flag_option_params.iter());
+        list
+    }
+
+    pub(crate) fn is_empty_flags_options_subcommands(&self) -> bool {
         self.flag_option_params.is_empty() && self.subcommands.is_empty()
     }
 
@@ -644,21 +613,45 @@ impl Command {
 
     fn update_recursively(&mut self, paths: Vec<String>) {
         self.paths = paths.clone();
-        let main = "main";
+
+        // update command_fn
         if paths.is_empty() {
-            if self.share.borrow().fns.contains_key(main) {
-                self.command_fn = Some(main.to_string())
+            if self.share.borrow().fns.contains_key(MAIN_NAME) {
+                self.command_fn = Some(MAIN_NAME.to_string())
             }
         } else if self.subcommands.is_empty() {
             self.command_fn = self.match_fn.clone();
         } else {
-            let command_fn = [paths.as_slice(), [main.to_string()].as_slice()]
+            let command_fn = [paths.as_slice(), [MAIN_NAME.to_string()].as_slice()]
                 .concat()
                 .join("::");
             if self.share.borrow().fns.contains_key(&command_fn) {
                 self.command_fn = Some(command_fn)
             }
         }
+
+        // update derived_flag_option_params
+        let mut describe = false;
+        let mut single = false;
+        for param in self.flag_option_params.iter() {
+            if param.long_prefix.len() == 1 {
+                single = true;
+            }
+            if !param.describe().is_empty() {
+                describe = true;
+            }
+        }
+        let long_prefix = if single { "-" } else { "--" };
+        self.derived_flag_option_params.extend(
+            [
+                self.create_help_flag(describe, long_prefix),
+                self.create_version_flag(describe, long_prefix),
+            ]
+            .into_iter()
+            .flatten(),
+        );
+
+        // update recursively
         for subcmd in self.subcommands.iter_mut() {
             let mut parents = paths.clone();
             parents.push(subcmd.name.clone().unwrap_or_default());
