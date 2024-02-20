@@ -12,6 +12,7 @@ pub const VARIABLE_PREFIX: &str = "argc_";
 pub const BEFORE_HOOK: &str = "_argc_before";
 pub const AFTER_HOOK: &str = "_argc_after";
 pub const ROOT_NAME: &str = "prog";
+pub const MAIN_NAME: &str = "main";
 
 pub(crate) const META_DOTENV: &str = "dotenv";
 pub(crate) const META_DEFAULT_SUBCOMMAND: &str = "default-subcommand";

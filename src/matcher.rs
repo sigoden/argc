@@ -118,7 +118,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         }
                     }
                 } else if is_rest_args_positional
-                    || (cmd.no_flags_options_subcommands()
+                    || (cmd.is_empty_flags_options_subcommands()
                         && !cmd.help_flags().contains(&arg)
                         && !cmd.version_flags().contains(&arg))
                 {
@@ -660,7 +660,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         return Some(MatchError::InvalidValue(
                             level,
                             value.to_string(),
-                            param.render_value(),
+                            param.render_notation(),
                             choices.clone(),
                         ));
                     }
@@ -671,7 +671,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let missing_positionals: Vec<_> = last_cmd.positional_params[positional_values_len..]
                 .iter()
                 .filter(|param| param.required())
-                .map(|v| v.render_value())
+                .map(|v| v.render_notation())
                 .collect();
             if !missing_positionals.is_empty() {
                 return Some(MatchError::MissingRequiredArguments(

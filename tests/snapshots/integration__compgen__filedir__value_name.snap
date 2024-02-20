@@ -9,6 +9,7 @@ src/build.rs	1	build.rs		default
 src/command/	0	command/		blue bold
 src/compgen.rs	1	compgen.rs		default
 src/lib.rs	1	lib.rs		default
+src/manpage.rs	1	manpage.rs		default
 src/matcher.rs	1	matcher.rs		default
 src/param.rs	1	param.rs		default
 src/parser.rs	1	parser.rs		default
@@ -25,6 +26,7 @@ src/parser.rs	1	parser.rs		default
 ./src/command/	0	command/		blue bold
 ./src/compgen.rs	1	compgen.rs		default
 ./src/lib.rs	1	lib.rs		default
+./src/manpage.rs	1	manpage.rs		default
 ./src/matcher.rs	1	matcher.rs		default
 ./src/param.rs	1	param.rs		default
 ./src/parser.rs	1	parser.rs		default

@@ -402,7 +402,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
     };
 
     let parse_fallback = if !cmd.subcommands.is_empty() && cmd.positional_params.is_empty() {
-        let cmd_paths = cmd.cmd_paths().join("-");
+        let name = cmd.full_name();
         if let Some(subcmd) = cmd.find_default_subcommand() {
             let paths = subcmd.paths.join("_");
             format!(
@@ -418,7 +418,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
             format!(
                 r#"
         *)
-            _argc_die "error: \`{cmd_paths}\` requires a subcommand but one was not provided"$'\n'"  [subcommands: $_argc_subcmds]"
+            _argc_die "error: \`{name}\` requires a subcommand but one was not provided"$'\n'"  [subcommands: $_argc_subcmds]"
             ;;"#
             )
         }
@@ -611,7 +611,7 @@ fn build_positionals(cmd: &Command) -> String {
         .enumerate()
         .map(|(index, param)| {
             let var_name = param.var_name();
-            let render_value = param.render_value();
+            let render_value = param.render_notation();
             let multiple = param.multiple_values();
             let variant = if multiple {
                 match param.args_delimiter() {

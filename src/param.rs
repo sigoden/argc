@@ -276,10 +276,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_notations(&self) -> String {
-        if self.is_flag() {
-            return String::new();
-        }
-        let mut output = String::new();
+        let mut list = vec![];
         if self.notations.len() == 1 {
             let name: &String = &self.notations[0];
             let value = match (self.required(), self.multiple_occurs()) {
@@ -287,16 +284,16 @@ impl FlagOptionParam {
                 (false, true) => format!("[{name}]..."),
                 (_, false) => format!("<{name}>"),
             };
-            output.push_str(&value);
+            list.push(value);
         } else {
             let values = self
                 .notations
                 .iter()
                 .map(|v| format!("<{v}>"))
                 .collect::<Vec<String>>();
-            output.push_str(&values.join(" "));
+            list.extend(values);
         }
-        output
+        list.join(" ")
     }
 
     pub(crate) fn to_argc_value(&self, args: &[FlagOptionArg]) -> Option<ArgcValue> {
@@ -512,7 +509,7 @@ impl PositionalParam {
         }
     }
 
-    pub(crate) fn render_value(&self) -> String {
+    pub(crate) fn render_notation(&self) -> String {
         let name: &String = &self.notation;
         match (self.required(), self.multiple_values()) {
             (true, true) => format!("<{name}>..."),
