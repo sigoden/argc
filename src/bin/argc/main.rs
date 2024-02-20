@@ -267,7 +267,7 @@ fn get_argc_help() -> String {
 USAGE:
     argc --argc-eval <SCRIPT> [ARGS]...             Use `eval "$(argc --argc-eval "$0" "$@")"`
     argc --argc-create [TASKS]...                   Create a boilerplate argcfile
-    argc --argc-build <SCRIPT> [OUTPATH]            Generate standalone bash script without argc dependency
+    argc --argc-build <SCRIPT> [OUTPATH]            Generate bashscript without argc dependency
     argc --argc-mangen <SCRIPT> <OUTDIR>            Generate man pages
     argc --argc-completions <SHELL> [CMDS]...       Generate shell completion scripts
     argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Generate completion candidates
