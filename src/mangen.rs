@@ -5,9 +5,9 @@ use roff::{bold, italic, roman, Inline, Roff};
 
 pub fn mangen(source: &str, root_name: &str) -> Result<Vec<(String, String)>> {
     let mut output = vec![];
-    let cmd = Command::new(source, root_name)?;
-    let section = cmd.get_metadata(META_MAN_SECTION).unwrap_or("1");
-    manpage_impl(&mut output, &cmd, section);
+    let root_cmd = Command::new(source, root_name)?;
+    let section = root_cmd.get_metadata(META_MAN_SECTION).unwrap_or("1");
+    manpage_impl(&mut output, &root_cmd, section);
     Ok(output)
 }
 
