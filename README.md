@@ -12,13 +12,12 @@ Argc lets you define your CLI through comments and focus on your specific code, 
 ## Features
 
 - Parsing user's command line and extracting:
-  - Positional arguments (defaults supported, choices supported, possibility of fixed, variable or infinite number of arguments),
-  - Option arguments (defaults supported, choices supported, possibility of fixed, variable or infinite number of arguments),
-  - Flag arguments,
-  - Repeated (i.e. non-overwriting) arguments,
-  - Comma-separated list of option arguments,
-  - Sub-commands (nesting supported).
-- Rendering usage texts and help screens, showing your tool's flags, options, positional arguments and commands (works for sub-commands also).
+  - Positional arguments (optional, required, default value, choices, repeated, multiple values),
+  - Option arguments (optional, required, default value, choices, multiple values),
+  - Flag arguments (repeated),
+  - Comma-separated list of option and positional arguments,
+  - Sub-commands (nesting).
+- Rendering usage texts,  showing flags, options, positional arguments and sub-commands.
 - Validating the arguments, printing error messages if the command line is invalid.
 - Generating a single, standalone bash script without argc dependency.
 - Generating man pages.
@@ -265,7 +264,7 @@ Build a single standalone bash script without argc dependency.
 argc --argc-build <SCRIPT> [OUTPATH]
 ```
 
-## Man pages
+## Manpage
 
 Generate man pages for your script.
 
