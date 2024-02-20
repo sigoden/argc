@@ -112,7 +112,7 @@ fn mangen() {
         .assert()
         .success();
     let manpath = outdir.join("demo.1");
-    let script = std::fs::read_to_string(&manpath).unwrap();
+    let script = std::fs::read_to_string(manpath).unwrap();
     assert!(script.contains(".TH DEMO 1"));
 }
 
