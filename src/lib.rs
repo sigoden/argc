@@ -2,7 +2,7 @@ mod argc_value;
 mod build;
 mod command;
 mod compgen;
-mod manpage;
+mod mangen;
 mod matcher;
 mod param;
 mod parser;
@@ -13,7 +13,7 @@ pub use argc_value::ArgcValue;
 pub use build::build;
 pub use command::CommandValue;
 pub use compgen::{compgen, Shell};
-pub use manpage::manpage;
+pub use mangen::mangen;
 pub use param::{ChoiceValue, DefaultValue, EnvValue, FlagOptionValue, PositionalValue};
 
 pub fn eval(

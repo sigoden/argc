@@ -3,7 +3,7 @@ use crate::{command::Command, param::Param};
 use anyhow::Result;
 use roff::{bold, italic, roman, Inline, Roff};
 
-pub fn manpage(source: &str, root_name: &str, section: &str) -> Result<Vec<(String, String)>> {
+pub fn mangen(source: &str, root_name: &str, section: &str) -> Result<Vec<(String, String)>> {
     let mut output = vec![];
     let cmd = Command::new(source, root_name)?;
     manpage_impl(&mut output, &cmd, section);
