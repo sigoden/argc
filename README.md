@@ -3,25 +3,26 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Argc helps you create CLI through comments, also works as a bash CLI generator, task runner, and multi-shell autocompleter.
+Easily create feature-rich CLIs in bash.
 
 ![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
 
-You define CLI through comments, and argc takes care of the remaining tasks:
-
-* Parse flags, options, positional arguments and subcommands.
-* Validate parameters and print error messages if necessary.
-* Output comprehensive help messages.
-* Initialize related variables.
-* Call the corresponding function.
+Argc lets you define your CLI through comments and focus on your specific code, without worrying about command line argument parsing, usage texts, error messages and other functions that are usually handled by a framework in any other programming language.
 
 ## Features
 
-- Comments are CLI definitions/documents.
-- As a command argument parser, like getopt/getopts.
-- As a bash CLI generator, like [argbash](https://github.com/matejak/argbash)/[bashly](https://github.com/DannyBen/bashly).
-- As a [task runner](./docs/task-runner.md), like make/[just](https://github.com/casey/just)/[task](https://github.com/go-task/task).
-- As a multi-shell autocompleter, see [argc-completions](https://github.com/sigoden/argc-completions) for more details.
+- Parsing user's command line and extracting:
+  - Positional arguments (defaults supported, choices supported, possibility of fixed, variable or infinite number of arguments),
+  - Option arguments (defaults supported, choices supported, possibility of fixed, variable or infinite number of arguments),
+  - Flag arguments,
+  - Repeated (i.e. non-overwriting) arguments,
+  - Comma-separated list of option arguments,
+  - Sub-commands (nesting supported).
+- Rendering usage texts and help screens, showing your tool's flags, options, positional arguments and commands (works for sub-commands also).
+- Validating the arguments, printing error messages if the command line is invalid.
+- Generating a single, standalone bash script without argc dependency.
+- Generating man pages.
+- Generating multi-shell completion scripts (require argc as completer).
 
 ## Install
 
@@ -98,7 +99,7 @@ It's how the argc parser identifies configuration.
 
 ### @cmd
 
-Define a subcommand
+Define a subcommand.
 
 ```sh
 # @cmd Upload a file
@@ -122,7 +123,7 @@ COMMANDS:
 
 ### @alias
 
-Add aliases for subcommand.
+Add aliases for the subcommand.
 
 ```sh
 # @cmd Run tests
@@ -159,7 +160,7 @@ Define a positional argument.
 
 ### @option
 
-Define a option.
+Define a option argument.
 
 ```sh
 # @option    --oa                   
@@ -180,7 +181,7 @@ Define a option.
 
 ### @flag
 
-Define a flag. A flag is an option of boolean type, and is always false by default (e.g. --verbose, --quiet, --all, --long, etc).
+Define a flag argument.
 
 
 ```sh
@@ -192,7 +193,7 @@ Define a flag. A flag is an option of boolean type, and is always false by defau
 
 ### @env
 
-Define an environment
+Define an environment variable.
 
 ```sh
 # @env EA                 optional
@@ -263,6 +264,14 @@ Build a single standalone bash script without argc dependency.
 argc --argc-build <SCRIPT> [OUTPATH]
 ```
 
+## Man pages
+
+Generate man pages for your script.
+
+```
+argc --argc-mangen <SCRIPT> [OUTDIR]
+```
+
 ## Completions
 
 Argc provides shell completion for argc command and all the bash scripts powered by argc.
@@ -306,14 +315,12 @@ Argc can be used as multiple shell completion engine. see [argc-completions](htt
 
 Argc will automatically find and run `Argcfile.sh` unless `--argc-*` options are used to change this behavior.
 
-Argcfile is to argc what Makefile is to make.
-
-what is the benefit?
+What is the benefit?
 
 - Can enjoy a handy shell completion.
-- Can be invoked in arbitrarily subdirectory, no need to locate script file each time.
+- Can be invoked in arbitrarily sub-directory, no need to locate script file each time.
 - As a centralized entrypoint/document for executing the project's bash scripts.
-- Serves as a script for a task runner.
+- Serves as [task runner](./docs/task-runner.md). Argcfile is to argc what Makefile is to make. 
 
 You can use `argc --argc-create` to quickly create a boilerplate argcscript.
 
