@@ -309,7 +309,21 @@ eval `argc --argc-completions tcsh mycmd1 mycmd2`
 
 **Replace `mycmd1 mycmd2` with your argc scripts**.
 
-Argc can be used as multiple shell completion engine. see [argc-completions](https://github.com/sigoden/argc-completions)
+The core of all completion scripts is to call `argc --argc-compgen` to fetch completion choices.
+
+```
+$ argc --argc-compgen bash ./demo.sh demo ''
+upload (Upload a file)
+download (Download a file)
+help (Show help for a command)
+
+$ argc --argc-compgen bash ./demo.sh demo download --
+--force (Override existing file)
+--tries (Set number of retries to NUM)
+--help (Print help)
+```
+
+Argc is a multi-shell completion engine. see [argc-completions](https://github.com/sigoden/argc-completions)
 
 ## Argcscript
 

@@ -8,6 +8,10 @@ help	/color:magenta	Show help for a command
 
 ************ COMPGEN `prog -` ************
 -G	/color:cyan,bold
+-help	/color:cyan
+-h	/color:cyan
+-version	/color:cyan
+-V	/color:cyan
 --foo	/color:magenta	Run --foo
 -F	/color:magenta	Run --foo
 -B	/color:magenta	Run bar
@@ -21,6 +25,8 @@ help	/color:magenta	Show help for a command
 -C	/color:cyan
 -D	/color:cyan
 --fa	/color:cyan
+-help	/color:cyan
+-h	/color:cyan
 
 ************ COMPGEN `prog -G` ************
 -G	/color:cyan,bold

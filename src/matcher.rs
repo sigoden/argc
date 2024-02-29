@@ -392,7 +392,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         }
         let mut output = match &self.arg_comp {
             ArgComp::FlagOrOption => {
-                let mut output = self.comp_flag_options();
+                let mut output = self.comp_flag_options(false);
                 output.extend(comp_subcomands(last_cmd, true));
                 output
             }
@@ -401,7 +401,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 if value.len() == 2 && &self.args[self.cmd_arg_indexes[level]] == value {
                     output.extend(comp_subcomands(self.cmds[level - 1], true));
                 }
-                output.extend(self.comp_flag_options().iter().filter_map(
+                output.extend(self.comp_flag_options(true).iter().filter_map(
                     |(v, description, nospace, comp_color)| {
                         if v.len() == 2 && v != value {
                             Some((
@@ -858,7 +858,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         (message, exit)
     }
 
-    fn comp_flag_options(&self) -> Vec<CompItem> {
+    fn comp_flag_options(&self, combine: bool) -> Vec<CompItem> {
         let mut output = vec![];
         let level = self.cmds.len() - 1;
         let last_cmd = self.last_cmd();
@@ -867,7 +867,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
             .filter_map(|v| v.2)
             .collect();
         let last = self.args.last().map(|v| v.as_str()).unwrap_or_default();
-        for param in last_cmd.flag_option_params.iter() {
+        let params = if combine {
+            last_cmd.flag_option_params.iter().collect()
+        } else {
+            last_cmd.all_flag_options()
+        };
+        for param in params.iter() {
             let mut exist = args.contains(param.id());
             if !last.is_empty() && param.is_match(last) {
                 exist = false;

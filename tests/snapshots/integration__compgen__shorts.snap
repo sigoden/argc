@@ -15,6 +15,10 @@ __argc_value=path	/color:default
 -e	/color:cyan,bold
 --oa	/color:cyan,bold
 -p	/color:cyan,bold
+-help	/color:cyan
+-h	/color:cyan
+-version	/color:cyan
+-V	/color:cyan
 
 ************ COMPGEN `prog --` ************
 --fb	/color:cyan
