@@ -5,9 +5,11 @@ expression: data
 ************ COMPGEN `prog cmda --` ************
 --oa	/color:cyan
 --ob	/color:cyan,bold	desc 1
+--help	/color:cyan
 
 ************ COMPGEN `prog cmdb --` ************
 --oa	/color:cyan
 --ob	/color:cyan,bold	desc 2
+--help	/color:cyan	Print help
 
 

@@ -18,6 +18,10 @@ __argc_value=FILE	/color:default
 -d	/color:cyan,bold
 --oe	/color:cyan,bold
 -e	/color:cyan,bold
+--help	/color:cyan
+-h	/color:cyan
+--version	/color:cyan
+-V	/color:cyan
 
 ************ COMPGEN `prog --` ************
 --fc	/color:cyan
@@ -26,6 +30,8 @@ __argc_value=FILE	/color:default
 --oc	/color:cyan,bold
 --od	/color:cyan,bold
 --oe	/color:cyan,bold
+--help	/color:cyan
+--version	/color:cyan
 
 ************ COMPGEN `prog -- ` ************
 __argc_value=FILE	/color:default
@@ -95,6 +101,10 @@ __argc_value=DIR+	/color:default
 -d	/color:cyan,bold
 --oe	/color:cyan,bold
 -e	/color:cyan,bold
+--help	/color:cyan
+-h	/color:cyan
+--version	/color:cyan
+-V	/color:cyan
 
 ************ COMPGEN `prog v1` ************
 __argc_value=FILE	/color:default
