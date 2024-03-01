@@ -74,13 +74,9 @@ fn render_description_section(roff: &mut Roff, cmd: &Command) {
         return;
     }
     roff.control("SH", ["DESCRIPTION"]);
-    for line in cmd.describe.lines() {
-        if line.trim().is_empty() {
-            roff.control("PP", []);
-        } else {
-            roff.text([roman(line)]);
-        }
-    }
+    let mut body = vec![];
+    render_describe(&mut body, &cmd.describe);
+    roff.text(body);
 }
 
 fn render_options_section(roff: &mut Roff, cmd: &Command) {
@@ -119,7 +115,7 @@ fn render_options_section(roff: &mut Roff, cmd: &Command) {
         let mut has_help_written = false;
         if !param.describe.is_empty() {
             has_help_written = true;
-            body.push(roman(&param.describe));
+            render_describe(&mut body, &param.describe);
         }
         roff.control("TP", []);
         roff.text(header);
@@ -142,7 +138,7 @@ fn render_options_section(roff: &mut Roff, cmd: &Command) {
         let mut has_help_written = false;
         if !param.describe.is_empty() {
             has_help_written = true;
-            body.push(roman(&param.describe));
+            render_describe(&mut body, &param.describe);
         }
         roff.control("TP", []);
         roff.text(header);
@@ -184,7 +180,7 @@ fn render_envs_section(roff: &mut Roff, cmd: &Command) {
         let mut has_help_written = false;
         if !param.describe.is_empty() {
             has_help_written = true;
-            body.push(roman(&param.describe));
+            render_describe(&mut body, &param.describe);
         }
         roff.control("TP", []);
         roff.text(header);
@@ -204,6 +200,13 @@ fn render_author_section(roff: &mut Roff, cmd: &Command) {
     if let Some(author) = &cmd.author {
         roff.control("SH", ["AUTHORS"]);
         roff.text([roman(author)]);
+    }
+}
+
+fn render_describe(body: &mut Vec<Inline>, describe: &str) {
+    for line in describe.split('\n') {
+        body.push(Inline::LineBreak);
+        body.push(roman(line));
     }
 }
 
