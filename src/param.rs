@@ -750,9 +750,6 @@ impl ParamData {
         let mut output = describe.to_string();
         let multiline = output.contains('\n');
         let sep = if multiline { '\n' } else { ' ' };
-        if multiline {
-            output.push('\n');
-        }
         if let Some(DefaultValue::Value(value)) = &self.default {
             if !output.is_empty() {
                 output.push(sep)

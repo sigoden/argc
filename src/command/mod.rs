@@ -833,27 +833,29 @@ fn render_list(
     value_size: usize,
     term_width: Option<usize>,
 ) {
-    let mut new_list = vec![];
-    let mut multiline = false;
+    let mut mapped_list = vec![];
+    let multiline = list.iter().any(|(_, describe)| describe.contains('\n'));
     for (value, describe) in list {
         let item = if describe.is_empty() {
-            format!("  {value}")
+            let maybe_newline = if multiline { "\n" } else { "" };
+            format!("  {value}{maybe_newline}")
+        } else if multiline {
+            format!(
+                "  {value}\n{}\n",
+                wrap_render_block(&" ".repeat(10), &describe, term_width)
+            )
         } else {
             let spaces = " ".repeat(value_size - value.len());
             wrap_render_block(&format!("  {value}{spaces}"), &describe, term_width)
         };
-        if item.contains('\n') {
-            multiline = true;
-        }
-        new_list.push(item);
+        mapped_list.push(item);
     }
-    for item in new_list {
+    for item in mapped_list {
         output.push(item);
-        if multiline {
-            output.push("".to_string());
-        }
     }
-    output.push("".to_string());
+    if !multiline {
+        output.push("".to_string());
+    }
 }
 
 fn wrap_render_block(name: &str, describe: &str, term_width: Option<usize>) -> String {
