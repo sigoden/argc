@@ -12,16 +12,15 @@ Argc lets you define your CLI through comments and focus on your specific code, 
 ## Features
 
 - Parsing user's command line and extracting:
-  - Positional arguments (optional, required, default value, choices, repeated, multiple values),
-  - Option arguments (optional, required, default value, choices, multiple values),
+  - Positional arguments (optional, required, default value, choices, comma-seperated, multiple values),
+  - Option arguments (optional, required, default value, choices, comma-seperated, multiple values, repeated),
   - Flag arguments (repeated),
-  - Comma-separated list of option and positional arguments,
-  - Sub-commands (nesting).
-- Rendering usage texts,  showing flags, options, positional arguments and sub-commands.
+  - Sub-commands (alias, nested).
+- Rendering usage texts, showing flags, options, positional arguments and sub-commands.
 - Validating the arguments, printing error messages if the command line is invalid.
-- Generating a single, standalone bash script without argc dependency.
+- Generating a single standalone bashscript without argc dependency.
 - Generating man pages.
-- Generating multi-shell completion scripts (require argc as completer).
+- Generating multi-shell completion scripts (require argc as completion engine).
 
 ## Install
 
@@ -50,53 +49,163 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 
 To write a command-line program with argc, we only need to do two things:
 
-1. Describe options, flags, positional parameters and subcommands in comments.
-2. Insert `eval "$(argc --argc-eval "$0" "$@")"` into script to let argc to parse command line arguments.
+1. Describe options, flags, positional parameters and subcommands in [comment tags](#comment-tags).
+2. Insert `eval "$(argc --argc-eval "$0" "$@")"` into script to let argc to handle command line arguments.
 
 Write `example.sh`
 
 ```sh
-# @flag --foo     Flag value
+# @flag -F --foo  Flag value
 # @option --bar   Option value
-# @arg baz*       Positional values
+# @option --baz*  Option values
+# @arg val*       Positional values
 
 eval "$(argc --argc-eval "$0" "$@")"
 echo foo: $argc_foo
 echo bar: $argc_bar
 echo baz: ${argc_baz[@]}
+echo val: ${argc_val[@]}
 ```
 
-Run `./example.sh --foo --bar=xyz a b c`, you can see argc successfully parses arguments and generate variables with `argc_` prefix.
+Run `./example.sh -F --bar=xyz --baz a --baz b v1 v2`, you can see argc successfully parses arguments and generate variables with `argc_` prefix.
 
 ```
 foo: 1
 bar: xyz
-baz: a b c
+baz: a b
+val: v1 v2
 ```
 
-Run `./example.sh -h`, argc will print help information for you.
+Run `./example.sh --help`, argc will print help information for you.
 
 ```
-USAGE: example.sh [OPTIONS] [BAZ]...
+USAGE: example [OPTIONS] [VAL]...
 
 ARGS:
-  [BAZ]...  Positional values
+  [VAL]...  Positional values
 
 OPTIONS:
-      --foo        Flag value
-      --bar <BAR>  Option value
-  -h, --help       Print help
+  -F, --foo           Flag value
+      --bar <BAR>     Option value
+      --baz [BAZ]...  Option values
+  -h, --help          Print help
+  -V, --version       Print version
 ```
 
-## Comment Decorator
+## Build
 
-Argc uses comments with a `JsDoc` inspired syntax to add functionality to the scripts at runtime.
+Build a single standalone bashscript without argc dependency.
 
-This [grammar](./docs/grammar.md), known as a `comment decorator`, is a normal Bash comment followed by an `@` sign and a tag.
+```
+argc --argc-build <SCRIPT> [OUTPATH]
+```
 
-It's how the argc parser identifies configuration.
+```sh
+argc --argc-build ./example.sh build/
 
-### @cmd
+./build/example.sh -h # Run without argc dependency
+```
+
+## Manpage
+
+Generate man pages for the CLI.
+
+```
+argc --argc-mangen <SCRIPT> [OUTDIR]
+```
+
+```sh
+argc --argc-mangen ./example.sh man/
+
+man man/example.1
+```
+
+## Completions
+
+Argc provides shell completion for all argc-based scripts.
+
+```
+argc --argc-completions <SHELL> [CMDS]...
+```
+
+```
+# bash (~/.bashrc)
+source <(argc --argc-completions bash cmd1 cmd2)
+
+# elvish (~/.config/elvish/rc.elv)
+eval (argc --argc-completions elvish cmd1 cmd2 | slurp)
+
+# fish (~/.config/fish/config.fish)
+argc --argc-completions fish cmd1 cmd2 | source
+
+# nushell (~/.config/nushell/config.nu)
+argc --argc-completions nushell cmd1 cmd2 # update config.nu manually according to output
+
+# powershell ($PROFILE)
+Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
+argc --argc-completions powershell cmd1 cmd2 | Out-String | Invoke-Expression
+
+# xonsh (~/.config/xonsh/rc.xsh)
+exec($(argc --argc-completions xonsh cmd1 cmd2))
+
+# zsh (~/.zshrc)
+source <(argc --argc-completions zsh cmd1 cmd2)
+
+# tcsh (~/.tcshrc)
+eval `argc --argc-completions tcsh cmd1 cmd2`
+```
+
+The core of all completion scripts is to call `argc --argc-compgen` to obtain completion candidates.
+
+```
+$ argc --argc-compgen bash ./example.sh example --
+--foo (Flag value)
+--bar (Option value)
+--baz (Option values)
+--help (Print help)
+--version (Print version)
+```
+
+Argc is a completion engine, see 1000+ examples in [argc-completions](https://github.com/sigoden/argc-completions).
+
+## Argcscript
+
+Argc will automatically find and run `Argcfile.sh` unless the `--argc-*` options are used to change this behavior.
+
+Argcfile is to argc what Makefile is to make. 
+
+What is the benefit?
+- Can enjoy convenient shell autocompletion.
+- Can be called in any subdirectory without locating the script file every time.
+- Serve as a centralized entrypoint/documentation for executing project bashscripts.
+
+Argc is a [task runner](./docs/task-runner.md).
+
+You can run `argc --argc-create` to quickly create a boilerplate argcscript.
+
+```
+argc --argc-create [TASKS]...
+```
+
+![argcscript](https://github.com/sigoden/argc/assets/4012553/707a3b28-5416-47f1-9d19-788f0135971a)
+
+## Parallel
+
+argc provides features for running commands/functions in parallel.
+
+```sh
+argc --argc-parallel "$0" cmd1 arg1 arg2 ::: cmd2
+```
+
+The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel.
+
+Compared with GNU parallel, the biggest advantage of argc parallel is that it preserves `argc_*` variables.
+
+## Comment Tags
+
+Comment tags is the CLI definition/documentation.
+
+### `@cmd`
 
 Define a subcommand.
 
@@ -120,7 +229,7 @@ COMMANDS:
   download  Download a file
 ```
 
-### @alias
+### `@alias`
 
 Add aliases for the subcommand.
 
@@ -139,7 +248,7 @@ COMMANDS:
   test  Run tests [aliases: t, tst]
 ```
 
-### @arg
+### `@arg`
 
 Define a positional argument.
 
@@ -157,7 +266,7 @@ Define a positional argument.
 # @arg vx~                 capture all remaining args
 ```
 
-### @option
+### `@option`
 
 Define a option argument.
 
@@ -178,7 +287,7 @@ Define a option argument.
 # @option    --oxa~                 capture all remaining args
 ```
 
-### @flag
+### `@flag`
 
 Define a flag argument.
 
@@ -190,7 +299,7 @@ Define a flag argument.
 # @flag     --fd*        multi-occurs
 ```
 
-### @env
+### `@env`
 
 Define an environment variable.
 
@@ -202,7 +311,7 @@ Define an environment variable.
 # @env EDB[=dev|prod]     choices + default
 ```
 
-### @meta
+### `@meta`
 
 Add a metadata.
 
@@ -210,17 +319,18 @@ Add a metadata.
 # @meta key [value]
 ```
 
-| usage                        | scope  | description                                                            |
-| :--------------------------- | ------ | :--------------------------------------------------------------------- |
-| `@meta dotenv [<path>]`      | root   | Load a `.env` file from a custom path, if persent.                     |
-| `@meta default-subcommand`   | subcmd | Set the current subcommand as the default.                             |
-| `@meta inherit-flag-options` | root   | Subcommands will inherit the flags/options from their parent.          |
-| `@meta no-inherit-env`       | root   | Subcommands won't inherit the environment variables from their parent. |
-| `@meta symbol <param>`       | anycmd | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.      |
-| `@meta combine-shorts`       | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `.   |
-| `@meta man-section <1-8>`    | root   | Override the default section the man page.                             |
+| usage                        | scope  | description                                                          |
+| :--------------------------- | ------ | :------------------------------------------------------------------- |
+| `@meta dotenv [<path>]`      | root   | Load a `.env` file from a custom path, if persent.                   |
+| `@meta default-subcommand`   | subcmd | Set the current subcommand as the default.                           |
+| `@meta inherit-flag-options` | root   | Subcommands will inherit the flags/options from their parent.        |
+| `@meta no-inherit-env`       | root   | Subcommands don't inherit the env vars from their parent.            |
+| `@meta symbol <param>`       | anycmd | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.    |
+| `@meta combine-shorts`       | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `. |
+| `@meta man-section <1-8>`    | root   | Override the default section the man page.                           |
 
-### @describe / @version / @author
+
+### `@describe` / `@version` / `@author`
 
 ```sh
 # @describe A demo cli
@@ -240,124 +350,27 @@ USAGE: prog
 <summary>
 
 ### Value Notation
-</summary>
 
-Value notation is used to describe value type of options and positional parameters.
+Value notation is used to describe the value types of options and positional parameters. 
+
+</summary>
 
 ```
 # @option --target <FILE>
 # @arg target <FILE>
 ```
 
-Here are some value notation that will affect the shell completion.
+Here are value notation that will affect the shell completion:
 
 - `FILE`/`PATH`: complete files
 - `DIR`: complete directories
 
 </details>
 
-## Build
-
-Build a single standalone bash script without argc dependency.
-
-```
-argc --argc-build <SCRIPT> [OUTPATH]
-```
-
-## Manpage
-
-Generate man pages for your script.
-
-```
-argc --argc-mangen <SCRIPT> [OUTDIR]
-```
-
-## Completions
-
-Argc provides shell completion for argc command and all the bash scripts powered by argc.
-
-```
-argc --argc-completions <SHELL> [CMDS]...
-```
-
-```
-# bash (~/.bashrc)
-source <(argc --argc-completions bash mycmd1 mycmd2)
-
-# elvish (~/.config/elvish/rc.elv)
-eval (argc --argc-completions elvish mycmd1 mycmd2 | slurp)
-
-# fish (~/.config/fish/config.fish)
-argc --argc-completions fish mycmd1 mycmd2 | source
-
-# nushell (~/.config/nushell/config.nu)
-argc --argc-completions nushell mycmd1 mycmd2 # update config.nu manually according to output
-
-# powershell ($PROFILE)
-Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
-argc --argc-completions powershell mycmd1 mycmd2 | Out-String | Invoke-Expression
-
-# xonsh (~/.config/xonsh/rc.xsh)
-exec($(argc --argc-completions xonsh mycmd1 mycmd2))
-
-# zsh (~/.zshrc)
-source <(argc --argc-completions zsh mycmd1 mycmd2)
-
-# tcsh (~/.tcshrc)
-eval `argc --argc-completions tcsh mycmd1 mycmd2`
-```
-
-**Replace `mycmd1 mycmd2` with your argc scripts**.
-
-The core of all completion scripts is to call `argc --argc-compgen` to fetch completion choices.
-
-```
-$ argc --argc-compgen bash ./demo.sh demo ''
-upload (Upload a file)
-download (Download a file)
-help (Show help for a command)
-
-$ argc --argc-compgen bash ./demo.sh demo download --
---force (Override existing file)
---tries (Set number of retries to NUM)
---help (Print help)
-```
-
-Argc is a multi-shell completion engine. see [argc-completions](https://github.com/sigoden/argc-completions)
-
-## Argcscript
-
-Argc will automatically find and run `Argcfile.sh` unless `--argc-*` options are used to change this behavior.
-
-What is the benefit?
-
-- Can enjoy a handy shell completion.
-- Can be invoked in arbitrarily sub-directory, no need to locate script file each time.
-- As a centralized entrypoint/document for executing the project's bash scripts.
-- Serves as [task runner](./docs/task-runner.md). Argcfile is to argc what Makefile is to make. 
-
-You can use `argc --argc-create` to quickly create a boilerplate argcscript.
-
-```
-argc --argc-create [TASKS]...
-```
-
-![argcscript](https://github.com/sigoden/argc/assets/4012553/5130d9c5-90ff-478e-8404-3db6f55ba1d0)
-
-## Parallel
-
-argc provides features for running commands/functions in parallel.
-
-```sh
-argc --argc-parallel "$0" cmd1 arg1 arg2 ::: cmd2
-```
-
-The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel. Functions running in parallel mode can still access the `argc_*` variable.
-
 <details>
 <summary>
 
-# Windows
+## Windows
 
 The only dependency of argc is bash. Developers under windows OS usually have [git](https://gitforwindows.org/) installed, and git has built-in bash. So you can safely use argc and GNU tools (grep, sed, awk...) under windows OS.
 
@@ -378,7 +391,7 @@ New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\co
   -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
 ```
 
-![image](https://github.com/sigoden/argc/assets/4012553/16af2b13-8c20-4954-bf58-ccdf1bbe23ef)
+![windows-shell](https://github.com/sigoden/argc/assets/4012553/16af2b13-8c20-4954-bf58-ccdf1bbe23ef)
 
 </details>
 
