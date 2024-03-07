@@ -129,7 +129,7 @@ cmda() { :; }
 # @cmd
 cmdb() { :; }
 # @cmd
-cmdbc() { :; }
+cmdc() { :; }
 "###;
 
     snapshot_compgen!(
