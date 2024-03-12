@@ -308,7 +308,13 @@ fn get_argc_script_dir(path: &str) -> Option<String> {
     if candidate_script_names().iter().all(|v| !path.ends_with(v)) {
         return None;
     }
-    let script_file = fs::canonicalize(Path::new(path)).ok()?;
+    let path = Path::new(path);
+    let script_file = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        let current_dir = env::current_dir().ok()?;
+        current_dir.join(path)
+    };
     let script_dir = script_file.parent()?;
     Some(script_dir.display().to_string())
 }
