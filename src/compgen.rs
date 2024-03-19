@@ -559,7 +559,11 @@ impl Shell {
         }
         match self {
             Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
-                Ok(v) => v.chars().collect(),
+                Ok(v) => [':', '=', '@']
+                    .iter()
+                    .filter(|c| v.contains(**c))
+                    .copied()
+                    .collect(),
                 Err(_) => [':', '=', '@'].to_vec(),
             },
             Shell::Powershell => vec![','],

@@ -955,22 +955,23 @@ fn break_chars_bash() {
     let script = r#"
 # @arg args[`_choice_fn`]
 _choice_fn() {
-    echo abc:def
-    echo abc:ghi
-    echo abc=def
-    echo abc=ghi
-    echo abc@def
-    echo abc@ghi
-    echo abc,def
-    echo abc,ghi
+    echo "a1:b1"
+    echo "a1:b2"
+    echo "a1@b1"
+    echo "a1@b2"
+    echo "a1=b1"
+    echo "a1=b2"
+    echo "a1 b1"
+    echo "a1 b2"
 }
 "#;
     snapshot_compgen!(
         script,
         [
-            vec!["prog", "abc:"],
-            vec!["prog", "abc="],
-            vec!["prog", "abc@"],
+            vec!["prog", "a1:b"],
+            vec!["prog", "a1@b"],
+            vec!["prog", "a1=b"],
+            vec!["prog", "a1 b"],
         ],
         argc::Shell::Bash
     );
