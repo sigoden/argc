@@ -2,16 +2,20 @@
 source: tests/compgen.rs
 expression: data
 ---
-************ COMPGEN `prog abc:` ************
-def 
-ghi 
+************ COMPGEN `prog a1:b` ************
+b1 
+b2 
 
-************ COMPGEN `prog abc=` ************
-def 
-ghi 
+************ COMPGEN `prog a1@b` ************
+@b1 
+@b2 
 
-************ COMPGEN `prog abc@` ************
-@def 
-@ghi 
+************ COMPGEN `prog a1=b` ************
+b1 
+b2 
+
+************ COMPGEN `prog a1 b` ************
+a1\ b1 
+a1\ b2 
 
 
