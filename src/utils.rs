@@ -1,7 +1,7 @@
 use convert_case::{Boundary, Converter, Pattern};
 use std::{
     collections::HashMap,
-    env,
+    env, fs,
     path::{Path, PathBuf},
     process, thread,
 };
@@ -186,7 +186,7 @@ pub fn path_env_with_exe() -> String {
 }
 
 pub fn expand_dotenv(value: &str) -> String {
-    let value = if value.is_empty() { ".env" } else { value };
+    let value = escape_shell_words(value);
     format!("[ -f {value} ] && set -o allexport && . {value} && set +o allexport")
 }
 
@@ -196,6 +196,22 @@ pub fn sanitize_var_name(id: &str) -> String {
 
 pub fn argc_var_name(id: &str) -> String {
     format!("{VARIABLE_PREFIX}{}", sanitize_var_name(id))
+}
+
+pub fn load_dotenv(path: &str) -> Option<HashMap<String, String>> {
+    let contents = fs::read_to_string(path).ok()?;
+    let mut output = HashMap::new();
+    for line in contents.lines() {
+        if line.starts_with('#') || line.trim().is_empty() {
+            continue;
+        }
+        if let Some((key, value)) = line.split_once('=') {
+            let key = key.trim().to_string();
+            let value = value.trim().to_string();
+            output.insert(key, value);
+        }
+    }
+    Some(output)
 }
 
 #[cfg(test)]

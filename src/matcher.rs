@@ -10,7 +10,7 @@ use crate::{
     command::{Command, SymbolParam},
     compgen::CompColor,
     param::{ChoiceValue, FlagOptionParam, Param, ParamData, PositionalParam},
-    utils::{argc_var_name, run_param_fns, META_COMBINE_SHORTS, META_DOTENV},
+    utils::{argc_var_name, load_dotenv, run_param_fns, META_COMBINE_SHORTS},
     Shell,
 };
 
@@ -292,10 +292,15 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
 
-        let mut envs = HashMap::new();
         let last_cmd = *cmds.last().unwrap();
+
+        let mut envs = HashMap::new();
+        let dotenv_vars = root_cmd.dotenv().and_then(load_dotenv).unwrap_or_default();
         for param in &last_cmd.env_params {
-            if let Ok(value) = std::env::var(param.id()) {
+            if let Some(value) = std::env::var(param.id())
+                .ok()
+                .or_else(|| dotenv_vars.get(param.id()).cloned())
+            {
                 envs.insert(param.id(), value);
             }
             add_param_choice_fn(&mut choice_fns, param)
@@ -476,7 +481,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let level = cmds_len - 1;
         let last_cmd = self.cmds[level];
 
-        if let Some(value) = root_cmd.get_metadata(META_DOTENV) {
+        if let Some(value) = root_cmd.dotenv() {
             output.push(ArgcValue::Dotenv(value.to_string()))
         }
 
