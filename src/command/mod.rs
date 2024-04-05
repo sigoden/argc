@@ -100,12 +100,7 @@ impl Command {
             if self.get_metadata(META_COMBINE_SHORTS).is_some() {
                 extra.insert("combine_shorts".into(), true.into());
             }
-            if let Some(dotenv) = self.get_metadata(META_DOTENV) {
-                let dotenv = if dotenv.is_empty() {
-                    ".env".to_string()
-                } else {
-                    dotenv.to_string()
-                };
+            if let Some(dotenv) = self.dotenv() {
                 extra.insert("dotenv".into(), dotenv.into());
             }
             let (before_hook, after_hook) = self.exist_hooks();
@@ -609,6 +604,12 @@ impl Command {
             && self.flag_option_params.is_empty()
             && self.positional_params.len() == 1
             && self.positional_params[0].terminated()
+    }
+
+    pub(crate) fn dotenv(&self) -> Option<&str> {
+        let dotenv = self.get_metadata(META_DOTENV)?;
+        let dotenv = if dotenv.is_empty() { ".env" } else { dotenv };
+        Some(dotenv)
     }
 
     fn update_recursively(&mut self, paths: Vec<String>) {

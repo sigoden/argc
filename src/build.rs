@@ -1,7 +1,7 @@
 use crate::{
     command::Command,
     param::{FlagOptionParam, Param},
-    utils::{escape_shell_words, expand_dotenv, META_DOTENV},
+    utils::{escape_shell_words, expand_dotenv},
     ChoiceValue, DefaultValue,
 };
 use anyhow::Result;
@@ -193,7 +193,7 @@ pub fn build(source: &str, root_name: &str) -> Result<String> {
 
 fn build_root(cmd: &Command) -> String {
     let command = build_command(cmd);
-    let dotenv = if let Some(value) = cmd.get_metadata(META_DOTENV) {
+    let dotenv = if let Some(value) = cmd.dotenv() {
         format!("\n    {}", expand_dotenv(value))
     } else {
         String::new()
@@ -224,8 +224,8 @@ _argc_run() {{
     argc__args=("$(basename "$0" .sh)" "$@")
     argc__positionals=()
     _argc_index=1
-    _argc_len="${{#argc__args[@]}}"
-    _argc_parse{dotenv}{before_hook}
+    _argc_len="${{#argc__args[@]}}"{dotenv}
+    _argc_parse{before_hook}
     if [ -n "$argc__fn" ]; then
         $argc__fn "${{argc__positionals[@]}}"{after_hook}
     fi
