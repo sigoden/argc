@@ -101,6 +101,7 @@ It's how the argc parser identifies configuration.
 
 | Tag                                             | Description                          |
 | :---------------------------------------------- | ------------------------------------ |
+| [`@describe`](./docs/specification.md#describe) | Set the description for the command. |
 | [`@cmd`](./docs/specification.md#cmd)           | Define a subcommand.                 |
 | [`@alias`](./docs/specification.md#alias)       | Set aliases for the subcommand.      |
 | [`@arg`](./docs/specification.md#arg)           | Define a positional argument.        |
@@ -108,9 +109,6 @@ It's how the argc parser identifies configuration.
 | [`@flag`](./docs/specification.md#flag)         | Define a flag argument.              |
 | [`@env`](./docs/specification.md#env)           | Define an environment variable.      |
 | [`@meta`](./docs/specification.md#meta)         | Add a metadata.                      |
-| [`@describe`](./docs/specification.md#describe) | Set the description for the command. |
-| [`@version`](./docs/specification.md#version)   | Set the version for the command.     |
-| [`@author`](./docs/specification.md#author)     | Set the author for the command.      |
 
 See [specification](https://github.com/sigoden/argc/blob/main/docs/specification.md) for the grammar and usage of all the comment tags.
 

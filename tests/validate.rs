@@ -4,8 +4,29 @@ use crate::*;
 fn help_version() {
     let script = r###"
 # @describe Test argc
-# @version    1.0.0
-# @author     nobody <nobody@example.com>
+# @meta version 1.0.0
+# @meta author nobody <nobody@example.com>
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "help"],
+            vec!["prog", "--help"],
+            vec!["prog", "-help"],
+            vec!["prog", "-h"],
+            vec!["prog", "--version"],
+            vec!["prog", "-version"],
+            vec!["prog", "-V"],
+        ]
+    );
+}
+
+#[test]
+fn help_version_legacy() {
+    let script = r###"
+# @describe Test argc
+# @version 1.0.0
+# @author nobody <nobody@example.com>
 "###;
     snapshot_multi!(
         script,
@@ -25,7 +46,7 @@ fn help_version() {
 fn help_version_shadow() {
     let script = r###"
 # @describe Test argc
-# @version    1.0.0
+# @meta version 1.0.0
 
 # @flag -h --host
 # @flag -V --verify
@@ -37,7 +58,7 @@ fn help_version_shadow() {
 fn help_version_exist() {
     let script = r###"
 # @describe Test argc
-# @version    1.0.0
+# @meta version 1.0.0
 
 # @flag -h --help
 # @flag -V --version
@@ -56,7 +77,7 @@ fn help_notations() {
 }
 
 #[test]
-fn version() {
+fn version_missing() {
     let script = r###"
 # @cmd
 cmd() { :; }
