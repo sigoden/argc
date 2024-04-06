@@ -183,13 +183,13 @@ Add a metadata.
 ```sh
 # @meta version 1.0.0
 # @meta author nobody <nobody@example.com>
-# @meta dotenv .env.local                         # Load .env.local
 # @meta dotenv                                    # Load .env
+# @meta dotenv .env.local                         # Load .env.local
 # @meta symbol +toolchain[`_choice_fn`]
 # @meta man-section 8                             # Generate to man section 8
 ```
 
-## Deprecated Tags
+## Deprecated tags
 
 Deprecated tags can still be used, but are not recommended and may be completely abandoned in subsequent versions.
 

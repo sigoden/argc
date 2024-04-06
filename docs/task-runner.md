@@ -78,6 +78,13 @@ COMMANDS:
 
 ```
 
+## Use dotenv
+
+```sh
+# @meta dotenv                                    # Load .env
+# @meta dotenv .env.local                         # Load .env.local
+```
+
 ## Use regular shell variables
 
 ```sh
