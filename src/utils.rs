@@ -14,6 +14,8 @@ pub const AFTER_HOOK: &str = "_argc_after";
 pub const ROOT_NAME: &str = "prog";
 pub const MAIN_NAME: &str = "main";
 
+pub(crate) const META_VERSION: &str = "version";
+pub(crate) const META_AUTHOR: &str = "author";
 pub(crate) const META_DOTENV: &str = "dotenv";
 pub(crate) const META_DEFAULT_SUBCOMMAND: &str = "default-subcommand";
 pub(crate) const META_INHERIT_FLAG_OPTIONS: &str = "inherit-flag-options";

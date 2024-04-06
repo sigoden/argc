@@ -1,5 +1,24 @@
 # Specification
 
+### `@describe`
+
+Set the description for the command.
+
+> **<sup>Syntax</sup>**\
+> `@describe` string
+
+```sh
+# @describe A demo CLI
+```
+
+```sh
+# @describe Multi-line auto-wrapped help text
+#
+# Extra lines after the @cmd or @describe, which don't start with an @, are 
+# treated as the long description. A line which is not a comment ends
+# the block.
+```
+
 ## `@cmd`
 
 Define a subcommand.
@@ -150,49 +169,49 @@ Add a metadata.
 
 | syntax                       | scope  | description                                                          |
 | :--------------------------- | ------ | :------------------------------------------------------------------- |
-| `@meta dotenv [<path>]`      | root   | Load a `.env` file from a custom path, if persent.                   |
+| `@meta version <value>`      | any    | Set the version for the command.                                     |
+| `@meta author <value>`       | any    | Set the author for the command.                                      |
+| `@meta dotenv [<path>]`      | root   | Load a dotenv file from a custom path, if persent.                   |
+| `@meta symbol <param>`       | any    | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.    |
+| `@meta man-section <1-8>`    | root   | Override the section for the man page, defaulting to 1.              |
 | `@meta default-subcommand`   | subcmd | Set the current subcommand as the default.                           |
 | `@meta inherit-flag-options` | root   | Subcommands will inherit the flags/options from their parent.        |
-| `@meta no-inherit-env`       | root   | Subcommands don't inherit the env vars from their parent.            |
-| `@meta symbol <param>`       | anycmd | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.    |
+| `@meta no-inherit-env`       | root   | Subcommands will not inherit the env vars from their parent.         |
 | `@meta combine-shorts`       | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `. |
-| `@meta man-section <1-8>`    | root   | Override the default section the man page.                           |
 
-
-### `@describe`
-
-Set the description for the command.
-
-> **<sup>Syntax</sup>**\
-> `@describe` string
 
 ```sh
-# @describe A demo cli
+# @meta version 1.0.0
+# @meta author nobody <nobody@example.com>
+# @meta dotenv .env.local                         # Load .env.local
+# @meta dotenv                                    # Load .env
+# @meta symbol +toolchain[`_choice_fn`]
+# @meta man-section 8                             # Generate to man section 8
 ```
 
-## `@version`
+## Deprecated Tags
+
+Deprecated tags can still be used, but are not recommended and may be completely abandoned in subsequent versions.
+
+### `@version`
 
 Set the version for the command.
 
-> **<sup>Syntax</sup>**\
-> `@version` string
-
-```sh
-# @version 2.17.1 
+```diff
+-- # @version 2.17.1
+++ # @meta version 2.17.1 
 ```
 
-## `@author`
+### `@author`
 
 Set the author for the command.
 
-```sh
-# @author alice <alice@example.com>
+```diff
+-- # @author nobody <nobody@example.com>
+++ # @meta author nobody <nobody@example.com>
 ```
 
-> **<sup>Syntax</sup>**\
-> `@author` string
-
-## Component
+## Internal components
 
 ### short
 

@@ -12,9 +12,9 @@ use crate::param::{
 };
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::utils::{
-    AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, MAIN_NAME, META_COMBINE_SHORTS,
+    AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, MAIN_NAME, META_AUTHOR, META_COMBINE_SHORTS,
     META_DEFAULT_SUBCOMMAND, META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_NO_INHERIT_ENV,
-    META_SYMBOL, ROOT_NAME,
+    META_SYMBOL, META_VERSION, ROOT_NAME,
 };
 use crate::Result;
 
@@ -150,12 +150,29 @@ impl Command {
                 }
                 EventData::Meta(key, value) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@meta", position)?;
-                    if key == META_SYMBOL {
-                        let (ch, name, choice_fn) = parse_symbol(&value).ok_or_else(|| {
-                            anyhow!("@meta(line {}) invalid symbol value", position)
-                        })?;
-                        cmd.symbols
-                            .insert(ch, (name.to_string(), choice_fn.map(|v| v.to_string())));
+                    match key.as_str() {
+                        META_SYMBOL => {
+                            let (ch, name, choice_fn) = parse_symbol(&value).ok_or_else(|| {
+                                anyhow!("@meta(line {}) invalid symbol value", position)
+                            })?;
+                            cmd.symbols
+                                .insert(ch, (name.to_string(), choice_fn.map(|v| v.to_string())));
+                        }
+                        META_VERSION => {
+                            if value.is_empty() {
+                                bail!("@meta(line {}) invalid version value", position)
+                            } else {
+                                cmd.version = Some(value.clone());
+                            }
+                        }
+                        META_AUTHOR => {
+                            if value.is_empty() {
+                                bail!("@meta(line {}) invalid version value", position)
+                            } else {
+                                cmd.author = Some(value.clone());
+                            }
+                        }
+                        _ => {}
                     }
                     cmd.metadata.push((key, value, position));
                 }
