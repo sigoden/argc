@@ -7,16 +7,20 @@ Easily create feature-rich CLIs in bash.
 
 ![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
 
-Argc lets you define your CLI through comments and focus on your specific code, without worrying about command line argument parsing, usage texts, error messages and other functions that are usually handled by a framework in any other programming language.
+Argc lets you define your CLI through comments and focus on your specific code, without worrying about command line argument parsing, usage text, error messages and other functions that are usually handled by a framework in any other programming language.
 
 ## Features
 
-- **Argument parsing**: Easily configure options, flags, positional arguments, subcommands or environment variables with validation and rendering of usage texts.
-- **Build pure bashscript**: Build a single standalone bashscript without argc dependency.
-- **Cross-shell autocompletion**: Auto-generating completion scripts for bash, zsh, fish, powershell, nushell, and more.
-- **Man page**: Auto-generating manage page documentation for your script.
-- **Task runner**: An ideal task runner in Bash that can be used with Argcfile to automate the execution of predefined tasks.
-- **Self documentation**: Comments are CLI definitions, documentation, usage texts.
+- **Argument parsing**: Parsing user's command line, validating and extracting:
+  - Optional or required positional arguments.
+  - Optional or required option arguments.
+  - Standard flags (like --help, --version, --verbose, -vvv).
+  - Commands (and sub-commands).
+- **Build bashscript**: Build a single standalone bashscript without argc dependency.
+- **Cross-shell autocompletion**: Generate completion scripts for bash, zsh, fish, powershell, and more.
+- **Man page**: Generate manage page documentation for your script.
+- **Task runner**: An ideal task runner in Bash to automate the execution of predefined tasks with Argcfile.sh.
+- **Self documentation**: Comments with tags are CLI definitions, documentation, usage text.
 - **Cross platform**: A single executable file that can run on macOS, Linux, Windows, and BSD systems.
 
 ## Install
@@ -193,7 +197,6 @@ $ argc --argc-compgen bash ./example.sh example --
 
 Argc is a completion engine, see 1000+ examples in [argc-completions](https://github.com/sigoden/argc-completions).
 
-
 ## Manpage
 
 Generate man pages for the CLI.
@@ -207,7 +210,6 @@ argc --argc-mangen ./example.sh man/
 
 man man/example.1
 ```
-
 
 ## Parallel
 
