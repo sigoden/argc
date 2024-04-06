@@ -11,20 +11,12 @@ Set the description for the command.
 # @describe A demo CLI
 ```
 
-```sh
-# @describe Multi-line auto-wrapped help text
-#
-# Extra lines after the @cmd or @describe, which don't start with an @, are 
-# treated as the long description. A line which is not a comment ends
-# the block.
-```
-
 ## `@cmd`
 
 Define a subcommand.
 
 > **<sup>Syntax</sup>**\
-> `@cmd` description<sup>?</sup>
+> `@cmd` [_description_]<sup>?</sup>
 
 ```sh
 # @cmd Upload a file
@@ -75,7 +67,7 @@ Define a positional argument.
 > **<sup>Syntax</sup>**\
 > `@arg` arg-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
 >   [_notation_]<sup>?</sup>
->   description<sup>?</sup>
+>   [_description_]<sup>?</sup>
 
 ```sh
 # @arg va
@@ -103,7 +95,7 @@ Define an option argument.
 > **<sup>Syntax</sup>**\
 > `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
 >   [_notations_]<sup>?</sup>
->   description<sup>?</sup>
+>   [_description_]<sup>?</sup>
 
 ```sh
 # @option    --oa                   
@@ -134,7 +126,7 @@ Define a flag argument. Flag is a special option that does not accept any value.
 
 > **<sup>Syntax</sup>**\
 > `@flag` [_short_]<sup>?</sup>[_long_] `*`<sup>?</sup>
->   description<sup>?</sup>
+>   [_description_]<sup>?</sup>
 
 ```sh
 # @flag     --fa 
@@ -150,7 +142,7 @@ Define an environment variable.
 > **<sup>Syntax</sup>**\
 > `@arg` env-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
 >   [_notation_]<sup>?</sup>
->   description<sup>?</sup>
+>   [_description_]<sup>?</sup>
 
 ```sh
 # @env EA                 optional
@@ -183,15 +175,15 @@ Add a metadata.
 ```sh
 # @meta version 1.0.0
 # @meta author nobody <nobody@example.com>
-# @meta dotenv                                    # Load .env
-# @meta dotenv .env.local                         # Load .env.local
+# @meta dotenv
+# @meta dotenv .env.local
 # @meta symbol +toolchain[`_choice_fn`]
-# @meta man-section 8                             # Generate to man section 8
+# @meta man-section 8
 ```
 
 ## Deprecated tags
 
-Deprecated tags can still be used, but are not recommended and may be completely abandoned in subsequent versions.
+Deprecated tags can still be used, but are not recommended and may be completely abandoned in the next major version (v2).
 
 ### `@version`
 
@@ -234,14 +226,12 @@ The long version of the flag / option.
 
 > **<sup>Syntax</sup>**\
 > &nbsp; `!` \
-> | `*` \
-> | `+` \
-> | `*` [_separated-char_] \
-> | `+` [_separated-char_]
+> | `*` [_separated-char_]<sup>?</sup> \
+> | `+` [_separated-char_]<sup>?</sup>
 
 - `!`: required
-- `*`: multi-occurs (for @option); multi-values (for @arg)
-- `+`: required + multi-occurs (for @option); required + multi-values (for @arg)
+- `*`: multi-occurs for @option; multi-values for @arg;
+- `+`: required + multiple
 - [_separated-char_]: *char*-separated list
 
 ### param-value
@@ -301,6 +291,18 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
 
 `,` `:` `@` `|` `/`
 
+## description
+
+Plain text, can be multiple lines.
+
+```sh
+# @describe Multi-line auto-wrapped help text
+#
+# Extra lines after the @describe/@cmd/@option/@flag/@arg/@env, 
+# which don't start with an @, are treated as the long description.
+# A line which is not a comment ends the block.
+```
+
 [_short_]: #short
 [_long_]: #long
 [_modifier_]: #modifier
@@ -313,3 +315,4 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
 [_short-char_]: #short-char
 [_separated-char_]: #separated-char
 [_long-name_]: #long-name 
+[_description_]: #description
