@@ -11,16 +11,13 @@ Argc lets you define your CLI through comments and focus on your specific code, 
 
 ## Features
 
-- Parsing user's command line and extracting:
-  - Positional arguments (optional, required, default value, choices, comma-seperated, multiple values),
-  - Option arguments (optional, required, default value, choices, comma-seperated, multiple values, repeated),
-  - Flag arguments (repeated),
-  - Sub-commands (alias, nested).
-- Rendering usage texts, showing flags, options, positional arguments and sub-commands.
-- Validating the arguments, printing error messages if the command line is invalid.
-- Generating a single standalone bashscript without argc dependency.
-- Generating man pages.
-- Generating multi-shell completion scripts (require argc as completion engine).
+- **Argument parsing**: Easily configure options, flags, positional arguments, subcommands or environment variables with validation and rendering of usage texts.
+- **Build pure bashscript**: Build a single standalone bashscript without argc dependency.
+- **Cross-shell autocompletion**: Auto-generating completion scripts for bash, zsh, fish, powershell, nushell, and more.
+- **Man page**: Auto-generating manage page documentation for your script.
+- **Task runner**: An ideal task runner in Bash that can be used with Argcfile to automate the execution of predefined tasks.
+- **Self documentation**: Comments are CLI definitions, documentation, usage texts.
+- **Cross platform**: A single executable file that can run on macOS, Linux, Windows, and BSD systems.
 
 ## Install
 
@@ -49,16 +46,16 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 
 To write a command-line program with argc, we only need to do two things:
 
-1. Describe options, flags, positional parameters and subcommands in [comment tags](#comment-tags).
+1. Describe options, flags, positional parameters and subcommands in [comment tag](#comment-tag).
 2. Insert `eval "$(argc --argc-eval "$0" "$@")"` into script to let argc to handle command line arguments.
 
 Write `example.sh`
 
 ```sh
-# @flag -F --foo  Flag value
-# @option --bar   Option value
-# @option --baz*  Option values
-# @arg val*       Positional values
+# @flag -F --foo  Flag param
+# @option --bar   Option param
+# @option --baz*  Option param (multi-occur)
+# @arg val*       Positional param
 
 eval "$(argc --argc-eval "$0" "$@")"
 echo foo: $argc_foo
@@ -82,15 +79,36 @@ Run `./example.sh --help`, argc will print help information for you.
 USAGE: example [OPTIONS] [VAL]...
 
 ARGS:
-  [VAL]...  Positional values
+  [VAL]...  Positional param
 
 OPTIONS:
-  -F, --foo           Flag value
-      --bar <BAR>     Option value
-      --baz [BAZ]...  Option values
+  -F, --foo           Flag param
+      --bar <BAR>     Option param
+      --baz [BAZ]...  Option param (multi-occur)
   -h, --help          Print help
   -V, --version       Print version
 ```
+
+## Comment Tag
+
+Argc uses comments with a `JsDoc` inspired syntax to add functionality to the scripts at runtime.
+This syntax, known as a `comment tag`, is a normal Bash comment followed by an `@` sign and a tag.
+It's how the argc parser identifies configuration.
+
+| Tag                                             | Description                          |
+| :---------------------------------------------- | ------------------------------------ |
+| [`@cmd`](./docs/specification.md#cmd)           | Define a subcommand.                 |
+| [`@alias`](./docs/specification.md#alias)       | Set aliases for the subcommand.      |
+| [`@arg`](./docs/specification.md#arg)           | Define a positional argument.        |
+| [`@option`](./docs/specification.md#option)     | Define an option argument.            |
+| [`@flag`](./docs/specification.md#flag)         | Define a flag argument.              |
+| [`@env`](./docs/specification.md#env)           | Define an environment variable.      |
+| [`@meta`](./docs/specification.md#meta)         | Add a metadata.                      |
+| [`@describe`](./docs/specification.md#describe) | Set the description for the command. |
+| [`@version`](./docs/specification.md#version)   | Set the version for the command.     |
+| [`@author`](./docs/specification.md#author)     | Set the author for the command.      |
+
+See [specification](https://github.com/sigoden/argc/blob/main/docs/specification.md) for the grammar and usage of all the comment tags.
 
 ## Build
 
@@ -103,22 +121,29 @@ argc --argc-build <SCRIPT> [OUTPATH]
 ```sh
 argc --argc-build ./example.sh build/
 
-./build/example.sh -h # Run without argc dependency
+./build/example.sh -h       # Run the script without argc dependency
 ```
 
-## Manpage
+## Argcscript
 
-Generate man pages for the CLI.
+Argc will automatically find and run `Argcfile.sh` unless the `--argc-*` options are used to change this behavior.
+
+Argcfile is to argc what Makefile is to make. 
+
+What is the benefit?
+- Can enjoy convenient shell autocompletion.
+- Can be called in any subdirectory without locating the script file every time.
+- Serve as a centralized entrypoint/documentation for executing project bashscripts.
+
+Argc is a [task runner](https://github.com/sigoden/argc/blob/main/docs/task-runner.md).
+
+You can run `argc --argc-create` to quickly create a boilerplate argcscript.
 
 ```
-argc --argc-mangen <SCRIPT> [OUTDIR]
+argc --argc-create [TASKS]...
 ```
 
-```sh
-argc --argc-mangen ./example.sh man/
-
-man man/example.1
-```
+![argcscript](https://github.com/sigoden/argc/assets/4012553/707a3b28-5416-47f1-9d19-788f0135971a)
 
 ## Completions
 
@@ -159,35 +184,30 @@ The core of all completion scripts is to call `argc --argc-compgen` to obtain co
 
 ```
 $ argc --argc-compgen bash ./example.sh example --
---foo (Flag value)
---bar (Option value)
---baz (Option values)
+--foo (Flag param)
+--bar (Option param)
+--baz (Option param (multi-occur))
 --help (Print help)
 --version (Print version)
 ```
 
 Argc is a completion engine, see 1000+ examples in [argc-completions](https://github.com/sigoden/argc-completions).
 
-## Argcscript
 
-Argc will automatically find and run `Argcfile.sh` unless the `--argc-*` options are used to change this behavior.
+## Manpage
 
-Argcfile is to argc what Makefile is to make. 
-
-What is the benefit?
-- Can enjoy convenient shell autocompletion.
-- Can be called in any subdirectory without locating the script file every time.
-- Serve as a centralized entrypoint/documentation for executing project bashscripts.
-
-Argc is a [task runner](./docs/task-runner.md).
-
-You can run `argc --argc-create` to quickly create a boilerplate argcscript.
+Generate man pages for the CLI.
 
 ```
-argc --argc-create [TASKS]...
+argc --argc-mangen <SCRIPT> [OUTDIR]
 ```
 
-![argcscript](https://github.com/sigoden/argc/assets/4012553/707a3b28-5416-47f1-9d19-788f0135971a)
+```sh
+argc --argc-mangen ./example.sh man/
+
+man man/example.1
+```
+
 
 ## Parallel
 
@@ -201,178 +221,12 @@ The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel.
 
 Compared with GNU parallel, the biggest advantage of argc parallel is that it preserves `argc_*` variables.
 
-## Comment Tags
-
-Comment tags is the CLI definition/documentation.
-
-### `@cmd`
-
-Define a subcommand.
-
-```sh
-# @cmd Upload a file
-upload() {
-  echo Run upload
-}
-
-# @cmd Download a file
-download() {
-  echo Run download
-}
-```
-
-```
-USAGE: prog <COMMAND>
-
-COMMANDS:
-  upload    Upload a file
-  download  Download a file
-```
-
-### `@alias`
-
-Add aliases for the subcommand.
-
-```sh
-# @cmd Run tests
-# @alias t,tst
-test() {
-  echo Run test
-}
-```
-
-```
-USAGE: prog <COMMAND>
-
-COMMANDS:
-  test  Run tests [aliases: t, tst]
-```
-
-### `@arg`
-
-Define a positional argument.
-
-```sh
-# @arg va
-# @arg vb!                 required
-# @arg vc*                 multi-values
-# @arg vd+                 multi-values + required
-# @arg vna <PATH>          value notation
-# @arg vda=a               default
-# @arg vdb=`_default_fn`   default from fn
-# @arg vca[a|b]            choices
-# @arg vcb[=a|b]           choices + default
-# @arg vcc[`_choice_fn`]   choices from fn
-# @arg vx~                 capture all remaining args
-```
-
-### `@option`
-
-Define a option argument.
-
-```sh
-# @option    --oa                   
-# @option -b --ob                   short
-# @option -c                        short only
-# @option    --oc!                  required
-# @option    --od*                  multi-occurs
-# @option    --oe+                  multi-occurs + required
-# @option    --ona <PATH>           value notation
-# @option    --onb <FILE> <FILE>    two-args value notations
-# @option    --oda=a                default
-# @option    --odb=`_default_fn`    default from fn
-# @option    --oca[a|b]             choices
-# @option    --ocb[=a|b]            choices + default
-# @option    --occ[`_choice_fn`]    choices from fn
-# @option    --oxa~                 capture all remaining args
-```
-
-### `@flag`
-
-Define a flag argument.
-
-
-```sh
-# @flag     --fa 
-# @flag  -b --fb         short
-# @flag  -c              short only
-# @flag     --fd*        multi-occurs
-```
-
-### `@env`
-
-Define an environment variable.
-
-```sh
-# @env EA                 optional
-# @env EB!                required
-# @env EC=true            default
-# @env EDA[dev|prod]      choices
-# @env EDB[=dev|prod]     choices + default
-```
-
-### `@meta`
-
-Add a metadata.
-
-```sh
-# @meta key [value]
-```
-
-| usage                        | scope  | description                                                          |
-| :--------------------------- | ------ | :------------------------------------------------------------------- |
-| `@meta dotenv [<path>]`      | root   | Load a `.env` file from a custom path, if persent.                   |
-| `@meta default-subcommand`   | subcmd | Set the current subcommand as the default.                           |
-| `@meta inherit-flag-options` | root   | Subcommands will inherit the flags/options from their parent.        |
-| `@meta no-inherit-env`       | root   | Subcommands don't inherit the env vars from their parent.            |
-| `@meta symbol <param>`       | anycmd | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.    |
-| `@meta combine-shorts`       | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `. |
-| `@meta man-section <1-8>`    | root   | Override the default section the man page.                           |
-
-
-### `@describe` / `@version` / `@author`
-
-```sh
-# @describe A demo cli
-# @version 2.17.1 
-# @author nobody <nobody@example.com>
-```
-
-```
-prog 2.17.1
-nobody <nobody@example.com>
-A demo cli
-
-USAGE: prog
-```
-
-<details>
-<summary>
-
-### Value Notation
-
-Value notation is used to describe the value types of options and positional parameters. 
-
-</summary>
-
-```
-# @option --target <FILE>
-# @arg target <FILE>
-```
-
-Here are value notation that will affect the shell completion:
-
-- `FILE`/`PATH`: complete files
-- `DIR`: complete directories
-
-</details>
-
 <details>
 <summary>
 
 ## Windows
 
-The only dependency of argc is bash. Developers under windows OS usually have [git](https://gitforwindows.org/) installed, and git has built-in bash. So you can safely use argc and GNU tools (grep, sed, awk...) under windows OS.
+The only dependency of argc is bash.  Developers who work on Windows OS usually have [git](https://gitforwindows.org/) (which includes git-bash) installed, so you can safely use argc and GNU tools (grep, sed, awk...) on windows OS.
 
 </summary>
 
