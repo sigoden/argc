@@ -549,7 +549,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
             )
         };
         let (min, max) = param.args_range();
-        if param.assigned {
+        let code = if param.assigned {
             let not_assigned = if min == 1 {
                 format!(
                     r#"
@@ -563,23 +563,23 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
             };
             format!(
                 r#"
-        {names})
             if [[ "$_argc_key" == "$_argc_item" ]]; then{not_assigned}
             else
                 _argc_take_args "{render_name_notations}" {min} {max} "{signs}" "{delimiter}"
-            fi
-            _argc_index=$((_argc_index + _argc_take_args_len + 1)){choice}{variant}
-            ;;"#
+            fi"#
             )
         } else {
             format!(
                 r#"
-        {names})
-            _argc_take_args "{render_name_notations}" {min} {max} "{signs}" "{delimiter}"
+            _argc_take_args "{render_name_notations}" {min} {max} "{signs}" "{delimiter}""#
+            )
+        };
+        format!(
+            r#"
+        {names}){code}
             _argc_index=$((_argc_index + _argc_take_args_len + 1)){choice}{variant}
             ;;"#
-            )
-        }
+        )
     }
 }
 
