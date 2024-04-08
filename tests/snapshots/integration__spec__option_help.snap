@@ -319,6 +319,31 @@ OPTIONS:
   -h,  -help  Print help
 
 ************ RUN ************
+prog options-assigned -h
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+Prefixed option
+
+USAGE: prog options-assigned [OPTIONS]
+
+OPTIONS:
+  -f, --follow=<FOLLOW>  assigned + choice [possible values: a, b]
+  -h, --help             Print help
+
+EOF
+exit 0
+
+# RUN_OUTPUT
+Prefixed option
+
+USAGE: prog options-assigned [OPTIONS]
+
+OPTIONS:
+  -f, --follow=<FOLLOW>  assigned + choice [possible values: a, b]
+  -h, --help             Print help
+
+************ RUN ************
 prog test1 -h
 
 # OUTPUT
@@ -424,5 +449,3 @@ OPTIONS:
       --of <OF>
       --cb <CB>  [default: x] [possible values: x, y, z]
   -h, --help
-
-

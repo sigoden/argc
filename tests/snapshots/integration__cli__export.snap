@@ -26,6 +26,7 @@ expression: stdout
       "args_delimiter": null,
       "terminated": false,
       "prefixed": false,
+      "assigned": false,
       "default": null,
       "choice": null,
       "inherit": false
@@ -47,6 +48,7 @@ expression: stdout
       "args_delimiter": null,
       "terminated": false,
       "prefixed": false,
+      "assigned": false,
       "default": null,
       "choice": null,
       "inherit": false
@@ -81,6 +83,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -104,6 +107,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -127,6 +131,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -150,6 +155,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -173,6 +179,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -196,6 +203,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -219,6 +227,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -243,6 +252,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -267,6 +277,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -290,6 +301,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": {
             "type": "Value",
             "value": "a"
@@ -316,6 +328,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": {
             "type": "Fn",
             "value": "_default_fn"
@@ -342,6 +355,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Values",
@@ -371,6 +385,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": {
             "type": "Value",
             "value": "a"
@@ -403,6 +418,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Values",
@@ -432,6 +448,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Values",
@@ -461,6 +478,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -490,6 +508,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -519,6 +538,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -548,6 +568,7 @@ expression: stdout
           "args_delimiter": ",",
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -577,6 +598,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": true,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -598,6 +620,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -635,6 +658,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -656,6 +680,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -677,6 +702,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -698,6 +724,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -719,6 +746,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -740,6 +768,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -777,6 +806,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -798,6 +828,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -819,6 +850,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -842,6 +874,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -865,6 +898,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -888,6 +922,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -911,6 +946,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Values",
@@ -940,6 +976,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -967,6 +1004,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1006,6 +1044,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1029,6 +1068,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1052,6 +1092,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1073,6 +1114,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1112,6 +1154,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1135,6 +1178,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1158,6 +1202,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1181,6 +1226,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1204,6 +1250,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1227,6 +1274,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1250,6 +1298,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1274,6 +1323,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1298,6 +1348,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1321,6 +1372,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": {
             "type": "Value",
             "value": "a"
@@ -1347,6 +1399,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": {
             "type": "Fn",
             "value": "_default_fn"
@@ -1373,6 +1426,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Values",
@@ -1402,6 +1456,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": {
             "type": "Value",
             "value": "a"
@@ -1434,6 +1489,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Values",
@@ -1463,6 +1519,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Values",
@@ -1492,6 +1549,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -1521,6 +1579,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -1550,6 +1609,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -1579,6 +1639,7 @@ expression: stdout
           "args_delimiter": ",",
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -1608,6 +1669,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": true,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1629,6 +1691,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1666,6 +1729,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1687,6 +1751,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1708,6 +1773,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1729,6 +1795,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1750,6 +1817,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1771,6 +1839,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1810,6 +1879,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1833,6 +1903,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1856,6 +1927,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1877,6 +1949,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1916,6 +1989,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": true,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -1945,6 +2019,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": true,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -1972,6 +2047,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -1984,6 +2060,74 @@ expression: stdout
         "options-prefixed"
       ],
       "command_fn": "options-prefixed"
+    },
+    {
+      "name": "options-assigned",
+      "describe": "Prefixed option",
+      "author": null,
+      "version": null,
+      "aliases": [],
+      "flag_options": [
+        {
+          "id": "follow",
+          "long_name": "--follow",
+          "short_name": "-f",
+          "describe": "assigned + choice",
+          "is_flag": false,
+          "notations": [
+            "FOLLOW"
+          ],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "args_range": [
+            1,
+            1
+          ],
+          "args_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "assigned": true,
+          "default": null,
+          "choice": {
+            "type": "Values",
+            "data": [
+              "a",
+              "b"
+            ]
+          },
+          "inherit": false
+        },
+        {
+          "id": "help",
+          "long_name": "--help",
+          "short_name": "-h",
+          "describe": "Print help",
+          "is_flag": true,
+          "notations": [],
+          "required": false,
+          "multiple_values": false,
+          "multiple_occurs": false,
+          "args_range": [
+            0,
+            0
+          ],
+          "args_delimiter": null,
+          "terminated": false,
+          "prefixed": false,
+          "assigned": false,
+          "default": null,
+          "choice": null,
+          "inherit": false
+        }
+      ],
+      "positionals": [],
+      "envs": [],
+      "subcommands": [],
+      "paths": [
+        "options-assigned"
+      ],
+      "command_fn": "options-assigned"
     },
     {
       "name": "test1",
@@ -2009,6 +2153,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2030,6 +2175,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2051,6 +2197,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2072,6 +2219,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2093,6 +2241,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2116,6 +2265,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2139,6 +2289,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2162,6 +2313,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2185,6 +2337,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2209,6 +2362,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2232,6 +2386,7 @@ expression: stdout
           "args_delimiter": ",",
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2255,6 +2410,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Values",
@@ -2285,6 +2441,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -2314,6 +2471,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -2343,6 +2501,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -2372,6 +2531,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2393,6 +2553,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2432,6 +2593,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2455,6 +2617,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2478,6 +2641,7 @@ expression: stdout
           "args_delimiter": ",",
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2501,6 +2665,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -2530,6 +2695,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -2559,6 +2725,7 @@ expression: stdout
           "args_delimiter": ",",
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": {
             "type": "Fn",
@@ -2586,6 +2753,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2625,6 +2793,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": {
             "type": "Value",
             "value": "val"
@@ -2651,6 +2820,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": {
             "type": "Fn",
             "value": "_default_fn"
@@ -2677,6 +2847,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": {
             "type": "Value",
             "value": "x"
@@ -2708,6 +2879,7 @@ expression: stdout
           "args_delimiter": null,
           "terminated": false,
           "prefixed": false,
+          "assigned": false,
           "default": null,
           "choice": null,
           "inherit": false
@@ -2726,4 +2898,3 @@ expression: stdout
   "command_fn": null,
   "combine_shorts": true
 }
-

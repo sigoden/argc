@@ -40,9 +40,6 @@ pub(crate) trait Param {
     fn terminated(&self) -> bool {
         self.data().terminated()
     }
-    fn prefixed(&self) -> bool {
-        self.data().prefixed()
-    }
     fn choice(&self) -> Option<&ChoiceValue> {
         self.data().choice.as_ref()
     }
@@ -70,6 +67,8 @@ pub(crate) struct FlagOptionParam {
     pub(crate) is_flag: bool,
     pub(crate) short: Option<String>,
     pub(crate) long_prefix: String,
+    pub(crate) prefixed: bool,
+    pub(crate) assigned: bool,
     pub(crate) id: String,
     pub(crate) raw_notations: Vec<String>,
     pub(crate) notations: Vec<String>,
@@ -103,7 +102,10 @@ impl Param for FlagOptionParam {
 
     fn guard(&self) -> Result<()> {
         if self.notations.len() > 1 {
-            if self.prefixed() {
+            if self.assigned {
+                bail!("cannot combine assign and multiple notations")
+            }
+            if self.prefixed {
                 bail!("cannot combine prefix and multiple notations")
             }
             if self.args_delimiter().is_some() {
@@ -122,10 +124,17 @@ impl Param for FlagOptionParam {
         if let Some(short) = &self.short {
             output.push(short.to_string());
         };
+        let mut name_suffix = String::new();
+        if self.prefixed {
+            name_suffix.push('-');
+        }
+        if self.assigned {
+            name_suffix.push(':');
+        }
         output.push(format!(
             "{}{}",
             self.long_prefix,
-            self.data.render_name_value()
+            self.data.render_name_value(&name_suffix)
         ));
         for raw_notation in &self.raw_notations {
             output.push(format!("<{}>", raw_notation));
@@ -139,13 +148,22 @@ impl Param for FlagOptionParam {
 
 impl FlagOptionParam {
     pub(crate) fn new(
-        data: ParamData,
+        mut data: ParamData,
         describe: &str,
         is_flag: bool,
         short: Option<&str>,
         long_prefix: &str,
         row_notations: &[&str],
     ) -> Self {
+        let (mut prefixed, mut assigned) = (false, false);
+        if let Some(new_name) = data.name.strip_suffix(':') {
+            data.name = new_name.to_string();
+            assigned = true;
+        }
+        if let Some(new_name) = data.name.strip_suffix('-') {
+            data.name = new_name.to_string();
+            prefixed = true;
+        }
         let name = data.name.clone();
         let id = if long_prefix.starts_with('+') {
             format!("plus_{}", name)
@@ -169,6 +187,8 @@ impl FlagOptionParam {
             is_flag,
             short: short.map(|v| v.to_string()),
             long_prefix: long_prefix.to_string(),
+            prefixed,
+            assigned,
             data,
             id,
             raw_notations,
@@ -191,7 +211,8 @@ impl FlagOptionParam {
             args_range: self.args_range(),
             args_delimiter: self.args_delimiter(),
             terminated: self.terminated(),
-            prefixed: self.prefixed(),
+            prefixed: self.prefixed,
+            assigned: self.assigned,
             default: self.data().default.clone(),
             choice: self.data().choice.clone(),
             inherit: self.inherit,
@@ -244,7 +265,8 @@ impl FlagOptionParam {
     pub(crate) fn render_name_notations(&self) -> String {
         let mut output = self.render_long_name();
         if !self.is_flag() {
-            output.push(' ');
+            let ch = if self.assigned { '=' } else { ' ' };
+            output.push(ch);
             output.push_str(&self.render_notations());
         }
         output
@@ -269,7 +291,8 @@ impl FlagOptionParam {
                 output.push_str("...")
             }
         } else {
-            output.push(' ');
+            let ch = if self.assigned { '=' } else { ' ' };
+            output.push(ch);
             output.push_str(&self.render_notations());
         }
         output
@@ -298,7 +321,7 @@ impl FlagOptionParam {
 
     pub(crate) fn to_argc_value(&self, args: &[FlagOptionArg]) -> Option<ArgcValue> {
         let id = self.id().to_string();
-        if self.prefixed() {
+        if self.prefixed {
             let mut map: IndexMap<String, Vec<String>> = IndexMap::new();
             for (arg, value, name) in args.iter() {
                 if name == &Some(id.as_str()) {
@@ -375,7 +398,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn match_prefix<'a>(&self, arg: &'a str) -> Option<&'a str> {
-        if self.prefixed() {
+        if self.prefixed {
             self.list_names().iter().find_map(|v| {
                 if arg.starts_with(v) {
                     Some(&arg[..v.len()])
@@ -391,7 +414,7 @@ impl FlagOptionParam {
     pub(crate) fn is_match(&self, name: &str) -> bool {
         self.id() == name
             || self.list_names().iter().any(|v| {
-                if self.prefixed() {
+                if self.prefixed {
                     name.starts_with(v)
                 } else {
                     v == name
@@ -424,6 +447,7 @@ pub struct FlagOptionValue {
     pub args_delimiter: Option<char>,
     pub terminated: bool,
     pub prefixed: bool,
+    pub assigned: bool,
     pub default: Option<DefaultValue>,
     pub choice: Option<ChoiceValue>,
     pub inherit: bool,
@@ -468,7 +492,7 @@ impl Param for PositionalParam {
 
     fn render_source(&self) -> String {
         let mut output = vec![];
-        output.push(self.data.render_name_value());
+        output.push(self.data.render_name_value(""));
         if let Some(raw_notation) = self.raw_notation.as_ref() {
             output.push(format!("<{}>", raw_notation));
         }
@@ -503,7 +527,6 @@ impl PositionalParam {
             multiple_occurs: self.multiple_occurs(),
             args_delimiter: self.args_delimiter(),
             terminated: self.terminated(),
-            prefixed: self.prefixed(),
             default: self.data().default.clone(),
             choice: self.data().choice.clone(),
         }
@@ -551,7 +574,6 @@ pub struct PositionalValue {
     pub multiple_occurs: bool,
     pub args_delimiter: Option<char>,
     pub terminated: bool,
-    pub prefixed: bool,
     pub default: Option<DefaultValue>,
     pub choice: Option<ChoiceValue>,
 }
@@ -597,7 +619,7 @@ impl Param for EnvParam {
 
     fn render_source(&self) -> String {
         let mut output = vec![];
-        output.push(self.data.render_name_value());
+        output.push(self.data.render_name_value(""));
         if !self.describe.is_empty() {
             output.push(self.describe.clone());
         }
@@ -688,10 +710,6 @@ impl ParamData {
         matches!(self.modifer, Modifier::Terminated)
     }
 
-    pub(crate) fn prefixed(&self) -> bool {
-        matches!(self.modifer, Modifier::Prefixed | Modifier::MultiPrefixed)
-    }
-
     pub(crate) fn choice_fn(&self) -> Option<(&String, &bool)> {
         match &self.choice {
             Some(ChoiceValue::Fn(f, v)) => Some((f, v)),
@@ -721,8 +739,8 @@ impl ParamData {
         }
     }
 
-    pub(crate) fn render_name_value(&self) -> String {
-        let mut output = self.name.to_string();
+    pub(crate) fn render_name_value(&self, name_suffix: &str) -> String {
+        let mut output = format!("{}{name_suffix}", self.name);
         output.push_str(&self.modifer.render());
         match (&self.choice, &self.default) {
             (Some(ChoiceValue::Values(values)), None) => {
@@ -799,8 +817,6 @@ pub(crate) enum Modifier {
     DelimiterOptional(char),
     DelimiterRequired(char),
     Terminated,
-    Prefixed,
-    MultiPrefixed,
 }
 
 impl Modifier {
@@ -813,8 +829,6 @@ impl Modifier {
             Self::DelimiterOptional(_) => true,
             Self::DelimiterRequired(_) => true,
             Self::Terminated => false,
-            Self::Prefixed => false,
-            Self::MultiPrefixed => true,
         }
     }
 
@@ -827,8 +841,6 @@ impl Modifier {
             Self::DelimiterOptional(_) => false,
             Self::DelimiterRequired(_) => true,
             Self::Terminated => false,
-            Self::Prefixed => false,
-            Self::MultiPrefixed => false,
         }
     }
 
@@ -841,8 +853,6 @@ impl Modifier {
             Self::DelimiterOptional(c) => format!("*{c}"),
             Self::DelimiterRequired(c) => format!("+{c}"),
             Self::Terminated => "~".to_string(),
-            Self::Prefixed => "-".to_string(),
-            Self::MultiPrefixed => "-*".to_string(),
         }
     }
 }

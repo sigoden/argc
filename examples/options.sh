@@ -106,6 +106,11 @@ options-prefixed() {
     _debug "$@";
 }
 
+# @cmd Prefixed option
+# @option -f --follow:[a|b]       assigned + choice
+options-assigned() {
+    _debug "$@";
+}
 
 # @cmd
 # @flag   -a

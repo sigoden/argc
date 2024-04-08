@@ -890,7 +890,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     CompColor::of_option()
                 };
                 for v in param.list_names() {
-                    output.push((v, describe.to_string(), param.prefixed(), kind))
+                    let nospace = param.prefixed || param.assigned;
+                    output.push((v, describe.to_string(), nospace, kind))
                 }
             }
         }
@@ -943,9 +944,15 @@ fn add_positional_arg<'a>(
     }
 }
 
-fn take_value_args<'a>(args: &'a [String], start: usize, len: usize, signs: &str) -> Vec<&'a str> {
+fn take_value_args<'a>(
+    args: &'a [String],
+    start: usize,
+    len: usize,
+    signs: &str,
+    assigned: bool,
+) -> Vec<&'a str> {
     let mut output = vec![];
-    if len == 0 {
+    if assigned || len == 0 {
         return output;
     }
     let end = (start + len).min(args.len());
@@ -1013,11 +1020,11 @@ fn match_flag_option<'a, 'b>(
     } else if let Some(prefix) = param.match_prefix(arg) {
         let args_len = args.len();
         let prefix_len = prefix.len();
-        let value_args = take_value_args(args, *arg_index + 1, 1, signs);
+        let value_args = take_value_args(args, *arg_index + 1, 1, signs, param.assigned);
         let take_empty = value_args.is_empty();
         *arg_index += value_args.len();
         let values = if take_empty { vec!["1"] } else { value_args };
-        if *arg_index == args_len - 1 {
+        if !param.assigned && *arg_index == args_len - 1 {
             *arg_comp = ArgComp::OptionValue(param.id().to_string(), 0);
             if take_empty {
                 *split_last_arg_at = Some(prefix_len);
@@ -1027,11 +1034,11 @@ fn match_flag_option<'a, 'b>(
     } else {
         let values_max = param.args_range().1;
         let args_len = args.len();
-        let value_args = take_value_args(args, *arg_index + 1, values_max, signs);
+        let value_args = take_value_args(args, *arg_index + 1, values_max, signs, param.assigned);
         *arg_index += value_args.len();
         if *arg_index == args_len - 1 {
             if *arg_comp != ArgComp::FlagOrOption {
-                if param.is_option() && value_args.len() <= values_max {
+                if param.is_option() && !param.assigned && value_args.len() <= values_max {
                     *arg_comp = ArgComp::OptionValue(
                         param.id().to_string(),
                         value_args.len().saturating_sub(1),

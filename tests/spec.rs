@@ -229,6 +229,23 @@ fn option_prefixed() {
 }
 
 #[test]
+fn option_assigned() {
+    let script = r###"
+# @option --oa:
+# @option --ob:*
+# @option --oc: <VALUE?>
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "--oa=v1", "--ob=1", "--ob=2"],
+            vec!["prog", "--oa", "v1"],
+            vec!["prog", "--oc", "v1"],
+        ]
+    );
+}
+
+#[test]
 fn cmd_with_hyphen() {
     let script = r###"
 # @cmd Run --foo
