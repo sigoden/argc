@@ -395,14 +395,7 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
             |(mut arg, multi_char)| {
                 match multi_char {
                     Some(c) => arg.modifer = Modifier::DelimiterOptional(c),
-                    None => {
-                        if let Some(name) = arg.name.strip_suffix('-') {
-                            arg.name = name.to_string();
-                            arg.modifer = Modifier::MultiPrefixed
-                        } else {
-                            arg.modifer = Modifier::MultipleOptional
-                        }
-                    }
+                    None => arg.modifer = Modifier::MultipleOptional,
                 };
                 arg
             },
@@ -418,13 +411,7 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
                 arg
             },
         ),
-        map(parse_param_name, |mut arg| {
-            if let Some(name) = arg.name.strip_suffix('-') {
-                arg.name = name.to_string();
-                arg.modifer = Modifier::Prefixed;
-            }
-            arg
-        }),
+        parse_param_name,
     ))(input)
 }
 
@@ -895,6 +882,8 @@ mod tests {
         assert_parse_option_arg!("-foo!");
         assert_parse_option_arg!("-foo-*");
         assert_parse_option_arg!("-foo-");
+        assert_parse_option_arg!("-foo:*");
+        assert_parse_option_arg!("-foo:");
         assert_parse_option_arg!("-foo=a");
         assert_parse_option_arg!("-foo=`_foo`");
         assert_parse_option_arg!("-foo[a|b]");

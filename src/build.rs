@@ -14,6 +14,9 @@ _argc_take_args() {
     _argc_take_args_values=()
     _argc_take_args_len=0
     local param="$1" min="$2" max="$3" signs="$4" delimiter="$5"
+    if [[ "$min" -eq 0 ]] && [[ "$max" -eq 0 ]]; then
+        return
+    fi
     local _argc_take_index=$((_argc_index + 1)) _argc_take_value
     if [[ "$_argc_item" == *=* ]]; then
         _argc_take_args_values=("${_argc_item##*=}")
@@ -546,10 +549,34 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
             )
         };
         let (min, max) = param.args_range();
+        let code = if param.assigned {
+            let not_assigned = if min == 1 {
+                format!(
+                    r#"
+                _argc_die "error: incorrect number of values for \`{render_name_notations}\`""#
+                )
+            } else {
+                r#"
+                _argc_take_args_values=()
+                _argc_take_args_len=0"#
+                    .into()
+            };
+            format!(
+                r#"
+            if [[ "$_argc_key" == "$_argc_item" ]]; then{not_assigned}
+            else
+                _argc_take_args "{render_name_notations}" {min} {max} "{signs}" "{delimiter}"
+            fi"#
+            )
+        } else {
+            format!(
+                r#"
+            _argc_take_args "{render_name_notations}" {min} {max} "{signs}" "{delimiter}""#
+            )
+        };
         format!(
             r#"
-        {names})
-            _argc_take_args "{render_name_notations}" {min} {max} "{signs}" "{delimiter}"
+        {names}){code}
             _argc_index=$((_argc_index + _argc_take_args_len + 1)){choice}{variant}
             ;;"#
         )

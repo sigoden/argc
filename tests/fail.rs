@@ -169,7 +169,19 @@ fn cmd_miss_fn() {
 }
 
 #[test]
-fn options_compbine_prefix_and_multi_notations() {
+fn options_compbine_assigned_and_multi_notations() {
+    let script = r###"
+# @option --format: <VAL1> <VAL2>
+    "###;
+    fail!(
+        script,
+        &["prog"],
+        "@option(line 2) is invalid, cannot combine assign and multiple notations"
+    );
+}
+
+#[test]
+fn options_compbine_prefixed_and_multi_notations() {
     let script = r###"
 # @option -D-* <VAL1> <VAL2>
     "###;

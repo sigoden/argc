@@ -691,6 +691,31 @@ _choice_fn() {
 }
 
 #[test]
+fn option_assigned() {
+    let script = r###"
+# @option --oa:[`_choice_fn`]
+# @option --ob:*[`_choice_fn`]
+_choice_fn() {
+	echo -e "abc\ndef\nghi"
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        [
+            vec!["prog", "--oa"],
+            vec!["prog", "--oa", ""],
+            vec!["prog", "--oa="],
+            vec!["prog", "--oa=abc", "--o"],
+            vec!["prog", "--ob"],
+            vec!["prog", "--ob", ""],
+            vec!["prog", "--ob="],
+            vec!["prog", "--ob=abc", "--o"],
+        ]
+    );
+}
+
+#[test]
 fn last_arg_option_assign() {
     let script = r###"
 # @option --oa~[`_choice_fn`]

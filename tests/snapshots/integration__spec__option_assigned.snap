@@ -1,0 +1,43 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog --oa=v1 --ob=1 --ob=2
+
+# OUTPUT
+argc_oa=v1
+argc_ob=( 1 2 )
+argc__args=( prog '--oa=v1' '--ob=1' '--ob=2' )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--oa=v1" [2]="--ob=1" [3]="--ob=2")
+argc__positionals=()
+argc_oa=v1
+argc_ob=([0]="1" [1]="2")
+
+************ RUN ************
+prog --oa v1
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+error: incorrect number of values for `--oa=<OA>`
+EOF
+exit 1
+
+# RUN_OUTPUT
+error: incorrect number of values for `--oa=<OA>`
+
+************ RUN ************
+prog --oc v1
+
+# OUTPUT
+argc_oc=''
+argc__args=( prog --oc v1 )
+argc__positionals=( v1 )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--oc" [2]="v1")
+argc__positionals=([0]="v1")
+argc_oc=
