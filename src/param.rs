@@ -128,7 +128,7 @@ impl Param for FlagOptionParam {
         if self.prefixed || self.data.name.ends_with('-') {
             name_suffix.push('-');
         }
-        if self.assigned || self.data.name.ends_with(":") {
+        if self.assigned || self.data.name.ends_with(':') {
             name_suffix.push(':');
         }
         output.push(format!(
