@@ -3,13 +3,13 @@ name = "argc"
 version = "1.16.0"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
-description = "An elegant command-line argument parser."
+description = "A bash cli framework, also a task management & automation tool."
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
 autotests = false
 categories = ["command-line-utilities"]
-keywords = ["command-line", "shell-script", "argument-parser"]
+keywords = ["command-line", "task-runner", "argument-parser"]
 
 [dependencies]
 anyhow = "1"
