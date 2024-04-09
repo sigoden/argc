@@ -273,7 +273,7 @@ USAGE:
     argc --argc-completions <SHELL> [CMDS]...       Generate shell completion scripts
     argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Generate completion candidates
     argc --argc-export <SCRIPT>                     Export command line definitions as json
-    argc --argc-parallel <SCRIPT> <ARGS>...         Execute argc functions in parallel
+    argc --argc-parallel <SCRIPT> <ARGS>...         Run functions in parallel
     argc --argc-script-path                         Print current argcfile path
     argc --argc-shell-path                          Print current shell path
     argc --argc-help                                Print help information
