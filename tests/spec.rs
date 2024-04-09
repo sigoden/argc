@@ -224,8 +224,15 @@ fn option_prefixed() {
     let script = r###"
 # @option -o-
 # @option -D-*
+# @flag -v--
 "###;
-    snapshot!(script, &["prog", "-o1", "-Dv1=foo", "-Dv2", "bar"]);
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "-o1", "-Dv1=foo", "-Dv2", "bar"],
+            vec!["prog", "-v-"]
+        ]
+    );
 }
 
 #[test]
@@ -234,6 +241,7 @@ fn option_assigned() {
 # @option --oa:
 # @option --ob:*
 # @option --oc: <VALUE?>
+# @option --o::
 "###;
     snapshot_multi!(
         script,
@@ -241,6 +249,7 @@ fn option_assigned() {
             vec!["prog", "--oa=v1", "--ob=1", "--ob=2"],
             vec!["prog", "--oa", "v1"],
             vec!["prog", "--oc", "v1"],
+            vec!["prog", "--o:", "v1"],
         ]
     );
 }
