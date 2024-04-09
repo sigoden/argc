@@ -125,10 +125,10 @@ impl Param for FlagOptionParam {
             output.push(short.to_string());
         };
         let mut name_suffix = String::new();
-        if self.prefixed {
+        if self.prefixed || self.data.name.ends_with('-') {
             name_suffix.push('-');
         }
-        if self.assigned {
+        if self.assigned || self.data.name.ends_with(":") {
             name_suffix.push(':');
         }
         output.push(format!(
@@ -156,11 +156,15 @@ impl FlagOptionParam {
         row_notations: &[&str],
     ) -> Self {
         let (mut prefixed, mut assigned) = (false, false);
-        if let Some(new_name) = data.name.strip_suffix(':') {
+        if let Some(new_name) = data.name.strip_suffix("::") {
+            data.name = format!("{new_name}:");
+        } else if let Some(new_name) = data.name.strip_suffix(':') {
             data.name = new_name.to_string();
             assigned = true;
         }
-        if let Some(new_name) = data.name.strip_suffix('-') {
+        if let Some(new_name) = data.name.strip_suffix("--") {
+            data.name = format!("{new_name}-");
+        } else if let Some(new_name) = data.name.strip_suffix('-') {
             data.name = new_name.to_string();
             prefixed = true;
         }

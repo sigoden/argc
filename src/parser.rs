@@ -846,6 +846,10 @@ mod tests {
         assert_parse_option_arg!("--foo!");
         assert_parse_option_arg!("--foo-*");
         assert_parse_option_arg!("--foo-");
+        assert_parse_option_arg!("--foo--");
+        assert_parse_option_arg!("--foo:*");
+        assert_parse_option_arg!("--foo:");
+        assert_parse_option_arg!("--foo::");
         assert_parse_option_arg!("--foo=a");
         assert_parse_option_arg!("--foo=`_foo`");
         assert_parse_option_arg!("--foo[a|b]");

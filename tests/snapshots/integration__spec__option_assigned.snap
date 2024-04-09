@@ -41,3 +41,16 @@ argc__positionals=( v1 )
 argc__args=([0]="prog" [1]="--oc" [2]="v1")
 argc__positionals=([0]="v1")
 argc_oc=
+
+************ RUN ************
+prog --o: v1
+
+# OUTPUT
+argc_o_=v1
+argc__args=( prog --o: v1 )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--o:" [2]="v1")
+argc__positionals=()
+argc_o_=v1
