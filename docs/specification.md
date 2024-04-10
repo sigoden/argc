@@ -5,7 +5,7 @@
 Set the description for the command.
 
 > **<sup>Syntax</sup>**\
-> `@describe` string
+> `@describe` [_description_]
 
 ```sh
 # @describe A demo CLI
@@ -43,7 +43,7 @@ COMMANDS:
 Set aliases for the subcommand.
 
 > **<sup>Syntax</sup>**\
-> cmd-name (`,` cmd-name)<sup>\*</sup>
+> [_name_] (`,` [_name_])<sup>\*</sup>
 
 ```sh
 # @cmd Run tests
@@ -65,7 +65,7 @@ COMMANDS:
 Define a positional argument.
 
 > **<sup>Syntax</sup>**\
-> `@arg` arg-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
+> `@arg` [_name_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
 >   [_notation_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
@@ -93,7 +93,7 @@ Define a positional argument.
 Define an option argument.
 
 > **<sup>Syntax</sup>**\
-> `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
+> `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
 >   [_notations_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
@@ -125,7 +125,7 @@ Define an option argument.
 Define a flag argument. Flag is a special option that does not accept any value.
 
 > **<sup>Syntax</sup>**\
-> `@flag` [_short_]<sup>?</sup>[_long_] `*`<sup>?</sup>
+> `@flag` [_short_]<sup>?</sup> [_long_]`*`<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
 ```sh
@@ -140,7 +140,7 @@ Define a flag argument. Flag is a special option that does not accept any value.
 Define an environment variable.
 
 > **<sup>Syntax</sup>**\
-> `@arg` env-name [_modifier_]<sup>?</sup>[_param-value_]<sup>?</sup>
+> `@arg` [_NAME_]`!`<sup>?</sup>[_param-value_]<sup>?</sup>
 >   [_notation_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
@@ -157,7 +157,7 @@ Define an environment variable.
 Add a metadata.
 
 > **<sup>Syntax</sup>**\
-> `@meta` meta-name meta-value<sup>?</sup>
+> `@meta` [_name_] [_value_]<sup>?</sup>
 
 | syntax                       | scope  | description                                                          |
 | :--------------------------- | ------ | :------------------------------------------------------------------- |
@@ -218,9 +218,9 @@ The short version of the flag / option.
 The long version of the flag / option.
 
 > **<sup>Syntax</sup>**\
-> &nbsp; -- [_long-name_] \
-> | -[_long-name_] \
-> | +[_long-name_]
+> &nbsp; -- [_name_] \
+> | -[_name_] \
+> | +[_name_]
 
 ### modifier
 
@@ -231,23 +231,22 @@ The long version of the flag / option.
 
 - `!`: required
 - `*`: multi-occurs for @option; multi-values for @arg;
-- `+`: required + multiple
-- [_separated-char_]: *char*-separated list
+- `+`: required + multi
 
 ### param-value
 
 > **<sup>Syntax</sup>**\
-> &nbsp; =value \
-> | =``` `default-fn` ``` \
+> &nbsp; =[_value_] \
+> | =\`[_fn-name_]\` \
 > | [[_choices_]] \
 > | [=[_choices_]] \
-> | [``` `choice-fn` ```] \
-> | [?``` `choice-fn` ```]
+> | [\`[_fn-name_]\`] \
+> | [?\`[_fn-name_]\`]
 
 ### choices
 
 > **<sup>Syntax</sup>**\
-> _value_ (`|` _value_)<sup>\*</sup>
+> [_value_] (`|` [_value_])<sup>\*</sup>
 
 ### notations
 
@@ -260,7 +259,7 @@ The long version of the flag / option.
 Placeholder for the argument’s value in the help message / usage.
 
 > **<sup>Syntax</sup>**\
-> `<` value `>`
+> `<` [_value_]` >`
 
 Notations that will affect the shell completion:
 
@@ -270,7 +269,7 @@ Notations that will affect the shell completion:
 ### notation-last
 
 > **<sup>Syntax</sup>**\
-> `<` value [_notation-modifier_]<sup>?</sup> `>`
+> `<` [_value_] [_notation-modifier_]<sup>?</sup> `>`
 
 ### notation-modifier
 
@@ -314,5 +313,8 @@ Plain text, can be multiple lines.
 [_notation-modifier_]: #notation-modifier
 [_short-char_]: #short-char
 [_separated-char_]: #separated-char
-[_long-name_]: #long-name 
 [_description_]: #description
+[_name_]: #name
+[_value_]: #value
+[_fn-name_]: #fn-name
+[_NAME_]: #name
