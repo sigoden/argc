@@ -67,6 +67,7 @@ Define a positional argument.
 > **<sup>Syntax</sup>**\
 > `@arg` [_name_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
 >   [_notation_]<sup>?</sup>
+>   [_bind-env_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
 ```sh
@@ -95,6 +96,7 @@ Define an option argument.
 > **<sup>Syntax</sup>**\
 > `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
 >   [_notations_]<sup>?</sup>
+>   [_bind-env_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
 ```sh
@@ -126,6 +128,7 @@ Define a flag argument. Flag is a special option that does not accept any value.
 
 > **<sup>Syntax</sup>**\
 > `@flag` [_short_]<sup>?</sup> [_long_]`*`<sup>?</sup>
+>   [_bind-env_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
 ```sh
@@ -164,6 +167,7 @@ Add a metadata.
 | `@meta version <value>`      | any    | Set the version for the command.                                     |
 | `@meta author <value>`       | any    | Set the author for the command.                                      |
 | `@meta dotenv [<path>]`      | root   | Load a dotenv file from a custom path, if persent.                   |
+| `@meta env-prefix <value>`   | root   | Set the prefix for environment variables bind with flags/options.    |
 | `@meta symbol <param>`       | any    | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.    |
 | `@meta man-section <1-8>`    | root   | Override the section for the man page, defaulting to 1.              |
 | `@meta default-subcommand`   | subcmd | Set the current subcommand as the default.                           |
@@ -177,6 +181,7 @@ Add a metadata.
 # @meta author nobody <nobody@example.com>
 # @meta dotenv
 # @meta dotenv .env.local
+# @meta env-prefix PROG
 # @meta symbol +toolchain[`_choice_fn`]
 # @meta man-section 8
 ```
@@ -290,6 +295,13 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
 
 `,` `:` `@` `|` `/`
 
+### bind-env
+
+Flags/options bind environment variables
+
+- `$$`: reference environment variable  whose name is derived from the corresponding param name
+- `$`[_NAME_]: reference environment variable whose name is *NAME*
+
 ## description
 
 Plain text, can be multiple lines.
@@ -313,6 +325,7 @@ Plain text, can be multiple lines.
 [_notation-modifier_]: #notation-modifier
 [_short-char_]: #short-char
 [_separated-char_]: #separated-char
+[_bind-env_]: #bind-env
 [_description_]: #description
 [_name_]: #name
 [_value_]: #value
