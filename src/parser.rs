@@ -85,18 +85,27 @@ pub(crate) fn parse(source: &str) -> Result<Vec<Event>> {
                                 EventData::Cmd(text)
                             }
                             EventData::Env(mut param) => {
-                                line_idx +=
-                                    take_comment_lines(&lines, line_idx + 1, &mut param.describe);
+                                line_idx += take_comment_lines(
+                                    &lines,
+                                    line_idx + 1,
+                                    &mut param.data.describe,
+                                );
                                 EventData::Env(param)
                             }
                             EventData::FlagOption(mut param) => {
-                                line_idx +=
-                                    take_comment_lines(&lines, line_idx + 1, &mut param.describe);
+                                line_idx += take_comment_lines(
+                                    &lines,
+                                    line_idx + 1,
+                                    &mut param.data.describe,
+                                );
                                 EventData::FlagOption(param)
                             }
                             EventData::Positional(mut param) => {
-                                line_idx +=
-                                    take_comment_lines(&lines, line_idx + 1, &mut param.describe);
+                                line_idx += take_comment_lines(
+                                    &lines,
+                                    line_idx + 1,
+                                    &mut param.data.describe,
+                                );
                                 EventData::Positional(param)
                             }
                             v => v,
@@ -240,10 +249,13 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
                 parse_param_modifer,
             )),
             parse_zero_or_many_value_notations,
+            parse_zero_or_one_bind_env,
             parse_tail,
         )),
-        |((short, long_prefix), arg, value_names, describe)| {
-            FlagOptionParam::new(arg, describe, false, short, long_prefix, &value_names)
+        |((short, long_prefix), mut arg, value_names, bind_env, describe)| {
+            arg.bind_env = bind_env;
+            arg.describe = describe.to_string();
+            FlagOptionParam::new(arg, false, short, long_prefix, &value_names)
         },
     )(input)
 }
@@ -265,10 +277,13 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
                 )),
             ),
             parse_zero_or_many_value_notations,
+            parse_zero_or_one_bind_env,
             parse_tail,
         )),
-        |(long_prefix, arg, value_names, describe)| {
-            FlagOptionParam::new(arg, describe, false, None, long_prefix, &value_names)
+        |(long_prefix, mut arg, value_names, bind_env, describe)| {
+            arg.bind_env = bind_env;
+            arg.describe = describe.to_string();
+            FlagOptionParam::new(arg, false, None, long_prefix, &value_names)
         },
     )(input)
 }
@@ -304,9 +319,14 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
                 parse_param_modifer,
             )),
             parse_zero_or_one_value_notation,
+            parse_zero_or_one_bind_env,
             parse_tail,
         )),
-        |(arg, value_name, describe)| PositionalParam::new(arg, describe, value_name),
+        |(mut arg, value_name, bind_env, describe)| {
+            arg.bind_env = bind_env;
+            arg.describe = describe.to_string();
+            PositionalParam::new(arg, value_name)
+        },
     )(input)
 }
 
@@ -318,9 +338,16 @@ fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
 // Parse `@flag`
 fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
-        tuple((parse_with_long_head, parse_with_long_flag_name, parse_tail)),
-        |((short, long_prefix), arg, describe)| {
-            FlagOptionParam::new(arg, describe, true, short, long_prefix, &[])
+        tuple((
+            parse_with_long_head,
+            parse_with_long_flag_name,
+            parse_zero_or_one_bind_env,
+            parse_tail,
+        )),
+        |((short, long_prefix), mut arg, bind_env, describe)| {
+            arg.bind_env = bind_env;
+            arg.describe = describe.to_string();
+            FlagOptionParam::new(arg, true, short, long_prefix, &[])
         },
     )(input)
 }
@@ -331,10 +358,13 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> 
         tuple((
             preceded(space0, alt((tag("-"), tag("+")))),
             parse_no_long_flag_name,
+            parse_zero_or_one_bind_env,
             parse_tail,
         )),
-        |(long_prefix, arg, describe)| {
-            FlagOptionParam::new(arg, describe, true, None, long_prefix, &[])
+        |(long_prefix, mut arg, bind_env, describe)| {
+            arg.bind_env = bind_env;
+            arg.describe = describe.to_string();
+            FlagOptionParam::new(arg, true, None, long_prefix, &[])
         },
     )(input)
 }
@@ -505,6 +535,10 @@ fn parse_value_notation(input: &str) -> nom::IResult<&str, &str> {
     )(input)
 }
 
+fn parse_bind_env_name(input: &str) -> nom::IResult<&str, &str> {
+    take_while1(is_env_name_char)(input)
+}
+
 // Parse `a|b|c`
 fn parse_choices(input: &str) -> nom::IResult<&str, Vec<&str>> {
     map(separated_list1(char('|'), parse_choice_value), |choices| {
@@ -648,6 +682,23 @@ fn parse_symbol_data(input: &str) -> nom::IResult<&str, (char, &str, Option<&str
     )(input)
 }
 
+fn parse_zero_or_one_bind_env(input: &str) -> nom::IResult<&str, Option<Option<String>>> {
+    opt(parse_bind_env)(input)
+}
+
+fn parse_bind_env(input: &str) -> nom::IResult<&str, Option<String>> {
+    map(
+        preceded(tag(" $"), alt((tag("$"), parse_bind_env_name))),
+        |v| {
+            if v == "$" {
+                None
+            } else {
+                Some(v.to_string())
+            }
+        },
+    )(input)
+}
+
 fn notation_text(input: &str, balances: usize) -> nom::IResult<&str, usize> {
     let (i1, c1) = anychar(input)?;
     match c1 {
@@ -685,6 +736,10 @@ fn create_err(input: &str, kind: ErrorKind) -> nom::Err<nom::error::Error<&str>>
 
 fn is_name_char(c: char) -> bool {
     c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | ':' | '@')
+}
+
+fn is_env_name_char(c: char) -> bool {
+    c.is_ascii_uppercase() || c == '_'
 }
 
 fn is_short_char(c: char) -> bool {
@@ -875,19 +930,27 @@ mod tests {
         assert_parse_option_arg!("--foo <>");
         assert_parse_option_arg!("--foo <abc def>");
         assert_parse_option_arg!("--foo <<abc def>>");
+        assert_parse_option_arg!("--foo $$");
+        assert_parse_option_arg!("--foo $FOO");
     }
 
     #[test]
     fn test_parse_with_long_option_arg_single_dash() {
         assert_parse_option_arg!("-f -foo=a <FOO> A foo option");
+        assert_parse_option_arg!("-foo:bar");
+        assert_parse_option_arg!("-foo.bar");
         assert_parse_option_arg!("-foo!");
         assert_parse_option_arg!("-foo+");
         assert_parse_option_arg!("-foo*");
+        assert_parse_option_arg!("-foo+,");
+        assert_parse_option_arg!("-foo*,");
         assert_parse_option_arg!("-foo!");
         assert_parse_option_arg!("-foo-*");
         assert_parse_option_arg!("-foo-");
+        assert_parse_option_arg!("-foo--");
         assert_parse_option_arg!("-foo:*");
         assert_parse_option_arg!("-foo:");
+        assert_parse_option_arg!("-foo::");
         assert_parse_option_arg!("-foo=a");
         assert_parse_option_arg!("-foo=`_foo`");
         assert_parse_option_arg!("-foo[a|b]");
@@ -911,6 +974,8 @@ mod tests {
         assert_parse_option_arg!("-foo <>");
         assert_parse_option_arg!("-foo <abc def>");
         assert_parse_option_arg!("-foo <<abc def>>");
+        assert_parse_option_arg!("-foo $$");
+        assert_parse_option_arg!("-foo $FOO");
     }
 
     #[test]
@@ -1002,6 +1067,8 @@ mod tests {
         assert_parse_positional_arg!("foo*[a|b]");
         assert_parse_positional_arg!("foo*[`_foo`]");
         assert_parse_positional_arg!("foo*[=a|b]");
+        assert_parse_positional_arg!("foo $$");
+        assert_parse_positional_arg!("foo $FOO");
     }
 
     #[test]

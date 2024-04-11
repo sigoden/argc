@@ -162,18 +162,17 @@ Add a metadata.
 > **<sup>Syntax</sup>**\
 > `@meta` [_name_] [_value_]<sup>?</sup>
 
-| syntax                            | scope  | description                                                          |
-| :-------------------------------- | ------ | :------------------------------------------------------------------- |
-| `@meta version <value>`           | any    | Set the version for the command.                                     |
-| `@meta author <value>`            | any    | Set the author for the command.                                      |
-| `@meta dotenv [<path>]`           | root   | Load a dotenv file from a custom path, if persent.                   |
-| `@meta bind-env-prefix [<value>]` | root   | Set the prefix for environment variables bind with flags/options.    |
-| `@meta symbol <param>`            | any    | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.    |
-| `@meta man-section <1-8>`         | root   | Override the section for the man page, defaulting to 1.              |
-| `@meta default-subcommand`        | subcmd | Set the current subcommand as the default.                           |
-| `@meta inherit-flag-options`      | root   | Subcommands will inherit the flags/options from their parent.        |
-| `@meta no-inherit-env`            | root   | Subcommands will not inherit the env vars from their parent.         |
-| `@meta combine-shorts`            | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `. |
+| syntax                       | scope  | description                                                          |
+| :--------------------------- | ------ | :------------------------------------------------------------------- |
+| `@meta version <value>`      | any    | Set the version for the command.                                     |
+| `@meta author <value>`       | any    | Set the author for the command.                                      |
+| `@meta dotenv [<path>]`      | root   | Load a dotenv file from a custom path, if persent.                   |
+| `@meta symbol <param>`       | any    | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.    |
+| `@meta man-section <1-8>`    | root   | Override the section for the man page, defaulting to 1.              |
+| `@meta default-subcommand`   | subcmd | Set the current subcommand as the default.                           |
+| `@meta inherit-flag-options` | root   | Subcommands will inherit the flags/options from their parent.        |
+| `@meta no-inherit-env`       | root   | Subcommands will not inherit the env vars from their parent.         |
+| `@meta combine-shorts`       | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `. |
 
 
 ```sh
@@ -181,7 +180,6 @@ Add a metadata.
 # @meta author nobody <nobody@example.com>
 # @meta dotenv
 # @meta dotenv .env.local
-# @meta env-prefix PROG
 # @meta symbol +toolchain[`_choice_fn`]
 # @meta man-section 8
 ```
