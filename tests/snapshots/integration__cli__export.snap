@@ -4,7 +4,7 @@ expression: stdout
 ---
 {
   "name": "options",
-  "describe": "",
+  "describe": "All kinds of @option and @flag",
   "author": null,
   "version": null,
   "aliases": [],

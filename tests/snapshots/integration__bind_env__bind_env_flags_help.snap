@@ -3,6 +3,8 @@ source: tests/bind_env.rs
 expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
 # OUTPUT
+Demonstrates how to bind environment variables to parameters
+
 USAGE: bind-envs flags [OPTIONS]
 
 OPTIONS:
@@ -16,6 +18,8 @@ OPTIONS:
 
 
 # BUILD_OUTPUT
+Demonstrates how to bind environment variables to parameters
+
 USAGE: prog flags [OPTIONS]
 
 OPTIONS:

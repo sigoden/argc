@@ -1,3 +1,5 @@
+# @describe All kinds of @option and @flag
+
 # @meta combine-shorts
 
 # @cmd All kind of options
@@ -22,7 +24,7 @@
 # @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option    --oxa~                 capture all remaining args
 options() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd All kind of flags
@@ -32,7 +34,7 @@ options() {
 # @flag     --fd*        multi-occurs
 # @flag  -e --fe*        short + multi-occurs
 flags() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd Flags or options with single hyphen
@@ -45,7 +47,7 @@ flags() {
 # @option  -oca[a|b]
 # @option  -ofa[`_choice_fn`]
 options-one-hyphen() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd Value notation modifier
@@ -53,7 +55,7 @@ options-one-hyphen() {
 # @option --ob <VALUE+>           multi values, one or more
 # @option --oc <VALUE?>           zero or one
 options-notation-modifier() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd All kind of options
@@ -78,7 +80,7 @@ options-notation-modifier() {
 # @option     +ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option     +oxa~                 capture all remaining args
 options-plus() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd All kind of flags
@@ -88,7 +90,7 @@ options-plus() {
 # @flag      +fd*        multi-occurs
 # @flag  +e  +fe*        short + multi-occurs
 flags-plus() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd Mixed `-` and `+` options
@@ -96,20 +98,20 @@ flags-plus() {
 # @option -b +b
 # @option +c --c
 options-mixed() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd Prefixed option
 # @option -X-*[`_choice_fn`]       prefixied + multi-occurs + choice from fn
 # @option +X-*[`_choice_fn`]       prefixied + multi-occurs + choice from fn
 options-prefixed() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd Prefixed option
 # @option -f --follow:[a|b]       assigned + choice
 options-assigned() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd
@@ -130,7 +132,7 @@ options-assigned() {
 # @option    --ce*[`_choice_fn`]
 # @option -s -soa
 test1() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd
@@ -141,7 +143,7 @@ test1() {
 # @option    --ocb+[`_choice_fn`]
 # @option    --occ+,[`_choice_fn`]
 test2() {
-    _debug "$@";
+    _debug "$@"
 }
 
 # @cmd
@@ -149,7 +151,7 @@ test2() {
 # @option    --of=`_default_fn`
 # @option    --cb[=x|y|z]
 test3() {
-    _debug "$@";
+    _debug "$@"
 }
 
 _debug() {
