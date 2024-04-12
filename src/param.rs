@@ -136,11 +136,22 @@ impl Param for FlagOptionParam {
             self.long_prefix,
             self.data.render_source_of_name_value(&name_suffix)
         ));
+
+        if let Some(bind_env) = &self.data.bind_env {
+            match bind_env {
+                Some(v) => output.push(format!("${v}")),
+                None => output.push("$$".into()),
+            }
+        }
+
         for raw_notation in &self.raw_notations {
             output.push(format!("<{}>", raw_notation));
         }
-        self.data
-            .render_source_of_bind_env_and_describe(&mut output);
+
+        if !self.data.describe.is_empty() {
+            output.push(self.data.describe.clone());
+        }
+
         output.join(" ")
     }
 }
@@ -478,13 +489,20 @@ impl Param for PositionalParam {
     }
 
     fn render_source(&self) -> String {
-        let mut output = vec![];
-        output.push(self.data.render_source_of_name_value(""));
+        let mut output = vec![self.data.render_source_of_name_value("")];
+
+        if let Some(bind_env) = &self.data.bind_env {
+            match bind_env {
+                Some(v) => output.push(format!("${v}")),
+                None => output.push("$$".into()),
+            }
+        }
         if let Some(raw_notation) = self.raw_notation.as_ref() {
             output.push(format!("<{}>", raw_notation));
         }
-        self.data
-            .render_source_of_bind_env_and_describe(&mut output);
+        if !self.data.describe.is_empty() {
+            output.push(self.data.describe.clone());
+        }
         output.join(" ")
     }
 }
@@ -609,8 +627,15 @@ impl Param for EnvParam {
 
     fn render_source(&self) -> String {
         let mut output = vec![self.data.render_source_of_name_value("")];
-        self.data
-            .render_source_of_bind_env_and_describe(&mut output);
+        if let Some(bind_env) = &self.data.bind_env {
+            match bind_env {
+                Some(v) => output.push(format!("${v}")),
+                None => output.push("$$".into()),
+            }
+        }
+        if !self.data.describe.is_empty() {
+            output.push(self.data.describe.clone());
+        }
         output.join(" ")
     }
 }
@@ -761,18 +786,6 @@ impl ParamData {
             _ => {}
         }
         output
-    }
-
-    pub(crate) fn render_source_of_bind_env_and_describe(&self, parts: &mut Vec<String>) {
-        if let Some(bind_env) = &self.bind_env {
-            match bind_env {
-                Some(v) => parts.push(format!("${v}")),
-                None => parts.push("$$".into()),
-            }
-        }
-        if !self.describe.is_empty() {
-            parts.push(self.describe.clone());
-        }
     }
 
     pub(crate) fn render_describe(&self, describe: &str, id: &str) -> String {

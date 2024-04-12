@@ -66,8 +66,8 @@ Define a positional argument.
 
 > **<sup>Syntax</sup>**\
 > `@arg` [_name_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
->   [_notation_]<sup>?</sup>
 >   [_bind-env_]<sup>?</sup>
+>   [_notation_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
 ```sh
@@ -87,8 +87,8 @@ Define a positional argument.
 # @arg vfc*[`_choice_fn`]         multi-values + choice from fn
 # @arg vfd*,[`_choice_fn`]        multi-values + choice from fn + comma-separated list
 # @arg vxa~                       capture all remaining args
-# @arg vea $$                      bind-env
-# @arg veb $BE                     bind-named-env
+# @arg vea $$                     bind-env
+# @arg veb $BE <PATH>             bind-named-env
 ```
 
 ### `@option`
@@ -97,8 +97,8 @@ Define an option argument.
 
 > **<sup>Syntax</sup>**\
 > `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
->   [_notations_]<sup>?</sup>
 >   [_bind-env_]<sup>?</sup>
+>   [_notations_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
 ```sh
@@ -123,8 +123,8 @@ Define an option argument.
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
 # @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option    --oxa~                 capture all remaining args
-# @option    --oea $$                bind-env
-# @option    --oeb $BE               bind-named-env
+# @option    --oea $$               bind-env
+# @option    --oeb $BE <PATH>       bind-named-env
 ```
 
 ### `@flag`

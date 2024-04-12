@@ -69,6 +69,13 @@ cmd_three_required_args() {
     _debug "$@";
 }
 
+# @cmd
+# @option --OA $$ <XYZ>
+# @arg val $$ <XYZ>
+cmd_for_notation() {
+    _debug "$@";
+}
+
 _debug() {
     ( set -o posix ; set ) | grep ^argc_
     echo "$argc__fn" "$@"

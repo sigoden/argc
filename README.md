@@ -19,6 +19,7 @@ Argc lets you define your CLI through comments and focus on your specific code, 
 - **Build bashscript**: Build a single standalone bashscript without argc dependency.
 - **Cross-shell autocompletion**: Generate completion scripts for bash, zsh, fish, powershell, and more.
 - **Man page**: Generate manage page documentation for your script.
+- **Environment variables**: Document, validating and binding to option and positional arguments.
 - **Task runner**: An ideal task runner in Bash to automate the execution of predefined tasks with Argcfile.sh.
 - **Self documentation**: Comments with tags are CLI definitions, documentation, usage text.
 - **Cross platform**: A single executable file that can run on macOS, Linux, Windows, and BSD systems.

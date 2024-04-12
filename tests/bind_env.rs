@@ -133,3 +133,15 @@ fn bind_env_cmd_three_required_args_err() {
         "VAL2": "v2",
     });
 }
+
+#[rstest]
+fn bind_env_with_notation() {
+    snapshot_bind_env!(args: ["cmd_for_notation"], envs: {
+        "OA": "oa",
+        "VAL": "v1",
+    });
+}
+#[rstest]
+fn bind_env_with_notation_help() {
+    snapshot_bind_env!(args: ["cmd_for_notation", "-h"], envs: {});
+}

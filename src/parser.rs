@@ -248,11 +248,11 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
                 parse_param_assign,
                 parse_param_modifer,
             )),
-            parse_zero_or_many_value_notations,
             parse_zero_or_one_bind_env,
+            parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |((short, long_prefix), mut arg, value_names, bind_env, describe)| {
+        |((short, long_prefix), mut arg, bind_env, value_names, describe)| {
             arg.bind_env = bind_env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, false, short, long_prefix, &value_names)
@@ -276,11 +276,11 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
                     parse_param_modifer,
                 )),
             ),
-            parse_zero_or_many_value_notations,
             parse_zero_or_one_bind_env,
+            parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |(long_prefix, mut arg, value_names, bind_env, describe)| {
+        |(long_prefix, mut arg, bind_env, value_names, describe)| {
             arg.bind_env = bind_env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, false, None, long_prefix, &value_names)
@@ -318,11 +318,11 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
                 parse_param_assign,
                 parse_param_modifer,
             )),
-            parse_zero_or_one_value_notation,
             parse_zero_or_one_bind_env,
+            parse_zero_or_one_value_notation,
             parse_tail,
         )),
-        |(mut arg, value_name, bind_env, describe)| {
+        |(mut arg, bind_env, value_name, describe)| {
             arg.bind_env = bind_env;
             arg.describe = describe.to_string();
             PositionalParam::new(arg, value_name)
@@ -940,6 +940,7 @@ mod tests {
         assert_parse_option_arg!("--foo <<abc def>>");
         assert_parse_option_arg!("--foo $$");
         assert_parse_option_arg!("--foo $FOO");
+        assert_parse_option_arg!("--foo $FOO <FOO>");
     }
 
     #[test]
@@ -984,6 +985,7 @@ mod tests {
         assert_parse_option_arg!("-foo <<abc def>>");
         assert_parse_option_arg!("-foo $$");
         assert_parse_option_arg!("-foo $FOO");
+        assert_parse_option_arg!("-foo $FOO <FOO>");
     }
 
     #[test]

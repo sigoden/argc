@@ -1,0 +1,25 @@
+---
+source: tests/bind_env.rs
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+---
+# OUTPUT
+USAGE: bind-envs cmd_for_notation [OPTIONS] [XYZ]
+
+ARGS:
+  [XYZ]  [env: VAL]
+
+OPTIONS:
+      --OA <XYZ>  [env: OA]
+  -h, --help
+
+
+
+# BUILD_OUTPUT
+USAGE: prog cmd_for_notation [OPTIONS] [XYZ]
+
+ARGS:
+  [XYZ]  [env: VAL]
+
+OPTIONS:
+      --OA <XYZ>  [env: OA]
+  -h, --help
