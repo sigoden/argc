@@ -14,7 +14,7 @@ use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position}
 use crate::utils::{
     AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, MAIN_NAME, META_AUTHOR, META_COMBINE_SHORTS,
     META_DEFAULT_SUBCOMMAND, META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_NO_INHERIT_ENV,
-    META_SYMBOL, META_VERSION, ROOT_NAME,
+    META_REQUIRE_TOOLS, META_SYMBOL, META_VERSION, ROOT_NAME,
 };
 use crate::Result;
 
@@ -44,8 +44,10 @@ pub(crate) struct Command {
     pub(crate) version: Option<String>,
     pub(crate) names_checker: NamesChecker,
     pub(crate) share: Arc<RefCell<ShareData>>,
+    // (key, value, position)
     pub(crate) metadata: Vec<(String, String, Position)>,
     pub(crate) symbols: IndexMap<char, SymbolParam>,
+    pub(crate) require_tools: IndexSet<String>,
 }
 
 impl Command {
@@ -53,7 +55,7 @@ impl Command {
         let events = parse(source)?;
         let mut root = Command::new_from_events(&events)?;
         root.share.borrow_mut().name = Some(root_name.to_string());
-        root.update_recursively(vec![]);
+        root.update_recursively(vec![], IndexSet::new());
         if root.has_metadata(META_INHERIT_FLAG_OPTIONS) {
             root.inherit_flag_options();
         }
@@ -96,6 +98,10 @@ impl Command {
 
     pub(crate) fn export(&self) -> CommandValue {
         let mut extra: IndexMap<String, serde_json::Value> = IndexMap::new();
+        let require_tools = self.meta_require_tools();
+        if !require_tools.is_empty() {
+            extra.insert("require_tools".into(), require_tools.into());
+        }
         if self.is_root() {
             if self.get_metadata(META_COMBINE_SHORTS).is_some() {
                 extra.insert("combine_shorts".into(), true.into());
@@ -113,6 +119,7 @@ impl Command {
         } else if let Some((idx, _)) = &self.default_subcommand {
             extra.insert("default_subcommand".into(), (*idx).into());
         }
+        extra.insert("command_fn".into(), self.command_fn.clone().into());
         let flag_options = self.all_flag_options().iter().map(|v| v.export()).collect();
         CommandValue {
             name: self.cmd_name(),
@@ -124,7 +131,6 @@ impl Command {
             positionals: self.positional_params.iter().map(|v| v.export()).collect(),
             envs: self.env_params.iter().map(|v| v.export()).collect(),
             subcommands: self.subcommands.iter().map(|v| v.export()).collect(),
-            command_fn: self.command_fn.clone(),
             extra,
         }
     }
@@ -329,6 +335,18 @@ impl Command {
             .iter()
             .find(|(k, _, _)| k == key)
             .map(|(_, v, _)| v.as_str())
+    }
+
+    pub(crate) fn meta_require_tools(&self) -> Vec<String> {
+        let raw_require_tools = self.get_metadata(META_REQUIRE_TOOLS).unwrap_or_default();
+        if raw_require_tools.is_empty() {
+            vec![]
+        } else {
+            raw_require_tools
+                .split(',')
+                .map(|v| v.to_string())
+                .collect()
+        }
     }
 
     pub(crate) fn flag_option_signs(&self) -> String {
@@ -632,7 +650,7 @@ impl Command {
         Some(dotenv)
     }
 
-    fn update_recursively(&mut self, paths: Vec<String>) {
+    fn update_recursively(&mut self, paths: Vec<String>, mut require_tools: IndexSet<String>) {
         self.paths = paths.clone();
 
         // update command_fn
@@ -672,11 +690,15 @@ impl Command {
             .flatten(),
         );
 
+        // update require_tools
+        require_tools.extend(self.meta_require_tools());
+        self.require_tools = require_tools;
+
         // update recursively
         for subcmd in self.subcommands.iter_mut() {
             let mut parents = paths.clone();
             parents.push(subcmd.name.clone().unwrap_or_default());
-            subcmd.update_recursively(parents);
+            subcmd.update_recursively(parents, self.require_tools.clone());
         }
     }
 
@@ -804,7 +826,6 @@ pub struct CommandValue {
     pub positionals: Vec<PositionalValue>,
     pub envs: Vec<EnvValue>,
     pub subcommands: Vec<CommandValue>,
-    pub command_fn: Option<String>,
     #[serde(flatten)]
     pub extra: IndexMap<String, serde_json::Value>,
 }

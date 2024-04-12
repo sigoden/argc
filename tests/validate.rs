@@ -323,3 +323,23 @@ do_::bar() { :; }
         ]
     );
 }
+
+#[test]
+fn require_tools() {
+    let script = r###"
+# @meta require-tools not-found1
+
+# @cmd
+# @meta require-tools not-found2
+cmd1() { :; }
+
+# @cmd
+cmd2() { :; }
+
+main() { :; }
+"###;
+    snapshot_multi!(
+        script,
+        [vec!["prog"], vec!["prog", "cmd1"], vec!["prog", "cmd2"],]
+    );
+}
