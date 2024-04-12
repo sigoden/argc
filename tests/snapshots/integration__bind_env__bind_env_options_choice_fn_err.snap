@@ -1,0 +1,12 @@
+---
+source: tests/bind_env.rs
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+---
+# OUTPUT
+error: invalid value `ofa` for environment variable `OFA` that bound to `--ofa`
+  [possible values: abc, def, ghi]
+
+
+# BUILD_OUTPUT
+error: invalid value `ofa` for environment variable `OFA` that bound to `--ofa <OFA>`
+  [possible values: abc, def, ghi]

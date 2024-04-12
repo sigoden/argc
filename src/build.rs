@@ -1,12 +1,12 @@
 use crate::{
     command::Command,
-    param::{FlagOptionParam, Param},
+    param::{FlagOptionParam, Param, PositionalParam},
     utils::{escape_shell_words, expand_dotenv},
     ChoiceValue, DefaultValue,
 };
 use anyhow::Result;
 
-const UTIL_FNS: [(&str, &str); 5] = [
+const UTIL_FNS: [(&str, &str); 6] = [
     (
         "_argc_take_args",
         r#"
@@ -159,6 +159,22 @@ _argc_validate_choices() {
             _argc_die "error: invalid value \`$item\` for $render_name"$'\n'"  [possible values: $concated_choices]"
         fi
     done
+}
+"#,
+    ),
+    (
+        "_argc_check_bool",
+        r#"
+_argc_check_bool() {
+    local env_name="$1" param_name=$2
+    local env_value="${!env_name}"
+    if [[ "$env_value" == "true" ]] || [[ "$env_value" == "1" ]]; then
+        return 0
+    elif [[ "$env_value" == "false" ]] || [[ "$env_value" == "0" ]]; then
+        return 1
+    else
+        _argc_die "error: environment variable '$env_name' has invalid value for param '$param_name'"
+    fi
 }
 "#,
     ),
@@ -447,6 +463,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         )
     };
 
+    let flag_option_bind_envs = build_flag_option_bind_envs(cmd);
     let required_flag_options = build_required_flag_options(cmd);
 
     let handle = build_handle(cmd, suffix);
@@ -479,7 +496,7 @@ _argc_parse{suffix}() {{
         _argc_key="${{_argc_item%%=*}}"
         case "$_argc_key" in{combined_case}
         esac
-    done{required_flag_options}
+    done{flag_option_bind_envs}{required_flag_options}
     if [[ -n "$_argc_action" ]]; then
         $_argc_action
     else{handle}
@@ -688,6 +705,9 @@ fn build_positionals(cmd: &Command) -> String {
             } else {
                 String::new()
             };
+
+            let bind_env = build_poistional_bind_env(param);
+
             let handle_nonexist = format!("{default}{required}");
             let handle_nonexist = if !handle_nonexist.is_empty() {
                 format!(
@@ -700,7 +720,7 @@ fn build_positionals(cmd: &Command) -> String {
             format!(
                 r#"
         IFS=: read -r values_index values_size <<<"${{_argc_match_positionals_values[{index}]}}"
-        if [[ -n "$values_index" ]]; then{variant}{choice}{handle_nonexist}
+        if [[ -n "$values_index" ]]; then{variant}{choice}{bind_env}{handle_nonexist}
         fi"#
             )
         })
@@ -711,6 +731,85 @@ fn build_positionals(cmd: &Command) -> String {
         _argc_match_positionals {split_args}
         local values_index values_size{positionals}"#
     )
+}
+
+fn build_flag_option_bind_envs(cmd: &Command) -> String {
+    let mut output = vec![];
+    for param in &cmd.flag_option_params {
+        if let Some(env_name) = param.bind_env() {
+            let var_name = param.var_name();
+            let render_name = param.render_name_notations();
+            let code = if param.is_flag() {
+                format!(
+                    r#"
+    if [[ -z "${var_name}" ]] && [[ -n "${env_name}" ]]; then
+        if _argc_check_bool {env_name} "{render_name}"; then
+            {var_name}=1
+        fi
+    fi"#
+                )
+            } else {
+                let handle_bind_env = build_handle_bind_env(param, &render_name, 2);
+                format!(
+                    r#"
+    if [[ -z "${var_name}" ]] && [[ -n "${env_name}" ]]; then{handle_bind_env}
+    fi"#
+                )
+            };
+            output.push(code);
+        }
+    }
+    output.join("")
+}
+
+fn build_poistional_bind_env(param: &PositionalParam) -> String {
+    match param.bind_env() {
+        None => String::new(),
+        Some(env_name) => {
+            let handle_bind_env = build_handle_bind_env(param, &param.render_notation(), 3);
+            format!(
+                r#"
+        elif [[ -n "${env_name}" ]]; then{handle_bind_env}
+            argc__positionals+=("${{_argc_env_values[@]}}")"#
+            )
+        }
+    }
+}
+
+fn build_handle_bind_env<T: Param>(param: &T, render_name: &str, indent_level: usize) -> String {
+    let indent = build_indent(indent_level);
+    let env_name = param.bind_env().unwrap_or_default();
+    let var_name = param.var_name();
+    let split_env = match param.args_delimiter() {
+        Some(delimiter) => format!(
+            r#"
+{indent}IFS="{delimiter}" read -r -a _argc_env_values <<<"${env_name}""#
+        ),
+        None => format!(
+            r#"
+{indent}_argc_env_values=("${env_name}")"#
+        ),
+    };
+
+    let choice = build_choice(
+        "{_argc_env_values[@]}",
+        &format!(r#"environment variable `{env_name}` that bound to `{render_name}`"#),
+        param.choice(),
+        indent_level,
+    );
+
+    let variant = if param.multiple_values() {
+        format!(
+            r#"
+{indent}{var_name}=("${{_argc_env_values[@]}}")"#
+        )
+    } else {
+        format!(
+            r#"
+{indent}{var_name}="${{_argc_env_values[0]}}""#
+        )
+    };
+    format!(r#"{indent}{split_env}{choice}{variant}"#)
 }
 
 fn build_required_flag_options(cmd: &Command) -> String {
@@ -829,8 +928,8 @@ fn build_envs(cmd: &Command) -> String {
         .join("")
 }
 
-fn build_default(var_name: &str, value: Option<&DefaultValue>, indent: usize) -> String {
-    let indent = build_indent(indent);
+fn build_default(var_name: &str, value: Option<&DefaultValue>, indent_level: usize) -> String {
+    let indent = build_indent(indent_level);
     match value {
         Some(value) => match value {
             DefaultValue::Value(value) => {
@@ -878,6 +977,6 @@ fn build_choice(
     }
 }
 
-fn build_indent(indent: usize) -> String {
-    "    ".repeat(indent)
+fn build_indent(indent_level: usize) -> String {
+    "    ".repeat(indent_level)
 }

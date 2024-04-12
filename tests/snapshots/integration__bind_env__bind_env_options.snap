@@ -1,0 +1,40 @@
+---
+source: tests/bind_env.rs
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+---
+# OUTPUT
+argc__args=([0]="bind-envs" [1]="options")
+argc__fn=options
+argc__positionals=()
+argc_oa1=oa1
+argc_oa2=oa2
+argc_oa3=oa3
+argc_ob=ob
+argc_oc=([0]="v1" [1]="v2")
+argc_oca=a
+argc_occ=([0]="a")
+argc_oda=oda
+argc_odb=argc
+argc_ofa=abc
+argc_ofd=([0]="abc" [1]="def")
+argc_oxa=([0]="oxa")
+options
+
+
+# BUILD_OUTPUT
+argc__args=([0]="prog" [1]="options")
+argc__fn=options
+argc__positionals=()
+argc_oa1=oa1
+argc_oa2=oa2
+argc_oa3=oa3
+argc_ob=ob
+argc_oc=([0]="v1" [1]="v2")
+argc_oca=a
+argc_occ=([0]="a")
+argc_oda=oda
+argc_odb=argc
+argc_ofa=abc
+argc_ofd=([0]="abc" [1]="def")
+argc_oxa=([0]="oxa")
+options

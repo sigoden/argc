@@ -1,6 +1,6 @@
 use crate::command::Command;
 use crate::matcher::Matcher;
-use crate::utils::{is_quote_char, is_windows_path, run_param_fns};
+use crate::utils::{get_os, is_quote_char, is_true_value, is_windows_path, run_param_fns};
 use crate::Result;
 
 use anyhow::bail;
@@ -116,7 +116,7 @@ pub fn compgen(
         } else {
             let mut envs = HashMap::new();
             envs.insert("ARGC_COMPGEN".into(), "1".into());
-            envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
+            envs.insert("ARGC_OS".into(), get_os());
             envs.insert("ARGC_CWORD".into(), argc_filter.clone());
             envs.insert("ARGC_LAST_ARG".into(), last_arg.to_string());
             run_param_fns(script_path, &[fn_name.as_str()], &new_args, envs)
@@ -480,14 +480,10 @@ impl Shell {
     }
 
     pub(crate) fn with_description(&self) -> bool {
-        if let Ok(v) = std::env::var("ARGC_COMPGEN_DESCRIPTION") {
-            if v == "true" || v == "1" {
-                return true;
-            } else if v == "false" || v == "0" {
-                return false;
-            }
+        match env::var("ARGC_COMPGEN_DESCRIPTION") {
+            Ok(v) => is_true_value(&v),
+            Err(_) => true,
         }
-        true
     }
 
     pub(crate) fn escape(&self, value: &str) -> String {
@@ -558,7 +554,7 @@ impl Shell {
             return vec![];
         }
         match self {
-            Shell::Bash => match std::env::var("COMP_WORDBREAKS") {
+            Shell::Bash => match env::var("COMP_WORDBREAKS") {
                 Ok(v) => [':', '=', '@']
                     .iter()
                     .filter(|c| v.contains(**c))

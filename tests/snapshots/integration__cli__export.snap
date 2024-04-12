@@ -29,6 +29,7 @@ expression: stdout
       "assigned": false,
       "default": null,
       "choice": null,
+      "env": null,
       "inherit": false
     },
     {
@@ -51,6 +52,7 @@ expression: stdout
       "assigned": false,
       "default": null,
       "choice": null,
+      "env": null,
       "inherit": false
     }
   ],
@@ -86,6 +88,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -110,6 +113,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -134,6 +138,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -158,6 +163,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -182,6 +188,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -206,6 +213,32 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
+          "inherit": false
+        },
+        {
+          "id": "of",
+          "long_name": "--of",
+          "short_name": null,
+          "describe": "multi-occurs + comma-separated list",
+          "is_flag": false,
+          "notations": [
+            "OF"
+          ],
+          "required": false,
+          "multiple_values": true,
+          "multiple_occurs": true,
+          "args_range": [
+            1,
+            1
+          ],
+          "args_delimiter": ",",
+          "terminated": false,
+          "prefixed": false,
+          "assigned": false,
+          "default": null,
+          "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -230,6 +263,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -255,6 +289,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -280,6 +315,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -307,6 +343,7 @@ expression: stdout
             "value": "a"
           },
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -334,6 +371,7 @@ expression: stdout
             "value": "_default_fn"
           },
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -364,6 +402,7 @@ expression: stdout
               "b"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -397,6 +436,7 @@ expression: stdout
               "b"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -427,36 +467,7 @@ expression: stdout
               "b"
             ]
           },
-          "inherit": false
-        },
-        {
-          "id": "ocd",
-          "long_name": "--ocd",
-          "short_name": null,
-          "describe": "required + multi-occurs + choice",
-          "is_flag": false,
-          "notations": [
-            "OCD"
-          ],
-          "required": true,
-          "multiple_values": true,
-          "multiple_occurs": true,
-          "args_range": [
-            1,
-            1
-          ],
-          "args_delimiter": null,
-          "terminated": false,
-          "prefixed": false,
-          "assigned": false,
-          "default": null,
-          "choice": {
-            "type": "Values",
-            "data": [
-              "a",
-              "b"
-            ]
-          },
+          "env": null,
           "inherit": false
         },
         {
@@ -487,6 +498,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -517,6 +529,7 @@ expression: stdout
               false
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -547,6 +560,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -577,6 +591,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -601,6 +616,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -623,6 +639,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -661,6 +678,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -683,6 +701,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -705,6 +724,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -727,6 +747,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -749,6 +770,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -771,6 +793,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -809,6 +832,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -831,6 +855,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -853,6 +878,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -877,6 +903,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -901,6 +928,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -925,6 +953,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -955,6 +984,7 @@ expression: stdout
               "b"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -985,6 +1015,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -1007,6 +1038,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -1047,6 +1079,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1071,6 +1104,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1095,6 +1129,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1117,6 +1152,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -1157,6 +1193,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1181,6 +1218,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1205,6 +1243,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1229,6 +1268,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1253,6 +1293,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1277,6 +1318,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1301,6 +1343,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1326,6 +1369,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1351,6 +1395,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1378,6 +1423,7 @@ expression: stdout
             "value": "a"
           },
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1405,6 +1451,7 @@ expression: stdout
             "value": "_default_fn"
           },
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1435,6 +1482,7 @@ expression: stdout
               "b"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -1468,6 +1516,7 @@ expression: stdout
               "b"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -1498,6 +1547,7 @@ expression: stdout
               "b"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -1528,6 +1578,7 @@ expression: stdout
               "b"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -1558,6 +1609,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -1588,6 +1640,7 @@ expression: stdout
               false
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -1618,6 +1671,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -1648,6 +1702,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -1672,6 +1727,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1694,6 +1750,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -1732,6 +1789,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1754,6 +1812,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1776,6 +1835,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1798,6 +1858,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1820,6 +1881,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1842,6 +1904,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -1882,6 +1945,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1906,6 +1970,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1930,6 +1995,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -1952,6 +2018,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -1998,6 +2065,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2028,6 +2096,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2050,6 +2119,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -2096,6 +2166,7 @@ expression: stdout
               "b"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2118,6 +2189,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -2156,6 +2228,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2178,6 +2251,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2200,6 +2274,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2222,6 +2297,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2244,6 +2320,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2268,6 +2345,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2292,6 +2370,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2316,6 +2395,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2340,6 +2420,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2365,6 +2446,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2389,6 +2471,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2420,6 +2503,7 @@ expression: stdout
               "z"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2450,6 +2534,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2480,6 +2565,7 @@ expression: stdout
               false
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2510,6 +2596,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2534,6 +2621,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2556,6 +2644,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -2596,6 +2685,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2620,6 +2710,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2644,6 +2735,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2674,6 +2766,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2704,6 +2797,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2734,6 +2828,7 @@ expression: stdout
               true
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2756,6 +2851,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],
@@ -2799,6 +2895,7 @@ expression: stdout
             "value": "val"
           },
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2826,6 +2923,7 @@ expression: stdout
             "value": "_default_fn"
           },
           "choice": null,
+          "env": null,
           "inherit": false
         },
         {
@@ -2860,6 +2958,7 @@ expression: stdout
               "z"
             ]
           },
+          "env": null,
           "inherit": false
         },
         {
@@ -2882,6 +2981,7 @@ expression: stdout
           "assigned": false,
           "default": null,
           "choice": null,
+          "env": null,
           "inherit": false
         }
       ],

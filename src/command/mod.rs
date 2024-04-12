@@ -754,9 +754,10 @@ impl Command {
         } else {
             None
         };
+        let mut param_data = ParamData::new("help");
+        param_data.describe = describe.to_string();
         Some(FlagOptionParam::new(
-            ParamData::new("help"),
-            describe,
+            param_data,
             true,
             short,
             long_prefix,
@@ -777,9 +778,10 @@ impl Command {
         } else {
             None
         };
+        let mut param_data = ParamData::new("version");
+        param_data.describe = describe.to_string();
         Some(FlagOptionParam::new(
-            ParamData::new("version"),
-            describe,
+            param_data,
             true,
             short,
             long_prefix,

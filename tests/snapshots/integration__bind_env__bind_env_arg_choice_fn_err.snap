@@ -1,0 +1,12 @@
+---
+source: tests/bind_env.rs
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+---
+# OUTPUT
+error: invalid value `v1` for environment variable `VAL` that bound to `[VAL]`
+  [possible values: abc, def, ghi]
+
+
+# BUILD_OUTPUT
+error: invalid value `v1` for environment variable `VAL` that bound to `[VAL]`
+  [possible values: abc, def, ghi]

@@ -169,13 +169,40 @@ macro_rules! snapshot_compgen_shells {
     };
 }
 
+macro_rules! snapshot_meta_env {
+    (
+        [$($arg:literal),*],
+        {$($key:literal : $value:literal),*$(,)?}
+    ) => {
+        snapshot_env!(
+            args: [$($arg),*],
+            envs: {$($key : $value),*}
+            script_file: "examples/envs.sh"
+        );
+    }
+}
+
+macro_rules! snapshot_bind_env {
+    (
+        args: [$($arg:literal),*],
+        envs: {$($key:literal : $value:literal),*$(,)?}
+
+    ) => {
+        snapshot_env!(
+            args: [$($arg),*],
+            envs: {$($key : $value),*}
+            script_file: "examples/bind-envs.sh"
+        );
+    };
+}
+
 macro_rules! snapshot_env {
     (
         args: [$($arg:literal),*],
-        envs: {$($key:literal : $value:literal),*}
-
+        envs: {$($key:literal : $value:literal),*$(,)?}
+        script_file: $script_file:literal
     ) => {
-        let script_path = $crate::fixtures::locate_script("examples/envs.sh");
+        let script_path = $crate::fixtures::locate_script($script_file);
         let args: Vec<String> = vec![$($arg.to_string(),)*];
         let envs: Vec<(&str, &str)> = [$(($key, $value),)*].into_iter().collect();
 

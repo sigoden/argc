@@ -113,9 +113,9 @@ fn render_options_section(roff: &mut Roff, cmd: &Command) {
         }
         let mut body = vec![];
         let mut has_help_written = false;
-        if !param.describe.is_empty() {
+        if !param.describe().is_empty() {
             has_help_written = true;
-            render_describe(&mut body, &param.describe);
+            render_describe(&mut body, param.describe());
         }
         roff.control("TP", []);
         roff.text(header);
@@ -136,9 +136,9 @@ fn render_options_section(roff: &mut Roff, cmd: &Command) {
         }
         let mut body = vec![];
         let mut has_help_written = false;
-        if !param.describe.is_empty() {
+        if !param.describe().is_empty() {
             has_help_written = true;
-            render_describe(&mut body, &param.describe);
+            render_describe(&mut body, param.describe());
         }
         roff.control("TP", []);
         roff.text(header);

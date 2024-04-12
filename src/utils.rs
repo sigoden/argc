@@ -38,16 +38,8 @@ pub fn escape_shell_words(value: &str) -> String {
     shell_words::quote(value).to_string()
 }
 
-pub fn is_choice_value_terminate(c: char) -> bool {
-    c == '|' || c == ']'
-}
-
 pub fn is_quote_char(c: char) -> bool {
     c == '\'' || c == '"'
-}
-
-pub fn is_default_value_terminate(c: char) -> bool {
-    c.is_whitespace()
 }
 
 pub fn get_shell_path() -> anyhow::Result<PathBuf> {
@@ -78,6 +70,10 @@ pub fn get_shell_args(shell_path: &Path) -> Vec<String> {
     } else {
         vec![]
     }
+}
+
+pub fn get_os() -> String {
+    env::consts::OS.to_string()
 }
 
 #[cfg(windows)]
@@ -192,12 +188,20 @@ pub fn expand_dotenv(value: &str) -> String {
     format!("[ -f {value} ] && set -o allexport && . {value} && set +o allexport")
 }
 
+pub fn is_special_var_char(c: char) -> bool {
+    matches!(c, '-' | '.' | ':' | '@')
+}
+
 pub fn sanitize_var_name(id: &str) -> String {
-    id.replace(['-', '.', ':'], "_")
+    id.replace(is_special_var_char, "_")
 }
 
 pub fn argc_var_name(id: &str) -> String {
     format!("{VARIABLE_PREFIX}{}", sanitize_var_name(id))
+}
+
+pub fn all_envs() -> HashMap<String, String> {
+    env::vars().collect()
 }
 
 pub fn load_dotenv(path: &str) -> Option<HashMap<String, String>> {
@@ -214,6 +218,10 @@ pub fn load_dotenv(path: &str) -> Option<HashMap<String, String>> {
         }
     }
     Some(output)
+}
+
+pub fn is_true_value(value: &str) -> bool {
+    matches!(value, "true" | "1")
 }
 
 #[cfg(test)]

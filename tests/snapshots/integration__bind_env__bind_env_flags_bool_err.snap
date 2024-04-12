@@ -1,0 +1,10 @@
+---
+source: tests/bind_env.rs
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+---
+# OUTPUT
+error: environment variable `FA1` has invalid value for param '--fa1'
+
+
+# BUILD_OUTPUT
+error: environment variable 'FA1' has invalid value for param '--fa1'

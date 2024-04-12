@@ -66,6 +66,7 @@ Define a positional argument.
 
 > **<sup>Syntax</sup>**\
 > `@arg` [_name_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
+>   [_bind-env_]<sup>?</sup>
 >   [_notation_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
@@ -86,6 +87,8 @@ Define a positional argument.
 # @arg vfc*[`_choice_fn`]         multi-values + choice from fn
 # @arg vfd*,[`_choice_fn`]        multi-values + choice from fn + comma-separated list
 # @arg vxa~                       capture all remaining args
+# @arg vea $$                     bind-env
+# @arg veb $BE <PATH>             bind-named-env
 ```
 
 ### `@option`
@@ -94,6 +97,7 @@ Define an option argument.
 
 > **<sup>Syntax</sup>**\
 > `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
+>   [_bind-env_]<sup>?</sup>
 >   [_notations_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
@@ -104,6 +108,7 @@ Define an option argument.
 # @option    --oc!                  required
 # @option    --od*                  multi-occurs
 # @option    --oe+                  required + multi-occurs
+# @option    --of*,                 multi-occurs + comma-separated list
 # @option    --ona <PATH>           value notation
 # @option    --onb <FILE> <FILE>    two-args value notations
 # @option    --onc <CMD> <FILE+>    unlimited-args value notations
@@ -118,6 +123,8 @@ Define an option argument.
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
 # @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option    --oxa~                 capture all remaining args
+# @option    --oea $$               bind-env
+# @option    --oeb $BE <PATH>       bind-named-env
 ```
 
 ### `@flag`
@@ -126,6 +133,7 @@ Define a flag argument. Flag is a special option that does not accept any value.
 
 > **<sup>Syntax</sup>**\
 > `@flag` [_short_]<sup>?</sup> [_long_]`*`<sup>?</sup>
+>   [_bind-env_]<sup>?</sup>
 >   [_description_]<sup>?</sup>
 
 ```sh
@@ -133,6 +141,8 @@ Define a flag argument. Flag is a special option that does not accept any value.
 # @flag  -b --fb         short
 # @flag  -c              short only
 # @flag     --fd*        multi-occurs
+# @flag     --ea $$      bind-env
+# @flag     --eb $BE     bind-named-env
 ```
 
 ### `@env`
@@ -290,6 +300,13 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
 
 `,` `:` `@` `|` `/`
 
+### bind-env
+
+Flags/options bind environment variables
+
+- `$$`: bind environment variable  whose name is derived from the corresponding param name
+- `$`[_NAME_]: bind environment variable whose name is *NAME*
+
 ## description
 
 Plain text, can be multiple lines.
@@ -313,6 +330,7 @@ Plain text, can be multiple lines.
 [_notation-modifier_]: #notation-modifier
 [_short-char_]: #short-char
 [_separated-char_]: #separated-char
+[_bind-env_]: #bind-env
 [_description_]: #description
 [_name_]: #name
 [_value_]: #value

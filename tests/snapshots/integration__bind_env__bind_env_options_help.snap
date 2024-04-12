@@ -1,0 +1,41 @@
+---
+source: tests/bind_env.rs
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+---
+# OUTPUT
+USAGE: bind-envs options [OPTIONS] --ob <OB>
+
+OPTIONS:
+      --oa1 <OA1>     [env: OA1]
+      --oa2 <OA2>     [env: OA2]
+      --oa3 <OA3>     [env: OA]
+      --ob <OB>       [env: OB]
+      --oc [OC]...    [env: OC]
+      --oda <ODA>     [default: a] [env: ODA]
+      --odb <ODB>     [env: ODB]
+      --oca <OCA>     [possible values: a, b] [env: OCA]
+      --occ [OCC]...  [possible values: a, b] [env: OCC]
+      --ofa <OFA>     [env: OFA]
+      --ofd [OFD]...  [env: OFD]
+      --oxa <OXA~>    [env: OXA]
+  -h, --help
+
+
+
+# BUILD_OUTPUT
+USAGE: prog options [OPTIONS] --ob <OB>
+
+OPTIONS:
+      --oa1 <OA1>     [env: OA1]
+      --oa2 <OA2>     [env: OA2]
+      --oa3 <OA3>     [env: OA]
+      --ob <OB>       [env: OB]
+      --oc [OC]...    [env: OC]
+      --oda <ODA>     [default: a] [env: ODA]
+      --odb <ODB>     [env: ODB]
+      --oca <OCA>     [possible values: a, b] [env: OCA]
+      --occ [OCC]...  [possible values: a, b] [env: OCC]
+      --ofa <OFA>     [env: OFA]
+      --ofd [OFD]...  [env: OFD]
+      --oxa <OXA~>    [env: OXA]
+  -h, --help
