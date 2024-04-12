@@ -15,6 +15,7 @@ pub(crate) trait Param {
     fn guard(&self) -> Result<()>;
     fn multiple_values(&self) -> bool;
     fn render_source(&self) -> String;
+
     fn describe_oneline(&self) -> &str {
         match self.describe().split_once('\n') {
             Some((v, _)) => v,
@@ -27,18 +28,13 @@ pub(crate) trait Param {
     fn describe(&self) -> &str {
         &self.data().describe
     }
-
     fn describe_mut(&mut self) -> &mut String {
         &mut self.data_mut().describe
     }
-
     fn required(&self) -> bool {
         self.data().required()
     }
-    fn multiple_occurs(&self) -> bool {
-        self.data().multiple_occurs()
-    }
-    fn args_delimiter(&self) -> Option<char> {
+    fn delimiter(&self) -> Option<char> {
         self.data().args_delimiter()
     }
     fn terminated(&self) -> bool {
@@ -71,14 +67,13 @@ pub(crate) trait Param {
 pub(crate) struct FlagOptionParam {
     data: ParamData,
     id: String,
-    is_flag: bool,
     short: Option<String>,
     long_prefix: String,
     prefixed: bool,
     assigned: bool,
     raw_notations: Vec<String>,
     notations: Vec<String>,
-    inherit: bool,
+    inherited: bool,
 }
 
 impl Param for FlagOptionParam {
@@ -114,7 +109,7 @@ impl Param for FlagOptionParam {
             if self.prefixed {
                 bail!("cannot combine prefix and multiple notations")
             }
-            if self.args_delimiter().is_some() {
+            if self.delimiter().is_some() {
                 bail!("cannot combine delmiter and multiple notations")
             }
         }
@@ -125,7 +120,7 @@ impl Param for FlagOptionParam {
     }
 
     fn multiple_values(&self) -> bool {
-        self.multiple_occurs() || self.args_range().1 > 1
+        self.data().multiple() || self.num_args().1 > 1
     }
 
     fn render_source(&self) -> String {
@@ -146,8 +141,8 @@ impl Param for FlagOptionParam {
             self.data.render_source_of_name_value(&name_suffix)
         ));
 
-        if let Some(bind_env) = &self.data.bind_env {
-            match bind_env {
+        if let Some(env) = &self.data.env {
+            match env {
                 Some(v) => output.push(format!("${v}")),
                 None => output.push("$$".into()),
             }
@@ -168,7 +163,7 @@ impl Param for FlagOptionParam {
 impl FlagOptionParam {
     pub(crate) fn new(
         mut data: ParamData,
-        is_flag: bool,
+        flag: bool,
         short: Option<&str>,
         long_prefix: &str,
         row_notations: &[&str],
@@ -193,7 +188,7 @@ impl FlagOptionParam {
             name.clone()
         };
         let raw_notations: Vec<String> = row_notations.iter().map(|v| v.to_string()).collect();
-        let mut notations = if is_flag {
+        let mut notations = if flag {
             vec![]
         } else if raw_notations.is_empty() {
             vec![to_cobol_case(&name)]
@@ -205,7 +200,6 @@ impl FlagOptionParam {
             last_arg.push('~')
         }
         Self {
-            is_flag,
             short: short.map(|v| v.to_string()),
             long_prefix: long_prefix.to_string(),
             prefixed,
@@ -214,46 +208,46 @@ impl FlagOptionParam {
             id,
             raw_notations,
             notations,
-            inherit: false,
+            inherited: false,
         }
     }
 
     pub(crate) fn export(&self) -> FlagOptionValue {
         FlagOptionValue {
             id: self.id().to_string(),
-            long_name: self.render_long_name(),
+            long_name: self.long_name(),
             short_name: self.short.clone(),
             describe: self.describe().to_string(),
-            is_flag: self.is_flag,
+            flag: self.is_flag(),
             notations: self.notations.clone(),
             required: self.required(),
             multiple_values: self.multiple_values(),
             multiple_occurs: self.multiple_occurs(),
-            args_range: self.args_range(),
-            args_delimiter: self.args_delimiter(),
+            num_args: self.num_args(),
+            delimiter: self.delimiter(),
             terminated: self.terminated(),
             prefixed: self.prefixed,
             assigned: self.assigned,
             default: self.data().default.clone(),
             choice: self.data().choice.clone(),
             env: self.bind_env(),
-            inherit: self.inherit,
+            inherited: self.inherited,
         }
     }
 
     pub(crate) fn is_flag(&self) -> bool {
-        self.is_flag
+        self.notations.is_empty()
     }
 
     pub(crate) fn is_option(&self) -> bool {
         !self.is_flag()
     }
 
-    pub(crate) fn is_assigned(&self) -> bool {
+    pub(crate) fn assigned(&self) -> bool {
         self.assigned
     }
 
-    pub(crate) fn is_prefixed(&self) -> bool {
+    pub(crate) fn prefixed(&self) -> bool {
         self.prefixed
     }
 
@@ -269,7 +263,11 @@ impl FlagOptionParam {
         &self.notations
     }
 
-    pub(crate) fn args_range(&self) -> (usize, usize) {
+    pub(crate) fn multiple_occurs(&self) -> bool {
+        self.data().multiple()
+    }
+
+    pub(crate) fn num_args(&self) -> (usize, usize) {
         let len = self.notations.len();
         if self.terminated()
             || self
@@ -296,7 +294,7 @@ impl FlagOptionParam {
             .and_then(|name| ['*', '+', '?'].into_iter().find(|v| name.ends_with(*v)))
     }
 
-    pub(crate) fn render_long_name(&self) -> String {
+    pub(crate) fn long_name(&self) -> String {
         format!("{}{}", self.long_prefix, self.data.name)
     }
 
@@ -305,7 +303,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn render_name_notations(&self) -> String {
-        let mut output = self.render_long_name();
+        let mut output = self.long_name();
         if !self.is_flag() {
             let ch = if self.assigned { '=' } else { ' ' };
             output.push(ch);
@@ -338,7 +336,7 @@ impl FlagOptionParam {
     pub(crate) fn render_body(&self) -> String {
         let mut output = String::new();
         if self.short.is_none() && self.long_prefix.len() == 1 && self.data.name.len() == 1 {
-            output.push_str(&self.render_long_name());
+            output.push_str(&self.long_name());
         } else {
             if let Some(short) = &self.short {
                 output.push_str(&format!("{short}, "))
@@ -392,7 +390,7 @@ impl FlagOptionParam {
             }
         } else {
             let values: Vec<&[&str]> = args.iter().map(|(_, value)| *value).collect();
-            if self.is_flag {
+            if self.is_flag() {
                 if values.is_empty() {
                     None
                 } else {
@@ -429,7 +427,7 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn set_inherit(&mut self) {
-        self.inherit = true;
+        self.inherited = true;
     }
 
     pub(crate) fn match_prefix<'a>(&self, arg: &'a str) -> Option<&'a str> {
@@ -459,7 +457,7 @@ impl FlagOptionParam {
 
     pub(crate) fn list_names(&self) -> Vec<String> {
         let mut output = vec![];
-        output.push(self.render_long_name());
+        output.push(self.long_name());
         if let Some(short) = &self.short {
             output.push(short.clone());
         }
@@ -473,20 +471,20 @@ pub struct FlagOptionValue {
     pub long_name: String,
     pub short_name: Option<String>,
     pub describe: String,
-    pub is_flag: bool,
+    pub flag: bool,
     pub notations: Vec<String>,
     pub required: bool,
     pub multiple_values: bool,
     pub multiple_occurs: bool,
-    pub args_range: (usize, usize),
-    pub args_delimiter: Option<char>,
+    pub num_args: (usize, usize),
+    pub delimiter: Option<char>,
     pub terminated: bool,
     pub prefixed: bool,
     pub assigned: bool,
     pub default: Option<DefaultValue>,
     pub choice: Option<ChoiceValue>,
     pub env: Option<String>,
-    pub inherit: bool,
+    pub inherited: bool,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -522,14 +520,14 @@ impl Param for PositionalParam {
     }
 
     fn multiple_values(&self) -> bool {
-        self.multiple_occurs() || self.terminated()
+        self.data.multiple() || self.terminated()
     }
 
     fn render_source(&self) -> String {
         let mut output = vec![self.data.render_source_of_name_value("")];
 
-        if let Some(bind_env) = &self.data.bind_env {
-            match bind_env {
+        if let Some(env) = &self.data.env {
+            match env {
                 Some(v) => output.push(format!("${v}")),
                 None => output.push("$$".into()),
             }
@@ -563,9 +561,8 @@ impl PositionalParam {
             describe: self.describe().to_string(),
             notation: self.notation.clone(),
             required: self.required(),
-            multiple_values: self.multiple_values(),
-            multiple_occurs: self.multiple_occurs(),
-            args_delimiter: self.args_delimiter(),
+            multiple: self.multiple_values(),
+            delimiter: self.delimiter(),
             terminated: self.terminated(),
             default: self.data().default.clone(),
             choice: self.data().choice.clone(),
@@ -615,9 +612,8 @@ pub struct PositionalValue {
     pub describe: String,
     pub notation: String,
     pub required: bool,
-    pub multiple_values: bool,
-    pub multiple_occurs: bool,
-    pub args_delimiter: Option<char>,
+    pub multiple: bool,
+    pub delimiter: Option<char>,
     pub terminated: bool,
     pub default: Option<DefaultValue>,
     pub choice: Option<ChoiceValue>,
@@ -627,8 +623,7 @@ pub struct PositionalValue {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct EnvParam {
     data: ParamData,
-    describe: String,
-    inherit: bool,
+    inherited: bool,
 }
 
 impl Param for EnvParam {
@@ -648,10 +643,6 @@ impl Param for EnvParam {
         self.id().to_string()
     }
 
-    fn describe(&self) -> &str {
-        &self.describe
-    }
-
     fn tag_name(&self) -> &str {
         "@env"
     }
@@ -660,7 +651,7 @@ impl Param for EnvParam {
         if !matches!(self.data().modifer, Modifier::Optional | Modifier::Required) {
             bail!("can only be a single value")
         }
-        if self.data.bind_env.is_some() {
+        if self.data.env.is_some() {
             bail!("cannot bind another env")
         }
         Ok(())
@@ -672,8 +663,8 @@ impl Param for EnvParam {
 
     fn render_source(&self) -> String {
         let mut output = vec![self.data.render_source_of_name_value("")];
-        if let Some(bind_env) = &self.data.bind_env {
-            match bind_env {
+        if let Some(env) = &self.data.env {
+            match env {
                 Some(v) => output.push(format!("${v}")),
                 None => output.push("$$".into()),
             }
@@ -686,22 +677,21 @@ impl Param for EnvParam {
 }
 
 impl EnvParam {
-    pub(crate) fn new(data: ParamData, describe: &str) -> Self {
+    pub(crate) fn new(data: ParamData) -> Self {
         Self {
-            describe: describe.to_string(),
             data,
-            inherit: false,
+            inherited: false,
         }
     }
 
     pub(crate) fn export(&self) -> EnvValue {
         EnvValue {
             id: self.id().to_string(),
-            describe: self.describe.clone(),
+            describe: self.describe().to_string(),
             required: self.required(),
             default: self.data().default.clone(),
             choice: self.data().choice.clone(),
-            inherit: self.inherit,
+            inherited: self.inherited,
         }
     }
 
@@ -721,7 +711,7 @@ impl EnvParam {
     }
 
     pub(crate) fn set_inherit(&mut self) {
-        self.inherit = true;
+        self.inherited = true;
     }
 }
 
@@ -732,7 +722,7 @@ pub struct EnvValue {
     pub required: bool,
     pub default: Option<DefaultValue>,
     pub choice: Option<ChoiceValue>,
-    pub inherit: bool,
+    pub inherited: bool,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -742,7 +732,7 @@ pub(crate) struct ParamData {
     pub(crate) choice: Option<ChoiceValue>,
     pub(crate) default: Option<DefaultValue>,
     pub(crate) modifer: Modifier,
-    pub(crate) bind_env: Option<Option<String>>,
+    pub(crate) env: Option<Option<String>>,
 }
 
 impl ParamData {
@@ -753,7 +743,7 @@ impl ParamData {
             choice: None,
             default: None,
             modifer: Modifier::Optional,
-            bind_env: None,
+            env: None,
         }
     }
 
@@ -761,8 +751,8 @@ impl ParamData {
         self.modifer.required() && self.default.is_none()
     }
 
-    pub(crate) fn multiple_occurs(&self) -> bool {
-        self.modifer.multiple_occurs()
+    pub(crate) fn multiple(&self) -> bool {
+        self.modifer.multiple()
     }
 
     pub(crate) fn args_delimiter(&self) -> Option<char> {
@@ -805,11 +795,11 @@ impl ParamData {
     }
 
     pub(crate) fn normalize_bind_env(&self, id: &str) -> Option<String> {
-        let bind_env = match self.bind_env.as_ref()? {
+        let env = match self.env.as_ref()? {
             Some(v) => v.clone(),
             None => sanitize_var_name(id).to_uppercase(),
         };
-        Some(bind_env)
+        Some(env)
     }
 
     pub(crate) fn render_source_of_name_value(&self, name_suffix: &str) -> String {
@@ -854,11 +844,11 @@ impl ParamData {
             let values: Vec<String> = values.iter().map(|v| escape_shell_words(v)).collect();
             output.push_str(&format!("[possible values: {}]", values.join(", ")));
         }
-        if let Some(bind_env) = self.normalize_bind_env(id) {
+        if let Some(env) = self.normalize_bind_env(id) {
             if !output.is_empty() {
                 output.push(sep)
             }
-            output.push_str(&format!("[env: {bind_env}]"));
+            output.push_str(&format!("[env: {env}]"));
         }
         output
     }
@@ -899,7 +889,7 @@ pub(crate) enum Modifier {
 }
 
 impl Modifier {
-    pub(crate) fn multiple_occurs(&self) -> bool {
+    pub(crate) fn multiple(&self) -> bool {
         match self {
             Self::Optional => false,
             Self::Required => false,

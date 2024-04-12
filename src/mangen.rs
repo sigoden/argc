@@ -90,7 +90,7 @@ fn render_options_section(roff: &mut Roff, cmd: &Command) {
             header.push(bold(short));
             header.push(roman(", "));
         }
-        header.push(bold(param.render_long_name()));
+        header.push(bold(param.long_name()));
         let notations = param.notations();
         if notations.len() == 1 {
             header.push(roman("="));
