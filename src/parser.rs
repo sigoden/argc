@@ -1,5 +1,6 @@
 use crate::param::{
-    ChoiceValue, DefaultValue, EnvParam, FlagOptionParam, Modifier, ParamData, PositionalParam,
+    ChoiceValue, DefaultValue, EnvParam, FlagOptionParam, Modifier, Param, ParamData,
+    PositionalParam,
 };
 use crate::utils::is_special_var_char;
 use crate::Result;
@@ -85,27 +86,18 @@ pub(crate) fn parse(source: &str) -> Result<Vec<Event>> {
                                 EventData::Cmd(text)
                             }
                             EventData::Env(mut param) => {
-                                line_idx += take_comment_lines(
-                                    &lines,
-                                    line_idx + 1,
-                                    &mut param.data.describe,
-                                );
+                                line_idx +=
+                                    take_comment_lines(&lines, line_idx + 1, param.describe_mut());
                                 EventData::Env(param)
                             }
                             EventData::FlagOption(mut param) => {
-                                line_idx += take_comment_lines(
-                                    &lines,
-                                    line_idx + 1,
-                                    &mut param.data.describe,
-                                );
+                                line_idx +=
+                                    take_comment_lines(&lines, line_idx + 1, param.describe_mut());
                                 EventData::FlagOption(param)
                             }
                             EventData::Positional(mut param) => {
-                                line_idx += take_comment_lines(
-                                    &lines,
-                                    line_idx + 1,
-                                    &mut param.data.describe,
-                                );
+                                line_idx +=
+                                    take_comment_lines(&lines, line_idx + 1, param.describe_mut());
                                 EventData::Positional(param)
                             }
                             v => v,

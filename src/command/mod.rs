@@ -335,10 +335,10 @@ impl Command {
     pub(crate) fn flag_option_signs(&self) -> String {
         let mut signs: IndexSet<char> = ['-'].into();
         for param in &self.flag_option_params {
-            if let Some(short) = &param.short {
+            if let Some(short) = param.short() {
                 signs.extend(short.chars().take(1))
             }
-            signs.extend(param.long_prefix.chars().take(1))
+            signs.extend(param.long_prefix().chars().take(1))
         }
         signs.into_iter().collect()
     }
@@ -652,7 +652,7 @@ impl Command {
         let mut describe = false;
         let mut single = false;
         for param in self.flag_option_params.iter() {
-            if param.long_prefix.len() == 1 {
+            if param.long_prefix().len() == 1 {
                 single = true;
             }
             if !param.describe().is_empty() {
@@ -683,7 +683,7 @@ impl Command {
             for flag_option in &self.flag_option_params {
                 if subcmd.find_flag_option(flag_option.id()).is_none() {
                     let mut flag_option = flag_option.clone();
-                    flag_option.inherit = true;
+                    flag_option.set_inherit();
                     inherited_flag_options.push(flag_option);
                 }
             }
@@ -702,7 +702,7 @@ impl Command {
             for env_param in &self.env_params {
                 if subcmd.find_env(env_param.id()).is_none() {
                     let mut env_param = env_param.clone();
-                    env_param.inherit = true;
+                    env_param.set_inherit();
                     inherited_envs.push(env_param);
                 }
             }

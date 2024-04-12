@@ -629,8 +629,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                 param.render_name_notations(),
                             ));
                         }
-                        if let Some(choices) =
-                            get_param_choice(&param.data.choice, &choices_fn_values)
+                        if let Some(choices) = get_param_choice(param.choice(), &choices_fn_values)
                         {
                             for value in values.iter() {
                                 if !choices.contains(&value.to_string()) {
@@ -675,8 +674,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             choice_values,
                         ));
                     }
-                    if let Some(choices) = get_param_choice(&param.data.choice, &choices_fn_values)
-                    {
+                    if let Some(choices) = get_param_choice(param.choice(), &choices_fn_values) {
                         choice_values = choices.to_vec();
                         for value in values.iter() {
                             if !choices.contains(&value.to_string()) {
@@ -752,7 +750,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         for (i, param) in last_cmd.positional_params.iter().enumerate() {
             if let (Some(values), Some(choices)) = (
                 positional_values.get(i),
-                get_param_choice(&param.data.choice, &choices_fn_values),
+                get_param_choice(param.choice(), &choices_fn_values),
             ) {
                 for value in values.iter() {
                     if !choices.contains(&value.to_string()) {
@@ -770,8 +768,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             let mut missing_positionals = vec![];
             for param in &last_cmd.positional_params[positional_values_len..] {
                 if let Some(values) = bind_envs.positionals.get(param.id()) {
-                    if let Some(choices) = get_param_choice(&param.data.choice, &choices_fn_values)
-                    {
+                    if let Some(choices) = get_param_choice(param.choice(), &choices_fn_values) {
                         for value in values.iter() {
                             if !choices.contains(&value.to_string()) {
                                 return Some(MatchError::InvalidBindEnvironment(
@@ -808,7 +805,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
         for param in &last_cmd.env_params {
             if let (Some(choices), Some(value)) = (
-                get_param_choice(&param.data.choice, &choices_fn_values),
+                get_param_choice(param.choice(), &choices_fn_values),
                 self.envs.get(param.id()),
             ) {
                 if !choices.contains(&value.to_string()) {
@@ -1021,7 +1018,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     CompColor::of_option()
                 };
                 for v in param.list_names() {
-                    let nospace = param.prefixed || param.assigned;
+                    let nospace = param.is_prefixed() || param.is_assigned();
                     output.push((v, describe.to_string(), nospace, kind))
                 }
             }
@@ -1170,11 +1167,11 @@ fn match_flag_option<'a, 'b>(
     } else if let Some(prefix) = param.match_prefix(arg) {
         let args_len = args.len();
         let prefix_len = prefix.len();
-        let value_args = take_value_args(args, *arg_index + 1, 1, signs, param.assigned);
+        let value_args = take_value_args(args, *arg_index + 1, 1, signs, param.is_assigned());
         let take_empty = value_args.is_empty();
         *arg_index += value_args.len();
         let values = if take_empty { vec!["1"] } else { value_args };
-        if !param.assigned && *arg_index == args_len - 1 {
+        if !param.is_assigned() && *arg_index == args_len - 1 {
             *arg_comp = ArgComp::OptionValue(param.id().to_string(), 0);
             if take_empty {
                 *split_last_arg_at = Some(prefix_len);
@@ -1184,11 +1181,12 @@ fn match_flag_option<'a, 'b>(
     } else {
         let values_max = param.args_range().1;
         let args_len = args.len();
-        let value_args = take_value_args(args, *arg_index + 1, values_max, signs, param.assigned);
+        let value_args =
+            take_value_args(args, *arg_index + 1, values_max, signs, param.is_assigned());
         *arg_index += value_args.len();
         if *arg_index == args_len - 1 {
             if *arg_comp != ArgComp::FlagOrOption {
-                if param.is_option() && !param.assigned && value_args.len() <= values_max {
+                if param.is_option() && !param.is_assigned() && value_args.len() <= values_max {
                     *arg_comp = ArgComp::OptionValue(
                         param.id().to_string(),
                         value_args.len().saturating_sub(1),
@@ -1320,15 +1318,15 @@ fn comp_symbol(cmd: &Command, ch: char) -> Vec<CompItem> {
 
 fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
     let value_name = param
-        .notations
+        .notations()
         .get(index)
         .map(|v| v.as_str())
-        .unwrap_or_else(|| param.notations.last().unwrap());
-    comp_param(param.describe_oneline(), value_name, &param.data)
+        .unwrap_or_else(|| param.notations().last().unwrap());
+    comp_param(param.describe_oneline(), value_name, param.data())
 }
 
 fn comp_positional(param: &PositionalParam) -> Vec<CompItem> {
-    comp_param(param.describe_oneline(), &param.notation, &param.data)
+    comp_param(param.describe_oneline(), param.notation(), param.data())
 }
 
 fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompItem> {
@@ -1371,7 +1369,7 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
 }
 
 fn get_param_choice<'a, 'b: 'a>(
-    choice: &'a Option<ChoiceValue>,
+    choice: Option<&'a ChoiceValue>,
     choices_fn_values: &'a HashMap<&str, Vec<String>>,
 ) -> Option<&'a Vec<String>> {
     match choice {

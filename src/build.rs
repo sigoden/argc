@@ -510,7 +510,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
     let names = param.list_names().join(" | ");
     let long_name = param.render_long_name();
     let var_name = param.var_name();
-    if param.is_flag {
+    if param.is_flag() {
         if param.id() == "help" || param.id() == "version" {
             return String::new();
         }
@@ -566,7 +566,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
             )
         };
         let (min, max) = param.args_range();
-        let code = if param.assigned {
+        let code = if param.is_assigned() {
             let not_assigned = if min == 1 {
                 format!(
                     r#"

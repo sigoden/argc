@@ -8,6 +8,7 @@ use serde::Serialize;
 
 pub(crate) trait Param {
     fn data(&self) -> &ParamData;
+    fn data_mut(&mut self) -> &mut ParamData;
     fn id(&self) -> &str;
     fn var_name(&self) -> String;
     fn tag_name(&self) -> &str;
@@ -25,6 +26,10 @@ pub(crate) trait Param {
     }
     fn describe(&self) -> &str {
         &self.data().describe
+    }
+
+    fn describe_mut(&mut self) -> &mut String {
+        &mut self.data_mut().describe
     }
 
     fn required(&self) -> bool {
@@ -64,21 +69,25 @@ pub(crate) trait Param {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct FlagOptionParam {
-    pub(crate) data: ParamData,
-    pub(crate) id: String,
-    pub(crate) is_flag: bool,
-    pub(crate) short: Option<String>,
-    pub(crate) long_prefix: String,
-    pub(crate) prefixed: bool,
-    pub(crate) assigned: bool,
-    pub(crate) raw_notations: Vec<String>,
-    pub(crate) notations: Vec<String>,
-    pub(crate) inherit: bool,
+    data: ParamData,
+    id: String,
+    is_flag: bool,
+    short: Option<String>,
+    long_prefix: String,
+    prefixed: bool,
+    assigned: bool,
+    raw_notations: Vec<String>,
+    notations: Vec<String>,
+    inherit: bool,
 }
 
 impl Param for FlagOptionParam {
     fn data(&self) -> &ParamData {
         &self.data
+    }
+
+    fn data_mut(&mut self) -> &mut ParamData {
+        &mut self.data
     }
 
     fn id(&self) -> &str {
@@ -240,6 +249,26 @@ impl FlagOptionParam {
         !self.is_flag()
     }
 
+    pub(crate) fn is_assigned(&self) -> bool {
+        self.assigned
+    }
+
+    pub(crate) fn is_prefixed(&self) -> bool {
+        self.prefixed
+    }
+
+    pub(crate) fn short(&self) -> &Option<String> {
+        &self.short
+    }
+
+    pub(crate) fn long_prefix(&self) -> &str {
+        &self.long_prefix
+    }
+
+    pub(crate) fn notations(&self) -> &[String] {
+        &self.notations
+    }
+
     pub(crate) fn args_range(&self) -> (usize, usize) {
         let len = self.notations.len();
         if self.terminated()
@@ -399,6 +428,10 @@ impl FlagOptionParam {
         }
     }
 
+    pub(crate) fn set_inherit(&mut self) {
+        self.inherit = true;
+    }
+
     pub(crate) fn match_prefix<'a>(&self, arg: &'a str) -> Option<&'a str> {
         if self.prefixed {
             self.list_names().iter().find_map(|v| {
@@ -458,14 +491,18 @@ pub struct FlagOptionValue {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct PositionalParam {
-    pub(crate) data: ParamData,
-    pub(crate) raw_notation: Option<String>,
-    pub(crate) notation: String,
+    data: ParamData,
+    raw_notation: Option<String>,
+    notation: String,
 }
 
 impl Param for PositionalParam {
     fn data(&self) -> &ParamData {
         &self.data
+    }
+
+    fn data_mut(&mut self) -> &mut ParamData {
+        &mut self.data
     }
 
     fn id(&self) -> &str {
@@ -536,6 +573,10 @@ impl PositionalParam {
         }
     }
 
+    pub(crate) fn notation(&self) -> &str {
+        &self.notation
+    }
+
     pub(crate) fn render_notation(&self) -> String {
         let name: &String = &self.notation;
         match (self.required(), self.multiple_values()) {
@@ -585,14 +626,18 @@ pub struct PositionalValue {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct EnvParam {
-    pub(crate) data: ParamData,
-    pub(crate) describe: String,
-    pub(crate) inherit: bool,
+    data: ParamData,
+    describe: String,
+    inherit: bool,
 }
 
 impl Param for EnvParam {
     fn data(&self) -> &ParamData {
         &self.data
+    }
+
+    fn data_mut(&mut self) -> &mut ParamData {
+        &mut self.data
     }
 
     fn id(&self) -> &str {
@@ -673,6 +718,10 @@ impl EnvParam {
             DefaultValue::Fn(value) => ArgcValue::EnvFn(id, value),
         };
         Some(value)
+    }
+
+    pub(crate) fn set_inherit(&mut self) {
+        self.inherit = true;
     }
 }
 
