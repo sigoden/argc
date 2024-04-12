@@ -2,8 +2,9 @@
 source: tests/env.rs
 expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
-
 # OUTPUT
+All kinds of @env
+
 USAGE: envs <COMMAND>
 
 COMMANDS:
@@ -22,6 +23,8 @@ ENVIRONMENTS:
 
 
 # BUILD_OUTPUT
+All kinds of @env
+
 USAGE: prog <COMMAND>
 
 COMMANDS:
@@ -35,5 +38,3 @@ ENVIRONMENTS:
   TEST_ECA  choice [possible values: a, b]
   TEST_ECB  choice + default [default: a] [possible values: a, b]
   TEST_EFA  choice from fn
-
-

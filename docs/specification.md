@@ -178,7 +178,7 @@ Add a metadata.
 | `@meta man-section <1-8>`    | root   | Override the section for the man page, defaulting to 1.              |
 | `@meta default-subcommand`   | subcmd | Set the current subcommand as the default.                           |
 | `@meta inherit-flag-options` | root   | Subcommands will inherit the flags/options from their parent.        |
-| `@meta no-inherit-env`       | root   | Subcommands will not inherit the env vars from their parent.         |
+| `@meta no-inherit-env`       | subcmd | Subcommands will not inherit the @env from their parent.             |
 | `@meta combine-shorts`       | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `. |
 
 

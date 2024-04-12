@@ -706,7 +706,7 @@ fn build_positionals(cmd: &Command) -> String {
                 String::new()
             };
 
-            let bind_env = build_poistional_bind_env(param);
+            let bind_env = build_positional_bind_env(param);
 
             let handle_nonexist = format!("{default}{required}");
             let handle_nonexist = if !handle_nonexist.is_empty() {
@@ -762,7 +762,7 @@ fn build_flag_option_bind_envs(cmd: &Command) -> String {
     output.join("")
 }
 
-fn build_poistional_bind_env(param: &PositionalParam) -> String {
+fn build_positional_bind_env(param: &PositionalParam) -> String {
     match param.bind_env() {
         None => String::new(),
         Some(env_name) => {

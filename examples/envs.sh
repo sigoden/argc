@@ -1,3 +1,5 @@
+# @describe All kinds of @env
+
 # @meta dotenv
 # @env TEST_EA                   optional
 # @env TEST_EB!                  required

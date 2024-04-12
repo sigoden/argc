@@ -1,6 +1,7 @@
-#/usr/bin/env node
-
+#/usr/bin/env bash
 set -e
+
+# @describe Demonstrates how to use argc-parallel
 
 # @cmd
 cmd1() {
