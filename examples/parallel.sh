@@ -2,6 +2,7 @@
 set -e
 
 # @describe Demonstrates how to use argc-parallel
+# Compared with GNU parallel, the biggest advantage of argc-parallel is that it preserves `argc_*` variables.
 
 # @cmd
 cmd1() {

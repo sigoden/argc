@@ -210,18 +210,6 @@ argc --argc-mangen ./example.sh man/
 man man/example.1
 ```
 
-## Parallel
-
-argc provides features for running commands/functions in parallel.
-
-```sh
-argc --argc-parallel "$0" cmd1 arg1 arg2 ::: cmd2
-```
-
-The above command will run `cmd1 arg1 arg2` and `cmd2` in parallel.
-
-Compared with GNU parallel, the biggest advantage of argc parallel is that it preserves `argc_*` variables.
-
 <details>
 <summary>
 
