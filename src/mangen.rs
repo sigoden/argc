@@ -86,12 +86,12 @@ fn render_options_section(roff: &mut Roff, cmd: &Command) {
     roff.control("SH", ["OPTIONS"]);
     for param in cmd.all_flag_options() {
         let mut header = vec![];
-        if let Some(short) = &param.short {
+        if let Some(short) = param.short() {
             header.push(bold(short));
             header.push(roman(", "));
         }
         header.push(bold(param.render_long_name()));
-        let notations = &param.notations;
+        let notations = param.notations();
         if notations.len() == 1 {
             header.push(roman("="));
             let notation = &notations[0];
@@ -124,7 +124,7 @@ fn render_options_section(roff: &mut Roff, cmd: &Command) {
     }
 
     for param in &cmd.positional_params {
-        let notation = &param.notation;
+        let notation = param.notation();
         let mut header = match (param.required(), param.multiple_values()) {
             (true, true) => vec![roman("<"), italic(notation), roman(">...")],
             (true, false) => vec![roman("<"), italic(notation), roman(">")],
@@ -178,9 +178,9 @@ fn render_envs_section(roff: &mut Roff, cmd: &Command) {
         }
         let mut body = vec![];
         let mut has_help_written = false;
-        if !param.describe.is_empty() {
+        if !param.describe().is_empty() {
             has_help_written = true;
-            render_describe(&mut body, &param.describe);
+            render_describe(&mut body, param.describe());
         }
         roff.control("TP", []);
         roff.text(header);
