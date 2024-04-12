@@ -2958,6 +2958,6 @@ expression: stdout
       "command_fn": "test3"
     }
   ],
-  "command_fn": null,
-  "combine_shorts": true
+  "combine_shorts": true,
+  "command_fn": null
 }

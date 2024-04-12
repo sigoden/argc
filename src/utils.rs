@@ -23,8 +23,22 @@ pub(crate) const META_NO_INHERIT_ENV: &str = "no-inherit-env";
 pub(crate) const META_SYMBOL: &str = "symbol";
 pub(crate) const META_COMBINE_SHORTS: &str = "combine-shorts";
 pub(crate) const META_MAN_SECTION: &str = "man-section";
+pub(crate) const META_REQUIRE_TOOLS: &str = "require-tools";
 
 pub(crate) const MAX_ARGS: usize = 32767;
+
+pub(crate) const ARGC_REQUIRE_TOOLS: &str = r#"_argc_require_tools() {
+    local tool missing_tools=()
+    for tool in "$@"; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            missing_tools+=("$tool")
+        fi
+    done
+    if [[ "${#missing_tools[@]}" -gt 0 ]]; then
+        echo "error: missing tools: ${missing_tools[*]}" >&2
+        exit 1
+    fi
+}"#;
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()

@@ -340,6 +340,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
             ));
         }
+        if !last_cmd.require_tools.is_empty() {
+            output.push(ArgcValue::RequireTools(
+                last_cmd.require_tools.iter().cloned().collect(),
+            ));
+        }
         if let Some(command_fn) = &last_cmd.command_fn {
             output.push(ArgcValue::CommandFn(command_fn.clone()));
         }

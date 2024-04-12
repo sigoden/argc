@@ -1,0 +1,84 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog
+
+# OUTPUT
+argc__args=( prog )
+argc__fn=main
+argc__positionals=(  )
+
+_argc_require_tools() {
+    local tool missing_tools=()
+    for tool in "$@"; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            missing_tools+=("$tool")
+        fi
+    done
+    if [[ "${#missing_tools[@]}" -gt 0 ]]; then
+        echo "error: missing tools: ${missing_tools[*]}" >&2
+        exit 1
+    fi
+}
+_argc_require_tools not-found1
+
+main
+
+# RUN_OUTPUT
+error: missing tools: not-found1
+
+************ RUN ************
+prog cmd1
+
+# OUTPUT
+argc__args=( prog cmd1 )
+argc__fn=cmd1
+argc__positionals=(  )
+
+_argc_require_tools() {
+    local tool missing_tools=()
+    for tool in "$@"; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            missing_tools+=("$tool")
+        fi
+    done
+    if [[ "${#missing_tools[@]}" -gt 0 ]]; then
+        echo "error: missing tools: ${missing_tools[*]}" >&2
+        exit 1
+    fi
+}
+_argc_require_tools not-found1 not-found2
+
+cmd1
+
+# RUN_OUTPUT
+error: missing tools: not-found1 not-found2
+
+************ RUN ************
+prog cmd2
+
+# OUTPUT
+argc__args=( prog cmd2 )
+argc__fn=cmd2
+argc__positionals=(  )
+
+_argc_require_tools() {
+    local tool missing_tools=()
+    for tool in "$@"; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            missing_tools+=("$tool")
+        fi
+    done
+    if [[ "${#missing_tools[@]}" -gt 0 ]]; then
+        echo "error: missing tools: ${missing_tools[*]}" >&2
+        exit 1
+    fi
+}
+_argc_require_tools not-found1
+
+cmd2
+
+# RUN_OUTPUT
+error: missing tools: not-found1

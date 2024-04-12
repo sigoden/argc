@@ -1,7 +1,8 @@
 use indexmap::IndexMap;
 
 use crate::utils::{
-    argc_var_name, escape_shell_words, expand_dotenv, AFTER_HOOK, BEFORE_HOOK, VARIABLE_PREFIX,
+    argc_var_name, escape_shell_words, expand_dotenv, AFTER_HOOK, ARGC_REQUIRE_TOOLS, BEFORE_HOOK,
+    VARIABLE_PREFIX,
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -18,6 +19,7 @@ pub enum ArgcValue {
     EnvFn(String, String),
     Hook((bool, bool)),
     Dotenv(String),
+    RequireTools(Vec<String>),
     CommandFn(String),
     ParamFn(String),
     Error((String, i32)),
@@ -29,6 +31,7 @@ impl ArgcValue {
         let mut last = String::new();
         let mut exit = false;
         let mut positional_args = vec![];
+        let mut require_tools = vec![];
         let (mut before_hook, mut after_hook) = (false, false);
         for value in values {
             match value {
@@ -106,6 +109,9 @@ impl ArgcValue {
                 ArgcValue::Dotenv(value) => {
                     list.push(expand_dotenv(value));
                 }
+                ArgcValue::RequireTools(tools) => {
+                    require_tools = tools.to_vec();
+                }
                 ArgcValue::CommandFn(name) => {
                     if positional_args.is_empty() {
                         last = name.to_string();
@@ -133,6 +139,16 @@ impl ArgcValue {
             VARIABLE_PREFIX,
             positional_args.join(" ")
         ));
+        if !require_tools.is_empty() {
+            let tools = require_tools
+                .iter()
+                .map(|v| escape_shell_words(v))
+                .collect::<Vec<_>>()
+                .join(" ");
+            list.push(format!(
+                "\n{ARGC_REQUIRE_TOOLS}\n_argc_require_tools {tools}\n"
+            ));
+        }
         if before_hook {
             list.push(BEFORE_HOOK.to_string())
         }

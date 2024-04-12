@@ -1,7 +1,7 @@
 use crate::{
     command::Command,
     param::{FlagOptionParam, Param, PositionalParam},
-    utils::{escape_shell_words, expand_dotenv},
+    utils::{escape_shell_words, expand_dotenv, ARGC_REQUIRE_TOOLS},
     ChoiceValue, DefaultValue,
 };
 use anyhow::Result;
@@ -230,6 +230,13 @@ fn build_root(cmd: &Command) -> String {
             util_fns.push_str(util_fn);
         }
     }
+    let require_tools = if command.contains("_argc_tools") {
+        util_fns.push_str(&format!("\n{ARGC_REQUIRE_TOOLS}\n"));
+        r#"
+    _argc_require_tools "${_argc_tools[@]}""#
+    } else {
+        ""
+    };
 
     format!(
         r#"# ARGC-BUILD {{
@@ -244,7 +251,8 @@ _argc_run() {{
     argc__positionals=()
     _argc_index=1
     _argc_len="${{#argc__args[@]}}"{dotenv}
-    _argc_parse{before_hook}
+    _argc_tools=()
+    _argc_parse{require_tools}{before_hook}
     if [ -n "$argc__fn" ]; then
         $argc__fn "${{argc__positionals[@]}}"{after_hook}
     fi
@@ -466,6 +474,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
     let flag_option_bind_envs = build_flag_option_bind_envs(cmd);
     let required_flag_options = build_required_flag_options(cmd);
 
+    let require_tools = build_require_tools(cmd);
     let handle = build_handle(cmd, suffix);
 
     if cmd.delegated() {
@@ -496,7 +505,7 @@ _argc_parse{suffix}() {{
         _argc_key="${{_argc_item%%=*}}"
         case "$_argc_key" in{combined_case}
         esac
-    done{flag_option_bind_envs}{required_flag_options}
+    done{flag_option_bind_envs}{required_flag_options}{require_tools}
     if [[ -n "$_argc_action" ]]; then
         $_argc_action
     else{handle}
@@ -637,6 +646,22 @@ fn build_handle(cmd: &Command, suffix: &str) -> String {
     } else {
         output
     }
+}
+
+fn build_require_tools(cmd: &Command) -> String {
+    if cmd.require_tools.is_empty() {
+        return String::new();
+    }
+    let tools = cmd
+        .require_tools
+        .iter()
+        .map(|v| escape_shell_words(v))
+        .collect::<Vec<_>>()
+        .join(" ");
+    format!(
+        r#"
+    _argc_tools=({tools})"#
+    )
 }
 
 fn build_positionals(cmd: &Command) -> String {
