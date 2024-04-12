@@ -3,7 +3,7 @@ mod parallel;
 
 use anyhow::{anyhow, bail, Context, Result};
 use argc::{
-    utils::{escape_shell_words, get_current_dir, get_shell_path, termwidth},
+    utils::{escape_shell_words, get_current_dir, get_shell_path, is_true_value, termwidth},
     Shell,
 };
 use base64::{engine::general_purpose, Engine as _};
@@ -214,7 +214,7 @@ fn run_compgen(mut args: Vec<String>) -> Option<()> {
         }
     }
     let no_color = std::env::var("NO_COLOR")
-        .map(|v| v == "true" || v == "1")
+        .map(|v| is_true_value(&v))
         .unwrap_or_default();
     let output = if &args[4] == "argc" && (args[3].is_empty() || args[5].starts_with("--argc")) {
         let cmd_args = &args[4..];

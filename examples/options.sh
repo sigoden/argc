@@ -7,6 +7,7 @@
 # @option    --oc!                  required
 # @option    --od*                  multi-occurs
 # @option    --oe+                  required + multi-occurs
+# @option    --of*,                 multi-occurs + comma-separated list
 # @option    --ona <PATH>           value notation
 # @option    --onb <FILE> <FILE>    two-args value notations
 # @option    --onc <CMD> <FILE+>    unlimited-args value notations
@@ -15,7 +16,6 @@
 # @option    --oca[a|b]             choice
 # @option    --ocb[=a|b]            choice + default
 # @option    --occ*[a|b]            multi-occurs + choice
-# @option    --ocd+[a|b]            required + multi-occurs + choice
 # @option    --ofa[`_choice_fn`]    choice from fn
 # @option    --ofb[?`_choice_fn`]   choice from fn + no validation
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn

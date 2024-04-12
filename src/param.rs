@@ -1,8 +1,5 @@
-use crate::matcher::FlagOptionArg;
-use crate::utils::{
-    argc_var_name, escape_shell_words, is_choice_value_terminate, is_default_value_terminate,
-    to_cobol_case, MAX_ARGS,
-};
+use crate::parser::{is_choice_value_terminate, is_default_value_terminate};
+use crate::utils::{argc_var_name, escape_shell_words, sanitize_var_name, to_cobol_case, MAX_ARGS};
 use crate::ArgcValue;
 
 use anyhow::{bail, Result};
@@ -60,20 +57,20 @@ pub(crate) trait Param {
     fn default_value(&self) -> Option<&String> {
         self.data().default_value()
     }
-    fn bind_env(&self) -> Option<Option<&String>> {
-        self.data().bind_env()
+    fn bind_env(&self) -> Option<String> {
+        self.data().normalize_bind_env(self.id())
     }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct FlagOptionParam {
     pub(crate) data: ParamData,
+    pub(crate) id: String,
     pub(crate) is_flag: bool,
     pub(crate) short: Option<String>,
     pub(crate) long_prefix: String,
     pub(crate) prefixed: bool,
     pub(crate) assigned: bool,
-    pub(crate) id: String,
     pub(crate) raw_notations: Vec<String>,
     pub(crate) notations: Vec<String>,
     pub(crate) inherit: bool,
@@ -111,6 +108,9 @@ impl Param for FlagOptionParam {
             if self.args_delimiter().is_some() {
                 bail!("cannot combine delmiter and multiple notations")
             }
+        }
+        if self.prefixed && self.bind_env().is_some() {
+            bail!("cannot bind env with prefixed options")
         }
         Ok(())
     }
@@ -216,6 +216,7 @@ impl FlagOptionParam {
             assigned: self.assigned,
             default: self.data().default.clone(),
             choice: self.data().choice.clone(),
+            env: self.bind_env(),
             inherit: self.inherit,
         }
     }
@@ -294,7 +295,7 @@ impl FlagOptionParam {
         list.join(" ")
     }
 
-    pub(crate) fn render_help_body(&self) -> String {
+    pub(crate) fn render_body(&self) -> String {
         let mut output = String::new();
         if self.short.is_none() && self.long_prefix.len() == 1 && self.data.name.len() == 1 {
             output.push_str(&self.render_long_name());
@@ -320,29 +321,27 @@ impl FlagOptionParam {
         output
     }
 
-    pub(crate) fn to_argc_value(&self, args: &[FlagOptionArg]) -> Option<ArgcValue> {
+    pub(crate) fn to_argc_value(&self, args: &[(&str, &[&str])]) -> Option<ArgcValue> {
         let id = self.id().to_string();
         if self.prefixed {
             let mut map: IndexMap<String, Vec<String>> = IndexMap::new();
-            for (arg, value, name) in args.iter() {
-                if name == &Some(id.as_str()) {
-                    if let Some(arg_suffix) = self
-                        .list_names()
-                        .into_iter()
-                        .find_map(|v| arg.strip_prefix(&v))
-                    {
-                        let key = match arg_suffix.split_once('=') {
-                            Some((arg_suffix, _)) => arg_suffix,
-                            None => arg_suffix,
-                        };
-                        if let Some(values) = map.get_mut(key) {
-                            values.extend(value.iter().map(|v| v.to_string()));
-                        } else {
-                            map.insert(
-                                key.to_string(),
-                                value.iter().map(|v| v.to_string()).collect(),
-                            );
-                        }
+            for (arg, value) in args {
+                if let Some(arg_suffix) = self
+                    .list_names()
+                    .into_iter()
+                    .find_map(|v| arg.strip_prefix(&v))
+                {
+                    let key = match arg_suffix.split_once('=') {
+                        Some((arg_suffix, _)) => arg_suffix,
+                        None => arg_suffix,
+                    };
+                    if let Some(values) = map.get_mut(key) {
+                        values.extend(value.iter().map(|v| v.to_string()));
+                    } else {
+                        map.insert(
+                            key.to_string(),
+                            value.iter().map(|v| v.to_string()).collect(),
+                        );
                     }
                 }
             }
@@ -352,16 +351,7 @@ impl FlagOptionParam {
                 Some(ArgcValue::Map(id, map))
             }
         } else {
-            let values: Vec<&[&str]> = args
-                .iter()
-                .filter_map(|(_, value, name)| {
-                    if name == &Some(self.id()) {
-                        Some(value.as_slice())
-                    } else {
-                        None
-                    }
-                })
-                .collect();
+            let values: Vec<&[&str]> = args.iter().map(|(_, value)| *value).collect();
             if self.is_flag {
                 if values.is_empty() {
                     None
@@ -451,6 +441,7 @@ pub struct FlagOptionValue {
     pub assigned: bool,
     pub default: Option<DefaultValue>,
     pub choice: Option<ChoiceValue>,
+    pub env: Option<String>,
     pub inherit: bool,
 }
 
@@ -523,6 +514,7 @@ impl PositionalParam {
             terminated: self.terminated(),
             default: self.data().default.clone(),
             choice: self.data().choice.clone(),
+            env: self.bind_env(),
         }
     }
 
@@ -570,6 +562,7 @@ pub struct PositionalValue {
     pub terminated: bool,
     pub default: Option<DefaultValue>,
     pub choice: Option<ChoiceValue>,
+    pub env: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -604,7 +597,7 @@ impl Param for EnvParam {
         if !matches!(self.data().modifer, Modifier::Optional | Modifier::Required) {
             bail!("can only be a single value")
         }
-        if self.bind_env().is_some() {
+        if self.data.bind_env.is_some() {
             bail!("cannot bind another env")
         }
         Ok(())
@@ -642,7 +635,7 @@ impl EnvParam {
         }
     }
 
-    pub(crate) fn render_help_body(&self) -> String {
+    pub(crate) fn render_body(&self) -> String {
         let marker = if self.required() { "*" } else { "" };
         format!("{}{}", self.id(), marker)
     }
@@ -737,14 +730,10 @@ impl ParamData {
         }
     }
 
-    pub(crate) fn bind_env(&self) -> Option<Option<&String>> {
-        self.bind_env.as_ref().map(|v| v.as_ref())
-    }
-
     pub(crate) fn normalize_bind_env(&self, id: &str) -> Option<String> {
-        let bind_env = match self.bind_env()? {
+        let bind_env = match self.bind_env.as_ref()? {
             Some(v) => v.clone(),
-            None => id.to_uppercase(),
+            None => sanitize_var_name(id).to_uppercase(),
         };
         Some(bind_env)
     }
@@ -775,7 +764,7 @@ impl ParamData {
     }
 
     pub(crate) fn render_source_of_bind_env_and_describe(&self, parts: &mut Vec<String>) {
-        if let Some(bind_env) = self.bind_env() {
+        if let Some(bind_env) = &self.bind_env {
             match bind_env {
                 Some(v) => parts.push(format!("${v}")),
                 None => parts.push("$$".into()),
@@ -804,6 +793,9 @@ impl ParamData {
             output.push_str(&format!("[possible values: {}]", values.join(", ")));
         }
         if let Some(bind_env) = self.normalize_bind_env(id) {
+            if !output.is_empty() {
+                output.push(sep)
+            }
             output.push_str(&format!("[env: {bind_env}]"));
         }
         output

@@ -1,0 +1,10 @@
+---
+source: tests/bind_env.rs
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+---
+# OUTPUT
+error: the following required arguments were not provided:
+  --ob <OB>
+
+
+# BUILD_OUTPUT

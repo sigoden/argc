@@ -1,16 +1,16 @@
 #![allow(clippy::too_many_arguments)]
 
-use std::{
-    collections::{HashMap, HashSet},
-    env,
-};
+use std::collections::{HashMap, HashSet};
 
 use crate::{
     argc_value::ArgcValue,
     command::{Command, SymbolParam},
     compgen::CompColor,
     param::{ChoiceValue, FlagOptionParam, Param, ParamData, PositionalParam},
-    utils::{argc_var_name, load_dotenv, run_param_fns, META_COMBINE_SHORTS},
+    utils::{
+        all_envs, argc_var_name, get_os, is_true_value, load_dotenv, run_param_fns,
+        META_COMBINE_SHORTS,
+    },
     Shell,
 };
 
@@ -28,7 +28,7 @@ pub(crate) struct Matcher<'a, 'b> {
     arg_comp: ArgComp,
     choice_fns: HashSet<&'a str>,
     script_path: Option<String>,
-    envs: HashMap<&'a str, String>,
+    envs: HashMap<String, String>,
     term_width: Option<usize>,
     split_last_arg_at: Option<usize>,
     comp_option: Option<&'a str>,
@@ -64,6 +64,7 @@ pub(crate) enum MatchError {
     MissingRequiredEnvironments(Vec<String>),
     NotMultipleArgument(usize, String),
     InvalidValue(usize, String, String, Vec<String>),
+    InvalidBindEnvironment(usize, String, String),
     InvalidEnvironment(usize, String, String, Vec<String>),
     MismatchValues(usize, String),
     NoFlagValue(usize, String),
@@ -294,15 +295,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
         let last_cmd = *cmds.last().unwrap();
 
-        let mut envs = HashMap::new();
-        let dotenv_vars = root_cmd.dotenv().and_then(load_dotenv).unwrap_or_default();
+        let mut envs = all_envs();
+        envs.extend(root_cmd.dotenv().and_then(load_dotenv).unwrap_or_default());
+
         for param in &last_cmd.env_params {
-            if let Some(value) = std::env::var(param.id())
-                .ok()
-                .or_else(|| dotenv_vars.get(param.id()).cloned())
-            {
-                envs.insert(param.id(), value);
-            }
             add_param_choice_fn(&mut choice_fns, param)
         }
 
@@ -333,11 +329,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
     }
 
     pub(crate) fn to_arg_values(&self) -> Vec<ArgcValue> {
-        if let Some(err) = self.validate() {
+        let bind_envs = self.build_bind_envs();
+        if let Some(err) = self.validate(&bind_envs) {
             return vec![ArgcValue::Error(self.stringify_match_error(&err))];
         }
         let last_cmd = self.last_cmd();
-        let mut output = self.to_arg_values_base();
+        let mut output = self.to_arg_values_base(&bind_envs);
         if last_cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
             output.push(ArgcValue::ExtraPositionalMultiple(
                 self.positional_args.iter().map(|v| v.to_string()).collect(),
@@ -350,7 +347,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
     }
 
     pub(crate) fn to_arg_values_for_param_fn(&self) -> Vec<ArgcValue> {
-        let mut output: Vec<ArgcValue> = self.to_arg_values_base();
+        let bind_envs = self.build_bind_envs();
+        let mut output: Vec<ArgcValue> = self.to_arg_values_base(&bind_envs);
         let cmds_len = self.cmds.len();
         let level = cmds_len - 1;
         let last_cmd = self.cmds[level];
@@ -474,19 +472,18 @@ impl<'a, 'b> Matcher<'a, 'b> {
         self.split_last_arg_at
     }
 
-    fn to_arg_values_base(&self) -> Vec<ArgcValue> {
+    fn to_arg_values_base<'x>(&'x self, bind_envs: &BindEnvs<'a, 'x>) -> Vec<ArgcValue> {
         let mut output = vec![];
         let root_cmd = self.cmds[0];
         let cmds_len = self.cmds.len();
-        let level = cmds_len - 1;
-        let last_cmd = self.cmds[level];
+        let last_cmd = self.last_cmd();
 
         if let Some(value) = root_cmd.dotenv() {
             output.push(ArgcValue::Dotenv(value.to_string()))
         }
 
         for param in &last_cmd.env_params {
-            if !self.envs.contains_key(&param.id()) {
+            if !self.envs.contains_key(param.id()) {
                 if let Some(value) = param.get_env_value() {
                     output.push(value);
                 }
@@ -503,10 +500,31 @@ impl<'a, 'b> Matcher<'a, 'b> {
         }
 
         for level in 0..cmds_len {
-            let args = &self.flag_option_args[level];
+            let args = self.flag_option_args[level].as_slice();
             let cmd = self.cmds[level];
             for param in cmd.flag_option_params.iter() {
-                if let Some(value) = param.to_argc_value(args) {
+                let mut args: Vec<_> = args
+                    .iter()
+                    .filter_map(|(name, value, param_name)| {
+                        if param_name == &Some(param.id()) {
+                            Some((*name, value.as_slice()))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+                if args.is_empty() {
+                    if let Some(env_values) = bind_envs.flag_options[level].get(param.id()) {
+                        if param.is_flag() {
+                            if is_true_value(env_values[0]) {
+                                args = vec![("", env_values.as_slice())];
+                            }
+                        } else {
+                            args = vec![("", env_values.as_slice())];
+                        }
+                    }
+                }
+                if let Some(value) = param.to_argc_value(&args) {
                     output.push(value);
                 }
             }
@@ -514,10 +532,15 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
         let positional_values = self.match_positionals();
         for (i, param) in last_cmd.positional_params.iter().enumerate() {
-            let values = positional_values
+            let mut values = positional_values
                 .get(i)
                 .map(|v| v.as_slice())
                 .unwrap_or_default();
+            if values.is_empty() {
+                if let Some(env_values) = bind_envs.positionals.get(param.id()) {
+                    values = env_values.as_slice()
+                }
+            }
             if let Some(value) = param.to_argc_value(values) {
                 output.push(value);
             }
@@ -526,20 +549,49 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
-    fn validate(&self) -> Option<MatchError> {
+    fn build_bind_envs<'x: 'a>(&'x self) -> BindEnvs<'a, 'x> {
         let cmds_len = self.cmds.len();
-        let choices_fn_values = self.run_choices_fns().unwrap_or_default();
+        let last_cmd = self.last_cmd();
+        let mut bind_envs = BindEnvs::new(cmds_len);
 
+        for level in 0..cmds_len {
+            let cmd = self.cmds[level];
+            for param in cmd.flag_option_params.iter() {
+                if let Some(env_value) = param.bind_env().and_then(|v| self.envs.get(&v)) {
+                    let values = delimit_arg_values(param, &[env_value]);
+                    bind_envs.flag_options[level].insert(param.id(), values);
+                    add_param_choice_fn(&mut bind_envs.choice_fns, param);
+                }
+            }
+        }
+
+        for param in last_cmd.positional_params.iter() {
+            if let Some(env_value) = param.bind_env().and_then(|v| self.envs.get(&v)) {
+                let values = delimit_arg_values(param, &[env_value]);
+                bind_envs.positionals.insert(param.id(), values);
+                add_param_choice_fn(&mut bind_envs.choice_fns, param);
+            }
+        }
+        bind_envs
+    }
+
+    fn validate<'x>(&'x self, bind_envs: &BindEnvs<'a, 'x>) -> Option<MatchError> {
+        let cmds_len = self.cmds.len();
+        let choices_fn_values = self.run_choices_fns(bind_envs).unwrap_or_default();
         for level in 0..cmds_len {
             let flag_option_args = &self.flag_option_args[level];
             let cmd = self.cmds[level];
+            let flag_option_bind_envs = &bind_envs.flag_options[level];
             let mut flag_option_map = IndexMap::new();
             let mut missing_flag_options: IndexSet<&str> = cmd
                 .flag_option_params
                 .iter()
-                .filter(|v| v.required())
+                .filter(|v| v.required() && !flag_option_bind_envs.contains_key(v.id()))
                 .map(|v| v.id())
                 .collect();
+
+            let mut check_flag_option_bind_envs: IndexSet<&str> =
+                flag_option_bind_envs.keys().copied().collect();
             for (i, (key, _, name)) in flag_option_args.iter().enumerate() {
                 match (*key, name) {
                     ("--help", _) | ("-help", _) | ("-h", None) | (_, Some("help")) => {
@@ -555,6 +607,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 match *name {
                     Some(name) => {
                         missing_flag_options.swap_remove(name);
+                        check_flag_option_bind_envs.swap_remove(name);
                         flag_option_map.entry(name).or_insert(vec![]).push(i);
                     }
                     None => return Some(MatchError::UnknownArgument(level, key.to_string())),
@@ -599,6 +652,40 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     }
                 }
             }
+
+            for name in check_flag_option_bind_envs {
+                if let Some(param) = cmd.flag_option_params.iter().find(|v| v.id() == name) {
+                    let values = &flag_option_bind_envs[name];
+                    let mut is_valid = true;
+                    let (min, _) = param.args_range();
+                    if param.is_flag() {
+                        if !is_bool_value(values[0]) {
+                            is_valid = false;
+                        }
+                    } else if min > 1 {
+                        is_valid = false;
+                    }
+                    if is_valid {
+                        if let Some(choices) =
+                            get_param_choice(&param.data.choice, &choices_fn_values)
+                        {
+                            for value in values.iter() {
+                                if !choices.contains(&value.to_string()) {
+                                    is_valid = false;
+                                }
+                            }
+                        }
+                    }
+                    if !is_valid {
+                        return Some(MatchError::InvalidBindEnvironment(
+                            level,
+                            param.bind_env().unwrap_or_default(),
+                            param.render_long_name(),
+                        ));
+                    }
+                }
+            }
+
             if !missing_flag_options.is_empty() {
                 let missing_flag_options: Vec<String> = missing_flag_options
                     .iter()
@@ -673,11 +760,25 @@ impl<'a, 'b> Matcher<'a, 'b> {
             }
         }
         if positional_params_len > positional_values_len {
-            let missing_positionals: Vec<_> = last_cmd.positional_params[positional_values_len..]
-                .iter()
-                .filter(|param| param.required())
-                .map(|v| v.render_notation())
-                .collect();
+            let mut missing_positionals = vec![];
+            for param in &last_cmd.positional_params[positional_values_len..] {
+                if let Some(values) = bind_envs.positionals.get(param.id()) {
+                    if let Some(choices) = get_param_choice(&param.data.choice, &choices_fn_values)
+                    {
+                        for value in values.iter() {
+                            if !choices.contains(&value.to_string()) {
+                                return Some(MatchError::InvalidBindEnvironment(
+                                    level,
+                                    param.bind_env().unwrap_or_default(),
+                                    param.render_notation(),
+                                ));
+                            }
+                        }
+                    }
+                } else if param.required() {
+                    missing_positionals.push(param.render_notation())
+                }
+            }
             if !missing_positionals.is_empty() {
                 return Some(MatchError::MissingRequiredArguments(
                     level,
@@ -715,12 +816,19 @@ impl<'a, 'b> Matcher<'a, 'b> {
         None
     }
 
-    fn run_choices_fns(&'a self) -> Option<HashMap<&'a str, Vec<String>>> {
+    fn run_choices_fns<'x>(
+        &'x self,
+        bind_envs: &BindEnvs<'a, 'x>,
+    ) -> Option<HashMap<&'a str, Vec<String>>> {
+        let fns: Vec<_> = {
+            let mut fns = self.choice_fns.clone();
+            fns.extend(bind_envs.choice_fns.iter());
+            fns.into_iter().collect()
+        };
         let script_path = self.script_path.as_ref()?;
         let mut choices_fn_values = HashMap::new();
-        let fns: Vec<&str> = self.choice_fns.iter().copied().collect();
         let mut envs = HashMap::new();
-        envs.insert("ARGC_OS".into(), env::consts::OS.to_string());
+        envs.insert("ARGC_OS".into(), get_os());
         let outputs = run_param_fns(script_path, &fns, self.args, envs)?;
         for (i, output) in outputs.into_iter().enumerate() {
             let choices = output
@@ -843,6 +951,12 @@ impl<'a, 'b> Matcher<'a, 'b> {
   [possible values: {list}]"###
                 )
             }
+            MatchError::InvalidBindEnvironment(_level, env_name, param_name) => {
+                exit = 1;
+                format!(
+                    r###"error: environment variable '{env_name}' has invalid value for param '{param_name}'"###
+                )
+            }
             MatchError::InvalidEnvironment(_level, value, name, choices) => {
                 exit = 1;
                 let list = choices.join(", ");
@@ -905,6 +1019,25 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
 /// (value, description, nospace, color)
 pub(crate) type CompItem = (String, String, bool, CompColor);
+
+#[derive(Debug)]
+struct BindEnvs<'a, 'x> {
+    flag_options: Vec<BindEnvMap<'a, 'x>>,
+    positionals: BindEnvMap<'a, 'x>,
+    choice_fns: HashSet<&'a str>,
+}
+
+impl<'a, 'x> BindEnvs<'a, 'x> {
+    fn new(len: usize) -> Self {
+        Self {
+            flag_options: vec![HashMap::new(); len],
+            positionals: HashMap::new(),
+            choice_fns: HashSet::new(),
+        }
+    }
+}
+
+type BindEnvMap<'a, 'x> = HashMap<&'a str, Vec<&'x str>>;
 
 fn find_subcommand<'a>(
     cmd: &'a Command,
@@ -1237,10 +1370,14 @@ fn get_param_choice<'a, 'b: 'a>(
     }
 }
 
-fn delimit_arg_values<'b, T: Param>(param: &T, values: &[&'b str]) -> Vec<&'b str> {
+fn delimit_arg_values<'x, T: Param>(param: &T, values: &[&'x str]) -> Vec<&'x str> {
     if let Some(delimiter) = param.args_delimiter() {
         values.iter().flat_map(|v| v.split(delimiter)).collect()
     } else {
         values.to_vec()
     }
+}
+
+fn is_bool_value(value: &str) -> bool {
+    matches!(value, "true" | "false" | "0" | "1")
 }

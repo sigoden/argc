@@ -197,3 +197,33 @@ macro_rules! snapshot_env {
 "#));
     };
 }
+
+macro_rules! snapshot_bind_env {
+    (
+        args: [$($arg:literal),*],
+        envs: {$($key:literal : $value:literal),*$(,)?}
+
+    ) => {
+        let script_path = $crate::fixtures::locate_script("examples/bind-envs.sh");
+        let args: Vec<String> = vec![$($arg.to_string(),)*];
+        let envs: Vec<(&str, &str)> = [$(($key, $value),)*].into_iter().collect();
+
+        let output = $crate::fixtures::run_script(&script_path, &args, &envs);
+
+        // let build_output = {
+        //     let build_script_dir = $crate::fixtures::tmpdir();
+        //     let source = std::fs::read_to_string(&script_path).unwrap();
+        //     let build_script_path = $crate::fixtures::build_script(&build_script_dir, &source);
+        //     $crate::fixtures::run_script(&build_script_path, &args, &envs)
+        // };
+        let build_output = "";
+
+        insta::assert_snapshot!(format!(r#"
+# OUTPUT
+{output}
+
+# BUILD_OUTPUT
+{build_output}
+"#));
+    };
+}

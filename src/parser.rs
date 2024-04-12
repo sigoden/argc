@@ -1,7 +1,7 @@
 use crate::param::{
     ChoiceValue, DefaultValue, EnvParam, FlagOptionParam, Modifier, ParamData, PositionalParam,
 };
-use crate::utils::{is_choice_value_terminate, is_default_value_terminate};
+use crate::utils::is_special_var_char;
 use crate::Result;
 use anyhow::bail;
 use nom::{
@@ -734,8 +734,16 @@ fn create_err(input: &str, kind: ErrorKind) -> nom::Err<nom::error::Error<&str>>
     nom::Err::Error(nom::error::Error::new(input, kind))
 }
 
+pub(crate) fn is_choice_value_terminate(c: char) -> bool {
+    c == '|' || c == ']'
+}
+
+pub(crate) fn is_default_value_terminate(c: char) -> bool {
+    c.is_whitespace()
+}
+
 fn is_name_char(c: char) -> bool {
-    c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | ':' | '@')
+    c.is_ascii_alphanumeric() || c == '_' || is_special_var_char(c)
 }
 
 fn is_env_name_char(c: char) -> bool {

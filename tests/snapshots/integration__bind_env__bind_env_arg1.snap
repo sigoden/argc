@@ -1,0 +1,13 @@
+---
+source: tests/bind_env.rs
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+---
+# OUTPUT
+argc__args=([0]="bind-envs" [1]="cmd_arg1")
+argc__fn=cmd_arg1
+argc__positionals=([0]="v1")
+argc_val=v1
+cmd_arg1 v1
+
+
+# BUILD_OUTPUT

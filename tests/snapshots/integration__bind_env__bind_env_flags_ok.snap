@@ -1,0 +1,21 @@
+---
+source: tests/bind_env.rs
+expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+---
+# OUTPUT
+USAGE: bind-envs <COMMAND>
+
+COMMANDS:
+  flags
+  options
+  cmd_arg1
+  cmd_arg2
+  cmd_arg_with_default
+  cmd_arg_with_choice
+  cmd_arg_with_choice_fn
+  cmd_multi_arg_with_choice_fn_and_comma_sep
+  cmd_three_required_args
+
+
+
+# BUILD_OUTPUT

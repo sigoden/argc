@@ -75,6 +75,7 @@ Define a positional argument.
 # @arg vb!                        required
 # @arg vc*                        multi-values
 # @arg vd+                        multi-values + required
+# @arg vf*,                       multi-values + comma-separated list
 # @arg vna <PATH>                 value notation
 # @arg vda=a                      default
 # @arg vdb=`_default_fn`          default from fn
@@ -87,6 +88,8 @@ Define a positional argument.
 # @arg vfc*[`_choice_fn`]         multi-values + choice from fn
 # @arg vfd*,[`_choice_fn`]        multi-values + choice from fn + comma-separated list
 # @arg vxa~                       capture all remaining args
+# @arg ea $$                      bind-env
+# @arg eb $BE                     bind-named-env
 ```
 
 ### `@option`
@@ -106,6 +109,7 @@ Define an option argument.
 # @option    --oc!                  required
 # @option    --od*                  multi-occurs
 # @option    --oe+                  required + multi-occurs
+# @option    --of*,                 multi-occurs + comma-separated list
 # @option    --ona <PATH>           value notation
 # @option    --onb <FILE> <FILE>    two-args value notations
 # @option    --onc <CMD> <FILE+>    unlimited-args value notations
@@ -120,6 +124,8 @@ Define an option argument.
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
 # @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option    --oxa~                 capture all remaining args
+# @option    --ea $$                bind-env
+# @option    --eb $BE               bind-named-env
 ```
 
 ### `@flag`
@@ -136,6 +142,8 @@ Define a flag argument. Flag is a special option that does not accept any value.
 # @flag  -b --fb         short
 # @flag  -c              short only
 # @flag     --fd*        multi-occurs
+# @flag     --ea $$      bind-env
+# @flag     --eb $BE     bind-named-env
 ```
 
 ### `@env`

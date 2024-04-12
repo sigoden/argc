@@ -376,10 +376,10 @@ impl Command {
         }
         output.push(self.render_usage());
         output.push(String::new());
-        output.extend(self.render_positionals_help(term_width));
-        output.extend(self.render_flag_options_help(term_width));
-        output.extend(self.render_subcommands_help(term_width));
-        output.extend(self.render_envs_help(term_width));
+        output.extend(self.render_positionals(term_width));
+        output.extend(self.render_flag_options(term_width));
+        output.extend(self.render_subcommands(term_width));
+        output.extend(self.render_envs(term_width));
         if output.is_empty() {
             return "\n".to_string();
         }
@@ -415,7 +415,7 @@ impl Command {
         output.join(" ")
     }
 
-    pub(crate) fn render_positionals_help(&self, term_width: Option<usize>) -> Vec<String> {
+    pub(crate) fn render_positionals(&self, term_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         if self.positional_params.is_empty() {
             return output;
@@ -436,7 +436,7 @@ impl Command {
         output
     }
 
-    pub(crate) fn render_flag_options_help(&self, term_width: Option<usize>) -> Vec<String> {
+    pub(crate) fn render_flag_options(&self, term_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         if self.flag_option_params.is_empty() {
             return output;
@@ -446,7 +446,7 @@ impl Command {
             .all_flag_options()
             .into_iter()
             .map(|param| {
-                let value = param.render_help_body();
+                let value = param.render_body();
                 let describe = param.render_describe();
                 value_size = value_size.max(value.len());
                 (value, describe)
@@ -458,7 +458,7 @@ impl Command {
         output
     }
 
-    pub(crate) fn render_subcommands_help(&self, term_width: Option<usize>) -> Vec<String> {
+    pub(crate) fn render_subcommands(&self, term_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         if self.subcommands.is_empty() {
             return output;
@@ -496,7 +496,7 @@ impl Command {
         output
     }
 
-    pub(crate) fn render_envs_help(&self, term_width: Option<usize>) -> Vec<String> {
+    pub(crate) fn render_envs(&self, term_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         if self.env_params.is_empty() {
             return output;
@@ -506,7 +506,7 @@ impl Command {
             .env_params
             .iter()
             .map(|param| {
-                let value = param.render_help_body();
+                let value = param.render_body();
                 value_size = value_size.max(value.len());
                 (value, param.render_describe())
             })
