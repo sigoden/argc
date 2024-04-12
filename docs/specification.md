@@ -175,7 +175,7 @@ Add a metadata.
 | `@meta author <value>`           | any    | Set the author for the command.                                      |
 | `@meta dotenv [<path>]`          | root   | Load a dotenv file from a custom path, if persent.                   |
 | `@meta default-subcommand`       | subcmd | Set the current subcommand as the default.                           |
-| `@meta require-tools <tool>,...` | any    | Specify a list of tools required by the command.                     |
+| `@meta require-tools <tool>,...` | any    | Require certain tools to be available on the system.                 |
 | `@meta man-section <1-8>`        | root   | Override the section for the man page, defaulting to 1.              |
 | `@meta inherit-flag-options`     | root   | Subcommands will inherit the flags/options from their parent.        |
 | `@meta no-inherit-env`           | subcmd | Subcommands will not inherit the @env from their parent.             |
