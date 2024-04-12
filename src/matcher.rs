@@ -64,7 +64,7 @@ pub(crate) enum MatchError {
     MissingRequiredEnvironments(Vec<String>),
     NotMultipleArgument(usize, String),
     InvalidValue(usize, String, String, Vec<String>),
-    InvalidBindEnvironment(usize, String, String),
+    InvalidBindEnvironment(usize, String, String, String, Vec<String>),
     InvalidEnvironment(usize, String, String, Vec<String>),
     MismatchValues(usize, String),
     NoFlagValue(usize, String),
@@ -657,6 +657,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 if let Some(param) = cmd.flag_option_params.iter().find(|v| v.id() == name) {
                     let values = &flag_option_bind_envs[name];
                     let mut is_valid = true;
+                    let mut choice_values = vec![];
                     let (min, _) = param.args_range();
                     if param.is_flag() {
                         if !is_bool_value(values[0]) {
@@ -665,23 +666,29 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     } else if min > 1 {
                         is_valid = false;
                     }
-                    if is_valid {
-                        if let Some(choices) =
-                            get_param_choice(&param.data.choice, &choices_fn_values)
-                        {
-                            for value in values.iter() {
-                                if !choices.contains(&value.to_string()) {
-                                    is_valid = false;
-                                }
-                            }
-                        }
-                    }
                     if !is_valid {
                         return Some(MatchError::InvalidBindEnvironment(
                             level,
+                            values[0].to_string(),
                             param.bind_env().unwrap_or_default(),
                             param.render_long_name(),
+                            choice_values,
                         ));
+                    }
+                    if let Some(choices) = get_param_choice(&param.data.choice, &choices_fn_values)
+                    {
+                        choice_values = choices.to_vec();
+                        for value in values.iter() {
+                            if !choices.contains(&value.to_string()) {
+                                return Some(MatchError::InvalidBindEnvironment(
+                                    level,
+                                    value.to_string(),
+                                    param.bind_env().unwrap_or_default(),
+                                    param.render_long_name(),
+                                    choice_values,
+                                ));
+                            }
+                        }
                     }
                 }
             }
@@ -769,8 +776,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             if !choices.contains(&value.to_string()) {
                                 return Some(MatchError::InvalidBindEnvironment(
                                     level,
+                                    value.to_string(),
                                     param.bind_env().unwrap_or_default(),
                                     param.render_notation(),
+                                    choices.to_vec(),
                                 ));
                             }
                         }
@@ -951,11 +960,19 @@ impl<'a, 'b> Matcher<'a, 'b> {
   [possible values: {list}]"###
                 )
             }
-            MatchError::InvalidBindEnvironment(_level, env_name, param_name) => {
+            MatchError::InvalidBindEnvironment(_level, value, env_name, name, choices) => {
                 exit = 1;
-                format!(
-                    r###"error: environment variable '{env_name}' has invalid value for param '{param_name}'"###
-                )
+                if choices.is_empty() {
+                    format!(
+                        r###"error: environment variable `{env_name}` has invalid value for param '{name}'"###
+                    )
+                } else {
+                    let list = choices.join(", ");
+                    format!(
+                        r###"error: invalid value `{value}` for environment variable `{env_name}` that bound to `{name}`
+  [possible values: {list}]"###
+                    )
+                }
             }
             MatchError::InvalidEnvironment(_level, value, name, choices) => {
                 exit = 1;

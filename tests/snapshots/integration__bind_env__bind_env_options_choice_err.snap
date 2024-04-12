@@ -3,7 +3,10 @@ source: tests/bind_env.rs
 expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
 # OUTPUT
-error: environment variable 'OCA' has invalid value for param '--oca'
+error: invalid value `oca` for environment variable `OCA` that bound to `--oca`
+  [possible values: a, b]
 
 
 # BUILD_OUTPUT
+error: invalid value `oca` for environment variable `OCA` that bound to `--oca <OCA>`
+  [possible values: a, b]

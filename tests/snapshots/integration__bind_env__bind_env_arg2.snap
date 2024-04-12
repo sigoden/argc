@@ -11,3 +11,8 @@ cmd_arg2 v1
 
 
 # BUILD_OUTPUT
+argc__args=([0]="prog" [1]="cmd_arg2")
+argc__fn=cmd_arg2
+argc__positionals=([0]="v1")
+argc_val=v1
+cmd_arg2 v1

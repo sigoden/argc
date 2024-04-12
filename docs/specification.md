@@ -75,7 +75,6 @@ Define a positional argument.
 # @arg vb!                        required
 # @arg vc*                        multi-values
 # @arg vd+                        multi-values + required
-# @arg vf*,                       multi-values + comma-separated list
 # @arg vna <PATH>                 value notation
 # @arg vda=a                      default
 # @arg vdb=`_default_fn`          default from fn
@@ -88,8 +87,8 @@ Define a positional argument.
 # @arg vfc*[`_choice_fn`]         multi-values + choice from fn
 # @arg vfd*,[`_choice_fn`]        multi-values + choice from fn + comma-separated list
 # @arg vxa~                       capture all remaining args
-# @arg ea $$                      bind-env
-# @arg eb $BE                     bind-named-env
+# @arg vea $$                      bind-env
+# @arg veb $BE                     bind-named-env
 ```
 
 ### `@option`
@@ -124,8 +123,8 @@ Define an option argument.
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
 # @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option    --oxa~                 capture all remaining args
-# @option    --ea $$                bind-env
-# @option    --eb $BE               bind-named-env
+# @option    --oea $$                bind-env
+# @option    --oeb $BE               bind-named-env
 ```
 
 ### `@flag`

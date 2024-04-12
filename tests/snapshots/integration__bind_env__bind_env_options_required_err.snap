@@ -8,3 +8,5 @@ error: the following required arguments were not provided:
 
 
 # BUILD_OUTPUT
+error: the following required arguments were not provided:
+  --ob <OB>

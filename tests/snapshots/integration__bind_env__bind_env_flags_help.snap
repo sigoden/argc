@@ -16,3 +16,12 @@ OPTIONS:
 
 
 # BUILD_OUTPUT
+USAGE: prog flags [OPTIONS]
+
+OPTIONS:
+      --fa1    [env: FA1]
+      --fa2    [env: FA2]
+      --fa3    [env: FA]
+      --fc...  [env: FC]
+      --fd     [env: FD]
+  -h, --help

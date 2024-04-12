@@ -11,3 +11,8 @@ flags
 
 
 # BUILD_OUTPUT
+argc__args=([0]="prog" [1]="flags" [2]="--fa1")
+argc__fn=flags
+argc__positionals=()
+argc_fa1=1
+flags

@@ -14,3 +14,11 @@ options
 
 
 # BUILD_OUTPUT
+argc__args=([0]="prog" [1]="options" [2]="--oca" [3]="a")
+argc__fn=options
+argc__positionals=()
+argc_ob=ob
+argc_oca=a
+argc_oda=a
+argc_odb=argc
+options

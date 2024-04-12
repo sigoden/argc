@@ -8,3 +8,4 @@ error: the following required arguments were not provided:
 
 
 # BUILD_OUTPUT
+error: the required environments `<VAL3>` were not provided
