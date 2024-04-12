@@ -96,7 +96,7 @@ impl Command {
 
     pub(crate) fn export(&self) -> CommandValue {
         let mut extra: IndexMap<String, serde_json::Value> = IndexMap::new();
-        if self.paths.is_empty() {
+        if self.is_root() {
             if self.get_metadata(META_COMBINE_SHORTS).is_some() {
                 extra.insert("combine_shorts".into(), true.into());
             }
@@ -124,7 +124,6 @@ impl Command {
             positionals: self.positional_params.iter().map(|v| v.export()).collect(),
             envs: self.env_params.iter().map(|v| v.export()).collect(),
             subcommands: self.subcommands.iter().map(|v| v.export()).collect(),
-            paths: self.paths.clone(),
             command_fn: self.command_fn.clone(),
             extra,
         }
@@ -347,6 +346,10 @@ impl Command {
         self.name
             .clone()
             .unwrap_or_else(|| self.share.borrow().name())
+    }
+
+    pub(crate) fn is_root(&self) -> bool {
+        self.paths.is_empty()
     }
 
     pub(crate) fn cmd_paths(&self) -> Vec<String> {
@@ -585,7 +588,7 @@ impl Command {
     }
 
     pub(crate) fn exist_version(&self) -> bool {
-        self.version.is_some() || self.paths.is_empty()
+        self.version.is_some() || self.is_root()
     }
 
     pub(crate) fn help_flags(&self) -> Vec<&'static str> {
@@ -801,7 +804,6 @@ pub struct CommandValue {
     pub positionals: Vec<PositionalValue>,
     pub envs: Vec<EnvValue>,
     pub subcommands: Vec<CommandValue>,
-    pub paths: Vec<String>,
     pub command_fn: Option<String>,
     #[serde(flatten)]
     pub extra: IndexMap<String, serde_json::Value>,

@@ -266,7 +266,7 @@ _argc_run "$@"
 }
 
 fn build_command(cmd: &Command) -> String {
-    let suffix = if cmd.paths.is_empty() {
+    let suffix = if cmd.is_root() {
         String::new()
     } else {
         format!("_{}", cmd.paths.join("_"))
@@ -508,7 +508,7 @@ _argc_parse{suffix}() {{
 
 fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
     let names = param.list_names().join(" | ");
-    let long_name = param.render_long_name();
+    let long_name = param.long_name();
     let var_name = param.var_name();
     if param.is_flag() {
         if param.id() == "help" || param.id() == "version" {
@@ -538,7 +538,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
         )
     } else {
         let signs = if param.terminated() { "" } else { signs };
-        let delimiter = match param.args_delimiter() {
+        let delimiter = match param.delimiter() {
             Some(v) => v.to_string(),
             None => String::new(),
         };
@@ -565,8 +565,8 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
             fi"#
             )
         };
-        let (min, max) = param.args_range();
-        let code = if param.is_assigned() {
+        let (min, max) = param.num_args();
+        let code = if param.assigned() {
             let not_assigned = if min == 1 {
                 format!(
                     r#"
@@ -658,7 +658,7 @@ fn build_positionals(cmd: &Command) -> String {
             let render_value = param.render_notation();
             let multiple = param.multiple_values();
             let variant = if multiple {
-                match param.args_delimiter() {
+                match param.delimiter() {
                     Some(delimiter) => format!(
                         r#"
             _argc_split_positionals "$values_index" "$values_size" "{delimiter}"
@@ -780,7 +780,7 @@ fn build_handle_bind_env<T: Param>(param: &T, render_name: &str, indent_level: u
     let indent = build_indent(indent_level);
     let env_name = param.bind_env().unwrap_or_default();
     let var_name = param.var_name();
-    let split_env = match param.args_delimiter() {
+    let split_env = match param.delimiter() {
         Some(delimiter) => format!(
             r#"
 {indent}IFS="{delimiter}" read -r -a _argc_env_values <<<"${env_name}""#

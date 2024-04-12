@@ -24,7 +24,7 @@ pub(crate) const META_SYMBOL: &str = "symbol";
 pub(crate) const META_COMBINE_SHORTS: &str = "combine-shorts";
 pub(crate) const META_MAN_SECTION: &str = "man-section";
 
-pub(crate) const MAX_ARGS: usize = 999999;
+pub(crate) const MAX_ARGS: usize = 32767;
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()

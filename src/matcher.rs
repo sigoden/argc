@@ -619,10 +619,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         .iter()
                         .map(|v| flag_option_args[*v].1.as_slice())
                         .collect();
-                    let (min, _) = param.args_range();
+                    let (min, _) = param.num_args();
                     for values in values_list.iter() {
                         if param.is_flag() && !values.is_empty() {
-                            return Some(MatchError::NoFlagValue(level, param.render_long_name()));
+                            return Some(MatchError::NoFlagValue(level, param.long_name()));
                         } else if values.len() < min {
                             return Some(MatchError::MismatchValues(
                                 level,
@@ -644,10 +644,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                         }
                     }
                     if !param.multiple_occurs() && values_list.len() > 1 {
-                        return Some(MatchError::NotMultipleArgument(
-                            level,
-                            param.render_long_name(),
-                        ));
+                        return Some(MatchError::NotMultipleArgument(level, param.long_name()));
                     }
                 }
             }
@@ -657,7 +654,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     let values = &flag_option_bind_envs[name];
                     let mut is_valid = true;
                     let mut choice_values = vec![];
-                    let (min, _) = param.args_range();
+                    let (min, _) = param.num_args();
                     if param.is_flag() {
                         if !is_bool_value(values[0]) {
                             is_valid = false;
@@ -670,7 +667,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             level,
                             values[0].to_string(),
                             param.bind_env().unwrap_or_default(),
-                            param.render_long_name(),
+                            param.long_name(),
                             choice_values,
                         ));
                     }
@@ -682,7 +679,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                                     level,
                                     value.to_string(),
                                     param.bind_env().unwrap_or_default(),
-                                    param.render_long_name(),
+                                    param.long_name(),
                                     choice_values,
                                 ));
                             }
@@ -1018,7 +1015,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     CompColor::of_option()
                 };
                 for v in param.list_names() {
-                    let nospace = param.is_prefixed() || param.is_assigned();
+                    let nospace = param.prefixed() || param.assigned();
                     output.push((v, describe.to_string(), nospace, kind))
                 }
             }
@@ -1167,11 +1164,11 @@ fn match_flag_option<'a, 'b>(
     } else if let Some(prefix) = param.match_prefix(arg) {
         let args_len = args.len();
         let prefix_len = prefix.len();
-        let value_args = take_value_args(args, *arg_index + 1, 1, signs, param.is_assigned());
+        let value_args = take_value_args(args, *arg_index + 1, 1, signs, param.assigned());
         let take_empty = value_args.is_empty();
         *arg_index += value_args.len();
         let values = if take_empty { vec!["1"] } else { value_args };
-        if !param.is_assigned() && *arg_index == args_len - 1 {
+        if !param.assigned() && *arg_index == args_len - 1 {
             *arg_comp = ArgComp::OptionValue(param.id().to_string(), 0);
             if take_empty {
                 *split_last_arg_at = Some(prefix_len);
@@ -1179,14 +1176,13 @@ fn match_flag_option<'a, 'b>(
         }
         flag_option_args.push((arg, values, Some(param.id())));
     } else {
-        let values_max = param.args_range().1;
+        let values_max = param.num_args().1;
         let args_len = args.len();
-        let value_args =
-            take_value_args(args, *arg_index + 1, values_max, signs, param.is_assigned());
+        let value_args = take_value_args(args, *arg_index + 1, values_max, signs, param.assigned());
         *arg_index += value_args.len();
         if *arg_index == args_len - 1 {
             if *arg_comp != ArgComp::FlagOrOption {
-                if param.is_option() && !param.is_assigned() && value_args.len() <= values_max {
+                if param.is_option() && !param.assigned() && value_args.len() <= values_max {
                     *arg_comp = ArgComp::OptionValue(
                         param.id().to_string(),
                         value_args.len().saturating_sub(1),
@@ -1386,7 +1382,7 @@ fn get_param_choice<'a, 'b: 'a>(
 }
 
 fn delimit_arg_values<'x, T: Param>(param: &T, values: &[&'x str]) -> Vec<&'x str> {
-    if let Some(delimiter) = param.args_delimiter() {
+    if let Some(delimiter) = param.delimiter() {
         values.iter().flat_map(|v| v.split(delimiter)).collect()
     } else {
         values.to_vec()

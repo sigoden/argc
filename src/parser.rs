@@ -244,8 +244,8 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
             parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |((short, long_prefix), mut arg, bind_env, value_names, describe)| {
-            arg.bind_env = bind_env;
+        |((short, long_prefix), mut arg, env, value_names, describe)| {
+            arg.env = env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, false, short, long_prefix, &value_names)
         },
@@ -272,8 +272,8 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             parse_zero_or_many_value_notations,
             parse_tail,
         )),
-        |(long_prefix, mut arg, bind_env, value_names, describe)| {
-            arg.bind_env = bind_env;
+        |(long_prefix, mut arg, env, value_names, describe)| {
+            arg.env = env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, false, None, long_prefix, &value_names)
         },
@@ -294,7 +294,10 @@ fn parse_env_param(input: &str) -> nom::IResult<&str, EnvParam> {
             )),
             parse_tail,
         ),
-        |(arg, describe)| EnvParam::new(arg, describe),
+        |(mut arg, describe)| {
+            arg.describe = describe.to_string();
+            EnvParam::new(arg)
+        },
     )(input)
 }
 
@@ -314,8 +317,8 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
             parse_zero_or_one_value_notation,
             parse_tail,
         )),
-        |(mut arg, bind_env, value_name, describe)| {
-            arg.bind_env = bind_env;
+        |(mut arg, env, value_name, describe)| {
+            arg.env = env;
             arg.describe = describe.to_string();
             PositionalParam::new(arg, value_name)
         },
@@ -336,8 +339,8 @@ fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             parse_zero_or_one_bind_env,
             parse_tail,
         )),
-        |((short, long_prefix), mut arg, bind_env, describe)| {
-            arg.bind_env = bind_env;
+        |((short, long_prefix), mut arg, env, describe)| {
+            arg.env = env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, true, short, long_prefix, &[])
         },
@@ -353,8 +356,8 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> 
             parse_zero_or_one_bind_env,
             parse_tail,
         )),
-        |(long_prefix, mut arg, bind_env, describe)| {
-            arg.bind_env = bind_env;
+        |(long_prefix, mut arg, env, describe)| {
+            arg.env = env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, true, None, long_prefix, &[])
         },

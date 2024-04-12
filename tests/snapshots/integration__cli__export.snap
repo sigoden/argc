@@ -14,46 +14,46 @@ expression: stdout
       "long_name": "--help",
       "short_name": "-h",
       "describe": "",
-      "is_flag": true,
+      "flag": true,
       "notations": [],
       "required": false,
       "multiple_values": false,
       "multiple_occurs": false,
-      "args_range": [
+      "num_args": [
         0,
         0
       ],
-      "args_delimiter": null,
+      "delimiter": null,
       "terminated": false,
       "prefixed": false,
       "assigned": false,
       "default": null,
       "choice": null,
       "env": null,
-      "inherit": false
+      "inherited": false
     },
     {
       "id": "version",
       "long_name": "--version",
       "short_name": "-V",
       "describe": "",
-      "is_flag": true,
+      "flag": true,
       "notations": [],
       "required": false,
       "multiple_values": false,
       "multiple_occurs": false,
-      "args_range": [
+      "num_args": [
         0,
         0
       ],
-      "args_delimiter": null,
+      "delimiter": null,
       "terminated": false,
       "prefixed": false,
       "assigned": false,
       "default": null,
       "choice": null,
       "env": null,
-      "inherit": false
+      "inherited": false
     }
   ],
   "positionals": [],
@@ -71,207 +71,207 @@ expression: stdout
           "long_name": "--oa",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ob",
           "long_name": "--ob",
           "short_name": "-b",
           "describe": "short",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OB"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "c",
           "long_name": "-c",
           "short_name": null,
           "describe": "short only",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "C"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oc",
           "long_name": "--oc",
           "short_name": null,
           "describe": "required",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OC"
           ],
           "required": true,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "od",
           "long_name": "--od",
           "short_name": null,
           "describe": "multi-occurs",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OD"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oe",
           "long_name": "--oe",
           "short_name": null,
           "describe": "required + multi-occurs",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OE"
           ],
           "required": true,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "of",
           "long_name": "--of",
           "short_name": null,
           "describe": "multi-occurs + comma-separated list",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OF"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": ",",
+          "delimiter": ",",
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ona",
           "long_name": "--ona",
           "short_name": null,
           "describe": "value notation",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "PATH"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "onb",
           "long_name": "--onb",
           "short_name": null,
           "describe": "two-args value notations",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "FILE",
             "FILE"
@@ -279,25 +279,25 @@ expression: stdout
           "required": false,
           "multiple_values": true,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             2,
             2
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "onc",
           "long_name": "--onc",
           "short_name": null,
           "describe": "unlimited-args value notations",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "CMD",
             "FILE+"
@@ -305,36 +305,36 @@ expression: stdout
           "required": false,
           "multiple_values": true,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             2,
-            999999
+            32767
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oda",
           "long_name": "--oda",
           "short_name": null,
           "describe": "default",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "ODA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -344,25 +344,25 @@ expression: stdout
           },
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "odb",
           "long_name": "--odb",
           "short_name": null,
           "describe": "default from fn",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "ODB"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -372,25 +372,25 @@ expression: stdout
           },
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oca",
           "long_name": "--oca",
           "short_name": null,
           "describe": "choice",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -403,25 +403,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ocb",
           "long_name": "--ocb",
           "short_name": null,
           "describe": "choice + default",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCB"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -437,25 +437,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "occ",
           "long_name": "--occ",
           "short_name": null,
           "describe": "multi-occurs + choice",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCC"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -468,25 +468,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ofa",
           "long_name": "--ofa",
           "short_name": null,
           "describe": "choice from fn",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OFA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -499,25 +499,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ofb",
           "long_name": "--ofb",
           "short_name": null,
           "describe": "choice from fn + no validation",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OFB"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -530,25 +530,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ofc",
           "long_name": "--ofc",
           "short_name": null,
           "describe": "multi-occurs + choice from fn",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OFC"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -561,25 +561,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ofd",
           "long_name": "--ofd",
           "short_name": null,
           "describe": "multi-occurs + choice from fn + comma-separated list",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OFD"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": ",",
+          "delimiter": ",",
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -592,63 +592,60 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oxa",
           "long_name": "--oxa",
           "short_name": null,
           "describe": "capture all remaining args",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OXA~"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
-            999999
+            32767
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": true,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "options"
-      ],
       "command_fn": "options"
     },
     {
@@ -663,146 +660,143 @@ expression: stdout
           "long_name": "--fa",
           "short_name": null,
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "fb",
           "long_name": "--fb",
           "short_name": "-b",
           "describe": "short",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "c",
           "long_name": "-c",
           "short_name": null,
           "describe": "short only",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "fd",
           "long_name": "--fd",
           "short_name": null,
           "describe": "multi-occurs",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "fe",
           "long_name": "--fe",
           "short_name": "-e",
           "describe": "short + multi-occurs",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "flags"
-      ],
       "command_fn": "flags"
     },
     {
@@ -817,162 +811,162 @@ expression: stdout
           "long_name": "-fa",
           "short_name": null,
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "fb",
           "long_name": "-fb",
           "short_name": "-b",
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "fd",
           "long_name": "-fd",
           "short_name": null,
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oa",
           "long_name": "-oa",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "od",
           "long_name": "-od",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OD"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ona",
           "long_name": "-ona",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "PATH"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oca",
           "long_name": "-oca",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -985,25 +979,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ofa",
           "long_name": "-ofa",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OFA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1016,38 +1010,35 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "options-one-hyphen"
-      ],
       "command_fn": "options-one-hyphen"
     },
     {
@@ -1062,106 +1053,103 @@ expression: stdout
           "long_name": "--oa",
           "short_name": null,
           "describe": "multi values, zero or more",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "VALUE*"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
-            999999
+            32767
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ob",
           "long_name": "--ob",
           "short_name": null,
           "describe": "multi values, one or more",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "VALUE+"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
-            999999
+            32767
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oc",
           "long_name": "--oc",
           "short_name": null,
           "describe": "zero or one",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "VALUE?"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "--help",
           "short_name": "-h",
           "describe": "Print help",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "options-notation-modifier"
-      ],
       "command_fn": "options-notation-modifier"
     },
     {
@@ -1176,182 +1164,182 @@ expression: stdout
           "long_name": "+oa",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_ob",
           "long_name": "+ob",
           "short_name": "+b",
           "describe": "short",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OB"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_c",
           "long_name": "+c",
           "short_name": null,
           "describe": "short only",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "C"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_oc",
           "long_name": "+oc",
           "short_name": null,
           "describe": "required",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OC"
           ],
           "required": true,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_od",
           "long_name": "+od",
           "short_name": null,
           "describe": "multi-occurs",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OD"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_oe",
           "long_name": "+oe",
           "short_name": null,
           "describe": "required + multi-occurs",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OE"
           ],
           "required": true,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_ona",
           "long_name": "+ona",
           "short_name": null,
           "describe": "value notation",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "PATH"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_onb",
           "long_name": "+onb",
           "short_name": null,
           "describe": "two-args value notations",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "FILE",
             "FILE"
@@ -1359,25 +1347,25 @@ expression: stdout
           "required": false,
           "multiple_values": true,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             2,
             2
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_onc",
           "long_name": "+onc",
           "short_name": null,
           "describe": "unlimited-args value notations",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "CMD",
             "FILE+"
@@ -1385,36 +1373,36 @@ expression: stdout
           "required": false,
           "multiple_values": true,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             2,
-            999999
+            32767
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_oda",
           "long_name": "+oda",
           "short_name": null,
           "describe": "default",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "ODA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1424,25 +1412,25 @@ expression: stdout
           },
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_odb",
           "long_name": "+odb",
           "short_name": null,
           "describe": "default from fn",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "ODB"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1452,25 +1440,25 @@ expression: stdout
           },
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_oca",
           "long_name": "+oca",
           "short_name": null,
           "describe": "choice",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1483,25 +1471,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_ocb",
           "long_name": "+ocb",
           "short_name": null,
           "describe": "choice + default",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCB"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1517,25 +1505,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_occ",
           "long_name": "+occ",
           "short_name": null,
           "describe": "multi-occurs + choice",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCC"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1548,25 +1536,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_ocd",
           "long_name": "+ocd",
           "short_name": null,
           "describe": "required + multi-occurs + choice",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCD"
           ],
           "required": true,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1579,25 +1567,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_ofa",
           "long_name": "+ofa",
           "short_name": null,
           "describe": "choice from fn",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OFA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1610,25 +1598,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_ofb",
           "long_name": "+ofb",
           "short_name": null,
           "describe": "choice from fn + no validation",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OFB"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1641,25 +1629,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_ofc",
           "long_name": "+ofc",
           "short_name": null,
           "describe": "multi-occurs + choice from fn",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OFC"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1672,25 +1660,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_ofd",
           "long_name": "+ofd",
           "short_name": null,
           "describe": "multi-occurs + choice from fn + comma-separated list",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OFD"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": ",",
+          "delimiter": ",",
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -1703,63 +1691,60 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_oxa",
           "long_name": "+oxa",
           "short_name": null,
           "describe": "capture all remaining args",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OXA~"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
-            999999
+            32767
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": true,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "options-plus"
-      ],
       "command_fn": "options-plus"
     },
     {
@@ -1774,146 +1759,143 @@ expression: stdout
           "long_name": "+fa",
           "short_name": null,
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_fb",
           "long_name": "+fb",
           "short_name": "+b",
           "describe": "short",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_c",
           "long_name": "+c",
           "short_name": null,
           "describe": "short only",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_fd",
           "long_name": "+fd",
           "short_name": null,
           "describe": "multi-occurs",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_fe",
           "long_name": "+fe",
           "short_name": "+e",
           "describe": "short + multi-occurs",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "flags-plus"
-      ],
       "command_fn": "flags-plus"
     },
     {
@@ -1928,106 +1910,103 @@ expression: stdout
           "long_name": "-a",
           "short_name": "+a",
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "A"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_b",
           "long_name": "+b",
           "short_name": "-b",
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "B"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "c",
           "long_name": "--c",
           "short_name": "+c",
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "C"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "options-mixed"
-      ],
       "command_fn": "options-mixed"
     },
     {
@@ -2042,18 +2021,18 @@ expression: stdout
           "long_name": "-X",
           "short_name": null,
           "describe": "prefixied + multi-occurs + choice from fn",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "X"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": true,
           "assigned": false,
@@ -2066,25 +2045,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "plus_X",
           "long_name": "+X",
           "short_name": null,
           "describe": "prefixied + multi-occurs + choice from fn",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "X"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": true,
           "assigned": false,
@@ -2097,38 +2076,35 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "Print help",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "options-prefixed"
-      ],
       "command_fn": "options-prefixed"
     },
     {
@@ -2143,18 +2119,18 @@ expression: stdout
           "long_name": "--follow",
           "short_name": "-f",
           "describe": "assigned + choice",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "FOLLOW"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": true,
@@ -2167,38 +2143,35 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "--help",
           "short_name": "-h",
           "describe": "Print help",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "options-assigned"
-      ],
       "command_fn": "options-assigned"
     },
     {
@@ -2213,222 +2186,222 @@ expression: stdout
           "long_name": "-a",
           "short_name": null,
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "fa",
           "long_name": "--fa",
           "short_name": null,
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "fb",
           "long_name": "--fb",
           "short_name": "-f",
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "sa",
           "long_name": "-sa",
           "short_name": null,
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "sb",
           "long_name": "-sb",
           "short_name": null,
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "e",
           "long_name": "-e",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "E"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oa",
           "long_name": "--oa",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ob",
           "long_name": "--ob",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OB"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oc",
           "long_name": "--oc",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "DIR"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "od",
           "long_name": "--od",
           "short_name": "-o",
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "FILE",
             "FILE"
@@ -2436,61 +2409,61 @@ expression: stdout
           "required": false,
           "multiple_values": true,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             2,
             2
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oe",
           "long_name": "--oe",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OE"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": ",",
+          "delimiter": ",",
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ca",
           "long_name": "--ca",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "CA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2504,25 +2477,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "cc",
           "long_name": "--cc",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "CC"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2535,25 +2508,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "cd",
           "long_name": "--cd",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "CD"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2566,25 +2539,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ce",
           "long_name": "--ce",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "CE"
           ],
           "required": false,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2597,63 +2570,60 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "soa",
           "long_name": "-soa",
           "short_name": "-s",
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "SOA"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "-help",
           "short_name": "-h",
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "test1"
-      ],
       "command_fn": "test1"
     },
     {
@@ -2668,93 +2638,93 @@ expression: stdout
           "long_name": "--oa",
           "short_name": "-a",
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OA"
           ],
           "required": true,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ob",
           "long_name": "--ob",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OB"
           ],
           "required": true,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oc",
           "long_name": "--oc",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OC"
           ],
           "required": true,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": ",",
+          "delimiter": ",",
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "oca",
           "long_name": "--oca",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCA"
           ],
           "required": true,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2767,25 +2737,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "ocb",
           "long_name": "--ocb",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCB"
           ],
           "required": true,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2798,25 +2768,25 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "occ",
           "long_name": "--occ",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OCC"
           ],
           "required": true,
           "multiple_values": true,
           "multiple_occurs": true,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": ",",
+          "delimiter": ",",
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2829,38 +2799,35 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "--help",
           "short_name": "-h",
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "test2"
-      ],
       "command_fn": "test2"
     },
     {
@@ -2875,18 +2842,18 @@ expression: stdout
           "long_name": "--oe",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OE"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2896,25 +2863,25 @@ expression: stdout
           },
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "of",
           "long_name": "--of",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "OF"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2924,25 +2891,25 @@ expression: stdout
           },
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "cb",
           "long_name": "--cb",
           "short_name": null,
           "describe": "",
-          "is_flag": false,
+          "flag": false,
           "notations": [
             "CB"
           ],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             1,
             1
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
@@ -2959,42 +2926,38 @@ expression: stdout
             ]
           },
           "env": null,
-          "inherit": false
+          "inherited": false
         },
         {
           "id": "help",
           "long_name": "--help",
           "short_name": "-h",
           "describe": "",
-          "is_flag": true,
+          "flag": true,
           "notations": [],
           "required": false,
           "multiple_values": false,
           "multiple_occurs": false,
-          "args_range": [
+          "num_args": [
             0,
             0
           ],
-          "args_delimiter": null,
+          "delimiter": null,
           "terminated": false,
           "prefixed": false,
           "assigned": false,
           "default": null,
           "choice": null,
           "env": null,
-          "inherit": false
+          "inherited": false
         }
       ],
       "positionals": [],
       "envs": [],
       "subcommands": [],
-      "paths": [
-        "test3"
-      ],
       "command_fn": "test3"
     }
   ],
-  "paths": [],
   "command_fn": null,
   "combine_shorts": true
 }
