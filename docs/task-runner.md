@@ -1,71 +1,81 @@
-# Task runner
+# Task runner in Bash
 
-Argc can be used as a task runner.
+Argc is an ideal task runner for automating complex tasks, especially for users familiar with Bash.
 
-Benefits:
-  - Supports Linux/macOS/Windows
-  - Autocomplete tasks names, task's options and positional parameters.
-  - No need to learn new technology, simply use bash.
-  - Feel free to use GNU tools such as awk/sed/grep/find/head...
+## Why Choose Argc?
 
-## Use boilerplate
+- **Leverage Bash Skills:** No need to learn a new language, perfect for Bash aficionados.
+- **GNU Toolset Integration:** Utilize familiar tools like awk, sed, grep, and find within your tasks.
+- **Environment variables Management**: Load dotenv, document, and validate environment variables effortlessly.
+- **Powerful Shell Autocompletion:** Enjoy autocomplete suggestions for enhanced productivity.
+- **Cross-Platform Compatibility::** Works seamlessly across Linux, macOS, Windows, and BSD systems.
 
-```
-$ argc --argc-create build test lint
-Argcfile.sh has been successfully created.
-```
+## Defining Tasks
 
-The contents of Argcfile.sh:
+A task is a regular shell function with a `# @cmd` comment tag above it.
+
+### Create an Argcfile.sh 
+
+Use `--argc-create` to quickly generate an Argcfile.sh for your project.
 
 ```sh
-#!/usr/bin/env bash
-
-set -e
-
-# @cmd
-build() {
-    echo To implement command: build
-}
-
-# @cmd
-test() {
-    echo To implement command: test
-}
-
-# @cmd
-lint() {
-    echo To implement command: lint
-}
-
-eval "$(argc --argc-eval "$0" "$@")"
+argc --argc-create build test
 ```
 
-## Define task
+This creates a basic Argcfile.sh with sample `build` and `test` tasks.
 
-A task is a regular shell function with a `# @cmd` tag above it.
+Here's what Argcfile.sh looks like:
+
+## Handling dependencies
+
+Since task are functions, manage dependencies by calling them sequentially within other functions.
 
 ```sh
 # @cmd
-build() {
-  echo Build...
+current() { before;
+  echo current
+after; }
+
+# @cmd
+before() {
+  echo before
 }
 
 # @cmd
-test() {
-  echo Test...
+after() { 
+  echo after
 }
-
-# @cmd
-lint() {
-  echo Lint...
-}
-
-func() {
-  echo "without '# @cmd', the function will no longer be treated a task."
-}
-
-eval "$(argc --argc-eval "$0" "$@")"
 ```
+
+This example demonstrates how the `current` task calls both `before` and `after` tasks.
+
+```
+$ argc current
+before
+current
+after
+```
+
+### Organizing Tasks
+
+Organize related tasks into groups for better readability.
+
+```sh
+# @cmd
+test() { :; }
+# @cmd
+test-unit() { :; }
+# @cmd
+test-bin() { :; }
+```
+
+> Valid group formats include: `foo:bar` `foo.bar` `foo@bar`.
+
+## Running Tasks
+
+### Default task recipe
+
+When invoked without a specific recipe, Argc displays available recipes.
 
 ```
 $ argc
@@ -74,18 +84,45 @@ USAGE: Argcfile.sh <COMMAND>
 COMMANDS:
   build
   test
-  lint
 
 ```
 
-## Use dotenv
+Use `main` function to set a default recipe to run automatically.
 
 ```sh
-# @meta dotenv                                    # Load .env
-# @meta dotenv .env.local                         # Load .env.local
+# @cmd
+build() { :; }
+
+# @cmd
+test() { :; }
+
+main() {
+  build
+}
 ```
 
-## Use regular shell variables
+Remember, you can always use `--help` for detailed help information.
+
+## Aliases
+
+Aliases allow recipes to be invoked on the command line with alternative names:
+
+```sh
+# @cmd
+# @alias t
+test() {
+  echo test
+}
+```
+
+Now you can run the `test` task using the alias `t`:
+```
+$ argc t
+```
+
+### Positional arguments
+
+Accessed through shell positional variables (`$1`, `$2`, `$@`, `$*` etc.).
 
 ```sh
 # @cmd
@@ -101,7 +138,9 @@ foo bar
 foo bar
 ```
 
-## Use `argc_*` variables
+### Flag/option arguments
+
+Define and use flags and options for more control.
 
 ```sh
 # @cmd  A simple task
@@ -135,80 +174,55 @@ option:  foo
 arg:     README.md
 ```
 
-## Add task aliases
+## Environment variable
+
+### Loading dotenv
+
+Use `@meta dotenv` to load environment variables from a `.env` file.
 
 ```sh
-# @cmd
-# @alias t
-test() {
-  echo test
-}
-```
-```
-$ argc t
+# @meta dotenv                                    # Load .env
+# @meta dotenv .env.local                         # Load .env.local
 ```
 
-## Use semantic grouping
+### Documentation and Validation
 
-common forms are `foo:bar` `foo.bar` `foo-bar` `foo@bar`.
+Define environment variables using `@env`.
 
 ```sh
-# @cmd
-test() { :; }
-# @cmd
-test:unit() { :; }
-# @cmd
-test:bin() { :; }
+# @env  FOO               A env var
+# @env  BAR!              A required env var
+# @env  MODE[dev|prod]    A env var with possible values
 ```
 
-## Manage task dependencies
+Argc automatically generates help information for environment variables.
 
-```sh
-# @cmd
-current() { before;
-  echo current
-after; }
-
-# @cmd
-before() {
-  echo before
-}
-
-# @cmd
-after() { 
-  echo after
-}
-```
-```
-$ argc current
-before
-current
-after
-```
-
-## Set the default task
-
-If the task name is not specified when calling, the `main` function is executed by default.
-
-```sh
-# @cmd
-foo() {
-  echo foo
-}
-# @cmd
-bar() {
-  echo baz
-}
-main() {
-  foo
-  bar
-}
-```
+By running `argc -h`, you'll see a list of variables with descriptions and any restrictions.
 
 ```
-$ argc
-foo
-bar
+$ argc -h
+USAGE: Argcfiles.sh
+
+ENVIRONMENTS:
+  FOO   A env var
+  BAR*  A required env var
+  MODE  A env var with possible values [possible values: dev, prod]
+```
+
+Argc also validates environment variables as per the `@env` definitions.
+
+If `$BAR` is missing, Argc will report an error:
+
+```
+error: the following required environments were not provided:
+  BAR$MO
+```
+
+For `$MODE`, which has predefined values, Argc verifies the input values and reports errors if they do not match:
+
+```
+error: invalid value `abc` for environment variable `MODE`
+  [possible values: dev, prod]
 ```
 
 ## Align the project's rootdir
@@ -249,5 +263,5 @@ $ cd src && argc build
 /tmp/project/src
 ```
 
-In the subdirectory, `argc` can correctly locate and execute the script. `PWD`
+When running argc under the subdirectory other than project root,
 `PWD` points to the project root, while `ARGC_PWD` points to the current directory.

@@ -2,7 +2,7 @@
 
 ### `@describe`
 
-Set the description for the command.
+Sets the description for the command.
 
 > **<sup>Syntax</sup>**\
 > `@describe` [_description_]
@@ -13,7 +13,7 @@ Set the description for the command.
 
 ## `@cmd`
 
-Define a subcommand.
+Defines a subcommand.
 
 > **<sup>Syntax</sup>**\
 > `@cmd` [_description_]<sup>?</sup>
@@ -40,7 +40,7 @@ COMMANDS:
 
 ### `@alias`
 
-Set aliases for the subcommand.
+Sets aliases for the subcommand.
 
 > **<sup>Syntax</sup>**\
 > [_name_] (`,` [_name_])<sup>\*</sup>
@@ -62,7 +62,7 @@ COMMANDS:
 
 ### `@arg`
 
-Define a positional argument.
+Defines a positional argument.
 
 > **<sup>Syntax</sup>**\
 > `@arg` [_name_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
@@ -93,7 +93,7 @@ Define a positional argument.
 
 ### `@option`
 
-Define an option argument.
+Defines an option argument.
 
 > **<sup>Syntax</sup>**\
 > `@option` [_short_]<sup>?</sup> [_long_] [_modifier_]<sup>?</sup> [_param-value_]<sup>?</sup>
@@ -129,7 +129,7 @@ Define an option argument.
 
 ### `@flag`
 
-Define a flag argument. Flag is a special option that does not accept any value.
+Defines a flag argument. Flag is a special option that does not accept any value.
 
 > **<sup>Syntax</sup>**\
 > `@flag` [_short_]<sup>?</sup> [_long_]`*`<sup>?</sup>
@@ -147,7 +147,7 @@ Define a flag argument. Flag is a special option that does not accept any value.
 
 ### `@env`
 
-Define an environment variable.
+Defines an environment variable.
 
 > **<sup>Syntax</sup>**\
 > `@arg` [_NAME_]`!`<sup>?</sup>[_param-value_]<sup>?</sup>
@@ -164,7 +164,7 @@ Define an environment variable.
 
 ### `@meta`
 
-Add a metadata.
+Adds metadata.
 
 > **<sup>Syntax</sup>**\
 > `@meta` [_name_] [_value_]<sup>?</sup>
