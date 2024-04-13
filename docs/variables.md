@@ -1,46 +1,42 @@
 # Variables
 
-## Shell variables
+Argc streamlines argument parsing in your shell scripts, allowing you to utilize variables seamlessly. Here's a breakdown of how it works:
 
-Argc is equivalent to a layer of argument parsing on top of bash, so you can use shell variables normally.
+## Shell Variables
+
+You can employ shell variables within your Argc scripts just like you normally would in Bash. Argc doesn't interfere with their behavior.
 
 ```sh
 # @cmd
 cmd() {
-  echo $1 $2
-  echo "$*"
-  echo "$@"
+  echo $1 $2  # Accessing positional arguments
+  echo "$*"   # All arguments as a single string
+  echo "$@"   # All arguments as separate strings
 }
 ```
 
-## Argc variables
+## Argc-Generated Variables
 
-### options/flags/positionals variables
+Argc automatically creates variables corresponding to the options, flags, and arguments defined in your script using the `@option`, `@flag`, and `@arg` directives.
 
-Argc automatically generates variables for each option/flag/arg.
-
-Here is a simple script:
 ```sh
 # @option --oa
-# @option --ob*
+# @option --ob*  # Multiple values allowed
 # @flag   --fa
 # @arg va
 # @arg vb*
 
-eval "$(argc --argc-eval "$0" "$@")"
+eval "$(argc --argc-eval "$0" "$@")"  # Initializes Argc variables
 
 echo '--oa:' $argc_oa
-echo '--ob:' ${argc_ob[@]}
+echo '--ob:' ${argc_ob[@]}  # Accessing multiple values as an array
 echo '--fa:' $argc_fa
 echo '  va:' $argc_va
 echo '  vb:' ${argc_vb[@]}
 ```
 
-If we run the script:
-```
-./script.sh --oa a --ob=b1 --ob=b2 --fa foo bar baz
-```
-It will print:
+Running `./script.sh --oa a --ob=b1 --ob=b2 --fa foo bar baz` would output:
+
 ```
 --oa: a
 --ob: b1 b2
@@ -49,69 +45,46 @@ It will print:
   vb: bar baz
 ```
 
-### builtin variables
+## Built-in Variables
 
-- `argc__args`:  The command line args
-- `argc__positionals`: The positional args
-- `argc__fn`: The command function to be run
+Argc also provides built-in variables that offer information about the parsing process:
 
-#### param fn only (for completion)
+*   **`argc__args`**: An array holding all command-line arguments.
+*   **`argc__positionals`**: An array containing only the positional arguments.
+*   **`argc__fn`**: The name of the function that will be executed.
 
-- `argc__cmd_arg_index`: The index of the command arg in `argc__args`
-- `argc__cmd_fn`: The name of command function
-- `argc__dash`:  The index of the first em-dash in the positionals array
-- `argc__option`: The variable name of the option that is currently being completed.
+**Additional Variables for Completion (Used internally by Argc-Completions):**
 
-Run command
+*   **`argc__cmd_arg_index`**: Index of the command argument within `argc__args`.
+*   **`argc__cmd_fn`**: Name of the command function.
+*   **`argc__dash`**: Index of the first em-dash (`--`) within the positional arguments.
+*   **`argc__option`**: Variable name of the option currently being completed.
 
-```
-git reset --hard <tab>
-```
+These variables are particularly useful when creating custom completion scripts. 
 
-Argc will generate variable:
-```sh
-argc__args=([0]="git" [1]="reset" [2]="--hard" [3]="")
-argc__cmd_arg_index=1
-argc__cmd_fn=reset
-argc__positionals=([0]="")
-```
+## Environment Variables
 
-Run command
+Several environment variables allow you to tailor Argc's behavior:
 
-```
-find . -name '*lib*' -type <tab>
-```
+**User-Defined:**
 
-Argc will generate variable:
-```sh
-argc__args=([0]="find" [1]="." [2]="-name" [3]="'*lib*'" [4]="-type" [5]="")
-argc__cmd_arg_index=0
-argc__option=argc_type
-argc__positionals=([0]=".")
-```
+*  **`ARGC_SHELL_PATH`**: Specifies the path to the shell/bash executable used by Argc.
+*  **`ARGC_SCRIPT_NAME`**: Overrides the default script filename (Argcfile.sh).
+*  **`ARGC_COMPGEN_DESCRIPTION`**: Disables descriptions for completion candidates if set to 0 or false. 
+*  **`ARGC_COMPLETIONS_PATH`**: Defines the search path for Argc-based completion scripts.
 
-## Environment variables
+**Argc-Injected:**
 
-### User provide
+*  **`ARGC_PWD`**: Current working directory (available only in Argcfile.sh).
 
-- `ARGC_SHELL_PATH`: Specify the shell/bash path to use for `argc`.
-- `ARGC_SCRIPT_NAME`: Specify the script filename to override the default `Argcfile.sh`. e.g. `Taskfile.sh`
-- `ARGC_COMPGEN_DESCRIPTION`: If value is 0 or false, the generated completion candidates do not contain descriptions.
-- `ARGC_COMPLETIONS_PATH`: Argc-based completion script searching path.
-                           Colon-seperated in non-windows OS. Semicolon-separated in Windows.
-                           Only if the arc-based completion script for the `<command>` is under the `ARGC_COMPLETIONS_PATH` or `PATH`, can it enable completion by sourcing `argc --argc-completions bash <command>`.
+**Argc-Injected (for completion):**
+*  **`ARGC_OS`**: Operating system type.
+*  **`ARGC_COMPGEN`**: Indicates whether the script is being used for generating completion candidates (1) or not (0).
+*  **`ARGC_CWORD`**: The last word in the processed command line.
 
-### Argc injected into Argcfile.sh
+It's important to distinguish between these two variables:
 
-- `ARGC_PWD`: Current workdir. Only available in Argcfile.sh.
+*  **`ARGC_CWORD`**: This variable isolates the final word, regardless of any preceding flags or options. For example, in the command `git --git-dir=git`, `ARGC_CWORD` would be `git`.
+*  **`ARGC_LAST_ARG`**: This variable captures the entire last argument, including any flags or options attached to it. In the same example, `ARGC_LAST_ARG` would be `--git-dir=git`.
 
-### Argc injected into `_choice_*`
-
-- `ARGC_OS`: The OS type
-- `ARGC_COMPGEN`: If value is 1, the script is called to generate completion candidates.
-- `ARGC_CWORD`: The last word in the command line (processed). Used to filter completion candidates.
-- `ARGC_LAST_ARG`: The last word in the command line (raw).
-
-The difference between `ARGC_CWORD` and `ARGC_LAST_ARG`:
-- If the command line is `git --git-dir=git`, then ARGC_LAST_ARG=`--git-dir=git` ARGC_CWORD=`git`
-- If the command line is `bat --theme 'Solarized`, then ARGC_LAST_ARG=`'Solarized` ARGC_CWORD=`Solarized`
+Understanding these variables is key to effectively leveraging Argc's capabilities and creating robust and user-friendly command-line interfaces.

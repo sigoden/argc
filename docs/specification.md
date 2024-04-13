@@ -192,33 +192,11 @@ Adds metadata.
 # @meta symbol +toolchain[`_choice_fn`]
 ```
 
-## Deprecated tags
-
-Deprecated tags can still be used, but are not recommended and may be completely abandoned in the next major version (v2).
-
-### `@version`
-
-Set the version for the command.
-
-```diff
--- # @version 2.17.1
-++ # @meta version 2.17.1 
-```
-
-### `@author`
-
-Set the author for the command.
-
-```diff
--- # @author nobody <nobody@example.com>
-++ # @meta author nobody <nobody@example.com>
-```
-
-## Internal components
+## Syntax parts
 
 ### short
 
-The short version of the flag / option.
+ A single character abbreviation for a flag/option.
 
 > **<sup>Syntax</sup>**\
 > &nbsp;&nbsp; -[_short-char_] \
@@ -226,25 +204,29 @@ The short version of the flag / option.
 
 ### long
 
-The long version of the flag / option.
+A descriptive name for a flag/option.
 
 > **<sup>Syntax</sup>**\
-> &nbsp; -- [_name_] \
-> | -[_name_] \
-> | +[_name_]
+> &nbsp; -- [_long-name_] \
+> | -[_long-name_] \
+> | +[_long-name_]
 
 ### modifier
+
+Symbols used to modify param behavior:
 
 > **<sup>Syntax</sup>**\
 > &nbsp; `!` \
 > | `*` [_separated-char_]<sup>?</sup> \
 > | `+` [_separated-char_]<sup>?</sup>
 
-- `!`: required
+- `!`: The option is required and must be provided.
 - `*`: multi-occurs for @option; multi-values for @arg;
-- `+`: required + multi
+- `+`: The option is required and can be used multiple times.
 
 ### param-value
+
+Ways to specify values for params:
 
 > **<sup>Syntax</sup>**\
 > &nbsp; =[_value_] \
@@ -256,23 +238,23 @@ The long version of the flag / option.
 
 ### choices
 
+Define a set of acceptable values for an param
+
 > **<sup>Syntax</sup>**\
 > [_value_] (`|` [_value_])<sup>\*</sup>
 
 ### notations
 
+Placeholders in help messages and usage instructions:
+
 > **<sup>Syntax</sup>**\
 > ([_notation_] )<sup>\*</sup>  [_notation-last_] 
 
-
 ### notation
-
-Placeholder for the argument’s value in the help message / usage.
 
 > **<sup>Syntax</sup>**\
 > `<` [_value_]` >`
 
-Notations that will affect the shell completion:
 
 - `FILE`/`PATH`: complete files
 - `DIR`: complete directories
@@ -284,14 +266,16 @@ Notations that will affect the shell completion:
 
 ### notation-modifier
 
+Symbols used within the last notation to specify value requirements
+
 > **<sup>Syntax</sup>**\
 > &nbsp; `*` \
 > | `+` \
 > | `?`
 
-- `*`: take zero or multiple values
-- `+`: take one or multiple values
-- `?`: take zero or one values
+- `*`: Zero or more values are allowed.
+- `+`: One or more values are allowed.
+- `?`: Zero or one value is allowed.
 
 ### short-char
 
@@ -303,20 +287,19 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
 
 ### bind-env
 
-Flags/options bind environment variables
+ Link environment variables to params:
 
-- `$$`: bind environment variable  whose name is derived from the corresponding param name
-- `$`[_NAME_]: bind environment variable whose name is *NAME*
+- `$$`: Automatically use the param's name for the environment variable.
+- `$`[_NAME_]: Use a specific environment variable name.
 
 ## description
 
-Plain text, can be multiple lines.
+lain text explanation of the command or param.
 
 ```sh
 # @describe Multi-line auto-wrapped help text
 #
-# Extra lines after the @describe/@cmd/@option/@flag/@arg/@env, 
-# which don't start with an @, are treated as the long description.
+# Extra lines after the comment tag which don't start with an `@`, are treated as the long description.
 # A line which is not a comment ends the block.
 ```
 
@@ -334,6 +317,7 @@ Plain text, can be multiple lines.
 [_bind-env_]: #bind-env
 [_description_]: #description
 [_name_]: #name
-[_value_]: #value
+[_long-name_]: #name
 [_fn-name_]: #fn-name
+[_value_]: #value
 [_NAME_]: #name
