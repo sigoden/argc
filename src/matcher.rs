@@ -120,8 +120,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
                     }
                 } else if is_rest_args_positional
                     || (cmd.is_empty_flags_options_subcommands()
-                        && !cmd.help_flags().contains(&arg)
-                        && !cmd.version_flags().contains(&arg))
+                        && !cmd.help_flags.contains(&arg)
+                        && !cmd.version_flags.contains(&arg))
                 {
                     add_positional_arg(
                         &mut positional_args,
@@ -146,6 +146,23 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             flag_option_args[cmd_level].push((k, values, Some(param.id())));
                             comp_option = Some(param.id());
                         } else {
+                            if positional_args.is_empty()
+                                && !cmd.help_flags.contains(&k)
+                                && !cmd.version_flags.contains(&k)
+                            {
+                                if let Some(subcmd) = cmd.find_default_subcommand() {
+                                    match_command(
+                                        &mut cmds,
+                                        &mut cmd_level,
+                                        &mut cmd_arg_indexes,
+                                        &mut flag_option_args,
+                                        subcmd,
+                                        arg_index,
+                                        &mut is_rest_args_positional,
+                                    );
+                                    continue;
+                                }
+                            }
                             flag_option_args[cmd_level].push((k, vec![v], None));
                         }
                     } else if let Some(param) = cmd.find_flag_option(arg) {
@@ -228,6 +245,23 @@ impl<'a, 'b> Matcher<'a, 'b> {
                             split_last_arg_at = Some(1);
                         }
                     } else {
+                        if positional_args.is_empty()
+                            && !cmd.help_flags.contains(&arg)
+                            && !cmd.version_flags.contains(&arg)
+                        {
+                            if let Some(subcmd) = cmd.find_default_subcommand() {
+                                match_command(
+                                    &mut cmds,
+                                    &mut cmd_level,
+                                    &mut cmd_arg_indexes,
+                                    &mut flag_option_args,
+                                    subcmd,
+                                    arg_index,
+                                    &mut is_rest_args_positional,
+                                );
+                                continue;
+                            }
+                        }
                         flag_option_args[cmd_level].push((arg, vec![], None));
                     }
                 } else if let Some(subcmd) =
@@ -287,7 +321,23 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 arg_comp = ArgComp::CommandOrPositional;
             }
 
-            let last_cmd = *cmds.last().unwrap();
+            let last_cmd = cmds[cmd_level];
+            if positional_args.is_empty() && flag_option_args[cmd_level].is_empty() {
+                if let Some(subcmd) = last_cmd.find_default_subcommand() {
+                    if subcmd.command_fn.is_some() {
+                        match_command(
+                            &mut cmds,
+                            &mut cmd_level,
+                            &mut cmd_arg_indexes,
+                            &mut flag_option_args,
+                            subcmd,
+                            arg_index - 1,
+                            &mut is_rest_args_positional,
+                        );
+                    }
+                }
+            }
+
             for param in &last_cmd.positional_params {
                 add_param_choice_fn(&mut choice_fns, param)
             }

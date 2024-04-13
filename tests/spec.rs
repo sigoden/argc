@@ -371,6 +371,8 @@ fn default_subcommand() {
     let script = r###"
 # @cmd
 # @meta default-subcommand
+# @flag --fa
+# @arg val
 cmda() { :; }
 
 # @cmd
@@ -380,6 +382,8 @@ cmdb() { :; }
         script,
         [
             vec!["prog", "-h"],
+            vec!["prog", "--fa"],
+            vec!["prog", "--fa", "-h"],
             vec!["prog", "v1"],
             vec!["prog", "cmda", "v1"],
             vec!["prog", "cmdb", "v1"],
