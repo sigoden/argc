@@ -12,8 +12,8 @@ use crate::param::{
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::utils::{
     AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, MAIN_NAME, META_AUTHOR, META_COMBINE_SHORTS,
-    META_DEFAULT_SUBCOMMAND, META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_NO_INHERIT_ENV,
-    META_REQUIRE_TOOLS, META_SYMBOL, META_VERSION, ROOT_NAME,
+    META_DEFAULT_SUBCOMMAND, META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_REQUIRE_TOOLS,
+    META_SYMBOL, META_VERSION, ROOT_NAME,
 };
 use crate::Result;
 
@@ -60,9 +60,7 @@ impl Command {
         if root.has_metadata(META_INHERIT_FLAG_OPTIONS) {
             root.inherit_flag_options();
         }
-        if !root.has_metadata(META_NO_INHERIT_ENV) {
-            root.inherit_envs();
-        }
+        root.inherit_envs();
         Ok(root)
     }
 
