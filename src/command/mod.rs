@@ -7,8 +7,7 @@ use self::share_data::ShareData;
 use crate::argc_value::ArgcValue;
 use crate::matcher::Matcher;
 use crate::param::{
-    EnvParam, EnvValue, FlagOptionParam, FlagOptionValue, Param, ParamData, PositionalParam,
-    PositionalValue,
+    EnvParam, EnvValue, FlagOptionParam, FlagOptionValue, Param, PositionalParam, PositionalValue,
 };
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::utils::{
@@ -48,6 +47,8 @@ pub(crate) struct Command {
     pub(crate) metadata: Vec<(String, String, Position)>,
     pub(crate) symbols: IndexMap<char, SymbolParam>,
     pub(crate) require_tools: IndexSet<String>,
+    pub(crate) help_flags: Vec<&'static str>,
+    pub(crate) version_flags: Vec<&'static str>,
 }
 
 impl Command {
@@ -415,130 +416,6 @@ impl Command {
         )
     }
 
-    pub(crate) fn render_usage(&self) -> String {
-        let mut output = vec!["USAGE:".to_string()];
-        output.extend(self.cmd_paths());
-        let required_options: Vec<String> = self
-            .flag_option_params
-            .iter()
-            .filter(|v| v.required())
-            .map(|v| v.render_name_notations())
-            .collect();
-        if self.flag_option_params.len() != required_options.len() {
-            output.push("[OPTIONS]".to_string());
-        }
-        output.extend(required_options);
-        if !self.subcommands.is_empty() {
-            output.push("<COMMAND>".to_string());
-        } else {
-            output.extend(self.positional_params.iter().map(|v| v.render_notation()));
-        }
-        output.join(" ")
-    }
-
-    pub(crate) fn render_positionals(&self, term_width: Option<usize>) -> Vec<String> {
-        let mut output = vec![];
-        if self.positional_params.is_empty() {
-            return output;
-        }
-        let mut value_size = 0;
-        let list: Vec<_> = self
-            .positional_params
-            .iter()
-            .map(|param| {
-                let value = param.render_notation();
-                value_size = value_size.max(value.len());
-                (value, param.render_describe())
-            })
-            .collect();
-        value_size += 2;
-        output.push("ARGS:".to_string());
-        render_list(&mut output, list, value_size, term_width);
-        output
-    }
-
-    pub(crate) fn render_flag_options(&self, term_width: Option<usize>) -> Vec<String> {
-        let mut output = vec![];
-        if self.flag_option_params.is_empty() {
-            return output;
-        }
-        let mut value_size = 0;
-        let list: Vec<_> = self
-            .all_flag_options()
-            .into_iter()
-            .map(|param| {
-                let value = param.render_body();
-                let describe = param.render_describe();
-                value_size = value_size.max(value.len());
-                (value, describe)
-            })
-            .collect();
-        value_size += 2;
-        output.push("OPTIONS:".to_string());
-        render_list(&mut output, list, value_size, term_width);
-        output
-    }
-
-    pub(crate) fn render_subcommands(&self, term_width: Option<usize>) -> Vec<String> {
-        let mut output = vec![];
-        if self.subcommands.is_empty() {
-            return output;
-        }
-        let mut value_size = 0;
-        let list: Vec<_> = self
-            .subcommands
-            .iter()
-            .map(|subcmd| {
-                let value = subcmd.cmd_name();
-                value_size = value_size.max(value.len());
-                (value, subcmd.render_subcommand_describe())
-            })
-            .collect();
-        value_size += 2;
-        output.push("COMMANDS:".to_string());
-        render_list(&mut output, list, value_size, term_width);
-        output
-    }
-
-    pub(crate) fn render_subcommand_describe(&self) -> String {
-        let mut output = self.describe_oneline().to_string();
-        if let Some((aliases, _)) = &self.aliases {
-            if !output.is_empty() {
-                output.push(' ')
-            }
-            output.push_str(&format!("[aliases: {}]", aliases.join(", ")));
-        }
-        if self.has_metadata(META_DEFAULT_SUBCOMMAND) {
-            if !output.is_empty() {
-                output.push(' ')
-            }
-            output.push_str("[default]");
-        }
-        output
-    }
-
-    pub(crate) fn render_envs(&self, term_width: Option<usize>) -> Vec<String> {
-        let mut output = vec![];
-        if self.env_params.is_empty() {
-            return output;
-        }
-        let mut value_size = 0;
-        let list: Vec<_> = self
-            .env_params
-            .iter()
-            .map(|param| {
-                let value = param.render_body();
-                value_size = value_size.max(value.len());
-                (value, param.render_describe())
-            })
-            .collect();
-        value_size += 2;
-        output.push("ENVIRONMENTS:".to_string());
-        render_list(&mut output, list, value_size, term_width);
-        output.push("".to_string());
-        output
-    }
-
     pub(crate) fn describe_oneline(&self) -> &str {
         match self.describe.split_once('\n') {
             Some((v, _)) => v,
@@ -609,34 +486,6 @@ impl Command {
         self.version.is_some() || self.is_root()
     }
 
-    pub(crate) fn help_flags(&self) -> Vec<&'static str> {
-        let mut output = vec!["--help", "-help"];
-        let short = match self.find_flag_option("-h") {
-            Some(param) => param.id() == "help",
-            None => true,
-        };
-        if short {
-            output.push("-h");
-        }
-        output
-    }
-
-    pub(crate) fn version_flags(&self) -> Vec<&'static str> {
-        let mut output = vec![];
-        if self.exist_version() {
-            output.push("--version");
-            output.push("-version");
-            let short = match self.find_flag_option("-V") {
-                Some(param) => param.id() == "version",
-                None => true,
-            };
-            if short {
-                output.push("-V");
-            }
-        }
-        output
-    }
-
     pub(crate) fn delegated(&self) -> bool {
         self.subcommands.is_empty()
             && self.flag_option_params.is_empty()
@@ -668,6 +517,33 @@ impl Command {
                 self.command_fn = Some(command_fn)
             }
         }
+
+        self.help_flags = {
+            let mut flags = vec!["--help", "-help"];
+            let short = match self.find_flag_option("-h") {
+                Some(param) => param.id() == "help",
+                None => true,
+            };
+            if short {
+                flags.push("-h");
+            }
+            flags
+        };
+        self.version_flags = {
+            let mut flags = vec![];
+            if self.exist_version() {
+                flags.push("--version");
+                flags.push("-version");
+                let short = match self.find_flag_option("-V") {
+                    Some(param) => param.id() == "version",
+                    None => true,
+                };
+                if short {
+                    flags.push("-V");
+                }
+            }
+            flags
+        };
 
         // update derived_flag_option_params
         let mut describe = false;
@@ -779,14 +655,10 @@ impl Command {
         } else {
             None
         };
-        let mut param_data = ParamData::new("help");
-        param_data.describe = describe.to_string();
-        Some(FlagOptionParam::new(
-            param_data,
-            true,
+        Some(FlagOptionParam::create_help_flag(
             short,
             long_prefix,
-            &[],
+            describe,
         ))
     }
 
@@ -803,15 +675,156 @@ impl Command {
         } else {
             None
         };
-        let mut param_data = ParamData::new("version");
-        param_data.describe = describe.to_string();
-        Some(FlagOptionParam::new(
-            param_data,
-            true,
+        Some(FlagOptionParam::create_version_flag(
             short,
             long_prefix,
-            &[],
+            describe,
         ))
+    }
+
+    fn render_usage(&self) -> String {
+        let mut output = vec!["USAGE:".to_string()];
+        output.extend(self.cmd_paths());
+        let required_options: Vec<String> = self
+            .flag_option_params
+            .iter()
+            .filter(|v| v.required())
+            .map(|v| v.render_name_notations())
+            .collect();
+        if self.flag_option_params.len() != required_options.len() {
+            output.push("[OPTIONS]".to_string());
+        }
+        output.extend(required_options);
+        if !self.subcommands.is_empty() {
+            output.push("<COMMAND>".to_string());
+        } else {
+            output.extend(self.positional_params.iter().map(|v| v.render_notation()));
+        }
+        output.join(" ")
+    }
+
+    fn render_flag_options(&self, term_width: Option<usize>) -> Vec<String> {
+        let mut output = vec![];
+        let default_subcmd = self.find_default_subcommand();
+        if self.flag_option_params.is_empty()
+            && default_subcmd
+                .map(|subcmd| subcmd.flag_option_params.is_empty())
+                .unwrap_or(true)
+        {
+            return output;
+        }
+
+        let params = match default_subcmd {
+            Some(subcmd) => [self.all_flag_options(), subcmd.all_flag_options()].concat(),
+            None => self.all_flag_options(),
+        };
+
+        let mut value_size = 0;
+        let list: IndexMap<String, String> = params
+            .into_iter()
+            .map(|param| {
+                let value = param.render_body();
+                let describe = param.render_describe();
+                value_size = value_size.max(value.len());
+                (value, describe)
+            })
+            .collect();
+        value_size += 2;
+        output.push("OPTIONS:".to_string());
+        render_list(
+            &mut output,
+            list.into_iter().collect(),
+            value_size,
+            term_width,
+        );
+        output
+    }
+
+    fn render_positionals(&self, term_width: Option<usize>) -> Vec<String> {
+        let mut output = vec![];
+        let params = match self.find_default_subcommand() {
+            Some(subcmd) => &subcmd.positional_params,
+            None => &self.positional_params,
+        };
+        if params.is_empty() {
+            return output;
+        }
+        let mut value_size = 0;
+        let list: Vec<_> = params
+            .iter()
+            .map(|param| {
+                let value = param.render_notation();
+                value_size = value_size.max(value.len());
+                (value, param.render_describe())
+            })
+            .collect();
+        value_size += 2;
+        output.push("ARGS:".to_string());
+        render_list(&mut output, list, value_size, term_width);
+        output
+    }
+
+    fn render_envs(&self, term_width: Option<usize>) -> Vec<String> {
+        let mut output = vec![];
+        let params = match self.find_default_subcommand() {
+            Some(subcmd) => &subcmd.env_params,
+            None => &self.env_params,
+        };
+        if params.is_empty() {
+            return output;
+        }
+        let mut value_size = 0;
+        let list: Vec<_> = params
+            .iter()
+            .map(|param| {
+                let value = param.render_body();
+                value_size = value_size.max(value.len());
+                (value, param.render_describe())
+            })
+            .collect();
+        value_size += 2;
+        output.push("ENVIRONMENTS:".to_string());
+        render_list(&mut output, list, value_size, term_width);
+        output.push("".to_string());
+        output
+    }
+
+    fn render_subcommands(&self, term_width: Option<usize>) -> Vec<String> {
+        let mut output = vec![];
+        if self.subcommands.is_empty() {
+            return output;
+        }
+        let mut value_size = 0;
+        let list: Vec<_> = self
+            .subcommands
+            .iter()
+            .map(|subcmd| {
+                let value = subcmd.cmd_name();
+                value_size = value_size.max(value.len());
+                (value, subcmd.render_subcommand_describe())
+            })
+            .collect();
+        value_size += 2;
+        output.push("COMMANDS:".to_string());
+        render_list(&mut output, list, value_size, term_width);
+        output
+    }
+
+    fn render_subcommand_describe(&self) -> String {
+        let mut output = self.describe_oneline().to_string();
+        if let Some((aliases, _)) = &self.aliases {
+            if !output.is_empty() {
+                output.push(' ')
+            }
+            output.push_str(&format!("[aliases: {}]", aliases.join(", ")));
+        }
+        if self.has_metadata(META_DEFAULT_SUBCOMMAND) {
+            if !output.is_empty() {
+                output.push(' ')
+            }
+            output.push_str("[default]");
+        }
+        output
     }
 }
 

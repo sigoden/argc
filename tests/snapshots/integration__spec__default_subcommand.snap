@@ -9,6 +9,14 @@ prog -h
 command cat >&2 <<-'EOF' 
 USAGE: prog <COMMAND>
 
+ARGS:
+  [VAL]
+
+OPTIONS:
+  -h, --help
+  -V, --version
+      --fa
+
 COMMANDS:
   cmda  [default]
   cmdb
@@ -19,14 +27,67 @@ exit 0
 # RUN_OUTPUT
 USAGE: prog <COMMAND>
 
+ARGS:
+  [VAL]
+
+OPTIONS:
+  -h, --help
+  -V, --version
+      --fa
+
 COMMANDS:
   cmda  [default]
   cmdb
 
 ************ RUN ************
+prog --fa
+
+# OUTPUT
+argc_fa=1
+argc__args=( prog --fa )
+argc__fn=cmda
+argc__positionals=(  )
+cmda
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--fa")
+argc__fn=cmda
+argc__positionals=()
+argc_fa=1
+cmda
+
+************ RUN ************
+prog --fa -h
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog cmda [OPTIONS] [VAL]
+
+ARGS:
+  [VAL]
+
+OPTIONS:
+      --fa
+  -h, --help
+
+EOF
+exit 0
+
+# RUN_OUTPUT
+USAGE: prog cmda [OPTIONS] [VAL]
+
+ARGS:
+  [VAL]
+
+OPTIONS:
+      --fa
+  -h, --help
+
+************ RUN ************
 prog v1
 
 # OUTPUT
+argc_val=v1
 argc__args=( prog v1 )
 argc__fn=cmda
 argc__positionals=( v1 )
@@ -36,12 +97,14 @@ cmda v1
 argc__args=([0]="prog" [1]="v1")
 argc__fn=cmda
 argc__positionals=([0]="v1")
+argc_val=v1
 cmda v1
 
 ************ RUN ************
 prog cmda v1
 
 # OUTPUT
+argc_val=v1
 argc__args=( prog cmda v1 )
 argc__fn=cmda
 argc__positionals=( v1 )
@@ -51,6 +114,7 @@ cmda v1
 argc__args=([0]="prog" [1]="cmda" [2]="v1")
 argc__fn=cmda
 argc__positionals=([0]="v1")
+argc_val=v1
 cmda v1
 
 ************ RUN ************
@@ -67,5 +131,3 @@ argc__args=([0]="prog" [1]="cmdb" [2]="v1")
 argc__fn=cmdb
 argc__positionals=([0]="v1")
 cmdb v1
-
-

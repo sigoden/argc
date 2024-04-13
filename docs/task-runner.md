@@ -101,6 +101,17 @@ main() {
 }
 ```
 
+Another way is to use `@meta default-subcommand`
+
+```sh
+# @cmd
+# @meta default-subcommand
+build() { :; }
+
+# @cmd
+test() { :; }
+```
+
 Remember, you can always use `--help` for detailed help information.
 
 ## Aliases

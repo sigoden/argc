@@ -430,6 +430,22 @@ impl FlagOptionParam {
         self.inherited = true;
     }
 
+    pub(crate) fn create_help_flag(short: Option<&str>, long_prefix: &str, describe: &str) -> Self {
+        let mut param_data = ParamData::new("help");
+        param_data.describe = describe.to_string();
+        FlagOptionParam::new(param_data, true, short, long_prefix, &[])
+    }
+
+    pub(crate) fn create_version_flag(
+        short: Option<&str>,
+        long_prefix: &str,
+        describe: &str,
+    ) -> Self {
+        let mut param_data = ParamData::new("version");
+        param_data.describe = describe.to_string();
+        FlagOptionParam::new(param_data, true, short, long_prefix, &[])
+    }
+
     pub(crate) fn match_prefix<'a>(&self, arg: &'a str) -> Option<&'a str> {
         if self.prefixed {
             self.list_names().iter().find_map(|v| {

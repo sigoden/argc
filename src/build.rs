@@ -322,7 +322,7 @@ _argc_version{suffix}() {{
 
 fn build_parse(cmd: &Command, suffix: &str) -> String {
     let mut parse_help = {
-        let help_flags = cmd.help_flags().join(" | ");
+        let help_flags = cmd.help_flags.join(" | ");
         format!(
             r#"
         {help_flags})
@@ -331,7 +331,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         )
     };
     let parse_version = if cmd.exist_version() {
-        let version_flags = cmd.version_flags().join(" | ");
+        let version_flags = cmd.version_flags.join(" | ");
         format!(
             r#"
         {version_flags})
