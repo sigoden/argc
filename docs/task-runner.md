@@ -1,4 +1,4 @@
-# Task runner in Bash
+# Task runner
 
 Argc is an ideal task runner for automating complex tasks, especially for users familiar with Bash.
 

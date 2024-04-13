@@ -50,10 +50,18 @@ Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip
 
 ## Get Started
 
-To write a command-line program with Argc, only requires two simple steps:
+Building a command-line program using Argc is a breeze. Just follow these two steps:
 
-1. **Define your CLI**: Describe options, flags, positional parameters, and subcommands using comment tags (explained later).
-2. **Process Arguments**: Insert `eval "$(argc --argc-eval "$0" "$@")"` into your script to enable Argc's argument handling.
+
+**1. Design Your CLI Interface:**
+
+Describe options, flags, positional parameters, and subcommands using comment tags (explained later).
+
+**2. Activate Argument Handling:**
+
+Add this line to your script: `eval "$(argc --argc-eval "$0" "$@")"`. This integrates Argc's parsing magic into your program.
+
+Let's illustrate with an example:
 
 ```sh
 # @flag -F --foo  Flag param
@@ -74,7 +82,7 @@ Run the script with some sample arguments:
 ./example.sh -F --bar=xyz --baz a --baz b v1 v2
 ```
 
-Argc will parse them and generate variables with the `argc_` prefix, as shown in the output.
+Argc parses these arguments and creates variables prefixed with `argc_`:
 
 ```
 foo: 1
@@ -83,7 +91,7 @@ baz: a b
 val: v1 v2
 ```
 
-Additionally, you can run `./example.sh --help` to see Argc automatically generate help information for your CLI:
+Just run `./example.sh --help` to see the automatically generated help information for your CLI:
 
 ```
 USAGE: example [OPTIONS] [VAL]...
@@ -99,7 +107,8 @@ OPTIONS:
   -V, --version       Print version
 
 ```
-Now you're ready to start building powerful command-line programs with Argc!
+
+With these simple steps, you're ready to leverage Argc and create robust command-line programs!
 
 ## Comment Tags
 
