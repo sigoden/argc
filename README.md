@@ -39,6 +39,12 @@ Argc is a powerful Bash framework that simplifies building full-featured CLIs. I
 
 Alternatively, download pre-built binaries for macOS, Linux, and Windows from [GitHub Releases](https://github.com/sigoden/argc/releases), extract it, and add the `argc` binary to your `$PATH`.
 
+You can use the following command on Linux, MacOS, or Windows to download the latest release.
+
+```
+curl -fsSL https://raw.githubusercontent.com/sigoden/argc/main/install.sh | sh -s -- --to /usr/local/bin
+```
+
 ### GitHub Actions
 
 [extractions/setup-crate](https://github.com/marketplace/actions/setup-crate) can be used to install argc in a GitHub Actions workflow.
