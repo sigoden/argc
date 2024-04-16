@@ -3,7 +3,7 @@
 # @describe An elegant command-line argument parser - https://github.com/sigoden/argc
 
 # @option --argc-eval~ <FILE> <ARGS>                                Use `eval "$(argc --argc-eval "$0" "$@")"`
-# @option --argc-create~ <RECEIPES>                                 Create a boilerplate argcfile
+# @option --argc-create~ <RECIPES>                                 Create a boilerplate argcfile
 # @option --argc-build <FILE> <OUTPATH?>                            Generate bashscript without argc dependency
 # @option --argc-mangen <FILE> <OUTDIR>                             Generate man pages
 # @option --argc-completions~[`_choice_completion`] <SHELL> <CMDS>  Generate shell completion scripts
