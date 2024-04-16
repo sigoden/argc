@@ -34,7 +34,7 @@ roff = "0.2"
 insta = "1.30"
 assert_cmd = "2"
 assert_fs = "1"
-rstest = "0.18"
+rstest = "0.19"
 predicates = "3"
 
 [target.'cfg(unix)'.dev-dependencies]
