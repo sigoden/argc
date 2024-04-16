@@ -1071,6 +1071,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
                 };
                 for v in param.list_names() {
                     let nospace = param.prefixed() || param.assigned();
+                    let v = if param.assigned() && v.len() > 2 {
+                        format!("{v}=")
+                    } else {
+                        v
+                    };
                     output.push((v, describe.to_string(), nospace, kind))
                 }
             }
