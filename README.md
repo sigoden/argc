@@ -166,11 +166,13 @@ See [command runner](https://github.com/sigoden/argc/blob/main/docs/command-runn
 
 ## Completions
 
-Argc provides shell completion for all argc-based scripts.
+Argc automaticlly provides shell completions for all argc-based scripts.
 
 ```
 argc --argc-completions <SHELL> [CMDS]...
 ```
+
+In the following, we use cmd1 and cmd2 as examples to show how to add a completion script for various shells.
 
 ```
 # bash (~/.bashrc)
@@ -210,11 +212,11 @@ $ argc --argc-compgen bash ./example.sh example --
 --version (Print version)
 ```
 
-Argc is a completion engine, see 1000+ examples in [argc-completions](https://github.com/sigoden/argc-completions).
+So argc is a also completion engine, see 1000+ examples in [argc-completions](https://github.com/sigoden/argc-completions).
 
 ## Manpage
 
-Generate man pages for the CLI.
+Generate man pages for your argc-based CLI.
 
 ```
 argc --argc-mangen <SCRIPT> [OUTDIR]
@@ -231,13 +233,13 @@ man man/example.1
 
 ## Windows
 
-The only dependency of argc is bash.  Developers who work on Windows OS usually have [git](https://gitforwindows.org/) (which includes git-bash) installed, so you can safely use argc and GNU tools (grep, sed, awk...) on windows OS.
+The only dependency of argc is bash. ince developers working on Windows typically have [git](https://gitforwindows.org/) installed, which includes git-bash, so you can safely use argc and GNU tools (grep, sed, awk...) in the Windows environment.
 
 </summary>
 
 ## Make `.sh` file executable
 
-If you want to run a `.sh` script file directly like a `.cmd` or `.exe` file, execute the following code in PowerShell.
+To execute a `.sh` script file directly like a `.cmd` or `.exe` file, execute the following code in PowerShell.
 
 ```ps1
 # Add .sh to PATHEXT

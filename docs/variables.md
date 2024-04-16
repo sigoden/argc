@@ -1,10 +1,10 @@
 # Variables
 
-Argc streamlines argument parsing in your shell scripts, allowing you to utilize variables seamlessly. Here's a breakdown of how it works:
+Argc streamlines argument parsing in your shell scripts, allowing you to utilize variables seamlessly.
 
 ## Shell Variables
 
-You can employ shell variables within your Argc scripts just like you normally would in Bash. Argc doesn't interfere with their behavior.
+You can employ shell variables within your argc-based scripts just like you normally would in Bash. Argc doesn't interfere with their behavior.
 
 ```sh
 # @cmd
@@ -17,7 +17,7 @@ cmd() {
 
 ## Argc-Generated Variables
 
-Argc automatically creates variables corresponding to the options, flags, and arguments defined in your script using the `@option`, `@flag`, and `@arg` directives.
+Argc automatically creates variables corresponding to the options, flags, and positional arguments defined in your script using the `@option`, `@flag`, and `@arg` directives.
 
 ```sh
 # @option --oa

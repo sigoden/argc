@@ -1,5 +1,7 @@
 # Specification
 
+## Comment Tags
+
 ### `@describe`
 
 Sets the description for the command.
@@ -11,7 +13,7 @@ Sets the description for the command.
 # @describe A demo CLI
 ```
 
-## `@cmd`
+### `@cmd`
 
 Defines a subcommand.
 
@@ -292,15 +294,15 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
 - `$$`: Automatically use the param's name for the environment variable.
 - `$`[_NAME_]: Use a specific environment variable name.
 
-## description
+### description
 
-lain text explanation of the command or param.
+Plain text for documentation and usage information
 
 ```sh
-# @describe Multi-line auto-wrapped help text
+# @describe Can be multiline 
 #
-# Extra lines after the comment tag which don't start with an `@`, are treated as the long description.
-# A line which is not a comment ends the block.
+# Extra lines after the comment tag accepts description, which don't start with an `@`,
+# are treated as the long description. A line which is not a comment ends the block.
 ```
 
 [_short_]: #short
