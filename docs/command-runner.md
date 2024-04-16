@@ -1,34 +1,44 @@
-# Task runner
+# Command runner
 
-Argc is an ideal task runner for automating complex tasks, especially for users familiar with Bash.
+Argc is a also command runner built for those who love the efficiency and flexibility of Bash scripting.
 
-## Why Choose Argc?
+This document explains how to effectively use `argc` as a command runner.
 
-- **Leverage Bash Skills:** No need to learn a new language, perfect for Bash aficionados.
-- **GNU Toolset Integration:** Utilize familiar tools like awk, sed, grep, and find within your tasks.
-- **Environment variables Management**: Load dotenv, document, and validate environment variables effortlessly.
-- **Powerful Shell Autocompletion:** Enjoy autocomplete suggestions for enhanced productivity.
-- **Cross-Platform Compatibility::** Works seamlessly across Linux, macOS, Windows, and BSD systems.
+## Create an Argcfile.sh 
 
-## Defining Tasks
+Commands, called recipes, are stored in a file called argcfile .
 
-A task is a regular shell function with a `# @cmd` comment tag above it.
-
-### Create an Argcfile.sh 
-
-Use `--argc-create` to quickly generate an Argcfile.sh for your project.
+Use `--argc-create` to quickly generate an `Argcfile.sh` for your project.
 
 ```sh
 argc --argc-create build test
 ```
 
-This creates a basic Argcfile.sh with sample `build` and `test` tasks.
+This creates a basic Argcfile.sh with sample `build` and `test` recipes.
 
-Here's what Argcfile.sh looks like:
+```sh
+#!/usr/bin/env bash
 
-## Handling dependencies
+set -e
 
-Since task are functions, manage dependencies by calling them sequentially within other functions.
+# @cmd
+build() {
+    echo To implement command: build
+}
+
+# @cmd
+test() {
+    echo To implement command: test
+}
+
+eval "$(argc --argc-eval "$0" "$@")"
+```
+
+A recipe is a regular shell function with a `@cmd` comment tag above it.
+
+## Handle dependencies
+
+Since recipe are functions, manage dependencies by calling them sequentially within other functions.
 
 ```sh
 # @cmd
@@ -47,7 +57,7 @@ after() {
 }
 ```
 
-This example demonstrates how the `current` task calls both `before` and `after` tasks.
+This example demonstrates how the `current` recipe calls both `before` and `after` recipes.
 
 ```
 $ argc current
@@ -56,9 +66,9 @@ current
 after
 ```
 
-### Organizing Tasks
+## Organize Recipes
 
-Organize related tasks into groups for better readability.
+Organize related recipes into groups for better readability.
 
 ```sh
 # @cmd
@@ -71,9 +81,7 @@ test-bin() { :; }
 
 > Valid group formats include: `foo:bar` `foo.bar` `foo@bar`.
 
-## Running Tasks
-
-### Default task recipe
+## Set default recipe
 
 When invoked without a specific recipe, Argc displays available recipes.
 
@@ -126,12 +134,12 @@ test() {
 }
 ```
 
-Now you can run the `test` task using the alias `t`:
+Now you can run the `test` recipe using the alias `t`:
 ```
 $ argc t
 ```
 
-### Positional arguments
+## Access positional arguments
 
 Accessed through shell positional variables (`$1`, `$2`, `$@`, `$*` etc.).
 
@@ -139,7 +147,8 @@ Accessed through shell positional variables (`$1`, `$2`, `$@`, `$*` etc.).
 # @cmd
 build() {
   echo $1 $2
-  echo "$@"
+  echo $@
+  echo $*
 }
 ```
 
@@ -149,12 +158,12 @@ foo bar
 foo bar
 ```
 
-### Flag/option arguments
+## Access Flag/option arguments
 
-Define and use flags and options for more control.
+Define and use flags/options for more control.
 
 ```sh
-# @cmd  A simple task
+# @cmd  A simple command
 # @flag -f --flag   A flag parameter
 # @option -option   A option parameter
 # @arg arg          A positional parameter
@@ -167,9 +176,9 @@ cmd() {
 
 ```
 $ argc cmd -h
-A simple task
+A simple command
 
-USAGE: test cmd [OPTIONS] [ARG]
+USAGE: Argcfile.sh cmd [OPTIONS] [ARG]
 
 ARGS:
   [ARG]  A positional parameter
@@ -185,9 +194,7 @@ option:  foo
 arg:     README.md
 ```
 
-## Environment variable
-
-### Loading dotenv
+## Load environment variables from dotenv file
 
 Use `@meta dotenv` to load environment variables from a `.env` file.
 
@@ -196,7 +203,7 @@ Use `@meta dotenv` to load environment variables from a `.env` file.
 # @meta dotenv .env.local                         # Load .env.local
 ```
 
-### Documentation and Validation
+## Document and Validate environment variables
 
 Define environment variables using `@env`.
 
@@ -250,7 +257,7 @@ $ tree /tmp/project
 └── src
 ```
 
-The code of build task as follows:
+The code of build recpie as follows:
 
 ```sh
 # @cmd

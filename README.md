@@ -3,17 +3,19 @@
 [![CI](https://github.com/sigoden/argc/actions/workflows/ci.yaml/badge.svg)](https://github.com/sigoden/argc/actions/workflows/ci.yaml)
 [![Crates](https://img.shields.io/crates/v/argc.svg)](https://crates.io/crates/argc)
 
-Argc is a powerful Bash framework that simplifies building command-line interfaces (CLIs) and automating tasks. It lets you define your CLI through comments, focusing on your core logic without dealing with argument parsing, usage text, error messages, and other boilerplate code.
+Argc is a powerful Bash framework that simplifies building full-featured CLIs. It lets you define your CLI through comments, focusing on your core logic without dealing with argument parsing, usage text, error messages, and other boilerplate code.
 
 ![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
 
 ## Features
 
 - **Effortless Argument Parsing:**
-  - Handles positional and optional arguments, flags, commands, and subcommands.
-  - Validates and extracts user input for robust error handling.
+  - Handles flags, options, positional arguments, and subcommands.
+  - Validates user input for robust error handling.
+  - Generates information-rich usage text.
+  - Maps arguments to corresponding variables.
 - **Standalone Bash Script Creation:**
-  - Build a single executable script without depending on Argc itself.
+  - Build a bash script that incorporates all functionalities without depending on Argc itself.
 - **Cross-shell Autocompletion:**
   - Generate autocompletion scripts for various shells (bash, zsh, fish, powershell, etc.).
 - **Man Page Generation:**
@@ -21,25 +23,25 @@ Argc is a powerful Bash framework that simplifies building command-line interfac
 - **Environment Variable Integration:**
   - Define, validate, and bind environment variables to options and positional arguments.
 - **Task Automation:**
-  - An ideal task runner for Bash, allowing you to automate tasks using Argcfile.sh.
+  - An Bash-based command runner that automates tasks via Argcfile.sh.
 - **Cross-Platform Compatibility:**
   - Seamlessly run your Argc-based scripts on macOS, Linux, Windows, and BSD systems.
 
 ## Install
 
-### With cargo
+### Package Managers
 
-```
-cargo install argc
-```
+- **Rust Developers:** `cargo install argc`
+- **Homebrew/Linuxbrew Users:** `brew install argc`
+- **Pacman Users**: `yay -S argc`
 
-### Binaries on macOS, Linux, Windows
+#### Pre-built Binaries
 
-Download from [Github Releases](https://github.com/sigoden/argc/releases), unzip and add argc to your $PATH.
+Alternatively, download pre-built binaries for macOS, Linux, and Windows from [GitHub Releases](https://github.com/sigoden/argc/releases), extract it, and add the `argc` binary to your `$PATH`.
 
 ### GitHub Actions
 
-[extractions/setup-crate](https://github.com/marketplace/actions/setup-crate) can be used to install just in a GitHub Actions workflow.
+[extractions/setup-crate](https://github.com/marketplace/actions/setup-crate) can be used to install argc in a GitHub Actions workflow.
 
 ```yaml
 - uses: extractions/setup-crate@v1
@@ -78,6 +80,7 @@ echo val: ${argc_val[@]}
 ```
 
 Run the script with some sample arguments:
+
 ```sh
 ./example.sh -F --bar=xyz --baz a --baz b v1 v2
 ```
@@ -127,9 +130,11 @@ Comment tags are standard Bash comments prefixed with `@` and a specific tag. Th
 
 See [specification](https://github.com/sigoden/argc/blob/main/docs/specification.md) for the grammar and usage of all the comment tags.
 
-## Build
+## Argc-build
 
-Build a standalone bash script without argc dependency.
+Generate an independent bash script that incorporates all functionalities typically available when the `argc` command is present.
+
+The generated script removes the `argc` dependency, enhances compatibility, and enables deployment in a wider range of environments.
 
 ```
 argc --argc-build <SCRIPT> [OUTPATH]
@@ -138,27 +143,24 @@ argc --argc-build <SCRIPT> [OUTPATH]
 ```sh
 argc --argc-build ./example.sh build/
 
-./build/example.sh -h       # Run the script without argc dependency
+./build/example.sh -h     # The script's functionality does not require the `argc` dependency
 ```
 
 ## Argcscript
 
-Argc will automatically find and run `Argcfile.sh` unless the `--argc-*` options are used to change this behavior.
+Argc is a also command runner built for those who love the efficiency and flexibility of Bash scripting.
 
-Argcfile is to argc what Makefile is to make. 
+Similar to how Makefile define commands for the `make` tool, Argcscript uses an `Argcfile.sh` to store your commands, referred to as "recipes".
 
-What is the benefit?
-- Can enjoy convenient shell autocompletion.
-- Can be called in any subdirectory without locating the script file every time.
-- Serve as a centralized entrypoint/documentation for executing project bashscripts.
+**Why Choose Argc for Your Projects?**
 
-Argc is a [task runner](https://github.com/sigoden/argc/blob/main/docs/task-runner.md).
+- **Leverage Bash Skills:** No need to learn a new language, perfect for Bash aficionados.
+- **GNU Toolset Integration:** Utilize familiar tools like awk, sed, grep, find, and others.
+- **Environment variables Management**: Load dotenv, document, and validate environment variables effortlessly.
+- **Powerful Shell Autocompletion:** Enjoy autocomplete suggestions for enhanced productivity.
+- **Cross-Platform Compatibility::** Works seamlessly across Linux, macOS, Windows, and BSD systems.
 
-You can run `argc --argc-create` to quickly create a boilerplate argcscript.
-
-```
-argc --argc-create [TASKS]...
-```
+See [command runner](https://github.com/sigoden/argc/blob/main/docs/command-runner.md) for more details.
 
 ![argcscript](https://github.com/sigoden/argc/assets/4012553/707a3b28-5416-47f1-9d19-788f0135971a)
 
