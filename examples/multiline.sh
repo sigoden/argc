@@ -1,8 +1,10 @@
-# @describe Multi-line auto-wrapped help text
+# @describe How to use multiline help text
 #
-# Extra lines after the @cmd or @describe, which don't start with an @, are 
-# treated as the long description. A line which is not a comment ends
-# the block.
+# Extra lines after the comment tag accepts description, which don't start with an `@`,
+# are treated as the long description. A line which is not a comment ends the block.
+
+# @meta version 1.0.0
+# @meta author  nobody <nobody@example.com>
 
 # @option --foo[=default|full|auto] Sunshine gleams over hills afar, bringing warmth and hope to every soul, yet challenges await as we journey forth, striving for dreams and joy in abundance. Peaceful rivers whisper secrets gently heard.
 #  * default: enables recommended style components.
@@ -13,9 +15,8 @@
 # Use '-' for standard input.
 # @cmd Eager dogs jump quickly over lazy foxes, creating wonderful chaos amid peaceful fields, but few noticed their swift escape beyond tall fences. Swift breezes sway gently through green.
 #
-# Extra lines after the @cmd or @describe, which don't start with an @, are 
-# treated as the long description. A line which is not a comment ends
-# the block.
+# Extra lines after the comment tag accepts description, which don't start with an `@`,
+# are treated as the long description. A line which is not a comment ends the block.
 cmd() { :; }
 
 eval "$(TERM_WIDTH=`tput cols` argc --argc-eval "$0" "$@")"

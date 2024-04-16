@@ -2,7 +2,7 @@
 
 Argc is a also command runner built for those who love the efficiency and flexibility of Bash scripting.
 
-This document explains how to effectively use `argc` as a command runner.
+This guide provides instructions on how to effectively use `argc` for this purpose.
 
 ## Create an Argcfile.sh 
 

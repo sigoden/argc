@@ -1,4 +1,4 @@
-# @cmd Demonstrates how to bind environment variables to parameters
+# @cmd How to bind env to param
 
 # @flag --fa1 $$
 # @flag --fa2 $$

@@ -1,4 +1,6 @@
-# @describe Docker CLI mocking
+# @describe How to use nested subcommands
+# 
+# Mock docker cli
 
 # @cmd
 builder() { :; }

@@ -1,4 +1,4 @@
-# describe Sample CLI that uses the default command option
+# describe How to use `@meta default-subcommand`
 
 # @cmd Upload a file
 # @meta default-subcommand

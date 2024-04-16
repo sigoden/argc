@@ -1,63 +1,18 @@
 ---
-source: tests/details.rs
+source: tests/multiline.rs
 expression: data
 ---
 RUN
-prog foo -h
+prog -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-Multi-line auto-wrapped help text
+prog 1.0.0
+nobody <nobody@example.com>
+How to use multiline help text
 
-Extra lines after the @cmd or @describe, which don't start with an @, are
-treated as the long description. A line which is not a comment ends
-the block.
-
-USAGE: prog [OPTIONS] <COMMAND>
-
-ARGS:
-  [TARGET]
-          Eager dogs jump over quick, lazy foxes behind brown wooden fences
-          around dark, old houses. Happy children laugh as they run through
-          golden wheat fields under blue, sunny skies.
-          Use '-' for standard input.
-
-OPTIONS:
-      --foo <FOO>
-          Sunshine gleams over hills afar, bringing warmth and hope to every
-          soul, yet challenges await as we journey forth, striving for dreams
-          and joy in abundance. Peaceful rivers whisper secrets gently heard.
-           * default: enables recommended style components.
-           * full: enables all available components.
-           * auto: same as 'default', unless the output is piped.
-          [default: default]
-          [possible values: default, full, auto]
-
-      --bar <BAR>
-          Eager dogs jump quickly over the lazy brown fox, swiftly running
-          past green fields, but only until the night turns dark. Bright stars
-          sparkle clearly above us now.
-
-  -h, --help
-          Print help
-
-  -V, --version
-          Print version
-
-COMMANDS:
-  cmd  Eager dogs jump quickly over lazy foxes, creating wonderful chaos amid
-       peaceful fields, but few noticed their swift escape beyond tall fences.
-       Swift breezes sway gently through green.
-
-EOF
-exit 0
-
-# BUILD_OUTPUT
-Multi-line auto-wrapped help text
-
-Extra lines after the @cmd or @describe, which don't start with an @, are
-treated as the long description. A line which is not a comment ends
-the block.
+Extra lines after the comment tag accepts description, which don't start with an `@`,
+are treated as the long description. A line which is not a comment ends the block.
 
 USAGE: prog [OPTIONS] <COMMAND>
 
@@ -87,4 +42,41 @@ OPTIONS:
 COMMANDS:
   cmd  Eager dogs jump quickly over lazy foxes, creating wonderful chaos amid peaceful fields, but few noticed their swift escape beyond tall fences. Swift breezes sway gently through green.
 
+EOF
+exit 0
 
+# BUILD_OUTPUT
+prog 1.0.0
+nobody <nobody@example.com>
+How to use multiline help text
+
+Extra lines after the comment tag accepts description, which don't start with an `@`,
+are treated as the long description. A line which is not a comment ends the block.
+
+USAGE: prog [OPTIONS] <COMMAND>
+
+ARGS:
+  [TARGET]
+          Eager dogs jump over quick, lazy foxes behind brown wooden fences around dark, old houses. Happy children laugh as they run through golden wheat fields under blue, sunny skies.
+          Use '-' for standard input.
+
+OPTIONS:
+      --foo <FOO>
+          Sunshine gleams over hills afar, bringing warmth and hope to every soul, yet challenges await as we journey forth, striving for dreams and joy in abundance. Peaceful rivers whisper secrets gently heard.
+           * default: enables recommended style components.
+           * full: enables all available components.
+           * auto: same as 'default', unless the output is piped.
+          [default: default]
+          [possible values: default, full, auto]
+
+      --bar <BAR>
+          Eager dogs jump quickly over the lazy brown fox, swiftly running past green fields, but only until the night turns dark. Bright stars sparkle clearly above us now.
+
+  -h, --help
+          Print help
+
+  -V, --version
+          Print version
+
+COMMANDS:
+  cmd  Eager dogs jump quickly over lazy foxes, creating wonderful chaos amid peaceful fields, but few noticed their swift escape beyond tall fences. Swift breezes sway gently through green.

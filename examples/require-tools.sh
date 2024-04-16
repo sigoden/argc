@@ -1,16 +1,16 @@
-# @describe Demonstrate how to use require-tools meta
+# @describe how to use `@meta require-tools`
 
-# @meta require-tools curl,sed
+# @meta require-tools awk,sed
 
 # @cmd
 # @meta require-tools git
-cmd1() {
+require-git() {
     :;
 }
 
 # @cmd
 # @meta require-tools not-found
-cmd2() {
+require-not-found() {
     :;
 }
 
