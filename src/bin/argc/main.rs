@@ -349,7 +349,7 @@ fn generate_boilerplate(args: &[String]) -> String {
                 r#"
 # @cmd
 {cmd}() {{
-    echo To implement command: {cmd}
+    echo TODO {cmd}
 }}
 "#
             )
@@ -362,6 +362,7 @@ fn generate_boilerplate(args: &[String]) -> String {
 
 set -e
 {tasks}
+# For more information, please refer to the https://github.com/sigoden/argc
 eval "$(argc --argc-eval "$0" "$@")"
 "#
     )
