@@ -362,7 +362,7 @@ fn generate_boilerplate(args: &[String]) -> String {
 
 set -e
 {tasks}
-# For more information, please refer to the https://github.com/sigoden/argc
+# See more details at https://github.com/sigoden/argc
 eval "$(argc --argc-eval "$0" "$@")"
 "#
     )

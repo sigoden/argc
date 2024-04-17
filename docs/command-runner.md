@@ -23,14 +23,15 @@ set -e
 
 # @cmd
 build() {
-    echo To implement command: build
+    echo TODO build
 }
 
 # @cmd
 test() {
-    echo To implement command: test
+    echo TODO test
 }
 
+# See more details at https://github.com/sigoden/argc
 eval "$(argc --argc-eval "$0" "$@")"
 ```
 
