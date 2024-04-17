@@ -8,8 +8,8 @@ license = "MIT OR Apache-2.0"
 homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
 autotests = false
-categories = ["command-line-utilities"]
-keywords = ["command-line", "task-runner", "argument-parser"]
+categories = ["command-line-utilities", "development-tools"]
+keywords = ["cli", "bash", "runner", "arg", "parser"]
 
 [dependencies]
 anyhow = "1"
