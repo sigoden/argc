@@ -168,7 +168,7 @@ Similar to how Makefile define commands for the `make` tool, Argcscript uses an 
 
 See [command runner](https://github.com/sigoden/argc/blob/main/docs/command-runner.md) for more details.
 
-![argcscript](https://github.com/sigoden/argc/assets/4012553/707a3b28-5416-47f1-9d19-788f0135971a)
+![argcscript](https://github.com/sigoden/argc/assets/4012553/42dd99bd-958a-49b7-b87d-585f7bd3b317)
 
 ## Completions
 

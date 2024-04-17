@@ -67,7 +67,7 @@ fn create_with_tasks() {
         .env("PATH", path_env_var)
         .arg("bar")
         .assert()
-        .stdout(predicates::str::contains("To implement command: bar"))
+        .stdout(predicates::str::contains("TODO bar"))
         .success();
 }
 
