@@ -783,7 +783,6 @@ impl Command {
         value_size += 2;
         output.push("ENVIRONMENTS:".to_string());
         render_list(&mut output, list, value_size, term_width);
-        output.push("".to_string());
         output
     }
 
