@@ -2,7 +2,6 @@
 source: tests/env.rs
 expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
-
 # OUTPUT
 USAGE: envs run
 
@@ -18,7 +17,6 @@ ENVIRONMENTS:
 
 
 
-
 # BUILD_OUTPUT
 USAGE: prog run
 
@@ -31,5 +29,3 @@ ENVIRONMENTS:
   TEST_EFA  choice from fn
   TEST_EA   override
   TEST_NEW  append
-
-
