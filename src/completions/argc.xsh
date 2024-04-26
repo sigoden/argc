@@ -30,4 +30,8 @@ def _argc_completer(context):
         
     return result
 
-_add_one_completer('argc', _argc_completer, 'start')
+if 'ARGC_XONSH_SCRIPTS' not in __xonsh__.env:
+    __xonsh__.env['ARGC_XONSH_SCRIPTS'] = []
+    
+if 'argc' not in __xonsh__.completers:
+    _add_one_completer('argc', _argc_completer, 'start')

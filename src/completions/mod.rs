@@ -1,8 +1,5 @@
 use crate::Shell;
 
-use semver::Version;
-use std::env;
-
 const BASH_SCRIPT: &str = include_str!("argc.bash");
 const ELVISH_SCRIPT: &str = include_str!("argc.elv");
 const FISH_SCRIPT: &str = include_str!("argc.fish");
@@ -30,19 +27,7 @@ pub fn generate_completions(shell: Shell, commands: &[String]) -> String {
             FISH_SCRIPT.replace("__COMMANDS__", &commands)
         }
         Shell::Generic => String::new(),
-        Shell::Nushell => {
-            if env::var("NU_VERSION")
-                .ok()
-                .and_then(|v| Version::parse(&v).ok())
-                .map(|v| v < Version::new(0, 89, 0))
-                .unwrap_or_default()
-            {
-                // https://github.com/nushell/nushell/pull/11289
-                NUSHELL_SCRIPT.replace("...$args", "$args")
-            } else {
-                NUSHELL_SCRIPT.to_string()
-            }
-        }
+        Shell::Nushell => NUSHELL_SCRIPT.to_string(),
         Shell::Powershell => {
             let commands = commands
                 .iter()
@@ -52,13 +37,7 @@ pub fn generate_completions(shell: Shell, commands: &[String]) -> String {
             POWERSHELL_SCRIPT.replace("__COMMANDS__", &commands)
         }
         Shell::Xonsh => {
-            let scripts_env_var = "ARGC_XONSH_SCRIPTS";
-            if env::var(scripts_env_var).is_ok() {
-                format!("__xonsh__.env['{scripts_env_var}'].extend({commands:?})")
-            } else {
-                let code = format!("__xonsh__.env['{scripts_env_var}'] = {commands:?}");
-                format!("{XONSH_SCRIPT}\n{code}")
-            }
+            format!("{XONSH_SCRIPT}\n__xonsh__.env['ARGC_XONSH_SCRIPTS'].extend({commands:?})")
         }
         Shell::Zsh => {
             let commands = commands.join(" ");
