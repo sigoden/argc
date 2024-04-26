@@ -31,7 +31,7 @@ impl Runtime for NativeRuntime {
         }
         let git_path = self.which("git")?;
         let git_parent_path = self.parent_path(&git_path)?;
-        let bash_path = self.join_path(self.parent_path(&git_parent_path)?, &["bin", "bash.exe"]);
+        let bash_path = self.join_path(&self.parent_path(&git_parent_path)?, &["bin", "bash.exe"]);
         if self.exist_path(&bash_path) {
             return Some(bash_path);
         }
@@ -151,12 +151,13 @@ impl Runtime for NativeRuntime {
             meta = fs::metadata(path).ok()?;
         }
         let is_dir = meta.is_dir();
-        let mut is_executable = false;
-        #[cfg(not(windows))]
-        if meta.is_file() {
+        #[cfg(target_family = "unix")]
+        let is_executable = {
             use std::os::unix::fs::PermissionsExt;
-            is_executable = meta.permissions().mode() & 0o111 != 0;
-        }
+            meta.permissions().mode() & 0o111 != 0
+        };
+        #[cfg(not(target_family = "unix"))]
+        let is_executable = false;
         Some((is_dir, is_symlink, is_executable))
     }
 
