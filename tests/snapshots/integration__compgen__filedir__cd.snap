@@ -8,6 +8,7 @@ bin/	0	bin/		blue bold
 build.rs	1	build.rs		default
 command/	0	command/		blue bold
 compgen.rs	1	compgen.rs		default
+completions/	0	completions/		blue bold
 lib.rs	1	lib.rs		default
 mangen.rs	1	mangen.rs		default
 matcher.rs	1	matcher.rs		default
@@ -21,6 +22,7 @@ utils.rs	1	utils.rs		default
 --oa=build.rs	1	build.rs		default
 --oa=command/	0	command/		blue bold
 --oa=compgen.rs	1	compgen.rs		default
+--oa=completions/	0	completions/		blue bold
 --oa=lib.rs	1	lib.rs		default
 --oa=mangen.rs	1	mangen.rs		default
 --oa=matcher.rs	1	matcher.rs		default
@@ -34,6 +36,7 @@ bin/	0	bin/		blue bold
 build.rs:	0	build.rs:		default
 command/	0	command/		blue bold
 compgen.rs:	0	compgen.rs:		default
+completions/	0	completions/		blue bold
 lib.rs:	0	lib.rs:		default
 mangen.rs:	0	mangen.rs:		default
 matcher.rs:	0	matcher.rs:		default
@@ -47,11 +50,10 @@ foo=bin/	0	bin/		blue bold
 foo=build.rs	1	build.rs		default
 foo=command/	0	command/		blue bold
 foo=compgen.rs	1	compgen.rs		default
+foo=completions/	0	completions/		blue bold
 foo=lib.rs	1	lib.rs		default
 foo=mangen.rs	1	mangen.rs		default
 foo=matcher.rs	1	matcher.rs		default
 foo=param.rs	1	param.rs		default
 foo=parser.rs	1	parser.rs		default
 foo=utils.rs	1	utils.rs		default
-
-

@@ -1,4 +1,3 @@
-mod completions;
 mod parallel;
 
 use anyhow::{anyhow, bail, Context, Result};
@@ -15,7 +14,6 @@ use std::{
 };
 use which::which;
 
-const COMPLETION_SCRIPT: &str = include_str!("completions/completion.sh");
 const ARGC_SCRIPT_NAMES: [&str; 6] = [
     "Argcfile.sh",
     "Argcfile",
@@ -124,7 +122,8 @@ fn run() -> Result<i32> {
                     Some(v) => v.parse()?,
                     None => bail!("Usage: argc --argc-completions <SHELL> [CMDS]..."),
                 };
-                let script = crate::completions::generate(shell, &args[3..]);
+                let commands = [vec!["argc".to_string()], args[3..].to_vec()].concat();
+                let script = argc::generate_completions(shell, &commands);
                 print!("{}", script);
             }
             "--argc-compgen" => {
@@ -218,7 +217,8 @@ fn run_compgen(mut args: Vec<String>) -> Option<()> {
         .unwrap_or_default();
     let output = if &args[4] == "argc" && (args[3].is_empty() || args[5].starts_with("--argc")) {
         let cmd_args = &args[4..];
-        argc::compgen(shell, "", COMPLETION_SCRIPT, cmd_args, no_color).ok()?
+        let script = get_argc_script_code();
+        argc::compgen(shell, "", &script, cmd_args, no_color).ok()?
     } else if args[3].is_empty() {
         let cmd_args = &args[4..];
         argc::compgen(shell, "", "# @arg path*", cmd_args, no_color).ok()?
@@ -278,6 +278,39 @@ USAGE:
     argc --argc-shell-path                          Print current shell path
     argc --argc-help                                Print help information
     argc --argc-version                             Print version information
+"###
+    )
+}
+
+fn get_argc_script_code() -> String {
+    let about = concat!(
+        env!("CARGO_PKG_DESCRIPTION"),
+        " - ",
+        env!("CARGO_PKG_REPOSITORY")
+    );
+    format!(
+        r###"#!/usr/bin/env bash
+
+# @describe {about}
+
+# @option --argc-eval~ <FILE> <ARGS>                                Use `eval "$(argc --argc-eval "$0" "$@")"`
+# @option --argc-create~ <RECIPES>                                 Create a boilerplate argcfile
+# @option --argc-build <FILE> <OUTPATH?>                            Generate bashscript without argc dependency
+# @option --argc-mangen <FILE> <OUTDIR>                             Generate man pages
+# @option --argc-completions~[`_choice_completion`] <SHELL> <CMDS>  Generate shell completion scripts
+# @option --argc-compgen~[`_choice_compgen`] <SHELL> <FILE> <ARGS>  Generate completion candidates
+# @option --argc-export <FILE>                                      Export command line definitions as json
+# @option --argc-parallel~ <FILE> <ARGS>                            Run functions in parallel
+# @flag --argc-script-path                                          Print current argcfile path
+# @flag --argc-shell-path                                           Print current shell path
+# @flag --argc-help                                                 Print help information
+# @flag --argc-version                                              Print version information
+
+_choice_completion() {{ :; }}
+_choice_compgen() {{ :; }}
+
+eval "$(argc --argc-eval "$0" "$@")"
+
 "###
     )
 }
