@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
+use argc::Runtime;
 use assert_cmd::cargo::cargo_bin;
 use assert_fs::fixture::{ChildPath, TempDir};
 use assert_fs::prelude::*;
@@ -96,7 +97,7 @@ pub fn build_script(script_dir: &TempDir, source: &str) -> PathBuf {
     echo "$argc__fn" "$@"
 }"#,
     );
-    let mut output = argc::build(&patched_source, "prog").unwrap();
+    let mut output = argc::build(&patched_source, "prog", None).unwrap();
     if !has_fn {
         output.push_str("\n( set -o posix ; set ) | grep ^argc_");
     }
@@ -113,7 +114,7 @@ pub fn run_script<T: AsRef<Path>>(
 ) -> String {
     let path_env_var = get_path_env_var();
     let envs: HashMap<&str, &str> = envs.iter().cloned().collect();
-    let shell_path = argc::utils::get_shell_path().unwrap();
+    let shell_path = argc::NativeRuntime.shell_path().unwrap();
     let output = std::process::Command::new(shell_path)
         .arg(script_path.as_ref())
         .args(args)

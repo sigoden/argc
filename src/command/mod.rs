@@ -5,11 +5,13 @@ use self::names_checker::NamesChecker;
 use self::share_data::ShareData;
 
 use crate::argc_value::ArgcValue;
+#[cfg(feature = "eval")]
 use crate::matcher::Matcher;
-use crate::param::{
-    EnvParam, EnvValue, FlagOptionParam, FlagOptionValue, Param, PositionalParam, PositionalValue,
-};
+use crate::param::{EnvParam, FlagOptionParam, Param, PositionalParam};
+#[cfg(feature = "export")]
+use crate::param::{EnvValue, FlagOptionValue, PositionalValue};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
+use crate::runtime::Runtime;
 use crate::utils::{
     AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, MAIN_NAME, META_AUTHOR, META_COMBINE_SHORTS,
     META_DEFAULT_SUBCOMMAND, META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_REQUIRE_TOOLS,
@@ -64,11 +66,13 @@ impl Command {
         Ok(root)
     }
 
-    pub(crate) fn eval(
+    #[cfg(feature = "eval")]
+    pub(crate) fn eval<T: Runtime>(
         &mut self,
+        runtime: T,
         args: &[String],
         script_path: Option<&str>,
-        term_width: Option<usize>,
+        wrap_width: Option<usize>,
     ) -> Result<Vec<ArgcValue>> {
         if args.is_empty() {
             bail!("Invalid args");
@@ -80,21 +84,22 @@ impl Command {
             } else {
                 &args[3..]
             };
-            let matcher = Matcher::new(self, new_args, false);
+            let matcher = Matcher::new(runtime, self, new_args, false);
             let mut arg_values = matcher.to_arg_values_for_param_fn();
             arg_values.push(ArgcValue::ParamFn(args[2].clone()));
             return Ok(arg_values);
         }
-        let mut matcher = Matcher::new(self, args, false);
+        let mut matcher = Matcher::new(runtime, self, args, false);
         if let Some(script_path) = script_path {
             matcher.set_script_path(script_path)
         }
-        if let Some(term_width) = term_width {
-            matcher.set_term_width(term_width)
+        if let Some(wrap_width) = wrap_width {
+            matcher.set_wrap_width(wrap_width)
         }
         Ok(matcher.to_arg_values())
     }
 
+    #[cfg(feature = "export")]
     pub(crate) fn export(&self) -> CommandValue {
         let mut extra: IndexMap<String, serde_json::Value> = IndexMap::new();
         let require_tools = self.meta_require_tools();
@@ -380,32 +385,6 @@ impl Command {
         self.cmd_paths().join("-")
     }
 
-    pub(crate) fn render_help(&self, term_width: Option<usize>) -> String {
-        let mut output = vec![];
-        if self.version.is_some() {
-            output.push(self.render_version());
-        }
-        if let Some(author) = &self.author {
-            output.push(author.to_string());
-        }
-        if !&self.describe.is_empty() {
-            output.push(wrap_render_block("", &self.describe, term_width));
-        }
-        if !output.is_empty() {
-            output.push(String::new());
-        }
-        output.push(self.render_usage());
-        output.push(String::new());
-        output.extend(self.render_positionals(term_width));
-        output.extend(self.render_flag_options(term_width));
-        output.extend(self.render_subcommands(term_width));
-        output.extend(self.render_envs(term_width));
-        if output.is_empty() {
-            return "\n".to_string();
-        }
-        output.join("\n")
-    }
-
     pub(crate) fn render_version(&self) -> String {
         format!(
             "{} {}",
@@ -679,6 +658,35 @@ impl Command {
             describe,
         ))
     }
+}
+
+#[cfg(any(feature = "build", feature = "eval"))]
+impl Command {
+    pub(crate) fn render_help(&self, wrap_width: Option<usize>) -> String {
+        let mut output = vec![];
+        if self.version.is_some() {
+            output.push(self.render_version());
+        }
+        if let Some(author) = &self.author {
+            output.push(author.to_string());
+        }
+        if !&self.describe.is_empty() {
+            output.push(render_block("", &self.describe, wrap_width));
+        }
+        if !output.is_empty() {
+            output.push(String::new());
+        }
+        output.push(self.render_usage());
+        output.push(String::new());
+        output.extend(self.render_positionals(wrap_width));
+        output.extend(self.render_flag_options(wrap_width));
+        output.extend(self.render_subcommands(wrap_width));
+        output.extend(self.render_envs(wrap_width));
+        if output.is_empty() {
+            return "\n".to_string();
+        }
+        output.join("\n")
+    }
 
     fn render_usage(&self) -> String {
         let mut output = vec!["USAGE:".to_string()];
@@ -701,7 +709,7 @@ impl Command {
         output.join(" ")
     }
 
-    fn render_flag_options(&self, term_width: Option<usize>) -> Vec<String> {
+    fn render_flag_options(&self, wrap_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         let default_subcmd = self.find_default_subcommand();
         if self.flag_option_params.is_empty()
@@ -733,12 +741,12 @@ impl Command {
             &mut output,
             list.into_iter().collect(),
             value_size,
-            term_width,
+            wrap_width,
         );
         output
     }
 
-    fn render_positionals(&self, term_width: Option<usize>) -> Vec<String> {
+    fn render_positionals(&self, wrap_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         let params = match self.find_default_subcommand() {
             Some(subcmd) => &subcmd.positional_params,
@@ -758,11 +766,11 @@ impl Command {
             .collect();
         value_size += 2;
         output.push("ARGS:".to_string());
-        render_list(&mut output, list, value_size, term_width);
+        render_list(&mut output, list, value_size, wrap_width);
         output
     }
 
-    fn render_envs(&self, term_width: Option<usize>) -> Vec<String> {
+    fn render_envs(&self, wrap_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         let params = match self.find_default_subcommand() {
             Some(subcmd) => &subcmd.env_params,
@@ -782,11 +790,11 @@ impl Command {
             .collect();
         value_size += 2;
         output.push("ENVIRONMENTS:".to_string());
-        render_list(&mut output, list, value_size, term_width);
+        render_list(&mut output, list, value_size, wrap_width);
         output
     }
 
-    fn render_subcommands(&self, term_width: Option<usize>) -> Vec<String> {
+    fn render_subcommands(&self, wrap_width: Option<usize>) -> Vec<String> {
         let mut output = vec![];
         if self.subcommands.is_empty() {
             return output;
@@ -803,7 +811,7 @@ impl Command {
             .collect();
         value_size += 2;
         output.push("COMMANDS:".to_string());
-        render_list(&mut output, list, value_size, term_width);
+        render_list(&mut output, list, value_size, wrap_width);
         output
     }
 
@@ -825,6 +833,7 @@ impl Command {
     }
 }
 
+#[cfg(feature = "export")]
 #[derive(Debug, Serialize)]
 pub struct CommandValue {
     pub name: String,
@@ -884,7 +893,7 @@ fn render_list(
     output: &mut Vec<String>,
     list: Vec<(String, String)>,
     value_size: usize,
-    term_width: Option<usize>,
+    wrap_width: Option<usize>,
 ) {
     let mut mapped_list = vec![];
     let multiline = list.iter().any(|(_, describe)| describe.contains('\n'));
@@ -895,11 +904,11 @@ fn render_list(
         } else if multiline {
             format!(
                 "  {value}\n{}\n",
-                wrap_render_block(&" ".repeat(10), &describe, term_width)
+                render_block(&" ".repeat(10), &describe, wrap_width)
             )
         } else {
             let spaces = " ".repeat(value_size - value.len());
-            wrap_render_block(&format!("  {value}{spaces}"), &describe, term_width)
+            render_block(&format!("  {value}{spaces}"), &describe, wrap_width)
         };
         mapped_list.push(item);
     }
@@ -911,12 +920,21 @@ fn render_list(
     }
 }
 
-fn wrap_render_block(name: &str, describe: &str, term_width: Option<usize>) -> String {
-    let size = term_width.unwrap_or(999) - name.len();
+fn render_block(name: &str, describe: &str, wrap_width: Option<usize>) -> String {
+    let size = wrap_width.unwrap_or(999) - name.len();
     let empty = " ".repeat(name.len());
     describe
         .split('\n')
-        .flat_map(|v| textwrap::wrap(v, size))
+        .flat_map(|v| {
+            #[cfg(feature = "wrap-help")]
+            {
+                textwrap::wrap(v, size)
+            }
+            #[cfg(not(feature = "wrap-help"))]
+            {
+                vec![v]
+            }
+        })
         .enumerate()
         .map(|(i, v)| {
             if i == 0 {

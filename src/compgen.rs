@@ -1,21 +1,19 @@
 use crate::command::Command;
 use crate::matcher::Matcher;
-use crate::utils::{get_os, is_quote_char, is_true_value, is_windows_path, run_param_fns};
-use crate::Result;
+use crate::runtime::Runtime;
+use crate::utils::{is_quote_char, is_windows_path, unbalance_quote, ARGC_COMPLETION_SCRIPT_PATH};
+use crate::Shell;
 
-use anyhow::bail;
-use dirs::home_dir;
+use anyhow::{bail, Result};
 use indexmap::IndexMap;
 use std::collections::{HashMap, HashSet};
-use std::env;
 use std::fmt;
-use std::fs;
-use std::path::PathBuf;
 use std::str::FromStr;
 
 const FILE_PROTO: &str = "file://";
 
-pub fn compgen(
+pub fn compgen<T: Runtime>(
+    runtime: T,
     shell: Shell,
     script_path: &str,
     script_content: &str,
@@ -50,7 +48,7 @@ pub fn compgen(
             })
             .collect()
     };
-    let matcher = Matcher::new(&cmd, &new_args, true);
+    let matcher = Matcher::new(runtime, &cmd, &new_args, true);
     let compgen_values = matcher.compgen(shell);
     let mut default_nospace = unbalance.is_some();
     let mut prefix = unbalance.map(|v| v.to_string()).unwrap_or_default();
@@ -97,15 +95,15 @@ pub fn compgen(
     let mut argc_filter = last.to_string();
     let mut argc_suffix = String::new();
     let mut argc_cd = None;
-    if let Some(fn_name) = argc_fn {
-        let output = if script_path.is_empty() {
+    if let Some(func) = argc_fn {
+        let output = if script_path == ARGC_COMPLETION_SCRIPT_PATH {
             // complete for argc
             let mut values = vec![];
-            if fn_name == "_choice_completion" {
+            if func == "_choice_completion" {
                 if new_args.len() == 3 {
                     values.extend(Shell::list().map(|v| v.name().to_string()))
                 }
-            } else if fn_name == "_choice_compgen" {
+            } else if func == "_choice_compgen" {
                 if new_args.len() == 3 {
                     values.extend(Shell::list().map(|v| v.name().to_string()))
                 } else {
@@ -113,14 +111,17 @@ pub fn compgen(
                 }
             }
             Some(values.join("\n"))
-        } else {
+        } else if !script_path.is_empty() {
             let mut envs = HashMap::new();
             envs.insert("ARGC_COMPGEN".into(), "1".into());
-            envs.insert("ARGC_OS".into(), get_os());
+            envs.insert("ARGC_OS".into(), runtime.os());
             envs.insert("ARGC_CWORD".into(), argc_filter.clone());
             envs.insert("ARGC_LAST_ARG".into(), last_arg.to_string());
-            run_param_fns(script_path, &[fn_name.as_str()], &new_args, envs)
-                .map(|output| output[0].clone())
+            runtime
+                .exec_bash_functions(script_path, &[func.as_str()], &new_args, envs)
+                .and_then(|output| output.first().cloned())
+        } else {
+            None
         };
         if let Some(output) = output.and_then(|v| if v.is_empty() { None } else { Some(v) }) {
             for line in output.trim().split('\n').map(|v| v.trim()) {
@@ -179,18 +180,30 @@ pub fn compgen(
         candidates = prepend_candidates;
     }
 
+    let need_description = shell.need_description(runtime);
+
     let mut candidates: Vec<CandidateValue> = candidates
         .into_iter()
         .map(|(value, (description, nospace, comp_color))| {
+            let description = if need_description {
+                description
+            } else {
+                String::new()
+            };
             (value, description, nospace, comp_color)
         })
         .collect();
 
     if !shell.is_generic() {
         if let Some(path_value) = argc_value.and_then(|v| convert_arg_value(&v)) {
-            if let Some((value_prefix, value_filter, more_candidates)) =
-                path_value.compgen(shell, &argc_filter, &argc_suffix, &argc_cd, default_nospace)
-            {
+            if let Some((value_prefix, value_filter, more_candidates)) = path_value.compgen(
+                runtime,
+                shell,
+                &argc_filter,
+                &argc_suffix,
+                &argc_cd,
+                default_nospace,
+            ) {
                 if candidates.is_empty() || value_prefix.is_empty() {
                     argc_prefix = format!("{argc_prefix}{value_prefix}");
                     argc_filter = value_filter;
@@ -205,7 +218,7 @@ pub fn compgen(
         }
     }
 
-    let break_chars = shell.need_break_chars(&argc_prefix);
+    let break_chars = shell.need_break_chars(runtime, &argc_prefix);
     if !break_chars.is_empty() {
         let prefix = format!("{}{}", argc_prefix, argc_filter);
         let prefix = match unbalance_quote(&prefix) {
@@ -242,356 +255,10 @@ pub fn compgen(
     Ok(values.join("\n"))
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Shell {
-    Bash,
-    Elvish,
-    Fish,
-    Generic,
-    Nushell,
-    Powershell,
-    Xonsh,
-    Zsh,
-    Tcsh,
-}
-
-impl FromStr for Shell {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        match s {
-            "bash" => Ok(Self::Bash),
-            "elvish" => Ok(Self::Elvish),
-            "fish" => Ok(Self::Fish),
-            "generic" => Ok(Self::Generic),
-            "nushell" => Ok(Self::Nushell),
-            "powershell" => Ok(Self::Powershell),
-            "xonsh" => Ok(Self::Xonsh),
-            "zsh" => Ok(Self::Zsh),
-            "tcsh" => Ok(Self::Tcsh),
-            _ => bail!(
-                "The provided shell is either invalid or missing, must be one of {}",
-                Shell::list_names(),
-            ),
-        }
-    }
-}
-
 pub(crate) type CandidateValue = (String, String, bool, CompColor); // value, description, nospace, comp_color
 
-impl Shell {
-    pub fn list() -> [Shell; 8] {
-        [
-            Shell::Bash,
-            Shell::Elvish,
-            Shell::Fish,
-            Shell::Nushell,
-            Shell::Powershell,
-            Shell::Xonsh,
-            Shell::Zsh,
-            Shell::Tcsh,
-        ]
-    }
-
-    pub fn list_names() -> String {
-        Shell::list()
-            .iter()
-            .map(|v| v.name())
-            .collect::<Vec<&str>>()
-            .join(",")
-    }
-
-    pub fn name(&self) -> &str {
-        match self {
-            Shell::Bash => "bash",
-            Shell::Elvish => "elvish",
-            Shell::Fish => "fish",
-            Shell::Generic => "generic",
-            Shell::Nushell => "nushell",
-            Shell::Powershell => "powershell",
-            Shell::Xonsh => "xonsh",
-            Shell::Zsh => "zsh",
-            Shell::Tcsh => "tcsh",
-        }
-    }
-
-    pub fn is_generic(&self) -> bool {
-        *self == Shell::Generic
-    }
-
-    pub(crate) fn convert_candidates(
-        &self,
-        candidates: Vec<CandidateValue>,
-        prefix: &str,
-        filter: &str,
-        no_color: bool,
-    ) -> Vec<String> {
-        match self {
-            Shell::Bash => {
-                let prefix_unbalance = unbalance_quote(prefix);
-                let values: Vec<&str> = candidates.iter().map(|(v, _, _, _)| v.as_str()).collect();
-                let mut add_space_to_first_candidate = false;
-                if values.len() == 1 {
-                    let space = if candidates[0].2 { "" } else { " " };
-                    let mut value = format!("{prefix}{}", candidates[0].0);
-                    if prefix_unbalance.is_none() {
-                        value = self.escape(&value);
-                    }
-                    return vec![format!("{value}{space}")];
-                } else if let Some(common) = common_prefix(&values) {
-                    if common != filter {
-                        if common != "--" {
-                            let mut value = format!("{prefix}{common}");
-                            if prefix_unbalance.is_none() {
-                                value = self.escape(&value);
-                            }
-                            return vec![value];
-                        }
-                    } else if !prefix.is_empty() && !common.starts_with(prefix) {
-                        add_space_to_first_candidate = true;
-                    }
-                }
-                candidates
-                    .into_iter()
-                    .enumerate()
-                    .map(|(i, (value, description, nospace, _comp_color))| {
-                        let mut new_value = if prefix_unbalance.is_none() {
-                            self.escape(&value)
-                        } else {
-                            value
-                        };
-                        if i == 0 && add_space_to_first_candidate {
-                            new_value = format!(" {}", new_value)
-                        };
-                        let description = self.comp_description(&description, "(", ")");
-                        if description.is_empty() {
-                            let space = if nospace { "" } else { " " };
-                            format!("{new_value}{space}")
-                        } else {
-                            format!("{new_value} {description}")
-                        }
-                    })
-                    .collect::<Vec<String>>()
-            }
-            Shell::Elvish | Shell::Powershell => candidates
-                .into_iter()
-                .map(|(value, description, nospace, comp_color)| {
-                    let new_value = self.combine_value(prefix, &value);
-                    let display = if value.is_empty() { " ".into() } else { value };
-                    let description = self.comp_description(&description, "", "");
-                    let space: &str = if nospace { "0" } else { "1" };
-                    let color = self.color(comp_color, no_color);
-                    format!("{new_value}\t{space}\t{display}\t{description}\t{color}")
-                })
-                .collect::<Vec<String>>(),
-            Shell::Fish => candidates
-                .into_iter()
-                .map(|(value, description, _nospace, _comp_color)| {
-                    let new_value = self.combine_value(prefix, &value);
-                    let description = self.comp_description(&description, "\t", "");
-                    format!("{new_value}{description}")
-                })
-                .collect::<Vec<String>>(),
-            Shell::Generic => candidates
-                .into_iter()
-                .map(|(value, description, nospace, comp_color)| {
-                    let comp_color = format!("\t/color:{}", comp_color.ser());
-                    let description = self.comp_description(&description, "\t", "");
-                    let space: &str = if nospace { "\0" } else { "" };
-                    format!("{value}{space}{comp_color}{description}")
-                })
-                .collect::<Vec<String>>(),
-            Shell::Nushell => candidates
-                .into_iter()
-                .map(|(value, description, nospace, _)| {
-                    let new_value = self.combine_value(prefix, &value);
-                    let space = if nospace { "" } else { " " };
-                    let description = self.comp_description(&description, "\t", "");
-                    format!("{new_value}{space}{description}")
-                })
-                .collect::<Vec<String>>(),
-            Shell::Xonsh => candidates
-                .into_iter()
-                .map(|(value, description, nospace, _)| {
-                    let mut new_value = format!("{prefix}{value}");
-                    if unbalance_quote(prefix).is_none() {
-                        let escaped_new_value = self.escape(&new_value);
-                        if escaped_new_value.ends_with("\\'")
-                            && !escaped_new_value.ends_with("\\\\'")
-                        {
-                            new_value = format!(
-                                "{}\\'",
-                                &escaped_new_value.as_str()[0..escaped_new_value.len() - 1]
-                            );
-                        } else {
-                            new_value = escaped_new_value
-                        }
-                    } else if new_value.ends_with('\\') && !new_value.ends_with("\\\\") {
-                        new_value.push('\\')
-                    }
-                    let display = if value.is_empty() { " ".into() } else { value };
-                    let description = self.comp_description(&description, "", "");
-                    let space: &str = if nospace { "0" } else { "1" };
-                    format!("{new_value}\t{space}\t{display}\t{description}")
-                })
-                .collect::<Vec<String>>(),
-            Shell::Zsh => candidates
-                .into_iter()
-                .map(|(value, description, nospace, comp_color)| {
-                    let new_value = if let Some((ch, i)) = unbalance_quote(prefix) {
-                        if i == 0 {
-                            format!("{}{value}", &prefix[1..])
-                        } else {
-                            format!(
-                                "{}{ch}{}{value}",
-                                self.escape(&prefix[0..i]),
-                                &prefix[i + 1..]
-                            )
-                        }
-                    } else {
-                        self.escape(&format!("{prefix}{value}"))
-                    };
-
-                    let new_value = new_value.replace(':', "\\:");
-                    let display = value.replace(':', "\\:");
-                    let description = self.comp_description(&description, ":", "");
-                    let color = self.color(comp_color, no_color);
-                    let space = if nospace { "" } else { " " };
-                    format!("{new_value}{space}\t{display}{description}\t{value}\t{color}")
-                })
-                .collect::<Vec<String>>(),
-            Shell::Tcsh => {
-                if candidates.len() == 1 {
-                    let new_value =
-                        sanitize_tcsh_value(&self.combine_value(prefix, &candidates[0].0));
-                    return vec![new_value];
-                }
-                candidates
-                    .into_iter()
-                    .map(|(value, description, _, _)| {
-                        let new_value = sanitize_tcsh_value(&self.combine_value(prefix, &value));
-                        let description = self.comp_description(&description, " (", ")");
-                        let description = description.replace(' ', "⠀");
-                        format!("{new_value}{description}")
-                    })
-                    .collect::<Vec<String>>()
-            }
-        }
-    }
-
-    pub(crate) fn with_description(&self) -> bool {
-        match env::var("ARGC_COMPGEN_DESCRIPTION") {
-            Ok(v) => is_true_value(&v),
-            Err(_) => true,
-        }
-    }
-
-    pub(crate) fn escape(&self, value: &str) -> String {
-        match self {
-            Shell::Bash => escape_chars(value, self.need_escape_chars(), "\\"),
-            Shell::Nushell | Shell::Powershell | Shell::Xonsh => {
-                if contains_chars(value, self.need_escape_chars()) {
-                    format!("'{value}'")
-                } else {
-                    value.into()
-                }
-            }
-            Shell::Zsh => escape_chars(value, self.need_escape_chars(), "\\\\"),
-            _ => value.into(),
-        }
-    }
-
-    pub(crate) fn color(&self, comp_color: CompColor, no_color: bool) -> String {
-        match self {
-            Shell::Elvish => {
-                if no_color {
-                    return "default".into();
-                }
-                comp_color.style()
-            }
-            Shell::Powershell | Shell::Zsh => {
-                if no_color {
-                    return "39".into();
-                }
-                comp_color.ansi_code()
-            }
-            _ => String::new(),
-        }
-    }
-
-    pub(crate) fn redirect_symbols(&self) -> Vec<&str> {
-        match self {
-            Shell::Nushell => vec![],
-            _ => vec!["<", ">"],
-        }
-    }
-
-    fn is_unix_only(&self) -> bool {
-        matches!(self, Shell::Bash | Shell::Fish | Shell::Zsh | Shell::Tcsh)
-    }
-
-    fn is_windows_mode(&self) -> bool {
-        if cfg!(windows) {
-            !self.is_unix_only()
-        } else {
-            false
-        }
-    }
-
-    fn need_escape_chars(&self) -> &str {
-        match self {
-            Shell::Bash => r#"()<>"'` !#$&;\|"#,
-            Shell::Nushell => r#"()[]{}"'` #$;|"#,
-            Shell::Powershell => r#"()<>[]{}"'` #$&;@|"#,
-            Shell::Xonsh => r#"()<>[]{}!"'` #&;|"#,
-            Shell::Zsh => r#"()<>[]"'` !#$&*;?\|"#,
-            _ => "",
-        }
-    }
-
-    fn need_break_chars(&self, last_arg: &str) -> Vec<char> {
-        if last_arg.starts_with(is_quote_char) {
-            return vec![];
-        }
-        match self {
-            Shell::Bash => match env::var("COMP_WORDBREAKS") {
-                Ok(v) => [':', '=', '@']
-                    .iter()
-                    .filter(|c| v.contains(**c))
-                    .copied()
-                    .collect(),
-                Err(_) => [':', '=', '@'].to_vec(),
-            },
-            Shell::Powershell => vec![','],
-            _ => vec![],
-        }
-    }
-
-    fn need_expand_tilde(&self) -> bool {
-        self.is_windows_mode() && self == &Self::Powershell
-    }
-
-    fn combine_value(&self, prefix: &str, value: &str) -> String {
-        let mut new_value = format!("{prefix}{value}");
-        if unbalance_quote(prefix).is_none() {
-            new_value = self.escape(&new_value);
-        }
-        new_value
-    }
-
-    fn comp_description(&self, description: &str, prefix: &str, suffix: &str) -> String {
-        if description.is_empty() || !self.with_description() {
-            String::new()
-        } else {
-            format!("{prefix}{}{suffix}", truncate_description(description))
-        }
-    }
-}
-
-fn sanitize_tcsh_value(value: &str) -> String {
-    value.replace(' ', "⠀")
-}
-
+/// (value, description, nospace, color)
+pub(crate) type CompItem = (String, String, bool, CompColor);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct CompColor {
     pub(crate) code: ColorCode,
@@ -779,20 +446,22 @@ pub(crate) struct ArgcPathValue {
 }
 
 impl ArgcPathValue {
-    fn compgen(
+    fn compgen<T: Runtime>(
         &self,
+        runtime: T,
         shell: Shell,
         value: &str,
         suffix: &str,
         cd: &Option<String>,
         default_nospace: bool,
     ) -> Option<(String, String, Vec<CandidateValue>)> {
-        let is_windows_mode = shell.is_windows_mode();
-        let need_expand_tilde = shell.need_expand_tilde();
+        let is_windows_mode = shell.is_windows_mode(runtime);
+        let need_expand_tilde = shell.need_expand_tilde(runtime);
         let is_file_proto = value.starts_with(FILE_PROTO);
         let (search_dir, filter, prefix) =
-            self.resolve_path(value, cd, is_windows_mode, need_expand_tilde)?;
-        if !search_dir.is_dir() {
+            self.resolve_path(runtime, value, cd, is_windows_mode, need_expand_tilde)?;
+        let (is_dir, _, _) = runtime.metadata(&search_dir)?;
+        if !is_dir {
             return None;
         }
 
@@ -823,19 +492,10 @@ impl ArgcPathValue {
             ("", "/")
         };
 
-        #[cfg(windows)]
-        let path_exts: Vec<String> = env::var("PATHEXT")
-            .unwrap_or(".COM;.EXE;.BAT;.CMD".into())
-            .split(';')
-            .filter(|v| !v.is_empty())
-            .map(|v| v.to_lowercase())
-            .collect();
-
         let mut output = vec![];
 
-        for entry in (fs::read_dir(&search_dir).ok()?).flatten() {
-            let path = entry.path();
-            let file_name = entry.file_name().to_string_lossy().to_string();
+        for file_name in runtime.read_dir(&search_dir)? {
+            let path = runtime.join_path(&search_dir, &[&file_name]);
             if !file_name.starts_with(&filter) {
                 continue;
             }
@@ -846,19 +506,10 @@ impl ArgcPathValue {
                 continue;
             };
 
-            let mut meta = match fs::symlink_metadata(&path) {
-                Ok(v) => v,
-                Err(_) => continue,
+            let (is_dir, is_symlink, is_executable) = match runtime.metadata(&path) {
+                Some(v) => v,
+                _ => continue,
             };
-            let is_symlink = meta.is_symlink();
-
-            if is_symlink {
-                meta = match fs::metadata(&path) {
-                    Ok(v) => v,
-                    Err(_) => continue,
-                };
-            }
-            let is_dir = meta.is_dir();
             if !is_dir && self.is_dir {
                 continue;
             }
@@ -881,22 +532,10 @@ impl ArgcPathValue {
                 CompColor::of_dir()
             } else if is_symlink {
                 CompColor::of_symlink()
+            } else if is_executable {
+                CompColor::of_file_exe()
             } else {
-                #[cfg(not(windows))]
-                let is_executable = {
-                    use std::os::unix::fs::PermissionsExt;
-                    meta.permissions().mode() & 0o111 != 0
-                };
-                #[cfg(windows)]
-                let is_executable = {
-                    let new_file_name = file_name.to_lowercase();
-                    path_exts.iter().any(|v| new_file_name.ends_with(v))
-                };
-                if is_executable {
-                    CompColor::of_file_exe()
-                } else {
-                    CompColor::of_file()
-                }
+                CompColor::of_file()
             };
             let nospace = if default_nospace { true } else { is_dir };
             output.push((path_value, String::new(), nospace, comp_color))
@@ -907,13 +546,14 @@ impl ArgcPathValue {
         Some((prefix, filter, output))
     }
 
-    fn resolve_path(
+    fn resolve_path<T: Runtime>(
         &self,
+        runtime: T,
         value: &str,
         cd: &Option<String>,
         is_windows_mode: bool,
         need_expand_tilde: bool,
-    ) -> Option<(PathBuf, String, String)> {
+    ) -> Option<(String, String, String)> {
         let is_home = value == "~";
         let is_file_proto = value.starts_with(FILE_PROTO);
         let (value, sep, home_p, cwd_p) = if is_windows_mode && !is_file_proto {
@@ -947,17 +587,16 @@ impl ArgcPathValue {
                     (value.to_string(), 0, FILE_PROTO.into())
                 }
             } else {
-                let mut cwd = env::current_dir().ok()?;
+                let mut cwd = runtime.current_dir()?;
                 if let Some(cd) = cd {
-                    cwd = cwd.join(cd).canonicalize().ok()?;
+                    cwd = runtime.chdir(&cwd, cd)?;
                 }
-                let cwd_s = cwd.to_string_lossy();
-                let trims = cwd_s.len() + 1;
-                let new_value = format!("{}{sep}{value}", cwd_s).replace('\\', "/");
+                let trims = cwd.len() + 1;
+                let new_value = format!("{}{sep}{value}", cwd).replace('\\', "/");
                 (new_value, trims, FILE_PROTO.into())
             }
         } else if is_home || value.starts_with(home_p) {
-            let home = home_dir()?;
+            let home = dirs::home_dir()?;
             let home_s = home.to_string_lossy();
             let path_s = if is_home {
                 format!("{home_s}{sep}")
@@ -990,13 +629,12 @@ impl ArgcPathValue {
             } else {
                 (value.clone(), "")
             };
-            let mut cwd = env::current_dir().ok()?;
+            let mut cwd = runtime.current_dir()?;
             if let Some(cd) = cd {
-                cwd = cwd.join(cd).canonicalize().ok()?;
+                cwd = runtime.chdir(&cwd, cd)?;
             }
-            let cwd_s = cwd.to_string_lossy();
-            let new_value = format!("{}{sep}{new_value}", cwd_s);
-            let trims = cwd_s.len() + 1;
+            let new_value = format!("{}{sep}{new_value}", cwd);
+            let trims = cwd.len() + 1;
             (new_value, trims, prefix.to_string())
         };
         let (path, filter) = if new_value.ends_with(sep) {
@@ -1008,7 +646,7 @@ impl ArgcPathValue {
             (format!("{parent}{sep}"), filter.into())
         };
         let prefix = format!("{prefix}{}", &path[trims..]);
-        Some((PathBuf::from(path), filter, prefix))
+        Some((path, filter, prefix))
     }
 }
 
@@ -1068,89 +706,12 @@ fn parse_candidate_value(input: &str) -> CandidateValue {
     (value, description, nospace, comp_color)
 }
 
-fn truncate_description(description: &str) -> String {
-    let max_width = 80;
-    let mut description = description.trim().replace('\t', "");
-    if description.starts_with('(') && description.ends_with(')') {
-        description = description
-            .trim_start_matches('(')
-            .trim_end_matches(')')
-            .to_string();
-    }
-    if description.chars().count() < max_width {
-        description
-    } else {
-        let truncated: String = description.chars().take(max_width).collect();
-        format!("{}...", truncated)
-    }
-}
-
-fn unbalance_quote(value: &str) -> Option<(char, usize)> {
-    let mut balance = None;
-    for (i, c) in value.chars().enumerate() {
-        match balance {
-            Some((c_, _)) => {
-                if c == c_ {
-                    balance = None
-                }
-            }
-            None => {
-                if is_quote_char(c) {
-                    balance = Some((c, i))
-                }
-            }
-        }
-    }
-    balance
-}
-
-fn common_prefix(strings: &[&str]) -> Option<String> {
-    if strings.is_empty() {
-        return None;
-    }
-    let mut prefix = String::new();
-    for (i, c) in strings[0].chars().enumerate() {
-        for s in &strings[1..] {
-            if i >= s.len() || s.chars().nth(i) != Some(c) {
-                if prefix.is_empty() {
-                    return None;
-                }
-                return Some(prefix);
-            }
-        }
-        prefix.push(c);
-    }
-    if prefix.is_empty() {
-        return None;
-    }
-    Some(prefix)
-}
-
-fn escape_chars(value: &str, need_escape: &str, for_escape: &str) -> String {
-    let chars: Vec<char> = need_escape.chars().collect();
-    value
-        .chars()
-        .map(|c| {
-            if chars.contains(&c) {
-                format!("{for_escape}{c}")
-            } else {
-                c.to_string()
-            }
-        })
-        .collect()
-}
-
 fn mod_quote(filter: &mut String, prefix: &mut String, default_nospace: &mut bool) {
     if filter.starts_with(is_quote_char) {
         prefix.push_str(&filter[0..1]);
         *default_nospace = true;
     }
     *filter = filter.trim_matches(is_quote_char).to_string();
-}
-
-fn contains_chars(value: &str, chars: &str) -> bool {
-    let value_chars: Vec<char> = value.chars().collect();
-    chars.chars().any(|v| value_chars.contains(&v))
 }
 
 #[cfg(test)]

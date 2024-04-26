@@ -180,9 +180,9 @@ _argc_check_bool() {
     ),
 ];
 
-pub fn build(source: &str, root_name: &str) -> Result<String> {
+pub fn build(source: &str, root_name: &str, wrap_width: Option<usize>) -> Result<String> {
     let cmd = Command::new(source, root_name)?;
-    let output = build_root(&cmd);
+    let output = build_root(&cmd, wrap_width);
     let mut build_block = false;
     let mut insert_at = None;
     let mut newlines = vec![];
@@ -210,8 +210,8 @@ pub fn build(source: &str, root_name: &str) -> Result<String> {
     Ok(newlines.join("\n"))
 }
 
-fn build_root(cmd: &Command) -> String {
-    let command = build_command(cmd);
+fn build_root(cmd: &Command, wrap_width: Option<usize>) -> String {
+    let command = build_command(cmd, wrap_width);
     let dotenv = if let Some(value) = cmd.dotenv() {
         format!("\n    {}", expand_dotenv(value))
     } else {
@@ -273,7 +273,7 @@ _argc_run "$@"
     )
 }
 
-fn build_command(cmd: &Command) -> String {
+fn build_command(cmd: &Command, wrap_width: Option<usize>) -> String {
     let suffix = if cmd.is_root() {
         String::new()
     } else {
@@ -281,7 +281,7 @@ fn build_command(cmd: &Command) -> String {
     };
 
     let usage = {
-        let usage = cmd.render_help(None);
+        let usage = cmd.render_help(wrap_width);
         let usage = usage.trim();
         format!(
             r#"
@@ -313,7 +313,7 @@ _argc_version{suffix}() {{
     let subcmds = cmd
         .subcommands
         .iter()
-        .map(build_command)
+        .map(|v| build_command(v, wrap_width))
         .collect::<Vec<String>>()
         .join("");
 

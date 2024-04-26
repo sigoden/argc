@@ -7,6 +7,11 @@ test() {
     cargo test "$@"
 }
 
+# @cmd Test features matrix
+test-features() {
+    cargo hack --no-dev-deps check --feature-powerset --depth 2 --lib
+}
+
 # @cmd Check the project
 # @alias c
 check() {

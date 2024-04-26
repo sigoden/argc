@@ -20,7 +20,7 @@ macro_rules! fail {
         $err:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let err = argc::eval($source, &args, None, None).unwrap_err();
+        let err = argc::eval(argc::NativeRuntime, $source, &args, None, None).unwrap_err();
         assert_eq!(err.to_string().as_str(), $err);
     };
 }
@@ -40,8 +40,8 @@ macro_rules! snapshot {
 		$width:expr
     ) => {
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
-        let values = argc::eval($source, &args, $path, $width).unwrap();
-        let shell_code = argc::ArgcValue::to_shell(&values);
+        let values = argc::eval(argc::NativeRuntime, $source, &args, $path, $width).unwrap();
+        let shell_code = argc::ArgcValue::to_bash(&values);
         let build_script_dir = $crate::fixtures::tmpdir();
         let build_script_path = $crate::fixtures::build_script(&build_script_dir, $source);
         let build_output = $crate::fixtures::run_script(&build_script_path, &args[1..], &[]);
@@ -77,9 +77,15 @@ macro_rules! snapshot_multi {
 
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
-            let values =
-                argc::eval(&script_content, &args, Some(script_path.as_str()), None).unwrap();
-            let shell_code = argc::ArgcValue::to_shell(&values);
+            let values = argc::eval(
+                argc::NativeRuntime,
+                &script_content,
+                &args,
+                Some(script_path.as_str()),
+                None,
+            )
+            .unwrap();
+            let shell_code = argc::ArgcValue::to_bash(&values);
             let build_output = $crate::fixtures::run_script(&build_script_path, &args[1..], &[]);
             let args = args.join(" ");
             let piece = format!(
@@ -113,7 +119,14 @@ macro_rules! snapshot_compgen {
             $crate::fixtures::create_argc_script($source, "compgen.sh");
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
-            let words = match argc::compgen($shell, &script_path, &script_content, &args, false) {
+            let words = match argc::compgen(
+                argc::NativeRuntime,
+                $shell,
+                &script_path,
+                &script_content,
+                &args,
+                false,
+            ) {
                 Ok(stdout) => stdout,
                 Err(stderr) => stderr.to_string(),
             };
@@ -149,7 +162,14 @@ macro_rules! snapshot_compgen_shells {
             $crate::fixtures::create_argc_script($source, "compgen.sh");
         let args: Vec<String> = $args.iter().map(|v| v.to_string()).collect();
         for shell in argc::Shell::list() {
-            let words = match argc::compgen(shell, &script_path, &script_content, &args, false) {
+            let words = match argc::compgen(
+                argc::NativeRuntime,
+                shell,
+                &script_path,
+                &script_content,
+                &args,
+                false,
+            ) {
                 Ok(stdout) => stdout,
                 Err(stderr) => stderr.to_string(),
             };

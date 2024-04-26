@@ -2,8 +2,8 @@ mod parallel;
 
 use anyhow::{anyhow, bail, Context, Result};
 use argc::{
-    utils::{escape_shell_words, get_current_dir, get_shell_path, is_true_value, termwidth},
-    Shell,
+    utils::{escape_shell_words, is_true_value, ARGC_COMPLETION_SCRIPT_PATH},
+    NativeRuntime, Runtime, Shell,
 };
 use base64::{engine::general_purpose, Engine as _};
 use std::{
@@ -12,7 +12,6 @@ use std::{
     path::{Path, PathBuf},
     process,
 };
-use which::which;
 
 const ARGC_SCRIPT_NAMES: [&str; 6] = [
     "Argcfile.sh",
@@ -38,6 +37,7 @@ fn main() {
 }
 
 fn run() -> Result<i32> {
+    let runtime = NativeRuntime;
     let args: Vec<String> = std::env::args().collect();
     let mut argc_cmd = None;
     if let Some(arg) = args.get(1) {
@@ -65,9 +65,15 @@ fn run() -> Result<i32> {
                     code.push_str(&cmds.join(" "));
                     println!("{code}")
                 } else {
-                    let values = argc::eval(&source, &cmd_args, Some(&args[2]), termwidth())?;
+                    let values = argc::eval(
+                        runtime,
+                        &source,
+                        &cmd_args,
+                        Some(&args[2]),
+                        get_term_width(),
+                    )?;
                     let dir_vars = export_dir_vars(&args[2]);
-                    let code = argc::ArgcValue::to_shell(&values);
+                    let code = argc::ArgcValue::to_bash(&values);
                     let export_vars = export_argc_variables(&code);
                     println!("{dir_vars}{export_vars}{code}")
                 }
@@ -85,7 +91,7 @@ fn run() -> Result<i32> {
             "--argc-build" => {
                 let script_path = &args[2];
                 let (source, args) = parse_script_args(&args[2..])?;
-                let script = argc::build(&source, &args[0])?;
+                let script = argc::build(&source, &args[0], get_term_width())?;
                 if let Some(outpath) = args.get(1) {
                     let script_name = get_script_name(script_path)?;
                     let (outpath, new) = ensure_outpath(outpath, script_name)
@@ -127,7 +133,7 @@ fn run() -> Result<i32> {
                 print!("{}", script);
             }
             "--argc-compgen" => {
-                run_compgen(args.to_vec());
+                run_compgen(runtime, args.to_vec());
             }
             "--argc-export" => {
                 let (source, args) = parse_script_args(&args[2..])?;
@@ -138,13 +144,13 @@ fn run() -> Result<i32> {
                 if args.len() <= 3 {
                     bail!("Usage: argc --argc-parallel <SCRIPT> <ARGS>...");
                 }
-                let shell = get_shell_path()?;
+                let shell = runtime.shell_path()?;
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
                 if !source.contains("--argc-eval") {
                     bail!("Parallel only available for argc based scripts.")
                 }
                 let script_file = args[2].clone();
-                parallel::parallel(&shell, &script_file, &cmd_args[1..])?;
+                parallel::parallel(runtime, &shell, &script_file, &cmd_args[1..])?;
             }
             "--argc-script-path" => {
                 let (_, script_file) =
@@ -152,8 +158,8 @@ fn run() -> Result<i32> {
                 println!("{}", script_file.display());
             }
             "--argc-shell-path" => {
-                let shell = get_shell_path()?;
-                println!("{}", shell.display());
+                let shell = runtime.shell_path()?;
+                println!("{}", shell);
             }
             "--argc-help" => {
                 println!("{}", get_argc_help())
@@ -167,11 +173,11 @@ fn run() -> Result<i32> {
         }
         Ok(0)
     } else {
-        let shell = get_shell_path()?;
+        let shell = runtime.shell_path()?;
         let (script_dir, script_file) = get_script_path(true)
             .ok_or_else(|| anyhow!("Argcfile not found, try `argc --argc-help` for help."))?;
         let mut envs = HashMap::new();
-        if let Some(cwd) = get_current_dir() {
+        if let Some(cwd) = runtime.current_dir() {
             envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
         }
         let mut command = process::Command::new(shell);
@@ -196,7 +202,7 @@ fn run() -> Result<i32> {
     }
 }
 
-fn run_compgen(mut args: Vec<String>) -> Option<()> {
+fn run_compgen(runtime: NativeRuntime, mut args: Vec<String>) -> Option<()> {
     if args.len() < 6 {
         return None;
     };
@@ -208,8 +214,8 @@ fn run_compgen(mut args: Vec<String>) -> Option<()> {
             }
         } else if let Some(script_file) = search_completion_script(&mut args) {
             args[3] = script_file.to_string_lossy().to_string();
-        } else if let Ok(script_file) = which(&args[4]) {
-            args[3] = script_file.to_string_lossy().to_string();
+        } else if let Some(script_file) = runtime.which(&args[4]) {
+            args[3] = script_file;
         }
     }
     let no_color = std::env::var("NO_COLOR")
@@ -218,13 +224,21 @@ fn run_compgen(mut args: Vec<String>) -> Option<()> {
     let output = if &args[4] == "argc" && (args[3].is_empty() || args[5].starts_with("--argc")) {
         let cmd_args = &args[4..];
         let script = get_argc_script_code();
-        argc::compgen(shell, "", &script, cmd_args, no_color).ok()?
+        argc::compgen(
+            runtime,
+            shell,
+            ARGC_COMPLETION_SCRIPT_PATH,
+            &script,
+            cmd_args,
+            no_color,
+        )
+        .ok()?
     } else if args[3].is_empty() {
         let cmd_args = &args[4..];
-        argc::compgen(shell, "", "# @arg path*", cmd_args, no_color).ok()?
+        argc::compgen(runtime, shell, "", "# @arg path*", cmd_args, no_color).ok()?
     } else {
         let (source, cmd_args) = parse_script_args(&args[3..]).ok()?;
-        argc::compgen(shell, &args[3], &source, &cmd_args[1..], no_color).ok()?
+        argc::compgen(runtime, shell, &args[3], &source, &cmd_args[1..], no_color).ok()?
     };
     if !output.is_empty() {
         println!("{output}");
@@ -321,10 +335,16 @@ fn get_argc_version() -> String {
     format!("{name} {version}")
 }
 
+fn get_term_width() -> Option<usize> {
+    env::var("TERM_WIDTH").ok().and_then(|v| v.parse().ok())
+}
+
 fn export_dir_vars(path: &str) -> String {
     if let (Some(argc_script_dir), Some(cwd)) = (
         get_argc_script_dir(path),
-        env::var("ARGC_PWD").ok().or_else(get_current_dir),
+        env::var("ARGC_PWD")
+            .ok()
+            .or_else(|| env::current_dir().ok().map(|v| v.to_string_lossy().into())),
     ) {
         let cd = if argc_script_dir != cwd {
             format!("cd {}\n", escape_shell_words(&argc_script_dir))
@@ -431,7 +451,7 @@ fn candidate_script_names() -> Vec<String> {
 }
 
 fn search_completion_script(args: &mut Vec<String>) -> Option<PathBuf> {
-    let search_paths = std::env::var("ARGC_COMPLETIONS_PATH").ok()?;
+    let search_paths = env::var("ARGC_COMPLETIONS_PATH").ok()?;
     let cmd = Path::new(&args[4])
         .file_stem()
         .and_then(|v| v.to_str())?

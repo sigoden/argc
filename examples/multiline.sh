@@ -19,4 +19,4 @@
 # are treated as the long description. A line which is not a comment ends the block.
 cmd() { :; }
 
-eval "$(TERM_WIDTH=`tput cols` argc --argc-eval "$0" "$@")"
+eval "$(TERM_WIDTH=${TERM_WIDTH:-`tput cols`} argc --argc-eval "$0" "$@")"

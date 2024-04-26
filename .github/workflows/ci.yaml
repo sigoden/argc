@@ -44,3 +44,18 @@ jobs:
 
     - name: Format
       run: cargo fmt --all --check
+
+  features:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain Components
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: taiki-e/install-action@cargo-hack
+
+      - run: cargo hack --no-dev-deps check --feature-powerset --depth 2 --lib
