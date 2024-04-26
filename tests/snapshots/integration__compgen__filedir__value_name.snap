@@ -8,6 +8,7 @@ src/bin/	0	bin/		blue bold
 src/build.rs	1	build.rs		default
 src/command/	0	command/		blue bold
 src/compgen.rs	1	compgen.rs		default
+src/completions/	0	completions/		blue bold
 src/lib.rs	1	lib.rs		default
 src/mangen.rs	1	mangen.rs		default
 src/matcher.rs	1	matcher.rs		default
@@ -25,6 +26,7 @@ src/parser.rs	1	parser.rs		default
 ./src/build.rs	1	build.rs		default
 ./src/command/	0	command/		blue bold
 ./src/compgen.rs	1	compgen.rs		default
+./src/completions/	0	completions/		blue bold
 ./src/lib.rs	1	lib.rs		default
 ./src/mangen.rs	1	mangen.rs		default
 ./src/matcher.rs	1	matcher.rs		default
@@ -40,11 +42,10 @@ Cargo.toml	1	Cargo.toml		default
 ./Cargo.lock	1	Cargo.lock		default
 ./Cargo.toml	1	Cargo.toml		default
 
-************ COMPGEN `prog --ob src/bin/argc/completions/ar` ************
-src/bin/argc/completions/argc.zsh	1	argc.zsh		default
+************ COMPGEN `prog --ob src/completions/ar` ************
+src/completions/argc.zsh	1	argc.zsh		default
 
 ************ COMPGEN `prog --oc src/` ************
 src/bin/	0	bin/		blue bold
 src/command/	0	command/		blue bold
-
-
+src/completions/	0	completions/		blue bold

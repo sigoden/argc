@@ -8,6 +8,7 @@ src\bin\	0	bin\		1;34
 src\build.rs	1	build.rs		39
 src\command\	0	command\		1;34
 src\compgen.rs	1	compgen.rs		39
+src\completions\	0	completions\		1;34
 src\lib.rs	1	lib.rs		39
 src\mangen.rs	1	mangen.rs		39
 src\matcher.rs	1	matcher.rs		39
@@ -25,6 +26,7 @@ src\parser.rs	1	parser.rs		39
 .\src\build.rs	1	build.rs		39
 .\src\command\	0	command\		1;34
 .\src\compgen.rs	1	compgen.rs		39
+.\src\completions\	0	completions\		1;34
 .\src\lib.rs	1	lib.rs		39
 .\src\mangen.rs	1	mangen.rs		39
 .\src\matcher.rs	1	matcher.rs		39
@@ -40,11 +42,10 @@ src\parser.rs	1	parser.rs		39
 .\Cargo.lock	1	Cargo.lock		39
 .\Cargo.toml	1	Cargo.toml		39
 
-************ COMPGEN `prog --ob src\bin\argc\completions\ar` ************
-src\bin\argc\completions\argc.zsh	1	argc.zsh		39
+************ COMPGEN `prog --ob src\completions/ar` ************
+src\completions\ar	0	src\completions\ar		39
 
 ************ COMPGEN `prog --oc src\` ************
 src\bin\	0	bin\		1;34
 src\command\	0	command\		1;34
-
-
+src\completions\	0	completions\		1;34

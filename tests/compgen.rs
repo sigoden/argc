@@ -1073,7 +1073,7 @@ mod filedir {
                 vec!["prog", "--oa", "./src/"],
                 vec!["prog", "--oa", "C"],
                 vec!["prog", "--oa", "./C"],
-                vec!["prog", "--ob", "src/bin/argc/completions/ar"],
+                vec!["prog", "--ob", "src/completions/ar"],
                 vec!["prog", "--oc", "src/"],
             ],
             TEST_SHELL
@@ -1091,7 +1091,7 @@ mod filedir {
                 vec!["prog", "--oa", ".\\src\\"],
                 vec!["prog", "--oa", "C"],
                 vec!["prog", "--oa", ".\\C"],
-                vec!["prog", "--ob", "src\\bin\\argc\\completions\\ar"],
+                vec!["prog", "--ob", "src\\completions/ar"],
                 vec!["prog", "--oc", "src\\"],
             ],
             TEST_SHELL

@@ -43,7 +43,6 @@ dependencies = [
  "predicates",
  "roff",
  "rstest",
- "semver",
  "serde",
  "serde_json",
  "shell-words",
