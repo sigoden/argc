@@ -212,6 +212,7 @@ impl FlagOptionParam {
         }
     }
 
+    #[cfg(feature = "export")]
     pub(crate) fn export(&self) -> FlagOptionValue {
         FlagOptionValue {
             id: self.id().to_string(),
@@ -481,6 +482,7 @@ impl FlagOptionParam {
     }
 }
 
+#[cfg(feature = "export")]
 #[derive(Debug, Serialize)]
 pub struct FlagOptionValue {
     pub id: String,
@@ -571,6 +573,7 @@ impl PositionalParam {
         }
     }
 
+    #[cfg(feature = "export")]
     pub(crate) fn export(&self) -> PositionalValue {
         PositionalValue {
             id: self.id().to_string(),
@@ -622,6 +625,7 @@ impl PositionalParam {
     }
 }
 
+#[cfg(feature = "export")]
 #[derive(Debug, Serialize)]
 pub struct PositionalValue {
     pub id: String,
@@ -700,6 +704,7 @@ impl EnvParam {
         }
     }
 
+    #[cfg(feature = "export")]
     pub(crate) fn export(&self) -> EnvValue {
         EnvValue {
             id: self.id().to_string(),
@@ -731,6 +736,7 @@ impl EnvParam {
     }
 }
 
+#[cfg(feature = "export")]
 #[derive(Debug, Serialize)]
 pub struct EnvValue {
     pub id: String,

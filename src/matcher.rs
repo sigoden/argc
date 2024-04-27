@@ -5,19 +5,22 @@ use std::collections::{HashMap, HashSet};
 use crate::{
     argc_value::ArgcValue,
     command::{Command, SymbolParam},
-    compgen::CompColor,
     param::{ChoiceValue, FlagOptionParam, Param, ParamData, PositionalParam},
-    utils::{
-        all_envs, argc_var_name, get_os, is_true_value, load_dotenv, run_param_fns,
-        META_COMBINE_SHORTS,
-    },
+    runtime::Runtime,
+    utils::{argc_var_name, is_true_value, META_COMBINE_SHORTS},
+};
+
+#[cfg(feature = "compgen")]
+use crate::{
+    compgen::{CompColor, CompItem},
     Shell,
 };
 
 use either::Either;
 use indexmap::{IndexMap, IndexSet};
 
-pub(crate) struct Matcher<'a, 'b> {
+pub(crate) struct Matcher<'a, 'b, T> {
+    runtime: T,
     cmds: Vec<&'a Command>,
     cmd_arg_indexes: Vec<usize>,
     args: &'b [String],
@@ -29,7 +32,7 @@ pub(crate) struct Matcher<'a, 'b> {
     choice_fns: HashSet<&'a str>,
     script_path: Option<String>,
     envs: HashMap<String, String>,
-    term_width: Option<usize>,
+    wrap_width: Option<usize>,
     split_last_arg_at: Option<usize>,
     comp_option: Option<&'a str>,
 }
@@ -70,8 +73,13 @@ pub(crate) enum MatchError {
     NoFlagValue(usize, String),
 }
 
-impl<'a, 'b> Matcher<'a, 'b> {
-    pub(crate) fn new(root_cmd: &'a Command, args: &'b [String], compgen: bool) -> Self {
+impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
+    pub(crate) fn new(
+        runtime: T,
+        root_cmd: &'a Command,
+        args: &'b [String],
+        compgen: bool,
+    ) -> Self {
         let combine_shorts = root_cmd.has_metadata(META_COMBINE_SHORTS);
         let mut cmds: Vec<&'a Command> = vec![root_cmd];
         let mut cmd_level = 0;
@@ -345,14 +353,17 @@ impl<'a, 'b> Matcher<'a, 'b> {
 
         let last_cmd = *cmds.last().unwrap();
 
-        let mut envs = all_envs();
-        envs.extend(root_cmd.dotenv().and_then(load_dotenv).unwrap_or_default());
+        let mut envs = runtime.env_vars();
+        if let Some(dot_envs) = root_cmd.dotenv().and_then(|v| runtime.load_dotenv(v)) {
+            envs.extend(dot_envs)
+        }
 
         for param in &last_cmd.env_params {
             add_param_choice_fn(&mut choice_fns, param)
         }
 
         Self {
+            runtime,
             cmds,
             cmd_arg_indexes,
             args,
@@ -363,7 +374,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
             arg_comp,
             choice_fns,
             script_path: None,
-            term_width: None,
+            wrap_width: None,
             split_last_arg_at,
             comp_option,
             envs,
@@ -374,10 +385,11 @@ impl<'a, 'b> Matcher<'a, 'b> {
         self.script_path = Some(script_path.to_string());
     }
 
-    pub(crate) fn set_term_width(&mut self, term_width: usize) {
-        self.term_width = Some(term_width);
+    pub(crate) fn set_wrap_width(&mut self, wrap_width: usize) {
+        self.wrap_width = Some(wrap_width);
     }
 
+    #[cfg(feature = "eval")]
     pub(crate) fn to_arg_values(&self) -> Vec<ArgcValue> {
         let bind_envs = self.build_bind_envs();
         if let Some(err) = self.validate(&bind_envs) {
@@ -401,6 +413,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
+    #[cfg(feature = "eval")]
     pub(crate) fn to_arg_values_for_param_fn(&self) -> Vec<ArgcValue> {
         let bind_envs = self.build_bind_envs();
         let mut output: Vec<ArgcValue> = self.to_arg_values_base(&bind_envs);
@@ -425,6 +438,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
+    #[cfg(feature = "compgen")]
     pub(crate) fn compgen(&self, shell: Shell) -> Vec<CompItem> {
         let redirect_symbols = shell.redirect_symbols();
         if self
@@ -527,6 +541,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         self.split_last_arg_at
     }
 
+    #[cfg(feature = "eval")]
     fn to_arg_values_base<'x>(&'x self, bind_envs: &BindEnvs<'a, 'x>) -> Vec<ArgcValue> {
         let mut output = vec![];
         let root_cmd = self.cmds[0];
@@ -604,6 +619,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
+    #[cfg(feature = "eval")]
     fn build_bind_envs<'x: 'a>(&'x self) -> BindEnvs<'a, 'x> {
         let cmds_len = self.cmds.len();
         let last_cmd = self.last_cmd();
@@ -630,9 +646,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
         bind_envs
     }
 
+    #[cfg(feature = "eval")]
     fn validate<'x>(&'x self, bind_envs: &BindEnvs<'a, 'x>) -> Option<MatchError> {
         let cmds_len = self.cmds.len();
-        let choices_fn_values = self.run_choices_fns(bind_envs).unwrap_or_default();
+        let choices_fn_values = self.execute_choices_fns(bind_envs).unwrap_or_default();
         for level in 0..cmds_len {
             let flag_option_args = &self.flag_option_args[level];
             let cmd = self.cmds[level];
@@ -874,7 +891,8 @@ impl<'a, 'b> Matcher<'a, 'b> {
         None
     }
 
-    fn run_choices_fns<'x>(
+    #[cfg(feature = "eval")]
+    fn execute_choices_fns<'x>(
         &'x self,
         bind_envs: &BindEnvs<'a, 'x>,
     ) -> Option<HashMap<&'a str, Vec<String>>> {
@@ -886,8 +904,10 @@ impl<'a, 'b> Matcher<'a, 'b> {
         let script_path = self.script_path.as_ref()?;
         let mut choices_fn_values = HashMap::new();
         let mut envs = HashMap::new();
-        envs.insert("ARGC_OS".into(), get_os());
-        let outputs = run_param_fns(script_path, &fns, self.args, envs)?;
+        envs.insert("ARGC_OS".into(), self.runtime.os());
+        let outputs = self
+            .runtime
+            .exec_bash_functions(script_path, &fns, self.args, envs)?;
         for (i, output) in outputs.into_iter().enumerate() {
             let choices = output
                 .split('\n')
@@ -943,17 +963,18 @@ impl<'a, 'b> Matcher<'a, 'b> {
         output
     }
 
+    #[cfg(feature = "eval")]
     fn stringify_match_error(&self, err: &MatchError) -> (String, i32) {
         let mut exit = 0;
         let message = match err {
             MatchError::DisplayHelp => {
                 let cmd = self.last_cmd();
-                cmd.render_help(self.term_width)
+                cmd.render_help(self.wrap_width)
             }
             MatchError::DisplaySubcommandHelp(name) => {
                 let cmd = self.last_cmd();
                 let cmd = cmd.find_subcommand(name).unwrap();
-                cmd.render_help(self.term_width)
+                cmd.render_help(self.wrap_width)
             }
             MatchError::DisplayVersion => {
                 let cmd = self.last_cmd();
@@ -1043,6 +1064,7 @@ impl<'a, 'b> Matcher<'a, 'b> {
         (message, exit)
     }
 
+    #[cfg(feature = "compgen")]
     fn comp_flag_options(&self, combine: bool) -> Vec<CompItem> {
         let mut output = vec![];
         let level = self.cmds.len() - 1;
@@ -1087,9 +1109,6 @@ impl<'a, 'b> Matcher<'a, 'b> {
         self.cmds.last().unwrap()
     }
 }
-
-/// (value, description, nospace, color)
-pub(crate) type CompItem = (String, String, bool, CompColor);
 
 #[derive(Debug)]
 struct BindEnvs<'a, 'x> {
@@ -1283,6 +1302,7 @@ fn add_param_choice_fn<'a>(choice_fns: &mut HashSet<&'a str>, param: &'a impl Pa
     }
 }
 
+#[cfg(feature = "compgen")]
 fn comp_subcommands_positional(
     cmd: &Command,
     values: &[Vec<&str>],
@@ -1307,6 +1327,7 @@ fn comp_subcommands_positional(
     output
 }
 
+#[cfg(feature = "compgen")]
 fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
     let mut output = vec![];
     let mut has_help_subcmd = false;
@@ -1347,6 +1368,7 @@ fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
     output
 }
 
+#[cfg(feature = "compgen")]
 fn comp_symbol(cmd: &Command, ch: char) -> Vec<CompItem> {
     if let Some((name, choices_fn)) = cmd.symbols.get(&ch) {
         match choices_fn {
@@ -1372,6 +1394,7 @@ fn comp_symbol(cmd: &Command, ch: char) -> Vec<CompItem> {
     }
 }
 
+#[cfg(feature = "compgen")]
 fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
     let value_name = param
         .notations()
@@ -1381,10 +1404,12 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
     comp_param(param.describe_oneline(), value_name, param.data())
 }
 
+#[cfg(feature = "compgen")]
 fn comp_positional(param: &PositionalParam) -> Vec<CompItem> {
     comp_param(param.describe_oneline(), param.notation(), param.data())
 }
 
+#[cfg(feature = "compgen")]
 fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompItem> {
     let choices: Option<Either<Vec<String>, String>> =
         if let Some((choice_fn, _)) = data.choice_fn() {

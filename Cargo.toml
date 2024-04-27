@@ -11,23 +11,52 @@ autotests = false
 categories = ["command-line-utilities", "development-tools"]
 keywords = ["cli", "bash", "runner", "arg", "parser"]
 
+[features]
+default = ["application"]
+# Feature required for argc the application. Should be disabled when depending on
+# argc as a library.
+application = [
+    "native-runtime",
+    "eval-bash",
+    "build",
+    "mangen",
+    "completions",
+    "compgen",
+    "export",
+    "wrap-help",
+
+    # deps
+    "num_cpus",
+    "threadpool",
+    "base64",
+]
+native-runtime = ["which"]
+eval = []
+eval-bash = ["eval"]
+build = []
+mangen = ["roff"]
+completions = []
+compgen = ["dirs", "natord"]
+export = ["serde_json", "indexmap/serde"]
+wrap-help = ["textwrap"]
+
 [dependencies]
 anyhow = "1"
 convert_case = "0.6"
-indexmap = { version = "2.1", features = ["serde"] }
+indexmap = { version = "2.1" }
 nom = "7.1"
 either = "1.8"
 serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0", features = ["preserve_order"] }
-which = "6.0"
+serde_json = { version = "1.0", features = ["preserve_order"], optional = true }
+which = { version = "6.0", optional = true }
 shell-words = "1.1"
-textwrap = "0.16"
-dirs = "5.0"
-num_cpus = "1.16"
-threadpool = "1.8"
-base64 = "0.22"
-natord = "1.0"
-roff = "0.2"
+textwrap = { version = "0.16", optional = true }
+dirs = { version = "5.0", optional = true }
+num_cpus = { version = "1.16", optional = true }
+threadpool = { version = "1.8", optional = true }
+base64 = { version = "0.22", optional = true }
+natord = { version = "1.0", optional = true }
+roff = { version = "0.2", optional = true }
 
 [dev-dependencies]
 insta = "1.30"

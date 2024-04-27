@@ -14,6 +14,8 @@ mangen.rs	1	mangen.rs		default
 matcher.rs	1	matcher.rs		default
 param.rs	1	param.rs		default
 parser.rs	1	parser.rs		default
+runtime/	0	runtime/		blue bold
+shell.rs	1	shell.rs		default
 utils.rs	1	utils.rs		default
 
 ************ COMPGEN `prog --oa=` ************
@@ -28,6 +30,8 @@ utils.rs	1	utils.rs		default
 --oa=matcher.rs	1	matcher.rs		default
 --oa=param.rs	1	param.rs		default
 --oa=parser.rs	1	parser.rs		default
+--oa=runtime/	0	runtime/		blue bold
+--oa=shell.rs	1	shell.rs		default
 --oa=utils.rs	1	utils.rs		default
 
 ************ COMPGEN `prog --ob ` ************
@@ -42,6 +46,8 @@ mangen.rs:	0	mangen.rs:		default
 matcher.rs:	0	matcher.rs:		default
 param.rs:	0	param.rs:		default
 parser.rs:	0	parser.rs:		default
+runtime/	0	runtime/		blue bold
+shell.rs:	0	shell.rs:		default
 utils.rs:	0	utils.rs:		default
 
 ************ COMPGEN `prog foo=` ************
@@ -56,4 +62,6 @@ foo=mangen.rs	1	mangen.rs		default
 foo=matcher.rs	1	matcher.rs		default
 foo=param.rs	1	param.rs		default
 foo=parser.rs	1	parser.rs		default
+foo=runtime/	0	runtime/		blue bold
+foo=shell.rs	1	shell.rs		default
 foo=utils.rs	1	utils.rs		default

@@ -1,5 +1,6 @@
 use indexmap::IndexMap;
 
+#[cfg(feature = "eval-bash")]
 use crate::utils::{
     argc_var_name, escape_shell_words, expand_dotenv, AFTER_HOOK, ARGC_REQUIRE_TOOLS, BEFORE_HOOK,
     VARIABLE_PREFIX,
@@ -25,8 +26,9 @@ pub enum ArgcValue {
     Error((String, i32)),
 }
 
+#[cfg(feature = "eval-bash")]
 impl ArgcValue {
-    pub fn to_shell(values: &[Self]) -> String {
+    pub fn to_bash(values: &[Self]) -> String {
         let mut list = vec![];
         let mut last = String::new();
         let mut exit = false;

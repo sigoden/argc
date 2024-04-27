@@ -1,11 +1,4 @@
 use convert_case::{Boundary, Converter, Pattern};
-use std::{
-    collections::HashMap,
-    env, fs,
-    path::{Path, PathBuf},
-    process, thread,
-};
-use which::which;
 
 pub const INTERNAL_SYMBOL: &str = "___internal___";
 pub const VARIABLE_PREFIX: &str = "argc_";
@@ -13,6 +6,9 @@ pub const BEFORE_HOOK: &str = "_argc_before";
 pub const AFTER_HOOK: &str = "_argc_after";
 pub const ROOT_NAME: &str = "prog";
 pub const MAIN_NAME: &str = "main";
+
+#[cfg(feature = "compgen")]
+pub const ARGC_COMPLETION_SCRIPT_PATH: &str = "___argc_completion_script_path___";
 
 pub(crate) const META_VERSION: &str = "version";
 pub(crate) const META_AUTHOR: &str = "author";
@@ -26,7 +22,8 @@ pub(crate) const META_REQUIRE_TOOLS: &str = "require-tools";
 
 pub(crate) const MAX_ARGS: usize = 32767;
 
-pub(crate) const ARGC_REQUIRE_TOOLS: &str = r#"_argc_require_tools() {
+#[cfg(any(feature = "build", feature = "eval-bash"))]
+pub const ARGC_REQUIRE_TOOLS: &str = r#"_argc_require_tools() {
     local tool missing_tools=()
     for tool in "$@"; do
         if ! command -v "$tool" >/dev/null 2>&1; then
@@ -38,6 +35,12 @@ pub(crate) const ARGC_REQUIRE_TOOLS: &str = r#"_argc_require_tools() {
         exit 1
     fi
 }"#;
+
+#[cfg(any(feature = "build", feature = "eval-bash"))]
+pub fn expand_dotenv(value: &str) -> String {
+    let value = escape_shell_words(value);
+    format!("[ -f {value} ] && set -o allexport && . {value} && set +o allexport")
+}
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()
@@ -55,113 +58,23 @@ pub fn is_quote_char(c: char) -> bool {
     c == '\'' || c == '"'
 }
 
-pub fn get_shell_path() -> anyhow::Result<PathBuf> {
-    match env::var("ARGC_SHELL_PATH") {
-        Ok(v) => {
-            let shell_path = Path::new(&v).to_path_buf();
-            if !shell_path.exists() {
-                anyhow::bail!(
-                    "Invalid ARGC_SHELL_PATH, '{}' does not exist",
-                    shell_path.display()
-                );
+pub fn unbalance_quote(value: &str) -> Option<(char, usize)> {
+    let mut balance = None;
+    for (i, c) in value.chars().enumerate() {
+        match balance {
+            Some((c_, _)) => {
+                if c == c_ {
+                    balance = None
+                }
             }
-            Ok(shell_path)
+            None => {
+                if is_quote_char(c) {
+                    balance = Some((c, i))
+                }
+            }
         }
-        Err(_) => get_bash_path().ok_or_else(|| anyhow::anyhow!("Shell not found")),
     }
-}
-
-pub fn get_shell_args(shell_path: &Path) -> Vec<String> {
-    if let Some(name) = shell_path
-        .file_stem()
-        .map(|v| v.to_string_lossy().to_lowercase())
-    {
-        match name.as_str() {
-            "bash" => vec!["--noprofile".to_string(), "--norc".to_string()],
-            _ => vec![],
-        }
-    } else {
-        vec![]
-    }
-}
-
-pub fn get_os() -> String {
-    env::consts::OS.to_string()
-}
-
-#[cfg(windows)]
-pub fn get_bash_path() -> Option<PathBuf> {
-    let bash_path = PathBuf::from("C:\\Program Files\\Git\\bin\\bash.exe");
-    if bash_path.exists() {
-        return Some(bash_path);
-    }
-    let git = which("git").ok()?;
-    let parent = git.parent()?;
-    let bash_path = parent.parent()?.join("bin").join("bash.exe");
-    if bash_path.exists() {
-        return Some(bash_path);
-    }
-    let bash_path = parent.join("bash.exe");
-    if bash_path.exists() {
-        return Some(bash_path);
-    }
-    None
-}
-
-#[cfg(not(windows))]
-pub fn get_bash_path() -> Option<PathBuf> {
-    which("bash").ok()
-}
-
-pub fn run_param_fns(
-    script_file: &str,
-    param_fns: &[&str],
-    args: &[String],
-    envs: HashMap<String, String>,
-) -> Option<Vec<String>> {
-    let shell = get_shell_path().ok()?;
-    let shell_extra_args = get_shell_args(&shell);
-    let path_env = path_env_with_exe();
-    let handles: Vec<_> = param_fns
-        .iter()
-        .map(|param_fn| {
-            let script_file = script_file.to_string();
-            let args: Vec<String> = args.to_vec();
-            let path_env = path_env.clone();
-            let param_fn = param_fn.to_string();
-            let shell = shell.clone();
-            let shell_extra_args = shell_extra_args.clone();
-            let envs = envs.clone();
-            thread::spawn(move || {
-                process::Command::new(shell)
-                    .args(shell_extra_args)
-                    .arg(&script_file)
-                    .arg(INTERNAL_SYMBOL)
-                    .arg(&param_fn)
-                    .args(args)
-                    .envs(envs)
-                    .env("PATH", path_env)
-                    .output()
-                    .ok()
-                    .map(|out| String::from_utf8_lossy(&out.stdout).to_string())
-                    .unwrap_or_default()
-            })
-        })
-        .collect();
-    let result: Vec<String> = handles
-        .into_iter()
-        .map(|h| {
-            h.join()
-                .ok()
-                .map(|v| v.trim().to_string())
-                .unwrap_or_default()
-        })
-        .collect();
-    Some(result)
-}
-
-pub fn termwidth() -> Option<usize> {
-    env::var("TERM_WIDTH").ok()?.parse().ok()
+    balance
 }
 
 pub fn is_windows_path(value: &str) -> bool {
@@ -175,32 +88,6 @@ pub fn is_windows_path(value: &str) -> bool {
     })
 }
 
-pub fn get_current_dir() -> Option<String> {
-    env::current_dir()
-        .ok()
-        .map(|v| v.to_string_lossy().to_string())
-}
-
-pub fn path_env_with_exe() -> String {
-    let mut path_env = std::env::var("PATH").ok().unwrap_or_default();
-    if let Some(exe_dir) = std::env::current_exe()
-        .ok()
-        .and_then(|v| v.parent().map(|v| v.to_path_buf()))
-    {
-        if cfg!(windows) {
-            path_env = format!("{};{}", exe_dir.display(), path_env)
-        } else {
-            path_env = format!("{}:{}", exe_dir.display(), path_env)
-        }
-    }
-    path_env
-}
-
-pub fn expand_dotenv(value: &str) -> String {
-    let value = escape_shell_words(value);
-    format!("[ -f {value} ] && set -o allexport && . {value} && set +o allexport")
-}
-
 pub fn is_special_var_char(c: char) -> bool {
     matches!(c, '-' | '.' | ':' | '@')
 }
@@ -211,26 +98,6 @@ pub fn sanitize_var_name(id: &str) -> String {
 
 pub fn argc_var_name(id: &str) -> String {
     format!("{VARIABLE_PREFIX}{}", sanitize_var_name(id))
-}
-
-pub fn all_envs() -> HashMap<String, String> {
-    env::vars().collect()
-}
-
-pub fn load_dotenv(path: &str) -> Option<HashMap<String, String>> {
-    let contents = fs::read_to_string(path).ok()?;
-    let mut output = HashMap::new();
-    for line in contents.lines() {
-        if line.starts_with('#') || line.trim().is_empty() {
-            continue;
-        }
-        if let Some((key, value)) = line.split_once('=') {
-            let key = key.trim().to_string();
-            let value = value.trim().to_string();
-            output.insert(key, value);
-        }
-    }
-    Some(output)
 }
 
 pub fn is_true_value(value: &str) -> bool {

@@ -1,25 +1,29 @@
 use anyhow::Result;
-use argc::utils::{get_shell_args, path_env_with_exe};
+use argc::{NativeRuntime, Runtime};
 use std::collections::HashMap;
-use std::path::Path;
 use std::process::{self, Command};
 use std::sync::mpsc::channel;
 use threadpool::ThreadPool;
 
 pub const PARALLEL_MODE: &str = "___parallel___";
 
-pub fn parallel(shell: &Path, script_file: &str, args: &[String]) -> Result<()> {
+pub fn parallel(
+    runtime: NativeRuntime,
+    shell: &str,
+    script_file: &str,
+    args: &[String],
+) -> Result<()> {
     let jobs = to_jobs(args);
     let jobs_len = jobs.len();
     let pool = ThreadPool::new(num_cpus::get());
     let (tx, rx) = channel();
-    let path_env = path_env_with_exe();
-    let mut shell_extra_args = get_shell_args(shell);
+    let path_env = runtime.path_env_with_current_exe();
+    let mut shell_extra_args = runtime.shell_args(shell);
     shell_extra_args.push(script_file.to_string());
     shell_extra_args.push(PARALLEL_MODE.to_string());
     for (i, job_args) in jobs.into_iter().enumerate() {
         let tx = tx.clone();
-        let shell = shell.to_path_buf();
+        let shell = shell.to_string();
         let path_env = path_env.clone();
         let shell_extra_args = shell_extra_args.clone();
         pool.execute(move || {
