@@ -2,13 +2,13 @@ use std::str::FromStr;
 
 use anyhow::bail;
 
-use crate::{
-    utils::{is_quote_char, is_true_value, unbalance_quote},
-    Runtime,
-};
+use crate::utils::{is_quote_char, is_true_value, unbalance_quote};
 
 #[cfg(feature = "compgen")]
-use crate::compgen::{CandidateValue, CompColor};
+use crate::{
+    compgen::{CandidateValue, CompColor},
+    Runtime,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Shell {
