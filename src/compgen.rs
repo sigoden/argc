@@ -1,7 +1,7 @@
 use crate::command::Command;
 use crate::matcher::Matcher;
 use crate::runtime::Runtime;
-use crate::utils::{is_quote_char, is_windows_path, unbalance_quote, ARGC_COMPLETION_SCRIPT_PATH};
+use crate::utils::{is_quote_char, is_windows_path, unbalance_quote};
 use crate::Shell;
 
 use anyhow::{bail, Result};
@@ -9,6 +9,8 @@ use indexmap::IndexMap;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::str::FromStr;
+
+pub const COMPGEN_KIND_SYMBOL: &str = "___compgen_kind___";
 
 const FILE_PROTO: &str = "file://";
 
@@ -33,7 +35,17 @@ pub fn compgen<T: Runtime>(
             (last_arg.to_string(), None)
         }
     };
-    let cmd = Command::new(script_content, &args[0])?;
+    let cmd = if script_path == COMPGEN_KIND_SYMBOL {
+        let comp_kind = &args[0];
+        let script_content = format!(
+            r#"# @arg args~[`{comp_kind}`]
+{comp_kind} () {{ :; }}
+"#
+        );
+        Command::new(&script_content, &args[0])?
+    } else {
+        Command::new(script_content, &args[0])?
+    };
     let new_args: Vec<String> = if cmd.delegated() {
         args.to_vec()
     } else {
@@ -96,19 +108,14 @@ pub fn compgen<T: Runtime>(
     let mut argc_suffix = String::new();
     let mut argc_cd = None;
     if let Some(func) = argc_fn {
-        let output = if script_path == ARGC_COMPLETION_SCRIPT_PATH {
-            // complete for argc
+        let output = if script_path == COMPGEN_KIND_SYMBOL {
             let mut values = vec![];
-            if func == "_choice_completion" {
-                if new_args.len() == 3 {
-                    values.extend(Shell::list().map(|v| v.name().to_string()))
-                }
-            } else if func == "_choice_compgen" {
-                if new_args.len() == 3 {
-                    values.extend(Shell::list().map(|v| v.name().to_string()))
-                } else {
-                    values.push("__argc_value=path".to_string());
-                }
+            let comp_kind = CompKind::new(&func);
+            match comp_kind {
+                CompKind::Shell => values.extend(Shell::list().map(|v| v.name().to_string())),
+                CompKind::Path => values.push("__argc_value=path".to_string()),
+                CompKind::Dir => values.push("__argc_value=dir".to_string()),
+                CompKind::Unknown => {}
             }
             Some(values.join("\n"))
         } else if !script_path.is_empty() {
@@ -253,6 +260,45 @@ pub fn compgen<T: Runtime>(
     let values = shell.convert_candidates(candidates, &argc_prefix, &argc_filter, no_color);
 
     Ok(values.join("\n"))
+}
+
+pub fn compgen_kind<T: Runtime>(
+    runtime: T,
+    shell: Shell,
+    kind: CompKind,
+    last_arg: &str,
+    no_color: bool,
+) -> Result<String> {
+    let args = [kind.name().to_string(), last_arg.to_string()];
+    compgen(runtime, shell, COMPGEN_KIND_SYMBOL, "", &args, no_color)
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CompKind {
+    Shell,
+    Path,
+    Dir,
+    Unknown,
+}
+
+impl CompKind {
+    pub fn new(value: &str) -> Self {
+        match value {
+            "shell" => CompKind::Shell,
+            "path" => CompKind::Path,
+            "dir" => CompKind::Dir,
+            _ => CompKind::Unknown,
+        }
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            CompKind::Shell => "shell",
+            CompKind::Path => "path",
+            CompKind::Dir => "dir",
+            CompKind::Unknown => "unknown",
+        }
+    }
 }
 
 pub(crate) type CandidateValue = (String, String, bool, CompColor); // value, description, nospace, comp_color

@@ -5,7 +5,7 @@ use std::process::{self, Command};
 use std::sync::mpsc::channel;
 use threadpool::ThreadPool;
 
-pub const PARALLEL_MODE: &str = "___parallel___";
+pub const PARALLEL_SYMBOL: &str = "___parallel___";
 
 pub fn parallel(
     runtime: NativeRuntime,
@@ -20,7 +20,7 @@ pub fn parallel(
     let path_env = runtime.path_env_with_current_exe();
     let mut shell_extra_args = runtime.shell_args(shell);
     shell_extra_args.push(script_file.to_string());
-    shell_extra_args.push(PARALLEL_MODE.to_string());
+    shell_extra_args.push(PARALLEL_SYMBOL.to_string());
     for (i, job_args) in jobs.into_iter().enumerate() {
         let tx = tx.clone();
         let shell = shell.to_string();

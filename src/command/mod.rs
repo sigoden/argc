@@ -13,9 +13,9 @@ use crate::param::{EnvValue, FlagOptionValue, PositionalValue};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::runtime::Runtime;
 use crate::utils::{
-    AFTER_HOOK, BEFORE_HOOK, INTERNAL_SYMBOL, MAIN_NAME, META_AUTHOR, META_COMBINE_SHORTS,
-    META_DEFAULT_SUBCOMMAND, META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_REQUIRE_TOOLS,
-    META_SYMBOL, META_VERSION, ROOT_NAME,
+    AFTER_HOOK, BEFORE_HOOK, MAIN_NAME, META_AUTHOR, META_COMBINE_SHORTS, META_DEFAULT_SUBCOMMAND,
+    META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_REQUIRE_TOOLS, META_SYMBOL, META_VERSION,
+    ROOT_NAME,
 };
 use crate::Result;
 
@@ -77,7 +77,7 @@ impl Command {
         if args.is_empty() {
             bail!("Invalid args");
         }
-        if args.len() >= 3 && args[1] == INTERNAL_SYMBOL {
+        if args.len() >= 3 && args[1] == T::INTERNAL_SYMBOL {
             let fallback_args = vec![ROOT_NAME.to_string()];
             let new_args = if args.len() == 3 {
                 &fallback_args
