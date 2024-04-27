@@ -1,14 +1,10 @@
 use convert_case::{Boundary, Converter, Pattern};
 
-pub const INTERNAL_SYMBOL: &str = "___internal___";
 pub const VARIABLE_PREFIX: &str = "argc_";
 pub const BEFORE_HOOK: &str = "_argc_before";
 pub const AFTER_HOOK: &str = "_argc_after";
 pub const ROOT_NAME: &str = "prog";
 pub const MAIN_NAME: &str = "main";
-
-#[cfg(feature = "compgen")]
-pub const ARGC_COMPLETION_SCRIPT_PATH: &str = "___argc_completion_script_path___";
 
 pub(crate) const META_VERSION: &str = "version";
 pub(crate) const META_AUTHOR: &str = "author";

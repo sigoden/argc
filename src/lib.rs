@@ -24,7 +24,7 @@ pub use build::build;
 #[cfg(feature = "export")]
 pub use command::CommandValue;
 #[cfg(feature = "compgen")]
-pub use compgen::compgen;
+pub use compgen::{compgen, compgen_kind, CompKind, COMPGEN_KIND_SYMBOL};
 #[cfg(feature = "completions")]
 pub use completions::generate_completions;
 #[cfg(feature = "mangen")]

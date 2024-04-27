@@ -169,6 +169,22 @@ fn compgen_argc() {
 }
 
 #[test]
+fn compgen_kind() {
+    Command::cargo_bin("argc")
+        .unwrap()
+        .args([
+            "--argc-compgen",
+            "fish",
+            argc::COMPGEN_KIND_SYMBOL,
+            "shell",
+            "",
+        ])
+        .assert()
+        .stdout(predicates::str::contains("zsh"))
+        .success();
+}
+
+#[test]
 fn export() {
     let path = locate_script("examples/options.sh");
     let output = Command::cargo_bin("argc")

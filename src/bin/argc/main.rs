@@ -2,8 +2,9 @@ mod parallel;
 
 use anyhow::{anyhow, bail, Context, Result};
 use argc::{
-    utils::{escape_shell_words, is_true_value, ARGC_COMPLETION_SCRIPT_PATH},
-    NativeRuntime, Runtime, Shell,
+    compgen_kind,
+    utils::{escape_shell_words, is_true_value},
+    CompKind, NativeRuntime, Runtime, Shell, COMPGEN_KIND_SYMBOL,
 };
 use base64::{engine::general_purpose, Engine as _};
 use std::{
@@ -21,6 +22,8 @@ const ARGC_SCRIPT_NAMES: [&str; 6] = [
     "ARGCFILE.sh",
     "ARGCFILE",
 ];
+
+const ARGC_COMPLETION_SCRIPT: &str = include_str!("completion.sh");
 
 fn main() {
     match run() {
@@ -52,7 +55,7 @@ fn run() -> Result<i32> {
                 let (source, cmd_args) = parse_script_args(&args[2..])?;
                 if cmd_args
                     .get(1)
-                    .map(|v| v == parallel::PARALLEL_MODE)
+                    .map(|v| v == parallel::PARALLEL_SYMBOL)
                     .unwrap_or_default()
                 {
                     let cmd_args_len = cmd_args.len();
@@ -162,7 +165,7 @@ fn run() -> Result<i32> {
                 println!("{}", shell);
             }
             "--argc-help" => {
-                println!("{}", get_argc_help())
+                println!("{}", get_argc_help(runtime)?)
             }
             "--argc-version" => {
                 println!("{}", get_argc_version())
@@ -221,21 +224,29 @@ fn run_compgen(runtime: NativeRuntime, mut args: Vec<String>) -> Option<()> {
     let no_color = std::env::var("NO_COLOR")
         .map(|v| is_true_value(&v))
         .unwrap_or_default();
+    let last_arg = args.last().map(|v| v.as_str()).unwrap_or_default();
     let output = if &args[4] == "argc" && (args[3].is_empty() || args[5].starts_with("--argc")) {
-        let cmd_args = &args[4..];
-        let script = get_argc_script_code();
-        argc::compgen(
-            runtime,
-            shell,
-            ARGC_COMPLETION_SCRIPT_PATH,
-            &script,
-            cmd_args,
-            no_color,
-        )
-        .ok()?
+        if (args[5] == "--argc-completions" || args[5] == "--argc-compgen") && args.len() == 7 {
+            compgen_kind(runtime, shell, CompKind::Shell, last_arg, no_color).ok()?
+        } else if args[5] == "--argc-compgen" {
+            compgen_kind(runtime, shell, CompKind::Path, last_arg, no_color).ok()?
+        } else {
+            argc::compgen(
+                runtime,
+                shell,
+                "",
+                ARGC_COMPLETION_SCRIPT,
+                &args[4..],
+                no_color,
+            )
+            .ok()?
+        }
+    } else if args[3] == COMPGEN_KIND_SYMBOL {
+        let kind = CompKind::new(&args[4]);
+        compgen_kind(runtime, shell, kind, last_arg, no_color).ok()?
     } else if args[3].is_empty() {
-        let cmd_args = &args[4..];
-        argc::compgen(runtime, shell, "", "# @arg path*", cmd_args, no_color).ok()?
+        let last_arg = args.last().map(|v| v.as_str()).unwrap_or_default();
+        compgen_kind(runtime, shell, CompKind::Path, last_arg, no_color).ok()?
     } else {
         let (source, cmd_args) = parse_script_args(&args[3..]).ok()?;
         argc::compgen(runtime, shell, &args[3], &source, &cmd_args[1..], no_color).ok()?
@@ -270,63 +281,34 @@ fn retrive_argc_variables() -> Option<String> {
     String::from_utf8(value).ok()
 }
 
-fn get_argc_help() -> String {
+fn get_argc_help(runtime: NativeRuntime) -> Result<String> {
     let about = concat!(
         env!("CARGO_PKG_DESCRIPTION"),
         " - ",
         env!("CARGO_PKG_REPOSITORY")
     );
-    format!(
+    let values = argc::eval(
+        runtime,
+        ARGC_COMPLETION_SCRIPT,
+        &["argc".into(), "--help".into()],
+        None,
+        None,
+    )?;
+    let argc_options = argc::ArgcValue::to_bash(&values);
+    let argc_options = argc_options
+        .lines()
+        .map(|v| v.trim())
+        .filter(|v| v.starts_with("--argc-"))
+        .map(|v| format!("    argc {v}\n"))
+        .collect::<Vec<String>>()
+        .join("");
+    let output = format!(
         r###"{about}
 
 USAGE:
-    argc --argc-eval <SCRIPT> [ARGS]...             Use `eval "$(argc --argc-eval "$0" "$@")"`
-    argc --argc-create [RECIPES]...                 Create a boilerplate argcfile
-    argc --argc-build <SCRIPT> [OUTPATH]            Generate bashscript without argc dependency
-    argc --argc-mangen <SCRIPT> <OUTDIR>            Generate man pages
-    argc --argc-completions <SHELL> [CMDS]...       Generate shell completion scripts
-    argc --argc-compgen <SHELL> <SCRIPT> <ARGS>...  Generate completion candidates
-    argc --argc-export <SCRIPT>                     Export command line definitions as json
-    argc --argc-parallel <SCRIPT> <ARGS>...         Run functions in parallel
-    argc --argc-script-path                         Print current argcfile path
-    argc --argc-shell-path                          Print current shell path
-    argc --argc-help                                Print help information
-    argc --argc-version                             Print version information
-"###
-    )
-}
-
-fn get_argc_script_code() -> String {
-    let about = concat!(
-        env!("CARGO_PKG_DESCRIPTION"),
-        " - ",
-        env!("CARGO_PKG_REPOSITORY")
+{argc_options}"###
     );
-    format!(
-        r###"#!/usr/bin/env bash
-
-# @describe {about}
-
-# @option --argc-eval~ <FILE> <ARGS>                                Use `eval "$(argc --argc-eval "$0" "$@")"`
-# @option --argc-create~ <RECIPES>                                 Create a boilerplate argcfile
-# @option --argc-build <FILE> <OUTPATH?>                            Generate bashscript without argc dependency
-# @option --argc-mangen <FILE> <OUTDIR>                             Generate man pages
-# @option --argc-completions~[`_choice_completion`] <SHELL> <CMDS>  Generate shell completion scripts
-# @option --argc-compgen~[`_choice_compgen`] <SHELL> <FILE> <ARGS>  Generate completion candidates
-# @option --argc-export <FILE>                                      Export command line definitions as json
-# @option --argc-parallel~ <FILE> <ARGS>                            Run functions in parallel
-# @flag --argc-script-path                                          Print current argcfile path
-# @flag --argc-shell-path                                           Print current shell path
-# @flag --argc-help                                                 Print help information
-# @flag --argc-version                                              Print version information
-
-_choice_completion() {{ :; }}
-_choice_compgen() {{ :; }}
-
-eval "$(argc --argc-eval "$0" "$@")"
-
-"###
-    )
+    Ok(output)
 }
 
 fn get_argc_version() -> String {
