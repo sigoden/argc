@@ -233,12 +233,12 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
         tuple((
             parse_with_long_head,
             alt((
-                parse_param_modifer_choices_default,
-                parse_param_modifer_choices_fn,
-                parse_param_modifer_choices,
+                parse_param_modifier_choices_default,
+                parse_param_modifier_choices_fn,
+                parse_param_modifier_choices,
                 parse_param_assign_fn,
                 parse_param_assign,
-                parse_param_modifer,
+                parse_param_modifier,
             )),
             parse_zero_or_one_bind_env,
             parse_zero_or_many_value_notations,
@@ -260,12 +260,12 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             preceded(
                 verify_single_char,
                 alt((
-                    parse_param_modifer_choices_default,
-                    parse_param_modifer_choices_fn,
-                    parse_param_modifer_choices,
+                    parse_param_modifier_choices_default,
+                    parse_param_modifier_choices_fn,
+                    parse_param_modifier_choices,
                     parse_param_assign_fn,
                     parse_param_assign,
-                    parse_param_modifer,
+                    parse_param_modifier,
                 )),
             ),
             parse_zero_or_one_bind_env,
@@ -285,12 +285,12 @@ fn parse_env_param(input: &str) -> nom::IResult<&str, EnvParam> {
     map(
         pair(
             alt((
-                parse_param_modifer_choices_default,
-                parse_param_modifer_choices_fn,
-                parse_param_modifer_choices,
+                parse_param_modifier_choices_default,
+                parse_param_modifier_choices_fn,
+                parse_param_modifier_choices,
                 parse_param_assign_fn,
                 parse_param_assign,
-                parse_param_modifer,
+                parse_param_modifier,
             )),
             parse_tail,
         ),
@@ -306,12 +306,12 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
     map(
         tuple((
             alt((
-                parse_param_modifer_choices_default,
-                parse_param_modifer_choices_fn,
-                parse_param_modifer_choices,
+                parse_param_modifier_choices_default,
+                parse_param_modifier_choices_fn,
+                parse_param_modifier_choices,
                 parse_param_assign_fn,
                 parse_param_assign,
-                parse_param_modifer,
+                parse_param_modifier,
             )),
             parse_zero_or_one_bind_env,
             parse_zero_or_one_value_notation,
@@ -367,7 +367,7 @@ fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> 
 fn parse_with_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
     alt((
         map(terminated(parse_param_name, tag("*")), |mut arg| {
-            arg.modifer = Modifier::MultipleOptional;
+            arg.modifier = Modifier::MultipleOptional;
             arg
         }),
         parse_param_name,
@@ -382,7 +382,7 @@ fn parse_no_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
     }
     map(pair(parser, opt(tag("*"))), |(mut arg, multiple)| {
         if multiple.is_some() {
-            arg.modifer = Modifier::MultipleOptional;
+            arg.modifier = Modifier::MultipleOptional;
         }
         arg
     })(input)
@@ -405,22 +405,22 @@ fn parse_with_long_head(input: &str) -> nom::IResult<&str, (Option<&str>, &str)>
 }
 
 // Parse `str!` `str~` `str*` `str+` `str`
-fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
+fn parse_param_modifier(input: &str) -> nom::IResult<&str, ParamData> {
     alt((
         map(terminated(parse_param_name, tag("!")), |mut arg| {
-            arg.modifer = Modifier::Required;
+            arg.modifier = Modifier::Required;
             arg
         }),
         map(terminated(parse_param_name, tag("~")), |mut arg| {
-            arg.modifer = Modifier::Terminated;
+            arg.modifier = Modifier::Terminated;
             arg
         }),
         map(
             pair(parse_param_name, preceded(tag("*"), opt(parse_multi_char))),
             |(mut arg, multi_char)| {
                 match multi_char {
-                    Some(c) => arg.modifer = Modifier::DelimiterOptional(c),
-                    None => arg.modifer = Modifier::MultipleOptional,
+                    Some(c) => arg.modifier = Modifier::DelimiterOptional(c),
+                    None => arg.modifier = Modifier::MultipleOptional,
                 };
                 arg
             },
@@ -432,7 +432,7 @@ fn parse_param_modifer(input: &str) -> nom::IResult<&str, ParamData> {
                     Some(c) => Modifier::DelimiterRequired(c),
                     None => Modifier::MultipleRequired,
                 };
-                arg.modifer = modifier;
+                arg.modifier = modifier;
                 arg
             },
         ),
@@ -462,10 +462,10 @@ fn parse_param_assign_fn(input: &str) -> nom::IResult<&str, ParamData> {
     )(input)
 }
 
-fn parse_param_modifer_choices_default(input: &str) -> nom::IResult<&str, ParamData> {
+fn parse_param_modifier_choices_default(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         pair(
-            parse_param_modifer,
+            parse_param_modifier,
             delimited(char('['), parse_choices_default, char(']')),
         ),
         |(mut arg, (values, default))| {
@@ -480,10 +480,10 @@ fn parse_param_modifer_choices_default(input: &str) -> nom::IResult<&str, ParamD
     )(input)
 }
 
-fn parse_param_modifer_choices(input: &str) -> nom::IResult<&str, ParamData> {
+fn parse_param_modifier_choices(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         pair(
-            parse_param_modifer,
+            parse_param_modifier,
             delimited(char('['), parse_choices, char(']')),
         ),
         |(mut arg, values)| {
@@ -495,10 +495,10 @@ fn parse_param_modifer_choices(input: &str) -> nom::IResult<&str, ParamData> {
     )(input)
 }
 
-fn parse_param_modifer_choices_fn(input: &str) -> nom::IResult<&str, ParamData> {
+fn parse_param_modifier_choices_fn(input: &str) -> nom::IResult<&str, ParamData> {
     map(
         pair(
-            parse_param_modifer,
+            parse_param_modifier,
             delimited(char('['), pair(opt(char('?')), parse_value_fn), char(']')),
         ),
         |(mut arg, (validate, f))| {

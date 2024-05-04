@@ -14,6 +14,7 @@ pub(crate) trait Param {
     fn tag_name(&self) -> &str;
     fn guard(&self) -> Result<()>;
     fn multiple_values(&self) -> bool;
+    #[allow(unused)]
     fn render_source(&self) -> String;
 
     fn describe_oneline(&self) -> &str {
@@ -272,24 +273,24 @@ impl FlagOptionParam {
         let len = self.notations.len();
         if self.terminated()
             || self
-                .notation_modifer()
+                .notation_modifier()
                 .map(|v| matches!(v, '*' | '+'))
                 .unwrap_or_default()
         {
-            let min = if self.notation_modifer() == Some('*') {
+            let min = if self.notation_modifier() == Some('*') {
                 len - 1
             } else {
                 len
             };
             (min, MAX_ARGS)
-        } else if self.notation_modifer() == Some('?') {
+        } else if self.notation_modifier() == Some('?') {
             (len - 1, len)
         } else {
             (len, len)
         }
     }
 
-    pub(crate) fn notation_modifer(&self) -> Option<char> {
+    pub(crate) fn notation_modifier(&self) -> Option<char> {
         self.notations
             .last()
             .and_then(|name| ['*', '+', '?'].into_iter().find(|v| name.ends_with(*v)))
@@ -668,7 +669,10 @@ impl Param for EnvParam {
     }
 
     fn guard(&self) -> Result<()> {
-        if !matches!(self.data().modifer, Modifier::Optional | Modifier::Required) {
+        if !matches!(
+            self.data().modifier,
+            Modifier::Optional | Modifier::Required
+        ) {
             bail!("can only be a single value")
         }
         if self.data.env.is_some() {
@@ -753,7 +757,7 @@ pub(crate) struct ParamData {
     pub(crate) describe: String,
     pub(crate) choice: Option<ChoiceValue>,
     pub(crate) default: Option<DefaultValue>,
-    pub(crate) modifer: Modifier,
+    pub(crate) modifier: Modifier,
     pub(crate) env: Option<Option<String>>,
 }
 
@@ -764,28 +768,28 @@ impl ParamData {
             describe: String::new(),
             choice: None,
             default: None,
-            modifer: Modifier::Optional,
+            modifier: Modifier::Optional,
             env: None,
         }
     }
 
     pub(crate) fn required(&self) -> bool {
-        self.modifer.required() && self.default.is_none()
+        self.modifier.required() && self.default.is_none()
     }
 
     pub(crate) fn multiple(&self) -> bool {
-        self.modifer.multiple()
+        self.modifier.multiple()
     }
 
     pub(crate) fn args_delimiter(&self) -> Option<char> {
-        match &self.modifer {
+        match &self.modifier {
             Modifier::DelimiterRequired(c) | Modifier::DelimiterOptional(c) => Some(*c),
             _ => None,
         }
     }
 
     pub(crate) fn terminated(&self) -> bool {
-        matches!(self.modifer, Modifier::Terminated)
+        matches!(self.modifier, Modifier::Terminated)
     }
 
     pub(crate) fn choice_fn(&self) -> Option<(&String, &bool)> {
@@ -826,7 +830,7 @@ impl ParamData {
 
     pub(crate) fn render_source_of_name_value(&self, name_suffix: &str) -> String {
         let mut output = format!("{}{name_suffix}", self.name);
-        output.push_str(&self.modifer.render());
+        output.push_str(&self.modifier.render());
         match (&self.choice, &self.default) {
             (Some(ChoiceValue::Values(values)), None) => {
                 output.push_str(&format!("[{}]", Self::render_choice_values(values)));

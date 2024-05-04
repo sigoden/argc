@@ -124,7 +124,7 @@ impl ArgcValue {
                 }
                 ArgcValue::ParamFn(name) => {
                     if positional_args.is_empty() {
-                        last = name.clone();
+                        last.clone_from(name);
                     } else {
                         last = format!("{} {}", name, positional_args.join(" "));
                     }

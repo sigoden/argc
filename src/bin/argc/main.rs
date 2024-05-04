@@ -62,7 +62,7 @@ fn run() -> Result<i32> {
                     if cmd_args_len < 3 {
                         bail!("No parallel command")
                     }
-                    let mut code = retrive_argc_variables().unwrap_or_default();
+                    let mut code = retrieve_argc_variables().unwrap_or_default();
                     let mut cmds = vec![cmd_args[2].to_string()];
                     cmds.extend(cmd_args[3..].iter().map(|v| escape_shell_words(v)));
                     code.push_str(&cmds.join(" "));
@@ -275,7 +275,7 @@ fn export_argc_variables(code: &str) -> String {
     )
 }
 
-fn retrive_argc_variables() -> Option<String> {
+fn retrieve_argc_variables() -> Option<String> {
     let value = env::var("ARGC_VARS").ok()?;
     let value = general_purpose::STANDARD.decode(value).ok()?;
     String::from_utf8(value).ok()

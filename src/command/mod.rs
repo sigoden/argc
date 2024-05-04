@@ -196,7 +196,7 @@ impl Command {
                     share_data.borrow_mut().scope = EventScope::CmdStart;
                     let subcmd = root_cmd.create_cmd();
                     if !value.is_empty() {
-                        subcmd.describe = value.clone();
+                        subcmd.describe.clone_from(&value);
                     }
                 }
                 EventData::Aliases(values) => {
@@ -291,7 +291,7 @@ impl Command {
                                 parents.iter().map(|v| sanitize_cmd_name(v)).collect();
                             cmd.name = Some(sanitize_cmd_name(child));
                             cmd.match_fn = Some(name.to_string());
-                            match retrive_cmd(&mut root_cmd, &parents) {
+                            match retrieve_cmd(&mut root_cmd, &parents) {
                                 Some(parent_cmd) => {
                                     parent_cmd
                                         .subcommand_fns
@@ -477,7 +477,7 @@ impl Command {
     }
 
     fn update_recursively(&mut self, paths: Vec<String>, mut require_tools: IndexSet<String>) {
-        self.paths = paths.clone();
+        self.paths.clone_from(&paths);
 
         // update command_fn
         if paths.is_empty() {
@@ -485,7 +485,7 @@ impl Command {
                 self.command_fn = Some(MAIN_NAME.to_string())
             }
         } else if self.subcommands.is_empty() {
-            self.command_fn = self.match_fn.clone();
+            self.command_fn.clone_from(&self.match_fn);
         } else {
             let command_fn = [paths.as_slice(), [MAIN_NAME.to_string()].as_slice()]
                 .concat()
@@ -851,7 +851,7 @@ pub struct CommandValue {
 
 pub(crate) type SymbolParam = (String, Option<String>);
 
-fn retrive_cmd<'a>(cmd: &'a mut Command, paths: &[String]) -> Option<&'a mut Command> {
+fn retrieve_cmd<'a>(cmd: &'a mut Command, paths: &[String]) -> Option<&'a mut Command> {
     if paths.is_empty() {
         return Some(cmd);
     }
@@ -859,7 +859,7 @@ fn retrive_cmd<'a>(cmd: &'a mut Command, paths: &[String]) -> Option<&'a mut Com
         .subcommands
         .iter_mut()
         .find(|v| v.name.as_deref() == Some(paths[0].as_str()))?;
-    retrive_cmd(child, &paths[1..])
+    retrieve_cmd(child, &paths[1..])
 }
 
 fn update_parent_cmd(parent: &mut Command) -> Result<()> {
