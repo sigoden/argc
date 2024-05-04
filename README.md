@@ -172,7 +172,7 @@ See [command runner](https://github.com/sigoden/argc/blob/main/docs/command-runn
 
 ## Completions
 
-Argc automaticlly provides shell completions for all argc-based scripts.
+Argc automatically provides shell completions for all argc-based scripts.
 
 ```
 argc --argc-completions <SHELL> [CMDS]...

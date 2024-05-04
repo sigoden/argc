@@ -258,7 +258,7 @@ $ tree /tmp/project
 └── src
 ```
 
-The code of build recpie as follows:
+The code of build recipe as follows:
 
 ```sh
 # @cmd

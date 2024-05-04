@@ -615,18 +615,18 @@ impl ArgcPathValue {
                 } else {
                     ("/".into(), 0, FILE_PROTO.into())
                 }
-            } else if let Some(trimed_value) = value.strip_prefix('/') {
+            } else if let Some(trimmed_value) = value.strip_prefix('/') {
                 if is_windows_mode {
-                    let new_value = if trimed_value.is_empty() {
+                    let new_value = if trimmed_value.is_empty() {
                         "C:/".into()
-                    } else if is_windows_path(trimed_value) {
-                        if trimed_value.len() == 2 {
-                            format!("{trimed_value}/")
+                    } else if is_windows_path(trimmed_value) {
+                        if trimmed_value.len() == 2 {
+                            format!("{trimmed_value}/")
                         } else {
-                            trimed_value.into()
+                            trimmed_value.into()
                         }
                     } else {
-                        trimed_value.into()
+                        trimmed_value.into()
                     };
                     (new_value, 0, format!("{FILE_PROTO}/"))
                 } else {

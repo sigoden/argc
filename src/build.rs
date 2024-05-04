@@ -187,15 +187,17 @@ pub fn build(source: &str, root_name: &str, wrap_width: Option<usize>) -> Result
     let mut insert_at = None;
     let mut newlines = vec![];
     for line in source.split('\n') {
-        let trimed_line = line.trim();
-        if !build_block && trimed_line.starts_with("eval") && trimed_line.contains(" --argc-eval ")
+        let trimmed_line = line.trim();
+        if !build_block
+            && trimmed_line.starts_with("eval")
+            && trimmed_line.contains(" --argc-eval ")
         {
             insert_at = Some(newlines.len());
-        } else if !build_block && trimed_line.contains("# ARGC-BUILD {") {
+        } else if !build_block && trimmed_line.contains("# ARGC-BUILD {") {
             build_block = true;
             insert_at = Some(newlines.len());
         } else if build_block {
-            if trimed_line.contains("# ARGC-BUILD }") {
+            if trimmed_line.contains("# ARGC-BUILD }") {
                 build_block = false;
             }
         } else {

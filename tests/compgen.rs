@@ -594,7 +594,7 @@ _choice_fn() {
 }
 
 #[test]
-fn assing_option_value() {
+fn assign_option_value() {
     let script = r"
 # @option --oa[`_choice_fn`]
 # @arg val[`_choice_fn`]
