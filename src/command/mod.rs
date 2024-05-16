@@ -101,8 +101,6 @@ impl Command {
 
     #[cfg(feature = "export")]
     pub(crate) fn export(&self) -> CommandValue {
-        use serde_json::json;
-
         let mut extra: IndexMap<String, serde_json::Value> = IndexMap::new();
         let require_tools = self.meta_require_tools();
         if !require_tools.is_empty() {
@@ -128,7 +126,7 @@ impl Command {
         if !self.metadata.is_empty() {
             extra.insert(
                 "metadata".into(),
-                json!(self
+                serde_json::json!(self
                     .metadata
                     .iter()
                     .map(|(k, v, _)| (
