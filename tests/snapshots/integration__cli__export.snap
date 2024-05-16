@@ -2959,5 +2959,8 @@ expression: stdout
     }
   ],
   "combine_shorts": true,
+  "metadata": {
+    "combine-shorts": null
+  },
   "command_fn": null
 }
