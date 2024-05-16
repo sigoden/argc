@@ -101,6 +101,8 @@ impl Command {
 
     #[cfg(feature = "export")]
     pub(crate) fn export(&self) -> CommandValue {
+        use serde_json::json;
+
         let mut extra: IndexMap<String, serde_json::Value> = IndexMap::new();
         let require_tools = self.meta_require_tools();
         if !require_tools.is_empty() {
@@ -122,6 +124,23 @@ impl Command {
             }
         } else if let Some((idx, _)) = &self.default_subcommand {
             extra.insert("default_subcommand".into(), (*idx).into());
+        }
+        if !self.metadata.is_empty() {
+            extra.insert(
+                "metadata".into(),
+                json!(self
+                    .metadata
+                    .iter()
+                    .map(|(k, v, _)| (
+                        k.to_string(),
+                        if v.is_empty() {
+                            None
+                        } else {
+                            Some(v.to_string())
+                        }
+                    ))
+                    .collect::<IndexMap<String, Option<String>>>()),
+            );
         }
         extra.insert("command_fn".into(), self.command_fn.clone().into());
         let flag_options = self.all_flag_options().iter().map(|v| v.export()).collect();
