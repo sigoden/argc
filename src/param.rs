@@ -855,23 +855,29 @@ impl ParamData {
 
     pub(crate) fn render_describe(&self, describe: &str, id: &str) -> String {
         let mut output = describe.to_string();
-        let multiline = output.contains('\n');
+        let multiline = describe.contains('\n');
+        let mut documented = false;
         let sep = if multiline { '\n' } else { ' ' };
-        if let Some(DefaultValue::Value(value)) = &self.default {
-            if !output.is_empty() {
-                output.push(sep)
-            }
-            output.push_str(&format!("[default: {}]", escape_shell_words(value)));
-        }
         if let Some(ChoiceValue::Values(values)) = &self.choice {
-            if !output.is_empty() {
-                output.push(sep)
+            documented = values.iter().all(|v| describe.contains(v));
+            if !documented {
+                if !output.is_empty() {
+                    output.push(sep)
+                }
+                let values: Vec<String> = values.iter().map(|v| escape_shell_words(v)).collect();
+                output.push_str(&format!("[possible values: {}]", values.join(", ")));
             }
-            let values: Vec<String> = values.iter().map(|v| escape_shell_words(v)).collect();
-            output.push_str(&format!("[possible values: {}]", values.join(", ")));
+        }
+        if !documented {
+            if let Some(DefaultValue::Value(value)) = &self.default {
+                if !output.is_empty() {
+                    output.push(sep)
+                }
+                output.push_str(&format!("[default: {}]", escape_shell_words(value)));
+            }
         }
         if let Some(env) = self.normalize_bind_env(id) {
-            if !output.is_empty() {
+            if !describe.contains(&env) && !output.is_empty() {
                 output.push(sep)
             }
             output.push_str(&format!("[env: {env}]"));

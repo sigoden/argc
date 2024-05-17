@@ -25,7 +25,7 @@ OPTIONS:
       --oda <ODA>          default [default: a]
       --odb <ODB>          default from fn
       --oca <OCA>          choice [possible values: a, b]
-      --ocb <OCB>          choice + default [default: a] [possible values: a, b]
+      --ocb <OCB>          choice + default [possible values: a, b] [default: a]
       --occ [OCC]...       multi-occurs + choice [possible values: a, b]
       --ofa <OFA>          choice from fn
       --ofb <OFB>          choice from fn + no validation
@@ -56,7 +56,7 @@ OPTIONS:
       --oda <ODA>          default [default: a]
       --odb <ODB>          default from fn
       --oca <OCA>          choice [possible values: a, b]
-      --ocb <OCB>          choice + default [default: a] [possible values: a, b]
+      --ocb <OCB>          choice + default [possible values: a, b] [default: a]
       --occ [OCC]...       multi-occurs + choice [possible values: a, b]
       --ofa <OFA>          choice from fn
       --ofb <OFB>          choice from fn + no validation
@@ -188,7 +188,7 @@ OPTIONS:
        +oda <ODA>          default [default: a]
        +odb <ODB>          default from fn
        +oca <OCA>          choice [possible values: a, b]
-       +ocb <OCB>          choice + default [default: a] [possible values: a, b]
+       +ocb <OCB>          choice + default [possible values: a, b] [default: a]
        +occ [OCC]...       multi-occurs + choice [possible values: a, b]
        +ocd <OCD>...       required + multi-occurs + choice [possible values: a, b]
        +ofa <OFA>          choice from fn
@@ -219,7 +219,7 @@ OPTIONS:
        +oda <ODA>          default [default: a]
        +odb <ODB>          default from fn
        +oca <OCA>          choice [possible values: a, b]
-       +ocb <OCB>          choice + default [default: a] [possible values: a, b]
+       +ocb <OCB>          choice + default [possible values: a, b] [default: a]
        +occ [OCC]...       multi-occurs + choice [possible values: a, b]
        +ocd <OCD>...       required + multi-occurs + choice [possible values: a, b]
        +ofa <OFA>          choice from fn
@@ -435,7 +435,7 @@ USAGE: prog test3 [OPTIONS]
 OPTIONS:
       --oe <OE>  [default: val]
       --of <OF>
-      --cb <CB>  [default: x] [possible values: x, y, z]
+      --cb <CB>  [possible values: x, y, z] [default: x]
   -h, --help
 
 EOF
@@ -447,5 +447,5 @@ USAGE: prog test3 [OPTIONS]
 OPTIONS:
       --oe <OE>  [default: val]
       --of <OF>
-      --cb <CB>  [default: x] [possible values: x, y, z]
+      --cb <CB>  [possible values: x, y, z] [default: x]
   -h, --help

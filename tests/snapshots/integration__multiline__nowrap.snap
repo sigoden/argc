@@ -27,8 +27,6 @@ OPTIONS:
            * default: enables recommended style components.
            * full: enables all available components.
            * auto: same as 'default', unless the output is piped.
-          [default: default]
-          [possible values: default, full, auto]
 
       --bar <BAR>
           Eager dogs jump quickly over the lazy brown fox, swiftly running past green fields, but only until the night turns dark. Bright stars sparkle clearly above us now.
@@ -66,8 +64,6 @@ OPTIONS:
            * default: enables recommended style components.
            * full: enables all available components.
            * auto: same as 'default', unless the output is piped.
-          [default: default]
-          [possible values: default, full, auto]
 
       --bar <BAR>
           Eager dogs jump quickly over the lazy brown fox, swiftly running past green fields, but only until the night turns dark. Bright stars sparkle clearly above us now.
