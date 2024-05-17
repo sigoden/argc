@@ -16,7 +16,7 @@ ENVIRONMENTS:
   TEST_EDA  default [default: a]
   TEST_EDB  default from fn
   TEST_ECA  choice [possible values: a, b]
-  TEST_ECB  choice + default [default: a] [possible values: a, b]
+  TEST_ECB  choice + default [possible values: a, b] [default: a]
   TEST_EFA  choice from fn
 
 
@@ -35,5 +35,5 @@ ENVIRONMENTS:
   TEST_EDA  default [default: a]
   TEST_EDB  default from fn
   TEST_ECA  choice [possible values: a, b]
-  TEST_ECB  choice + default [default: a] [possible values: a, b]
+  TEST_ECB  choice + default [possible values: a, b] [default: a]
   TEST_EFA  choice from fn

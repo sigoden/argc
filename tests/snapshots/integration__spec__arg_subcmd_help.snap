@@ -169,7 +169,7 @@ command cat >&2 <<-'EOF'
 USAGE: prog cmd_arg_with_choices_and_default [VAL]
 
 ARGS:
-  [VAL]  [default: x] [possible values: x, y, z]
+  [VAL]  [possible values: x, y, z] [default: x]
 
 EOF
 exit 0
@@ -178,7 +178,7 @@ exit 0
 USAGE: prog cmd_arg_with_choices_and_default [VAL]
 
 ARGS:
-  [VAL]  [default: x] [possible values: x, y, z]
+  [VAL]  [possible values: x, y, z] [default: x]
 
 ************ RUN ************
 prog cmd_multi_arg_with_choices -h
@@ -432,5 +432,3 @@ ARGS:
   <VAL1>
   <VAL2>
   <VAL3>
-
-
