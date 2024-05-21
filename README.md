@@ -47,13 +47,12 @@ curl -fsSL https://raw.githubusercontent.com/sigoden/argc/main/install.sh | sh -
 
 ### GitHub Actions
 
-[extractions/setup-crate](https://github.com/marketplace/actions/setup-crate) can be used to install argc in a GitHub Actions workflow.
+[install-binary](https://github.com/sigoden/install-binary) can be used to install argc in a GitHub Actions workflow.
 
 ```yaml
-- uses: extractions/setup-crate@v1
-  with:
-    owner: sigoden
-    name: argc
+  - uses: sigoden/install-binary@v1
+    with:
+      repo: sigoden/argc
 ```
 
 ## Get Started
