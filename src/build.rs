@@ -13,7 +13,7 @@ const UTIL_FNS: [(&str, &str); 6] = [
 _argc_take_args() {
     _argc_take_args_values=()
     _argc_take_args_len=0
-    local param="${{1:-}}" min="${{2:-}}" max="${{3:-}}" signs="${{4:-}}" delimiter="${{5:-}}"
+    local param="${1:-}" min="${2:-}" max="${3:-}" signs="${4:-}" delimiter="${5:-}"
     if [[ "$min" -eq 0 ]] && [[ "$max" -eq 0 ]]; then
         return
     fi
