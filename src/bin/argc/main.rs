@@ -83,12 +83,34 @@ fn run() -> Result<i32> {
                     println!("{dir_vars}{export_vars}{code}")
                 }
             }
+            "--argc-run" => {
+                if args.len() < 3 {
+                    bail!("No script file provided");
+                }
+                let shell = runtime.shell_path()?;
+                let script_path = normalize_script_path(&args[2]);
+                let (script_dir, script_path) = {
+                    let path = fs::canonicalize(script_path)?;
+                    let script_dir = path.parent().unwrap();
+                    (script_dir.to_path_buf(), path.display().to_string())
+                };
+                let mut envs = HashMap::new();
+                if is_runner_script(&script_path) {
+                    if let Some(cwd) = runtime.current_dir() {
+                        if env::var("ARGC_PWD").is_err() {
+                            envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
+                        }
+                    }
+                }
+                let args = [vec![&script_path], args.iter().skip(3).collect()].concat();
+                return run_command(&script_path, &shell, &args, envs, Some(&script_dir));
+            }
             "--argc-create" => {
                 if let Some((_, script_file)) = get_script_path(false) {
                     bail!("Already exist {}", script_file.display());
                 }
                 let content = generate_boilerplate(&args[2..]);
-                let names = candidate_script_names();
+                let names = runner_script_names();
                 fs::write(&names[0], content)
                     .with_context(|| format!("Failed to create {}", &names[0]))?;
                 println!("{} has been successfully created.", &names[0]);
@@ -181,7 +203,9 @@ fn run() -> Result<i32> {
             .ok_or_else(|| anyhow!("Argcfile not found, try `argc --argc-help` for help."))?;
         let mut envs = HashMap::new();
         if let Some(cwd) = runtime.current_dir() {
-            envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
+            if env::var("ARGC_PWD").is_err() {
+                envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
+            }
         }
         let script_file = script_file.display().to_string();
         let args = [vec![&script_file], args[1..].iter().collect()].concat();
@@ -360,7 +384,7 @@ fn export_dir_vars(path: &str) -> String {
 }
 
 fn get_argc_script_dir(path: &str) -> Option<String> {
-    if candidate_script_names().iter().all(|v| !path.ends_with(v)) {
+    if runner_script_names().iter().all(|v| !path.ends_with(v)) {
         return None;
     }
     let path = Path::new(path);
@@ -376,7 +400,7 @@ fn get_argc_script_dir(path: &str) -> Option<String> {
 
 fn parse_script_args(args: &[String]) -> Result<(String, String, Vec<String>)> {
     if args.is_empty() {
-        bail!("No script provided");
+        bail!("No script file provided");
     }
     let script_file = args[0].as_str();
     let script_file = normalize_script_path(script_file);
@@ -425,7 +449,7 @@ eval "$(argc --argc-eval "$0" "$@")"
 }
 
 fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
-    let candidates = candidate_script_names();
+    let candidates = runner_script_names();
     let mut dir = env::current_dir().ok()?;
     loop {
         for name in candidates.iter() {
@@ -441,7 +465,7 @@ fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
     }
 }
 
-fn candidate_script_names() -> Vec<String> {
+fn runner_script_names() -> Vec<String> {
     let mut names = vec![];
     if let Ok(name) = env::var("ARGC_SCRIPT_NAME") {
         names.push(name.clone());
@@ -451,6 +475,18 @@ fn candidate_script_names() -> Vec<String> {
     }
     names.extend(ARGC_SCRIPT_NAMES.into_iter().map(|v| v.to_string()));
     names
+}
+
+fn is_runner_script(script_file: &str) -> bool {
+    let name = match get_script_name(script_file) {
+        Ok(v) => v,
+        Err(_) => return false,
+    };
+    let name = name.strip_suffix(".sh").unwrap_or(name);
+    let expect_name = env::var("ARGC_SCRIPT_NAME")
+        .map(|v| v.to_lowercase())
+        .unwrap_or_else(|_| "argcfile".to_string());
+    name.to_lowercase() == expect_name
 }
 
 fn search_completion_script(args: &mut Vec<String>) -> Option<PathBuf> {
