@@ -90,9 +90,18 @@ fn run() -> Result<i32> {
                 let shell = runtime.shell_path()?;
                 let script_path = normalize_script_path(&args[2]);
                 let (script_dir, script_path) = {
-                    let path = fs::canonicalize(script_path)?;
-                    let script_dir = path.parent().unwrap();
-                    (script_dir.to_path_buf(), path.display().to_string())
+                    let script_path = fs::canonicalize(&script_path)
+                        .with_context(|| format!("Failed to run '{script_path}'"))?;
+                    let script_dir = script_path.parent().unwrap();
+                    let script_path = {
+                        let path = script_path.display().to_string();
+                        if cfg!(windows) && path.starts_with(r"\\?\") {
+                            path[4..].to_string()
+                        } else {
+                            path
+                        }
+                    };
+                    (script_dir.to_path_buf(), script_path)
                 };
                 let mut envs = HashMap::new();
                 if is_runner_script(&script_path) {
