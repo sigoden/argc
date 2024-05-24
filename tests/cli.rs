@@ -73,11 +73,13 @@ fn create_with_tasks() {
 
 #[test]
 fn run() {
+    let path_env_var = get_path_env_var();
     let path = locate_script("examples/demo.sh");
     Command::cargo_bin("argc")
         .unwrap()
         .arg("--argc-run")
         .arg(path)
+        .env("PATH", path_env_var)
         .assert()
         .stderr(predicates::str::contains("USAGE: demo"))
         .success();
