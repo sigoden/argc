@@ -9,7 +9,9 @@ use argc::{
 use base64::{engine::general_purpose, Engine as _};
 use std::{
     collections::HashMap,
-    env, fs,
+    env,
+    ffi::OsStr,
+    fs,
     path::{Path, PathBuf},
     process,
 };
@@ -52,7 +54,7 @@ fn run() -> Result<i32> {
     if let Some(argc_cmd) = argc_cmd {
         match argc_cmd {
             "--argc-eval" => {
-                let (source, cmd_args) = parse_script_args(&args[2..])?;
+                let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
                 if cmd_args
                     .get(1)
                     .map(|v| v == parallel::PARALLEL_SYMBOL)
@@ -92,11 +94,10 @@ fn run() -> Result<i32> {
                 println!("{} has been successfully created.", &names[0]);
             }
             "--argc-build" => {
-                let script_path = &args[2];
-                let (source, args) = parse_script_args(&args[2..])?;
-                let script = argc::build(&source, &args[0], get_term_width())?;
-                if let Some(outpath) = args.get(1) {
-                    let script_name = get_script_name(script_path)?;
+                let (source, script_path, cmd_args) = parse_script_args(&args[2..])?;
+                let script = argc::build(&source, &cmd_args[0], get_term_width())?;
+                if let Some(outpath) = cmd_args.get(1) {
+                    let script_name = get_script_name(&script_path)?;
                     let (outpath, new) = ensure_outpath(outpath, script_name)
                         .with_context(|| format!("Invalid output path '{outpath}'"))?;
                     fs::write(&outpath, script).with_context(|| {
@@ -115,9 +116,9 @@ fn run() -> Result<i32> {
                 }
             }
             "--argc-mangen" => {
-                let (source, args) = parse_script_args(&args[2..])?;
-                let outdir = args.get(1).ok_or_else(|| anyhow!("No output dir"))?;
-                let pages = argc::mangen(&source, &args[0])?;
+                let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
+                let outdir = cmd_args.get(1).ok_or_else(|| anyhow!("No output dir"))?;
+                let pages = argc::mangen(&source, &cmd_args[0])?;
                 let outdir = ensure_outdir(outdir).with_context(|| "Invalid output dir")?;
                 for (filename, page) in pages {
                     let outfile = outdir.join(filename);
@@ -139,8 +140,8 @@ fn run() -> Result<i32> {
                 run_compgen(runtime, args.to_vec());
             }
             "--argc-export" => {
-                let (source, args) = parse_script_args(&args[2..])?;
-                let value = argc::export(&source, &args[0])?;
+                let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
+                let value = argc::export(&source, &cmd_args[0])?;
                 println!("{}", serde_json::to_string_pretty(&value)?);
             }
             "--argc-parallel" => {
@@ -148,12 +149,11 @@ fn run() -> Result<i32> {
                     bail!("Usage: argc --argc-parallel <SCRIPT> <ARGS>...");
                 }
                 let shell = runtime.shell_path()?;
-                let (source, cmd_args) = parse_script_args(&args[2..])?;
+                let (source, script_path, cmd_args) = parse_script_args(&args[2..])?;
                 if !source.contains("--argc-eval") {
                     bail!("Parallel only available for argc based scripts.")
                 }
-                let script_file = args[2].clone();
-                parallel::parallel(runtime, &shell, &script_file, &cmd_args[1..])?;
+                parallel::parallel(runtime, &shell, &script_path, &cmd_args[1..])?;
             }
             "--argc-script-path" => {
                 let (_, script_file) =
@@ -183,25 +183,35 @@ fn run() -> Result<i32> {
         if let Some(cwd) = runtime.current_dir() {
             envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
         }
-        let mut command = process::Command::new(shell);
-        command
-            .arg(&script_file)
-            .args(&args[1..])
-            .current_dir(script_dir)
-            .envs(envs);
-        #[cfg(unix)]
-        {
-            use std::os::unix::process::CommandExt;
-            let err = command.exec();
-            bail!("Failed to run `{err}`");
-        }
-        #[cfg(not(unix))]
-        {
-            let status = command
-                .status()
-                .with_context(|| format!("Failed to run `{}`", script_file.display()))?;
-            Ok(status.code().unwrap_or_default())
-        }
+        let script_file = script_file.display().to_string();
+        let args = [vec![&script_file], args[1..].iter().collect()].concat();
+        run_command(&shell, &args, envs, Some(&script_dir))
+    }
+}
+
+fn run_command<T: AsRef<OsStr>>(
+    prog: &str,
+    args: &[T],
+    envs: HashMap<String, String>,
+    cwd: Option<&Path>,
+) -> Result<i32> {
+    let mut command = process::Command::new(prog);
+    command.args(args).envs(envs);
+    if let Some(cwd) = cwd {
+        command.current_dir(cwd);
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        let err = command.exec();
+        bail!("Failed to run `{err}`");
+    }
+    #[cfg(not(unix))]
+    {
+        let status = command
+            .status()
+            .with_context(|| format!("Failed to run `{}`", script_file.display()))?;
+        Ok(status.code().unwrap_or_default())
     }
 }
 
@@ -245,11 +255,20 @@ fn run_compgen(runtime: NativeRuntime, mut args: Vec<String>) -> Option<()> {
         let kind = CompKind::new(&args[4]);
         compgen_kind(runtime, shell, kind, last_arg, no_color).ok()?
     } else if args[3].is_empty() {
+        // Fallback unknown command to path completion
         let last_arg = args.last().map(|v| v.as_str()).unwrap_or_default();
         compgen_kind(runtime, shell, CompKind::Path, last_arg, no_color).ok()?
     } else {
-        let (source, cmd_args) = parse_script_args(&args[3..]).ok()?;
-        argc::compgen(runtime, shell, &args[3], &source, &cmd_args[1..], no_color).ok()?
+        let (source, script_path, cmd_args) = parse_script_args(&args[3..]).ok()?;
+        argc::compgen(
+            runtime,
+            shell,
+            &script_path,
+            &source,
+            &cmd_args[1..],
+            no_color,
+        )
+        .ok()?
     };
     if !output.is_empty() {
         println!("{output}");
@@ -354,7 +373,7 @@ fn get_argc_script_dir(path: &str) -> Option<String> {
     Some(script_dir.display().to_string())
 }
 
-fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
+fn parse_script_args(args: &[String]) -> Result<(String, String, Vec<String>)> {
     if args.is_empty() {
         bail!("No script provided");
     }
@@ -367,7 +386,7 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
     let name = name.strip_suffix(".sh").unwrap_or(name);
     let mut cmd_args = vec![name.to_string()];
     cmd_args.extend(args);
-    Ok((source, cmd_args))
+    Ok((source, script_file, cmd_args))
 }
 
 fn get_script_name(script_path: &str) -> Result<&str> {
