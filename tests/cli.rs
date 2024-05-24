@@ -72,6 +72,18 @@ fn create_with_tasks() {
 }
 
 #[test]
+fn run() {
+    let path = locate_script("examples/demo.sh");
+    Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-run")
+        .arg(path)
+        .assert()
+        .stderr(predicates::str::contains("USAGE: demo"))
+        .success();
+}
+
+#[test]
 fn build_stdout() {
     let path = locate_script("examples/demo.sh");
     Command::cargo_bin("argc")
