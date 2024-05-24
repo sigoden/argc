@@ -561,7 +561,7 @@ fn normalize_script_path(path: &str) -> String {
     if cfg!(windows)
         && env::var("MSYSTEM").is_ok()
         && path.len() >= 3
-        && path.chars().nth(0) == Some('/')
+        && path.starts_with('/')
         && path.chars().nth(1).map(|v| v.is_ascii_alphabetic()) == Some(true)
         && path.chars().nth(2) == Some('/')
     {
