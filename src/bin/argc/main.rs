@@ -185,11 +185,12 @@ fn run() -> Result<i32> {
         }
         let script_file = script_file.display().to_string();
         let args = [vec![&script_file], args[1..].iter().collect()].concat();
-        run_command(&shell, &args, envs, Some(&script_dir))
+        run_command(&script_file, &shell, &args, envs, Some(&script_dir))
     }
 }
 
 fn run_command<T: AsRef<OsStr>>(
+    script_path: &str,
     prog: &str,
     args: &[T],
     envs: HashMap<String, String>,
@@ -204,13 +205,13 @@ fn run_command<T: AsRef<OsStr>>(
     {
         use std::os::unix::process::CommandExt;
         let err = command.exec();
-        bail!("Failed to run `{err}`");
+        bail!("Failed to run '{script_path}', {err}");
     }
     #[cfg(not(unix))]
     {
         let status = command
             .status()
-            .with_context(|| format!("Failed to run `{}`", script_file.display()))?;
+            .with_context(|| format!("Failed to run '{script_path}'"))?;
         Ok(status.code().unwrap_or_default())
     }
 }
