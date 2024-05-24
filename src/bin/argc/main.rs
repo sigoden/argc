@@ -359,10 +359,11 @@ fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
         bail!("No script provided");
     }
     let script_file = args[0].as_str();
+    let script_file = normalize_script_path(script_file);
     let args: Vec<String> = args[1..].to_vec();
-    let source = fs::read_to_string(script_file)
+    let source = fs::read_to_string(&script_file)
         .with_context(|| format!("Failed to load script at '{}'", script_file))?;
-    let name = get_script_name(script_file)?;
+    let name = get_script_name(&script_file)?;
     let name = name.strip_suffix(".sh").unwrap_or(name);
     let mut cmd_args = vec![name.to_string()];
     cmd_args.extend(args);
@@ -554,4 +555,18 @@ fn set_permissions<T: AsRef<Path>>(path: T) -> Result<()> {
 #[cfg(not(unix))]
 fn set_permissions<T: AsRef<Path>>(_path: T) -> Result<()> {
     Ok(())
+}
+
+fn normalize_script_path(path: &str) -> String {
+    if cfg!(windows)
+        && env::var("MSYSTEM").is_ok()
+        && path.len() >= 3
+        && path.starts_with('/')
+        && path.chars().nth(1).map(|v| v.is_ascii_alphabetic()) == Some(true)
+        && path.chars().nth(2) == Some('/')
+    {
+        let drive = path.chars().nth(1).unwrap().to_uppercase();
+        return format!("{}:{}", drive, &path[2..].replace('/', "\\"));
+    }
+    path.to_string()
 }
