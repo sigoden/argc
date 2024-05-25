@@ -7,6 +7,7 @@ use argc::{
     CompKind, NativeRuntime, Runtime, Shell, COMPGEN_KIND_SYMBOL,
 };
 use base64::{engine::general_purpose, Engine as _};
+use path_absolutize::Absolutize;
 use std::{
     collections::HashMap,
     env,
@@ -90,29 +91,30 @@ fn run() -> Result<i32> {
                 let shell = runtime.shell_path()?;
                 let script_path = normalize_script_path(&args[2]);
                 let (script_dir, script_path) = {
-                    let script_path = fs::canonicalize(&script_path)
-                        .with_context(|| format!("Failed to run '{script_path}'"))?;
-                    let script_dir = script_path.parent().unwrap();
-                    let script_path = {
-                        let path = script_path.display().to_string();
-                        if cfg!(windows) && path.starts_with(r"\\?\") {
-                            path[4..].to_string()
-                        } else {
-                            path
-                        }
-                    };
-                    (script_dir.to_path_buf(), script_path)
+                    let absolute_script_path = Path::new(&script_path)
+                        .absolutize()
+                        .with_context(|| format!("Invalid script path '{script_path}'"))?;
+                    let script_dir = absolute_script_path.parent().ok_or_else(|| {
+                        anyhow!("Unable to retrieve the script dir from '{script_path}'")
+                    })?;
+                    (
+                        script_dir.to_path_buf(),
+                        absolute_script_path.display().to_string(),
+                    )
                 };
                 let mut envs = HashMap::new();
-                if is_runner_script(&script_path) {
+                let cwd = if is_runner_script(&script_path) {
                     if let Some(cwd) = runtime.current_dir() {
                         if env::var("ARGC_PWD").is_err() {
                             envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
                         }
                     }
-                }
+                    Some(script_dir.as_path())
+                } else {
+                    None
+                };
                 let args = [vec![&script_path], args.iter().skip(3).collect()].concat();
-                return run_command(&script_path, &shell, &args, envs, Some(&script_dir));
+                return run_command(&script_path, &shell, &args, envs, cwd);
             }
             "--argc-create" => {
                 if let Some((_, script_file)) = get_script_path(false) {
@@ -458,10 +460,10 @@ eval "$(argc --argc-eval "$0" "$@")"
 }
 
 fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
-    let candidates = runner_script_names();
+    let names = runner_script_names();
     let mut dir = env::current_dir().ok()?;
     loop {
-        for name in candidates.iter() {
+        for name in names.iter() {
             let path = dir.join(name);
             if path.exists() {
                 return Some((dir, path));
