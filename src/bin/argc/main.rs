@@ -9,7 +9,9 @@ use argc::{
 use base64::{engine::general_purpose, Engine as _};
 use std::{
     collections::HashMap,
-    env, fs,
+    env,
+    ffi::OsStr,
+    fs,
     path::{Path, PathBuf},
     process,
 };
@@ -33,7 +35,7 @@ fn main() {
             }
         }
         Err(err) => {
-            eprintln!("{}", err);
+            eprintln!("{err:?}");
             process::exit(1);
         }
     }
@@ -52,7 +54,7 @@ fn run() -> Result<i32> {
     if let Some(argc_cmd) = argc_cmd {
         match argc_cmd {
             "--argc-eval" => {
-                let (source, cmd_args) = parse_script_args(&args[2..])?;
+                let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
                 if cmd_args
                     .get(1)
                     .map(|v| v == parallel::PARALLEL_SYMBOL)
@@ -81,22 +83,52 @@ fn run() -> Result<i32> {
                     println!("{dir_vars}{export_vars}{code}")
                 }
             }
+            "--argc-run" => {
+                if args.len() < 3 {
+                    bail!("No script file provided");
+                }
+                let shell = runtime.shell_path()?;
+                let script_path = normalize_script_path(&args[2]);
+                let (script_dir, script_path) = {
+                    let script_path = fs::canonicalize(&script_path)
+                        .with_context(|| format!("Failed to run '{script_path}'"))?;
+                    let script_dir = script_path.parent().unwrap();
+                    let script_path = {
+                        let path = script_path.display().to_string();
+                        if cfg!(windows) && path.starts_with(r"\\?\") {
+                            path[4..].to_string()
+                        } else {
+                            path
+                        }
+                    };
+                    (script_dir.to_path_buf(), script_path)
+                };
+                let mut envs = HashMap::new();
+                if is_runner_script(&script_path) {
+                    if let Some(cwd) = runtime.current_dir() {
+                        if env::var("ARGC_PWD").is_err() {
+                            envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
+                        }
+                    }
+                }
+                let args = [vec![&script_path], args.iter().skip(3).collect()].concat();
+                return run_command(&script_path, &shell, &args, envs, Some(&script_dir));
+            }
             "--argc-create" => {
                 if let Some((_, script_file)) = get_script_path(false) {
                     bail!("Already exist {}", script_file.display());
                 }
                 let content = generate_boilerplate(&args[2..]);
-                let names = candidate_script_names();
+                let names = runner_script_names();
                 fs::write(&names[0], content)
                     .with_context(|| format!("Failed to create {}", &names[0]))?;
                 println!("{} has been successfully created.", &names[0]);
             }
             "--argc-build" => {
-                let script_path = &args[2];
-                let (source, args) = parse_script_args(&args[2..])?;
-                let script = argc::build(&source, &args[0], get_term_width())?;
-                if let Some(outpath) = args.get(1) {
-                    let script_name = get_script_name(script_path)?;
+                let (source, script_path, cmd_args) = parse_script_args(&args[2..])?;
+                let script = argc::build(&source, &cmd_args[0], get_term_width())?;
+                if let Some(outpath) = cmd_args.get(1) {
+                    let script_name = get_script_name(&script_path)?;
                     let (outpath, new) = ensure_outpath(outpath, script_name)
                         .with_context(|| format!("Invalid output path '{outpath}'"))?;
                     fs::write(&outpath, script).with_context(|| {
@@ -115,9 +147,9 @@ fn run() -> Result<i32> {
                 }
             }
             "--argc-mangen" => {
-                let (source, args) = parse_script_args(&args[2..])?;
-                let outdir = args.get(1).ok_or_else(|| anyhow!("No output dir"))?;
-                let pages = argc::mangen(&source, &args[0])?;
+                let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
+                let outdir = cmd_args.get(1).ok_or_else(|| anyhow!("No output dir"))?;
+                let pages = argc::mangen(&source, &cmd_args[0])?;
                 let outdir = ensure_outdir(outdir).with_context(|| "Invalid output dir")?;
                 for (filename, page) in pages {
                     let outfile = outdir.join(filename);
@@ -139,8 +171,8 @@ fn run() -> Result<i32> {
                 run_compgen(runtime, args.to_vec());
             }
             "--argc-export" => {
-                let (source, args) = parse_script_args(&args[2..])?;
-                let value = argc::export(&source, &args[0])?;
+                let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
+                let value = argc::export(&source, &cmd_args[0])?;
                 println!("{}", serde_json::to_string_pretty(&value)?);
             }
             "--argc-parallel" => {
@@ -148,12 +180,11 @@ fn run() -> Result<i32> {
                     bail!("Usage: argc --argc-parallel <SCRIPT> <ARGS>...");
                 }
                 let shell = runtime.shell_path()?;
-                let (source, cmd_args) = parse_script_args(&args[2..])?;
+                let (source, script_path, cmd_args) = parse_script_args(&args[2..])?;
                 if !source.contains("--argc-eval") {
                     bail!("Parallel only available for argc based scripts.")
                 }
-                let script_file = args[2].clone();
-                parallel::parallel(runtime, &shell, &script_file, &cmd_args[1..])?;
+                parallel::parallel(runtime, &shell, &script_path, &cmd_args[1..])?;
             }
             "--argc-script-path" => {
                 let (_, script_file) =
@@ -181,27 +212,40 @@ fn run() -> Result<i32> {
             .ok_or_else(|| anyhow!("Argcfile not found, try `argc --argc-help` for help."))?;
         let mut envs = HashMap::new();
         if let Some(cwd) = runtime.current_dir() {
-            envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
+            if env::var("ARGC_PWD").is_err() {
+                envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
+            }
         }
-        let mut command = process::Command::new(shell);
-        command
-            .arg(&script_file)
-            .args(&args[1..])
-            .current_dir(script_dir)
-            .envs(envs);
-        #[cfg(unix)]
-        {
-            use std::os::unix::process::CommandExt;
-            let err = command.exec();
-            bail!("Failed to run `{err}`");
-        }
-        #[cfg(not(unix))]
-        {
-            let status = command
-                .status()
-                .with_context(|| format!("Failed to run `{}`", script_file.display()))?;
-            Ok(status.code().unwrap_or_default())
-        }
+        let script_file = script_file.display().to_string();
+        let args = [vec![&script_file], args[1..].iter().collect()].concat();
+        run_command(&script_file, &shell, &args, envs, Some(&script_dir))
+    }
+}
+
+fn run_command<T: AsRef<OsStr>>(
+    script_path: &str,
+    prog: &str,
+    args: &[T],
+    envs: HashMap<String, String>,
+    cwd: Option<&Path>,
+) -> Result<i32> {
+    let mut command = process::Command::new(prog);
+    command.args(args).envs(envs);
+    if let Some(cwd) = cwd {
+        command.current_dir(cwd);
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        let err = command.exec();
+        bail!("Failed to run '{script_path}', {err}");
+    }
+    #[cfg(not(unix))]
+    {
+        let status = command
+            .status()
+            .with_context(|| format!("Failed to run '{script_path}'"))?;
+        Ok(status.code().unwrap_or_default())
     }
 }
 
@@ -245,11 +289,20 @@ fn run_compgen(runtime: NativeRuntime, mut args: Vec<String>) -> Option<()> {
         let kind = CompKind::new(&args[4]);
         compgen_kind(runtime, shell, kind, last_arg, no_color).ok()?
     } else if args[3].is_empty() {
+        // Fallback unknown command to path completion
         let last_arg = args.last().map(|v| v.as_str()).unwrap_or_default();
         compgen_kind(runtime, shell, CompKind::Path, last_arg, no_color).ok()?
     } else {
-        let (source, cmd_args) = parse_script_args(&args[3..]).ok()?;
-        argc::compgen(runtime, shell, &args[3], &source, &cmd_args[1..], no_color).ok()?
+        let (source, script_path, cmd_args) = parse_script_args(&args[3..]).ok()?;
+        argc::compgen(
+            runtime,
+            shell,
+            &script_path,
+            &source,
+            &cmd_args[1..],
+            no_color,
+        )
+        .ok()?
     };
     if !output.is_empty() {
         println!("{output}");
@@ -340,7 +393,7 @@ fn export_dir_vars(path: &str) -> String {
 }
 
 fn get_argc_script_dir(path: &str) -> Option<String> {
-    if candidate_script_names().iter().all(|v| !path.ends_with(v)) {
+    if runner_script_names().iter().all(|v| !path.ends_with(v)) {
         return None;
     }
     let path = Path::new(path);
@@ -354,19 +407,20 @@ fn get_argc_script_dir(path: &str) -> Option<String> {
     Some(script_dir.display().to_string())
 }
 
-fn parse_script_args(args: &[String]) -> Result<(String, Vec<String>)> {
+fn parse_script_args(args: &[String]) -> Result<(String, String, Vec<String>)> {
     if args.is_empty() {
-        bail!("No script provided");
+        bail!("No script file provided");
     }
     let script_file = args[0].as_str();
+    let script_file = normalize_script_path(script_file);
     let args: Vec<String> = args[1..].to_vec();
-    let source = fs::read_to_string(script_file)
+    let source = fs::read_to_string(&script_file)
         .with_context(|| format!("Failed to load script at '{}'", script_file))?;
-    let name = get_script_name(script_file)?;
+    let name = get_script_name(&script_file)?;
     let name = name.strip_suffix(".sh").unwrap_or(name);
     let mut cmd_args = vec![name.to_string()];
     cmd_args.extend(args);
-    Ok((source, cmd_args))
+    Ok((source, script_file, cmd_args))
 }
 
 fn get_script_name(script_path: &str) -> Result<&str> {
@@ -404,7 +458,7 @@ eval "$(argc --argc-eval "$0" "$@")"
 }
 
 fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
-    let candidates = candidate_script_names();
+    let candidates = runner_script_names();
     let mut dir = env::current_dir().ok()?;
     loop {
         for name in candidates.iter() {
@@ -420,7 +474,7 @@ fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
     }
 }
 
-fn candidate_script_names() -> Vec<String> {
+fn runner_script_names() -> Vec<String> {
     let mut names = vec![];
     if let Ok(name) = env::var("ARGC_SCRIPT_NAME") {
         names.push(name.clone());
@@ -430,6 +484,18 @@ fn candidate_script_names() -> Vec<String> {
     }
     names.extend(ARGC_SCRIPT_NAMES.into_iter().map(|v| v.to_string()));
     names
+}
+
+fn is_runner_script(script_file: &str) -> bool {
+    let name = match get_script_name(script_file) {
+        Ok(v) => v,
+        Err(_) => return false,
+    };
+    let name = name.strip_suffix(".sh").unwrap_or(name);
+    let expect_name = env::var("ARGC_SCRIPT_NAME")
+        .map(|v| v.to_lowercase())
+        .unwrap_or_else(|_| "argcfile".to_string());
+    name.to_lowercase() == expect_name
 }
 
 fn search_completion_script(args: &mut Vec<String>) -> Option<PathBuf> {
@@ -554,4 +620,18 @@ fn set_permissions<T: AsRef<Path>>(path: T) -> Result<()> {
 #[cfg(not(unix))]
 fn set_permissions<T: AsRef<Path>>(_path: T) -> Result<()> {
     Ok(())
+}
+
+fn normalize_script_path(path: &str) -> String {
+    if cfg!(windows)
+        && env::var("MSYSTEM").is_ok()
+        && path.len() >= 3
+        && path.starts_with('/')
+        && path.chars().nth(1).map(|v| v.is_ascii_alphabetic()) == Some(true)
+        && path.chars().nth(2) == Some('/')
+    {
+        let drive = path.chars().nth(1).unwrap().to_uppercase();
+        return format!("{}:{}", drive, &path[2..].replace('/', "\\"));
+    }
+    path.to_string()
 }
