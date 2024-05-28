@@ -116,6 +116,7 @@ pub fn run_script<T: AsRef<Path>>(
     let envs: HashMap<&str, &str> = envs.iter().cloned().collect();
     let shell_path = argc::NativeRuntime.shell_path().unwrap();
     let output = std::process::Command::new(shell_path)
+        .arg("-u")
         .arg(script_path.as_ref())
         .args(args)
         .env("PATH", path_env_var.clone())
