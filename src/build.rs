@@ -13,7 +13,7 @@ const UTIL_FNS: [(&str, &str); 6] = [
 _argc_take_args() {
     _argc_take_args_values=()
     _argc_take_args_len=0
-    local param="${1:-}" min="${2:-}" max="${3:-}" signs="${4:-}" delimiter="${5:-}"
+    local param="$1" min="$2" max="$3" signs="$4" delimiter="$5"
     if [[ "$min" -eq 0 ]] && [[ "$max" -eq 0 ]]; then
         return
     fi
@@ -140,7 +140,7 @@ _argc_require_params() {
         r#"
 _argc_validate_choices() {
     local render_name="$1" raw_choices="$2" choices item choice concated_choices=""
-    IFS=$'\n' read -d '' -r -a choices <<<"$raw_choices"
+    IFS=$'\n' read -r -a choices <<<"$raw_choices"
     for choice in "${choices[@]}"; do
         if [[ -z "$concated_choices" ]]; then
             concated_choices="$choice"

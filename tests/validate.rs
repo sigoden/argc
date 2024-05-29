@@ -249,7 +249,7 @@ fn choice_access_vars() {
 # @flag --fa
 # @arg val[`_choice_fn`]
 _choice_fn() {
-	if [[ ${argc_fa:-} == 1 ]]; then
+	if [[ $argc_fa == 1 ]]; then
 		echo abc
 	else
 		echo def
@@ -266,10 +266,10 @@ fn choice_slash() {
 # @arg foo
 # @arg bar[`_choice_fn`]
 cmd() {
-    echo ${1:-}
+    echo $1
 }
 _choice_fn() {
-    echo ${1:-}
+    echo $1
 }
 "###;
     snapshot_multi!(script, [vec!["prog", "cmd", "a\\b", "a\\b"],]);

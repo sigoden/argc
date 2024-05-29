@@ -6,6 +6,7 @@ Each of these examples demonstrates one aspect or feature of argc.
 - [multiline.sh](./multiline.sh) - how to use multiline help text.
 - [nested-commands](./nested-commands.sh) - how to use nested commands.
 - [hooks.sh](./hooks.sh) - how to use argc hooks.
+- [strict.sh](./strict.sh) - how to use strict mode
 - [parallel.sh](./parallel.sh) - how to use `--argc-parallel`.
 
 - [args.sh](./args.sh) - all kinds of `@arg`.

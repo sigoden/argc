@@ -98,10 +98,10 @@ fn build_stdout() {
 }
 
 #[test]
-fn build_outpath() {
-    let path = locate_script("examples/demo.sh");
+fn run_build() {
+    let path = locate_script("examples/strict.sh");
     let tmpdir = tmpdir();
-    let outpath = tmpdir.join("demo.sh");
+    let outpath = tmpdir.join("strict.sh");
     Command::cargo_bin("argc")
         .unwrap()
         .arg("--argc-build")
@@ -109,8 +109,23 @@ fn build_outpath() {
         .arg(&outpath)
         .assert()
         .success();
-    let script = std::fs::read_to_string(&outpath).unwrap();
-    assert!(script.contains("# ARGC-BUILD"));
+
+    Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-run")
+        .arg(&outpath)
+        .args([
+            "--fa",
+            "--oa",
+            "oa1",
+            "--of=of1,of2",
+            "--oca=a",
+            "--ofa",
+            "abc",
+        ])
+        .assert()
+        .stdout(predicates::str::contains("argc__fn=main"))
+        .success();
 }
 
 #[test]
