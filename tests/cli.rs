@@ -110,22 +110,22 @@ fn run_build() {
         .assert()
         .success();
 
-    // Command::cargo_bin("argc")
-    //     .unwrap()
-    //     .arg("--argc-run")
-    //     .arg(&outpath)
-    //     .args([
-    //         "--fa",
-    //         "--oa",
-    //         "oa1",
-    //         "--of=of1,of2",
-    //         "--oca=a",
-    //         "--ofa",
-    //         "abc",
-    //     ])
-    //     .assert()
-    //     .stdout(predicates::str::contains("argc__fn=main"))
-    //     .success();
+    Command::cargo_bin("argc")
+        .unwrap()
+        .arg("--argc-run")
+        .arg(&outpath)
+        .args([
+            "--fa",
+            "--oa",
+            "oa1",
+            "--of=of1,of2",
+            "--oca=a",
+            "--ofa",
+            "abc",
+        ])
+        .assert()
+        .stdout(predicates::str::contains("argc__fn=main"))
+        .success();
 }
 
 #[test]

@@ -36,6 +36,13 @@ jobs:
 
     - uses: Swatinem/rust-cache@v2
 
+    - name: Install Bash 5 on macOS
+      if: runner.os == 'macOS'
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+        brew install bash
+        bash --version
+
     - name: Test
       run: cargo test --all
 
