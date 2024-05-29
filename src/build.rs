@@ -140,7 +140,7 @@ _argc_require_params() {
         r#"
 _argc_validate_choices() {
     local render_name="$1" raw_choices="$2" choices item choice concated_choices=""
-    IFS=$'\n' read -r -a choices <<<"$raw_choices"
+    IFS=$'\n' read -r -d '' -a choices <<<"$raw_choices" || true
     for choice in "${choices[@]}"; do
         if [[ -z "$concated_choices" ]]; then
             concated_choices="$choice"
