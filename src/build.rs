@@ -64,11 +64,11 @@ _argc_match_positionals() {
         local takes=0
         if [[ "${params[param_index]}" -eq 1 ]]; then
             if [[ $param_index -eq 0 ]] &&
-                [[ $_argc_dash -gt 0 ]] &&
+                [[ ${_argc_dash:-} -gt 0 ]] &&
                 [[ $params_len -eq 2 ]] &&
                 [[ "${params[$((param_index + 1))]}" -eq 1 ]] \
                 ; then
-                takes=$_argc_dash
+                takes=${_argc_dash:-}
             else
                 local arg_diff=$((args_len - arg_index)) param_diff=$((params_len - param_index))
                 if [[ $arg_diff -gt $param_diff ]]; then
@@ -121,15 +121,15 @@ _argc_split_positionals() {
         "_argc_require_params",
         r#"
 _argc_require_params() {
-    local message="$1" missed_envs item name render_name
+    local message="$1" missed_envs="" item name render_name
     for item in "${@:2}"; do
         name="${item%%:*}"
         render_name="${item##*:}"
-        if [[ -z "${!name}" ]]; then
+        if [[ -z "${!name:-}" ]]; then
             missed_envs="$missed_envs"$'\n'"  $render_name"
         fi
     done
-    if [[ -n "$missed_envs" ]]; then
+    if [[ -n "${missed_envs}" ]]; then
         _argc_die "$message$missed_envs"
     fi
 }
@@ -139,8 +139,8 @@ _argc_require_params() {
         "_argc_validate_choices",
         r#"
 _argc_validate_choices() {
-    local render_name="$1" raw_choices="$2" choices item choice concated_choices
-    IFS=$'\n' read -d '' -r -a choices <<<"$raw_choices"
+    local render_name="$1" raw_choices="$2" choices item choice concated_choices=""
+    IFS=$'\n' read -r -d '' -a choices <<<"$raw_choices" || true
     for choice in "${choices[@]}"; do
         if [[ -z "$concated_choices" ]]; then
             concated_choices="$choice"
@@ -246,7 +246,7 @@ fn build_root(cmd: &Command, wrap_width: Option<usize>) -> String {
 # Modifying it manually is not recommended
 
 _argc_run() {{
-    if [[ "$1" == "___internal___" ]]; then
+    if [[ "${{1:-}}" == "___internal___" ]]; then
         _argc_die "error: no supported param"
     fi
     argc__args=("$(basename "$0" .sh)" "$@")
@@ -255,7 +255,7 @@ _argc_run() {{
     _argc_len="${{#argc__args[@]}}"{dotenv}
     _argc_tools=()
     _argc_parse{require_tools}{before_hook}
-    if [ -n "$argc__fn" ]; then
+    if [ -n "${{argc__fn:-}}" ]; then
         $argc__fn "${{argc__positionals[@]}}"{after_hook}
     fi
 }}
@@ -414,7 +414,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         parses.push(format!(
                 r#"
         help)
-            local help_arg="${{argc__args[$((_argc_index + 1))]}}"
+            local help_arg="${{argc__args[$((_argc_index + 1))]:-}}"
             case "$help_arg" in{subcmd_usages}
             "")
                 _argc_usage{suffix}
@@ -508,7 +508,7 @@ _argc_parse{suffix}() {{
         case "$_argc_key" in{combined_case}
         esac
     done{flag_option_bind_envs}{required_flag_options}{require_tools}
-    if [[ -n "$_argc_action" ]]; then
+    if [[ -n "${{_argc_action:-}}" ]]; then
         $_argc_action
     else{handle}
     fi
@@ -540,7 +540,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
                 _argc_die "error: flag \`{long_name}\` don't accept any value"
             fi
             _argc_index=$((_argc_index + 1))
-            if [[ -n "${var_name}" ]]; then
+            if [[ -n "${{{var_name}:-}}" ]]; then
                 {variant}
             else
                 {var_name}=1
@@ -569,8 +569,8 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
         } else {
             format!(
                 r#"
-            if [[ -z "${var_name}" ]]; then
-                {var_name}="${{_argc_take_args_values[0]}}"
+            if [[ -z "${{{var_name}:-}}" ]]; then
+                {var_name}="${{_argc_take_args_values[0]:-}}"
             else
                 _argc_die "error: the argument \`{long_name}\` cannot be used multiple times"
             fi"#
@@ -627,7 +627,7 @@ fn build_handle(cmd: &Command, suffix: &str) -> String {
     };
     let run_help = format!(
         r#"
-        if [[ "${{argc__positionals[0]}}" == "help" ]] && [[ "${{#argc__positionals[@]}}" -eq 1 ]]; then
+        if [[ "${{argc__positionals[0]:-}}" == "help" ]] && [[ "${{#argc__positionals[@]}}" -eq 1 ]]; then
             _argc_usage{suffix}
         fi"#
     );
@@ -746,7 +746,7 @@ fn build_positionals(cmd: &Command) -> String {
             };
             format!(
                 r#"
-        IFS=: read -r values_index values_size <<<"${{_argc_match_positionals_values[{index}]}}"
+        IFS=: read -r values_index values_size <<<"${{_argc_match_positionals_values[{index}]:-}}"
         if [[ -n "$values_index" ]]; then{variant}{choice}{bind_env}{handle_nonexist}
         fi"#
             )
@@ -769,7 +769,7 @@ fn build_flag_option_bind_envs(cmd: &Command) -> String {
             let code = if param.is_flag() {
                 format!(
                     r#"
-    if [[ -z "${var_name}" ]] && [[ -n "${env_name}" ]]; then
+    if [[ -z "${{{var_name}:-}}" ]] && [[ -n "${{{env_name}:-}}" ]]; then
         if _argc_check_bool {env_name} "{render_name}"; then
             {var_name}=1
         fi
@@ -779,7 +779,7 @@ fn build_flag_option_bind_envs(cmd: &Command) -> String {
                 let handle_bind_env = build_handle_bind_env(param, &render_name, 2);
                 format!(
                     r#"
-    if [[ -z "${var_name}" ]] && [[ -n "${env_name}" ]]; then{handle_bind_env}
+    if [[ -z "${{{var_name}:-}}" ]] && [[ -n "${{{env_name}:-}}" ]]; then{handle_bind_env}
     fi"#
                 )
             };
@@ -796,7 +796,7 @@ fn build_positional_bind_env(param: &PositionalParam) -> String {
             let handle_bind_env = build_handle_bind_env(param, &param.render_notation(), 3);
             format!(
                 r#"
-        elif [[ -n "${env_name}" ]]; then{handle_bind_env}
+        elif [[ -n "${{{env_name}:-}}" ]]; then{handle_bind_env}
             argc__positionals+=("${{_argc_env_values[@]}}")"#
             )
         }
@@ -881,7 +881,7 @@ fn build_default_flag_options(cmd: &Command) -> String {
             let default = build_default(&var_name, param.default(), 3);
             format!(
                 r#"
-        if [[ -z "${var_name}" ]]; then{default}
+        if [[ -z "${{{var_name}:-}}" ]]; then{default}
         fi"#
             )
         })
@@ -933,19 +933,19 @@ fn build_envs(cmd: &Command) -> String {
             } else if default.is_empty() {
                 format!(
                     r#"
-        if [[ -n "${var_name}" ]]; then{choice}
+        if [[ -n "${{{var_name}:-}}" ]]; then{choice}
         fi"#
                 )
             } else if choice.is_empty() {
                 format!(
                     r#"
-        if [[ -z "${var_name}" ]]; then{default}
+        if [[ -z "${{{var_name}:-}}" ]]; then{default}
         fi"#
                 )
             } else {
                 format!(
                     r#"
-        if [[ -z "${var_name}" ]]; then{default}
+        if [[ -z "${{{var_name}:-}}" ]]; then{default}
         else{choice}
         fi"#
                 )
