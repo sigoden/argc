@@ -390,3 +390,19 @@ cmdb() { :; }
         ]
     );
 }
+
+#[test]
+fn auto_alias_subcommand() {
+    let script = r###"
+# @cmd
+cmd_a() { :; }
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "-h"],
+            vec!["prog", "cmd_a"],
+            vec!["prog", "cmd-a"],
+        ]
+    );
+}

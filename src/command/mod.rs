@@ -496,6 +496,19 @@ impl Command {
     fn update_recursively(&mut self, paths: Vec<String>, mut require_tools: IndexSet<String>) {
         self.paths.clone_from(&paths);
 
+        // auto alias if command name contains `_`
+        if let Some(name) = self.name.clone() {
+            let compatible_name = name.replace('_', "-");
+            if compatible_name != name {
+                match self.aliases.as_mut() {
+                    Some((aliaes, _)) => aliaes.insert(0, compatible_name),
+                    None => {
+                        self.aliases = Some((vec![compatible_name], Position::default()));
+                    }
+                }
+            }
+        }
+
         // update command_fn
         if paths.is_empty() {
             if self.share.borrow().fns.contains_key(MAIN_NAME) {

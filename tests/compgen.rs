@@ -820,6 +820,16 @@ _choice_fn() {
 }
 
 #[test]
+fn auto_alias_subcommand() {
+    let script = r###"
+# @cmd
+cmd_a() { :; }
+"###;
+
+    snapshot_compgen!(script, [vec!["prog", ""], vec!["prog", "cmd"]]);
+}
+
+#[test]
 fn multi_char() {
     let script = r#"
 # @option --oa*,[`_choice_fn`]

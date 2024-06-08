@@ -1,0 +1,12 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog ` ************
+cmd_a	/color:magenta
+cmd-a	/color:magenta
+help	/color:magenta
+
+************ COMPGEN `prog cmd` ************
+cmd_a	/color:magenta
+cmd-a	/color:magenta
