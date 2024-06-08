@@ -1,0 +1,52 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog -h
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  cmd_a  [aliases: cmd-a]
+
+EOF
+exit 0
+
+# RUN_OUTPUT
+USAGE: prog <COMMAND>
+
+COMMANDS:
+  cmd_a  [aliases: cmd-a]
+
+************ RUN ************
+prog cmd_a
+
+# OUTPUT
+argc__args=( prog cmd_a )
+argc__fn=cmd_a
+argc__positionals=(  )
+cmd_a
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd_a")
+argc__fn=cmd_a
+argc__positionals=()
+cmd_a
+
+************ RUN ************
+prog cmd-a
+
+# OUTPUT
+argc__args=( prog cmd-a )
+argc__fn=cmd_a
+argc__positionals=(  )
+cmd_a
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd-a")
+argc__fn=cmd_a
+argc__positionals=()
+cmd_a
