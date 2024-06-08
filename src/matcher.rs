@@ -61,7 +61,7 @@ pub(crate) enum MatchError {
     DisplayHelp,
     DisplaySubcommandHelp(String),
     DisplayVersion,
-    InvalidSubcommand,
+    InvalidSubcommand(Option<String>),
     UnknownArgument(usize, String),
     MissingRequiredArguments(usize, Vec<String>),
     MissingRequiredEnvironments(Vec<String>),
@@ -798,10 +798,12 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
                 if self.positional_args.is_empty() && last_args.is_empty() {
                     return Some(MatchError::DisplayHelp);
                 } else {
-                    return Some(MatchError::InvalidSubcommand);
+                    return Some(MatchError::InvalidSubcommand(None));
                 }
             } else if last_cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
-                return Some(MatchError::InvalidSubcommand);
+                return Some(MatchError::InvalidSubcommand(
+                    self.positional_args.first().map(|v| v.to_string()),
+                ));
             }
         }
 
@@ -980,13 +982,17 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
                 let cmd = self.last_cmd();
                 cmd.render_version()
             }
-            MatchError::InvalidSubcommand => {
+            MatchError::InvalidSubcommand(name) => {
                 exit = 1;
                 let cmd = self.last_cmd();
                 let cmd_str = cmd.cmd_paths().join("-");
                 let names = cmd.list_subcommand_names().join(", ");
+                let details = match name {
+                    Some(name) => format!("but '{name}' is not one of them"),
+                    None => "but one was not provided".to_string(),
+                };
                 format!(
-                    r###"error: `{cmd_str}` requires a subcommand but one was not provided
+                    r###"error: `{cmd_str}` requires a subcommand {details}
   [subcommands: {names}]"###
                 )
             }
