@@ -7,7 +7,7 @@ prog foo
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-error: `prog` requires a subcommand but one was not provided
+error: `prog` requires a subcommand but 'foo' is not one of them
   [subcommands: cmda, cmdb]
 EOF
 exit 1
@@ -15,5 +15,3 @@ exit 1
 # BUILD_OUTPUT
 error: `prog` requires a subcommand but one was not provided
   [subcommands: cmda, cmdb]
-
-
