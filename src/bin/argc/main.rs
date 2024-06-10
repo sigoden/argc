@@ -1,11 +1,7 @@
 mod parallel;
 
 use anyhow::{anyhow, bail, Context, Result};
-use argc::{
-    compgen_kind,
-    utils::{escape_shell_words, is_true_value},
-    CompKind, NativeRuntime, Runtime, Shell, COMPGEN_KIND_SYMBOL,
-};
+use argc::{compgen_kind, utils::*, CompKind, NativeRuntime, Runtime, Shell, COMPGEN_KIND_SYMBOL};
 use base64::{engine::general_purpose, Engine as _};
 use path_absolutize::Absolutize;
 use std::{
@@ -317,7 +313,12 @@ fn run_compgen(runtime: NativeRuntime, mut args: Vec<String>) -> Option<()> {
 fn export_argc_variables(code: &str) -> String {
     let mut value = code
         .split('\n')
-        .filter(|line| line.starts_with(argc::utils::VARIABLE_PREFIX))
+        .filter(|line| {
+            line.starts_with(VARIABLE_PREFIX)
+                || line.starts_with("declare ")
+                || *line == BEFORE_HOOK
+                || *line == AFTER_HOOK
+        })
         .map(|v| v.to_string())
         .collect::<Vec<String>>()
         .join(";");
