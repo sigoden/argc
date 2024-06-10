@@ -13,7 +13,7 @@ _choice_fn
 exit
 
 # RUN_OUTPUT
-error: no supported param
+error: unsupported ___internal___ command
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog test1 --cc 
@@ -29,7 +29,7 @@ _choice_fn
 exit
 
 # RUN_OUTPUT
-error: no supported param
+error: unsupported ___internal___ command
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog test1 -a --oa oa --cc 
@@ -47,6 +47,4 @@ _choice_fn
 exit
 
 # RUN_OUTPUT
-error: no supported param
-
-
+error: unsupported ___internal___ command

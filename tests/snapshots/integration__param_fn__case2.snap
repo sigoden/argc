@@ -13,7 +13,7 @@ _choice_fn
 exit
 
 # RUN_OUTPUT
-error: no supported param
+error: unsupported ___internal___ command
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn 
@@ -28,7 +28,7 @@ _choice_fn ''
 exit
 
 # RUN_OUTPUT
-error: no supported param
+error: unsupported ___internal___ command
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1
@@ -43,7 +43,7 @@ _choice_fn v1
 exit
 
 # RUN_OUTPUT
-error: no supported param
+error: unsupported ___internal___ command
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1 
@@ -58,7 +58,7 @@ _choice_fn v1 ''
 exit
 
 # RUN_OUTPUT
-error: no supported param
+error: unsupported ___internal___ command
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1 v2
@@ -73,7 +73,7 @@ _choice_fn v1 v2
 exit
 
 # RUN_OUTPUT
-error: no supported param
+error: unsupported ___internal___ command
 
 ************ RUN ************
 prog ___internal___ _choice_fn prog cmd_multi_arg_with_choice_fn v1 v2 
@@ -88,6 +88,4 @@ _choice_fn v1 v2 ''
 exit
 
 # RUN_OUTPUT
-error: no supported param
-
-
+error: unsupported ___internal___ command
