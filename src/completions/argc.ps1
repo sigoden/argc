@@ -2,7 +2,15 @@ using namespace System.Management.Automation
 
 $_argc_completer = {
     param($wordToComplete, $commandAst, $cursorPosition)
-    $words = @($commandAst.CommandElements | Where { $_.Extent.StartOffset -lt $cursorPosition } | ForEach-Object { $_.ToString() })
+    $words = @($commandAst.CommandElements | Where { $_.Extent.StartOffset -lt $cursorPosition } | ForEach-Object {
+        $word =  $_.ToString() 
+        if ($word.Length -gt 2) {
+            if (($word.StartsWith('"') -and $word.EndsWith('"')) -or ($word.StartsWith("'") -and $word.EndsWith("'"))) {
+                $word = $word.Substring(1, $word.Length - 2)
+            }
+        }
+        return $word
+    })
     $emptyS = ''
     if ($PSVersionTable.PSVersion.Major -eq 5) {
         $emptyS = '""'
