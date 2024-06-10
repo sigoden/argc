@@ -65,11 +65,12 @@ fn run() -> Result<i32> {
                     if cmd_args_len < 3 {
                         bail!("No parallel command")
                     }
+                    let bash_options = get_bash_options();
                     let mut code = retrieve_argc_variables().unwrap_or_default();
                     let mut cmds = vec![cmd_args[2].to_string()];
                     cmds.extend(cmd_args[3..].iter().map(|v| escape_shell_words(v)));
                     code.push_str(&cmds.join(" "));
-                    println!("{code}")
+                    println!("{bash_options}{code}")
                 } else {
                     let values = argc::eval(
                         runtime,
@@ -78,10 +79,11 @@ fn run() -> Result<i32> {
                         Some(&args[2]),
                         get_term_width(),
                     )?;
+                    let bash_options = get_bash_options();
                     let dir_vars = export_dir_vars(&args[2]);
                     let code = argc::ArgcValue::to_bash(&values);
                     let export_vars = export_argc_variables(&code);
-                    println!("{dir_vars}{export_vars}{code}")
+                    println!("{bash_options}{dir_vars}{export_vars}{code}")
                 }
             }
             "--argc-run" => {
@@ -624,9 +626,16 @@ fn set_permissions<T: AsRef<Path>>(_path: T) -> Result<()> {
     Ok(())
 }
 
+fn get_bash_options() -> String {
+    if is_msys() {
+        "set -o igncr\n".to_string()
+    } else {
+        String::new()
+    }
+}
+
 fn normalize_script_path(path: &str) -> String {
-    if cfg!(windows)
-        && env::var("MSYSTEM").is_ok()
+    if is_msys()
         && path.len() >= 3
         && path.starts_with('/')
         && path.chars().nth(1).map(|v| v.is_ascii_alphabetic()) == Some(true)
@@ -636,4 +645,8 @@ fn normalize_script_path(path: &str) -> String {
         return format!("{}:{}", drive, &path[2..].replace('/', "\\"));
     }
     path.to_string()
+}
+
+fn is_msys() -> bool {
+    cfg!(windows) && env::var("MSYSTEM").is_ok()
 }
