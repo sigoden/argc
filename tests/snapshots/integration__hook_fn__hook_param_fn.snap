@@ -15,6 +15,4 @@ _argc_after
 exit
 
 # BUILD_OUTPUT
-error: no supported param
-
-
+error: unsupported ___internal___ command
