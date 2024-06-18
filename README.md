@@ -238,7 +238,7 @@ man man/example.1
 
 ## Windows
 
-The only dependency of argc is bash. ince developers working on Windows typically have [git](https://gitforwindows.org/) installed, which includes git-bash, so you can safely use argc and GNU tools (grep, sed, awk...) in the Windows environment.
+The only dependency for `argc` is Bash. Since most developers working on Windows have [Git](https://gitforwindows.org/) installed, which includes Git Bash, you can safely use `argc` and GNU tools (like `grep`, `sed`, `awk`, etc.) in the Windows environment.
 
 </summary>
 
