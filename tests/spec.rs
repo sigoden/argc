@@ -406,3 +406,14 @@ cmd_a() { :; }
         ]
     );
 }
+
+#[test]
+fn option_single_dash() {
+    let script = r###"
+# @option --oa
+"###;
+    snapshot_multi!(
+        script,
+        [vec!["prog", "--oa", "-"], vec!["prog", "--oa", "-", ""],]
+    );
+}
