@@ -137,7 +137,7 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
                         &mut is_rest_args_positional,
                         cmd,
                     );
-                } else if arg.starts_with(|c| signs.contains(c)) {
+                } else if arg.len() > 1 && arg.starts_with(|c| signs.contains(c)) {
                     if let Some((k, v)) = arg.split_once('=') {
                         if let Some(param) = cmd.find_flag_option(k) {
                             add_param_choice_fn(&mut choice_fns, param);
@@ -1186,9 +1186,10 @@ fn take_value_args<'a>(
     if assigned || len == 0 {
         return output;
     }
-    let end = (start + len).min(args.len());
-    for arg in args.iter().take(end).skip(start) {
-        if arg.starts_with(|c| signs.contains(c)) {
+    let args_len = args.len();
+    let end = (start + len).min(args_len);
+    for (i, arg) in args.iter().enumerate().take(end).skip(start) {
+        if arg.starts_with(|c| signs.contains(c)) && (arg.len() > 1 || i == args_len - 1) {
             break;
         }
         output.push(arg.as_str());
