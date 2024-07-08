@@ -184,6 +184,7 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
                             &mut split_last_arg_at,
                             combine_shorts,
                             &signs,
+                            compgen,
                         );
                         comp_option = Some(param.id());
                     } else if let Some(subcmd) = find_subcommand(cmd, arg, &positional_args)
@@ -240,6 +241,7 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
                                 &mut split_last_arg_at,
                                 combine_shorts,
                                 &signs,
+                                compgen,
                             );
                             comp_option = Some(param.id());
                         }
@@ -1181,6 +1183,7 @@ fn take_value_args<'a>(
     len: usize,
     signs: &str,
     assigned: bool,
+    compgen: bool,
 ) -> Vec<&'a str> {
     let mut output = vec![];
     if assigned || len == 0 {
@@ -1189,7 +1192,9 @@ fn take_value_args<'a>(
     let args_len = args.len();
     let end = (start + len).min(args_len);
     for (i, arg) in args.iter().enumerate().take(end).skip(start) {
-        if arg.starts_with(|c| signs.contains(c)) && (arg.len() > 1 || i == args_len - 1) {
+        if arg.starts_with(|c| signs.contains(c))
+            && (arg.len() > 1 || (compgen && i == args_len - 1))
+        {
             break;
         }
         output.push(arg.as_str());
@@ -1239,6 +1244,7 @@ fn match_flag_option<'a, 'b>(
     split_last_arg_at: &mut Option<usize>,
     combine_shorts: bool,
     signs: &str,
+    compgen: bool,
 ) {
     let arg = &args[*arg_index];
     if param.terminated() {
@@ -1252,7 +1258,7 @@ fn match_flag_option<'a, 'b>(
     } else if let Some(prefix) = param.match_prefix(arg) {
         let args_len = args.len();
         let prefix_len = prefix.len();
-        let value_args = take_value_args(args, *arg_index + 1, 1, signs, param.assigned());
+        let value_args = take_value_args(args, *arg_index + 1, 1, signs, param.assigned(), compgen);
         let take_empty = value_args.is_empty();
         *arg_index += value_args.len();
         let values = if take_empty { vec!["1"] } else { value_args };
@@ -1266,7 +1272,14 @@ fn match_flag_option<'a, 'b>(
     } else {
         let values_max = param.num_args().1;
         let args_len = args.len();
-        let value_args = take_value_args(args, *arg_index + 1, values_max, signs, param.assigned());
+        let value_args = take_value_args(
+            args,
+            *arg_index + 1,
+            values_max,
+            signs,
+            param.assigned(),
+            compgen,
+        );
         *arg_index += value_args.len();
         if *arg_index == args_len - 1 {
             if *arg_comp != ArgComp::FlagOrOption {

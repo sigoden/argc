@@ -6,13 +6,14 @@ expression: data
 prog --oa -
 
 # OUTPUT
-command cat >&2 <<-'EOF' 
-error: incorrect number of values for `--oa <OA>`
-EOF
-exit 1
+argc_oa=-
+argc__args=( prog --oa - )
+argc__positionals=(  )
 
 # RUN_OUTPUT
-error: incorrect number of values for `--oa <OA>`
+argc__args=([0]="prog" [1]="--oa" [2]="-")
+argc__positionals=()
+argc_oa=-
 
 ************ RUN ************
 prog --oa - 

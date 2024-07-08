@@ -24,7 +24,7 @@ _argc_take_args() {
         while [[ $_argc_take_index -lt $_argc_len ]]; do
             _argc_take_value="${argc__args[_argc_take_index]}"
             if [[ -n "$signs" ]] && [[ "$_argc_take_value" =~ ^["$signs"] ]]; then
-                if [[ "${#_argc_take_value}" -gt 1 ]] || [[ "$_argc_take_index" == $(($_argc_len - 1)) ]]; then
+                if [[ "${#_argc_take_value}" -gt 1 ]]; then
                     break
                 fi
             fi
