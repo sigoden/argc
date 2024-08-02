@@ -828,6 +828,7 @@ impl ParamData {
         Some(env)
     }
 
+    #[allow(unused)]
     pub(crate) fn render_source_of_name_value(&self, name_suffix: &str) -> String {
         let mut output = format!("{}{name_suffix}", self.name);
         output.push_str(&self.modifier.render());
@@ -945,6 +946,7 @@ impl Modifier {
         }
     }
 
+    #[allow(unused)]
     pub(crate) fn render(&self) -> String {
         match self {
             Self::Optional => "".into(),
