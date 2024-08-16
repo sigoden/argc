@@ -99,7 +99,7 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
         } else {
             let mut is_rest_args_positional = false; // option(e.g. -f --foo) will be treated as positional arg
             if let Some(arg) = args.last() {
-                if arg.starts_with(|c| root_cmd.flag_option_signs().contains(c)) {
+                if maybe_flag_option(arg, &root_cmd.flag_option_signs()) {
                     arg_comp = ArgComp::FlagOrOption;
                 } else if !arg.is_empty() {
                     arg_comp = ArgComp::CommandOrPositional;
@@ -137,7 +137,7 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
                         &mut is_rest_args_positional,
                         cmd,
                     );
-                } else if arg.len() > 1 && arg.starts_with(|c| signs.contains(c)) {
+                } else if arg.len() > 1 && maybe_flag_option(arg, &signs) {
                     if let Some((k, v)) = arg.split_once('=') {
                         if let Some(param) = cmd.find_flag_option(k) {
                             add_param_choice_fn(&mut choice_fns, param);
@@ -1181,7 +1181,7 @@ fn take_value_args<'a>(
     args: &'a [String],
     start: usize,
     len: usize,
-    signs: &str,
+    signs: &IndexSet<char>,
     assigned: bool,
     compgen: bool,
 ) -> Vec<&'a str> {
@@ -1192,9 +1192,7 @@ fn take_value_args<'a>(
     let args_len = args.len();
     let end = (start + len).min(args_len);
     for (i, arg) in args.iter().enumerate().take(end).skip(start) {
-        if arg.starts_with(|c| signs.contains(c))
-            && (arg.len() > 1 || (compgen && i == args_len - 1))
-        {
+        if maybe_flag_option(arg, signs) && (arg.len() > 1 || (compgen && i == args_len - 1)) {
             break;
         }
         output.push(arg.as_str());
@@ -1243,7 +1241,7 @@ fn match_flag_option<'a, 'b>(
     arg_comp: &mut ArgComp,
     split_last_arg_at: &mut Option<usize>,
     combine_shorts: bool,
-    signs: &str,
+    signs: &IndexSet<char>,
     compgen: bool,
 ) {
     let arg = &args[*arg_index];
@@ -1361,8 +1359,7 @@ fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
             if i > 0 && v.len() < 2 {
                 continue;
             }
-            if (flag && v.starts_with(|c| signs.contains(c)))
-                || (!flag && !v.starts_with(|c| signs.contains(c)))
+            if (flag && maybe_flag_option(&v, &signs)) || (!flag && !maybe_flag_option(&v, &signs))
             {
                 if !flag {
                     has_help_subcmd = true;
@@ -1498,4 +1495,25 @@ fn delimit_arg_values<'x, T: Param>(param: &T, values: &[&'x str]) -> Vec<&'x st
 
 fn is_bool_value(value: &str) -> bool {
     matches!(value, "true" | "false" | "0" | "1")
+}
+
+fn maybe_flag_option(arg: &str, signs: &IndexSet<char>) -> bool {
+    let cond = if signs.contains(&'+') && arg.starts_with('+') {
+        !arg.starts_with("++")
+    } else if arg.starts_with('-') {
+        arg.len() < 3 || !arg.starts_with("---")
+    } else {
+        false
+    };
+    if !cond {
+        return false;
+    }
+    let value = match arg.split_once('=') {
+        Some((v, _)) => v,
+        _ => arg,
+    };
+    if value.contains(|c: char| c.is_whitespace()) {
+        return false;
+    }
+    true
 }

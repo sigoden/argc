@@ -417,3 +417,18 @@ fn option_single_dash() {
         [vec!["prog", "--oa", "-"], vec!["prog", "--oa", "-", ""],]
     );
 }
+
+#[test]
+fn option_value_dash() {
+    let script = r###"
+# @option --oa
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "--oa", "---"],
+            vec!["prog", "---"],
+            vec!["prog", "--a\nb"]
+        ]
+    );
+}
