@@ -27,15 +27,12 @@ argc__args=([0]="prog" [1]="---")
 argc__positionals=([0]="---")
 
 ************ RUN ************
-prog --a
-b
+prog --a b
 
 # OUTPUT
-argc__args=( prog '--a
-b' )
-argc__positionals=( '--a
-b' )
+argc__args=( prog '--a b' )
+argc__positionals=( '--a b' )
 
 # RUN_OUTPUT
-argc__args=([0]="prog" [1]=$'--a\nb')
-argc__positionals=([0]=$'--a\nb')
+argc__args=([0]="prog" [1]="--a b")
+argc__positionals=([0]="--a b")

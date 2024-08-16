@@ -428,7 +428,7 @@ fn option_value_dash() {
         [
             vec!["prog", "--oa", "---"],
             vec!["prog", "---"],
-            vec!["prog", "--a\nb"]
+            vec!["prog", "--a b"]
         ]
     );
 }
