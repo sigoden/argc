@@ -1,0 +1,38 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog --oa ---
+
+# OUTPUT
+argc_oa=---
+argc__args=( prog --oa --- )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--oa" [2]="---")
+argc__positionals=()
+argc_oa=---
+
+************ RUN ************
+prog ---
+
+# OUTPUT
+argc__args=( prog --- )
+argc__positionals=( --- )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="---")
+argc__positionals=([0]="---")
+
+************ RUN ************
+prog --a b
+
+# OUTPUT
+argc__args=( prog '--a b' )
+argc__positionals=( '--a b' )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--a b")
+argc__positionals=([0]="--a b")

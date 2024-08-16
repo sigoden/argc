@@ -398,7 +398,14 @@ fn parse_with_long_head(input: &str) -> nom::IResult<&str, (Option<&str>, &str)>
                 ),
                 peek(space1),
             )),
-            preceded(space0, alt((tag("--"), tag("-"), tag("+")))),
+            preceded(
+                space0,
+                alt((
+                    terminated(tag("--"), peek(not(char('-')))),
+                    terminated(tag("-"), peek(not(char('-')))),
+                    terminated(tag("+"), peek(not(char('+')))),
+                )),
+            ),
         ),)),
         |(short, long_prefix)| (short.map(|_| &input[0..2]), long_prefix),
     )(input)
@@ -1047,6 +1054,8 @@ mod tests {
             Ok(("foo", (Some("+f"), "+")))
         );
         assert_eq!(parse_with_long_head("+foo"), Ok(("foo", (None, "+"))));
+        assert!(parse_with_long_head("-f ---foo").is_err());
+        assert!(parse_with_long_head("+f ++foo").is_err());
     }
 
     #[test]

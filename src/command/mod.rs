@@ -370,7 +370,7 @@ impl Command {
         }
     }
 
-    pub(crate) fn flag_option_signs(&self) -> String {
+    pub(crate) fn flag_option_signs(&self) -> IndexSet<char> {
         let mut signs: IndexSet<char> = ['-'].into();
         for param in &self.flag_option_params {
             if let Some(short) = param.short() {
@@ -378,7 +378,7 @@ impl Command {
             }
             signs.extend(param.long_prefix().chars().take(1))
         }
-        signs.into_iter().collect()
+        signs
     }
 
     pub(crate) fn cmd_name(&self) -> String {

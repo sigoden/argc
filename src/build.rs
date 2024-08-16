@@ -5,8 +5,9 @@ use crate::{
     ChoiceValue, DefaultValue,
 };
 use anyhow::Result;
+use indexmap::IndexSet;
 
-const UTIL_FNS: [(&str, &str); 6] = [
+const UTIL_FNS: [(&str, &str); 7] = [
     (
         "_argc_take_args",
         r#"
@@ -23,7 +24,7 @@ _argc_take_args() {
     else
         while [[ $_argc_take_index -lt $_argc_len ]]; do
             _argc_take_value="${argc__args[_argc_take_index]}"
-            if [[ -n "$signs" ]] && [[ "$_argc_take_value" =~ ^["$signs"] ]]; then
+            if _argc_maybe_flag_option "$signs" "$_argc_take_value"; then
                 if [[ "${#_argc_take_value}" -gt 1 ]]; then
                     break
                 fi
@@ -182,6 +183,35 @@ _argc_check_bool() {
 }
 "#,
     ),
+    (
+        "_argc_maybe_flag_option",
+        r#"
+_argc_maybe_flag_option() {
+    local signs="$1" arg="$2"
+    if [[ -z "$signs" ]]; then
+        return 1
+    fi
+    local cond=false
+    if [[ "$signs" == *"+"* ]]; then
+        if [[ "$arg" =~ ^\+[^+].* ]]; then
+            cond=true
+        fi
+    elif [[ "$arg" == -* ]]; then
+        if (( ${#arg} < 3 )) || [[ ! "$arg" =~ ^---.* ]]; then
+            cond=true
+        fi
+    fi
+    if [[ "$cond" == "false" ]]; then
+        return 1
+    fi
+    local value="${arg%%=*}"
+    if [[ "$value" =~ [[:space:]] ]]; then
+        return 1
+    fi
+    return 0
+}
+"#,
+    ),
 ];
 
 pub fn build(source: &str, root_name: &str, wrap_width: Option<usize>) -> Result<String> {
@@ -232,7 +262,7 @@ fn build_root(cmd: &Command, wrap_width: Option<usize>) -> String {
     let after_hook = if after_hook { "\n    _argc_after" } else { "" };
     let mut util_fns = String::new();
     for (fn_name, util_fn) in UTIL_FNS {
-        if command.contains(fn_name) {
+        if command.contains(fn_name) || util_fns.contains(fn_name) {
             util_fns.push_str(util_fn);
         }
     }
@@ -369,21 +399,6 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
     } else {
         String::new()
     };
-    let parse_unknown_flag_options = if !cmd.flag_option_params.is_empty() {
-        let unknown_flags = flag_option_signs
-            .chars()
-            .map(|v| format!("{v}?*"))
-            .collect::<Vec<String>>()
-            .join(" | ");
-        format!(
-            r#"
-        {unknown_flags})
-            _argc_die "error: unexpected argument \`$_argc_key\` found"
-            ;;"#
-        )
-    } else {
-        String::new()
-    };
     let parse_subcommands = if !cmd.subcommands.is_empty() {
         let mut parses: Vec<String> = cmd
             .subcommands
@@ -437,13 +452,24 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         String::new()
     };
 
+    let handle_unknown_flag_options = if !cmd.flag_option_params.is_empty() {
+        let signs = flag_option_signs.iter().collect::<String>();
+        format!(
+            r#"
+            if _argc_maybe_flag_option "{signs}" "$_argc_item"; then
+                _argc_die "error: unexpected argument \`$_argc_key\` found"
+            fi"#,
+        )
+    } else {
+        String::new()
+    };
     let parse_fallback = if !cmd.subcommands.is_empty() && cmd.positional_params.is_empty() {
         let name = cmd.full_name();
         if let Some(subcmd) = cmd.find_default_subcommand() {
             let paths = subcmd.paths.join("_");
             format!(
                 r#"
-        *)
+        *){handle_unknown_flag_options}
             if [[ "${{#argc__positionals[@]}}" -eq 0 ]]; then
                 _argc_action=_argc_parse_{paths}
                 break
@@ -453,7 +479,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         } else {
             format!(
                 r#"
-        *)
+        *){handle_unknown_flag_options}
             _argc_die "error: \`{name}\` requires a subcommand but one was not provided"$'\n'"  [subcommands: $_argc_subcmds]"
             ;;"#
             )
@@ -473,7 +499,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         };
         format!(
             r#"
-        *)
+        *){handle_unknown_flag_options}
             argc__positionals+=("$_argc_item")
             _argc_index=$((_argc_index + 1)){terminated}
             ;;"#
@@ -499,7 +525,6 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         parse_dash,
         parse_flag_options,
         parse_subcommands,
-        parse_unknown_flag_options,
         parse_fallback,
     ]
     .join("");
@@ -524,7 +549,7 @@ _argc_parse{suffix}() {{
     )
 }
 
-fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
+fn build_parse_flag_option(param: &FlagOptionParam, signs: &IndexSet<char>) -> String {
     let names = param.list_names().join(" | ");
     let long_name = param.long_name();
     let var_name = param.var_name();
@@ -555,7 +580,11 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &str) -> String {
             ;;"#
         )
     } else {
-        let signs = if param.terminated() { "" } else { signs };
+        let signs: String = if param.terminated() {
+            "".into()
+        } else {
+            signs.iter().collect::<String>()
+        };
         let delimiter = match param.delimiter() {
             Some(v) => v.to_string(),
             None => String::new(),
