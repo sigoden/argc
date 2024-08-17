@@ -1,6 +1,6 @@
 [package]
 name = "argc"
-version = "1.20.0"
+version = "1.20.1"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
 description = "A bash cli framework, also a bash-based command runner"
@@ -64,7 +64,7 @@ path-absolutize = { version = "3.1.1", optional = true }
 insta = "1.30"
 assert_cmd = "2"
 assert_fs = "1"
-rstest = "0.21"
+rstest = "0.22"
 predicates = "3"
 
 [target.'cfg(unix)'.dev-dependencies]
