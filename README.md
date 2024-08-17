@@ -236,6 +236,29 @@ man man/example.1
 <details>
 <summary>
 
+## MacOS
+
+The built-in Bash in macOS is version 3.2 (released in 2007), and the known tools (ls, cp, grep, sed, awk, etc.) are based on BSD. 
+For better functionality and compatibility, it is recommended to install Bash version 5 and GNU tools.
+
+</summary>
+
+Use `brew` to install Bash and GNU tools:
+
+```sh
+brew install bash coreutils gawk gnu-sed grep
+```
+
+And update the `PATH` environment variable:
+```sh
+export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:/opt/homebrew/opt/gawk/libexec/gnubin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
+```
+
+</details>
+
+<details>
+<summary>
+
 ## Windows
 
 The only dependency for `argc` is Bash. Since most developers working on Windows have [Git](https://gitforwindows.org/) installed, which includes Git Bash, you can safely use `argc` and GNU tools (like `grep`, `sed`, `awk`, etc.) in the Windows environment.
