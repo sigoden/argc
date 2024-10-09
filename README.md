@@ -274,9 +274,9 @@ To execute a `.sh` script file directly like a `.cmd` or `.exe` file, execute th
 [Environment]::SetEnvironmentVariable("PATHEXT", [Environment]::GetEnvironmentVariable("PATHEXT", "Machine") + ";.SH", "Machine")
 
 # Associate the .sh file extension with Git Bash
-New-Item -Path Registry::HKEY_CLASSES_ROOT\.sh
+New-Item -LiteralPath Registry::HKEY_CLASSES_ROOT\.sh
 New-ItemProperty -LiteralPath Registry::HKEY_CLASSES_ROOT\.sh -Name "(Default)" -Value "sh_auto_file" -PropertyType String -Force
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\sh_auto_file\shell\open\command' `
+New-ItemProperty -LiteralPath  Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Classes\sh_auto_file\shell\open\command `
   -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
 ```
 
