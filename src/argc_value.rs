@@ -1,9 +1,9 @@
 use indexmap::IndexMap;
 
-use crate::utils::ARGC_LOAD_DOTENV;
 #[cfg(feature = "eval-bash")]
 use crate::utils::{
-    argc_var_name, escape_shell_words, AFTER_HOOK, ARGC_REQUIRE_TOOLS, BEFORE_HOOK, VARIABLE_PREFIX,
+    argc_var_name, escape_shell_words, AFTER_HOOK, ARGC_LOAD_DOTENV, ARGC_REQUIRE_TOOLS,
+    BEFORE_HOOK, VARIABLE_PREFIX,
 };
 
 #[derive(Debug, PartialEq, Eq)]
