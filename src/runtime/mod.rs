@@ -2,7 +2,7 @@
 pub mod navite;
 
 use anyhow::Result;
-use std::collections::HashMap;
+use std::{collections::HashMap, env};
 
 pub trait Runtime
 where
@@ -65,9 +65,19 @@ where
                 continue;
             }
             if let Some((key, value)) = line.split_once('=') {
-                let key = key.trim().to_string();
-                let value = value.trim().to_string();
-                output.insert(key, value);
+                let env_name = key.trim().to_string();
+                let env_value = value.trim().to_string();
+                let env_value = if (env_value.starts_with('"') && env_value.ends_with('"'))
+                    || (env_value.starts_with('\'') && env_value.ends_with('\''))
+                {
+                    &env_value[1..env_value.len() - 1]
+                } else {
+                    &env_value
+                };
+
+                if env::var(&env_name).is_err() {
+                    output.insert(env_name, env_value.to_string());
+                }
             }
         }
         Some(output)

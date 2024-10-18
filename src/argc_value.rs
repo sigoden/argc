@@ -2,8 +2,8 @@ use indexmap::IndexMap;
 
 #[cfg(feature = "eval-bash")]
 use crate::utils::{
-    argc_var_name, escape_shell_words, expand_dotenv, AFTER_HOOK, ARGC_REQUIRE_TOOLS, BEFORE_HOOK,
-    VARIABLE_PREFIX,
+    argc_var_name, escape_shell_words, AFTER_HOOK, ARGC_LOAD_DOTENV, ARGC_REQUIRE_TOOLS,
+    BEFORE_HOOK, VARIABLE_PREFIX,
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -109,7 +109,9 @@ impl ArgcValue {
                     }
                 }
                 ArgcValue::Dotenv(value) => {
-                    list.push(expand_dotenv(value));
+                    let value = escape_shell_words(value);
+                    list.push(ARGC_LOAD_DOTENV.to_string());
+                    list.push(format!("_argc_load_dotenv {value}"));
                 }
                 ArgcValue::RequireTools(tools) => {
                     require_tools = tools.to_vec();

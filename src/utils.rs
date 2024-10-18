@@ -33,10 +33,22 @@ pub const ARGC_REQUIRE_TOOLS: &str = r#"_argc_require_tools() {
 }"#;
 
 #[cfg(any(feature = "build", feature = "eval-bash"))]
-pub fn expand_dotenv(value: &str) -> String {
-    let value = escape_shell_words(value);
-    format!("[ -f {value} ] && set -o allexport && . {value} && set +o allexport")
-}
+pub const ARGC_LOAD_DOTENV: &str = r#"_argc_load_dotenv() {
+    local env_file="$1" env_vars=""
+    if [[ -f "$env_file" ]]; then
+        while IFS='=' read -r key value; do
+            if [[ "$key" == $'#'* ]] || [[ -z "$key" ]]; then
+                continue
+            fi
+            if [[ -z "${!key+x}" ]]; then
+                env_vars="$env_vars $key=$value"
+            fi
+        done < <(cat "$env_file"; echo "")
+        if [[ -n "$env_vars" ]]; then
+            eval "export $env_vars"
+        fi
+    fi
+}"#;
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()
