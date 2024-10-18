@@ -1,7 +1,7 @@
 use crate::{
     command::Command,
     param::{FlagOptionParam, Param, PositionalParam},
-    utils::{escape_shell_words, expand_dotenv, ARGC_REQUIRE_TOOLS},
+    utils::{escape_shell_words, ARGC_LOAD_DOTENV, ARGC_REQUIRE_TOOLS},
     ChoiceValue, DefaultValue,
 };
 use anyhow::Result;
@@ -248,11 +248,6 @@ pub fn build(source: &str, root_name: &str, wrap_width: Option<usize>) -> Result
 
 fn build_root(cmd: &Command, wrap_width: Option<usize>) -> String {
     let command = build_command(cmd, wrap_width);
-    let dotenv = if let Some(value) = cmd.dotenv() {
-        format!("\n    {}", expand_dotenv(value))
-    } else {
-        String::new()
-    };
     let (before_hook, after_hook) = cmd.exist_hooks();
     let before_hook = if before_hook {
         "\n    _argc_before"
@@ -266,6 +261,12 @@ fn build_root(cmd: &Command, wrap_width: Option<usize>) -> String {
             util_fns.push_str(util_fn);
         }
     }
+    let dotenv = if let Some(value) = cmd.dotenv() {
+        util_fns.push_str(&format!("\n{ARGC_LOAD_DOTENV}\n"));
+        format!("\n    _argc_load_dotenv {}", escape_shell_words(value))
+    } else {
+        String::new()
+    };
     let require_tools = if command.contains("_argc_tools") {
         util_fns.push_str(&format!("\n{ARGC_REQUIRE_TOOLS}\n"));
         r#"
