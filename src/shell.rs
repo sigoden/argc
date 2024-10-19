@@ -527,7 +527,7 @@ impl Shell {
             .into_iter()
             .enumerate()
             .map(|(i, c)| {
-                if match_escape_chars(need_escape_chars, c, i, len) {
+                if Self::match_escape_chars(need_escape_chars, c, i, len) {
                     format!("{for_escape}{c}")
                 } else {
                     c.to_string()
@@ -541,26 +541,26 @@ impl Shell {
         chars
             .iter()
             .enumerate()
-            .any(|(i, c)| match_escape_chars(need_escape_chars, *c, i, chars.len()))
+            .any(|(i, c)| Self::match_escape_chars(need_escape_chars, *c, i, chars.len()))
+    }
+
+    fn match_escape_chars(need_escape_chars: &[(char, u8)], c: char, i: usize, len: usize) -> bool {
+        need_escape_chars.iter().any(|(ch, flag)| {
+            if *ch == c {
+                if i == 0 {
+                    (*flag & 1) != 0
+                } else if i == len - 1 {
+                    (*flag & 4) != 0
+                } else {
+                    (*flag & 2) != 0
+                }
+            } else {
+                false
+            }
+        })
     }
 
     fn sanitize_tcsh_value(value: &str) -> String {
         value.replace(' ', "⠀")
     }
-}
-
-fn match_escape_chars(need_escape_chars: &[(char, u8)], c: char, i: usize, len: usize) -> bool {
-    need_escape_chars.iter().any(|(ch, flag)| {
-        if *ch == c {
-            if i == 0 {
-                (*flag & 1) != 0
-            } else if i == len - 1 {
-                (*flag & 4) != 0
-            } else {
-                (*flag & 2) != 0
-            }
-        } else {
-            false
-        }
-    })
 }
