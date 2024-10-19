@@ -264,7 +264,7 @@ impl Shell {
         // Flags:
         // 1: escape-first-char
         // 2: escape-middle-char
-        // 3: escape-last-char
+        // 4: escape-last-char
         match self {
             Shell::Bash => &[
                 (' ', 7),
