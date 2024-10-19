@@ -19,8 +19,8 @@ a:b>c
 d:e>f 
 
 ************ COMPGEN Powershell `prog --oa ` ************
-'a:b>c'	1	a:b>c		39
-'d:e>f'	1	d:e>f		39
+a:b>c	1	a:b>c		39
+d:e>f	1	d:e>f		39
 
 ************ COMPGEN Xonsh `prog --oa ` ************
 'a:b>c'	1	a:b>c	
@@ -31,7 +31,5 @@ a\:b\\>c 	a\:b>c	a:b>c	39
 d\:e\\>f 	d\:e>f	d:e>f	39
 
 ************ COMPGEN Tcsh `prog --oa ` ************
-a:b>c
-d:e>f
-
-
+a:b\>c
+d:e\>f

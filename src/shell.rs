@@ -260,18 +260,150 @@ impl Shell {
         }
     }
 
+    pub(crate) fn need_escape_chars(&self) -> &[(char, u8)] {
+        // Flags:
+        // 1: escape-first-char
+        // 2: escape-middle-char
+        // 4: escape-last-char
+        match self {
+            Shell::Bash => &[
+                (' ', 7),
+                ('!', 3),
+                ('"', 7),
+                ('#', 1),
+                ('$', 3),
+                ('&', 7),
+                ('\'', 7),
+                ('(', 7),
+                (')', 7),
+                (';', 7),
+                ('<', 7),
+                ('>', 7),
+                ('\\', 7),
+                ('`', 7),
+                ('|', 7),
+            ],
+            Shell::Elvish => &[],
+            Shell::Fish => &[],
+            Shell::Generic => &[],
+            Shell::Nushell => &[
+                (' ', 7),
+                ('!', 1),
+                ('"', 7),
+                ('#', 1),
+                ('$', 1),
+                ('\'', 7),
+                ('(', 7),
+                (')', 7),
+                (';', 7),
+                ('[', 7),
+                ('`', 7),
+                ('{', 7),
+                ('|', 7),
+                ('}', 7),
+            ],
+            Shell::Powershell => &[
+                (' ', 7),
+                ('"', 7),
+                ('#', 1),
+                ('$', 3),
+                ('&', 7),
+                ('\'', 7),
+                ('(', 7),
+                (')', 7),
+                (',', 7),
+                (';', 7),
+                ('<', 1),
+                ('>', 1),
+                ('@', 1),
+                (']', 1),
+                ('`', 7),
+                ('{', 7),
+                ('|', 7),
+                ('}', 7),
+            ],
+            Shell::Xonsh => &[
+                (' ', 7),
+                ('!', 7),
+                ('"', 7),
+                ('#', 7),
+                ('$', 4),
+                ('&', 7),
+                ('\'', 7),
+                ('(', 7),
+                (')', 7),
+                ('*', 7),
+                (':', 1),
+                (';', 7),
+                ('<', 7),
+                ('=', 1),
+                ('>', 7),
+                ('[', 7),
+                ('\\', 4),
+                (']', 7),
+                ('^', 1),
+                ('`', 7),
+                ('{', 7),
+                ('|', 7),
+                ('}', 7),
+            ],
+            Shell::Zsh => &[
+                (' ', 7),
+                ('!', 3),
+                ('"', 7),
+                ('#', 1),
+                ('$', 3),
+                ('&', 7),
+                ('\'', 7),
+                ('(', 7),
+                (')', 7),
+                ('*', 7),
+                (';', 7),
+                ('<', 7),
+                ('=', 1),
+                ('>', 7),
+                ('?', 7),
+                ('[', 7),
+                ('\\', 7),
+                ('`', 7),
+                ('|', 7),
+                ('~', 1),
+            ],
+            Shell::Tcsh => &[
+                (' ', 7),
+                ('!', 3),
+                ('"', 7),
+                ('$', 3),
+                ('&', 7),
+                ('\'', 7),
+                ('(', 7),
+                (')', 7),
+                ('*', 7),
+                (';', 7),
+                ('<', 7),
+                ('>', 7),
+                ('?', 7),
+                ('\\', 7),
+                ('`', 7),
+                ('{', 7),
+                ('|', 7),
+                ('~', 1),
+            ],
+        }
+    }
+
     pub(crate) fn escape(&self, value: &str) -> String {
         match self {
-            Shell::Bash => Self::escape_chars(value, self.need_escape_chars(), "\\"),
+            Shell::Bash | Shell::Tcsh => Self::escape_chars(value, self.need_escape_chars(), "\\"),
+            Shell::Elvish | Shell::Fish | Shell::Generic => value.into(),
             Shell::Nushell | Shell::Powershell | Shell::Xonsh => {
-                if Self::contains_chars(value, self.need_escape_chars()) {
+                if Self::contains_escape_chars(value, self.need_escape_chars()) {
                     format!("'{value}'")
                 } else {
                     value.into()
                 }
             }
             Shell::Zsh => Self::escape_chars(value, self.need_escape_chars(), "\\\\"),
-            _ => value.into(),
         }
     }
 
@@ -305,17 +437,6 @@ impl Shell {
             !self.is_unix_only()
         } else {
             false
-        }
-    }
-
-    pub(crate) fn need_escape_chars(&self) -> &str {
-        match self {
-            Shell::Bash => r#"()<>"'` !#$&;\|"#,
-            Shell::Nushell => r#"()[]{}"'` #$;|"#,
-            Shell::Powershell => r#"()<>[]{}"'` #$&;@|"#,
-            Shell::Xonsh => r#"()<>[]{}!"'` #&;|"#,
-            Shell::Zsh => r#"()<>[]"'` !#$&*;?\|"#,
-            _ => "",
         }
     }
 
@@ -399,12 +520,14 @@ impl Shell {
         Some(prefix)
     }
 
-    fn escape_chars(value: &str, need_escape: &str, for_escape: &str) -> String {
-        let chars: Vec<char> = need_escape.chars().collect();
-        value
-            .chars()
-            .map(|c| {
-                if chars.contains(&c) {
+    fn escape_chars(value: &str, need_escape_chars: &[(char, u8)], for_escape: &str) -> String {
+        let chars: Vec<char> = value.chars().collect();
+        let len = chars.len();
+        chars
+            .into_iter()
+            .enumerate()
+            .map(|(i, c)| {
+                if Self::match_escape_chars(need_escape_chars, c, i, len) {
                     format!("{for_escape}{c}")
                 } else {
                     c.to_string()
@@ -413,9 +536,28 @@ impl Shell {
             .collect()
     }
 
-    fn contains_chars(value: &str, chars: &str) -> bool {
-        let value_chars: Vec<char> = value.chars().collect();
-        chars.chars().any(|v| value_chars.contains(&v))
+    fn contains_escape_chars(value: &str, need_escape_chars: &[(char, u8)]) -> bool {
+        let chars: Vec<char> = value.chars().collect();
+        chars
+            .iter()
+            .enumerate()
+            .any(|(i, c)| Self::match_escape_chars(need_escape_chars, *c, i, chars.len()))
+    }
+
+    fn match_escape_chars(need_escape_chars: &[(char, u8)], c: char, i: usize, len: usize) -> bool {
+        need_escape_chars.iter().any(|(ch, flag)| {
+            if *ch == c {
+                if i == 0 {
+                    (*flag & 1) != 0
+                } else if i == len - 1 {
+                    (*flag & 4) != 0
+                } else {
+                    (*flag & 2) != 0
+                }
+            } else {
+                false
+            }
+        })
     }
 
     fn sanitize_tcsh_value(value: &str) -> String {
