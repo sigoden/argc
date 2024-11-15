@@ -1,0 +1,38 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog -h
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+Patch utils
+
+Here is an example of a patch block:
+--- a/hello.py
++++ b/hello.py
+@ ... @@
+ def hello():
+-    print("Hello World")
++    name = input("What is your name? ")
++    print(f"Hello {name}")
+
+USAGE: prog
+
+EOF
+exit 0
+
+# RUN_OUTPUT
+Patch utils
+
+Here is an example of a patch block:
+--- a/hello.py
++++ b/hello.py
+@ ... @@
+ def hello():
+-    print("Hello World")
++    name = input("What is your name? ")
++    print(f"Hello {name}")
+
+USAGE: prog

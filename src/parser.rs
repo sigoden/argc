@@ -783,6 +783,10 @@ fn take_comment_lines(lines: &[&str], idx: usize, output: &mut String) -> usize 
     for line in lines.iter().skip(idx) {
         if let Ok((text, _)) = parse_normal_comment(line) {
             output.push('\n');
+            let text = match text.strip_prefix("\\@") {
+                Some(v) => v,
+                None => text,
+            };
             output.push_str(text);
             count += 1;
         } else {

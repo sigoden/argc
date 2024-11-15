@@ -77,6 +77,23 @@ fn help_notations() {
 }
 
 #[test]
+fn escape_at_symbol() {
+    let script = r###"
+# @describe Patch utils
+#
+# Here is an example of a patch block:
+# --- a/hello.py
+# +++ b/hello.py
+# \@@ ... @@
+#  def hello():
+# -    print("Hello World")
+# +    name = input("What is your name? ")
+# +    print(f"Hello {name}")
+"###;
+    snapshot_multi!(script, [vec!["prog", "-h"]]);
+}
+
+#[test]
 fn version_missing() {
     let script = r###"
 # @cmd
