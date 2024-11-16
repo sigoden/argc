@@ -12,7 +12,7 @@ Patch utils
 Here is an example of a patch block:
 --- a/hello.py
 +++ b/hello.py
-@ ... @@
+@@ ... @@
  def hello():
 -    print("Hello World")
 +    name = input("What is your name? ")
@@ -29,7 +29,7 @@ Patch utils
 Here is an example of a patch block:
 --- a/hello.py
 +++ b/hello.py
-@ ... @@
+@@ ... @@
  def hello():
 -    print("Hello World")
 +    name = input("What is your name? ")
