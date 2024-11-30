@@ -441,9 +441,9 @@ impl Command {
     }
 
     pub(crate) fn find_subcommand(&self, name: &str) -> Option<&Self> {
-        self.subcommands.iter().find(|subcmd| {
-            return subcmd.list_names().iter().any(|v| v == name);
-        })
+        self.subcommands
+            .iter()
+            .find(|subcmd| subcmd.list_names().iter().any(|v| v == name))
     }
 
     pub(crate) fn find_default_subcommand(&self) -> Option<&Self> {

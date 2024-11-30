@@ -1127,7 +1127,7 @@ struct BindEnvs<'a, 'x> {
     choice_fns: HashSet<&'a str>,
 }
 
-impl<'a, 'x> BindEnvs<'a, 'x> {
+impl BindEnvs<'_, '_> {
     fn new(len: usize) -> Self {
         Self {
             flag_options: vec![HashMap::new(); len],
