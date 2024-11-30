@@ -11,6 +11,7 @@ USAGE: prog <COMMAND>
 
 COMMANDS:
   cmd_a  [aliases: cmd-a]
+  _cmdb
 
 EOF
 exit 0
@@ -20,6 +21,7 @@ USAGE: prog <COMMAND>
 
 COMMANDS:
   cmd_a  [aliases: cmd-a]
+  _cmdb
 
 ************ RUN ************
 prog cmd_a
@@ -50,3 +52,18 @@ argc__args=([0]="prog" [1]="cmd-a")
 argc__fn=cmd_a
 argc__positionals=()
 cmd_a
+
+************ RUN ************
+prog _cmdb
+
+# OUTPUT
+argc__args=( prog _cmdb )
+argc__fn=_cmdb
+argc__positionals=(  )
+_cmdb
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="_cmdb")
+argc__fn=_cmdb
+argc__positionals=()
+_cmdb

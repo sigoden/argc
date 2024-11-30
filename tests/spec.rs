@@ -396,6 +396,9 @@ fn auto_alias_subcommand() {
     let script = r###"
 # @cmd
 cmd_a() { :; }
+
+# @cmd
+_cmdb() { :; }
 "###;
     snapshot_multi!(
         script,
@@ -403,6 +406,7 @@ cmd_a() { :; }
             vec!["prog", "-h"],
             vec!["prog", "cmd_a"],
             vec!["prog", "cmd-a"],
+            vec!["prog", "_cmdb"],
         ]
     );
 }
