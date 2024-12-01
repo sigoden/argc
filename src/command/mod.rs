@@ -498,11 +498,11 @@ impl Command {
 
         // auto alias if command name contains `_`
         if let Some(name) = self.name.clone() {
-            let compatible_name = name
-                .chars()
-                .enumerate()
-                .map(|(i, c)| if i > 0 && c == '_' { '-' } else { c })
-                .collect::<String>();
+            let compatible_name = if !name.starts_with('_') {
+                name.replace("_", "-")
+            } else {
+                name.clone()
+            };
             if compatible_name != name {
                 match self.aliases.as_mut() {
                     Some((aliaes, _)) => aliaes.insert(0, compatible_name),
