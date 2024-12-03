@@ -50,38 +50,17 @@ fn run() -> Result<i32> {
 
     if let Some(argc_cmd) = argc_cmd {
         match argc_cmd {
-            "--argc-eval" => {
-                let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
-                if cmd_args
-                    .get(1)
-                    .map(|v| v == parallel::PARALLEL_SYMBOL)
-                    .unwrap_or_default()
-                {
-                    let cmd_args_len = cmd_args.len();
-                    if cmd_args_len < 3 {
-                        bail!("No parallel command")
-                    }
-                    let bash_options = get_bash_options();
-                    let mut code = retrieve_argc_variables().unwrap_or_default();
-                    let mut cmds = vec![cmd_args[2].to_string()];
-                    cmds.extend(cmd_args[3..].iter().map(|v| escape_shell_words(v)));
-                    code.push_str(&cmds.join(" "));
-                    println!("{bash_options}{code}")
-                } else {
-                    let values = argc::eval(
-                        runtime,
-                        &source,
-                        &cmd_args,
-                        Some(&args[2]),
-                        get_term_width(),
-                    )?;
-                    let bash_options = get_bash_options();
-                    let dir_vars = export_dir_vars(&args[2]);
-                    let code = argc::ArgcValue::to_bash(&values);
-                    let export_vars = export_argc_variables(&code);
-                    println!("{bash_options}{dir_vars}{export_vars}{code}")
+            "--argc-eval" => match run_eval(runtime, args) {
+                Ok(output) => {
+                    println!("{}", output);
                 }
-            }
+                Err(err) => {
+                    println!(
+                        "echo {}\nexit 1",
+                        escape_shell_words(&format!("Error: {err}"))
+                    );
+                }
+            },
             "--argc-run" => {
                 if args.len() < 3 {
                     bail!("No script file provided");
@@ -220,6 +199,40 @@ fn run() -> Result<i32> {
         let args = [vec![&script_file], args[1..].iter().collect()].concat();
         run_command(&script_file, &shell, &args, envs, Some(&script_dir))
     }
+}
+
+fn run_eval(runtime: NativeRuntime, args: Vec<String>) -> Result<String> {
+    let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
+    let output = if cmd_args
+        .get(1)
+        .map(|v| v == parallel::PARALLEL_SYMBOL)
+        .unwrap_or_default()
+    {
+        let cmd_args_len = cmd_args.len();
+        if cmd_args_len < 3 {
+            bail!("No parallel command")
+        }
+        let bash_options = get_bash_options();
+        let mut code = retrieve_argc_variables().unwrap_or_default();
+        let mut cmds = vec![cmd_args[2].to_string()];
+        cmds.extend(cmd_args[3..].iter().map(|v| escape_shell_words(v)));
+        code.push_str(&cmds.join(" "));
+        format!("{bash_options}{code}")
+    } else {
+        let values = argc::eval(
+            runtime,
+            &source,
+            &cmd_args,
+            Some(&args[2]),
+            get_term_width(),
+        )?;
+        let bash_options = get_bash_options();
+        let dir_vars = export_dir_vars(&args[2]);
+        let code = argc::ArgcValue::to_bash(&values);
+        let export_vars = export_argc_variables(&code);
+        format!("{bash_options}{dir_vars}{export_vars}{code}")
+    };
+    Ok(output)
 }
 
 fn run_command<T: AsRef<OsStr>>(
