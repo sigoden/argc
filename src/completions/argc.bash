@@ -1,18 +1,18 @@
 _argc_completer() {
-    local words
+    declare -a _argc_completer_words
     _argc_completer_parse_line
 
     export COMP_WORDBREAKS
     while IFS=$'\n' read -r line; do
         COMPREPLY+=( "$line" )
-    done < <(argc --argc-compgen bash "" "${words[@]}" 2>/dev/null)
+    done < <(argc --argc-compgen bash "" "${_argc_completer_words[@]}" 2>/dev/null)
 }
 
 _argc_completer_parse_line() {
-    local line len i char prev_char word unbalance word_index
-    word_index=0
+    local line len i char prev_char word unbalance
     line="${COMP_LINE:0:$COMP_POINT}"
     len="${#line}"
+
     for ((i=0; i<len; i++)); do
         char="${line:i:1}"
         if [[ -n "$unbalance" ]]; then
@@ -24,8 +24,7 @@ _argc_completer_parse_line() {
             if [[ "$prev_char" == "\\" ]]; then
                 word="$word$char"
             elif [[ -n "$word" ]]; then
-                words[$word_index]="$word"
-                word_index=$((word_index+1))
+                _argc_completer_words+=( "$word" )
                 word=""
             fi
         elif [[ "$char" == "'" || "$char" == '"' ]]; then
@@ -40,7 +39,8 @@ _argc_completer_parse_line() {
         fi
         prev_char="$char"
     done
-    words[$word_index]="$word"
+
+    _argc_completer_words+=( "$word" )
 }
 
 complete -F _argc_completer -o nospace -o nosort \
