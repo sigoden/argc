@@ -217,7 +217,7 @@ $ argc --argc-compgen bash ./example.sh example --
 --version (Print version)
 ```
 
-So argc is a also completion engine, see 1000+ examples in [argc-completions](https://github.com/sigoden/argc-completions).
+So argc is a also completion engine, see [argc-completions](https://github.com/sigoden/argc-completions).
 
 ## Manpage
 
