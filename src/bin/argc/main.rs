@@ -83,7 +83,7 @@ fn run() -> Result<i32> {
                 let cwd = if is_runner_script(&script_path) {
                     if let Some(cwd) = runtime.current_dir() {
                         if env::var("ARGC_PWD").is_err() {
-                            envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
+                            envs.insert("ARGC_PWD".to_string(), cwd);
                         }
                     }
                     Some(script_dir.as_path())
@@ -192,7 +192,7 @@ fn run() -> Result<i32> {
         let mut envs = HashMap::new();
         if let Some(cwd) = runtime.current_dir() {
             if env::var("ARGC_PWD").is_err() {
-                envs.insert("ARGC_PWD".to_string(), escape_shell_words(&cwd));
+                envs.insert("ARGC_PWD".to_string(), cwd);
             }
         }
         let script_file = script_file.display().to_string();
