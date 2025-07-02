@@ -90,9 +90,9 @@ where
             .and_then(|exe_path| self.parent_path(&exe_path))
         {
             if self.is_windows() {
-                path_env = format!("{};{}", exe_dir, path_env)
+                path_env = format!("{exe_dir};{path_env}")
             } else {
-                path_env = format!("{}:{}", exe_dir, path_env)
+                path_env = format!("{exe_dir}:{path_env}")
             }
         }
         path_env

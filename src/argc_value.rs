@@ -77,7 +77,7 @@ impl ArgcValue {
                 }
                 ArgcValue::PositionalSingleFn(id, fn_name) => {
                     list.push(format!("{}=`{}`", argc_var_name(id), &fn_name));
-                    positional_args.push(format!("`{}`", fn_name));
+                    positional_args.push(format!("`{fn_name}`"));
                 }
                 ArgcValue::PositionalMultiple(id, values) => {
                     let values = values
@@ -98,7 +98,7 @@ impl ArgcValue {
                     list.push(format!("export {}={}", name, escape_shell_words(value)));
                 }
                 ArgcValue::EnvFn(id, fn_name) => {
-                    list.push(format!("export {}=`{}`", id, fn_name,));
+                    list.push(format!("export {id}=`{fn_name}`",));
                 }
                 ArgcValue::Hook((before, after)) => {
                     if *before {
@@ -122,7 +122,7 @@ impl ArgcValue {
                     } else {
                         last = format!("{} {}", name, positional_args.join(" "));
                     }
-                    list.push(format!("{}_fn={}", VARIABLE_PREFIX, name));
+                    list.push(format!("{VARIABLE_PREFIX}_fn={name}"));
                 }
                 ArgcValue::ParamFn(name) => {
                     if positional_args.is_empty() {
@@ -133,7 +133,7 @@ impl ArgcValue {
                     exit = true;
                 }
                 ArgcValue::Error((error, exit)) => {
-                    return format!("command cat >&2 <<-'EOF' \n{}\nEOF\nexit {}", error, exit)
+                    return format!("command cat >&2 <<-'EOF' \n{error}\nEOF\nexit {exit}")
                 }
             }
         }

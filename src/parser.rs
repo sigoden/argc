@@ -377,7 +377,7 @@ fn parse_with_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
 fn parse_no_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
     fn parser(input: &str) -> nom::IResult<&str, ParamData> {
         map(satisfy(is_short_char), |ch| {
-            ParamData::new(&format!("{}", ch))
+            ParamData::new(&format!("{ch}"))
         })(input)
     }
     map(pair(parser, opt(tag("*"))), |(mut arg, multiple)| {

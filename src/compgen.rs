@@ -227,7 +227,7 @@ pub fn compgen<T: Runtime>(
 
     let break_chars = shell.need_break_chars(runtime, &argc_prefix);
     if !break_chars.is_empty() {
-        let prefix = format!("{}{}", argc_prefix, argc_filter);
+        let prefix = format!("{argc_prefix}{argc_filter}");
         let prefix = match unbalance_quote(&prefix) {
             Some((_, i)) => prefix.chars().take(i.saturating_sub(1)).collect(),
             None => prefix,
@@ -569,7 +569,7 @@ impl ArgcPathValue {
                 continue;
             }
             let path_value = if is_dir {
-                format!("{value_prefix}{file_name}{}", path_sep)
+                format!("{value_prefix}{file_name}{path_sep}")
             } else {
                 format!("{value_prefix}{file_name}{suffix}")
             };
@@ -638,7 +638,7 @@ impl ArgcPathValue {
                     cwd = runtime.chdir(&cwd, cd)?;
                 }
                 let trims = cwd.len() + 1;
-                let new_value = format!("{}{sep}{value}", cwd).replace('\\', "/");
+                let new_value = format!("{cwd}{sep}{value}").replace('\\', "/");
                 (new_value, trims, FILE_PROTO.into())
             }
         } else if is_home || value.starts_with(home_p) {
@@ -657,7 +657,7 @@ impl ArgcPathValue {
             (path_s, trims, prefix.into())
         } else if value.starts_with(sep) {
             let new_value = if is_windows_mode {
-                format!("C:{}", value)
+                format!("C:{value}")
             } else {
                 value.clone()
             };
@@ -679,7 +679,7 @@ impl ArgcPathValue {
             if let Some(cd) = cd {
                 cwd = runtime.chdir(&cwd, cd)?;
             }
-            let new_value = format!("{}{sep}{new_value}", cwd);
+            let new_value = format!("{cwd}{sep}{new_value}");
             let trims = cwd.len() + 1;
             (new_value, trims, prefix.to_string())
         };
