@@ -4,7 +4,6 @@
 # are treated as the long description. A line which is not a comment ends the block.
 
 # @meta version 1.0.0
-# @meta author  nobody <nobody@example.com>
 
 # @option --foo[=default|full|auto] Sunshine gleams over hills afar, bringing warmth and hope to every soul, yet challenges await as we journey forth, striving for dreams and joy in abundance. Peaceful rivers whisper secrets gently heard.
 #  * default: enables recommended style components.

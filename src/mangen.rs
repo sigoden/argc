@@ -30,7 +30,6 @@ fn render_manpage(cmd: &Command, section: &str) -> String {
     render_subcommands_section(&mut roff, cmd, section);
     render_envs_section(&mut roff, cmd);
     render_version_section(&mut roff, cmd);
-    render_author_section(&mut roff, cmd);
     roff.to_roff()
 }
 
@@ -193,13 +192,6 @@ fn render_version_section(roff: &mut Roff, cmd: &Command) {
     if let Some(version) = &cmd.version {
         roff.control("SH", ["VERSION"]);
         roff.text([roman(version)]);
-    }
-}
-
-fn render_author_section(roff: &mut Roff, cmd: &Command) {
-    if let Some(author) = &cmd.author {
-        roff.control("SH", ["AUTHORS"]);
-        roff.text([roman(author)]);
     }
 }
 

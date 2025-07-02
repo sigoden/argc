@@ -5,7 +5,6 @@ fn help_version() {
     let script = r###"
 # @describe Test argc
 # @meta version 1.0.0
-# @meta author nobody <nobody@example.com>
 "###;
     snapshot_multi!(
         script,
@@ -26,7 +25,6 @@ fn help_version_legacy() {
     let script = r###"
 # @describe Test argc
 # @version 1.0.0
-# @author nobody <nobody@example.com>
 "###;
     snapshot_multi!(
         script,

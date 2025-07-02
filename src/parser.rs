@@ -31,8 +31,6 @@ pub(crate) enum EventData {
     Describe(String),
     /// Version info
     Version(String),
-    /// Author info
-    Author(String),
     /// Metadata
     Meta(String, String),
     /// Define a subcommand, e.g. `@cmd A sub command`
@@ -158,7 +156,7 @@ fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
 fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
     map(
         pair(
-            alt((tag("describe"), tag("version"), tag("author"), tag("cmd"))),
+            alt((tag("describe"), tag("version"), tag("cmd"))),
             parse_tail,
         ),
         |(tag, text)| {
@@ -166,7 +164,6 @@ fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
             Some(match tag {
                 "describe" => EventData::Describe(text),
                 "version" => EventData::Version(text),
-                "author" => EventData::Author(text),
                 "cmd" => EventData::Cmd(text),
                 _ => unreachable!(),
             })
@@ -1098,7 +1095,6 @@ mod tests {
     fn test_parse_line() {
         assert_token!("# @describe A demo cli", Describe, "A demo cli");
         assert_token!("# @version 1.0.0", Version, "1.0.0");
-        assert_token!("# @author Somebody", Author, "Somebody");
         assert_token!("# @meta key", Meta, "key", "");
         assert_token!("# @meta key value", Meta, "key", "value");
         assert_token!("# @cmd A subcommand", Cmd, "A subcommand");

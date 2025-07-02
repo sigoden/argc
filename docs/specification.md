@@ -174,7 +174,6 @@ Adds metadata.
 | syntax                           | scope  | description                                                          |
 | :------------------------------- | ------ | :------------------------------------------------------------------- |
 | `@meta version <value>`          | any    | Set the version for the command.                                     |
-| `@meta author <value>`           | any    | Set the author for the command.                                      |
 | `@meta dotenv [<path>]`          | root   | Load a dotenv file from a custom path, if persent.                   |
 | `@meta default-subcommand`       | subcmd | Set the current subcommand as the default.                           |
 | `@meta require-tools <tool>,...` | any    | Require certain tools to be available on the system.                 |
@@ -186,7 +185,6 @@ Adds metadata.
 
 ```sh
 # @meta version 1.0.0
-# @meta author nobody <nobody@example.com>
 # @meta dotenv
 # @meta dotenv .env.local
 # @meta require-tools git,yq
