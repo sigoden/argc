@@ -7,7 +7,6 @@ prog -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-prog 1.0.0
 Test argc
 
 USAGE: prog [OPTIONS]
@@ -20,7 +19,6 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-prog 1.0.0
 Test argc
 
 USAGE: prog [OPTIONS]
@@ -40,5 +38,3 @@ exit 0
 
 # RUN_OUTPUT
 prog 1.0.0
-
-

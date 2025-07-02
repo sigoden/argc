@@ -684,9 +684,6 @@ impl Command {
 impl Command {
     pub(crate) fn render_help(&self, wrap_width: Option<usize>) -> String {
         let mut output = vec![];
-        if self.version.is_some() {
-            output.push(self.render_version());
-        }
         if !&self.describe.is_empty() {
             output.push(render_block("", &self.describe, wrap_width));
         }

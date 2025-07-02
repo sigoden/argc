@@ -7,7 +7,6 @@ prog foo -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-prog 1.0.0
 How to use multiline help text
 
 Extra lines after the comment tag accepts description, which don't start with
@@ -53,7 +52,6 @@ EOF
 exit 0
 
 # BUILD_OUTPUT
-prog 1.0.0
 How to use multiline help text
 
 Extra lines after the comment tag accepts description, which don't start with an `@`,
