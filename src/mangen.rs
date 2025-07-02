@@ -155,7 +155,7 @@ fn render_subcommands_section(roff: &mut Roff, cmd: &Command, section: &str) {
     for subcmd in &cmd.subcommands {
         roff.control("TP", []);
         let name = subcmd.full_name();
-        roff.text([roman(format!("{}({})", name, section))]);
+        roff.text([roman(format!("{name}({section})"))]);
         for line in subcmd.describe.lines() {
             roff.text([roman(line)]);
         }

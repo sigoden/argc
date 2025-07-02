@@ -24,7 +24,7 @@ impl NamesChecker {
                 bail!("{}", Self::conflict_error(tag_name, pos, name, *exist_pos));
             }
             self.flag_options
-                .insert(name.to_string(), (pos, format!("{} {}", tag_name, name)));
+                .insert(name.to_string(), (pos, format!("{tag_name} {name}")));
         }
         Ok(())
     }
@@ -63,9 +63,6 @@ impl NamesChecker {
         name_desc: &str,
         exist_pos: Position,
     ) -> String {
-        format!(
-            "{}(line {}) has '{}' already exists at line {}",
-            tag_name, pos, name_desc, exist_pos,
-        )
+        format!("{tag_name}(line {pos}) has '{name_desc}' already exists at line {exist_pos}",)
     }
 }

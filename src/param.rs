@@ -150,7 +150,7 @@ impl Param for FlagOptionParam {
         }
 
         for raw_notation in &self.raw_notations {
-            output.push(format!("<{}>", raw_notation));
+            output.push(format!("<{raw_notation}>"));
         }
 
         if !self.data.describe.is_empty() {
@@ -184,7 +184,7 @@ impl FlagOptionParam {
         }
         let name = data.name.clone();
         let id = if long_prefix.starts_with('+') {
-            format!("plus_{}", name)
+            format!("plus_{name}")
         } else {
             name.clone()
         };
@@ -552,7 +552,7 @@ impl Param for PositionalParam {
             }
         }
         if let Some(raw_notation) = self.raw_notation.as_ref() {
-            output.push(format!("<{}>", raw_notation));
+            output.push(format!("<{raw_notation}>"));
         }
         if !self.data.describe.is_empty() {
             output.push(self.data.describe.clone());
@@ -891,7 +891,7 @@ impl ParamData {
             .iter()
             .map(|value| {
                 if value.chars().any(is_choice_value_terminate) {
-                    format!("\"{}\"", value)
+                    format!("\"{value}\"")
                 } else {
                     value.to_string()
                 }
@@ -902,7 +902,7 @@ impl ParamData {
 
     fn render_default_value(value: &str) -> String {
         if value.chars().any(is_default_value_terminate) {
-            format!("\"{}\"", value)
+            format!("\"{value}\"")
         } else {
             value.to_string()
         }

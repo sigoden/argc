@@ -1393,7 +1393,7 @@ fn comp_symbol(cmd: &Command, ch: char) -> Vec<CompItem> {
         match choices_fn {
             Some(choices_fn) => {
                 vec![(
-                    format!("__argc_fn={}", choices_fn),
+                    format!("__argc_fn={choices_fn}"),
                     String::new(),
                     false,
                     CompColor::of_value(),
@@ -1401,7 +1401,7 @@ fn comp_symbol(cmd: &Command, ch: char) -> Vec<CompItem> {
             }
             None => {
                 vec![(
-                    format!("__argc_value={}", name),
+                    format!("__argc_value={name}"),
                     String::new(),
                     false,
                     CompColor::of_value(),
@@ -1444,21 +1444,21 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
                 .map(|v| (v.to_string(), String::new(), false, CompColor::of_value()))
                 .collect(),
             Either::Right(choices_fn) => vec![(
-                format!("__argc_fn={}", choices_fn),
+                format!("__argc_fn={choices_fn}"),
                 String::new(),
                 false,
                 CompColor::of_value(),
             )],
         }
     } else {
-        let value = format!("__argc_value={}", value_name);
+        let value = format!("__argc_value={value_name}");
         vec![(value, describe.into(), false, CompColor::of_value())]
     };
     if let Some(ch) = data.args_delimiter() {
         output.insert(
             0,
             (
-                format!("__argc_multi={}", ch),
+                format!("__argc_multi={ch}"),
                 String::new(),
                 false,
                 CompColor::of_value(),

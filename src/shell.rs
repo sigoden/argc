@@ -134,7 +134,7 @@ impl Shell {
                             value
                         };
                         if i == 0 && add_space_to_first_candidate {
-                            new_value = format!(" {}", new_value)
+                            new_value = format!(" {new_value}")
                         };
                         let description = self.comp_description(&description, "(", ")");
                         if description.is_empty() {
@@ -492,7 +492,7 @@ impl Shell {
             description
         } else {
             let truncated: String = description.chars().take(max_width).collect();
-            format!("{}...", truncated)
+            format!("{truncated}...")
         }
     }
 

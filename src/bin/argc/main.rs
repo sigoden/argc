@@ -52,7 +52,7 @@ fn run() -> Result<i32> {
         match argc_cmd {
             "--argc-eval" => match run_eval(runtime, args) {
                 Ok(output) => {
-                    println!("{}", output);
+                    println!("{output}");
                 }
                 Err(err) => {
                     println!(
@@ -122,7 +122,7 @@ fn run() -> Result<i32> {
                         })?;
                     }
                 } else {
-                    print!("{}", script);
+                    print!("{script}");
                 }
             }
             "--argc-mangen" => {
@@ -144,7 +144,7 @@ fn run() -> Result<i32> {
                 };
                 let commands = [vec!["argc".to_string()], args[3..].to_vec()].concat();
                 let script = argc::generate_completions(shell, &commands);
-                print!("{}", script);
+                print!("{script}");
             }
             "--argc-compgen" => {
                 run_compgen(runtime, args.to_vec());
@@ -172,7 +172,7 @@ fn run() -> Result<i32> {
             }
             "--argc-shell-path" => {
                 let shell = runtime.shell_path()?;
-                println!("{}", shell);
+                println!("{shell}");
             }
             "--argc-help" => {
                 println!("{}", get_argc_help(runtime)?)
@@ -433,7 +433,7 @@ fn parse_script_args(args: &[String]) -> Result<(String, String, Vec<String>)> {
     let script_file = normalize_script_path(script_file);
     let args: Vec<String> = args[1..].to_vec();
     let source = fs::read_to_string(&script_file)
-        .with_context(|| format!("Failed to load script at '{}'", script_file))?;
+        .with_context(|| format!("Failed to load script at '{script_file}'"))?;
     let name = get_script_name(&script_file)?;
     let name = name.strip_suffix(".sh").unwrap_or(name);
     let mut cmd_args = vec![name.to_string()];
