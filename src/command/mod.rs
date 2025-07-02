@@ -13,9 +13,8 @@ use crate::param::{EnvValue, FlagOptionValue, PositionalValue};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::runtime::Runtime;
 use crate::utils::{
-    AFTER_HOOK, BEFORE_HOOK, MAIN_NAME, META_AUTHOR, META_COMBINE_SHORTS, META_DEFAULT_SUBCOMMAND,
-    META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_REQUIRE_TOOLS, META_SYMBOL, META_VERSION,
-    ROOT_NAME,
+    AFTER_HOOK, BEFORE_HOOK, MAIN_NAME, META_COMBINE_SHORTS, META_DEFAULT_SUBCOMMAND, META_DOTENV,
+    META_INHERIT_FLAG_OPTIONS, META_REQUIRE_TOOLS, META_SYMBOL, META_VERSION, ROOT_NAME,
 };
 use crate::Result;
 
@@ -41,7 +40,6 @@ pub(crate) struct Command {
     pub(crate) subcommand_fns: HashMap<String, Position>,
     pub(crate) default_subcommand: Option<(usize, Position)>,
     pub(crate) aliases: Option<(Vec<String>, Position)>,
-    pub(crate) author: Option<String>,
     pub(crate) version: Option<String>,
     pub(crate) names_checker: NamesChecker,
     pub(crate) share: Arc<RefCell<ShareData>>,
@@ -145,7 +143,6 @@ impl Command {
         CommandValue {
             name: self.cmd_name(),
             describe: self.describe.clone(),
-            author: self.author.clone(),
             version: self.version.clone(),
             aliases: self.list_alias_names().clone(),
             flag_options,
@@ -170,10 +167,6 @@ impl Command {
                     let cmd = Self::get_cmd(&mut root_cmd, "@version", position)?;
                     cmd.version = Some(value);
                 }
-                EventData::Author(value) => {
-                    let cmd = Self::get_cmd(&mut root_cmd, "@author", position)?;
-                    cmd.author = Some(value);
-                }
                 EventData::Meta(key, value) => {
                     let cmd = Self::get_cmd(&mut root_cmd, "@meta", position)?;
                     match key.as_str() {
@@ -189,13 +182,6 @@ impl Command {
                                 bail!("@meta(line {}) invalid version value", position)
                             } else {
                                 cmd.version = Some(value.clone());
-                            }
-                        }
-                        META_AUTHOR => {
-                            if value.is_empty() {
-                                bail!("@meta(line {}) invalid version value", position)
-                            } else {
-                                cmd.author = Some(value.clone());
                             }
                         }
                         _ => {}
@@ -701,9 +687,6 @@ impl Command {
         if self.version.is_some() {
             output.push(self.render_version());
         }
-        if let Some(author) = &self.author {
-            output.push(author.to_string());
-        }
         if !&self.describe.is_empty() {
             output.push(render_block("", &self.describe, wrap_width));
         }
@@ -872,7 +855,6 @@ impl Command {
 pub struct CommandValue {
     pub name: String,
     pub describe: String,
-    pub author: Option<String>,
     pub version: Option<String>,
     pub aliases: Vec<String>,
     pub flag_options: Vec<FlagOptionValue>,

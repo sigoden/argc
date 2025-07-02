@@ -5,7 +5,6 @@ expression: stdout
 {
   "name": "options",
   "describe": "All kinds of @option and @flag",
-  "author": null,
   "version": null,
   "aliases": [],
   "flag_options": [
@@ -62,7 +61,6 @@ expression: stdout
     {
       "name": "options",
       "describe": "All kind of options",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -651,7 +649,6 @@ expression: stdout
     {
       "name": "flags",
       "describe": "All kind of flags",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -802,7 +799,6 @@ expression: stdout
     {
       "name": "options-one-hyphen",
       "describe": "Flags or options with single hyphen",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -1044,7 +1040,6 @@ expression: stdout
     {
       "name": "options-notation-modifier",
       "describe": "Value notation modifier",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -1155,7 +1150,6 @@ expression: stdout
     {
       "name": "options-plus",
       "describe": "All kind of options",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -1750,7 +1744,6 @@ expression: stdout
     {
       "name": "flags-plus",
       "describe": "All kind of flags",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -1901,7 +1894,6 @@ expression: stdout
     {
       "name": "options-mixed",
       "describe": "Mixed `-` and `+` options",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -2012,7 +2004,6 @@ expression: stdout
     {
       "name": "options-prefixed",
       "describe": "Prefixed option",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -2110,7 +2101,6 @@ expression: stdout
     {
       "name": "options-assigned",
       "describe": "Prefixed option",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -2177,7 +2167,6 @@ expression: stdout
     {
       "name": "test1",
       "describe": "",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -2629,7 +2618,6 @@ expression: stdout
     {
       "name": "test2",
       "describe": "",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
@@ -2833,7 +2821,6 @@ expression: stdout
     {
       "name": "test3",
       "describe": "",
-      "author": null,
       "version": null,
       "aliases": [],
       "flag_options": [
