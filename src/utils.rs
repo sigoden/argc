@@ -1,4 +1,4 @@
-use convert_case::{Boundary, Converter, Pattern};
+use convert_case::{Boundary, Converter};
 
 pub const VARIABLE_PREFIX: &str = "argc_";
 pub const BEFORE_HOOK: &str = "_argc_before";
@@ -51,9 +51,13 @@ pub const ARGC_LOAD_DOTENV: &str = r#"_argc_load_dotenv() {
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()
-        .set_pattern(Pattern::Uppercase)
+        .set_pattern(convert_case::pattern::uppercase)
         .set_delim("-")
-        .set_boundaries(&[Boundary::Underscore, Boundary::LowerUpper, Boundary::Hyphen])
+        .set_boundaries(&[
+            Boundary::UNDERSCORE,
+            Boundary::LOWER_UPPER,
+            Boundary::HYPHEN,
+        ])
         .convert(value)
 }
 

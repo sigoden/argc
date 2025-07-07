@@ -4,6 +4,7 @@ use crate::param::{
 };
 use crate::utils::is_special_var_char;
 use crate::Result;
+
 use anyhow::bail;
 use nom::{
     branch::alt,
@@ -15,7 +16,8 @@ use nom::{
     combinator::{eof, fail, map, not, opt, peek, rest, success},
     error::ErrorKind,
     multi::{many0, many1, separated_list1},
-    sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
+    sequence::{delimited, pair, preceded, separated_pair, terminated},
+    Parser,
 };
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct Event {
@@ -121,28 +123,29 @@ pub(crate) fn parse_symbol(input: &str) -> Option<(char, &str, Option<&str>)> {
 }
 
 fn parse_line(line: &str) -> nom::IResult<&str, Option<Option<EventData>>> {
-    alt((map(alt((parse_tag, parse_fn)), Some), success(None)))(line)
+    alt((map(alt((parse_tag, parse_fn)), Some), success(None))).parse(line)
 }
 
 fn parse_fn(input: &str) -> nom::IResult<&str, Option<EventData>> {
     map(alt((parse_fn_keyword, parse_fn_no_keyword)), |v| {
         Some(EventData::Func(v.to_string()))
-    })(input)
+    })
+    .parse(input)
 }
 
 // Parse fn likes `function foo`
 fn parse_fn_keyword(input: &str) -> nom::IResult<&str, &str> {
-    preceded(terminated(tag("function"), space1), parse_fn_name)(input)
+    preceded(terminated(tag("function"), space1), parse_fn_name).parse(input)
 }
 
 // Parse fn likes `foo ()`
 fn parse_fn_no_keyword(input: &str) -> nom::IResult<&str, &str> {
-    terminated(parse_fn_name, tuple((space0, char('('), space0, char(')'))))(input)
+    terminated(parse_fn_name, (space0, char('('), space0, char(')'))).parse(input)
 }
 
 fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
     preceded(
-        tuple((many1(char('#')), space0, char('@'))),
+        (many1(char('#')), space0, char('@')),
         alt((
             parse_tag_text,
             parse_tag_meta,
@@ -150,7 +153,8 @@ fn parse_tag(input: &str) -> nom::IResult<&str, Option<EventData>> {
             parse_tag_alias,
             parse_tag_unknown,
         )),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
@@ -168,7 +172,8 @@ fn parse_tag_text(input: &str) -> nom::IResult<&str, Option<EventData>> {
                 _ => unreachable!(),
             })
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_tag_meta(input: &str) -> nom::IResult<&str, Option<EventData>> {
@@ -177,7 +182,8 @@ fn parse_tag_meta(input: &str) -> nom::IResult<&str, Option<EventData>> {
         map(preceded(space1, parse_key_value), |kv| {
             kv.map(|(k, v)| EventData::Meta(k.to_string(), v.to_string()))
         }),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
@@ -200,7 +206,7 @@ fn parse_tag_param(input: &str) -> nom::IResult<&str, Option<EventData>> {
             |param| Some(EventData::Positional(param)),
         ),
     ));
-    preceded(check, alt((arg, success(None))))(input)
+    preceded(check, alt((arg, success(None)))).parse(input)
 }
 
 fn parse_tag_alias(input: &str) -> nom::IResult<&str, Option<EventData>> {
@@ -212,22 +218,23 @@ fn parse_tag_alias(input: &str) -> nom::IResult<&str, Option<EventData>> {
                 _ => unreachable!(),
             })
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_tag_unknown(input: &str) -> nom::IResult<&str, Option<EventData>> {
-    map(parse_name, |v| Some(EventData::Unknown(v.to_string())))(input)
+    map(parse_name, |v| Some(EventData::Unknown(v.to_string()))).parse(input)
 }
 
 // Parse `@option`
 fn parse_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
-    alt((parse_with_long_option_param, parse_no_long_option_param))(input)
+    alt((parse_with_long_option_param, parse_no_long_option_param)).parse(input)
 }
 
 // Parse `@option` with long name
 fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
-        tuple((
+        (
             parse_with_long_head,
             alt((
                 parse_param_modifier_choices_default,
@@ -240,19 +247,20 @@ fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionPar
             parse_zero_or_one_bind_env,
             parse_zero_or_many_value_notations,
             parse_tail,
-        )),
+        ),
         |((short, long_prefix), mut arg, env, value_names, describe)| {
             arg.env = env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, false, short, long_prefix, &value_names)
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 // Parse `@option` without long name
 fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
-        tuple((
+        (
             preceded(space0, alt((tag("-"), tag("+")))),
             preceded(
                 verify_single_char,
@@ -268,13 +276,14 @@ fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam
             parse_zero_or_one_bind_env,
             parse_zero_or_many_value_notations,
             parse_tail,
-        )),
+        ),
         |(long_prefix, mut arg, env, value_names, describe)| {
             arg.env = env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, false, None, long_prefix, &value_names)
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 // Parse `@env`
@@ -295,13 +304,14 @@ fn parse_env_param(input: &str) -> nom::IResult<&str, EnvParam> {
             arg.describe = describe.to_string();
             EnvParam::new(arg)
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 // Parse `@option`, positional only
 fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
     map(
-        tuple((
+        (
             alt((
                 parse_param_modifier_choices_default,
                 parse_param_modifier_choices_fn,
@@ -313,52 +323,55 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
             parse_zero_or_one_bind_env,
             parse_zero_or_one_value_notation,
             parse_tail,
-        )),
+        ),
         |(mut arg, env, value_name, describe)| {
             arg.env = env;
             arg.describe = describe.to_string();
             PositionalParam::new(arg, value_name)
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 // Parse `@flag`
 fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
-    alt((parse_with_long_flag_param, parse_no_long_flag_param))(input)
+    alt((parse_with_long_flag_param, parse_no_long_flag_param)).parse(input)
 }
 
 // Parse `@flag`
 fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
-        tuple((
+        (
             parse_with_long_head,
             parse_with_long_flag_name,
             parse_zero_or_one_bind_env,
             parse_tail,
-        )),
+        ),
         |((short, long_prefix), mut arg, env, describe)| {
             arg.env = env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, true, short, long_prefix, &[])
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 // Parse `@flag` without long name
 fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
-        tuple((
+        (
             preceded(space0, alt((tag("-"), tag("+")))),
             parse_no_long_flag_name,
             parse_zero_or_one_bind_env,
             parse_tail,
-        )),
+        ),
         |(long_prefix, mut arg, env, describe)| {
             arg.env = env;
             arg.describe = describe.to_string();
             FlagOptionParam::new(arg, true, None, long_prefix, &[])
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_with_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
@@ -368,21 +381,24 @@ fn parse_with_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
             arg
         }),
         parse_param_name,
-    ))(input)
+    ))
+    .parse(input)
 }
 
 fn parse_no_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
     fn parser(input: &str) -> nom::IResult<&str, ParamData> {
         map(satisfy(is_short_char), |ch| {
             ParamData::new(&format!("{ch}"))
-        })(input)
+        })
+        .parse(input)
     }
     map(pair(parser, opt(tag("*"))), |(mut arg, multiple)| {
         if multiple.is_some() {
             arg.modifier = Modifier::MultipleOptional;
         }
         arg
-    })(input)
+    })
+    .parse(input)
 }
 
 fn parse_with_long_head(input: &str) -> nom::IResult<&str, (Option<&str>, &str)> {
@@ -405,7 +421,8 @@ fn parse_with_long_head(input: &str) -> nom::IResult<&str, (Option<&str>, &str)>
             ),
         ),)),
         |(short, long_prefix)| (short.map(|_| &input[0..2]), long_prefix),
-    )(input)
+    )
+    .parse(input)
 }
 
 // Parse `str!` `str~` `str*` `str+` `str`
@@ -441,7 +458,8 @@ fn parse_param_modifier(input: &str) -> nom::IResult<&str, ParamData> {
             },
         ),
         parse_param_name,
-    ))(input)
+    ))
+    .parse(input)
 }
 
 // Parse `str=value`
@@ -452,7 +470,8 @@ fn parse_param_assign(input: &str) -> nom::IResult<&str, ParamData> {
             arg.default = Some(DefaultValue::Value(value.to_string()));
             arg
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 // Parse str=`value`
@@ -463,7 +482,8 @@ fn parse_param_assign_fn(input: &str) -> nom::IResult<&str, ParamData> {
             arg.default = Some(DefaultValue::Fn(f.to_string()));
             arg
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_param_modifier_choices_default(input: &str) -> nom::IResult<&str, ParamData> {
@@ -481,7 +501,8 @@ fn parse_param_modifier_choices_default(input: &str) -> nom::IResult<&str, Param
             }
             arg
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_param_modifier_choices(input: &str) -> nom::IResult<&str, ParamData> {
@@ -496,7 +517,8 @@ fn parse_param_modifier_choices(input: &str) -> nom::IResult<&str, ParamData> {
             ));
             arg
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_param_modifier_choices_fn(input: &str) -> nom::IResult<&str, ParamData> {
@@ -509,21 +531,22 @@ fn parse_param_modifier_choices_fn(input: &str) -> nom::IResult<&str, ParamData>
             arg.choice = Some(ChoiceValue::Fn(f.into(), validate.is_none()));
             arg
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_param_name(input: &str) -> nom::IResult<&str, ParamData> {
-    map(parse_name, ParamData::new)(input)
+    map(parse_name, ParamData::new).parse(input)
 }
 
 // Zero or many '<FOO>'
 fn parse_zero_or_many_value_notations(input: &str) -> nom::IResult<&str, Vec<&str>> {
-    many0(parse_value_notation)(input)
+    many0(parse_value_notation).parse(input)
 }
 
 // Zero or one '<FOO>'
 fn parse_zero_or_one_value_notation(input: &str) -> nom::IResult<&str, Option<&str>> {
-    opt(parse_value_notation)(input)
+    opt(parse_value_notation).parse(input)
 }
 
 // Parse '<FOO>'
@@ -531,41 +554,45 @@ fn parse_value_notation(input: &str) -> nom::IResult<&str, &str> {
     preceded(
         char(' '),
         delimited(char('<'), parse_notation_text, char('>')),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_bind_env_name(input: &str) -> nom::IResult<&str, &str> {
-    take_while1(is_env_name_char)(input)
+    take_while1(is_env_name_char).parse(input)
 }
 
 // Parse `a|b|c`
 fn parse_choices(input: &str) -> nom::IResult<&str, Vec<&str>> {
     map(separated_list1(char('|'), parse_choice_value), |choices| {
         choices
-    })(input)
+    })
+    .parse(input)
 }
 
 // Parse `=a|b|c`
 fn parse_choices_default(input: &str) -> nom::IResult<&str, (Vec<&str>, Option<&str>)> {
     map(
-        tuple((
+        (
             char('='),
             parse_choice_value,
             many1(preceded(char('|'), parse_choice_value)),
-        )),
+        ),
         |(_, head, tail)| {
             let mut choices = vec![head];
             choices.extend(tail);
             (choices, Some(head))
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_tail(input: &str) -> nom::IResult<&str, &str> {
     alt((
         eof,
         preceded(space1, alt((eof, map(rest, |v: &str| v.trim())))),
-    ))(input)
+    ))
+    .parse(input)
 }
 
 fn parse_key_value(input: &str) -> nom::IResult<&str, Option<(&str, &str)>> {
@@ -574,11 +601,11 @@ fn parse_key_value(input: &str) -> nom::IResult<&str, Option<(&str, &str)>> {
         Some((key, value))
     });
 
-    alt((key_value, success(None)))(input)
+    alt((key_value, success(None))).parse(input)
 }
 
 fn parse_name_list(input: &str) -> nom::IResult<&str, Vec<&str>> {
-    separated_list1(char(','), delimited(space0, parse_name, space0))(input)
+    separated_list1(char(','), delimited(space0, parse_name, space0)).parse(input)
 }
 
 fn parse_fn_name(input: &str) -> nom::IResult<&str, &str> {
@@ -603,30 +630,31 @@ fn parse_fn_name(input: &str) -> nom::IResult<&str, &str> {
                 | ';'
                 | '|'
         )
-    })(input)
+    })
+    .parse(input)
 }
 
 fn parse_name(input: &str) -> nom::IResult<&str, &str> {
-    take_while1(is_name_char)(input)
+    take_while1(is_name_char).parse(input)
 }
 
 fn parse_multi_char(input: &str) -> nom::IResult<&str, char> {
-    one_of(",:;@|/")(input)
+    one_of(",:;@|/").parse(input)
 }
 
 fn parse_default_value(input: &str) -> nom::IResult<&str, &str> {
-    alt((parse_quoted_string, take_till(is_default_value_terminate)))(input)
+    alt((parse_quoted_string, take_till(is_default_value_terminate))).parse(input)
 }
 
 fn parse_value_fn(input: &str) -> nom::IResult<&str, &str> {
-    delimited(char('`'), parse_fn_name, char('`'))(input)
+    delimited(char('`'), parse_fn_name, char('`')).parse(input)
 }
 
 fn parse_choice_value(input: &str) -> nom::IResult<&str, &str> {
     if input.starts_with('=') || input.starts_with('`') {
-        return fail(input);
+        return fail().parse(input);
     }
-    alt((parse_quoted_string, take_till(is_choice_value_terminate)))(input)
+    alt((parse_quoted_string, take_till(is_choice_value_terminate))).parse(input)
 }
 
 fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
@@ -640,7 +668,7 @@ fn parse_quoted_string(input: &str) -> nom::IResult<&str, &str> {
         alt((escaped(none_of("\\\""), '\\', char('"')), tag(""))),
         char('"'),
     );
-    alt((single, double))(input)
+    alt((single, double)).parse(input)
 }
 
 fn parse_notation_text(input: &str) -> nom::IResult<&str, &str> {
@@ -655,34 +683,36 @@ fn parse_notation_text(input: &str) -> nom::IResult<&str, &str> {
 
 fn parse_normal_comment(input: &str) -> nom::IResult<&str, &str> {
     alt((
-        map(tuple((many1(char('#')), space0, eof)), |_| ""),
+        map((many1(char('#')), space0, eof), |_| ""),
         map(
-            tuple((
+            (
                 many1(char('#')),
                 opt(one_of(" \t")),
                 not(pair(space0, char('@'))),
-            )),
+            ),
             |_| "",
         ),
-    ))(input)
+    ))
+    .parse(input)
 }
 
 fn parse_symbol_data(input: &str) -> nom::IResult<&str, (char, &str, Option<&str>)> {
     map(
         terminated(
-            tuple((
+            (
                 alt((char('@'), char('+'))),
                 parse_name,
                 opt(delimited(char('['), parse_value_fn, char(']'))),
-            )),
+            ),
             eof,
         ),
         |(symbol, name, choice_fn)| (symbol, name, choice_fn),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_zero_or_one_bind_env(input: &str) -> nom::IResult<&str, Option<Option<String>>> {
-    opt(parse_bind_env)(input)
+    opt(parse_bind_env).parse(input)
 }
 
 fn parse_bind_env(input: &str) -> nom::IResult<&str, Option<String>> {
@@ -695,7 +725,8 @@ fn parse_bind_env(input: &str) -> nom::IResult<&str, Option<String>> {
                 Some(v.to_string())
             }
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 fn notation_text(input: &str, balances: usize) -> nom::IResult<&str, usize> {
