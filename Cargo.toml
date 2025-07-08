@@ -1,6 +1,6 @@
 [package]
 name = "argc"
-version = "1.22.0"
+version = "1.23.0"
 edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
 description = "A bash cli framework, also a bash-based command runner"
