@@ -9,11 +9,11 @@ _argc_completer() {
     done < <(argc --argc-compgen zsh $'\0' $new_words 2>/dev/null)
     for candidate in ${candidates[@]}; do
         IFS=$'\t' read -r value display color_key color <<< "$candidate"
-        colors="$colors:=(#b)($color_key)( * -- *)=0=$color=2;37:=(#b)($color_key)()=0=$color=2;37"
+        colors="$colors:=(#b)($color_key)([ ]## -- *)=0=$color=2:=(#b)($color_key)=0=$color"
         values+=( "${value}" )
         displays+=( "$display" )
     done
-    zstyle ":completion:${curcontext}:*" list-colors "${colors:1}:=(#b)(-- *)=0=2;37:=(#b)(--[A-Za-z0-9_-]#)( * -- *)=0==2;37"
+    zstyle ":completion:${curcontext}:*" list-colors "${colors:1}:=(#b)(-- *)=0=2"
     _describe "" displays values -Q -S '' -o nosort
 }
 
