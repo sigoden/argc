@@ -7,55 +7,53 @@ abc (desc)
 def (desc)
 ijk (value (desc))
 xyz ([desc])
-cjk (福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完)
+cjk (福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓...)
 
 ************ COMPGEN Elvish `prog --oa ` ************
 abc	1	abc	desc	default
 def	1	def	desc	default
 ijk	1	ijk	value (desc)	default
 xyz	1	xyz	[desc]	default
-cjk	1	cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完	default
+cjk	1	cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓...	default
 
 ************ COMPGEN Fish `prog --oa ` ************
 abc	desc
 def	desc
 ijk	value (desc)
 xyz	[desc]
-cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完
+cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓...
 
 ************ COMPGEN Nushell `prog --oa ` ************
 abc 	desc
 def 	desc
 ijk 	value (desc)
 xyz 	[desc]
-cjk 	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完
+cjk 	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓...
 
 ************ COMPGEN Powershell `prog --oa ` ************
 abc	1	abc	desc	39
 def	1	def	desc	39
 ijk	1	ijk	value (desc)	39
 xyz	1	xyz	[desc]	39
-cjk	1	cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完	39
+cjk	1	cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓...	39
 
 ************ COMPGEN Xonsh `prog --oa ` ************
 abc	1	abc	desc
 def	1	def	desc
 ijk	1	ijk	value (desc)
 xyz	1	xyz	[desc]
-cjk	1	cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完
+cjk	1	cjk	福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓...
 
 ************ COMPGEN Zsh `prog --oa ` ************
 abc 	abc:desc	abc	39
 def 	def:desc	def	39
 ijk 	ijk:value (desc)	ijk	39
 xyz 	xyz:[desc]	xyz	39
-cjk 	cjk:福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完	cjk	39
+cjk 	cjk:福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓...	cjk	39
 
 ************ COMPGEN Tcsh `prog --oa ` ************
 abc⠀(desc)
 def⠀(desc)
 ijk⠀(value⠀(desc))
 xyz⠀([desc])
-cjk⠀(福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓葉福音語：向哭扒長次友誰員完)
-
-
+cjk⠀(福聲幸雪弓們家扒乍植哪黑信，坡也士背文反四未間美穿八和經。何朵申別兆洋行苗青誰圓弓...)
