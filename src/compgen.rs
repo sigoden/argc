@@ -257,7 +257,18 @@ pub fn compgen<T: Runtime>(
         }
     }
 
-    let values = shell.convert_candidates(candidates, &argc_prefix, &argc_filter, no_color);
+    let max_description_width = runtime
+        .env_var("ARGC_COMPGEN_DESCRIPTION_MAX_WIDTH")
+        .and_then(|v| v.parse::<usize>().ok())
+        .unwrap_or(80);
+
+    let values = shell.convert_candidates(
+        candidates,
+        &argc_prefix,
+        &argc_filter,
+        no_color,
+        max_description_width,
+    );
 
     Ok(values.join("\n"))
 }

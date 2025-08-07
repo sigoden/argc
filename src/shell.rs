@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use anyhow::bail;
+use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 use crate::utils::{is_quote_char, is_true_value, unbalance_quote};
 
@@ -98,6 +99,7 @@ impl Shell {
         prefix: &str,
         filter: &str,
         no_color: bool,
+        max_description_width: usize,
     ) -> Vec<String> {
         match self {
             Shell::Bash => {
@@ -136,7 +138,8 @@ impl Shell {
                         if i == 0 && add_space_to_first_candidate {
                             new_value = format!(" {new_value}")
                         };
-                        let description = self.comp_description(&description, "(", ")");
+                        let description =
+                            self.comp_description(&description, "(", ")", max_description_width);
                         if description.is_empty() {
                             let space = if nospace { "" } else { " " };
                             format!("{new_value}{space}")
@@ -151,7 +154,8 @@ impl Shell {
                 .map(|(value, description, nospace, comp_color)| {
                     let new_value = self.combine_value(prefix, &value);
                     let display = if value.is_empty() { " ".into() } else { value };
-                    let description = self.comp_description(&description, "", "");
+                    let description =
+                        self.comp_description(&description, "", "", max_description_width);
                     let space: &str = if nospace { "0" } else { "1" };
                     let color = self.color(comp_color, no_color);
                     format!("{new_value}\t{space}\t{display}\t{description}\t{color}")
@@ -161,7 +165,8 @@ impl Shell {
                 .into_iter()
                 .map(|(value, description, _nospace, _comp_color)| {
                     let new_value = self.combine_value(prefix, &value);
-                    let description = self.comp_description(&description, "\t", "");
+                    let description =
+                        self.comp_description(&description, "\t", "", max_description_width);
                     format!("{new_value}{description}")
                 })
                 .collect::<Vec<String>>(),
@@ -169,7 +174,8 @@ impl Shell {
                 .into_iter()
                 .map(|(value, description, nospace, comp_color)| {
                     let comp_color = format!("\t/color:{}", comp_color.ser());
-                    let description = self.comp_description(&description, "\t", "");
+                    let description =
+                        self.comp_description(&description, "\t", "", max_description_width);
                     let space: &str = if nospace { "\0" } else { "" };
                     format!("{value}{space}{comp_color}{description}")
                 })
@@ -179,7 +185,8 @@ impl Shell {
                 .map(|(value, description, nospace, _)| {
                     let new_value = self.combine_value(prefix, &value);
                     let space = if nospace { "" } else { " " };
-                    let description = self.comp_description(&description, "\t", "");
+                    let description =
+                        self.comp_description(&description, "\t", "", max_description_width);
                     format!("{new_value}{space}{description}")
                 })
                 .collect::<Vec<String>>(),
@@ -203,7 +210,8 @@ impl Shell {
                         new_value.push('\\')
                     }
                     let display = if value.is_empty() { " ".into() } else { value };
-                    let description = self.comp_description(&description, "", "");
+                    let description =
+                        self.comp_description(&description, "", "", max_description_width);
                     let space: &str = if nospace { "0" } else { "1" };
                     format!("{new_value}\t{space}\t{display}\t{description}")
                 })
@@ -227,7 +235,8 @@ impl Shell {
 
                     let new_value = new_value.replace(':', "\\:");
                     let display = value.replace(':', "\\:");
-                    let description = self.comp_description(&description, ":", "");
+                    let description =
+                        self.comp_description(&description, ":", "", max_description_width);
                     let color = self.color(comp_color, no_color);
                     let space = if nospace { "" } else { " " };
                     format!("{new_value}{space}\t{display}{description}\t{value}\t{color}")
@@ -244,7 +253,8 @@ impl Shell {
                     .map(|(value, description, _, _)| {
                         let new_value =
                             Self::sanitize_tcsh_value(&self.combine_value(prefix, &value));
-                        let description = self.comp_description(&description, " (", ")");
+                        let description =
+                            self.comp_description(&description, " (", ")", max_description_width);
                         let description = description.replace(' ', "⠀");
                         format!("{new_value}{description}")
                     })
@@ -468,30 +478,44 @@ impl Shell {
         new_value
     }
 
-    fn comp_description(&self, description: &str, prefix: &str, suffix: &str) -> String {
+    fn comp_description(
+        &self,
+        description: &str,
+        prefix: &str,
+        suffix: &str,
+        max_width: usize,
+    ) -> String {
         if description.is_empty() {
             String::new()
         } else {
             format!(
                 "{prefix}{}{suffix}",
-                Self::truncate_description(description)
+                Self::truncate_description(description, max_width)
             )
         }
     }
 
-    fn truncate_description(description: &str) -> String {
-        let max_width = 80;
-        let mut description = description.trim().replace('\t', "");
-        if description.starts_with('(') && description.ends_with(')') {
-            description = description
+    fn truncate_description(description: &str, max_width: usize) -> String {
+        let mut desc = description.trim().replace('\t', " ");
+        if desc.starts_with('(') && desc.ends_with(')') {
+            desc = desc
                 .trim_start_matches('(')
                 .trim_end_matches(')')
                 .to_string();
         }
-        if description.chars().count() < max_width {
-            description
+        if UnicodeWidthStr::width(desc.as_str()) <= max_width {
+            desc
         } else {
-            let truncated: String = description.chars().take(max_width).collect();
+            let mut width = 0;
+            let mut truncated = String::new();
+            for c in desc.chars() {
+                let w = UnicodeWidthChar::width(c).unwrap_or(0);
+                if width + w > max_width + 3 {
+                    break;
+                }
+                width += w;
+                truncated.push(c);
+            }
             format!("{truncated}...")
         }
     }

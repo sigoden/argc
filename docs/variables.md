@@ -71,6 +71,7 @@ Several environment variables allow you to tailor Argc's behavior:
 *  **`ARGC_SHELL_PATH`**: Specifies the path to the shell/bash executable used by Argc.
 *  **`ARGC_SCRIPT_NAME`**: Overrides the default script filename (Argcfile.sh).
 *  **`ARGC_COMPGEN_DESCRIPTION`**: Disables descriptions for completion candidates if set to 0 or false. 
+*  **`ARGC_COMPGEN_DESCRIPTION_MAX_WIDTH`**: Maximum width for completion descriptions; excess will be truncated with an ellipsis.
 *  **`ARGC_COMPLETIONS_PATH`**: Defines the search path for Argc-based completion scripts.
 
 **Argc-Injected:**

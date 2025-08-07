@@ -49,6 +49,7 @@ dependencies = [
  "shell-words",
  "textwrap",
  "threadpool",
+ "unicode-width",
  "which",
 ]
 
