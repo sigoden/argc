@@ -1,7 +1,8 @@
 ---
 source: tests/env.rs
-expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
+
 # OUTPUT
 All kinds of @env
 

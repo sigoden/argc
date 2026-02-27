@@ -18,5 +18,3 @@ argc__fn=cmd_arg_with_choice_fn_and_skip_check
 argc__positionals=([0]="abc")
 argc_val=abc
 cmd_arg_with_choice_fn_and_skip_check abc
-
-

@@ -35,5 +35,3 @@ argc__positionals=([0]="v1" [1]="--oa" [2]="a")
 argc_f=1
 argc_v1=v1
 argc_v2=([0]="--oa" [1]="a")
-
-

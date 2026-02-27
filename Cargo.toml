@@ -43,7 +43,7 @@ wrap-help = ["textwrap"]
 
 [dependencies]
 anyhow = "1"
-convert_case = "0.8.0"
+convert_case = "0.11.0"
 indexmap = { version = "2.10.0" }
 nom = "8.0.0"
 either = "1.15.0"
@@ -57,7 +57,7 @@ num_cpus = { version = "1.17.0", optional = true }
 threadpool = { version = "1.8.1", optional = true }
 base64 = { version = "0.22.1", optional = true }
 natord = { version = "1.0.9", optional = true }
-roff = { version = "0.2.2", optional = true }
+roff = { version = "1.0.0", optional = true }
 path-absolutize = { version = "3.1.1", optional = true }
 unicode-width = "0.2.1"
 
@@ -65,7 +65,7 @@ unicode-width = "0.2.1"
 insta = "1"
 assert_cmd = "2"
 assert_fs = "1"
-rstest = "0.25.0"
+rstest = "0.26.1"
 predicates = "3"
 
 [target.'cfg(unix)'.dev-dependencies]

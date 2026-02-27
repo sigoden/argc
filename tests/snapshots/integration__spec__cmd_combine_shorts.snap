@@ -30,5 +30,3 @@ argc__positionals=(  )
 # RUN_OUTPUT
 error: `prog` requires a subcommand but one was not provided
   [subcommands: -A]
-
-

@@ -35,5 +35,3 @@ argc__positionals=([0]="abc")
 argc_foo=123
 argc_val=abc
 main abc
-
-

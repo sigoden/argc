@@ -1,6 +1,6 @@
 ---
 source: tests/env.rs
-expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
 
 # OUTPUT
@@ -11,5 +11,3 @@ error: the following required environments were not provided:
 # BUILD_OUTPUT
 error: the following required environments were not provided:
   TEST_EB
-
-

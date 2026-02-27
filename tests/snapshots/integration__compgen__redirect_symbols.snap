@@ -3,6 +3,4 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog > Argc` ************
-Argcfile.sh 
-
-
+Argcfile.sh

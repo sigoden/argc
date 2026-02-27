@@ -12,5 +12,3 @@ ok	/color:default
 ************ COMPGEN `prog abc --ob=` ************
 __argc_filter=	/color:default
 ok	/color:default
-
-

@@ -14,5 +14,3 @@ argc__positionals=( v2 )
 argc__args=([0]="prog" [1]="--oa" [2]="v1" [3]="v2")
 argc__positionals=([0]="v2")
 argc_oa=v1
-
-

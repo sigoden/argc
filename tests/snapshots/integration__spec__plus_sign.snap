@@ -31,5 +31,3 @@ argc__positionals=(  )
 argc__args=([0]="prog" [1]="+d" [2]="fd1" [3]="-fd" [4]="fd2")
 argc__positionals=()
 argc_fd=([0]="fd1" [1]="fd2")
-
-

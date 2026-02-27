@@ -1,5 +1,3 @@
-use crate::*;
-
 #[test]
 fn multiple() {
     let script = r###"

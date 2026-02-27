@@ -5,5 +5,3 @@ expression: data
 ************ COMPGEN `prog -a` ************
 -a	/color:cyan
 -ab	/color:cyan
-
-

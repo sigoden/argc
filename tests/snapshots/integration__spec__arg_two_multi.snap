@@ -94,5 +94,3 @@ argc__fn=cmd_two_multi_args
 argc__positionals=([0]="a" [1]="b" [2]="c")
 argc_val1=([0]="a" [1]="b" [2]="c")
 cmd_two_multi_args a b c
-
-

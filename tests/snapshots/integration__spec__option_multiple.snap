@@ -125,5 +125,3 @@ argc__positionals=(  )
 argc__args=([0]="prog" [1]="-e" [2]="dir1" [3]="-e" [4]="dir2" [5]="dir3")
 argc__positionals=()
 argc_oe=([0]="dir1" [1]="dir2" [2]="dir3")
-
-

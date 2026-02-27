@@ -9,5 +9,3 @@ help	/color:magenta	Show help for a command
 
 ************ COMPGEN `prog cmda ` ************
 __argc_value=BAR	/color:default
-
-

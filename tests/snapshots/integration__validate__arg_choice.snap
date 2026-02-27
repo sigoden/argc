@@ -15,5 +15,3 @@ exit 1
 # BUILD_OUTPUT
 error: invalid value `val` for `[VAL]`
   [possible values: x, y, z]
-
-

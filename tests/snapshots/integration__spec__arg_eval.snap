@@ -179,5 +179,3 @@ argc_val1=v1
 argc_val2=v2
 argc_val3=v3
 cmd_three_required_args v1 v2 v3
-
-

@@ -1,5 +1,3 @@
-use crate::*;
-
 #[test]
 fn dotenv() {
     let script = r###"

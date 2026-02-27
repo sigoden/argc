@@ -14,5 +14,3 @@ exit 1
 
 # BUILD_OUTPUT
 error: the required environments `<VAL>...` were not provided
-
-

@@ -29,5 +29,3 @@ exit 1
 # RUN_OUTPUT
 error: invalid value `foo` for `[VAL]`
   [possible values: def]
-
-

@@ -30,5 +30,3 @@ help	/color:magenta	Show help for a command
 
 ************ COMPGEN `prog -G` ************
 -G	/color:cyan,bold
-
-

@@ -15,5 +15,3 @@ test1
 # BUILD_OUTPUT
 error: invalid value `val` for `<CC>`
   [possible values: abc, def, ghi]
-
-

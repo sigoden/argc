@@ -11,5 +11,3 @@ expression: data
 --oa	/color:cyan
 --ob	/color:cyan,bold	desc 2
 --help	/color:cyan	Print help
-
-

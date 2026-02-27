@@ -13,5 +13,3 @@ exit 1
 
 # BUILD_OUTPUT
 error: incorrect number of values for `-e <E>`
-
-

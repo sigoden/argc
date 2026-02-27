@@ -13,5 +13,3 @@ argc__positionals=(  )
 # RUN_OUTPUT
 argc__args=([0]="prog" [1]="+nightly")
 argc__positionals=([0]="+nightly")
-
-

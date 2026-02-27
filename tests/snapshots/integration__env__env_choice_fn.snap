@@ -1,6 +1,6 @@
 ---
 source: tests/env.rs
-expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
+expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
 
 # OUTPUT
@@ -11,5 +11,3 @@ error: invalid value `val` for environment variable `TEST_EFA`
 # BUILD_OUTPUT
 error: invalid value `val` for environment variable `TEST_EFA`
   [possible values: abc, def, ghi]
-
-

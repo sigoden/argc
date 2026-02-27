@@ -1,5 +1,3 @@
-use crate::*;
-
 #[test]
 fn with_main() {
     let script = r###"

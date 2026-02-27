@@ -16,5 +16,3 @@ argc__args=([0]="prog" [1]="cmd")
 argc__fn=cmd::main
 argc__positionals=()
 cmd::main
-
-

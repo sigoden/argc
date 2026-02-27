@@ -15,5 +15,3 @@ exit 1
 # RUN_OUTPUT
 error: invalid value `foo` for `<OA>`
   [possible values: ]
-
-

@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use argc::Runtime;
-use assert_cmd::cargo::cargo_bin;
 use assert_fs::fixture::{ChildPath, TempDir};
 use assert_fs::prelude::*;
 use rstest::fixture;
@@ -50,7 +49,7 @@ pub fn tmpdir_argcfiles() -> TempDir {
 }
 
 pub fn get_path_env_var() -> String {
-    let argc_path = cargo_bin("argc");
+    let argc_path = assert_cmd::cargo::cargo_bin!();
     let argc_dir = argc_path.parent().unwrap();
     let path_env_var = std::env::var("PATH").unwrap();
     if cfg!(windows) {
@@ -128,7 +127,7 @@ pub fn run_script<T: AsRef<Path>>(
 }
 
 fn get_argc_path() -> String {
-    let argc_path = assert_cmd::cargo::cargo_bin("argc");
+    let argc_path = assert_cmd::cargo::cargo_bin!();
     let cwd = std::env::current_dir().unwrap();
     let base_path = argc_path.strip_prefix(cwd).unwrap();
     let base_path = base_path.display().to_string();

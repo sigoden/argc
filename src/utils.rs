@@ -51,13 +51,9 @@ pub const ARGC_LOAD_DOTENV: &str = r#"_argc_load_dotenv() {
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()
-        .set_pattern(convert_case::pattern::uppercase)
-        .set_delim("-")
-        .set_boundaries(&[
-            Boundary::UNDERSCORE,
-            Boundary::LOWER_UPPER,
-            Boundary::HYPHEN,
-        ])
+        .set_pattern(convert_case::Pattern::Uppercase)
+        .set_delimiter("-")
+        .set_boundaries(&[Boundary::Underscore, Boundary::LowerUpper, Boundary::Hyphen])
         .convert(value)
 }
 

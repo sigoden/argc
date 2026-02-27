@@ -18,5 +18,3 @@ argc__fn=cmd_multi_arg
 argc__positionals=([0]="--o1" [1]="-o2" [2]="-3")
 argc_val=([0]="--o1" [1]="-o2" [2]="-3")
 cmd_multi_arg --o1 -o2 -3
-
-

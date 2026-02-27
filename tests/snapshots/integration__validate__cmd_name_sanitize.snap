@@ -107,5 +107,3 @@ argc__args=([0]="prog" [1]="do" [2]="foo")
 argc__fn=do_::foo
 argc__positionals=()
 do_::foo
-
-

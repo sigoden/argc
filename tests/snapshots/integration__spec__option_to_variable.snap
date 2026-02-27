@@ -22,5 +22,3 @@ argc_arg_foo=v1
 argc_flag_foo=1
 argc_option_bar=bar
 argc_option_foo=([0]="foo1" [1]="foo2")
-
-

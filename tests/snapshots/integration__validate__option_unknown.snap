@@ -13,5 +13,3 @@ exit 1
 
 # BUILD_OUTPUT
 error: unexpected argument `--unknown` found
-
-

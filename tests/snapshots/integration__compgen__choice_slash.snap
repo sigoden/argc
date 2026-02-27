@@ -4,5 +4,3 @@ expression: data
 ---
 ************ COMPGEN `prog cmd a\b ` ************
 a\b	/color:default
-
-

@@ -1,5 +1,3 @@
-use crate::*;
-
 #[test]
 fn hook_without_subcmd() {
     let script = r###"

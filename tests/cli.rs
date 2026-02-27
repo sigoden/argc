@@ -8,8 +8,7 @@ use crate::fixtures::{
 
 #[test]
 fn version() {
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-version")
         .assert()
         .stdout(predicates::str::contains(format!(
@@ -21,8 +20,7 @@ fn version() {
 
 #[test]
 fn help() {
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-help")
         .assert()
         .stdout(predicates::str::contains(env!("CARGO_PKG_DESCRIPTION")))
@@ -33,16 +31,14 @@ fn help() {
 fn create() {
     let tmpdir = tmpdir();
     let path_env_var = get_path_env_var();
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .current_dir(tmpdir.path())
         .env("PATH", path_env_var.clone())
         .arg("--argc-create")
         .assert()
         .success();
     assert!(tmpdir.path().join("Argcfile.sh").exists());
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .current_dir(tmpdir.path())
         .env("PATH", path_env_var)
         .assert()
@@ -53,16 +49,14 @@ fn create() {
 fn create_with_tasks() {
     let tmpdir = tmpdir();
     let path_env_var = get_path_env_var();
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .current_dir(tmpdir.path())
         .env("PATH", path_env_var.clone())
         .arg("--argc-create")
         .args(["foo", "bar"])
         .assert()
         .success();
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .current_dir(tmpdir.path())
         .env("PATH", path_env_var)
         .arg("bar")
@@ -75,8 +69,7 @@ fn create_with_tasks() {
 fn run() {
     let path_env_var = get_path_env_var();
     let path = locate_script("examples/demo.sh");
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-run")
         .arg(path)
         .env("PATH", path_env_var)
@@ -88,8 +81,7 @@ fn run() {
 #[test]
 fn build_stdout() {
     let path = locate_script("examples/demo.sh");
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-build")
         .arg(path)
         .assert()
@@ -102,16 +94,14 @@ fn run_build() {
     let path = locate_script("examples/strict.sh");
     let tmpdir = tmpdir();
     let outpath = tmpdir.join("strict.sh");
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-build")
         .arg(&path)
         .arg(&outpath)
         .assert()
         .success();
 
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-run")
         .arg(&outpath)
         .args([
@@ -133,8 +123,7 @@ fn mangen() {
     let path = locate_script("examples/demo.sh");
     let tmpdir = tmpdir();
     let outdir = tmpdir.to_path_buf();
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-mangen")
         .arg(&path)
         .arg(&outdir)
@@ -147,8 +136,7 @@ fn mangen() {
 
 #[test]
 fn completions() {
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .args(["--argc-completions", "bash", "mycmd1", "mycmd2"])
         .assert()
         .stdout(predicates::str::contains(r#"argc mycmd1 mycmd2"#))
@@ -159,8 +147,7 @@ fn completions() {
 fn compgen_args() {
     let path = locate_script("examples/args.sh");
     let path_env_var = get_path_env_var();
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-compgen")
         .arg("fish")
         .arg(path)
@@ -175,8 +162,7 @@ fn compgen_args() {
 fn compgen_options() {
     let path = locate_script("examples/options.sh");
     let path_env_var = get_path_env_var();
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-compgen")
         .arg("fish")
         .arg(path)
@@ -189,8 +175,7 @@ fn compgen_options() {
 
 #[test]
 fn compgen_argc() {
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .args(["--argc-compgen", "fish", "", "argc", "--argc-compgen", ""])
         .assert()
         .stdout(predicates::str::contains("zsh"))
@@ -199,8 +184,7 @@ fn compgen_argc() {
 
 #[test]
 fn compgen_kind() {
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .args([
             "--argc-compgen",
             "fish",
@@ -216,8 +200,7 @@ fn compgen_kind() {
 #[test]
 fn export() {
     let path = locate_script("examples/options.sh");
-    let output = Command::cargo_bin("argc")
-        .unwrap()
+    let output = Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-export")
         .arg(path)
         .output()
@@ -232,8 +215,7 @@ fn parallel() {
     let path_env_var = get_path_env_var();
     let args = ["task2", "--oa", "3"];
     let start_time = Instant::now();
-    let output = Command::cargo_bin("argc")
-        .unwrap()
+    let output = Command::new(assert_cmd::cargo::cargo_bin!())
         .current_dir(tmpdir_path(&tmpdir, "dir1"))
         .env("PATH", path_env_var)
         .args(args)
@@ -263,8 +245,7 @@ STDERR:
 #[test]
 fn script_path() {
     let tmpdir = tmpdir_argcfiles();
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-script-path")
         .current_dir(tmpdir.child("dir1").path())
         .assert()
@@ -278,8 +259,7 @@ fn script_path() {
 
 #[test]
 fn shell_path() {
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .arg("--argc-shell-path")
         .assert()
         .stdout(predicates::str::contains("bash"))
@@ -294,8 +274,7 @@ fn run_argcfile() {
         if path.ends_with("EMPTY") {
             continue;
         }
-        Command::cargo_bin("argc")
-            .unwrap()
+        Command::new(assert_cmd::cargo::cargo_bin!())
             .current_dir(tmpdir_path(&tmpdir, path).path().parent().unwrap())
             .env("PATH", path_env_var.clone())
             .assert()
@@ -303,8 +282,7 @@ fn run_argcfile() {
             .success();
     }
 
-    Command::cargo_bin("argc")
-        .unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!())
         .current_dir(tmpdir_path(&tmpdir, "dir1/subdir1/subdirdir1"))
         .env("PATH", path_env_var)
         .assert()

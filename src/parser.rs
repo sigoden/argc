@@ -51,17 +51,12 @@ pub(crate) enum EventData {
     Unknown(String),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub(crate) enum EventScope {
+    #[default]
     Root,
     CmdStart,
     FnEnd,
-}
-
-impl Default for EventScope {
-    fn default() -> Self {
-        Self::Root
-    }
 }
 
 /// Tokenize shell script
