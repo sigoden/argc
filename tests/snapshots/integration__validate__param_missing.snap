@@ -13,5 +13,4 @@ EOF
 exit 1
 
 # BUILD_OUTPUT
-error: the following required arguments were not provided:
-  --ao <AO>
+error: the required environments `<VAL>` were not provided

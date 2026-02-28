@@ -1,13 +1,13 @@
 use crate::{
     command::Command,
     param::{FlagOptionParam, Param, PositionalParam},
-    utils::{escape_shell_words, ARGC_LOAD_DOTENV, ARGC_REQUIRE_TOOLS},
+    utils::{escape_shell_words, ARGC_LOAD_DOTENV, ARGC_REQUIRE_PARAMS, ARGC_REQUIRE_TOOLS},
     ChoiceValue, DefaultValue,
 };
 use anyhow::Result;
 use indexmap::IndexSet;
 
-const UTIL_FNS: [(&str, &str); 7] = [
+const UTIL_FNS: [(&str, &str); 6] = [
     (
         "_argc_take_args",
         r#"
@@ -117,24 +117,6 @@ _argc_split_positionals() {
         tails=("${argc__positionals[@]:tails_index}")
     fi
     argc__positionals=("${heads[@]}" "${_argc_split_positionals_values[@]}" "${tails[@]}")
-}
-"#,
-    ),
-    (
-        "_argc_require_params",
-        r#"
-_argc_require_params() {
-    local message="$1" missed_envs="" item name render_name
-    for item in "${@:2}"; do
-        name="${item%%:*}"
-        render_name="${item##*:}"
-        if [[ -z "${!name:-}" ]]; then
-            missed_envs="$missed_envs"$'\n'"  $render_name"
-        fi
-    done
-    if [[ -n "${missed_envs}" ]]; then
-        _argc_die "$message$missed_envs"
-    fi
 }
 "#,
     ),
@@ -267,6 +249,21 @@ fn build_root(cmd: &Command, wrap_width: Option<usize>) -> String {
     } else {
         String::new()
     };
+    if command.contains("_argc_required_flag_options") || command.contains("_argc_required_envs") {
+        util_fns.push_str(&format!("\n{ARGC_REQUIRE_PARAMS}\n"));
+    }
+    let require_flag_options = if command.contains("_argc_required_flag_options") {
+        r#"
+    _argc_require_params "error: the following required arguments were not provided:" "${_argc_required_flag_options[@]}""#
+    } else {
+        ""
+    };
+    let require_envs = if command.contains("_argc_required_envs") {
+        r#"
+    _argc_require_params "error: the following required environments were not provided:" "${_argc_required_envs[@]}""#
+    } else {
+        ""
+    };
     let require_tools = if command.contains("_argc_tools") {
         util_fns.push_str(&format!("\n{ARGC_REQUIRE_TOOLS}\n"));
         r#"
@@ -291,8 +288,10 @@ _argc_run() {{
     argc__positionals=()
     _argc_index=1
     _argc_len="${{#argc__args[@]}}"{dotenv}
+    _argc_required_flag_options=()
+    _argc_required_envs=()
     _argc_tools=()
-    _argc_parse{require_tools}{before_hook}
+    _argc_parse{require_flag_options}{require_envs}{require_tools}{before_hook}
     if [ -n "${{argc__fn:-}}" ]; then
         $argc__fn "${{argc__positionals[@]}}"{after_hook}
     fi
@@ -508,6 +507,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
     };
 
     let flag_option_bind_envs = build_flag_option_bind_envs(cmd);
+    let default_flag_options = build_default_flag_options(cmd);
     let required_flag_options = build_required_flag_options(cmd);
 
     let require_tools = build_require_tools(cmd);
@@ -540,7 +540,7 @@ _argc_parse{suffix}() {{
         _argc_key="${{_argc_item%%=*}}"
         case "$_argc_key" in{combined_case}
         esac
-    done{flag_option_bind_envs}{required_flag_options}{require_tools}
+    done{flag_option_bind_envs}{default_flag_options}{required_flag_options}{require_tools}
     if [[ -n "${{_argc_action:-}}" ]]; then
         $_argc_action
     else{handle}
@@ -670,14 +670,10 @@ fn build_handle(cmd: &Command, suffix: &str) -> String {
     );
     let positionals = build_positionals(cmd);
 
-    let default_flag_options = build_default_flag_options(cmd);
-
     let required_envs = build_required_envs(cmd);
 
     let envs = build_envs(cmd);
-
-    let output =
-        format!("{set_argc_fn}{run_help}{positionals}{default_flag_options}{required_envs}{envs}");
+    let output = format!("{set_argc_fn}{run_help}{positionals}{required_envs}{envs}");
     if output.is_empty() {
         r#"
         :;"#
@@ -890,14 +886,17 @@ fn build_required_flag_options(cmd: &Command) -> String {
         .map(|param| {
             let var_name = param.var_name();
             let render_name = param.render_name_notations();
-            format!("'{var_name}:{render_name}'")
+            escape_shell_words(&format!("{var_name}:{render_name}"))
         })
         .collect::<Vec<String>>()
         .join(" ");
+    let expr = match cmd.inherited_flag_options {
+        true => "=",
+        false => "+=",
+    };
     format!(
         r#"
-    _argc_require_params "error: the following required arguments were not provided:" \
-        {values}"#
+    _argc_required_flag_options{expr}({values})"#
     )
 }
 
@@ -915,11 +914,11 @@ fn build_default_flag_options(cmd: &Command) -> String {
         .into_iter()
         .map(|param| {
             let var_name = param.var_name();
-            let default = build_default(&var_name, param.default(), 3);
+            let default = build_default(&var_name, param.default(), 2);
             format!(
                 r#"
-        if [[ -z "${{{var_name}:-}}" ]]; then{default}
-        fi"#
+    if [[ -z "${{{var_name}:-}}" ]]; then{default}
+    fi"#
             )
         })
         .collect::<Vec<String>>()
@@ -939,14 +938,13 @@ fn build_required_envs(cmd: &Command) -> String {
         .into_iter()
         .map(|param| {
             let name = param.var_name();
-            format!("{name}:{name}")
+            escape_shell_words(&format!("{name}:{name}"))
         })
         .collect::<Vec<String>>()
         .join(" ");
     format!(
         r#"
-        _argc_require_params "error: the following required environments were not provided:" \
-            {values}"#
+        _argc_required_envs=({values})"#
     )
 }
 

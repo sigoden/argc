@@ -34,6 +34,7 @@ pub(crate) struct Command {
     pub(crate) describe: String,
     pub(crate) flag_option_params: Vec<FlagOptionParam>,
     pub(crate) derived_flag_option_params: Vec<FlagOptionParam>,
+    pub(crate) inherited_flag_options: bool,
     pub(crate) positional_params: Vec<PositionalParam>,
     pub(crate) env_params: Vec<EnvParam>,
     pub(crate) subcommands: Vec<Command>,
@@ -588,6 +589,7 @@ impl Command {
             subcmd
                 .flag_option_params
                 .splice(..0, inherited_flag_options);
+            subcmd.inherited_flag_options = true;
         }
         for subcmd in self.subcommands.iter_mut() {
             subcmd.inherit_flag_options();
