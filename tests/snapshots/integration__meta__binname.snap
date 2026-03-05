@@ -1,0 +1,16 @@
+---
+source: tests/meta.rs
+expression: data
+---
+RUN
+prog -h
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+USAGE: test-binname
+
+EOF
+exit 0
+
+# BUILD_OUTPUT
+USAGE: test-binname

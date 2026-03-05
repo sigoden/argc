@@ -13,8 +13,9 @@ use crate::param::{EnvValue, FlagOptionValue, PositionalValue};
 use crate::parser::{parse, parse_symbol, Event, EventData, EventScope, Position};
 use crate::runtime::Runtime;
 use crate::utils::{
-    AFTER_HOOK, BEFORE_HOOK, MAIN_NAME, META_COMBINE_SHORTS, META_DEFAULT_SUBCOMMAND, META_DOTENV,
-    META_INHERIT_FLAG_OPTIONS, META_REQUIRE_TOOLS, META_SYMBOL, META_VERSION, ROOT_NAME,
+    AFTER_HOOK, BEFORE_HOOK, MAIN_NAME, META_BINNAME, META_COMBINE_SHORTS, META_DEFAULT_SUBCOMMAND,
+    META_DOTENV, META_INHERIT_FLAG_OPTIONS, META_REQUIRE_TOOLS, META_SYMBOL, META_VERSION,
+    ROOT_NAME,
 };
 use crate::Result;
 
@@ -56,7 +57,10 @@ impl Command {
     pub(crate) fn new(source: &str, root_name: &str) -> Result<Self> {
         let events = parse(source)?;
         let mut root = Command::new_from_events(&events)?;
-        root.share.borrow_mut().name = Some(root_name.to_string());
+        root.share.borrow_mut().name = root
+            .get_metadata(META_BINNAME)
+            .map(|v| v.to_string())
+            .or_else(|| Some(root_name.to_string()));
         root.update_recursively(vec![], IndexSet::new());
         if root.has_metadata(META_INHERIT_FLAG_OPTIONS) {
             root.inherit_flag_options();

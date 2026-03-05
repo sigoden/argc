@@ -13,3 +13,11 @@ fn dotenv_custom_path() {
 "###;
     snapshot!(script, &["prog"]);
 }
+
+#[test]
+fn binname() {
+    let script = r###"
+# @meta binname test-binname
+"###;
+    snapshot!(script, &["prog", "-h"]);
+}
