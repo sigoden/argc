@@ -11,6 +11,7 @@ pub use fixtures::locate_script;
 mod macros;
 mod bind_env;
 mod cli;
+mod cli_extended;
 mod compgen;
 mod env;
 mod fail;
