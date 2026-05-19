@@ -1,5 +1,5 @@
 #[cfg(feature = "native-runtime")]
-pub mod navite;
+pub mod native;
 
 use anyhow::Result;
 use std::{collections::HashMap, env};
