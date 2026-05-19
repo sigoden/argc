@@ -1,11 +1,3 @@
----
-source: tests/meta.rs
-expression: data
----
-RUN
-prog
-
-# OUTPUT
 _argc_load_dotenv() {
     local env_file="$1" env_vars=""
     if [[ -f "$env_file" ]]; then
@@ -22,11 +14,3 @@ _argc_load_dotenv() {
         fi
     fi
 }
-
-_argc_load_dotenv .env
-argc__args=( prog )
-argc__positionals=(  )
-
-# BUILD_OUTPUT
-argc__args=([0]="prog")
-argc__positionals=()

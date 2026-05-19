@@ -22,6 +22,7 @@ _argc_load_dotenv() {
         fi
     fi
 }
+
 _argc_load_dotenv .env.local
 argc__args=( prog )
 argc__positionals=(  )

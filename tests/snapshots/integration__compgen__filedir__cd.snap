@@ -16,6 +16,7 @@ param.rs	1	param.rs		default
 parser.rs	1	parser.rs		default
 runtime/	0	runtime/		blue bold
 shell.rs	1	shell.rs		default
+template/	0	template/		blue bold
 utils.rs	1	utils.rs		default
 
 ************ COMPGEN `prog --oa=` ************
@@ -32,6 +33,7 @@ utils.rs	1	utils.rs		default
 --oa=parser.rs	1	parser.rs		default
 --oa=runtime/	0	runtime/		blue bold
 --oa=shell.rs	1	shell.rs		default
+--oa=template/	0	template/		blue bold
 --oa=utils.rs	1	utils.rs		default
 
 ************ COMPGEN `prog --ob ` ************
@@ -48,6 +50,7 @@ param.rs:	0	param.rs:		default
 parser.rs:	0	parser.rs:		default
 runtime/	0	runtime/		blue bold
 shell.rs:	0	shell.rs:		default
+template/	0	template/		blue bold
 utils.rs:	0	utils.rs:		default
 
 ************ COMPGEN `prog foo=` ************
@@ -64,4 +67,5 @@ foo=param.rs	1	param.rs		default
 foo=parser.rs	1	parser.rs		default
 foo=runtime/	0	runtime/		blue bold
 foo=shell.rs	1	shell.rs		default
+foo=template/	0	template/		blue bold
 foo=utils.rs	1	utils.rs		default

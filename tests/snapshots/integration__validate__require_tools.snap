@@ -22,6 +22,7 @@ _argc_require_tools() {
         exit 1
     fi
 }
+
 _argc_require_tools not-found1
 
 main
@@ -49,6 +50,7 @@ _argc_require_tools() {
         exit 1
     fi
 }
+
 _argc_require_tools not-found1 not-found2
 
 cmd1
@@ -76,6 +78,7 @@ _argc_require_tools() {
         exit 1
     fi
 }
+
 _argc_require_tools not-found1
 
 cmd2
