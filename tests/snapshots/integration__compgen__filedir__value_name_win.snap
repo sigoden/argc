@@ -16,6 +16,7 @@ src\param.rs	1	param.rs		39
 src\parser.rs	1	parser.rs		39
 src\runtime\	0	runtime\		1;34
 src\shell.rs	1	shell.rs		39
+src\template\	0	template\		1;34
 src\utils.rs	1	utils.rs		39
 
 ************ COMPGEN `prog --oa src\p` ************
@@ -36,6 +37,7 @@ src\parser.rs	1	parser.rs		39
 .\src\parser.rs	1	parser.rs		39
 .\src\runtime\	0	runtime\		1;34
 .\src\shell.rs	1	shell.rs		39
+.\src\template\	0	template\		1;34
 .\src\utils.rs	1	utils.rs		39
 
 ************ COMPGEN `prog --oa C` ************
@@ -54,3 +56,4 @@ src\bin\	0	bin\		1;34
 src\command\	0	command\		1;34
 src\completions\	0	completions\		1;34
 src\runtime\	0	runtime\		1;34
+src\template\	0	template\		1;34
