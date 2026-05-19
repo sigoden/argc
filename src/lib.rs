@@ -33,7 +33,7 @@ pub use param::{ChoiceValue, DefaultValue};
 #[cfg(feature = "export")]
 pub use param::{EnvValue, FlagOptionValue, PositionalValue};
 #[cfg(feature = "native-runtime")]
-pub use runtime::navite::NativeRuntime;
+pub use runtime::native::NativeRuntime;
 #[cfg(any(feature = "eval", feature = "compgen"))]
 pub use runtime::Runtime;
 #[cfg(any(feature = "compgen", feature = "completions"))]
