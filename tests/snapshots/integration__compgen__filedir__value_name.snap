@@ -16,6 +16,7 @@ src/param.rs	1	param.rs		default
 src/parser.rs	1	parser.rs		default
 src/runtime/	0	runtime/		blue bold
 src/shell.rs	1	shell.rs		default
+src/template/	0	template/		blue bold
 src/utils.rs	1	utils.rs		default
 
 ************ COMPGEN `prog --oa src/p` ************
@@ -36,6 +37,7 @@ src/parser.rs	1	parser.rs		default
 ./src/parser.rs	1	parser.rs		default
 ./src/runtime/	0	runtime/		blue bold
 ./src/shell.rs	1	shell.rs		default
+./src/template/	0	template/		blue bold
 ./src/utils.rs	1	utils.rs		default
 
 ************ COMPGEN `prog --oa C` ************
@@ -54,3 +56,4 @@ src/bin/	0	bin/		blue bold
 src/command/	0	command/		blue bold
 src/completions/	0	completions/		blue bold
 src/runtime/	0	runtime/		blue bold
+src/template/	0	template/		blue bold

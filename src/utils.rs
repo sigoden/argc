@@ -19,51 +19,13 @@ pub(crate) const META_REQUIRE_TOOLS: &str = "require-tools";
 pub(crate) const MAX_ARGS: usize = 32767;
 
 #[cfg(any(feature = "build", feature = "eval-bash"))]
-pub const ARGC_REQUIRE_TOOLS: &str = r#"_argc_require_tools() {
-    local tool missing_tools=()
-    for tool in "$@"; do
-        if ! command -v "$tool" >/dev/null 2>&1; then
-            missing_tools+=("$tool")
-        fi
-    done
-    if [[ "${#missing_tools[@]}" -gt 0 ]]; then
-        echo "error: missing tools: ${missing_tools[*]}" >&2
-        exit 1
-    fi
-}"#;
+pub const ARGC_REQUIRE_TOOLS: &str = include_str!("template/require_tools.sh");
 
 #[cfg(any(feature = "build", feature = "eval-bash"))]
-pub const ARGC_REQUIRE_PARAMS: &str = r#"_argc_require_params() {
-    local message="$1" missed_envs="" item name render_name
-    for item in "${@:2}"; do
-        name="${item%%:*}"
-        render_name="${item##*:}"
-        if [[ -z "${!name:-}" ]]; then
-            missed_envs="$missed_envs"$'\n'"  $render_name"
-        fi
-    done
-    if [[ -n "${missed_envs}" ]]; then
-        _argc_die "$message$missed_envs"
-    fi
-}"#;
+pub const ARGC_REQUIRE_PARAMS: &str = include_str!("template/require_params.sh");
 
 #[cfg(any(feature = "build", feature = "eval-bash"))]
-pub const ARGC_LOAD_DOTENV: &str = r#"_argc_load_dotenv() {
-    local env_file="$1" env_vars=""
-    if [[ -f "$env_file" ]]; then
-        while IFS='=' read -r key value; do
-            if [[ "$key" == $'#'* ]] || [[ -z "$key" ]]; then
-                continue
-            fi
-            if [[ -z "${!key+x}" ]]; then
-                env_vars="$env_vars $key=$value"
-            fi
-        done < <(cat "$env_file"; echo "")
-        if [[ -n "$env_vars" ]]; then
-            eval "export $env_vars"
-        fi
-    fi
-}"#;
+pub const ARGC_LOAD_DOTENV: &str = include_str!("template/load_dotenv.sh");
 
 pub fn to_cobol_case(value: &str) -> String {
     Converter::new()

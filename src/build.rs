@@ -8,191 +8,23 @@ use anyhow::Result;
 use indexmap::IndexSet;
 
 const UTIL_FNS: [(&str, &str); 6] = [
-    (
-        "_argc_take_args",
-        r#"
-_argc_take_args() {
-    _argc_take_args_values=()
-    _argc_take_args_len=0
-    local param="$1" min="$2" max="$3" signs="$4" delimiter="$5"
-    if [[ "$min" -eq 0 ]] && [[ "$max" -eq 0 ]]; then
-        return
-    fi
-    local _argc_take_index=$((_argc_index + 1)) _argc_take_value
-    if [[ "$_argc_item" == *=* ]]; then
-        _argc_take_args_values=("${_argc_item##*=}")
-    else
-        while [[ $_argc_take_index -lt $_argc_len ]]; do
-            _argc_take_value="${argc__args[_argc_take_index]}"
-            if _argc_maybe_flag_option "$signs" "$_argc_take_value"; then
-                if [[ "${#_argc_take_value}" -gt 1 ]]; then
-                    break
-                fi
-            fi
-            _argc_take_args_values+=("$_argc_take_value")
-            _argc_take_args_len=$((_argc_take_args_len + 1))
-            if [[ "$_argc_take_args_len" -ge "$max" ]]; then
-                break
-            fi
-            _argc_take_index=$((_argc_take_index + 1))
-        done
-    fi
-    if [[ "${#_argc_take_args_values[@]}" -lt "$min" ]]; then
-        _argc_die "error: incorrect number of values for \`$param\`"
-    fi
-    if [[ -n "$delimiter" ]] && [[ "${#_argc_take_args_values[@]}" -gt 0 ]]; then
-        local item values arr=()
-        for item in "${_argc_take_args_values[@]}"; do
-            IFS="$delimiter" read -r -a values <<<"$item"
-            arr+=("${values[@]}")
-        done
-        _argc_take_args_values=("${arr[@]}")
-    fi
-}
-"#,
-    ),
+    ("_argc_take_args", include_str!("template/take_args.sh")),
     (
         "_argc_match_positionals",
-        r#"
-_argc_match_positionals() {
-    _argc_match_positionals_values=()
-    _argc_match_positionals_len=0
-    local params=("$@")
-    local args_len="${#argc__positionals[@]}"
-    if [[ $args_len -eq 0 ]]; then
-        return
-    fi
-    local params_len=$# arg_index=0 param_index=0
-    while [[ $param_index -lt $params_len && $arg_index -lt $args_len ]]; do
-        local takes=0
-        if [[ "${params[param_index]}" -eq 1 ]]; then
-            if [[ $param_index -eq 0 ]] &&
-                [[ ${_argc_dash:-} -gt 0 ]] &&
-                [[ $params_len -eq 2 ]] &&
-                [[ "${params[$((param_index + 1))]}" -eq 1 ]] \
-                ; then
-                takes=${_argc_dash:-}
-            else
-                local arg_diff=$((args_len - arg_index)) param_diff=$((params_len - param_index))
-                if [[ $arg_diff -gt $param_diff ]]; then
-                    takes=$((arg_diff - param_diff + 1))
-                else
-                    takes=1
-                fi
-            fi
-        else
-            takes=1
-        fi
-        _argc_match_positionals_values+=("$arg_index:$takes")
-        arg_index=$((arg_index + takes))
-        param_index=$((param_index + 1))
-    done
-    if [[ $arg_index -lt $args_len ]]; then
-        _argc_match_positionals_values+=("$arg_index:$((args_len - arg_index))")
-    fi
-    _argc_match_positionals_len=${#_argc_match_positionals_values[@]}
-    if [[ $params_len -gt 0 ]] && [[ $_argc_match_positionals_len -gt $params_len ]]; then
-        local index="${_argc_match_positionals_values[params_len]%%:*}"
-        _argc_die "error: unexpected argument \`${argc__positionals[index]}\` found"
-    fi
-}
-"#,
+        include_str!("template/match_positionals.sh"),
     ),
     (
         "_argc_split_positionals",
-        r#"
-_argc_split_positionals() {
-    _argc_split_positionals_values=()
-    local values_index="$1" values_size="$2" delimiter="$3" item values
-    local split_values=("${argc__positionals[@]:values_index:values_size}")
-    for item in "${split_values[@]}"; do
-        IFS="$delimiter" read -r -a values <<<"$item"
-        _argc_split_positionals_values+=("${values[@]}")
-    done
-    local heads=() tails=() tails_index=$((values_index + values_size))
-    if [[ $values_index -gt 0 ]]; then
-        heads=("${argc__positionals[@]:0:values_index}")
-    fi
-    if [[ $tails_index -lt ${#argc__positionals[@]} ]]; then
-        tails=("${argc__positionals[@]:tails_index}")
-    fi
-    argc__positionals=("${heads[@]}" "${_argc_split_positionals_values[@]}" "${tails[@]}")
-}
-"#,
+        include_str!("template/split_positionals.sh"),
     ),
     (
         "_argc_validate_choices",
-        r#"
-_argc_validate_choices() {
-    local render_name="$1" raw_choices="$2" choices item choice concated_choices=""
-    while IFS= read -r line; do
-        choices+=("$line")
-    done <<<"$raw_choices"
-    for choice in "${choices[@]}"; do
-        if [[ -z "$concated_choices" ]]; then
-            concated_choices="$choice"
-        else
-            concated_choices="$concated_choices, $choice"
-        fi
-    done
-    for item in "${@:3}"; do
-        local pass=0 choice
-        for choice in "${choices[@]}"; do
-            if [[ "$item" == "$choice" ]]; then
-                pass=1
-            fi
-        done
-        if [[ $pass -ne 1 ]]; then
-            _argc_die "error: invalid value \`$item\` for $render_name"$'\n'"  [possible values: $concated_choices]"
-        fi
-    done
-}
-"#,
+        include_str!("template/validate_choices.sh"),
     ),
-    (
-        "_argc_check_bool",
-        r#"
-_argc_check_bool() {
-    local env_name="$1" param_name=$2
-    local env_value="${!env_name}"
-    if [[ "$env_value" == "true" ]] || [[ "$env_value" == "1" ]]; then
-        return 0
-    elif [[ "$env_value" == "false" ]] || [[ "$env_value" == "0" ]]; then
-        return 1
-    else
-        _argc_die "error: environment variable '$env_name' has invalid value for param '$param_name'"
-    fi
-}
-"#,
-    ),
+    ("_argc_check_bool", include_str!("template/check_bool.sh")),
     (
         "_argc_maybe_flag_option",
-        r#"
-_argc_maybe_flag_option() {
-    local signs="$1" arg="$2"
-    if [[ -z "$signs" ]]; then
-        return 1
-    fi
-    local cond=false
-    if [[ "$signs" == *"+"* ]]; then
-        if [[ "$arg" =~ ^\+[^+].* ]]; then
-            cond=true
-        fi
-    elif [[ "$arg" == -* ]]; then
-        if (( ${#arg} < 3 )) || [[ ! "$arg" =~ ^---.* ]]; then
-            cond=true
-        fi
-    fi
-    if [[ "$cond" == "false" ]]; then
-        return 1
-    fi
-    local value="${arg%%=*}"
-    if [[ "$value" =~ [[:space:]] ]]; then
-        return 1
-    fi
-    return 0
-}
-"#,
+        include_str!("template/maybe_flag_option.sh"),
     ),
 ];
 
@@ -240,7 +72,7 @@ fn build_root(cmd: &Command, wrap_width: Option<usize>) -> String {
     let mut util_fns = String::new();
     for (fn_name, util_fn) in UTIL_FNS {
         if command.contains(fn_name) || util_fns.contains(fn_name) {
-            util_fns.push_str(util_fn);
+            util_fns.push_str(&format!("\n{}\n", util_fn.trim()));
         }
     }
     let dotenv = if let Some(value) = cmd.dotenv() {
