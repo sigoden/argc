@@ -496,7 +496,7 @@ impl Command {
             };
             if compatible_name != name {
                 match self.aliases.as_mut() {
-                    Some((aliaes, _)) => aliaes.insert(0, compatible_name),
+                    Some((aliases, _)) => aliases.insert(0, compatible_name),
                     None => {
                         self.aliases = Some((vec![compatible_name], Position::default()));
                     }

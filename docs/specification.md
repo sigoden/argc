@@ -175,7 +175,7 @@ Adds metadata.
 | :------------------------------- | ------ | :------------------------------------------------------------------- |
 | `@meta version <value>`          | any    | Set the version for the command.                                     |
 | `@meta binname <value>`          | root   | Set binary name for usage, defaults to script file name.             |
-| `@meta dotenv [<path>]`          | root   | Load a dotenv file from a custom path, if persent.                   |
+| `@meta dotenv [<path>]`          | root   | Load a dotenv file from a custom path, if present.                   |
 | `@meta default-subcommand`       | subcmd | Set the current subcommand as the default.                           |
 | `@meta require-tools <tool>,...` | any    | Require certain tools to be available on the system.                 |
 | `@meta man-section <1-8>`        | root   | Override the section for the man page, defaulting to 1.              |
