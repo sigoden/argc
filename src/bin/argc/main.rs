@@ -275,6 +275,8 @@ fn run_compgen(runtime: NativeRuntime, mut args: Vec<String>) -> Option<()> {
         } else if let Some(script_file) = search_completion_script(&mut args) {
             args[3] = script_file.to_string_lossy().to_string();
         } else if let Some(script_file) = runtime.which(&args[4]) {
+            #[cfg(windows)]
+            let script_file = resolve_script_shim(&script_file).unwrap_or(script_file);
             args[3] = script_file;
         }
     }
@@ -580,6 +582,20 @@ fn search_completion_script(args: &mut Vec<String>) -> Option<PathBuf> {
     }
     if let Some(path) = cmd_script_path {
         return Some(path);
+    }
+    None
+}
+
+#[cfg(windows)]
+fn resolve_script_shim(path: &str) -> Option<String> {
+    let p = Path::new(path);
+    let ext = p.extension()?.to_str()?.to_lowercase();
+    if !matches!(ext.as_str(), "cmd" | "bat" | "ps1") {
+        return None;
+    }
+    let bash_script = p.with_extension("");
+    if bash_script.exists() {
+        return bash_script.to_str().map(|s| s.to_string());
     }
     None
 }
