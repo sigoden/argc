@@ -77,7 +77,7 @@ fn build_root(cmd: &Command, wrap_width: Option<usize>) -> String {
     }
     let dotenv = if let Some(value) = cmd.dotenv() {
         util_fns.push_str(&format!("\n{ARGC_LOAD_DOTENV}\n"));
-        format!("\n    _argc_load_dotenv {}", escape_shell_words(value))
+        format!("\n    _argc_load_dotenv {value}")
     } else {
         String::new()
     };
