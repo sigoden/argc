@@ -109,7 +109,6 @@ impl ArgcValue {
                     }
                 }
                 ArgcValue::Dotenv(value) => {
-                    let value = escape_shell_words(value);
                     list.push(ARGC_LOAD_DOTENV.to_string());
                     list.push(format!("_argc_load_dotenv {value}"));
                 }

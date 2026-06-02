@@ -1,16 +1,37 @@
 _argc_load_dotenv() {
-    local env_file="$1" env_vars=""
-    if [[ -f "$env_file" ]]; then
-        while IFS='=' read -r key value; do
-            if [[ "$key" == $'#'* ]] || [[ -z "$key" ]]; then
-                continue
-            fi
-            if [[ -z "${!key+x}" ]]; then
-                env_vars="$env_vars $key=$value"
-            fi
-        done < <(cat "$env_file"; echo "")
-        if [[ -n "$env_vars" ]]; then
-            eval "export $env_vars"
+    local env_vars=""
+    for env_file in "$@"; do
+        if [[ -f "$env_file" ]]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+                if [[ -z "$line" ]] || [[ "$line" =~ ^[[:space:]]*# ]]; then
+                    continue
+                fi
+                
+                if [[ "$line" =~ ^[[:space:]]*([a-zA-Z_][a-zA-Z0-9_]*)=(.*)$ ]]; then
+                    local key="${BASH_REMATCH[1]}"
+                    local value="${BASH_REMATCH[2]}"
+                    
+                    if [[ "$value" =~ ^\"(.*)\"(.*)$ ]]; then
+                        value="${BASH_REMATCH[1]}"
+                    elif [[ "$value" =~ ^\'(.*)\'(.*)$ ]]; then
+                        value="${BASH_REMATCH[1]}"
+                    else
+                        if [[ "$value" =~ ^([^#]*[^[:space:]])[[:space:]]+#.*$ ]]; then
+                            value="${BASH_REMATCH[1]}"
+                        elif [[ "$value" =~ ^([^#]*)[[:space:]]*$ ]]; then
+                            value="${BASH_REMATCH[1]}"
+                        fi
+                        value="$(echo "$value" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+                    fi
+                    
+                    if [[ -z "${!key+x}" ]]; then
+                        env_vars="$env_vars $key=$value"
+                    fi
+                fi
+            done < "$env_file"
         fi
+    done
+    if [[ -n "$env_vars" ]]; then
+        eval "export $env_vars"
     fi
 }
