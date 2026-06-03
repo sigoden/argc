@@ -181,6 +181,7 @@ Adds metadata.
 | `@meta man-section <1-8>`        | root   | Override the section for the man page, defaulting to 1.              |
 | `@meta inherit-flag-options`     | root   | Subcommands will inherit the flags/options from their parent.        |
 | `@meta combine-shorts`           | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `. |
+| `@meta external-subcommands`     | root   | Enable external subcommands: scripts named `<cmd>-<name>.sh` in the same directory. |
 | `@meta symbol <param>`           | any    | Define a symbolic parameter, e.g. `+toolchain`, `@argument-file`.    |
 
 

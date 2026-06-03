@@ -23,6 +23,7 @@ pub enum ArgcValue {
     RequireTools(Vec<String>),
     CommandFn(String),
     ParamFn(String),
+    ExternalSubcommand(String, Vec<String>, usize),
     Error((String, i32)),
 }
 
@@ -34,6 +35,7 @@ impl ArgcValue {
         let mut exit = false;
         let mut positional_args = vec![];
         let mut require_tools = vec![];
+        let mut exist_external_subcommand = false;
         let (mut before_hook, mut after_hook) = (false, false);
         for value in values {
             match value {
@@ -131,10 +133,34 @@ impl ArgcValue {
                     }
                     exit = true;
                 }
+                ArgcValue::ExternalSubcommand(script_path, args, subcommand_args_index) => {
+                    let parent_args = &args[0..*subcommand_args_index];
+                    let remaining_args = &args[*subcommand_args_index + 1..];
+                    let parent_cmd = parent_args
+                        .iter()
+                        .map(|v| escape_shell_words(v))
+                        .collect::<Vec<_>>()
+                        .join(" ");
+                    let cmd = std::iter::once("bash".to_string())
+                        .chain(std::iter::once(script_path.clone()))
+                        .chain(remaining_args.iter().cloned())
+                        .map(|v| escape_shell_words(&v))
+                        .collect::<Vec<_>>()
+                        .join(" ");
+                    last = format!(
+                        "export ARGC_PARENT_ARGS={}\n{cmd}",
+                        escape_shell_words(&parent_cmd)
+                    );
+                    exist_external_subcommand = true;
+                }
                 ArgcValue::Error((error, exit)) => {
                     return format!("command cat >&2 <<-'EOF' \n{error}\nEOF\nexit {exit}")
                 }
             }
+        }
+
+        if exist_external_subcommand {
+            return last;
         }
 
         list.push(format!(

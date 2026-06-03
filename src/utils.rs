@@ -13,6 +13,7 @@ pub(crate) const META_DEFAULT_SUBCOMMAND: &str = "default-subcommand";
 pub(crate) const META_INHERIT_FLAG_OPTIONS: &str = "inherit-flag-options";
 pub(crate) const META_SYMBOL: &str = "symbol";
 pub(crate) const META_COMBINE_SHORTS: &str = "combine-shorts";
+pub(crate) const META_EXTERNAL_SUBCOMMANDS: &str = "external-subcommands";
 pub(crate) const META_MAN_SECTION: &str = "man-section";
 pub(crate) const META_REQUIRE_TOOLS: &str = "require-tools";
 

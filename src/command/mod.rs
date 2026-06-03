@@ -26,6 +26,13 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::Arc;
 
+#[derive(Debug, Clone)]
+pub(crate) struct ExternalSubcommandInfo {
+    pub name: String,
+    pub description: String,
+    pub path: String,
+}
+
 #[derive(Debug, Default)]
 pub(crate) struct Command {
     pub(crate) name: Option<String>,
@@ -51,6 +58,7 @@ pub(crate) struct Command {
     pub(crate) require_tools: IndexSet<String>,
     pub(crate) help_flags: Vec<&'static str>,
     pub(crate) version_flags: Vec<&'static str>,
+    pub(crate) external_subcommands: Vec<ExternalSubcommandInfo>,
 }
 
 impl Command {
@@ -701,6 +709,7 @@ impl Command {
         output.extend(self.render_positionals(wrap_width));
         output.extend(self.render_flag_options(wrap_width));
         output.extend(self.render_subcommands(wrap_width));
+        output.extend(self.render_external_subcommands(wrap_width));
         output.extend(self.render_envs(wrap_width));
         if output.is_empty() {
             return "\n".to_string();
@@ -835,6 +844,26 @@ impl Command {
         output
     }
 
+    fn render_external_subcommands(&self, wrap_width: Option<usize>) -> Vec<String> {
+        let mut output = vec![];
+        if self.external_subcommands.is_empty() {
+            return output;
+        }
+        let mut value_size = 0;
+        let list: Vec<_> = self
+            .external_subcommands
+            .iter()
+            .map(|info| {
+                value_size = value_size.max(info.name.len());
+                (info.name.clone(), info.description.clone())
+            })
+            .collect();
+        value_size += 2;
+        output.push("EXTERNAL COMMANDS:".to_string());
+        render_list(&mut output, list, value_size, wrap_width);
+        output
+    }
+
     fn render_subcommand_describe(&self) -> String {
         let mut output = self.describe_oneline().to_string();
         if let Some((aliases, _)) = &self.aliases {
@@ -906,6 +935,74 @@ fn update_parent_cmd(parent: &mut Command) -> Result<()> {
 
 fn sanitize_cmd_name(name: &str) -> String {
     name.trim_end_matches('_').to_string()
+}
+
+#[cfg(any(feature = "eval", feature = "compgen"))]
+pub(crate) fn collect_external_subcommands<T: Runtime>(
+    runtime: T,
+    script_path: &str,
+) -> Vec<ExternalSubcommandInfo> {
+    let dir = match runtime.parent_path(script_path) {
+        Some(d) => d,
+        None => return vec![],
+    };
+    let script_name = match script_path.rsplit(['/', '\\']).next() {
+        Some(name) => name.to_string(),
+        None => return vec![],
+    };
+    let (base_name, ext) = match script_name.rsplit_once('.') {
+        Some((stem, "sh")) => (stem.to_string(), ".sh".to_string()),
+        _ => (script_name, String::new()),
+    };
+    let prefix = format!("{base_name}-");
+    let mut result = vec![];
+    if let Some(entries) = runtime.read_dir(&dir) {
+        for file_name in entries {
+            if !file_name.starts_with(&prefix) {
+                continue;
+            }
+            if !ext.is_empty() && !file_name.ends_with(&ext) {
+                continue;
+            }
+            let sub_name = if ext.is_empty() {
+                file_name[prefix.len()..].to_string()
+            } else {
+                file_name[prefix.len()..]
+                    .strip_suffix(".sh")
+                    .unwrap_or(&file_name[prefix.len()..])
+                    .to_string()
+            };
+            if sub_name.starts_with('-') {
+                continue;
+            }
+            let full_path = runtime.join_path(&dir, &[&file_name]);
+            let description = runtime
+                .read_to_string(&full_path)
+                .map(|content| extract_description(&content))
+                .unwrap_or_default();
+            result.push(ExternalSubcommandInfo {
+                name: sub_name,
+                description,
+                path: full_path,
+            });
+        }
+    }
+    result.sort_by(|a, b| natord::compare_ignore_case(&a.name, &b.name));
+    result
+}
+
+#[cfg(any(feature = "eval", feature = "compgen"))]
+fn extract_description(content: &str) -> String {
+    for line in content.lines() {
+        match crate::parser::parse_line(line) {
+            Ok((_, Some(Some(EventData::Describe(value))))) => return value,
+            Ok((_, Some(Some(EventData::Cmd(_))))) | Ok((_, Some(Some(EventData::Func(_))))) => {
+                break;
+            }
+            _ => {}
+        }
+    }
+    String::new()
 }
 
 fn render_list(

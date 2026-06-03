@@ -48,6 +48,11 @@ pub fn eval<T: Runtime>(
     wrap_width: Option<usize>,
 ) -> Result<Vec<ArgcValue>> {
     let mut cmd = command::Command::new(script_content, &args[0])?;
+    if let Some(p) = script_path {
+        if cmd.has_metadata(crate::utils::META_EXTERNAL_SUBCOMMANDS) {
+            cmd.external_subcommands = command::collect_external_subcommands(runtime, p);
+        }
+    }
     cmd.eval(runtime, args, script_path, wrap_width)
 }
 
