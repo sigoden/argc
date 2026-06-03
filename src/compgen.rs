@@ -602,10 +602,14 @@ impl ArgcPathValue {
             }
             if !is_dir
                 && !self.exts.is_empty()
-                && self
-                    .exts
-                    .iter()
-                    .all(|v| !file_name.to_lowercase().ends_with(v))
+                && self.exts.iter().all(|v| {
+                    let ext = if v.starts_with('.') {
+                        v.to_string()
+                    } else {
+                        format!(".{v}")
+                    };
+                    !file_name.to_lowercase().ends_with(&ext)
+                })
             {
                 continue;
             }
@@ -749,12 +753,14 @@ fn convert_arg_value(value: &str) -> Option<ArgcPathValue> {
     } else if ["path", "file", "arg", "any"]
         .iter()
         .any(|v| value.contains(v))
+    // Here need to be contains, becuase user may set output-file or something like that
     {
         Some(ArgcPathValue {
             is_dir: false,
             exts: vec![],
         })
     } else if value.contains("dir") || value.contains("folder") {
+        // Same as above, need to be contains
         Some(ArgcPathValue {
             is_dir: true,
             exts: vec![],

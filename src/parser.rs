@@ -725,6 +725,12 @@ fn parse_bind_env(input: &str) -> nom::IResult<&str, Option<String>> {
 }
 
 fn notation_text(input: &str, balances: usize) -> nom::IResult<&str, usize> {
+    if balances > 128 {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Fail,
+        )));
+    }
     let (i1, c1) = anychar(input)?;
     match c1 {
         '<' => {

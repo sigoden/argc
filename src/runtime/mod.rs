@@ -67,8 +67,9 @@ where
             if let Some((key, value)) = line.split_once('=') {
                 let env_name = key.trim().to_string();
                 let env_value = value.trim().to_string();
-                let env_value = if (env_value.starts_with('"') && env_value.ends_with('"'))
-                    || (env_value.starts_with('\'') && env_value.ends_with('\''))
+                let env_value = if env_value.len() >= 2
+                    && ((env_value.starts_with('"') && env_value.ends_with('"'))
+                        || (env_value.starts_with('\'') && env_value.ends_with('\'')))
                 {
                     &env_value[1..env_value.len() - 1]
                 } else {

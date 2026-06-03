@@ -232,8 +232,13 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                                 arg_comp = ArgComp::FlagOrOptionCombine(arg.to_string());
                             }
                         } else {
-                            let name = arr.pop().and_then(|v| v.2).unwrap();
-                            let param = current_cmd.find_flag_option(name).unwrap();
+                            let name = arr
+                                .pop()
+                                .and_then(|v| v.2)
+                                .expect("combine_shorts: expected flag/option name");
+                            let param = current_cmd
+                                .find_flag_option(name)
+                                .expect("combine_shorts: expected matching param");
                             add_param_choice_fn(&mut choice_fns, param);
                             flag_option_args[cmd_level].extend(arr);
                             match_flag_option(
@@ -1496,7 +1501,12 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
         .notations()
         .get(index)
         .map(|v| v.as_str())
-        .unwrap_or_else(|| param.notations().last().unwrap());
+        .unwrap_or_else(|| {
+            param
+                .notations()
+                .last()
+                .expect("Notaion always has at least one")
+        });
     comp_param(param.describe_oneline(), value_name, param.data())
 }
 
