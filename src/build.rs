@@ -592,7 +592,7 @@ fn build_positionals(cmd: &Command) -> String {
             let required = if param.required() {
                 format!(
                     r#"
-            _argc_die "error: the required environments \`{render_value}\` were not provided""#
+            _argc_die "error: the required arguments \`{render_value}\` were not provided""#
                 )
             } else {
                 String::new()

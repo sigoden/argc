@@ -13,4 +13,4 @@ EOF
 exit 1
 
 # BUILD_OUTPUT
-error: the required environments `<VAL>...` were not provided
+error: the required arguments `<VAL>...` were not provided
