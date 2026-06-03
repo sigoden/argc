@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::{
     argc_value::ArgcValue,
-    command::{Command, SymbolParam},
+    command::{Command, ExternalSubcommandInfo, SymbolParam},
     param::{ChoiceValue, FlagOptionParam, Param, ParamData, PositionalParam},
     runtime::Runtime,
     utils::{argc_var_name, is_true_value, META_COMBINE_SHORTS},
@@ -19,7 +19,7 @@ use crate::{
 use either::Either;
 use indexmap::{IndexMap, IndexSet};
 
-pub(crate) struct Matcher<'a, 'b, T> {
+pub(crate) struct Matcher<'a: 'b, 'b, T> {
     runtime: T,
     cmds: Vec<&'a Command>,
     cmd_arg_indexes: Vec<usize>,
@@ -35,6 +35,8 @@ pub(crate) struct Matcher<'a, 'b, T> {
     wrap_width: Option<usize>,
     split_last_arg_at: Option<usize>,
     comp_option: Option<&'a str>,
+    pub(crate) detected_external_subcommand: Option<&'b str>,
+    pub(crate) detected_external_subcommand_args: &'b [String],
 }
 
 pub(crate) type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>); // key, values, param_name
@@ -73,7 +75,7 @@ pub(crate) enum MatchError {
     NoFlagValue(usize, String),
 }
 
-impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
+impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
     pub(crate) fn new(
         runtime: T,
         root_cmd: &'a Command,
@@ -93,6 +95,8 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
         let mut arg_comp = ArgComp::Any;
         let mut choice_fns = HashSet::new();
         let mut comp_option = None;
+        let mut detected_external_subcommand = None;
+        let mut detected_external_subcommand_args: &[String] = &[];
         let args_len = args.len();
         if root_cmd.delegated() {
             positional_args = args.iter().skip(1).map(|v| v.as_str()).collect();
@@ -302,6 +306,19 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
                         split_last_arg_at = Some(1);
                     }
                 } else {
+                    // External subcommand detection
+                    if !root_cmd.external_subcommands.is_empty()
+                        && positional_args.is_empty()
+                        && !(compgen && is_last_arg)
+                    {
+                        if let Some(info) =
+                            root_cmd.external_subcommands.iter().find(|e| e.name == arg)
+                        {
+                            detected_external_subcommand = Some(info.name.as_str());
+                            detected_external_subcommand_args = &args[arg_index + 1..];
+                            break;
+                        }
+                    }
                     let mut target_cmd = cmd;
                     if positional_args.is_empty() && !(compgen && is_last_arg) {
                         if let Some(subcmd) = cmd.find_default_subcommand() {
@@ -380,6 +397,8 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
             split_last_arg_at,
             comp_option,
             envs,
+            detected_external_subcommand,
+            detected_external_subcommand_args,
         }
     }
 
@@ -393,6 +412,21 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
 
     #[cfg(feature = "eval")]
     pub(crate) fn to_arg_values(&self) -> Vec<ArgcValue> {
+        if let Some(detected_name) = self.detected_external_subcommand {
+            let script_path = self.cmds[0]
+                .external_subcommands
+                .iter()
+                .find(|e| e.name == detected_name)
+                .map(|e| e.path.clone())
+                .unwrap_or_default();
+            let remaining_len = self.detected_external_subcommand_args.len();
+            let subcommand_args_index = self.args.len() - remaining_len - 1;
+            return vec![ArgcValue::ExternalSubcommand(
+                script_path,
+                self.args.to_vec(),
+                subcommand_args_index,
+            )];
+        }
         let bind_envs = self.build_bind_envs();
         if let Some(err) = self.validate(&bind_envs) {
             return vec![ArgcValue::Error(self.stringify_match_error(&err))];
@@ -467,13 +501,21 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
         let mut output = match &self.arg_comp {
             ArgComp::FlagOrOption => {
                 let mut output = self.comp_flag_options(false);
-                output.extend(comp_subcomands(last_cmd, true));
+                output.extend(comp_subcomands(
+                    last_cmd,
+                    true,
+                    &self.cmds[0].external_subcommands,
+                ));
                 output
             }
             ArgComp::FlagOrOptionCombine(value) => {
                 let mut output: Vec<CompItem> = vec![];
                 if value.len() == 2 && &self.args[self.cmd_arg_indexes[level]] == value {
-                    output.extend(comp_subcomands(self.cmds[level - 1], true));
+                    output.extend(comp_subcomands(
+                        self.cmds[level - 1],
+                        true,
+                        &self.cmds[0].external_subcommands,
+                    ));
                 }
                 output.extend(self.comp_flag_options(true).iter().filter_map(
                     |(v, description, nospace, comp_color)| {
@@ -504,10 +546,15 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
             }
             ArgComp::CommandOrPositional => {
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
-                    return comp_subcomands(last_cmd, false);
+                    return comp_subcomands(last_cmd, false, &self.cmds[0].external_subcommands);
                 }
                 let values = self.match_positionals();
-                comp_subcommands_positional(last_cmd, &values, self.positional_args.len() < 2)
+                comp_subcommands_positional(
+                    last_cmd,
+                    &values,
+                    self.positional_args.len() < 2,
+                    &self.cmds[0].external_subcommands,
+                )
             }
             ArgComp::OptionValue(name, index) => {
                 if let Some(param) = last_cmd.flag_option_params.iter().find(|v| v.id() == name) {
@@ -519,10 +566,15 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
             ArgComp::Symbol(ch) => comp_symbol(last_cmd, *ch),
             ArgComp::Any => {
                 if self.positional_args.len() == 2 && self.positional_args[0] == "help" {
-                    return comp_subcomands(last_cmd, false);
+                    return comp_subcomands(last_cmd, false, &self.cmds[0].external_subcommands);
                 }
                 let values = self.match_positionals();
-                comp_subcommands_positional(last_cmd, &values, self.positional_args.len() < 2)
+                comp_subcommands_positional(
+                    last_cmd,
+                    &values,
+                    self.positional_args.len() < 2,
+                    &self.cmds[0].external_subcommands,
+                )
             }
         };
         if output.is_empty()
@@ -990,7 +1042,13 @@ impl<'a, 'b, T: Runtime> Matcher<'a, 'b, T> {
                 exit = 1;
                 let cmd = self.last_cmd();
                 let cmd_str = cmd.cmd_paths().join("-");
-                let names = cmd.list_subcommand_names().join(", ");
+                let mut names: Vec<String> = cmd.list_subcommand_names();
+                for info in self.cmds[0].external_subcommands.iter() {
+                    if !names.contains(&info.name) {
+                        names.push(info.name.clone());
+                    }
+                }
+                let names = names.join(", ");
                 let details = match arg {
                     Some(arg) => format!("but '{arg}' is not one of them"),
                     None => "but one was not provided".to_string(),
@@ -1327,10 +1385,11 @@ fn comp_subcommands_positional(
     cmd: &Command,
     values: &[Vec<&str>],
     with_subcmd: bool,
+    external_subcommands: &[ExternalSubcommandInfo],
 ) -> Vec<CompItem> {
     let mut output = vec![];
     if with_subcmd {
-        output.extend(comp_subcomands(cmd, false));
+        output.extend(comp_subcomands(cmd, false, external_subcommands));
 
         // default subcommand
         if let Some(subcmd) = cmd.find_default_subcommand() {
@@ -1348,7 +1407,11 @@ fn comp_subcommands_positional(
 }
 
 #[cfg(feature = "compgen")]
-fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
+fn comp_subcomands(
+    cmd: &Command,
+    flag: bool,
+    external_subcommands: &[ExternalSubcommandInfo],
+) -> Vec<CompItem> {
     let mut output = vec![];
     let mut has_help_subcmd = false;
     let mut describe_help_subcmd = false;
@@ -1368,6 +1431,20 @@ fn comp_subcomands(cmd: &Command, flag: bool) -> Vec<CompItem> {
                     describe_help_subcmd = true
                 }
                 output.push((v, describe.to_string(), false, CompColor::of_command()))
+            }
+        }
+    }
+    for info in external_subcommands {
+        output.push((
+            info.name.clone(),
+            info.description.clone(),
+            false,
+            CompColor::of_command(),
+        ));
+        if !flag {
+            has_help_subcmd = true;
+            if !info.description.is_empty() {
+                describe_help_subcmd = true;
             }
         }
     }

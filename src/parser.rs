@@ -117,7 +117,7 @@ pub(crate) fn parse_symbol(input: &str) -> Option<(char, &str, Option<&str>)> {
     parse_symbol_data(input).map(|(_, v)| v).ok()
 }
 
-fn parse_line(line: &str) -> nom::IResult<&str, Option<Option<EventData>>> {
+pub(crate) fn parse_line(line: &str) -> nom::IResult<&str, Option<Option<EventData>>> {
     alt((map(alt((parse_tag, parse_fn)), Some), success(None))).parse(line)
 }
 

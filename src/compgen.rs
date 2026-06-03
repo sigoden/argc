@@ -1,10 +1,10 @@
-use crate::command::Command;
+use crate::command::{collect_external_subcommands, Command};
 use crate::matcher::Matcher;
 use crate::runtime::Runtime;
 use crate::utils::{is_quote_char, is_windows_path, unbalance_quote};
 use crate::Shell;
 
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use indexmap::IndexMap;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -35,7 +35,7 @@ pub fn compgen<T: Runtime>(
             (last_arg.to_string(), None)
         }
     };
-    let cmd = if script_path == COMPGEN_KIND_SYMBOL {
+    let mut cmd = if script_path == COMPGEN_KIND_SYMBOL {
         let comp_kind = &args[0];
         let script_content = format!(
             r#"# @arg args~[`{comp_kind}`]
@@ -60,7 +60,37 @@ pub fn compgen<T: Runtime>(
             })
             .collect()
     };
+
+    // Collect external subcommands for Matcher-based detection
+    if script_path != COMPGEN_KIND_SYMBOL
+        && !script_path.is_empty()
+        && cmd.has_metadata(crate::utils::META_EXTERNAL_SUBCOMMANDS)
+    {
+        cmd.external_subcommands = collect_external_subcommands(runtime, script_path);
+    }
     let matcher = Matcher::new(runtime, &cmd, &new_args, true);
+    // Check for external subcommand detection in Matcher
+    if let Some(detected_name) = matcher.detected_external_subcommand {
+        if let Some(info) = cmd
+            .external_subcommands
+            .iter()
+            .find(|e| e.name == detected_name)
+        {
+            let content = runtime
+                .read_to_string(&info.path)
+                .ok_or_else(|| anyhow!("Failed to read external script at {}", info.path))?;
+            let ext_name = info
+                .path
+                .rsplit(['/', '\\'])
+                .next()
+                .and_then(|n| n.strip_suffix(".sh").or(Some(n)))
+                .unwrap_or("argc");
+            let ext_args: Vec<String> = std::iter::once(ext_name.to_string())
+                .chain(matcher.detected_external_subcommand_args.iter().cloned())
+                .collect();
+            return compgen(runtime, shell, &info.path, &content, &ext_args, no_color);
+        }
+    }
     let compgen_values = matcher.compgen(shell);
     let mut default_nospace = unbalance.is_some();
     let mut prefix = unbalance.map(|v| v.to_string()).unwrap_or_default();

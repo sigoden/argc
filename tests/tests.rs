@@ -23,3 +23,5 @@ mod multiline;
 mod param_fn;
 mod spec;
 mod validate;
+
+mod external_subcommands;
