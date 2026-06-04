@@ -4,10 +4,10 @@ expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}
 ---
 
 # OUTPUT
-error: invalid value `oca` for environment variable `OCA` that bound to `--oca`
+error: invalid value `oca` for environment variable `BIND_ENVS_OCA` that bound to `--oca`
   [possible values: a, b]
 
 
 # BUILD_OUTPUT
-error: invalid value `oca` for environment variable `OCA` that bound to `--oca <OCA>`
+error: invalid value `oca` for environment variable `BIND_ENVS_OCA` that bound to `--oca <OCA>`
   [possible values: a, b]

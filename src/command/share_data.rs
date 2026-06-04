@@ -9,7 +9,7 @@ use std::collections::HashMap;
 #[derive(Default, Debug)]
 pub(crate) struct ShareData {
     pub(crate) scope: EventScope,
-    pub(crate) name: Option<String>,
+    pub(crate) root_name: Option<String>,
     pub(crate) fns: HashMap<String, Position>,
     pub(crate) cmd_fns: HashMap<String, Position>,
     pub(crate) cmd_pos: usize,
@@ -19,7 +19,7 @@ pub(crate) struct ShareData {
 
 impl ShareData {
     pub(crate) fn name(&self) -> String {
-        match &self.name {
+        match &self.root_name {
             Some(v) => v.clone(),
             None => ROOT_NAME.to_string(),
         }

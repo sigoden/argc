@@ -7,36 +7,36 @@ expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}
 USAGE: bind-envs options [OPTIONS] --ob <OB>
 
 OPTIONS:
-      --oa1 <OA1>     [env: OA1]
-      --oa2 <OA2>     [env: OA2]
+      --oa1 <OA1>     [env: BIND_ENVS_OA1]
+      --oa2 <OA2>     [env: BIND_ENVS_OA2]
       --oa3 <OA3>     [env: OA]
       --ob <OB>       [env: OB]
-      --oc [OC]...    [env: OC]
-      --oda <ODA>     [default: a] [env: ODA]
-      --odb <ODB>     [env: ODB]
-      --oca <OCA>     [possible values: a, b] [env: OCA]
-      --occ [OCC]...  [possible values: a, b] [env: OCC]
-      --ofa <OFA>     [env: OFA]
-      --ofd [OFD]...  [env: OFD]
-      --oxa <OXA~>    [env: OXA]
+      --oc [OC]...    [env: BIND_ENVS_OC]
+      --oda <ODA>     [default: a] [env: BIND_ENVS_ODA]
+      --odb <ODB>     [env: BIND_ENVS_ODB]
+      --oca <OCA>     [possible values: a, b] [env: BIND_ENVS_OCA]
+      --occ [OCC]...  [possible values: a, b] [env: BIND_ENVS_OCC]
+      --ofa <OFA>     [env: BIND_ENVS_OFA]
+      --ofd [OFD]...  [env: BIND_ENVS_OFD]
+      --oxa <OXA~>    [env: BIND_ENVS_OXA]
   -h, --help
 
 
 
 # BUILD_OUTPUT
-USAGE: prog options [OPTIONS] --ob <OB>
+USAGE: bind-envs options [OPTIONS] --ob <OB>
 
 OPTIONS:
-      --oa1 <OA1>     [env: OA1]
-      --oa2 <OA2>     [env: OA2]
+      --oa1 <OA1>     [env: BIND_ENVS_OA1]
+      --oa2 <OA2>     [env: BIND_ENVS_OA2]
       --oa3 <OA3>     [env: OA]
       --ob <OB>       [env: OB]
-      --oc [OC]...    [env: OC]
-      --oda <ODA>     [default: a] [env: ODA]
-      --odb <ODB>     [env: ODB]
-      --oca <OCA>     [possible values: a, b] [env: OCA]
-      --occ [OCC]...  [possible values: a, b] [env: OCC]
-      --ofa <OFA>     [env: OFA]
-      --ofd [OFD]...  [env: OFD]
-      --oxa <OXA~>    [env: OXA]
+      --oc [OC]...    [env: BIND_ENVS_OC]
+      --oda <ODA>     [default: a] [env: BIND_ENVS_ODA]
+      --odb <ODB>     [env: BIND_ENVS_ODB]
+      --oca <OCA>     [possible values: a, b] [env: BIND_ENVS_OCA]
+      --occ [OCC]...  [possible values: a, b] [env: BIND_ENVS_OCC]
+      --ofa <OFA>     [env: BIND_ENVS_OFA]
+      --ofd [OFD]...  [env: BIND_ENVS_OFD]
+      --oxa <OXA~>    [env: BIND_ENVS_OXA]
   -h, --help

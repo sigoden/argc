@@ -25,7 +25,7 @@ ENVIRONMENTS:
 # BUILD_OUTPUT
 All kinds of @env
 
-USAGE: prog <COMMAND>
+USAGE: envs <COMMAND>
 
 COMMANDS:
   run

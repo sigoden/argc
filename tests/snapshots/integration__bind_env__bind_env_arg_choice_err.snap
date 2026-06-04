@@ -4,10 +4,10 @@ expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}
 ---
 
 # OUTPUT
-error: invalid value `v1` for environment variable `VAL` that bound to `[VAL]`
+error: invalid value `v1` for environment variable `BIND_ENVS_VAL` that bound to `[VAL]`
   [possible values: x, y, z]
 
 
 # BUILD_OUTPUT
-error: invalid value `v1` for environment variable `VAL` that bound to `[VAL]`
+error: invalid value `v1` for environment variable `BIND_ENVS_VAL` that bound to `[VAL]`
   [possible values: x, y, z]

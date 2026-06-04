@@ -90,7 +90,7 @@ Defines a positional argument.
 # @arg vfd*,[`_choice_fn`]        multi-values + choice from fn + comma-separated list
 # @arg vxa~                       capture all remaining args
 # @arg vea $$                     bind-env
-# @arg veb $BE <PATH>             bind-named-env
+# @arg veb $VEB <PATH             bind-named-env
 ```
 
 ### `@option`
@@ -126,7 +126,7 @@ Defines an option argument.
 # @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option    --oxa~                 capture all remaining args
 # @option    --oea $$               bind-env
-# @option    --oeb $BE <PATH>       bind-named-env
+# @option    --oeb $OEB <PATH>      bind-named-env
 ```
 
 ### `@flag`
@@ -144,7 +144,7 @@ Defines a flag argument. Flag is a special option that does not accept any value
 # @flag  -c              short only
 # @flag     --fd*        multi-occurs
 # @flag     --ea $$      bind-env
-# @flag     --eb $BE     bind-named-env
+# @flag     --eb $EB     bind-named-env
 ```
 
 ### `@env`
@@ -291,7 +291,7 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
 
  Link environment variables to params:
 
-- `$$`: Automatically use the param's name for the environment variable.
+- `$$`: Automatically use the parameter's name in uppercase as the environment variable name, prefixed with the command name (e.g. `--port $$` in command `serve` becomes `SERVE_PORT`).
 - `$`[_NAME_]: Use a specific environment variable name.
 
 ### description

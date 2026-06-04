@@ -87,7 +87,7 @@ eval "$({argc_path} --argc-eval "$0" "$@")"
     }
 }
 
-pub fn build_script(script_dir: &TempDir, source: &str) -> PathBuf {
+pub fn build_script(script_dir: &TempDir, source: &str, root_name: &str) -> PathBuf {
     let has_fn = source.contains("()");
     let patched_source = source.replace(
         "{ :; }",
@@ -96,7 +96,7 @@ pub fn build_script(script_dir: &TempDir, source: &str) -> PathBuf {
     echo "$argc__fn" "$@"
 }"#,
     );
-    let mut output = argc::build(&patched_source, "prog", None).unwrap();
+    let mut output = argc::build(&patched_source, root_name, None).unwrap();
     if !has_fn {
         output.push_str("\n( set -o posix ; set ) | grep ^argc_");
     }
