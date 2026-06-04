@@ -35,8 +35,7 @@ pub(crate) struct Matcher<'a: 'b, 'b, T> {
     wrap_width: Option<usize>,
     split_last_arg_at: Option<usize>,
     comp_option: Option<&'a str>,
-    pub(crate) detected_external_subcommand: Option<&'b str>,
-    pub(crate) detected_external_subcommand_args: &'b [String],
+    pub(crate) detected_external_subcommand: Option<(&'b str, &'b [String])>,
 }
 
 pub(crate) type FlagOptionArg<'a, 'b> = (&'b str, Vec<&'b str>, Option<&'a str>); // key, values, param_name
@@ -96,7 +95,6 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
         let mut choice_fns = HashSet::new();
         let mut comp_option = None;
         let mut detected_external_subcommand = None;
-        let mut detected_external_subcommand_args: &[String] = &[];
         let args_len = args.len();
         if root_cmd.delegated() {
             positional_args = args.iter().skip(1).map(|v| v.as_str()).collect();
@@ -319,8 +317,8 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                         if let Some(info) =
                             root_cmd.external_subcommands.iter().find(|e| e.name == arg)
                         {
-                            detected_external_subcommand = Some(info.name.as_str());
-                            detected_external_subcommand_args = &args[arg_index + 1..];
+                            detected_external_subcommand =
+                                Some((info.name.as_str(), &args[arg_index + 1..]));
                             break;
                         }
                     }
@@ -403,7 +401,6 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
             comp_option,
             envs,
             detected_external_subcommand,
-            detected_external_subcommand_args,
         }
     }
 
@@ -417,14 +414,14 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
 
     #[cfg(feature = "eval")]
     pub(crate) fn to_arg_values(&self) -> Vec<ArgcValue> {
-        if let Some(detected_name) = self.detected_external_subcommand {
+        if let Some((detected_name, detected_args)) = self.detected_external_subcommand {
             let script_path = self.cmds[0]
                 .external_subcommands
                 .iter()
                 .find(|e| e.name == detected_name)
                 .map(|e| e.path.clone())
                 .unwrap_or_default();
-            let remaining_len = self.detected_external_subcommand_args.len();
+            let remaining_len = detected_args.len();
             let subcommand_args_index = self.args.len() - remaining_len - 1;
             return vec![ArgcValue::ExternalSubcommand(
                 script_path,

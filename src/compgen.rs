@@ -70,7 +70,7 @@ pub fn compgen<T: Runtime>(
     }
     let matcher = Matcher::new(runtime, &cmd, &new_args, true);
     // Check for external subcommand detection in Matcher
-    if let Some(detected_name) = matcher.detected_external_subcommand {
+    if let Some((detected_name, detected_args)) = matcher.detected_external_subcommand {
         if let Some(info) = cmd
             .external_subcommands
             .iter()
@@ -86,7 +86,7 @@ pub fn compgen<T: Runtime>(
                 .and_then(|n| n.strip_suffix(".sh").or(Some(n)))
                 .unwrap_or("argc");
             let ext_args: Vec<String> = std::iter::once(ext_name.to_string())
-                .chain(matcher.detected_external_subcommand_args.iter().cloned())
+                .chain(detected_args.iter().cloned())
                 .collect();
             return compgen(runtime, shell, &info.path, &content, &ext_args, no_color);
         }
