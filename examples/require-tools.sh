@@ -1,6 +1,6 @@
 # @describe how to use `@meta require-tools`
 
-# @meta require-tools awk,sed
+# @meta require-tools awk sed
 
 # @cmd
 # @meta require-tools git

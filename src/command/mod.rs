@@ -364,7 +364,8 @@ impl Command {
             vec![]
         } else {
             raw_require_tools
-                .split(',')
+                .split(',') // Keep commas as separator for compatibility
+                .flat_map(|part| part.split_whitespace())
                 .map(|v| v.to_string())
                 .collect()
         }
