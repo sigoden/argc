@@ -43,7 +43,7 @@ macro_rules! snapshot {
         let values = argc::eval(argc::NativeRuntime, $source, &args, $path, $width).unwrap();
         let shell_code = argc::ArgcValue::to_bash(&values);
         let build_script_dir = $crate::fixtures::tmpdir();
-        let build_script_path = $crate::fixtures::build_script(&build_script_dir, $source);
+        let build_script_path = $crate::fixtures::build_script(&build_script_dir, $source, "prog");
         let build_output = $crate::fixtures::run_script(&build_script_path, &args[1..], &[]);
         let args = $args.join(" ");
         let data = format!(
@@ -73,7 +73,7 @@ macro_rules! snapshot_multi {
             $crate::fixtures::create_argc_script($source, "script.sh");
 
         let build_script_dir = $crate::fixtures::tmpdir();
-        let build_script_path = $crate::fixtures::build_script(&build_script_dir, $source);
+        let build_script_path = $crate::fixtures::build_script(&build_script_dir, $source, "prog");
 
         for args in $matrix.iter() {
             let args: Vec<String> = args.iter().map(|v| v.to_string()).collect();
@@ -231,7 +231,8 @@ macro_rules! snapshot_env {
         let build_output = {
             let build_script_dir = $crate::fixtures::tmpdir();
             let source = std::fs::read_to_string(&script_path).unwrap();
-            let build_script_path = $crate::fixtures::build_script(&build_script_dir, &source);
+            let root_name =  std::path::Path::new($script_file).file_stem().and_then(|s| s.to_str()).unwrap_or("prog");
+            let build_script_path = $crate::fixtures::build_script(&build_script_dir, &source, root_name);
             $crate::fixtures::run_script(&build_script_path, &args, &envs)
         };
 

@@ -65,7 +65,7 @@ impl Command {
     pub(crate) fn new(source: &str, root_name: &str) -> Result<Self> {
         let events = parse(source)?;
         let mut root = Command::new_from_events(&events)?;
-        root.share.borrow_mut().name = root
+        root.share.borrow_mut().root_name = root
             .get_metadata(META_BINNAME)
             .map(|v| v.to_string())
             .or_else(|| Some(root_name.to_string()));
@@ -74,6 +74,7 @@ impl Command {
             root.inherit_flag_options();
         }
         root.inherit_envs();
+        root.propagate_cmd_name_to_params();
         Ok(root)
     }
 
@@ -605,6 +606,24 @@ impl Command {
         }
         for subcmd in self.subcommands.iter_mut() {
             subcmd.inherit_flag_options();
+        }
+    }
+
+    fn propagate_cmd_name_to_params(&mut self) {
+        let root_name = self
+            .share
+            .borrow()
+            .root_name
+            .clone()
+            .unwrap_or_else(|| ROOT_NAME.to_string());
+        for param in self.flag_option_params.iter_mut() {
+            param.data_mut().root_name = Some(root_name.clone());
+        }
+        for param in self.positional_params.iter_mut() {
+            param.data_mut().root_name = Some(root_name.clone());
+        }
+        for subcmd in self.subcommands.iter_mut() {
+            subcmd.propagate_cmd_name_to_params();
         }
     }
 

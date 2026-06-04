@@ -7,20 +7,20 @@ expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}
 USAGE: bind-envs cmd_for_notation [OPTIONS] [XYZ]
 
 ARGS:
-  [XYZ]  [env: VAL]
+  [XYZ]  [env: BIND_ENVS_VAL]
 
 OPTIONS:
-      --OA <XYZ>  [env: OA]
+      --OA <XYZ>  [env: BIND_ENVS_OA]
   -h, --help
 
 
 
 # BUILD_OUTPUT
-USAGE: prog cmd_for_notation [OPTIONS] [XYZ]
+USAGE: bind-envs cmd_for_notation [OPTIONS] [XYZ]
 
 ARGS:
-  [XYZ]  [env: VAL]
+  [XYZ]  [env: BIND_ENVS_VAL]
 
 OPTIONS:
-      --OA <XYZ>  [env: OA]
+      --OA <XYZ>  [env: BIND_ENVS_OA]
   -h, --help

@@ -9,11 +9,11 @@ How to bind env to param
 USAGE: bind-envs flags [OPTIONS]
 
 OPTIONS:
-      --fa1    [env: FA1]
-      --fa2    [env: FA2]
+      --fa1    [env: BIND_ENVS_FA1]
+      --fa2    [env: BIND_ENVS_FA2]
       --fa3    [env: FA]
-      --fc...  [env: FC]
-      --fd     [env: FD]
+      --fc...  [env: BIND_ENVS_FC]
+      --fd     [env: BIND_ENVS_FD]
   -h, --help
 
 
@@ -21,12 +21,12 @@ OPTIONS:
 # BUILD_OUTPUT
 How to bind env to param
 
-USAGE: prog flags [OPTIONS]
+USAGE: bind-envs flags [OPTIONS]
 
 OPTIONS:
-      --fa1    [env: FA1]
-      --fa2    [env: FA2]
+      --fa1    [env: BIND_ENVS_FA1]
+      --fa2    [env: BIND_ENVS_FA2]
       --fa3    [env: FA]
-      --fc...  [env: FC]
-      --fd     [env: FD]
+      --fc...  [env: BIND_ENVS_FC]
+      --fd     [env: BIND_ENVS_FD]
   -h, --help

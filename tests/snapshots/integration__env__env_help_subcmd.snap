@@ -19,7 +19,7 @@ ENVIRONMENTS:
 
 
 # BUILD_OUTPUT
-USAGE: prog run
+USAGE: envs run
 
 ENVIRONMENTS:
   TEST_EB*  required

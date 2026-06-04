@@ -15,7 +15,7 @@ argc_oc=([0]="v1" [1]="v2")
 argc_oca=a
 argc_occ=([0]="a")
 argc_oda=oda
-argc_odb=argc
+argc_odb=odd
 argc_ofa=abc
 argc_ofd=([0]="abc" [1]="def")
 argc_oxa=([0]="oxa")
@@ -34,7 +34,7 @@ argc_oc=([0]="v1" [1]="v2")
 argc_oca=a
 argc_occ=([0]="a")
 argc_oda=oda
-argc_odb=argc
+argc_odb=odd
 argc_ofa=abc
 argc_ofd=([0]="abc" [1]="def")
 argc_oxa=([0]="oxa")

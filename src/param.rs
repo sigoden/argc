@@ -759,6 +759,7 @@ pub(crate) struct ParamData {
     pub(crate) default: Option<DefaultValue>,
     pub(crate) modifier: Modifier,
     pub(crate) env: Option<Option<String>>,
+    pub(crate) root_name: Option<String>,
 }
 
 impl ParamData {
@@ -770,6 +771,7 @@ impl ParamData {
             default: None,
             modifier: Modifier::Optional,
             env: None,
+            root_name: None,
         }
     }
 
@@ -823,7 +825,15 @@ impl ParamData {
     pub(crate) fn normalize_bind_env(&self, id: &str) -> Option<String> {
         let env = match self.env.as_ref()? {
             Some(v) => v.clone(),
-            None => sanitize_var_name(id).to_uppercase(),
+            None => {
+                let name = sanitize_var_name(id).to_uppercase();
+                match &self.root_name {
+                    Some(prefix) => {
+                        format!("{}_{}", sanitize_var_name(prefix).to_uppercase(), name)
+                    }
+                    None => name,
+                }
+            }
         };
         Some(env)
     }
