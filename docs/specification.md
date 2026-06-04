@@ -177,7 +177,7 @@ Adds metadata.
 | `@meta binname <value>`          | root   | Set binary name for usage, defaults to script file name.             |
 | `@meta dotenv [<path>]`          | root   | Load a dotenv file from a custom path, if present.                   |
 | `@meta default-subcommand`       | subcmd | Set the current subcommand as the default.                           |
-| `@meta require-tools <tool>,...` | any    | Require certain tools to be available on the system.                 |
+| `@meta require-tools <tool>...`  | any    | Require certain tools to be available on the system. |
 | `@meta man-section <1-8>`        | root   | Override the section for the man page, defaulting to 1.              |
 | `@meta inherit-flag-options`     | root   | Subcommands will inherit the flags/options from their parent.        |
 | `@meta combine-shorts`           | root   | Short flags/options can be combined, e.g. `prog -xf => prog -x -f `. |
@@ -189,7 +189,7 @@ Adds metadata.
 # @meta version 1.0.0
 # @meta dotenv
 # @meta dotenv .env.local
-# @meta require-tools git,yq
+# @meta require-tools git yq
 # @meta man-section 8
 # @meta symbol +toolchain[`_choice_fn`]
 ```
