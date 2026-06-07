@@ -761,6 +761,31 @@ cmd() { :; }
 }
 
 #[test]
+fn fallback_comp_file_with_dot_prefix() {
+    let script = r###"
+# @cmd
+# @option --val1
+# @option --val2[`_choice_fn`]
+# @arg val3
+cmd() { :; }
+
+_choice_fn() {
+    :;
+}
+"###;
+
+    snapshot_compgen!(
+        script,
+        [
+            vec!["prog", "cmd", "--val1", "./Argc"],
+            vec!["prog", "cmd", "--val2", "./Argc"],
+            vec!["prog", "cmd", "./Argc"],
+        ],
+        argc::Shell::Bash
+    );
+}
+
+#[test]
 fn redirect_symbols() {
     let script = r###"
 # @option --oa

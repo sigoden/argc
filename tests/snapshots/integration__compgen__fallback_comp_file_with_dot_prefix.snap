@@ -1,0 +1,12 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog cmd --val1 ./Argc` ************
+./Argcfile.sh 
+
+************ COMPGEN `prog cmd --val2 ./Argc` ************
+./Argcfile.sh 
+
+************ COMPGEN `prog cmd ./Argc` ************
+./Argcfile.sh
