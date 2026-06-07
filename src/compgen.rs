@@ -232,7 +232,17 @@ pub fn compgen<T: Runtime>(
         .collect();
 
     if !shell.is_generic() {
-        if let Some(path_value) = argc_value.and_then(|v| convert_arg_value(&v)) {
+        let mut path_value = argc_value.and_then(|v| convert_arg_value(&v));
+        if path_value.is_none()
+            && candidates.is_empty()
+            && (last_arg.starts_with("./") || last_arg.starts_with(".\\"))
+        {
+            path_value = Some(ArgcPathValue {
+                is_dir: false,
+                exts: vec![],
+            });
+        }
+        if let Some(path_value) = path_value {
             if let Some((value_prefix, value_filter, more_candidates)) = path_value.compgen(
                 runtime,
                 shell,
