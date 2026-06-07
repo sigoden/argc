@@ -20,6 +20,10 @@ pub const SCRIPT_PATHS: [&str; 8] = [
     "dir6/ARGCFILE",
 ];
 
+pub fn argc_bin() -> assert_cmd::Command {
+    assert_cmd::Command::new(assert_cmd::cargo::cargo_bin!())
+}
+
 pub fn locate_script(script_path: &str) -> String {
     let mut spec_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     spec_path.push(script_path);
@@ -31,6 +35,7 @@ pub fn locate_script(script_path: &str) -> String {
 pub fn tmpdir() -> TempDir {
     assert_fs::TempDir::new().expect("Couldn't create a temp dir for tests")
 }
+
 /// Test fixture which creates a temporary directory with a few files and directories inside.
 /// The directories also contain files.
 #[fixture]
