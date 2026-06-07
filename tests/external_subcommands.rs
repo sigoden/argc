@@ -1,8 +1,6 @@
-use predicates::prelude::*;
+use crate::fixtures::argc_bin;
 
-fn bin() -> assert_cmd::Command {
-    assert_cmd::Command::new(assert_cmd::cargo::cargo_bin!())
-}
+use predicates::prelude::*;
 
 fn script_path() -> String {
     crate::fixtures::locate_script("examples/external.sh")
@@ -10,7 +8,7 @@ fn script_path() -> String {
 
 #[test]
 fn help_shows_external_commands() {
-    bin()
+    argc_bin()
         .arg("--argc-eval")
         .arg(script_path())
         .arg("--help")
@@ -27,7 +25,7 @@ fn help_shows_external_commands() {
 
 #[test]
 fn internal_subcommand_still_works() {
-    bin()
+    argc_bin()
         .arg("--argc-eval")
         .arg(script_path())
         .arg("builtin")
@@ -39,7 +37,7 @@ fn internal_subcommand_still_works() {
 
 #[test]
 fn external_external_subcommand_generates_bash_call() {
-    bin()
+    argc_bin()
         .arg("--argc-eval")
         .arg(script_path())
         .arg("foo")
@@ -54,7 +52,7 @@ fn external_external_subcommand_generates_bash_call() {
 
 #[test]
 fn external_external_subcommand_with_flags_generates_bash_call() {
-    bin()
+    argc_bin()
         .arg("--argc-eval")
         .arg(script_path())
         .arg("bar")
@@ -70,7 +68,7 @@ fn external_external_subcommand_with_flags_generates_bash_call() {
 
 #[test]
 fn compgen_include_external_subcommands() {
-    bin()
+    argc_bin()
         .arg("--argc-compgen")
         .arg("generic")
         .arg(script_path())
@@ -86,7 +84,7 @@ fn compgen_include_external_subcommands() {
 
 #[test]
 fn compgen_show_external_subcommands_after_partial() {
-    bin()
+    argc_bin()
         .arg("--argc-compgen")
         .arg("generic")
         .arg(script_path())
@@ -99,7 +97,7 @@ fn compgen_show_external_subcommands_after_partial() {
 
 #[test]
 fn compgen_show_external_subcommand_flags() {
-    bin()
+    argc_bin()
         .arg("--argc-compgen")
         .arg("generic")
         .arg(script_path())
@@ -113,7 +111,7 @@ fn compgen_show_external_subcommand_flags() {
 
 #[test]
 fn invalid_subcommand_error_includes_external() {
-    bin()
+    argc_bin()
         .arg("--argc-eval")
         .arg(script_path())
         .arg("abc")
