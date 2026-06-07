@@ -46,13 +46,14 @@ fn create() {
 }
 
 #[test]
-fn create_with_tasks() {
+fn create_argcfile_with_tasks() {
     let tmpdir = tmpdir();
     let path_env_var = get_path_env_var();
     Command::new(assert_cmd::cargo::cargo_bin!())
         .current_dir(tmpdir.path())
         .env("PATH", path_env_var.clone())
         .arg("--argc-create")
+        .arg("-")
         .args(["foo", "bar"])
         .assert()
         .success();
@@ -63,6 +64,22 @@ fn create_with_tasks() {
         .assert()
         .stdout(predicates::str::contains("TODO bar"))
         .success();
+}
+
+#[test]
+fn create_cli_with_tasks() {
+    let tmpdir = tmpdir();
+    let path_env_var = get_path_env_var();
+    Command::new(assert_cmd::cargo::cargo_bin!())
+        .current_dir(tmpdir.path())
+        .env("PATH", path_env_var.clone())
+        .arg("--argc-create")
+        .arg("mycli")
+        .args(["foo", "bar"])
+        .assert()
+        .success();
+    let contents = std::fs::read_to_string(tmpdir.join("mycli")).unwrap();
+    insta::assert_snapshot!(contents);
 }
 
 #[test]

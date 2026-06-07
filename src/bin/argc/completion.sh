@@ -1,5 +1,5 @@
 # @option --argc-eval~ <FILE> <ARGS>                Use `eval "$(argc --argc-eval "$0" "$@")"`
-# @option --argc-create~ <RECIPES>                  Create a boilerplate argcfile
+# @option --argc-create~ <-|FILE> <RECIPES>         Create a boilerplate argc-based script
 # @option --argc-run~ <FILE> <ARGS>                 Run an argc-based script
 # @option --argc-build <FILE> <OUTPATH?>            Generate bashscript without argc dependency
 # @option --argc-mangen <FILE> <OUTDIR>             Generate man pages

@@ -1,0 +1,20 @@
+---
+source: tests/cli.rs
+expression: contents
+---
+#!/usr/bin/env bash
+
+set -e
+
+# @cmd
+foo() {
+    echo TODO foo
+}
+
+# @cmd
+bar() {
+    echo TODO bar
+}
+
+# See more details at https://github.com/sigoden/argc
+eval "$(argc --argc-eval "$0" "$@")"

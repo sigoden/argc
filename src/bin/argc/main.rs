@@ -94,14 +94,34 @@ fn run() -> Result<i32> {
                 return run_command(&script_path, &shell, &args, envs, cwd);
             }
             "--argc-create" => {
-                if let Some((_, script_file)) = get_script_path(false) {
-                    bail!("Already exist {}", script_file.display());
-                }
-                let content = generate_boilerplate(&args[2..]);
-                let names = runner_script_names();
-                fs::write(&names[0], content)
-                    .with_context(|| format!("Failed to create {}", &names[0]))?;
-                println!("{} has been successfully created.", &names[0]);
+                let (outpath, task_args) = match args.get(2) {
+                    Some(v) if v == "-" => {
+                        if let Some((_, script_file)) = get_script_path(false) {
+                            bail!("Already exist {}", script_file.display());
+                        }
+                        let names = runner_script_names();
+                        (names[0].clone(), &args[3..])
+                    }
+                    Some(v) => {
+                        if Path::new(v).exists() {
+                            bail!("Already exist {}", v);
+                        }
+                        (v.clone(), &args[3..])
+                    }
+                    None => {
+                        if let Some((_, script_file)) = get_script_path(false) {
+                            bail!("Already exist {}", script_file.display());
+                        }
+                        let names = runner_script_names();
+                        (names[0].clone(), &args[2..])
+                    }
+                };
+                let content = generate_boilerplate(task_args);
+                fs::write(&outpath, content)
+                    .with_context(|| format!("Failed to create {outpath}"))?;
+                set_permissions(&outpath)
+                    .with_context(|| format!("Failed to set execute permission to '{outpath}'",))?;
+                println!("Successfully created {outpath}");
             }
             "--argc-build" => {
                 let (source, script_path, cmd_args) = parse_script_args(&args[2..])?;
@@ -161,7 +181,7 @@ fn run() -> Result<i32> {
                 let shell = runtime.shell_path()?;
                 let (source, script_path, cmd_args) = parse_script_args(&args[2..])?;
                 if !source.contains("--argc-eval") {
-                    bail!("Parallel only available for argc based scripts.")
+                    bail!("Parallel only available for argc based scripts")
                 }
                 parallel::parallel(runtime, &shell, &script_path, &cmd_args[1..])?;
             }
@@ -188,7 +208,7 @@ fn run() -> Result<i32> {
     } else {
         let shell = runtime.shell_path()?;
         let (script_dir, script_file) = get_script_path(true)
-            .ok_or_else(|| anyhow!("Argcfile not found, try `argc --argc-help` for help."))?;
+            .ok_or_else(|| anyhow!("Argcfile not found, try `argc --argc-help` for help"))?;
         let mut envs = HashMap::new();
         if let Some(cwd) = runtime.current_dir() {
             if env::var("ARGC_PWD").is_err() {
