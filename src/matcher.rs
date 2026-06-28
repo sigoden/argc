@@ -597,6 +597,14 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
         self.split_last_arg_at
     }
 
+    fn parent_has_explicit_flag_option(&self, level: usize, param_id: &str) -> bool {
+        (0..level).any(|parent_level| {
+            self.flag_option_args[parent_level]
+                .iter()
+                .any(|(_, _, name)| name == &Some(param_id))
+        })
+    }
+
     #[cfg(feature = "eval")]
     fn to_arg_values_base<'x>(&'x self, bind_envs: &BindEnvs<'a, 'x>) -> Vec<ArgcValue> {
         let mut output = vec![];
@@ -640,13 +648,18 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                     })
                     .collect();
                 if args.is_empty() {
-                    if let Some(env_values) = bind_envs.flag_options[level].get(param.id()) {
-                        if param.is_flag() {
-                            if is_true_value(env_values[0]) {
+                    let skip_bind_env = param.is_inherited()
+                        && level > 0
+                        && self.parent_has_explicit_flag_option(level, param.id());
+                    if !skip_bind_env {
+                        if let Some(env_values) = bind_envs.flag_options[level].get(param.id()) {
+                            if param.is_flag() {
+                                if is_true_value(env_values[0]) {
+                                    args = vec![("", env_values.as_slice())];
+                                }
+                            } else {
                                 args = vec![("", env_values.as_slice())];
                             }
-                        } else {
-                            args = vec![("", env_values.as_slice())];
                         }
                     }
                 }
@@ -774,6 +787,16 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                     if !param.multiple_occurs() && values_list.len() > 1 {
                         return Some(MatchError::NotMultipleArgument(level, param.long_name()));
                     }
+                }
+            }
+
+            for param in cmd
+                .flag_option_params
+                .iter()
+                .filter(|p| p.is_inherited() && level > 0)
+            {
+                if self.parent_has_explicit_flag_option(level, param.id()) {
+                    check_flag_option_bind_envs.swap_remove(param.id());
                 }
             }
 

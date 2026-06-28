@@ -432,6 +432,10 @@ impl FlagOptionParam {
         self.inherited = true;
     }
 
+    pub(crate) fn is_inherited(&self) -> bool {
+        self.inherited
+    }
+
     pub(crate) fn create_help_flag(short: Option<&str>, long_prefix: &str, describe: &str) -> Self {
         let mut param_data = ParamData::new("help");
         param_data.describe = describe.to_string();
