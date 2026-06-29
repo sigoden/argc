@@ -185,6 +185,39 @@ fn run() -> Result<i32> {
                 }
                 parallel::parallel(runtime, &shell, &script_path, &cmd_args[1..])?;
             }
+            "--argc-tasks" => {
+                let json_output = args.iter().skip(2).any(|v| v == "--json");
+                let file_args: Vec<&String> = args
+                    .iter()
+                    .skip(2)
+                    .filter(|v| v.as_str() != "--json")
+                    .collect();
+                let (source, root_name) = if file_args.is_empty() {
+                    let (_, script_file) =
+                        get_script_path(true).ok_or_else(|| anyhow!("Argcfile not found."))?;
+                    let script_path = script_file.to_string_lossy().to_string();
+                    let source = fs::read_to_string(&script_file)
+                        .with_context(|| format!("Failed to load script at '{script_path}'"))?;
+                    let name = get_script_name(&script_path)?;
+                    let name = name.strip_suffix(".sh").unwrap_or(name);
+                    (source, name.to_string())
+                } else {
+                    let script_file = normalize_script_path(file_args[0]);
+                    let source = fs::read_to_string(&script_file)
+                        .with_context(|| format!("Failed to load script at '{script_file}'"))?;
+                    let name = get_script_name(&script_file)?;
+                    let name = name.strip_suffix(".sh").unwrap_or(name);
+                    (source, name.to_string())
+                };
+                let tasks = argc::list_tasks(&source, &root_name)?;
+                if json_output {
+                    println!("{}", serde_json::to_string_pretty(&tasks)?);
+                } else {
+                    for task in &tasks {
+                        println!("{}", task.name);
+                    }
+                }
+            }
             "--argc-script-path" => {
                 let (_, script_file) =
                     get_script_path(true).ok_or_else(|| anyhow!("Argcfile not found."))?;

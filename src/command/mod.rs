@@ -904,6 +904,26 @@ impl Command {
 
 #[cfg(feature = "export")]
 #[derive(Debug, Serialize)]
+pub struct TaskInfo {
+    pub name: String,
+    pub aliases: Vec<String>,
+}
+
+#[cfg(feature = "export")]
+pub(crate) fn list_tasks(source: &str, root_name: &str) -> Result<Vec<TaskInfo>> {
+    let cmd = Command::new(source, root_name)?;
+    Ok(cmd
+        .subcommands
+        .iter()
+        .map(|subcmd| TaskInfo {
+            name: subcmd.cmd_name(),
+            aliases: subcmd.list_alias_names(),
+        })
+        .collect())
+}
+
+#[cfg(feature = "export")]
+#[derive(Debug, Serialize)]
 pub struct CommandValue {
     pub name: String,
     pub describe: String,

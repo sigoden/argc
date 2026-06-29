@@ -270,6 +270,40 @@ fn script_path() {
 }
 
 #[test]
+fn argc_tasks() {
+    argc_bin()
+        .arg("--argc-tasks")
+        .assert()
+        .stdout(predicates::str::contains("test\n"))
+        .stdout(predicates::str::contains("check\n"))
+        .stdout(predicates::str::contains("fix\n"))
+        .success();
+}
+
+#[test]
+fn argc_tasks_json() {
+    let output = argc_bin()
+        .args(["--argc-tasks", "--json"])
+        .output()
+        .unwrap();
+    let stdout = std::str::from_utf8(&output.stdout).unwrap();
+    assert!(stdout.contains(r#""name": "test""#));
+    assert!(stdout.contains(r#""name": "check""#));
+    assert!(stdout.contains(r#""c""#));
+}
+
+#[test]
+fn argc_tasks_file() {
+    let path = locate_script("examples/demo.sh");
+    argc_bin()
+        .args(["--argc-tasks", &path])
+        .assert()
+        .stdout(predicates::str::contains("upload\n"))
+        .stdout(predicates::str::contains("download\n"))
+        .success();
+}
+
+#[test]
 fn shell_path() {
     argc_bin()
         .arg("--argc-shell-path")

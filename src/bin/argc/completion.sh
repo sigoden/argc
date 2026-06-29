@@ -7,6 +7,7 @@
 # @option --argc-compgen <SHELL> <FILE> <ARGS>      Generate completion candidates
 # @option --argc-export <FILE>                      Export command line definitions as json
 # @option --argc-parallel~ <FILE> <ARGS>            Run functions in parallel
+# @flag --argc-tasks                                List @cmd task names in the Argcfile
 # @flag --argc-script-path                          Print current argcfile path
 # @flag --argc-shell-path                           Print current shell path
 # @flag --argc-help                                 Print help information

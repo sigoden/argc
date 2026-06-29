@@ -22,7 +22,7 @@ pub use argc_value::ArgcValue;
 #[cfg(feature = "build")]
 pub use build::build;
 #[cfg(feature = "export")]
-pub use command::CommandValue;
+pub use command::{CommandValue, TaskInfo};
 #[cfg(feature = "compgen")]
 pub use compgen::{compgen, compgen_kind, CompKind, COMPGEN_KIND_SYMBOL};
 #[cfg(feature = "completions")]
@@ -60,4 +60,9 @@ pub fn eval<T: Runtime>(
 pub fn export(source: &str, root_name: &str) -> Result<CommandValue> {
     let cmd = command::Command::new(source, root_name)?;
     Ok(cmd.export())
+}
+
+#[cfg(feature = "export")]
+pub fn list_tasks(source: &str, root_name: &str) -> Result<Vec<TaskInfo>> {
+    command::list_tasks(source, root_name)
 }
