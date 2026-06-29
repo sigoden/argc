@@ -145,3 +145,59 @@ fn bind_env_with_notation() {
 fn bind_env_with_notation_help() {
     snapshot_bind_env!(args: ["cmd_for_notation", "-h"], envs: {});
 }
+
+#[rstest]
+fn bind_env_inherit_flag_options_before_subcmd() {
+    let script = r###"
+# @meta inherit-flag-options
+# @option --opt $ENV <PATH>  Option
+
+# @cmd
+cmd() {
+    echo "argc_opt=${argc_opt:?}"
+}
+
+eval "$(argc --argc-eval "$0" "$@")"
+"###;
+    let (script_path, _, script_file) =
+        crate::fixtures::create_argc_script(script, "inherit-bind-env.sh");
+    let args: Vec<String> = vec!["--opt".into(), "arg".into(), "cmd".into()];
+    let envs = vec![("ENV", "env")];
+    let output = crate::fixtures::run_script(&script_path, &args, &envs);
+    assert!(
+        output.contains("argc_opt=arg"),
+        "expected explicit option before subcommand, got: {output}"
+    );
+    script_file.close().unwrap();
+}
+
+#[rstest]
+fn bind_env_inherit_flag_options_before_and_after_subcmd() {
+    let script = r###"
+# @meta inherit-flag-options
+# @option --opt $ENV <PATH>  Option
+
+# @cmd
+cmd() {
+    echo "argc_opt=${argc_opt:?}"
+}
+
+eval "$(argc --argc-eval "$0" "$@")"
+"###;
+    let (script_path, _, script_file) =
+        crate::fixtures::create_argc_script(script, "inherit-bind-env2.sh");
+    let args: Vec<String> = vec![
+        "--opt".into(),
+        "arg1".into(),
+        "cmd".into(),
+        "--opt".into(),
+        "arg2".into(),
+    ];
+    let envs = vec![("ENV", "env")];
+    let output = crate::fixtures::run_script(&script_path, &args, &envs);
+    assert!(
+        output.contains("argc_opt=arg2"),
+        "expected last explicit option after subcommand to win, got: {output}"
+    );
+    script_file.close().unwrap();
+}
