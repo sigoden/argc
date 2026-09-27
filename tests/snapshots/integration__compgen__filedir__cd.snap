@@ -3,69 +3,69 @@ source: tests/compgen.rs
 expression: data
 ---
 ************ COMPGEN `prog --oa ` ************
-argc_value.rs	1	argc_value.rs		default
-bin/	0	bin/		blue bold
-build.rs	1	build.rs		default
-command/	0	command/		blue bold
-compgen.rs	1	compgen.rs		default
-completions/	0	completions/		blue bold
-lib.rs	1	lib.rs		default
-mangen.rs	1	mangen.rs		default
-matcher.rs	1	matcher.rs		default
-param.rs	1	param.rs		default
-parser.rs	1	parser.rs		default
-runtime/	0	runtime/		blue bold
-shell.rs	1	shell.rs		default
-template/	0	template/		blue bold
-utils.rs	1	utils.rs		default
+argc_value.rs 	argc_value.rs	argc_value.rs	39
+bin/	bin/	bin/	1;34
+build.rs 	build.rs	build.rs	39
+command/	command/	command/	1;34
+compgen.rs 	compgen.rs	compgen.rs	39
+completions/	completions/	completions/	1;34
+lib.rs 	lib.rs	lib.rs	39
+mangen.rs 	mangen.rs	mangen.rs	39
+matcher.rs 	matcher.rs	matcher.rs	39
+param.rs 	param.rs	param.rs	39
+parser.rs 	parser.rs	parser.rs	39
+runtime/	runtime/	runtime/	1;34
+shell.rs 	shell.rs	shell.rs	39
+template/	template/	template/	1;34
+utils.rs 	utils.rs	utils.rs	39
 
 ************ COMPGEN `prog --oa=` ************
---oa=argc_value.rs	1	argc_value.rs		default
---oa=bin/	0	bin/		blue bold
---oa=build.rs	1	build.rs		default
---oa=command/	0	command/		blue bold
---oa=compgen.rs	1	compgen.rs		default
---oa=completions/	0	completions/		blue bold
---oa=lib.rs	1	lib.rs		default
---oa=mangen.rs	1	mangen.rs		default
---oa=matcher.rs	1	matcher.rs		default
---oa=param.rs	1	param.rs		default
---oa=parser.rs	1	parser.rs		default
---oa=runtime/	0	runtime/		blue bold
---oa=shell.rs	1	shell.rs		default
---oa=template/	0	template/		blue bold
---oa=utils.rs	1	utils.rs		default
+--oa=argc_value.rs 	argc_value.rs	argc_value.rs	39
+--oa=bin/	bin/	bin/	1;34
+--oa=build.rs 	build.rs	build.rs	39
+--oa=command/	command/	command/	1;34
+--oa=compgen.rs 	compgen.rs	compgen.rs	39
+--oa=completions/	completions/	completions/	1;34
+--oa=lib.rs 	lib.rs	lib.rs	39
+--oa=mangen.rs 	mangen.rs	mangen.rs	39
+--oa=matcher.rs 	matcher.rs	matcher.rs	39
+--oa=param.rs 	param.rs	param.rs	39
+--oa=parser.rs 	parser.rs	parser.rs	39
+--oa=runtime/	runtime/	runtime/	1;34
+--oa=shell.rs 	shell.rs	shell.rs	39
+--oa=template/	template/	template/	1;34
+--oa=utils.rs 	utils.rs	utils.rs	39
 
 ************ COMPGEN `prog --ob ` ************
-argc_value.rs:	0	argc_value.rs:		default
-bin/	0	bin/		blue bold
-build.rs:	0	build.rs:		default
-command/	0	command/		blue bold
-compgen.rs:	0	compgen.rs:		default
-completions/	0	completions/		blue bold
-lib.rs:	0	lib.rs:		default
-mangen.rs:	0	mangen.rs:		default
-matcher.rs:	0	matcher.rs:		default
-param.rs:	0	param.rs:		default
-parser.rs:	0	parser.rs:		default
-runtime/	0	runtime/		blue bold
-shell.rs:	0	shell.rs:		default
-template/	0	template/		blue bold
-utils.rs:	0	utils.rs:		default
+argc_value.rs\:	argc_value.rs\:	argc_value.rs:	39
+bin/	bin/	bin/	1;34
+build.rs\:	build.rs\:	build.rs:	39
+command/	command/	command/	1;34
+compgen.rs\:	compgen.rs\:	compgen.rs:	39
+completions/	completions/	completions/	1;34
+lib.rs\:	lib.rs\:	lib.rs:	39
+mangen.rs\:	mangen.rs\:	mangen.rs:	39
+matcher.rs\:	matcher.rs\:	matcher.rs:	39
+param.rs\:	param.rs\:	param.rs:	39
+parser.rs\:	parser.rs\:	parser.rs:	39
+runtime/	runtime/	runtime/	1;34
+shell.rs\:	shell.rs\:	shell.rs:	39
+template/	template/	template/	1;34
+utils.rs\:	utils.rs\:	utils.rs:	39
 
 ************ COMPGEN `prog foo=` ************
-foo=argc_value.rs	1	argc_value.rs		default
-foo=bin/	0	bin/		blue bold
-foo=build.rs	1	build.rs		default
-foo=command/	0	command/		blue bold
-foo=compgen.rs	1	compgen.rs		default
-foo=completions/	0	completions/		blue bold
-foo=lib.rs	1	lib.rs		default
-foo=mangen.rs	1	mangen.rs		default
-foo=matcher.rs	1	matcher.rs		default
-foo=param.rs	1	param.rs		default
-foo=parser.rs	1	parser.rs		default
-foo=runtime/	0	runtime/		blue bold
-foo=shell.rs	1	shell.rs		default
-foo=template/	0	template/		blue bold
-foo=utils.rs	1	utils.rs		default
+foo=argc_value.rs 	argc_value.rs	argc_value.rs	39
+foo=bin/	bin/	bin/	1;34
+foo=build.rs 	build.rs	build.rs	39
+foo=command/	command/	command/	1;34
+foo=compgen.rs 	compgen.rs	compgen.rs	39
+foo=completions/	completions/	completions/	1;34
+foo=lib.rs 	lib.rs	lib.rs	39
+foo=mangen.rs 	mangen.rs	mangen.rs	39
+foo=matcher.rs 	matcher.rs	matcher.rs	39
+foo=param.rs 	param.rs	param.rs	39
+foo=parser.rs 	parser.rs	parser.rs	39
+foo=runtime/	runtime/	runtime/	1;34
+foo=shell.rs 	shell.rs	shell.rs	39
+foo=template/	template/	template/	1;34
+foo=utils.rs 	utils.rs	utils.rs	39

@@ -7,11 +7,6 @@ abc=
 def=
 ghk=
 
-************ COMPGEN Elvish `prog --oa ` ************
-abc=	0	abc=		default
-def=	0	def=		default
-ghk=	0	ghk=		default
-
 ************ COMPGEN Fish `prog --oa ` ************
 abc=
 def=
@@ -27,17 +22,7 @@ abc=	0	abc=		39
 def=	0	def=		39
 ghk=	0	ghk=		39
 
-************ COMPGEN Xonsh `prog --oa ` ************
-abc=	0	abc=	
-def=	0	def=	
-ghk=	0	ghk=	
-
 ************ COMPGEN Zsh `prog --oa ` ************
 abc=	abc=	abc=	39
 def=	def=	def=	39
 ghk=	ghk=	ghk=	39
-
-************ COMPGEN Tcsh `prog --oa ` ************
-abc=
-def=
-ghk=

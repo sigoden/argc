@@ -30,34 +30,6 @@ colorWhiteBold
 colorDefault
 colorDefaultBold
 
-************ COMPGEN Elvish `prog ` ************
-kindFlag	0	kindFlag		cyan
-kindOption	0	kindOption		cyan bold
-kindCommand	0	kindCommand		magenta
-kindDir	0	kindDir		blue bold
-kindFile	0	kindFile		default
-kindFileExe	0	kindFileExe		green bold
-kindSymlink	0	kindSymlink		cyan bold
-kindValue	0	kindValue		green
-colorBlack	0	colorBlack		black
-colorBlackBold	0	colorBlackBold		black bold
-colorRed	0	colorRed		red
-colorRedBold	0	colorRedBold		red bold
-colorGreen	0	colorGreen		green
-colorGreenBold	0	colorGreenBold		green bold
-colorYellow	0	colorYellow		yellow
-colorYellowBold	0	colorYellowBold		yellow bold
-colorBlue	0	colorBlue		blue
-colorBlueBold	0	colorBlueBold		blue bold
-colorMagenta	0	colorMagenta		magenta
-colorMagentaBold	0	colorMagentaBold		magenta bold
-colorCyan	0	colorCyan		cyan
-colorCyanBold	0	colorCyanBold		cyan bold
-colorWhite	0	colorWhite		white
-colorWhiteBold	0	colorWhiteBold		white bold
-colorDefault	0	colorDefault		default
-colorDefaultBold	0	colorDefaultBold		default bold
-
 ************ COMPGEN Fish `prog ` ************
 kindFlag
 kindOption
@@ -142,34 +114,6 @@ colorWhiteBold	0	colorWhiteBold		1;37
 colorDefault	0	colorDefault		39
 colorDefaultBold	0	colorDefaultBold		1;39
 
-************ COMPGEN Xonsh `prog ` ************
-kindFlag	0	kindFlag	
-kindOption	0	kindOption	
-kindCommand	0	kindCommand	
-kindDir	0	kindDir	
-kindFile	0	kindFile	
-kindFileExe	0	kindFileExe	
-kindSymlink	0	kindSymlink	
-kindValue	0	kindValue	
-colorBlack	0	colorBlack	
-colorBlackBold	0	colorBlackBold	
-colorRed	0	colorRed	
-colorRedBold	0	colorRedBold	
-colorGreen	0	colorGreen	
-colorGreenBold	0	colorGreenBold	
-colorYellow	0	colorYellow	
-colorYellowBold	0	colorYellowBold	
-colorBlue	0	colorBlue	
-colorBlueBold	0	colorBlueBold	
-colorMagenta	0	colorMagenta	
-colorMagentaBold	0	colorMagentaBold	
-colorCyan	0	colorCyan	
-colorCyanBold	0	colorCyanBold	
-colorWhite	0	colorWhite	
-colorWhiteBold	0	colorWhiteBold	
-colorDefault	0	colorDefault	
-colorDefaultBold	0	colorDefaultBold	
-
 ************ COMPGEN Zsh `prog ` ************
 kindFlag	kindFlag	kindFlag	36
 kindOption	kindOption	kindOption	1;36
@@ -197,31 +141,3 @@ colorWhite	colorWhite	colorWhite	37
 colorWhiteBold	colorWhiteBold	colorWhiteBold	1;37
 colorDefault	colorDefault	colorDefault	39
 colorDefaultBold	colorDefaultBold	colorDefaultBold	1;39
-
-************ COMPGEN Tcsh `prog ` ************
-kindFlag
-kindOption
-kindCommand
-kindDir
-kindFile
-kindFileExe
-kindSymlink
-kindValue
-colorBlack
-colorBlackBold
-colorRed
-colorRedBold
-colorGreen
-colorGreenBold
-colorYellow
-colorYellowBold
-colorBlue
-colorBlueBold
-colorMagenta
-colorMagentaBold
-colorCyan
-colorCyanBold
-colorWhite
-colorWhiteBold
-colorDefault
-colorDefaultBold

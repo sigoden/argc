@@ -6,10 +6,6 @@ expression: data
 foo
 bar
 
-************ COMPGEN Elvish `prog v='` ************
-v='foo	0	foo		default
-v='bar	0	bar		default
-
 ************ COMPGEN Fish `prog v='` ************
 v='foo
 v='bar
@@ -22,14 +18,6 @@ v='bar
 v='foo	0	foo		39
 v='bar	0	bar		39
 
-************ COMPGEN Xonsh `prog v='` ************
-v='foo	0	foo	
-v='bar	0	bar	
-
 ************ COMPGEN Zsh `prog v='` ************
 v='foo	foo	foo	39
 v='bar	bar	bar	39
-
-************ COMPGEN Tcsh `prog v='` ************
-v='foo
-v='bar

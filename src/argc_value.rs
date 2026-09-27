@@ -75,11 +75,11 @@ impl ArgcValue {
                 }
                 ArgcValue::PositionalSingle(id, value) => {
                     let value = escape_shell_words(value);
-                    list.push(format!("{}={}", argc_var_name(id), &value));
+                    list.push(format!("{}={}", argc_var_name(id), value));
                     positional_args.push(value);
                 }
                 ArgcValue::PositionalSingleFn(id, fn_name) => {
-                    list.push(format!("{}=`{}`", argc_var_name(id), &fn_name));
+                    list.push(format!("{}=`{}`", argc_var_name(id), fn_name));
                     positional_args.push(format!("`{fn_name}`"));
                 }
                 ArgcValue::PositionalMultiple(id, values) => {

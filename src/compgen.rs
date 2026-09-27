@@ -160,7 +160,7 @@ pub fn compgen<T: Runtime>(
         } else {
             None
         };
-        if let Some(output) = output.and_then(|v| if v.is_empty() { None } else { Some(v) }) {
+        if let Some(output) = output.filter(|v| !v.is_empty()) {
             for line in output.trim().split('\n').map(|v| v.trim()) {
                 let (value, description, nospace, comp_type) = parse_candidate_value(line);
                 let nospace = nospace || default_nospace;
@@ -393,14 +393,6 @@ impl CompColor {
             String::new()
         };
         ret.push_str(self.code.ansi_code());
-        ret
-    }
-
-    pub(crate) fn style(&self) -> String {
-        let mut ret = self.code.to_string();
-        if self.style != ColorStyle::Regular {
-            ret.push_str(&format!(" {}", self.style))
-        }
         ret
     }
 
