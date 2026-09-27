@@ -230,18 +230,21 @@ impl Shell {
                 ('\'', 7),
                 ('(', 7),
                 (')', 7),
+                ('*', 7),
                 (';', 7),
                 ('<', 7),
                 ('>', 7),
+                ('?', 7),
+                ('[', 7),
                 ('\\', 7),
                 ('`', 7),
+                ('{', 7),
                 ('|', 7),
             ],
             Shell::Fish => &[],
             Shell::Generic => &[],
             Shell::Nushell => &[
                 (' ', 7),
-                ('!', 1),
                 ('"', 7),
                 ('#', 1),
                 ('$', 1),
@@ -264,7 +267,7 @@ impl Shell {
                 ('\'', 7),
                 ('(', 7),
                 (')', 7),
-                (',', 7),
+                (',', 5),
                 (';', 7),
                 ('<', 1),
                 ('>', 1),
@@ -294,6 +297,7 @@ impl Shell {
                 ('[', 7),
                 ('\\', 7),
                 ('`', 7),
+                ('{', 7),
                 ('|', 7),
             ],
         }
@@ -303,9 +307,26 @@ impl Shell {
         match self {
             Shell::Bash => Self::escape_chars(value, self.need_escape_chars(), "\\"),
             Shell::Fish | Shell::Generic => value.into(),
-            Shell::Nushell | Shell::Powershell => {
+            Shell::Nushell => {
                 if Self::contains_escape_chars(value, self.need_escape_chars()) {
-                    format!("'{value}'")
+                    if value.contains('\'') {
+                        format!(
+                            "\"{}\"",
+                            value
+                                .replace('\\', "\\\\")
+                                .replace('"', "\\\"")
+                                .replace('$', "\\$")
+                        )
+                    } else {
+                        format!("'{value}'")
+                    }
+                } else {
+                    value.into()
+                }
+            }
+            Shell::Powershell => {
+                if Self::contains_escape_chars(value, self.need_escape_chars()) {
+                    format!("'{}'", value.replace('\'', "''"))
                 } else {
                     value.into()
                 }

@@ -943,6 +943,23 @@ _choice_fn() {
 }
 
 #[test]
+fn escape_more() {
+    let script = r#"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    echo "a*b"
+    echo "b?b"
+    echo "c[b]"
+    echo "d{b}"
+    echo "e!b"
+    echo "f'b"
+}
+"#;
+
+    snapshot_compgen_shells!(script, ["prog", "--oa", ""]);
+}
+
+#[test]
 fn bash_shell() {
     let script = r#"
 # @option --oa[`_choice_fn`]
@@ -1045,6 +1062,22 @@ _choice_fn() {
 }
 "#;
     snapshot_compgen!(script, [vec!["prog", "abc,"],], argc::Shell::Powershell);
+}
+
+#[test]
+fn powershell_escape() {
+    let script = r#"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    echo "a,b"
+    echo "a,b,c"
+    echo ",a"
+    echo "a,"
+    echo "a'b"
+    echo "a b"
+}
+"#;
+    snapshot_compgen!(script, [vec!["prog", "--oa", ""]], argc::Shell::Powershell);
 }
 
 #[test]
