@@ -692,7 +692,7 @@ fn normalize_script_path(path: &str) -> String {
         && path.chars().nth(2) == Some('/')
     {
         let drive = path.chars().nth(1).unwrap().to_uppercase();
-        return format!("{}:{}", drive, &path[2..].replace('/', "\\"));
+        return format!("{}:{}", drive, path[2..].replace('/', "\\"));
     }
     path.to_string()
 }

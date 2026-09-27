@@ -190,13 +190,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                         );
                         comp_option = Some(param.id());
                     } else if let Some(subcmd) = find_subcommand(cmd, arg, &positional_args)
-                        .and_then(|v| {
-                            if is_last_arg && compgen {
-                                None
-                            } else {
-                                Some(v)
-                            }
-                        })
+                        .filter(|_| !(is_last_arg && compgen))
                     {
                         match_command(
                             &mut cmds,
@@ -281,14 +275,8 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                         }
                         flag_option_args[cmd_level].push((arg, vec![], None));
                     }
-                } else if let Some(subcmd) =
-                    find_subcommand(cmd, arg, &positional_args).and_then(|v| {
-                        if is_last_arg && compgen {
-                            None
-                        } else {
-                            Some(v)
-                        }
-                    })
+                } else if let Some(subcmd) = find_subcommand(cmd, arg, &positional_args)
+                    .filter(|_| !(is_last_arg && compgen))
                 {
                     match_command(
                         &mut cmds,
@@ -1227,13 +1215,8 @@ fn find_subcommand<'a>(
     arg: &str,
     positional_args: &[&str],
 ) -> Option<&'a Command> {
-    cmd.find_subcommand(arg).and_then(|v| {
-        if positional_args.is_empty() {
-            Some(v)
-        } else {
-            None
-        }
-    })
+    cmd.find_subcommand(arg)
+        .filter(|_| positional_args.is_empty())
 }
 
 fn find_symbol<'a>(cmd: &'a Command, arg: &str) -> Option<(char, &'a SymbolParam)> {
@@ -1306,11 +1289,8 @@ fn match_combine_shorts<'a, 'b>(
                 continue;
             }
         }
-        if let Some(param) = current_cmd.find_flag_option(&name) {
-            output.push((arg, vec![], Some(param.id())))
-        } else {
-            return None;
-        }
+        let param = current_cmd.find_flag_option(&name)?;
+        output.push((arg, vec![], Some(param.id())));
     }
 
     Some((output, subcmd))

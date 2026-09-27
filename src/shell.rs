@@ -14,14 +14,11 @@ use crate::{
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Shell {
     Bash,
-    Elvish,
     Fish,
     Generic,
     Nushell,
     Powershell,
-    Xonsh,
     Zsh,
-    Tcsh,
 }
 
 impl FromStr for Shell {
@@ -30,14 +27,11 @@ impl FromStr for Shell {
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s {
             "bash" => Ok(Self::Bash),
-            "elvish" => Ok(Self::Elvish),
             "fish" => Ok(Self::Fish),
             "generic" => Ok(Self::Generic),
             "nushell" => Ok(Self::Nushell),
             "powershell" => Ok(Self::Powershell),
-            "xonsh" => Ok(Self::Xonsh),
             "zsh" => Ok(Self::Zsh),
-            "tcsh" => Ok(Self::Tcsh),
             _ => bail!(
                 "The provided shell is either invalid or missing, must be one of {}",
                 Shell::list_names(),
@@ -47,16 +41,13 @@ impl FromStr for Shell {
 }
 
 impl Shell {
-    pub fn list() -> [Shell; 8] {
+    pub fn list() -> [Shell; 5] {
         [
             Shell::Bash,
-            Shell::Elvish,
             Shell::Fish,
             Shell::Nushell,
             Shell::Powershell,
-            Shell::Xonsh,
             Shell::Zsh,
-            Shell::Tcsh,
         ]
     }
 
@@ -71,14 +62,11 @@ impl Shell {
     pub fn name(&self) -> &str {
         match self {
             Shell::Bash => "bash",
-            Shell::Elvish => "elvish",
             Shell::Fish => "fish",
             Shell::Generic => "generic",
             Shell::Nushell => "nushell",
             Shell::Powershell => "powershell",
-            Shell::Xonsh => "xonsh",
             Shell::Zsh => "zsh",
-            Shell::Tcsh => "tcsh",
         }
     }
 
@@ -87,7 +75,7 @@ impl Shell {
     }
 
     pub fn is_unix_only(&self) -> bool {
-        matches!(self, Shell::Bash | Shell::Fish | Shell::Zsh | Shell::Tcsh)
+        matches!(self, Shell::Bash | Shell::Fish | Shell::Zsh)
     }
 }
 
@@ -149,7 +137,7 @@ impl Shell {
                     })
                     .collect::<Vec<String>>()
             }
-            Shell::Elvish | Shell::Powershell => candidates
+            Shell::Powershell => candidates
                 .into_iter()
                 .map(|(value, description, nospace, comp_color)| {
                     let new_value = self.combine_value(prefix, &value);
@@ -190,32 +178,6 @@ impl Shell {
                     format!("{new_value}{space}{description}")
                 })
                 .collect::<Vec<String>>(),
-            Shell::Xonsh => candidates
-                .into_iter()
-                .map(|(value, description, nospace, _)| {
-                    let mut new_value = format!("{prefix}{value}");
-                    if unbalance_quote(prefix).is_none() {
-                        let escaped_new_value = self.escape(&new_value);
-                        if escaped_new_value.ends_with("\\'")
-                            && !escaped_new_value.ends_with("\\\\'")
-                        {
-                            new_value = format!(
-                                "{}\\'",
-                                &escaped_new_value.as_str()[0..escaped_new_value.len() - 1]
-                            );
-                        } else {
-                            new_value = escaped_new_value
-                        }
-                    } else if new_value.ends_with('\\') && !new_value.ends_with("\\\\") {
-                        new_value.push('\\')
-                    }
-                    let display = if value.is_empty() { " ".into() } else { value };
-                    let description =
-                        self.comp_description(&description, "", "", max_description_width);
-                    let space: &str = if nospace { "0" } else { "1" };
-                    format!("{new_value}\t{space}\t{display}\t{description}")
-                })
-                .collect::<Vec<String>>(),
             Shell::Zsh => candidates
                 .into_iter()
                 .map(|(value, description, nospace, comp_color)| {
@@ -242,24 +204,6 @@ impl Shell {
                     format!("{new_value}{space}\t{display}{description}\t{value}\t{color}")
                 })
                 .collect::<Vec<String>>(),
-            Shell::Tcsh => {
-                if candidates.len() == 1 {
-                    let new_value =
-                        Self::sanitize_tcsh_value(&self.combine_value(prefix, &candidates[0].0));
-                    return vec![new_value];
-                }
-                candidates
-                    .into_iter()
-                    .map(|(value, description, _, _)| {
-                        let new_value =
-                            Self::sanitize_tcsh_value(&self.combine_value(prefix, &value));
-                        let description =
-                            self.comp_description(&description, " (", ")", max_description_width);
-                        let description = description.replace(' ', "⠀");
-                        format!("{new_value}{description}")
-                    })
-                    .collect::<Vec<String>>()
-            }
         }
     }
 
@@ -293,7 +237,6 @@ impl Shell {
                 ('`', 7),
                 ('|', 7),
             ],
-            Shell::Elvish => &[],
             Shell::Fish => &[],
             Shell::Generic => &[],
             Shell::Nushell => &[
@@ -332,31 +275,6 @@ impl Shell {
                 ('|', 7),
                 ('}', 7),
             ],
-            Shell::Xonsh => &[
-                (' ', 7),
-                ('!', 7),
-                ('"', 7),
-                ('#', 7),
-                ('$', 4),
-                ('&', 7),
-                ('\'', 7),
-                ('(', 7),
-                (')', 7),
-                ('*', 7),
-                (':', 1),
-                (';', 7),
-                ('<', 7),
-                ('=', 1),
-                ('>', 7),
-                ('[', 7),
-                ('\\', 4),
-                (']', 7),
-                ('^', 1),
-                ('`', 7),
-                ('{', 7),
-                ('|', 7),
-                ('}', 7),
-            ],
             Shell::Zsh => &[
                 (' ', 7),
                 ('!', 3),
@@ -378,33 +296,14 @@ impl Shell {
                 ('`', 7),
                 ('|', 7),
             ],
-            Shell::Tcsh => &[
-                (' ', 7),
-                ('!', 3),
-                ('"', 7),
-                ('$', 3),
-                ('&', 7),
-                ('\'', 7),
-                ('(', 7),
-                (')', 7),
-                ('*', 7),
-                (';', 7),
-                ('<', 7),
-                ('>', 7),
-                ('?', 7),
-                ('\\', 7),
-                ('`', 7),
-                ('{', 7),
-                ('|', 7),
-            ],
         }
     }
 
     pub(crate) fn escape(&self, value: &str) -> String {
         match self {
-            Shell::Bash | Shell::Tcsh => Self::escape_chars(value, self.need_escape_chars(), "\\"),
-            Shell::Elvish | Shell::Fish | Shell::Generic => value.into(),
-            Shell::Nushell | Shell::Powershell | Shell::Xonsh => {
+            Shell::Bash => Self::escape_chars(value, self.need_escape_chars(), "\\"),
+            Shell::Fish | Shell::Generic => value.into(),
+            Shell::Nushell | Shell::Powershell => {
                 if Self::contains_escape_chars(value, self.need_escape_chars()) {
                     format!("'{value}'")
                 } else {
@@ -417,12 +316,6 @@ impl Shell {
 
     pub(crate) fn color(&self, comp_color: CompColor, no_color: bool) -> String {
         match self {
-            Shell::Elvish => {
-                if no_color {
-                    return "default".into();
-                }
-                comp_color.style()
-            }
             Shell::Powershell | Shell::Zsh => {
                 if no_color {
                     return "39".into();
@@ -580,9 +473,5 @@ impl Shell {
                 false
             }
         })
-    }
-
-    fn sanitize_tcsh_value(value: &str) -> String {
-        value.replace(' ', "⠀")
     }
 }

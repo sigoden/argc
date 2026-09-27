@@ -28,18 +28,15 @@ fix() {
 }
 
 # @cmd Code for setup shell to load argc completion script
-# @option -s --shell[=bash|elvish|fish|nushell|powershell|xonsh|zsh|tcsh] shell type
+# @option -s --shell[=bash|fish|nushell|powershell|zsh] shell type
 # @arg cmds* any other scripts based on argc
 setup-shell() {
     case $argc_shell in
         bash) echo "source <(argc --argc-completions bash ${argc_cmds[@]})" ;;
-        elvish) echo "eval (argc --argc-completions elvish ${argc_cmds[@]} | slurp)" ;;
         fish) echo "argc --argc-completions fish ${argc_cmds[@]} | source" ;;
         nushell) echo "argc --argc-completions nushell | save -f argc.nu"$'\n'"source argc.nu" ;;
         powershell) echo "argc --argc-completions powershell ${argc_cmds[@]} | Out-String | Invoke-Expression" ;;
-        xonsh) echo "exec(\$(argc --argc-completions xonsh ${argc_cmds[@]}))" ;;
         zsh) echo "source <(argc --argc-completions zsh ${argc_cmds[@]})" ;;
-        tcsh) echo "eval \`argc --argc-completions tcsh ${argc_cmds[@]}\`" ;;
     esac
 }
 

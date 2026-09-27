@@ -5,9 +5,6 @@ expression: data
 ************ COMPGEN Bash `prog --oa a` ************
 abc 
 
-************ COMPGEN Elvish `prog --oa a` ************
-abc	1	abc	desc1	default
-
 ************ COMPGEN Fish `prog --oa a` ************
 abc	desc1
 
@@ -17,11 +14,5 @@ abc 	desc1
 ************ COMPGEN Powershell `prog --oa a` ************
 abc	1	abc	desc1	39
 
-************ COMPGEN Xonsh `prog --oa a` ************
-abc	1	abc	desc1
-
 ************ COMPGEN Zsh `prog --oa a` ************
 abc 	abc:desc1	abc	39
-
-************ COMPGEN Tcsh `prog --oa a` ************
-abc

@@ -1087,7 +1087,7 @@ mod filedir {
     #[cfg(windows)]
     const TEST_SHELL: argc::Shell = argc::Shell::Powershell;
     #[cfg(not(windows))]
-    const TEST_SHELL: argc::Shell = argc::Shell::Elvish;
+    const TEST_SHELL: argc::Shell = argc::Shell::Zsh;
 
     const VALUE_NAME_SCRIPT: &str = r###"
 # @option --oa <file>

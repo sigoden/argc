@@ -6,10 +6,6 @@ expression: data
 def
 ijk
 
-************ COMPGEN Elvish `prog --oa=abc,` ************
---oa=abc,def	0	def		default
---oa=abc,ijk	0	ijk		default
-
 ************ COMPGEN Fish `prog --oa=abc,` ************
 --oa=abc,def
 --oa=abc,ijk
@@ -22,14 +18,6 @@ ijk
 def	0	def		39
 ijk	0	ijk		39
 
-************ COMPGEN Xonsh `prog --oa=abc,` ************
---oa=abc,def	0	def	
---oa=abc,ijk	0	ijk	
-
 ************ COMPGEN Zsh `prog --oa=abc,` ************
 --oa=abc,def	def	def	39
 --oa=abc,ijk	ijk	ijk	39
-
-************ COMPGEN Tcsh `prog --oa=abc,` ************
---oa=abc,def
---oa=abc,ijk

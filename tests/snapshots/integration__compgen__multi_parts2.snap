@@ -7,11 +7,6 @@ expression: data
 C 
 D 
 
-************ COMPGEN Elvish `prog --oa A/B/` ************
-A/B/	1	 		default
-A/B/C	1	C		default
-A/B/D	1	D		default
-
 ************ COMPGEN Fish `prog --oa A/B/` ************
 A/B/
 A/B/C
@@ -27,17 +22,7 @@ A/B/	1	 		39
 A/B/C	1	C		39
 A/B/D	1	D		39
 
-************ COMPGEN Xonsh `prog --oa A/B/` ************
-A/B/	1	 	
-A/B/C	1	C	
-A/B/D	1	D	
-
 ************ COMPGEN Zsh `prog --oa A/B/` ************
 A/B/ 			39
 A/B/C 	C	C	39
 A/B/D 	D	D	39
-
-************ COMPGEN Tcsh `prog --oa A/B/` ************
-A/B/
-A/B/C
-A/B/D

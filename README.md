@@ -183,9 +183,6 @@ In the following, we use cmd1 and cmd2 as examples to show how to add a completi
 # bash (~/.bashrc)
 source <(argc --argc-completions bash cmd1 cmd2)
 
-# elvish (~/.config/elvish/rc.elv)
-eval (argc --argc-completions elvish cmd1 cmd2 | slurp)
-
 # fish (~/.config/fish/config.fish)
 argc --argc-completions fish cmd1 cmd2 | source
 
@@ -196,14 +193,8 @@ argc --argc-completions nushell cmd1 cmd2 # update config.nu manually according 
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 argc --argc-completions powershell cmd1 cmd2 | Out-String | Invoke-Expression
 
-# xonsh (~/.config/xonsh/rc.xsh)
-exec($(argc --argc-completions xonsh cmd1 cmd2))
-
 # zsh (~/.zshrc)
 source <(argc --argc-completions zsh cmd1 cmd2)
-
-# tcsh (~/.tcshrc)
-eval `argc --argc-completions tcsh cmd1 cmd2`
 ```
 
 The core of all completion scripts is to call `argc --argc-compgen` to obtain completion candidates.
