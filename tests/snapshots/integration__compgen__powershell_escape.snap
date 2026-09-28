@@ -1,0 +1,11 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN `prog --oa ` ************
+a,b	1	a,b		39
+a,b,c	1	a,b,c		39
+',a'	1	,a		39
+'a,'	1	a,		39
+'a''b'	1	a'b		39
+'a b'	1	a b		39
