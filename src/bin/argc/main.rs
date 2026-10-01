@@ -3,7 +3,6 @@ mod parallel;
 use anyhow::{anyhow, bail, Context, Result};
 use argc::{compgen_kind, utils::*, CompKind, NativeRuntime, Runtime, Shell, COMPGEN_KIND_SYMBOL};
 use base64::{engine::general_purpose, Engine as _};
-use path_absolutize::Absolutize;
 use std::{
     collections::HashMap,
     env,
@@ -61,38 +60,6 @@ fn run() -> Result<i32> {
                     );
                 }
             },
-            "--argc-run" => {
-                if args.len() < 3 {
-                    bail!("No script file provided");
-                }
-                let shell = runtime.shell_path()?;
-                let script_path = normalize_script_path(&args[2]);
-                let (script_dir, script_path) = {
-                    let absolute_script_path = Path::new(&script_path)
-                        .absolutize()
-                        .with_context(|| format!("Invalid script path '{script_path}'"))?;
-                    let script_dir = absolute_script_path.parent().ok_or_else(|| {
-                        anyhow!("Unable to retrieve the script dir from '{script_path}'")
-                    })?;
-                    (
-                        script_dir.to_path_buf(),
-                        absolute_script_path.display().to_string(),
-                    )
-                };
-                let mut envs = HashMap::new();
-                let cwd = if is_runner_script(&script_path) {
-                    if let Some(cwd) = runtime.current_dir() {
-                        if env::var("ARGC_PWD").is_err() {
-                            envs.insert("ARGC_PWD".to_string(), cwd);
-                        }
-                    }
-                    Some(script_dir.as_path())
-                } else {
-                    None
-                };
-                let args = [vec![&script_path], args.iter().skip(3).collect()].concat();
-                return run_command(&script_path, &shell, &args, envs, cwd);
-            }
             "--argc-create" => {
                 let (outpath, task_args) = match args.get(2) {
                     Some(v) if v == "-" => {
@@ -524,18 +491,6 @@ fn runner_script_names() -> Vec<String> {
     }
     names.extend(ARGC_SCRIPT_NAMES.into_iter().map(|v| v.to_string()));
     names
-}
-
-fn is_runner_script(script_file: &str) -> bool {
-    let name = match get_script_name(script_file) {
-        Ok(v) => v,
-        Err(_) => return false,
-    };
-    let name = name.strip_suffix(".sh").unwrap_or(name);
-    let expect_name = env::var("ARGC_SCRIPT_NAME")
-        .map(|v| v.to_lowercase())
-        .unwrap_or_else(|_| "argcfile".to_string());
-    name.to_lowercase() == expect_name
 }
 
 fn search_completion_script(args: &mut Vec<String>) -> Option<PathBuf> {

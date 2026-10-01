@@ -1,5 +1,6 @@
 use crate::fixtures::{
-    argc_bin, get_path_env_var, locate_script, tmpdir, tmpdir_argcfiles, tmpdir_path, SCRIPT_PATHS,
+    argc_bin, get_path_env_var, locate_script, run_script, tmpdir, tmpdir_argcfiles, tmpdir_path,
+    SCRIPT_PATHS,
 };
 
 use assert_fs::fixture::PathChild;
@@ -82,19 +83,6 @@ fn create_cli_with_tasks() {
 }
 
 #[test]
-fn run() {
-    let path_env_var = get_path_env_var();
-    let path = locate_script("examples/demo.sh");
-    argc_bin()
-        .arg("--argc-run")
-        .arg(path)
-        .env("PATH", path_env_var)
-        .assert()
-        .stderr(predicates::str::contains("USAGE: demo"))
-        .success();
-}
-
-#[test]
 fn build_stdout() {
     let path = locate_script("examples/demo.sh");
     argc_bin()
@@ -117,21 +105,18 @@ fn run_build() {
         .assert()
         .success();
 
-    argc_bin()
-        .arg("--argc-run")
-        .arg(&outpath)
-        .args([
-            "--fa",
-            "--oa",
-            "oa1",
-            "--of=of1,of2",
-            "--oca=a",
-            "--ofa",
-            "abc",
-        ])
-        .assert()
-        .stdout(predicates::str::contains("argc__fn=main"))
-        .success();
+    let args = [
+        "--fa",
+        "--oa",
+        "oa1",
+        "--of=of1,of2",
+        "--oca=a",
+        "--ofa",
+        "abc",
+    ]
+    .map(String::from);
+    let output = run_script(&outpath, &args, &[]);
+    assert!(output.contains("argc__fn=main"));
 }
 
 #[test]
