@@ -448,6 +448,11 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
         let last_cmd = self.cmds[level];
         let cmd_arg_index = self.cmd_arg_indexes[level];
 
+        if last_cmd.positional_params.is_empty() && !self.positional_args.is_empty() {
+            output.push(ArgcValue::ExtraPositionalMultiple(
+                self.positional_args.iter().map(|v| v.to_string()).collect(),
+            ));
+        }
         output.push(ArgcValue::Single(
             "_cmd_arg_index".into(),
             cmd_arg_index.to_string(),

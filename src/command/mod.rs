@@ -90,14 +90,18 @@ impl Command {
             bail!("Invalid args");
         }
         if args.len() >= 3 && args[1] == T::INTERNAL_SYMBOL {
-            let fallback_args = vec![ROOT_NAME.to_string()];
-            let new_args = if args.len() == 3 {
-                &fallback_args
+            let mut arg_values = if args.get(3).map(|v| v.as_str()) == Some("--") {
+                vec![ArgcValue::ExtraPositionalMultiple(args[4..].to_vec())]
             } else {
-                &args[3..]
+                let fallback_args = vec![ROOT_NAME.to_string()];
+                let new_args = if args.len() == 3 {
+                    &fallback_args
+                } else {
+                    &args[3..]
+                };
+                let matcher = Matcher::new(runtime, self, new_args, false);
+                matcher.to_arg_values_for_param_fn()
             };
-            let matcher = Matcher::new(runtime, self, new_args, false);
-            let mut arg_values = matcher.to_arg_values_for_param_fn();
             arg_values.push(ArgcValue::ParamFn(args[2].clone()));
             return Ok(arg_values);
         }

@@ -115,3 +115,39 @@ _choice_fn() {
         ]
     );
 }
+
+#[test]
+fn case4() {
+    let script = r###"
+# @cmd
+foo() { :; }
+
+_choice_fn() {
+	echo "$@"
+}
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec![
+                "prog",
+                "___internal___",
+                "_choice_fn",
+                "prog",
+                "foo",
+                "a",
+                "b"
+            ],
+            vec![
+                "prog",
+                "___internal___",
+                "_choice_fn",
+                "--",
+                "prog",
+                "foo",
+                "a",
+                "b"
+            ],
+        ]
+    );
+}
