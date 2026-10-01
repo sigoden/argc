@@ -1,0 +1,28 @@
+---
+source: tests/param_fn.rs
+expression: data
+---
+************ RUN ************
+prog ___internal___ _choice_fn prog foo a b
+
+# OUTPUT
+argc__args=( prog foo a b )
+argc__cmd_arg_index=1
+argc__cmd_fn=foo
+argc__positionals=( a b )
+_choice_fn a b
+exit
+
+# RUN_OUTPUT
+error: unsupported ___internal___ command
+
+************ RUN ************
+prog ___internal___ _choice_fn -- prog foo a b
+
+# OUTPUT
+argc__positionals=( prog foo a b )
+_choice_fn prog foo a b
+exit
+
+# RUN_OUTPUT
+error: unsupported ___internal___ command
