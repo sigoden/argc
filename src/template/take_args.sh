@@ -7,7 +7,7 @@ _argc_take_args() {
     fi
     local _argc_take_index=$((_argc_index + 1)) _argc_take_value
     if [[ "$_argc_item" == *=* ]]; then
-        _argc_take_args_values=("${_argc_item##*=}")
+        _argc_take_args_values=("${_argc_item#*=}")
     else
         while [[ $_argc_take_index -lt $_argc_len ]]; do
             _argc_take_value="${argc__args[_argc_take_index]}"

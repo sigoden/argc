@@ -1,0 +1,71 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog test1 --oa=a=b
+
+# OUTPUT
+argc_oa='a=b'
+argc__args=( prog test1 '--oa=a=b' )
+argc__fn=test1
+argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="--oa=a=b")
+argc__fn=test1
+argc__positionals=()
+argc_oa=a=b
+test1
+
+************ RUN ************
+prog test1 --ob=k=v --ob=x=y=z
+
+# OUTPUT
+argc_ob=( 'k=v' 'x=y=z' )
+argc__args=( prog test1 '--ob=k=v' '--ob=x=y=z' )
+argc__fn=test1
+argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="--ob=k=v" [3]="--ob=x=y=z")
+argc__fn=test1
+argc__positionals=()
+argc_ob=([0]="k=v" [1]="x=y=z")
+test1
+
+************ RUN ************
+prog test1 --oe=a=1,b=2
+
+# OUTPUT
+argc_oe=( 'a=1' 'b=2' )
+argc__args=( prog test1 '--oe=a=1,b=2' )
+argc__fn=test1
+argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="--oe=a=1,b=2")
+argc__fn=test1
+argc__positionals=()
+argc_oe=([0]="a=1" [1]="b=2")
+test1
+
+************ RUN ************
+prog test1 -e=x=y
+
+# OUTPUT
+argc_e='x=y'
+argc__args=( prog test1 '-e=x=y' )
+argc__fn=test1
+argc__positionals=(  )
+test1
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="test1" [2]="-e=x=y")
+argc__fn=test1
+argc__positionals=()
+argc_e=x=y
+test1
