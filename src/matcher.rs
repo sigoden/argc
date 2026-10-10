@@ -1,5 +1,7 @@
 #![allow(clippy::too_many_arguments)]
 
+#[cfg(feature = "eval")]
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 
 use crate::{
@@ -356,8 +358,11 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                 }
             }
 
-            for param in &last_cmd.positional_params {
-                add_param_choice_fn(&mut choice_fns, param)
+            let positional_values = match_positionals(last_cmd, &positional_args, dash);
+            for (i, param) in last_cmd.positional_params.iter().enumerate() {
+                if i < positional_values.len() {
+                    add_param_choice_fn(&mut choice_fns, param)
+                }
             }
         }
 
@@ -369,7 +374,9 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
         }
 
         for param in &last_cmd.env_params {
-            add_param_choice_fn(&mut choice_fns, param)
+            if envs.contains_key(param.id()) {
+                add_param_choice_fn(&mut choice_fns, param)
+            }
         }
 
         Self {
@@ -711,7 +718,15 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
     #[cfg(feature = "eval")]
     fn validate<'x>(&'x self, bind_envs: &BindEnvs<'a, 'x>) -> Option<MatchError> {
         let cmds_len = self.cmds.len();
-        let choices_fn_values = self.execute_choices_fns(bind_envs).unwrap_or_default();
+        let choices_fn_values = {
+            let mut fns = self.choice_fns.clone();
+            fns.extend(bind_envs.choice_fns.iter().copied());
+            ChoicesFnValues {
+                matcher: self,
+                fns: fns.into_iter().collect(),
+                cache: RefCell::new(None),
+            }
+        };
         for level in 0..cmds_len {
             let flag_option_args = &self.flag_option_args[level];
             let cmd = self.cmds[level];
@@ -763,15 +778,14 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                                 param.render_name_notations(),
                             ));
                         }
-                        if let Some(choices) = get_param_choice(param.choice(), &choices_fn_values)
-                        {
+                        if let Some(choices) = choices_fn_values.get(param.choice()) {
                             for value in values.iter() {
                                 if !choices.contains(&value.to_string()) {
                                     return Some(MatchError::InvalidValue(
                                         level,
                                         value.to_string(),
                                         param.render_first_notation(),
-                                        choices.clone(),
+                                        choices,
                                     ));
                                 }
                             }
@@ -797,7 +811,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                 if let Some(param) = cmd.flag_option_params.iter().find(|v| v.id() == name) {
                     let values = &flag_option_bind_envs[name];
                     let mut is_valid = true;
-                    let mut choice_values = vec![];
+                    let choice_values = vec![];
                     let (min, _) = param.num_args();
                     if param.is_flag() {
                         if !is_bool_value(values[0]) {
@@ -815,8 +829,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                             choice_values,
                         ));
                     }
-                    if let Some(choices) = get_param_choice(param.choice(), &choices_fn_values) {
-                        choice_values = choices.to_vec();
+                    if let Some(choices) = choices_fn_values.get(param.choice()) {
                         for value in values.iter() {
                             if !choices.contains(&value.to_string()) {
                                 return Some(MatchError::InvalidBindEnvironment(
@@ -824,7 +837,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                                     value.to_string(),
                                     param.bind_env().unwrap_or_default(),
                                     param.long_name(),
-                                    choice_values,
+                                    choices,
                                 ));
                             }
                         }
@@ -893,18 +906,17 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
         }
 
         for (i, param) in last_cmd.positional_params.iter().enumerate() {
-            if let (Some(values), Some(choices)) = (
-                positional_values.get(i),
-                get_param_choice(param.choice(), &choices_fn_values),
-            ) {
-                for value in values.iter() {
-                    if !choices.contains(&value.to_string()) {
-                        return Some(MatchError::InvalidValue(
-                            level,
-                            value.to_string(),
-                            param.render_notation(),
-                            choices.clone(),
-                        ));
+            if let Some(values) = positional_values.get(i) {
+                if let Some(choices) = choices_fn_values.get(param.choice()) {
+                    for value in values.iter() {
+                        if !choices.contains(&value.to_string()) {
+                            return Some(MatchError::InvalidValue(
+                                level,
+                                value.to_string(),
+                                param.render_notation(),
+                                choices,
+                            ));
+                        }
                     }
                 }
             }
@@ -913,7 +925,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
             let mut missing_positionals = vec![];
             for param in &last_cmd.positional_params[positional_values_len..] {
                 if let Some(values) = bind_envs.positionals.get(param.id()) {
-                    if let Some(choices) = get_param_choice(param.choice(), &choices_fn_values) {
+                    if let Some(choices) = choices_fn_values.get(param.choice()) {
                         for value in values.iter() {
                             if !choices.contains(&value.to_string()) {
                                 return Some(MatchError::InvalidBindEnvironment(
@@ -921,7 +933,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                                     value.to_string(),
                                     param.bind_env().unwrap_or_default(),
                                     param.render_notation(),
-                                    choices.to_vec(),
+                                    choices,
                                 ));
                             }
                         }
@@ -949,17 +961,16 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
         }
 
         for param in &last_cmd.env_params {
-            if let (Some(choices), Some(value)) = (
-                get_param_choice(param.choice(), &choices_fn_values),
-                self.envs.get(param.id()),
-            ) {
-                if !choices.contains(&value.to_string()) {
-                    return Some(MatchError::InvalidEnvironment(
-                        level,
-                        value.to_string(),
-                        param.id().to_string(),
-                        choices.clone(),
-                    ));
+            if let Some(value) = self.envs.get(param.id()) {
+                if let Some(choices) = choices_fn_values.get(param.choice()) {
+                    if !choices.contains(&value.to_string()) {
+                        return Some(MatchError::InvalidEnvironment(
+                            level,
+                            value.to_string(),
+                            param.id().to_string(),
+                            choices,
+                        ));
+                    }
                 }
             }
         }
@@ -968,22 +979,14 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
     }
 
     #[cfg(feature = "eval")]
-    fn execute_choices_fns<'x>(
-        &'x self,
-        bind_envs: &BindEnvs<'a, 'x>,
-    ) -> Option<HashMap<&'a str, Vec<String>>> {
-        let fns: Vec<_> = {
-            let mut fns = self.choice_fns.clone();
-            fns.extend(bind_envs.choice_fns.iter());
-            fns.into_iter().collect()
-        };
+    fn exec_choices_fns(&self, fns: &[&'a str]) -> Option<HashMap<&'a str, Vec<String>>> {
         let script_path = self.script_path.as_ref()?;
         let mut choices_fn_values = HashMap::new();
         let mut envs = HashMap::new();
         envs.insert("ARGC_OS".into(), self.runtime.os());
         let outputs = self
             .runtime
-            .exec_bash_functions(script_path, &fns, self.args, envs)?;
+            .exec_bash_functions(script_path, fns, self.args, envs)?;
         for (i, output) in outputs.into_iter().enumerate() {
             let choices = output
                 .split('\n')
@@ -1002,41 +1005,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
     }
 
     fn match_positionals(&self) -> Vec<Vec<&str>> {
-        let mut output = vec![];
-        let args_len = self.positional_args.len();
-        if args_len == 0 {
-            return output;
-        }
-        let last_cmd = self.last_cmd();
-        let params_len = last_cmd.positional_params.len();
-        let mut arg_index = 0;
-        let mut param_index = 0;
-        while param_index < params_len && arg_index < args_len {
-            let param = &last_cmd.positional_params[param_index];
-            let takes = if param.multiple_values() {
-                let dash = self.dash.unwrap_or_default();
-                if param_index == 0
-                    && dash > 0
-                    && params_len == 2
-                    && last_cmd.positional_params[1].multiple_values()
-                {
-                    dash
-                } else {
-                    (args_len - arg_index).saturating_sub(params_len - param_index) + 1
-                }
-            } else {
-                1
-            };
-            let values =
-                delimit_arg_values(param, &self.positional_args[arg_index..(arg_index + takes)]);
-            output.push(values);
-            arg_index += takes;
-            param_index += 1;
-        }
-        if arg_index < args_len {
-            output.push(self.positional_args[arg_index..].to_vec())
-        }
-        output
+        match_positionals(self.last_cmd(), &self.positional_args, self.dash)
     }
 
     #[cfg(feature = "eval")]
@@ -1214,6 +1183,38 @@ impl BindEnvs<'_, '_> {
 }
 
 type BindEnvMap<'a, 'x> = HashMap<&'a str, Vec<&'x str>>;
+
+#[cfg(feature = "eval")]
+struct ChoicesFnValues<'a: 'b, 'b, 'm, T> {
+    matcher: &'m Matcher<'a, 'b, T>,
+    fns: Vec<&'a str>,
+    cache: RefCell<Option<HashMap<&'a str, Vec<String>>>>,
+}
+
+#[cfg(feature = "eval")]
+impl<'a: 'b, 'b, 'm, T: Runtime> ChoicesFnValues<'a, 'b, 'm, T> {
+    fn get(&self, choice: Option<&ChoiceValue>) -> Option<Vec<String>> {
+        match choice {
+            Some(ChoiceValue::Values(v)) => Some(v.clone()),
+            Some(ChoiceValue::Fn(choice_fn, validate)) => {
+                if *validate {
+                    let Self {
+                        matcher,
+                        fns,
+                        cache,
+                    } = self;
+                    let mut cache = cache.borrow_mut();
+                    let map = cache
+                        .get_or_insert_with(|| matcher.exec_choices_fns(fns).unwrap_or_default());
+                    map.get(choice_fn.as_str()).cloned()
+                } else {
+                    None
+                }
+            }
+            None => None,
+        }
+    }
+}
 
 fn find_subcommand<'a>(
     cmd: &'a Command,
@@ -1560,29 +1561,52 @@ fn comp_param(describe: &str, value_name: &str, data: &ParamData) -> Vec<CompIte
     output
 }
 
-fn get_param_choice<'a, 'b: 'a>(
-    choice: Option<&'a ChoiceValue>,
-    choices_fn_values: &'a HashMap<&str, Vec<String>>,
-) -> Option<&'a Vec<String>> {
-    match choice {
-        Some(ChoiceValue::Values(v)) => Some(v),
-        Some(ChoiceValue::Fn(choice_fn, validate)) => {
-            if *validate {
-                choices_fn_values.get(choice_fn.as_str())
-            } else {
-                None
-            }
-        }
-        None => None,
-    }
-}
-
 fn delimit_arg_values<'x, T: Param>(param: &T, values: &[&'x str]) -> Vec<&'x str> {
     if let Some(delimiter) = param.delimiter() {
         values.iter().flat_map(|v| v.split(delimiter)).collect()
     } else {
         values.to_vec()
     }
+}
+
+fn match_positionals<'b>(
+    last_cmd: &Command,
+    positional_args: &[&'b str],
+    dash: Option<usize>,
+) -> Vec<Vec<&'b str>> {
+    let mut output = vec![];
+    let args_len = positional_args.len();
+    if args_len == 0 {
+        return output;
+    }
+    let params_len = last_cmd.positional_params.len();
+    let mut arg_index = 0;
+    let mut param_index = 0;
+    while param_index < params_len && arg_index < args_len {
+        let param = &last_cmd.positional_params[param_index];
+        let takes = if param.multiple_values() {
+            let dash = dash.unwrap_or_default();
+            if param_index == 0
+                && dash > 0
+                && params_len == 2
+                && last_cmd.positional_params[1].multiple_values()
+            {
+                dash
+            } else {
+                (args_len - arg_index).saturating_sub(params_len - param_index) + 1
+            }
+        } else {
+            1
+        };
+        let values = delimit_arg_values(param, &positional_args[arg_index..(arg_index + takes)]);
+        output.push(values);
+        arg_index += takes;
+        param_index += 1;
+    }
+    if arg_index < args_len {
+        output.push(positional_args[arg_index..].to_vec())
+    }
+    output
 }
 
 fn is_bool_value(value: &str) -> bool {
