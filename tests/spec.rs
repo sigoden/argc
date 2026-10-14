@@ -38,6 +38,19 @@ fn option_eval() {
 }
 
 #[test]
+fn option_value_with_equals() {
+    snapshot_multi!(
+        SCRIPT_OPTIONS,
+        [
+            vec!["prog", "test1", "--oa=a=b"],
+            vec!["prog", "test1", "--ob=k=v", "--ob=x=y=z"],
+            vec!["prog", "test1", "--oe=a=1,b=2"],
+            vec!["prog", "test1", "-e=x=y"],
+        ]
+    );
+}
+
+#[test]
 fn option_shorts() {
     snapshot_multi!(
         SCRIPT_OPTIONS,
