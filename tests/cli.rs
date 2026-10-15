@@ -232,10 +232,28 @@ fn compgen_options() {
 
 #[test]
 fn compgen_argc() {
+    let path_env_var = get_path_env_var();
+    let output = argc_bin()
+        .args(["--argc-compgen", "fish", "-", "argc", "--argc-"])
+        .env("PATH", path_env_var)
+        .output()
+        .unwrap();
+    let stdout = std::str::from_utf8(&output.stdout).unwrap();
+    insta::assert_snapshot!(stdout);
+}
+
+#[test]
+fn compgen_path_fallback() {
+    let tmpdir = tmpdir();
+    std::fs::write(tmpdir.path().join("alpha.txt"), "").unwrap();
+    std::fs::write(tmpdir.path().join("beta.txt"), "").unwrap();
     argc_bin()
-        .args(["--argc-compgen", "fish", "", "argc", "--argc-compgen", ""])
+        .current_dir(tmpdir.path())
+        .env("PATH", get_path_env_var())
+        .args(["--argc-compgen", "bash", "-", "nonexistent-cmd-xyz", ""])
         .assert()
-        .stdout(predicates::str::contains("zsh"))
+        .stdout(predicates::str::contains("alpha.txt"))
+        .stdout(predicates::str::contains("beta.txt"))
         .success();
 }
 

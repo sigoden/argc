@@ -5,7 +5,7 @@ _argc_completer() {
     export COMP_WORDBREAKS
     while IFS=$'\n' read -r line; do
         COMPREPLY+=( "$line" )
-    done < <(argc --argc-compgen bash "" "${_argc_completer_words[@]}" 2>/dev/null)
+    done < <(argc --argc-compgen bash - "${_argc_completer_words[@]}" 2>/dev/null)
 }
 
 _argc_completer_parse_line() {

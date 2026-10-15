@@ -40,11 +40,11 @@ COMMANDS:
             argc --argc-completions fish mycli | source
             argc --argc-completions nushell | save --append $nu.config-path
 
-    --argc-compgen <SHELL> <FILE> <CMD> <ARGS>
-        Generate completion candidates.
+    --argc-compgen <SHELL> <-|FILE> <CMD> <ARGS>
+        Generate completion candidates. Use '-' to resolve the command from $PATH.
         
         Examples:
-            argc --argc-compgen bash "" demo download --    # Find demo in $PATH
+            argc --argc-compgen bash - demo download --    # Find demo in $PATH
             argc --argc-compgen bash ./examples/demo demo download --
 
     --argc-export <FILE>

@@ -6,7 +6,7 @@ _argc_completer() {
     while IFS=$'\n' read -r line; do
         if [[ "$line" == "" ]]; then line=$'\0'; fi
         candidates+=( "$line" )
-    done < <(argc --argc-compgen zsh $'\0' $new_words 2>/dev/null)
+    done < <(argc --argc-compgen zsh - $new_words 2>/dev/null)
     for candidate in ${candidates[@]}; do
         IFS=$'\t' read -r value display color_key color <<< "$candidate"
         colors="$colors:=(#b)($color_key)([ ]## -- *)=0=$color=2:=(#b)($color_key)=0=$color"

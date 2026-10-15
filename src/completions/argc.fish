@@ -2,7 +2,7 @@ function _argc_completer
     set -g _argc_completer_words
     _argc_completer_parse_line
 
-    argc --argc-compgen fish "" $_argc_completer_words
+    argc --argc-compgen fish - $_argc_completer_words
 end
 
 function _argc_completer_parse_line
