@@ -24,6 +24,10 @@ fn help() {
         .arg("--argc-help")
         .assert()
         .stdout(predicates::str::contains(env!("CARGO_PKG_DESCRIPTION")))
+        .stdout(predicates::str::contains("--argc-create - build test"))
+        .stdout(predicates::str::contains(
+            "argc --argc-build ./examples/demo > /tmp/demo",
+        ))
         .success();
 }
 
