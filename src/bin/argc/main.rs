@@ -255,9 +255,8 @@ fn run_compgen(runtime: NativeRuntime, mut args: Vec<String>) -> Option<()> {
         return None;
     };
     let shell: Shell = args.get(2).and_then(|v| v.parse().ok())?;
-    // The command was not resolved to a script file, e.g. unknown command
-    let unresolved = args[3].is_empty() || args[3] == "-";
-    if unresolved {
+    let is_unsolved = |arg: &str| arg.is_empty() || arg == "-"; // '' will be deprecated soon
+    if is_unsolved(&args[3]) {
         if args[4] == "argc" {
             if let Some((_, script_file)) = get_script_path(true) {
                 args[3] = script_file.to_string_lossy().to_string();
@@ -274,7 +273,7 @@ fn run_compgen(runtime: NativeRuntime, mut args: Vec<String>) -> Option<()> {
         .map(|v| is_true_value(&v))
         .unwrap_or_default();
     let last_arg = args.last().map(|v| v.as_str()).unwrap_or_default();
-    let output = if &args[4] == "argc" && (unresolved || args[5].starts_with("--argc")) {
+    let output = if &args[4] == "argc" && (is_unsolved(&args[3]) || args[5].starts_with("--argc")) {
         if (args[5] == "--argc-completions" || args[5] == "--argc-compgen") && args.len() == 7 {
             compgen_kind(runtime, shell, CompKind::Shell, last_arg, no_color).ok()?
         } else if args[5] == "--argc-compgen" {
@@ -293,7 +292,7 @@ fn run_compgen(runtime: NativeRuntime, mut args: Vec<String>) -> Option<()> {
     } else if args[3] == COMPGEN_KIND_SYMBOL {
         let kind = CompKind::new(&args[4]);
         compgen_kind(runtime, shell, kind, last_arg, no_color).ok()?
-    } else if unresolved {
+    } else if is_unsolved(&args[3]) {
         // Fallback unknown command to path completion
         let last_arg = args.last().map(|v| v.as_str()).unwrap_or_default();
         compgen_kind(runtime, shell, CompKind::Path, last_arg, no_color).ok()?
