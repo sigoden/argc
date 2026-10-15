@@ -20,11 +20,9 @@ fn version() {
 
 #[test]
 fn help() {
-    argc_bin()
-        .arg("--argc-help")
-        .assert()
-        .stdout(predicates::str::contains(env!("CARGO_PKG_DESCRIPTION")))
-        .success();
+    let output = argc_bin().arg("--argc-help").output().unwrap();
+    let stdout = std::str::from_utf8(&output.stdout).unwrap();
+    insta::assert_snapshot!(stdout);
 }
 
 #[test]

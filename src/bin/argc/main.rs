@@ -355,19 +355,37 @@ fn get_argc_help(runtime: NativeRuntime) -> Result<String> {
         None,
         None,
     )?;
-    let argc_options = argc::ArgcValue::to_bash(&values);
-    let argc_options = argc_options
+    let origin = argc::ArgcValue::to_bash(&values);
+    let options_marker = "OPTIONS:";
+    let options_start = match origin.find(options_marker) {
+        Some(pos) => pos + options_marker.len(),
+        None => bail!("Failed to get argc help"),
+    };
+    let after_options = &origin[options_start..];
+    let end_marker = "-h, --help";
+    let commands = match after_options.find(end_marker) {
+        Some(pos) => &after_options[..pos],
+        None => bail!("Failed to get argc help"),
+    };
+
+    let commands = commands
+        .trim_start_matches(['\r', '\n'])
+        .trim_end()
         .lines()
-        .map(|v| v.trim())
-        .filter(|v| v.starts_with("--argc-"))
-        .map(|v| format!("    argc {v}\n"))
-        .collect::<Vec<String>>()
-        .join("");
+        .map(|line| {
+            if let Some(rest) = line.strip_prefix("  ") {
+                rest
+            } else {
+                line
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
     let output = format!(
         r###"{about}
 
-USAGE:
-{argc_options}"###
+COMMANDS:
+{commands}"###
     );
     Ok(output)
 }

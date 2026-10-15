@@ -87,7 +87,7 @@ echo val: ${argc_val[@]}
 Run the script with some sample arguments:
 
 ```sh
-./example.sh -F --bar=xyz --baz a --baz b v1 v2
+./mycli -F --bar=xyz --baz a --baz b v1 v2
 ```
 
 Argc parses these arguments and creates variables prefixed with `argc_`:
@@ -99,7 +99,7 @@ baz: a b
 val: v1 v2
 ```
 
-Just run `./example.sh --help` to see the automatically generated help information for your CLI:
+Just run `./mycli --help` to see the automatically generated help information for your CLI:
 
 ```
 USAGE: example [OPTIONS] [VAL]...
@@ -146,9 +146,9 @@ argc --argc-build <SCRIPT> [OUTPATH]
 ```
 
 ```sh
-argc --argc-build ./example.sh build/
+argc --argc-build ./mycli build/mycli
 
-./build/example.sh -h     # The script's functionality does not require the `argc` dependency
+./build/mycli -h     # The script's functionality does not require the `argc` dependency
 ```
 
 ## Argcscript
@@ -177,30 +177,30 @@ Argc automatically provides shell completions for all argc-based scripts.
 argc --argc-completions <SHELL> [CMDS]...
 ```
 
-In the following, we use cmd1 and cmd2 as examples to show how to add a completion script for various shells.
+In the following, we use mycli and mycli2 as examples to show how to add a completion script for various shells.
 
 ```
 # bash (~/.bashrc)
-source <(argc --argc-completions bash cmd1 cmd2)
+source <(argc --argc-completions bash mycli mycli2)
 
-# fish (~/.config/fish/config.fish)
-argc --argc-completions fish cmd1 cmd2 | source
-
-# nushell (~/.config/nushell/config.nu)
-argc --argc-completions nushell cmd1 cmd2 # update config.nu manually according to output
+# zsh (~/.zshrc)
+source <(argc --argc-completions zsh mycli mycli2)
 
 # powershell ($PROFILE)
 Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
-argc --argc-completions powershell cmd1 cmd2 | Out-String | Invoke-Expression
+argc --argc-completions powershell mycli mycli2 | Out-String | Invoke-Expression
 
-# zsh (~/.zshrc)
-source <(argc --argc-completions zsh cmd1 cmd2)
+# fish (~/.config/fish/config.fish)
+argc --argc-completions fish mycli mycli2 | source
+
+# nushell (~/.config/nushell/config.nu)
+argc --argc-completions nushell | save --append $nu.config-path
 ```
 
 The core of all completion scripts is to call `argc --argc-compgen` to obtain completion candidates.
 
 ```
-$ argc --argc-compgen bash ./example.sh example --
+$ argc --argc-compgen bash ./mycli mycli --
 --foo (Flag param)
 --bar (Option param)
 --baz (Option param (multi-occurs))
@@ -219,9 +219,9 @@ argc --argc-mangen <SCRIPT> [OUTDIR]
 ```
 
 ```sh
-argc --argc-mangen ./example.sh man/
+argc --argc-mangen ./mycli man/
 
-man man/example.1
+man man/mycli.1
 ```
 
 <details>
