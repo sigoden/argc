@@ -1,5 +1,5 @@
 _argc_load_dotenv() {
-    local env_vars=""
+    local env_keys=() env_values=()
     for env_file in "$@"; do
         if [[ -f "$env_file" ]]; then
             while IFS= read -r line || [[ -n "$line" ]]; do
@@ -25,13 +25,16 @@ _argc_load_dotenv() {
                     fi
                     
                     if [[ -z "${!key+x}" ]]; then
-                        env_vars="$env_vars $key=$value"
+                        env_keys+=("$key")
+                        env_values+=("$value")
                     fi
                 fi
             done < "$env_file"
         fi
     done
-    if [[ -n "$env_vars" ]]; then
-        eval "export $env_vars"
-    fi
+    local i
+    for i in "${!env_keys[@]}"; do
+        printf -v "${env_keys[i]}" '%s' "${env_values[i]}"
+        export "${env_keys[i]}"
+    done
 }
