@@ -256,22 +256,29 @@ The only dependency for `argc` is Bash. Since most developers working on Windows
 
 </summary>
 
-## Make `.sh` file executable
+## Run argc scripts on Windows
 
-To execute a `.sh` script file directly like a `.cmd` or `.exe` file, execute the following code in PowerShell.
+Argc scripts are Bash scripts, so they need Bash (Git Bash) to run.
 
-```ps1
-# Add .sh to PATHEXT
-[Environment]::SetEnvironmentVariable("PATHEXT", [Environment]::GetEnvironmentVariable("PATHEXT", "Machine") + ";.SH", "Machine")
+When you create a script with `--argc-create` using a name without a `.sh` extension, argc also generates a `<name>.cmd` shim next to the script. This lets you run the script directly from `cmd.exe` or PowerShell, without adding `.sh` to `PATHEXT` or registering a `.sh` file association.
 
-# Associate the .sh file extension with Git Bash
-New-Item -Path Registry::HKEY_CLASSES_ROOT\.sh
-New-ItemProperty -Path Registry::HKEY_CLASSES_ROOT\.sh -Name "(Default)" -Value "sh_auto_file" -PropertyType String -Force
-New-Item -Path Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Classes\sh_auto_file\shell\open\command -Force
-New-ItemProperty -Path Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Classes\sh_auto_file\shell\open\command -Name '(default)' -Value '"C:\Program Files\Git\bin\bash.exe" "%1" %*' -PropertyType String -Force
+```sh
+argc --argc-create mycli build test
 ```
 
-![windows-shell](https://github.com/sigoden/argc/assets/4012553/16af2b13-8c20-4954-bf58-ccdf1bbe23ef)
+This creates `mycli` (the argc script) and `mycli.cmd` (the shim):
+
+```cmd
+@"C:\Program Files\Git\bin\bash.exe" --noprofile --norc -c "mycli \"$@\"" -- %*
+```
+
+Add the directory containing the script to your `PATH`, then run it like any other command:
+
+```
+mycli build
+```
+
+> The shim is only generated on Windows, and only when the name does not end with `.sh`.
 
 </details>
 

@@ -82,6 +82,64 @@ fn create_cli_with_tasks() {
     insta::assert_snapshot!(contents);
 }
 
+#[cfg(windows)]
+#[test]
+fn create_cli_with_shim() {
+    use argc::Runtime;
+    let tmpdir = tmpdir();
+    argc_bin()
+        .current_dir(tmpdir.path())
+        .arg("--argc-create")
+        .arg("mycli")
+        .args(["foo", "bar"])
+        .assert()
+        .success();
+    assert!(tmpdir.path().join("mycli").exists());
+    match argc::NativeRuntime.bash_path() {
+        Some(bash_path) => {
+            let shim = std::fs::read_to_string(tmpdir.path().join("mycli.cmd")).unwrap();
+            assert_eq!(
+                shim,
+                format!("@\"{bash_path}\" --noprofile --norc -c \"mycli \\\"$@\\\"\" -- %*\r\n")
+            );
+        }
+        None => {
+            assert!(!tmpdir.path().join("mycli.cmd").exists());
+        }
+    }
+}
+
+#[cfg(windows)]
+#[test]
+fn create_sh_skips_shim() {
+    let tmpdir = tmpdir();
+    argc_bin()
+        .current_dir(tmpdir.path())
+        .arg("--argc-create")
+        .arg("mycli.sh")
+        .args(["foo"])
+        .assert()
+        .success();
+    assert!(tmpdir.path().join("mycli.sh").exists());
+    assert!(!tmpdir.path().join("mycli.sh.cmd").exists());
+}
+
+#[cfg(windows)]
+#[test]
+fn create_skips_existing_shim() {
+    let tmpdir = tmpdir();
+    let shim = tmpdir.path().join("mycli.cmd");
+    std::fs::write(&shim, "existing shim").unwrap();
+    argc_bin()
+        .current_dir(tmpdir.path())
+        .arg("--argc-create")
+        .arg("mycli")
+        .args(["foo"])
+        .assert()
+        .success();
+    assert_eq!(std::fs::read_to_string(&shim).unwrap(), "existing shim");
+}
+
 #[test]
 fn build_stdout() {
     let path = locate_script("examples/demo.sh");
