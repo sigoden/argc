@@ -1,4 +1,7 @@
-# @describe how to use `@meta require-tools`
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates `@meta require-tools` for verifying required tools
 
 # @meta require-tools awk sed
 

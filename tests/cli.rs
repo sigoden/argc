@@ -142,7 +142,7 @@ fn create_skips_existing_shim() {
 
 #[test]
 fn build_stdout() {
-    let path = locate_script("examples/demo.sh");
+    let path = locate_script("examples/demo");
     argc_bin()
         .arg("--argc-build")
         .arg(path)
@@ -153,7 +153,7 @@ fn build_stdout() {
 
 #[test]
 fn run_build() {
-    let path = locate_script("examples/strict.sh");
+    let path = locate_script("examples/strict");
     let tmpdir = tmpdir();
     let outpath = tmpdir.join("strict.sh");
     argc_bin()
@@ -179,7 +179,7 @@ fn run_build() {
 
 #[test]
 fn mangen() {
-    let path = locate_script("examples/demo.sh");
+    let path = locate_script("examples/demo");
     let tmpdir = tmpdir();
     let outdir = tmpdir.to_path_buf();
     argc_bin()
@@ -204,7 +204,7 @@ fn completions() {
 
 #[test]
 fn compgen_args() {
-    let path = locate_script("examples/args.sh");
+    let path = locate_script("examples/args");
     let path_env_var = get_path_env_var();
     argc_bin()
         .arg("--argc-compgen")
@@ -219,7 +219,7 @@ fn compgen_args() {
 
 #[test]
 fn compgen_options() {
-    let path = locate_script("examples/options.sh");
+    let path = locate_script("examples/options");
     let path_env_var = get_path_env_var();
     argc_bin()
         .arg("--argc-compgen")
@@ -258,7 +258,7 @@ fn compgen_kind() {
 
 #[test]
 fn export() {
-    let path = locate_script("examples/options.sh");
+    let path = locate_script("examples/options");
     let output = argc_bin().arg("--argc-export").arg(path).output().unwrap();
     let stdout = std::str::from_utf8(&output.stdout).unwrap();
     insta::assert_snapshot!(stdout);

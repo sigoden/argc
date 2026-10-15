@@ -1,4 +1,7 @@
-# @describe How to use multiline help text
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates multiline descriptions and help text
 #
 # Extra lines after the comment tag accepts description, which don't start with an `@`,
 # are treated as the long description. A line which is not a comment ends the block.

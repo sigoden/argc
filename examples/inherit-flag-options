@@ -1,4 +1,7 @@
-# @describe How to use `@meta inherit-flag-options`
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates `@meta inherit-flag-options` for sharing flags with subcommands
 #
 # Mock systemctl cli
 # Examples:

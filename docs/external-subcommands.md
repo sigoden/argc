@@ -128,7 +128,7 @@ For example, with `git --git-dir=<path> mytool ...`, the external subcommand `my
 
 ```sh
 export ARGC_PARENT_ARGS="git --git-dir=<path>"
-bash examples/git-mytool.sh ...
+bash examples/git-mytool ...
 ```
 
 The external script can define a helper function to call back to the parent:

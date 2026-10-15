@@ -1,4 +1,7 @@
-# @describe All kinds of @option and @flag
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates all kinds of `@option` and `@flag` declarations
 
 # @meta combine-shorts
 

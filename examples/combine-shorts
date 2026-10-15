@@ -1,4 +1,7 @@
-# @describe How to use `@meta combine-shorts`
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates `@meta combine-shorts` for combining short flags (e.g. `-rf`)
 #
 # Mock rm cli
 # Examples:

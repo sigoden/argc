@@ -1,4 +1,7 @@
-# @describe All kinds of @arg
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates all kinds of `@arg` positional parameter definitions
 
 # @cmd
 cmd() {

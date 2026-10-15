@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates binding env vars to flags, options, and args
+
 # @cmd How to bind env to param
 
 # @flag --fa1 $$

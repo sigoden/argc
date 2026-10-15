@@ -4,7 +4,7 @@ expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}
 ---
 
 # OUTPUT
-All kinds of @env
+Demonstrates all kinds of `@env` declarations
 
 USAGE: envs <COMMAND>
 
@@ -23,7 +23,7 @@ ENVIRONMENTS:
 
 
 # BUILD_OUTPUT
-All kinds of @env
+Demonstrates all kinds of `@env` declarations
 
 USAGE: envs <COMMAND>
 
