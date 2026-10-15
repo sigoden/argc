@@ -62,25 +62,24 @@ fn run() -> Result<i32> {
             },
             "--argc-create" => {
                 let argcfiles = runner_script_names();
-                let (outpath, task_args, is_argcfile) = match args.get(2) {
+                let (outpath, task_args) = match args.get(2) {
                     Some(v) if v == "-" => {
                         if let Some((_, script_file)) = get_script_path(false) {
                             bail!("Already exist {}", script_file.display());
                         }
-                        (argcfiles[0].clone(), &args[3..], true)
+                        (argcfiles[0].clone(), &args[3..])
                     }
                     Some(v) => {
                         if Path::new(v).exists() {
                             bail!("Already exist {}", v);
                         }
-                        let is_argcfile = argcfiles.iter().any(|name| name == v);
-                        (v.clone(), &args[3..], is_argcfile)
+                        (v.clone(), &args[3..])
                     }
                     None => {
                         if let Some((_, script_file)) = get_script_path(false) {
                             bail!("Already exist {}", script_file.display());
                         }
-                        (argcfiles[0].clone(), &args[2..], true)
+                        (argcfiles[0].clone(), &args[2..])
                     }
                 };
                 let content = generate_boilerplate(task_args);
@@ -90,7 +89,10 @@ fn run() -> Result<i32> {
                     .with_context(|| format!("Failed to set execute permission to '{outpath}'",))?;
                 println!("Successfully created {outpath}");
                 #[cfg(windows)]
-                if !is_argcfile {
+                if !argcfiles
+                    .iter()
+                    .any(|name| &outpath == name || outpath.ends_with(name))
+                {
                     if let Some(shim_path) = create_windows_shim(&runtime, &outpath) {
                         println!("Successfully created {shim_path} (command shim)");
                     }
