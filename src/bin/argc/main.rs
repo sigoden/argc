@@ -61,13 +61,13 @@ fn run() -> Result<i32> {
                 }
             },
             "--argc-create" => {
+                let argcfiles = runner_script_names();
                 let (outpath, task_args) = match args.get(2) {
                     Some(v) if v == "-" => {
                         if let Some((_, script_file)) = get_script_path(false) {
                             bail!("Already exist {}", script_file.display());
                         }
-                        let names = runner_script_names();
-                        (names[0].clone(), &args[3..])
+                        (argcfiles[0].clone(), &args[3..])
                     }
                     Some(v) => {
                         if Path::new(v).exists() {
@@ -79,8 +79,7 @@ fn run() -> Result<i32> {
                         if let Some((_, script_file)) = get_script_path(false) {
                             bail!("Already exist {}", script_file.display());
                         }
-                        let names = runner_script_names();
-                        (names[0].clone(), &args[2..])
+                        (argcfiles[0].clone(), &args[2..])
                     }
                 };
                 let content = generate_boilerplate(task_args);
@@ -89,6 +88,15 @@ fn run() -> Result<i32> {
                 set_permissions(&outpath)
                     .with_context(|| format!("Failed to set execute permission to '{outpath}'",))?;
                 println!("Successfully created {outpath}");
+                #[cfg(windows)]
+                if !argcfiles
+                    .iter()
+                    .any(|name| &outpath == name || outpath.ends_with(name))
+                {
+                    if let Some(shim_path) = create_windows_shim(&runtime, &outpath) {
+                        println!("Successfully created {shim_path} (command shim)");
+                    }
+                }
             }
             "--argc-build" => {
                 let (source, script_path, cmd_args) = parse_script_args(&args[2..])?;
@@ -462,6 +470,26 @@ set -e
 eval "$(argc --argc-eval "$0" "$@")"
 "#
     )
+}
+
+#[cfg(windows)]
+fn create_windows_shim(runtime: &NativeRuntime, script_path: &str) -> Option<String> {
+    if Path::new(script_path)
+        .extension()
+        .map(|ext| ext.eq_ignore_ascii_case("sh"))
+        .unwrap_or(false)
+    {
+        return None;
+    }
+    let shim_path = format!("{script_path}.cmd");
+    if Path::new(&shim_path).exists() {
+        return None;
+    }
+    let bash_path = runtime.bash_path()?;
+    let name = Path::new(script_path).file_name()?.to_str()?;
+    let content = format!("@\"{bash_path}\" --noprofile --norc -c \"{name} \\\"$@\\\"\" -- %*\r\n");
+    fs::write(&shim_path, content).ok()?;
+    Some(shim_path)
 }
 
 fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
