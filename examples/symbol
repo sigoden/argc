@@ -1,4 +1,7 @@
-# @describe How to use `@meta symbol`
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates `@meta symbol` for using a custom option prefix (`+toolchain`)
 #
 # Mock cargo cli
 # @meta symbol +toolchain[`_choice_toolchain`]

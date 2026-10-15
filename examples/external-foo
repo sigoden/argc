@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+# @describe An external subcommand "foo" that echoes a message
+
+# @arg message!   Message to echo
+main() {
+    echo "external-foo: $argc_message"
+}
+
+eval "$(argc --argc-eval "$0" "$@")"

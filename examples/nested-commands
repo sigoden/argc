@@ -1,4 +1,7 @@
-# @describe How to use nested subcommands
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates nested subcommands declared with `::`
 # 
 # Mock docker cli
 

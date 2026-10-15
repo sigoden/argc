@@ -3,7 +3,6 @@ source: tests/cli.rs
 expression: contents
 ---
 #!/usr/bin/env bash
-
 set -e
 
 # @cmd

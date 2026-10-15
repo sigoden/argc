@@ -1,4 +1,7 @@
-# @describe All kinds of @env
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates all kinds of `@env` declarations
 
 # @meta dotenv
 # @env TEST_EA                   optional

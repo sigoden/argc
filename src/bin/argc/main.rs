@@ -456,7 +456,6 @@ fn generate_boilerplate(args: &[String]) -> String {
 
     format!(
         r#"#!/usr/bin/env bash
-
 set -e
 {tasks}
 # See more details at https://github.com/sigoden/argc

@@ -1,4 +1,7 @@
-# @describe An external subcommand "bar" with options
+#!/usr/bin/env bash
+set -e
+
+# @describe An external subcommand "bar" with a verbose flag
 
 # @flag   -v --verbose   Enable verbose output
 # @arg    message!       Message to echo

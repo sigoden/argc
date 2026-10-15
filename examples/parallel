@@ -1,7 +1,7 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 set -e
 
-# @describe How to use `--argc-parallel`
+# @describe Demonstrates `--argc-parallel` for running subcommands in parallel
 #
 # Compared with GNU parallel, the biggest advantage of argc-parallel is that it preserves `argc_*` variables.
 

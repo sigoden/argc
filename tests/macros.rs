@@ -197,7 +197,7 @@ macro_rules! snapshot_meta_env {
         snapshot_env!(
             args: [$($arg),*],
             envs: {$($key : $value),*}
-            script_file: "examples/envs.sh"
+            script_file: "examples/envs"
         );
     }
 }
@@ -211,7 +211,7 @@ macro_rules! snapshot_bind_env {
         snapshot_env!(
             args: [$($arg),*],
             envs: {$($key : $value),*}
-            script_file: "examples/bind-envs.sh"
+            script_file: "examples/bind-envs"
         );
     };
 }

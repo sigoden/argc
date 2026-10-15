@@ -2,22 +2,22 @@
 
 Each of these examples demonstrates one aspect or feature of argc.
 
-- [demo.sh](./demo.sh) - A simple demo script.
-- [multiline.sh](./multiline.sh) - how to use multiline help text.
-- [nested-commands.sh](./nested-commands.sh) - how to use nested commands.
-- [hooks.sh](./hooks.sh) - how to use argc hooks.
-- [strict.sh](./strict.sh) - how to use strict mode
-- [parallel.sh](./parallel.sh) - how to use `--argc-parallel`.
+- [demo](./demo) - A demo CLI with subcommands, flags, options, and positional args.
+- [multiline](./multiline) - how to write multiline descriptions and help text.
+- [nested-commands](./nested-commands) - how to declare nested subcommands with `::`.
+- [hooks](./hooks) - how to use the `_argc_before` and `_argc_after` hooks.
+- [strict](./strict) - how to use argc scripts in strict mode (`set -eu`).
+- [parallel](./parallel) - how to run subcommands in parallel with `--argc-parallel`.
 
-- [args.sh](./args.sh) - all kinds of `@arg`.
-- [options.sh](./options.sh) - all kinds of `@option` and `@flag`.
-- [bind-envs.sh](./bind-envs.sh) - how to bind env to param.
-- [envs.sh](./envs.sh) - all kind of `@env`.
+- [args](./args) - all kinds of `@arg` positional parameter definitions.
+- [options](./options) - all kinds of `@option` and `@flag` declarations.
+- [bind-envs](./bind-envs) - how to bind env vars to flags, options, and args.
+- [envs](./envs) - all kinds of `@env` declarations.
 
-- [default-subcommand.sh](./default-subcommand.sh) - how to use `@meta default-subcommand`.
-- [require-tools.sh](./require-tools.sh) - how to use `@meta require-tools`.
-- [inherit-flag-options.sh](./inherit-flag-options.sh) - how to use `@meta inherit-flag-options`.
-- [combine-shorts.sh](./combine-shorts.sh) - how to use `@meta combine-shorts`.
-- [symbol.sh](./symbol.sh) - how to use `@meta symbol`.
+- [default-subcommand](./default-subcommand) - how to pick a default subcommand with `@meta default-subcommand`.
+- [require-tools](./require-tools) - how to verify required tools with `@meta require-tools`.
+- [inherit-flag-options](./inherit-flag-options) - how to share flags with subcommands via `@meta inherit-flag-options`.
+- [combine-shorts](./combine-shorts) - how to combine short flags (e.g. `-rf`) with `@meta combine-shorts`.
+- [symbol](./symbol) - how to use a custom option prefix with `@meta symbol`.
 
-- [external.sh](./external.sh) - how to use `@meta external-subcommands`.
+- [external](./external) - how to add external subcommand scripts with `@meta external-subcommands`.

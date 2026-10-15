@@ -1,4 +1,7 @@
-# @describe A demo cli
+#!/usr/bin/env bash
+set -e
+
+# @describe A demo CLI with subcommands, flags, options, and positional args
 
 # @cmd Upload a file
 # @alias    u

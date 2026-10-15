@@ -1,4 +1,7 @@
-# @describe Test external subcommands
+#!/usr/bin/env bash
+set -e
+
+# @describe Demonstrates `@meta external-subcommands` with external subcommand scripts
 # @meta external-subcommands
 
 # @cmd A built-in subcommand

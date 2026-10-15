@@ -3,7 +3,7 @@ use crate::fixtures::argc_bin;
 use predicates::prelude::*;
 
 fn script_path() -> String {
-    crate::fixtures::locate_script("examples/external.sh")
+    crate::fixtures::locate_script("examples/external")
 }
 
 #[test]
@@ -17,9 +17,11 @@ fn help_shows_external_commands() {
         .stdout(predicate::str::contains("bar"))
         .stdout(predicate::str::contains("foo"))
         .stdout(predicate::str::contains(
-            r#"An external subcommand "bar" with options"#,
+            r#"An external subcommand "bar" with a verbose flag"#,
         ))
-        .stdout(predicate::str::contains(r#"An external subcommand "foo""#))
+        .stdout(predicate::str::contains(
+            r#"An external subcommand "foo" that echoes a message"#,
+        ))
         .success();
 }
 
@@ -45,7 +47,7 @@ fn external_external_subcommand_generates_bash_call() {
         .assert()
         .stdout(predicate::str::contains("export ARGC_PARENT_ARGS=external"))
         .stdout(predicate::str::contains("bash"))
-        .stdout(predicate::str::contains("external-foo.sh"))
+        .stdout(predicate::str::contains("external-foo"))
         .stdout(predicate::str::contains("hello"))
         .success();
 }
@@ -60,7 +62,7 @@ fn external_external_subcommand_with_flags_generates_bash_call() {
         .arg("hey")
         .assert()
         .stdout(predicate::str::contains("bash"))
-        .stdout(predicate::str::contains("external-bar.sh"))
+        .stdout(predicate::str::contains("external-bar"))
         .stdout(predicate::str::contains("-v"))
         .stdout(predicate::str::contains("hey"))
         .success();

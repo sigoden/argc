@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-
 set -eu
 
+# @describe Demonstrates using argc scripts in strict mode (`set -eu`)
 
 # @flag      --fa 
 # @option    --oa                   
