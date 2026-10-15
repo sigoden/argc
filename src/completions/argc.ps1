@@ -22,7 +22,7 @@ $_argc_completer = {
     if ($commandAst.CommandElements[$lastElemIndex].Extent.EndOffset -lt $cursorPosition) {
         $words += $emptyS
     }
-    @((argc --argc-compgen powershell $emptyS $words) -split "`n") | ForEach-Object {
+    @((argc --argc-compgen powershell - $words) -split "`n") | ForEach-Object {
         $parts = ($_ -split "`t")
         if ($parts[1] -eq "1") {
             $value = $parts[0] + " "

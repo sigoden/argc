@@ -1,5 +1,5 @@
 def _argc_completer [args: list<string>] {
-    argc --argc-compgen nushell "" ...$args
+    argc --argc-compgen nushell - ...$args
         | lines
         | each { |line| $line | split column "\t" value description }
         | flatten

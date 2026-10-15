@@ -1,0 +1,16 @@
+---
+source: tests/cli.rs
+expression: stdout
+---
+--argc-eval	Parse arguments and output shell code to eval
+--argc-create	Create a boilerplate argc script. Use '-' as an alias for Argcfile.sh
+--argc-build	Build a standalone script without argc dependency
+--argc-mangen	Generate man pages for a script
+--argc-completions	Generate shell completion scripts
+--argc-compgen	Generate completion candidates. Use '-' to resolve the command from $PATH.
+--argc-export	Export command definitions as JSON
+--argc-parallel	Run recipes in parallel
+--argc-script-path	Print the path of the current argcfile
+--argc-shell-path	Print the path of the current shell
+--argc-help	Print help information
+--argc-version	Print version information
