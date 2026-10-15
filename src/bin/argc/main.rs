@@ -12,14 +12,9 @@ use std::{
     process,
 };
 
-const ARGC_SCRIPT_NAMES: [&str; 6] = [
-    "Argcfile.sh",
-    "Argcfile",
-    "argcfile.sh",
-    "argcfile",
-    "ARGCFILE.sh",
-    "ARGCFILE",
-];
+/// Default argcfile name. It is matched case-insensitively with an optional
+/// `.sh` extension, e.g. `Argcfile`, `argcfile.sh` or `ARGCFILE`.
+const DEFAULT_SCRIPT_NAME: &str = "Argcfile.sh";
 
 const ARGC_COMPLETION_SCRIPT: &str = include_str!("completion.sh");
 
@@ -61,13 +56,14 @@ fn run() -> Result<i32> {
                 }
             },
             "--argc-create" => {
-                let argcfiles = runner_script_names();
+                let default_script = env::var("ARGC_SCRIPT_NAME")
+                    .unwrap_or_else(|_| DEFAULT_SCRIPT_NAME.to_string());
                 let (outpath, task_args) = match args.get(2) {
                     Some(v) if v == "-" => {
                         if let Some((_, script_file)) = get_script_path(false) {
                             bail!("Already exist {}", script_file.display());
                         }
-                        (argcfiles[0].clone(), &args[3..])
+                        (default_script.clone(), &args[3..])
                     }
                     Some(v) => {
                         if Path::new(v).exists() {
@@ -79,7 +75,7 @@ fn run() -> Result<i32> {
                         if let Some((_, script_file)) = get_script_path(false) {
                             bail!("Already exist {}", script_file.display());
                         }
-                        (argcfiles[0].clone(), &args[2..])
+                        (default_script.clone(), &args[2..])
                     }
                 };
                 let content = generate_boilerplate(task_args);
@@ -89,10 +85,7 @@ fn run() -> Result<i32> {
                     .with_context(|| format!("Failed to set execute permission to '{outpath}'",))?;
                 println!("Successfully created {outpath}");
                 #[cfg(windows)]
-                if !argcfiles
-                    .iter()
-                    .any(|name| &outpath == name || outpath.ends_with(name))
-                {
+                if !is_argc_script_path(&outpath) {
                     if let Some(shim_path) = create_windows_shim(&runtime, &outpath) {
                         println!("Successfully created {shim_path} (command shim)");
                     }
@@ -408,7 +401,7 @@ fn export_dir_vars(path: &str) -> String {
 }
 
 fn get_argc_script_dir(path: &str) -> Option<String> {
-    if runner_script_names().iter().all(|v| !path.ends_with(v)) {
+    if !is_argc_script_path(path) {
         return None;
     }
     let path = Path::new(path);
@@ -492,15 +485,48 @@ fn create_windows_shim(runtime: &NativeRuntime, script_path: &str) -> Option<Str
     Some(shim_path)
 }
 
+/// Whether `name` is the argcfile, ignoring case and an optional `.sh` suffix.
+fn is_argc_script_name(name: &str) -> bool {
+    let name = name.to_ascii_lowercase();
+    name == "argcfile" || name == "argcfile.sh"
+}
+
+/// File names supplied via the `ARGC_SCRIPT_NAME` environment variable, with
+/// and without the `.sh` suffix.
+fn override_script_names() -> Vec<String> {
+    let mut names = vec![];
+    if let Ok(name) = env::var("ARGC_SCRIPT_NAME") {
+        names.push(name.clone());
+        if !name.ends_with(".sh") {
+            names.push(format!("{name}.sh"));
+        }
+    }
+    names
+}
+
+/// Whether `path` refers to the argcfile, honoring `ARGC_SCRIPT_NAME`.
+fn is_argc_script_path(path: &str) -> bool {
+    let Some(name) = Path::new(path).file_name().and_then(|v| v.to_str()) else {
+        return false;
+    };
+    if override_script_names().iter().any(|v| v == name) {
+        return true;
+    }
+    is_argc_script_name(name)
+}
+
 fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
-    let names = runner_script_names();
+    let override_names = override_script_names();
     let mut dir = env::current_dir().ok()?;
     loop {
-        for name in names.iter() {
+        for name in &override_names {
             let path = dir.join(name);
             if path.exists() {
                 return Some((dir, path));
             }
+        }
+        if let Some(path) = find_script_in_dir(&dir) {
+            return Some((dir, path));
         }
         if !recursive {
             return None;
@@ -509,16 +535,24 @@ fn get_script_path(recursive: bool) -> Option<(PathBuf, PathBuf)> {
     }
 }
 
-fn runner_script_names() -> Vec<String> {
-    let mut names = vec![];
-    if let Ok(name) = env::var("ARGC_SCRIPT_NAME") {
-        names.push(name.clone());
-        if !name.ends_with(".sh") {
-            names.push(format!("{name}.sh"));
+/// Look for an argcfile in `dir`, preferring the `.sh` variant.
+fn find_script_in_dir(dir: &Path) -> Option<PathBuf> {
+    let mut without_ext = None;
+    let mut with_ext = None;
+    for entry in fs::read_dir(dir).ok()?.flatten() {
+        let file_name = entry.file_name();
+        let Some(name) = file_name.to_str() else {
+            continue;
+        };
+        if is_argc_script_name(name) {
+            if name.to_ascii_lowercase().ends_with(".sh") {
+                with_ext = Some(entry.path());
+            } else {
+                without_ext = Some(entry.path());
+            }
         }
     }
-    names.extend(ARGC_SCRIPT_NAMES.into_iter().map(|v| v.to_string()));
-    names
+    with_ext.or(without_ext)
 }
 
 fn search_completion_script(args: &mut Vec<String>) -> Option<PathBuf> {
