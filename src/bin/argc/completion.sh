@@ -28,10 +28,10 @@
 #     argc --argc-completions fish mycli | source
 #     argc --argc-completions nushell | save --append $nu.config-path
 
-# @option --argc-compgen <SHELL> <-|FILE> <CMD> <ARGS>  Generate completion candidates. Use '-' to resolve the command from $PATH.
+# @option --argc-compgen <SHELL> <FILE> <CMD> <ARGS>  Generate completion candidates.
 #
 # Examples:
-#     argc --argc-compgen bash - demo download --    # Find demo in $PATH
+#     argc --argc-compgen bash "" demo download --    # Find demo in $PATH
 #     argc --argc-compgen bash ./examples/demo demo download --
 
 # @option --argc-export <FILE>                          Export command definitions as JSON
