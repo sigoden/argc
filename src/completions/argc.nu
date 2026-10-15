@@ -1,11 +1,16 @@
 def _argc_completer [args: list<string>] {
     argc --argc-compgen nushell "" ...$args
-        | split row "\n"
+        | lines
         | each { |line| $line | split column "\t" value description }
-        | flatten 
+        | flatten
 }
 
-let external_completer = {|spans| 
+let external_completer = {|place|
+    let spans = if (($place | describe) | str starts-with "record") {
+        $place.command
+    } else {
+        $place
+    }
     _argc_completer $spans
 }
 
