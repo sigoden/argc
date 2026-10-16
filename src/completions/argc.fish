@@ -45,5 +45,6 @@ end
 
 
 for cmd in __COMMANDS__
-    complete -x -k -c $cmd -a "(_argc_completer)"
+    complete -c $cmd -e
+    complete -c $cmd -x -k -a "(_argc_completer)"
 end
