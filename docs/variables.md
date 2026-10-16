@@ -89,3 +89,15 @@ It's important to distinguish between these two variables:
 *  **`ARGC_LAST_ARG`**: This variable captures the entire last argument, including any flags or options attached to it. In the same example, `ARGC_LAST_ARG` would be `--git-dir=git`.
 
 Understanding these variables is key to effectively leveraging Argc's capabilities and creating robust and user-friendly command-line interfaces.
+
+## Inspecting Variables
+
+When debugging a script, you can dump the internal variables and the `ARGC_*` environment variables from any function:
+
+```sh
+(set -o posix; set) | grep argc_
+printenv | grep ARGC_
+```
+
+- `(set -o posix; set) | grep argc_` lists the argc shell variables (e.g. `argc__args`, `argc__positionals`, `argc_oa`). The `set -o posix` makes the output portable across shells.
+- `printenv | grep ARGC_` lists the exported `ARGC_*` environment variables (e.g. `ARGC_PWD`, `ARGC_OS`).

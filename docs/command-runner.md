@@ -11,7 +11,7 @@ Commands, called recipes, are stored in a file called argcfile .
 Use `--argc-create` to quickly generate an `Argcfile.sh` for your project.
 
 ```sh
-argc --argc-create build test
+argc --argc-create - build test  # '-' is equivalent to Argcfile.sh
 ```
 
 This creates a basic Argcfile.sh with sample `build` and `test` recipes.

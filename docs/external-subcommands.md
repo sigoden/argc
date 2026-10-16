@@ -127,8 +127,7 @@ When an external subcommand is dispatched, argc exports the `ARGC_PARENT_ARGS` e
 For example, with `git --git-dir=<path> mytool ...`, the external subcommand `mytool` receives:
 
 ```sh
-export ARGC_PARENT_ARGS="git --git-dir=<path>"
-bash examples/git-mytool ...
+ARGC_PARENT_ARGS="git --git-dir=<path>"
 ```
 
 The external script can define a helper function to call back to the parent:
@@ -138,7 +137,6 @@ _git() {
   eval "$ARGC_PARENT_ARGS" "$@"
 }
 
-# Usage:
 _git log --oneline
 ```
 
