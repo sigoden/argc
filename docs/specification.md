@@ -89,8 +89,8 @@ Defines a positional argument.
 # @arg vfc*[`_choice_fn`]         multi-values + choice from fn
 # @arg vfd*,[`_choice_fn`]        multi-values + choice from fn + comma-separated list
 # @arg vxa~                       capture all remaining args
-# @arg vea $$                     bind-env
-# @arg veb $VEB <PATH             bind-named-env
+# @arg vea $$                     bind-env (auto-named)
+# @arg veb $VEB <PATH>            bind-env
 ```
 
 ### `@option`
@@ -125,8 +125,8 @@ Defines an option argument.
 # @option    --ofc*[`_choice_fn`]   multi-occurs + choice from fn
 # @option    --ofd*,[`_choice_fn`]  multi-occurs + choice from fn + comma-separated list
 # @option    --oxa~                 capture all remaining args
-# @option    --oea $$               bind-env
-# @option    --oeb $OEB <PATH>      bind-named-env
+# @option    --oea $$               bind-env (auto-named)
+# @option    --oeb $OEB <PATH>      bind-env
 ```
 
 ### `@flag`
@@ -143,8 +143,8 @@ Defines a flag argument. Flag is a special option that does not accept any value
 # @flag  -b --fb         short
 # @flag  -c              short only
 # @flag     --fd*        multi-occurs
-# @flag     --ea $$      bind-env
-# @flag     --eb $EB     bind-named-env
+# @flag     --ea $$      bind-env (auto-named)
+# @flag     --eb $EB     bind-env
 ```
 
 ### `@env`
@@ -187,6 +187,7 @@ Adds metadata.
 
 ```sh
 # @meta version 1.0.0
+# @meta biname mycli
 # @meta dotenv
 # @meta dotenv .env.local
 # @meta require-tools git yq
@@ -292,7 +293,7 @@ A-Z a-z 0-9 `!` `#` `$` `%` `*` `+` `,` `.` `/` `:` `=` `?` `@` `[` `]` `^` `_` 
  Link environment variables to params:
 
 - `$$`: Automatically use the parameter's name in uppercase as the environment variable name, prefixed with the command name (e.g. `--port $$` in command `serve` becomes `SERVE_PORT`).
-- `$`[_NAME_]: Use a specific environment variable name.
+- `$NAME`: Use `NAME` as environment variable name.
 
 ### description
 
@@ -322,4 +323,3 @@ Plain text for documentation and usage information
 [_long-name_]: #name
 [_fn-name_]: #fn-name
 [_value_]: #value
-[_NAME_]: #name

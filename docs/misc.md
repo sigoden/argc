@@ -1,18 +1,5 @@
 # Misc
 
-## Inspecting Variables
-
-When debugging a script, you can dump the internal variables and the `ARGC_*` environment variables from any function:
-
-```sh
-(set -o posix; set) | grep argc_
-printenv | grep ARGC_
-```
-
-- `(set -o posix; set) | grep argc_` lists the argc shell variables (e.g. `argc__args`, `argc__positionals`, `argc_oa`). The `set -o posix` makes the output portable across shells.
-- `printenv | grep ARGC_` lists the exported `ARGC_*` environment variables (e.g. `ARGC_PWD`, `ARGC_OS`).
-
-
 ## Using `___internal___`
 
 `___internal___` is an internal marker that tells an argc script to invoke one of its own functions instead of running a command. Argc uses it to call functions defined in the script — such as choice functions, default functions, and completion functions — while reusing the current command-line context.

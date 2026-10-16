@@ -5,7 +5,7 @@
 
 Argc is a powerful Bash framework that simplifies building full-featured CLIs. It lets you define your CLI through comments, focusing on your core logic without dealing with argument parsing, usage text, error messages, and other boilerplate code.
 
-![demo](https://user-images.githubusercontent.com/4012553/228990851-fee5649f-aa24-4297-a924-0d392e0a7400.gif)
+<img width="2400" height="1400" alt="demo" src="https://github.com/user-attachments/assets/b8a0ea63-c5c8-4a0b-8812-7b27297462d9" />
 
 ## Features
 
@@ -135,22 +135,6 @@ Comment tags are standard Bash comments prefixed with `@` and a specific tag. Th
 
 See [specification](https://github.com/sigoden/argc/blob/main/docs/specification.md) for the grammar and usage of all the comment tags.
 
-## Argc-build
-
-Generate an independent bash script that incorporates all functionalities typically available when the `argc` command is present.
-
-The generated script removes the `argc` dependency, enhances compatibility, and enables deployment in a wider range of environments.
-
-```
-argc --argc-build <SCRIPT> [OUTPATH]
-```
-
-```sh
-argc --argc-build ./mycli build/mycli
-
-./build/mycli -h     # The script's functionality does not require the `argc` dependency
-```
-
 ## Argcscript
 
 Argc is a also command runner built for those who love the efficiency and flexibility of Bash scripting.
@@ -165,9 +149,22 @@ Similar to how Makefile define commands for the `make` tool, Argcscript uses an 
 - **Powerful Shell Autocompletion:** Enjoy autocomplete suggestions for enhanced productivity.
 - **Cross-Platform Compatibility::** Works seamlessly across Linux, macOS, Windows, and BSD systems.
 
+Use `argc --argc-create` to quickly generate a boilerplate `Argcfile.sh`:
+
+```sh
+argc --argc-create - build test     # '-' is an alias for Argcfile.sh
+```
+
+You can also generate a standalone argc-based script with a custom name, or an explicit path:
+
+```sh
+argc --argc-create mycli foo bar    # Create ./mycli
+argc --argc-create /tmp/mycli foo   # Create /tmp/mycli
+```
+
 See [command runner](https://github.com/sigoden/argc/blob/main/docs/command-runner.md) for more details.
 
-![argcscript](https://github.com/sigoden/argc/assets/4012553/42dd99bd-958a-49b7-b87d-585f7bd3b317)
+<img width="2400" height="1080" alt="runner" src="https://github.com/user-attachments/assets/936c8da2-8fd1-40c5-ac58-1c8feda6a533" />
 
 ## Completions
 
@@ -210,7 +207,23 @@ $ argc --argc-compgen bash ./mycli mycli --
 
 So argc is a also completion engine, see [argc-completions](https://github.com/sigoden/argc-completions).
 
-## Manpage
+## Argc-build
+
+Generate an independent bash script that incorporates all functionalities typically available when the `argc` command is present.
+
+The generated script removes the `argc` dependency, enhances compatibility, and enables deployment in a wider range of environments.
+
+```
+argc --argc-build <SCRIPT> [OUTPATH]
+```
+
+```sh
+argc --argc-build ./mycli ./build/mycli
+
+./build/mycli -h     # The script's functionality does not require the `argc` dependency
+```
+
+## Argc-mangen
 
 Generate man pages for your argc-based CLI.
 
@@ -224,67 +237,9 @@ argc --argc-mangen ./mycli man/
 man man/mycli.1
 ```
 
-<details>
-<summary>
-
-## MacOS
-
-The built-in Bash in macOS is version 3.2 (released in 2007), and the known tools (ls, cp, grep, sed, awk, etc.) are based on BSD. 
-For better functionality and compatibility, it is recommended to install Bash version 5 and GNU tools.
-
-</summary>
-
-Use `brew` to install Bash and GNU tools:
-
-```sh
-brew install bash coreutils gawk gnu-sed grep
-```
-
-And update the `PATH` environment variable:
-```sh
-export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:/opt/homebrew/opt/gawk/libexec/gnubin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
-```
-
-</details>
-
-<details>
-<summary>
-
-## Windows
-
-The only dependency for `argc` is Bash. Since most developers working on Windows have [Git](https://gitforwindows.org/) installed, which includes Git Bash, you can safely use `argc` and GNU tools (like `grep`, `sed`, `awk`, etc.) in the Windows environment.
-
-</summary>
-
-## Run argc scripts on Windows
-
-Argc scripts are Bash scripts, so they need Bash (Git Bash) to run.
-
-When you create a script with `--argc-create` using a name without a `.sh` extension, argc also generates a `<name>.cmd` shim next to the script. This lets you run the script directly from `cmd.exe` or PowerShell, without adding `.sh` to `PATHEXT` or registering a `.sh` file association.
-
-```sh
-argc --argc-create mycli build test
-```
-
-This creates `mycli` (the argc script) and `mycli.cmd` (the shim):
-
-```cmd
-@"C:\Program Files\Git\bin\bash.exe" --noprofile --norc -c "mycli \"$@\"" -- %*
-```
-
-Add the directory containing the script to your `PATH`, then run it like any other command:
-
-```
-mycli build
-```
-
-> The shim is only generated on Windows, and only when the name does not end with `.sh`.
-
-</details>
-
 ## License
 
-Copyright (c) 2023-2024 argc developers.
+Copyright (c) 2023-2026 argc developers.
 
 argc is made available under the terms of either the MIT License or the Apache License 2.0, at your option.
 
