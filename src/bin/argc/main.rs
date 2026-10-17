@@ -140,7 +140,17 @@ fn run() -> Result<i32> {
             "--argc-export" => {
                 let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
                 let value = argc::export(&source, &cmd_args[0])?;
-                println!("{}", serde_json::to_string_pretty(&value)?);
+                let content = serde_json::to_string_pretty(&value)?;
+                if let Some(outpath) = cmd_args.get(1) {
+                    let filename = format!("{}.json", cmd_args[0]);
+                    let (outpath, _) = ensure_outpath(outpath, &filename)
+                        .with_context(|| format!("Invalid output path '{outpath}'"))?;
+                    fs::write(&outpath, content).with_context(|| {
+                        format!("Failed to write json to '{}'", outpath.display())
+                    })?;
+                } else {
+                    println!("{content}");
+                }
             }
             "--argc-parallel" => {
                 if args.len() <= 3 {

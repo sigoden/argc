@@ -281,6 +281,52 @@ fn export() {
 }
 
 #[test]
+fn export_to_file() {
+    let path = locate_script("examples/options");
+    let tmpdir = tmpdir();
+    let outpath = tmpdir.join("options.json");
+    argc_bin()
+        .arg("--argc-export")
+        .arg(&path)
+        .arg(&outpath)
+        .assert()
+        .success();
+    let content = std::fs::read_to_string(&outpath).unwrap();
+    assert!(content.contains(r#""name": "options""#));
+}
+
+#[test]
+fn export_to_dir() {
+    let path = locate_script("examples/options");
+    let tmpdir = tmpdir();
+    argc_bin()
+        .arg("--argc-export")
+        .arg(&path)
+        .arg(tmpdir.path())
+        .assert()
+        .success();
+    let outpath = tmpdir.join("options.json");
+    let content = std::fs::read_to_string(&outpath).unwrap();
+    assert!(content.contains(r#""name": "options""#));
+}
+
+#[test]
+fn export_to_new_dir() {
+    let path = locate_script("examples/options");
+    let tmpdir = tmpdir();
+    let outdir = format!("{}/", tmpdir.join("output").display());
+    argc_bin()
+        .arg("--argc-export")
+        .arg(&path)
+        .arg(&outdir)
+        .assert()
+        .success();
+    let outpath = tmpdir.join("output").join("options.json");
+    let content = std::fs::read_to_string(&outpath).unwrap();
+    assert!(content.contains(r#""name": "options""#));
+}
+
+#[test]
 fn parallel() {
     let tmpdir = tmpdir_argcfiles();
     let path_env_var = get_path_env_var();

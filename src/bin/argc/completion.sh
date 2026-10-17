@@ -34,9 +34,11 @@
 #     argc --argc-compgen bash - demo download --    # Find demo in $PATH
 #     argc --argc-compgen bash ./examples/demo demo download --
 
-# @option --argc-export <FILE>                          Export command definitions as JSON
+# @option --argc-export <FILE> <OUTPATH?>              Export command definitions as JSON
 #
-# Example: argc --argc-export ./example/demo > demo.json
+# Examples:
+#     argc --argc-export ./examples/demo > /tmp/demo.json
+#     argc --argc-export ./examples/demo /tmp/demo.json
 
 # @option --argc-parallel~ <FILE> <ARGS>                Run recipes in parallel
 #
