@@ -7,9 +7,9 @@ prog -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog <COMMAND>
+Usage: prog <COMMAND>
 
-COMMANDS:
+Commands:
   cmd_a  [aliases: cmd-a]
   _cmdb
 
@@ -17,9 +17,9 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog <COMMAND>
+Usage: prog <COMMAND>
 
-COMMANDS:
+Commands:
   cmd_a  [aliases: cmd-a]
   _cmdb
 

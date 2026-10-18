@@ -5,7 +5,8 @@
 
 Argc is a powerful Bash framework that simplifies building full-featured CLIs. It lets you define your CLI through comments, focusing on your core logic without dealing with argument parsing, usage text, error messages, and other boilerplate code.
 
-<img width="2400" height="1400" alt="demo" src="https://github.com/user-attachments/assets/b8a0ea63-c5c8-4a0b-8812-7b27297462d9" />
+<img width="2400" height="1400" alt="demo" src="https://github.com/user-attachments/assets/364d8292-0ae5-4c2b-b109-2f2fee6fc827" />
+
 
 ## Features
 
@@ -102,12 +103,12 @@ val: v1 v2
 Just run `./mycli --help` to see the automatically generated help information for your CLI:
 
 ```
-USAGE: example [OPTIONS] [VAL]...
+Usage: example [OPTIONS] [VAL]...
 
-ARGS:
+Args:
   [VAL]...  Positional param
 
-OPTIONS:
+Options:
   -F, --foo           Flag param
       --bar <BAR>     Option param
       --baz [BAZ]...  Option param (multi-occurs)
@@ -164,7 +165,8 @@ argc --argc-create /tmp/mycli foo   # Create /tmp/mycli
 
 See [command runner](https://github.com/sigoden/argc/blob/main/docs/command-runner.md) for more details.
 
-<img width="2400" height="1080" alt="runner" src="https://github.com/user-attachments/assets/936c8da2-8fd1-40c5-ac58-1c8feda6a533" />
+<img width="2400" height="1080" alt="runner" src="https://github.com/user-attachments/assets/879473cf-1377-48ce-a1b9-03333bde6c59" />
+
 
 ## Completions
 

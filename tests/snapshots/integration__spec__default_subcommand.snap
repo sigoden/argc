@@ -7,17 +7,17 @@ prog -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog <COMMAND>
+Usage: prog <COMMAND>
 
-ARGS:
+Args:
   [VAL]
 
-OPTIONS:
+Options:
   -h, --help
   -V, --version
       --fa
 
-COMMANDS:
+Commands:
   cmda  [default]
   cmdb
 
@@ -25,17 +25,17 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog <COMMAND>
+Usage: prog <COMMAND>
 
-ARGS:
+Args:
   [VAL]
 
-OPTIONS:
+Options:
   -h, --help
   -V, --version
       --fa
 
-COMMANDS:
+Commands:
   cmda  [default]
   cmdb
 
@@ -61,12 +61,12 @@ prog --fa -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog cmda [OPTIONS] [VAL]
+Usage: prog cmda [OPTIONS] [VAL]
 
-ARGS:
+Args:
   [VAL]
 
-OPTIONS:
+Options:
       --fa
   -h, --help
 
@@ -74,12 +74,12 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog cmda [OPTIONS] [VAL]
+Usage: prog cmda [OPTIONS] [VAL]
 
-ARGS:
+Args:
   [VAL]
 
-OPTIONS:
+Options:
       --fa
   -h, --help
 

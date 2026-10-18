@@ -3,9 +3,9 @@ source: tests/bind_env.rs
 expression: "format!(r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}\n\"#)"
 ---
 # OUTPUT
-USAGE: bind-envs <COMMAND>
+Usage: bind-envs <COMMAND>
 
-COMMANDS:
+Commands:
   flags
   options
   cmd_arg1

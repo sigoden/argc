@@ -9,7 +9,7 @@ prog help
 command cat >&2 <<-'EOF' 
 Test argc
 
-USAGE: prog
+Usage: prog
 
 EOF
 exit 0
@@ -17,7 +17,7 @@ exit 0
 # RUN_OUTPUT
 Test argc
 
-USAGE: prog
+Usage: prog
 
 ************ RUN ************
 prog --help
@@ -26,7 +26,7 @@ prog --help
 command cat >&2 <<-'EOF' 
 Test argc
 
-USAGE: prog
+Usage: prog
 
 EOF
 exit 0
@@ -34,7 +34,7 @@ exit 0
 # RUN_OUTPUT
 Test argc
 
-USAGE: prog
+Usage: prog
 
 ************ RUN ************
 prog -help
@@ -43,7 +43,7 @@ prog -help
 command cat >&2 <<-'EOF' 
 Test argc
 
-USAGE: prog
+Usage: prog
 
 EOF
 exit 0
@@ -51,7 +51,7 @@ exit 0
 # RUN_OUTPUT
 Test argc
 
-USAGE: prog
+Usage: prog
 
 ************ RUN ************
 prog -h
@@ -60,7 +60,7 @@ prog -h
 command cat >&2 <<-'EOF' 
 Test argc
 
-USAGE: prog
+Usage: prog
 
 EOF
 exit 0
@@ -68,7 +68,7 @@ exit 0
 # RUN_OUTPUT
 Test argc
 
-USAGE: prog
+Usage: prog
 
 ************ RUN ************
 prog --version

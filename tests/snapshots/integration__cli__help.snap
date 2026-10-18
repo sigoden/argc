@@ -4,7 +4,7 @@ expression: stdout
 ---
 A bash CLI framework and command runner - https://github.com/sigoden/argc
 
-COMMANDS:
+Commands:
     --argc-eval <FILE> <ARGS~>
         Parse arguments and output shell code to eval
         

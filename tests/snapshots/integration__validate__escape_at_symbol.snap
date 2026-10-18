@@ -18,7 +18,7 @@ Here is an example of a patch block:
 +    name = input("What is your name? ")
 +    print(f"Hello {name}")
 
-USAGE: prog
+Usage: prog
 
 EOF
 exit 0
@@ -35,4 +35,4 @@ Here is an example of a patch block:
 +    name = input("What is your name? ")
 +    print(f"Hello {name}")
 
-USAGE: prog
+Usage: prog

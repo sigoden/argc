@@ -9,9 +9,9 @@ prog options -h
 command cat >&2 <<-'EOF' 
 All kind of options
 
-USAGE: prog options [OPTIONS] --oc <OC> --oe <OE>...
+Usage: prog options [OPTIONS] --oc <OC> --oe <OE>...
 
-OPTIONS:
+Options:
       --oa <OA>
   -b, --ob <OB>            short
   -c <C>                   short only
@@ -40,9 +40,9 @@ exit 0
 # RUN_OUTPUT
 All kind of options
 
-USAGE: prog options [OPTIONS] --oc <OC> --oe <OE>...
+Usage: prog options [OPTIONS] --oc <OC> --oe <OE>...
 
-OPTIONS:
+Options:
       --oa <OA>
   -b, --ob <OB>            short
   -c <C>                   short only
@@ -72,9 +72,9 @@ prog flags -h
 command cat >&2 <<-'EOF' 
 All kind of flags
 
-USAGE: prog flags [OPTIONS]
+Usage: prog flags [OPTIONS]
 
-OPTIONS:
+Options:
       --fa
   -b, --fb     short
   -c           short only
@@ -88,9 +88,9 @@ exit 0
 # RUN_OUTPUT
 All kind of flags
 
-USAGE: prog flags [OPTIONS]
+Usage: prog flags [OPTIONS]
 
-OPTIONS:
+Options:
       --fa
   -b, --fb     short
   -c           short only
@@ -105,9 +105,9 @@ prog options-one-hyphen -h
 command cat >&2 <<-'EOF' 
 Flags or options with single hyphen
 
-USAGE: prog options-one-hyphen [OPTIONS]
+Usage: prog options-one-hyphen [OPTIONS]
 
-OPTIONS:
+Options:
        -fa
   -b,  -fb
        -fd...
@@ -124,9 +124,9 @@ exit 0
 # RUN_OUTPUT
 Flags or options with single hyphen
 
-USAGE: prog options-one-hyphen [OPTIONS]
+Usage: prog options-one-hyphen [OPTIONS]
 
-OPTIONS:
+Options:
        -fa
   -b,  -fb
        -fd...
@@ -144,9 +144,9 @@ prog options-notation-modifier -h
 command cat >&2 <<-'EOF' 
 Value notation modifier
 
-USAGE: prog options-notation-modifier [OPTIONS]
+Usage: prog options-notation-modifier [OPTIONS]
 
-OPTIONS:
+Options:
       --oa <VALUE*>  multi values, zero or more
       --ob <VALUE+>  multi values, one or more
       --oc <VALUE?>  zero or one
@@ -158,9 +158,9 @@ exit 0
 # RUN_OUTPUT
 Value notation modifier
 
-USAGE: prog options-notation-modifier [OPTIONS]
+Usage: prog options-notation-modifier [OPTIONS]
 
-OPTIONS:
+Options:
       --oa <VALUE*>  multi values, zero or more
       --ob <VALUE+>  multi values, one or more
       --oc <VALUE?>  zero or one
@@ -173,9 +173,9 @@ prog options-plus -h
 command cat >&2 <<-'EOF' 
 All kind of options
 
-USAGE: prog options-plus [OPTIONS] +oc <OC> +oe <OE>... +ocd <OCD>...
+Usage: prog options-plus [OPTIONS] +oc <OC> +oe <OE>... +ocd <OCD>...
 
-OPTIONS:
+Options:
        +oa <OA>
   +b,  +ob <OB>            short
   +c <C>                   short only
@@ -204,9 +204,9 @@ exit 0
 # RUN_OUTPUT
 All kind of options
 
-USAGE: prog options-plus [OPTIONS] +oc <OC> +oe <OE>... +ocd <OCD>...
+Usage: prog options-plus [OPTIONS] +oc <OC> +oe <OE>... +ocd <OCD>...
 
-OPTIONS:
+Options:
        +oa <OA>
   +b,  +ob <OB>            short
   +c <C>                   short only
@@ -236,9 +236,9 @@ prog flags-plus -h
 command cat >&2 <<-'EOF' 
 All kind of flags
 
-USAGE: prog flags-plus [OPTIONS]
+Usage: prog flags-plus [OPTIONS]
 
-OPTIONS:
+Options:
        +fa
   +b,  +fb     short
   +c           short only
@@ -252,9 +252,9 @@ exit 0
 # RUN_OUTPUT
 All kind of flags
 
-USAGE: prog flags-plus [OPTIONS]
+Usage: prog flags-plus [OPTIONS]
 
-OPTIONS:
+Options:
        +fa
   +b,  +fb     short
   +c           short only
@@ -269,9 +269,9 @@ prog options-mixed -h
 command cat >&2 <<-'EOF' 
 Mixed `-` and `+` options
 
-USAGE: prog options-mixed [OPTIONS]
+Usage: prog options-mixed [OPTIONS]
 
-OPTIONS:
+Options:
   +a,  -a <A>
   -b,  +b <B>
   +c, --c <C>
@@ -283,9 +283,9 @@ exit 0
 # RUN_OUTPUT
 Mixed `-` and `+` options
 
-USAGE: prog options-mixed [OPTIONS]
+Usage: prog options-mixed [OPTIONS]
 
-OPTIONS:
+Options:
   +a,  -a <A>
   -b,  +b <B>
   +c, --c <C>
@@ -298,9 +298,9 @@ prog options-prefixed -h
 command cat >&2 <<-'EOF' 
 Prefixed option
 
-USAGE: prog options-prefixed [OPTIONS]
+Usage: prog options-prefixed [OPTIONS]
 
-OPTIONS:
+Options:
   -X [X]...   prefixied + multi-occurs + choice from fn
   +X [X]...   prefixied + multi-occurs + choice from fn
   -h,  -help  Print help
@@ -311,9 +311,9 @@ exit 0
 # RUN_OUTPUT
 Prefixed option
 
-USAGE: prog options-prefixed [OPTIONS]
+Usage: prog options-prefixed [OPTIONS]
 
-OPTIONS:
+Options:
   -X [X]...   prefixied + multi-occurs + choice from fn
   +X [X]...   prefixied + multi-occurs + choice from fn
   -h,  -help  Print help
@@ -325,9 +325,9 @@ prog options-assigned -h
 command cat >&2 <<-'EOF' 
 Prefixed option
 
-USAGE: prog options-assigned [OPTIONS]
+Usage: prog options-assigned [OPTIONS]
 
-OPTIONS:
+Options:
   -f, --follow=<FOLLOW>  assigned + choice [possible values: a, b]
   -h, --help             Print help
 
@@ -337,9 +337,9 @@ exit 0
 # RUN_OUTPUT
 Prefixed option
 
-USAGE: prog options-assigned [OPTIONS]
+Usage: prog options-assigned [OPTIONS]
 
-OPTIONS:
+Options:
   -f, --follow=<FOLLOW>  assigned + choice [possible values: a, b]
   -h, --help             Print help
 
@@ -348,9 +348,9 @@ prog test1 -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog test1 [OPTIONS]
+Usage: prog test1 [OPTIONS]
 
-OPTIONS:
+Options:
   -a
       --fa
   -f, --fb...
@@ -373,9 +373,9 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog test1 [OPTIONS]
+Usage: prog test1 [OPTIONS]
 
-OPTIONS:
+Options:
   -a
       --fa
   -f, --fb...
@@ -399,9 +399,9 @@ prog test2 -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog test2 --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
+Usage: prog test2 --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
 
-OPTIONS:
+Options:
   -a, --oa <OA>
       --ob <OB>...
       --oc <OC>...
@@ -414,9 +414,9 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog test2 --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
+Usage: prog test2 --oa <OA> --ob <OB>... --oc <OC>... --oca <OCA> --ocb <OCB>... --occ <OCC>...
 
-OPTIONS:
+Options:
   -a, --oa <OA>
       --ob <OB>...
       --oc <OC>...
@@ -430,9 +430,9 @@ prog test3 -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog test3 [OPTIONS]
+Usage: prog test3 [OPTIONS]
 
-OPTIONS:
+Options:
       --oe <OE>  [default: val]
       --of <OF>
       --cb <CB>  [possible values: x, y, z] [default: x]
@@ -442,9 +442,9 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog test3 [OPTIONS]
+Usage: prog test3 [OPTIONS]
 
-OPTIONS:
+Options:
       --oe <OE>  [default: val]
       --of <OF>
       --cb <CB>  [possible values: x, y, z] [default: x]

@@ -33,9 +33,9 @@ download() {
 ```
 
 ```
-USAGE: prog <COMMAND>
+Usage: prog <COMMAND>
 
-COMMANDS:
+Commands:
   upload    Upload a file
   download  Download a file
 ```
@@ -56,9 +56,9 @@ test() {
 ```
 
 ```
-USAGE: prog <COMMAND>
+Usage: prog <COMMAND>
 
-COMMANDS:
+Commands:
   test  Run tests [aliases: t, tst]
 ```
 

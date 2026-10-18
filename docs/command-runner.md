@@ -88,9 +88,9 @@ When invoked without a specific recipe, Argc displays available recipes.
 
 ```
 $ argc
-USAGE: Argcfile.sh <COMMAND>
+Usage: Argcfile.sh <COMMAND>
 
-COMMANDS:
+Commands:
   build
   test
 
@@ -179,12 +179,12 @@ cmd() {
 $ argc cmd -h
 A simple command
 
-USAGE: Argcfile.sh cmd [OPTIONS] [ARG]
+Usage: Argcfile.sh cmd [OPTIONS] [ARG]
 
-ARGS:
+Args:
   [ARG]  A positional parameter
 
-OPTIONS:
+Options:
   -f, --flag             A flag parameter
       --option <OPTION>  A option parameter
   -h, --help             Print help
@@ -220,9 +220,9 @@ By running `argc -h`, you'll see a list of variables with descriptions and any r
 
 ```
 $ argc -h
-USAGE: Argcfiles.sh
+Usage: Argcfiles.sh
 
-ENVIRONMENTS:
+Environments:
   FOO   A env var
   BAR*  A required env var
   MODE  A env var with possible values [possible values: dev, prod]

@@ -4,9 +4,9 @@ expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}
 ---
 
 # OUTPUT
-USAGE: envs run
+Usage: envs run
 
-ENVIRONMENTS:
+Environments:
   TEST_EB*  required
   TEST_EDA  default [default: a]
   TEST_EDB  default from fn
@@ -19,9 +19,9 @@ ENVIRONMENTS:
 
 
 # BUILD_OUTPUT
-USAGE: envs run
+Usage: envs run
 
-ENVIRONMENTS:
+Environments:
   TEST_EB*  required
   TEST_EDA  default [default: a]
   TEST_EDB  default from fn

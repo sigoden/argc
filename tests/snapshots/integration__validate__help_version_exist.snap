@@ -9,9 +9,9 @@ prog -h
 command cat >&2 <<-'EOF' 
 Test argc
 
-USAGE: prog [OPTIONS]
+Usage: prog [OPTIONS]
 
-OPTIONS:
+Options:
   -h, --help
   -V, --version
 
@@ -21,9 +21,9 @@ exit 0
 # RUN_OUTPUT
 Test argc
 
-USAGE: prog [OPTIONS]
+Usage: prog [OPTIONS]
 
-OPTIONS:
+Options:
   -h, --help
   -V, --version
 
