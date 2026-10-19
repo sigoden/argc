@@ -14,7 +14,7 @@ Commands:
         Create a boilerplate argc script. Use '-' as an alias for Argcfile.sh
         
         Examples:
-            argc --argc-create - build test            # Create Argcfile.sh
+            argc --argc-create - build test                   # Create Argcfile.sh
             argc --argc-create mycli foo bar
             argc --argc-create /tmp/mycli foo bar
 
@@ -30,7 +30,7 @@ Commands:
         
         Example: argc --argc-mangen ./examples/demo ./man
 
-    --argc-completions <SHELL> <CMDS>
+    --argc-completions <SHELL> <CMDS*>
         Generate shell completion scripts
         
         Examples:
@@ -40,11 +40,11 @@ Commands:
             argc --argc-completions fish mycli | source
             argc --argc-completions nushell | save --append $nu.config-path
 
-    --argc-compgen <SHELL> <-|FILE> <CMD> <ARGS>
+    --argc-compgen <SHELL> <-|FILE> <CMD> <ARGS+>
         Generate completion candidates. Use '-' to resolve the command from $PATH.
         
         Examples:
-            argc --argc-compgen bash - demo download --    # Find demo in $PATH
+            argc --argc-compgen bash - demo download --       # Find demo in $PATH
             argc --argc-compgen bash ./examples/demo demo download --
 
     --argc-export <FILE> <OUTPATH?>

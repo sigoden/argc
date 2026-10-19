@@ -1,20 +1,18 @@
-# Command runner
+# Command Runner
 
-Argc is a also command runner built for those who love the efficiency and flexibility of Bash scripting.
+Argc is also a command runner for Bash. Instead of writing argument parsing for every project task, you put the tasks in an `Argcfile.sh`, and `argc` handles routing, help, validation, and completion.
 
-This guide provides instructions on how to effectively use `argc` for this purpose.
+This guide covers the runner-specific features. For the underlying tag reference, see [Comment Tags](./comment-tags.md).
 
-## Create an Argcfile.sh 
+## Create an Argcfile.sh
 
-Commands, called recipes, are stored in a file called argcfile .
-
-Use `--argc-create` to quickly generate an `Argcfile.sh` for your project.
+Recipes are stored in a file named `Argcfile.sh`:
 
 ```sh
-argc --argc-create - build test  # '-' is equivalent to Argcfile.sh
+argc --argc-create - build test
 ```
 
-This creates a basic Argcfile.sh with sample `build` and `test` recipes.
+`-` is an alias for `Argcfile.sh`. The command creates a boilerplate file:
 
 ```sh
 #!/usr/bin/env bash
@@ -35,68 +33,91 @@ test() {
 eval "$(argc --argc-eval "$0" "$@")"
 ```
 
-A recipe is a regular shell function with a `@cmd` comment tag above it.
+Run a recipe with `argc`:
 
-## Handle dependencies
+```sh
+argc build
+argc test
+```
 
-Since recipe are functions, manage dependencies by calling them sequentially within other functions.
+`argc` searches for `Argcfile.sh` in the current directory and its parents, so you can run it from a subdirectory. The name is matched case-insensitively, and the `.sh` suffix is optional, so `Argcfile`, `argcfile.sh`, and `ARGCFILE` are all recognized.
+
+## Recipes
+
+A recipe is a normal Bash function with a `@cmd` tag:
+
+```sh
+# @cmd Build the project
+build() {
+    cargo build
+}
+```
+
+### Dependencies
+
+Since recipes are ordinary Bash functions, manage dependencies by calling other recipes or helper functions in order. With `set -e` (the default in generated scripts), a failing step stops the recipe.
 
 ```sh
 # @cmd
-current() { before;
-  echo current
-after; }
+current() {
+    before
+    echo current
+    after
+}
 
-# @cmd
 before() {
-  echo before
+    echo before
 }
 
-# @cmd
-after() { 
-  echo after
+after() {
+    echo after
 }
 ```
 
-This example demonstrates how the `current` recipe calls both `before` and `after` recipes.
-
-```
+```text
 $ argc current
 before
 current
 after
 ```
 
-## Organize Recipes
+Functions without `@cmd` are not exposed as commands, which makes it easy to keep helper functions private.
 
-Organize related recipes into groups for better readability.
+## Organize recipes
+
+Related recipes can share a prefix and a separator:
 
 ```sh
 # @cmd
-test() { :; }
+test:unit() { :; }
+
 # @cmd
-test-unit() { :; }
-# @cmd
-test-bin() { :; }
+test:bin() { :; }
 ```
 
-> Valid group formats include: `foo:bar` `foo.bar` `foo@bar`.
-
-## Set default recipe
-
-When invoked without a specific recipe, Argc displays available recipes.
-
+```sh
+argc test:unit
+argc test:bin
 ```
+
+The same convention works with `.` or `@`, for example `test.unit` and `test@unit`. These are single command names with readable prefixes; use `::` instead when you need real nested commands (see [`@cmd`](./comment-tags.md#cmd)).
+
+## Set a default recipe
+
+Run `argc` without a subcommand to display the available recipes. If the root command has a `main` function or a default subcommand, that command runs instead (see below).
+
+```text
 $ argc
 Usage: Argcfile.sh <COMMAND>
 
 Commands:
   build
   test
-
 ```
 
-Use `main` function to set a default recipe to run automatically.
+There are two ways to run a recipe by default.
+
+### Use `main`
 
 ```sh
 # @cmd
@@ -106,11 +127,13 @@ build() { :; }
 test() { :; }
 
 main() {
-  build
+    build
 }
 ```
 
-Another way is to use `@meta default-subcommand`
+`main` runs when no subcommand is selected.
+
+### Use `@meta default-subcommand`
 
 ```sh
 # @cmd
@@ -121,61 +144,68 @@ build() { :; }
 test() { :; }
 ```
 
-Remember, you can always use `--help` for detailed help information.
+The marked recipe runs when no subcommand is selected and appears as `[default]` in help.
 
 ## Aliases
-
-Aliases allow recipes to be invoked on the command line with alternative names:
 
 ```sh
 # @cmd
 # @alias t
 test() {
-  echo test
+    echo test
 }
 ```
 
-Now you can run the `test` recipe using the alias `t`:
+```sh
+argc t
 ```
-$ argc t
-```
+
+Like command names in a regular argc script, recipe names containing `_` also get a hyphenated alias automatically.
 
 ## Access positional arguments
 
-Accessed through shell positional variables (`$1`, `$2`, `$@`, `$*` etc.).
+Recipes access positional arguments through the normal Bash variables:
 
 ```sh
 # @cmd
 build() {
-  echo $1 $2
-  echo $@
-  echo $*
+    echo "$1"
+    echo "$@"
+    echo "$*"
 }
 ```
-
-```
-$ argc build foo bar
-foo bar
-foo bar
-```
-
-## Access Flag/option arguments
-
-Define and use flags/options for more control.
 
 ```sh
-# @cmd  A simple command
-# @flag -f --flag   A flag parameter
-# @option -option   A option parameter
-# @arg arg          A positional parameter
-cmd() {
-  echo "flag:    $argc_flag"
-  echo "option:  $argc_option"
-  echo "arg:     $argc_arg"
+argc build foo bar
+```
+
+argc also exposes the same values through `argc_*` variables when the arguments are declared with `@arg`:
+
+```sh
+# @cmd
+# @arg target!
+build() {
+    echo "$argc_target"
 }
 ```
 
+## Access flags and options
+
+Declare them above the recipe and read the generated variables:
+
+```sh
+# @cmd A simple command
+# @flag -f --flag       A flag parameter
+# @option --option <VALUE>  An option parameter
+# @arg arg              A positional parameter
+cmd() {
+    echo "flag:   $argc_flag"
+    echo "option: $argc_option"
+    echo "arg:    $argc_arg"
+}
 ```
+
+```text
 $ argc cmd -h
 A simple command
 
@@ -186,101 +216,126 @@ Args:
 
 Options:
   -f, --flag             A flag parameter
-      --option <OPTION>  A option parameter
+      --option <VALUE>   An option parameter
   -h, --help             Print help
 
 $ argc cmd -f --option foo README.md
-flag:    1
-option:  foo
-arg:     README.md
+flag:   1
+option: foo
+arg:    README.md
 ```
 
-## Load environment variables from dotenv file
+## Hooks
 
-Use `@meta dotenv` to load environment variables from a `.env` file.
+argc recognizes two optional hooks:
+
+| Hook | When it runs |
+| --- | --- |
+| `_argc_before` | Before the selected command function, after variables are initialized |
+| `_argc_after` | After the selected command function |
 
 ```sh
-# @meta dotenv                                    # Load .env
-# @meta dotenv .env.local                         # Load .env.local
+_argc_before() {
+    echo "before"
+}
+
+_argc_after() {
+    echo "after"
+}
+
+# @cmd
+build() {
+    echo "build"
+}
 ```
-
-## Document and Validate environment variables
-
-Define environment variables using `@env`.
 
 ```sh
-# @env  FOO               A env var
-# @env  BAR!              A required env var
-# @env  MODE[dev|prod]    A env var with possible values
+argc build
 ```
 
-Argc automatically generates help information for environment variables.
-
-By running `argc -h`, you'll see a list of variables with descriptions and any restrictions.
-
+```text
+before
+build
+after
 ```
-$ argc -h
-Usage: Argcfiles.sh
 
+Hooks also run for the root command and for nested subcommands. They are useful for setup, cleanup, timing, and logging.
+
+## Environment variables
+
+Use `@meta dotenv` to load a `.env` file:
+
+```sh
+# @meta dotenv              # loads .env
+# @meta dotenv .env.local   # or load .env.local
+```
+
+Use `@env` to document and validate environment variables:
+
+```sh
+# @env FOO               A normal variable
+# @env BAR!              A required variable
+# @env MODE[dev|prod]    A variable with possible values
+```
+
+```sh
+argc -h
+```
+
+```text
 Environments:
-  FOO   A env var
-  BAR*  A required env var
-  MODE  A env var with possible values [possible values: dev, prod]
+  FOO   A normal variable
+  BAR*  A required variable
+  MODE  A variable with possible values [possible values: dev, prod]
 ```
 
-Argc also validates environment variables as per the `@env` definitions.
+If a required variable is missing, argc reports an error. If a variable has choices, argc validates the value. Root-level `@env` declarations are inherited by subcommands automatically.
 
-If `$BAR` is missing, Argc will report an error:
+## Require external tools
 
-```
-error: the following required environments were not provided:
-  BAR$MO
-```
+Use `@meta require-tools` to check that commands are available before running a recipe:
 
-For `$MODE`, which has predefined values, Argc verifies the input values and reports errors if they do not match:
+```sh
+# @meta require-tools awk sed
 
-```
-error: invalid value `abc` for environment variable `MODE`
-  [possible values: dev, prod]
+# @cmd
+# @meta require-tools git
+require-git() { :; }
 ```
 
-## Align the project's rootdir
-
-Argc automatically cds into the directory of the Argcfile.sh it finds in the parent hierarchy.
-
-Project directory structure as follows:
-
+```sh
+argc require-git
+# error: missing tools: git
 ```
-$ tree /tmp/project
 
-/tmp/project
+The check runs before the recipe. A root-level declaration applies to the whole script; a command-level declaration applies to that command.
+
+## Project root directory
+
+When `argc` finds an `Argcfile.sh` in a parent directory, it changes the working directory to the directory containing the Argcfile:
+
+```text
+project/
 ├── Argcfile.sh
-└── src
+└── src/
 ```
-
-The code of build recipe as follows:
 
 ```sh
 # @cmd
 build() {
-    echo $PWD
-    echo $ARGC_PWD
+    echo "$PWD"
+    echo "$ARGC_PWD"
 }
 ```
 
-Run the build in the project dir:
-```
+```text
+$ cd /tmp/project/src
 $ argc build
-/tmp/project
-/tmp/project
-```
-
-Change directory (cd) into the subdirectory and run the build:
-```
-$ cd src && argc build
 /tmp/project
 /tmp/project/src
 ```
 
-When running argc under the subdirectory other than project root,
-`PWD` points to the project root, while `ARGC_PWD` points to the current directory.
+- `PWD` points to the project root (the Argcfile directory).
+- `ARGC_PWD` points to the directory where `argc` was invoked.
+
+This makes recipes independent of the caller's current directory.

@@ -1,0 +1,203 @@
+(*
+  argc comment-tag grammar
+
+  argc reads CLI definitions from comments in a Bash script. Tags and
+  description continuation lines must start at column 0. Leading whitespace
+  before '#' makes the line ordinary text and it is ignored by argc.
+
+  A tag line starts with one or more '#' characters, followed by optional
+  whitespace and '@'. Unknown tags are reported as errors.
+
+  Example:
+
+      # @describe A demo CLI
+      # @cmd Say hello
+      # @arg name!  Name to greet
+      hello() {
+          echo "Hello, $argc_name"
+      }
+
+  See docs/comment-tags.md for tag behavior and examples.
+*)
+
+(* ------------------------------------------------------------------------- *)
+(* Lexical helpers                                                           *)
+(* ------------------------------------------------------------------------- *)
+
+ws = ( " " | "\t" ), { " " | "\t" } ;
+eol = ? end of line or end of input ? ;
+ascii-alnum = ? "A".."Z" | "a".."z" | "0".."9" ? ;
+
+(* ------------------------------------------------------------------------- *)
+(* Script structure                                                          *)
+(* ------------------------------------------------------------------------- *)
+
+script = { line } ;
+line = tag-line | comment-line | other-line ;
+
+(* One or more '#', optional whitespace, then a tag and its arguments. *)
+tag-line = "#", { "#" }, [ ws ], tag, [ ws, arguments ], eol ;
+
+tag = "@describe" | "@cmd" | "@alias" | "@arg"
+    | "@option" | "@flag" | "@env" | "@meta"
+    | "@", name ;
+
+(* A comment line that is not a tag. Consecutive comment lines after a
+   description become the long description. *)
+comment-line = "#", { "#" }, [ ? comment text ? ], eol ;
+other-line = ? any line that is not a tag line or comment line ? ;
+arguments = ? tag-specific arguments, defined below ? ;
+
+(* ------------------------------------------------------------------------- *)
+(* Command tags                                                              *)
+(* ------------------------------------------------------------------------- *)
+
+(* The first description line is the short description. Following comment
+   lines become the long description. A continuation line beginning with
+   '\@' keeps the leading '@' as literal text; the backslash is removed.
+   This escape only applies to continuation lines. *)
+describe = "@describe", [ ws, description ] ;
+
+(* Declare the next shell function as a subcommand. Use '::' in the function
+   name for nested commands, for example builder::ls. Declare the parent
+   group function (builder) before the child function. *)
+cmd = "@cmd", [ ws, description ] ;
+
+(* Comma-separated aliases for the current subcommand. *)
+alias = "@alias", ws, name, { [ ws ], ",", [ ws ], name } ;
+
+(* Metadata key-value pair. The value consumes the rest of the line.
+   Metadata keys and scopes are documented in docs/meta.md. *)
+meta = "@meta", ws, name, [ ws, meta-value ] ;
+meta-value = ? rest of the line, trimmed ? ;
+
+(* ------------------------------------------------------------------------- *)
+(* Parameter tags                                                            *)
+(* ------------------------------------------------------------------------- *)
+
+(* Positional argument. At most one <NOTATION> is allowed. *)
+arg = "@arg", ws, name, [ modifier ], [ param-value ],
+      [ ws, bind-env ], [ ws, notation ], [ ws, description ] ;
+
+(* Option with an optional short form. A short-only option is written as a
+   single-character long form, for example @option -c. *)
+option = "@option", ws, [ short, ws ], long, [ modifier ], [ param-value ],
+         [ ws, bind-env ], [ ws, option-notations ], [ ws, description ] ;
+
+(* Boolean flag. A trailing '*' makes the flag repeatable. *)
+flag = "@flag", ws, [ short, ws ], long, [ "*" ],
+       [ ws, bind-env ], [ ws, description ] ;
+
+(* Environment variable declaration. A trailing '!' makes it required.
+   Value notation is not supported. *)
+env = "@env", ws, name, [ "!" ], [ param-value ],
+      [ ws, description ] ;
+
+(* ------------------------------------------------------------------------- *)
+(* Shared syntax                                                             *)
+(* ------------------------------------------------------------------------- *)
+
+(* Command, parameter, and metadata names. *)
+name = name-char, { name-char } ;
+name-char = ascii-alnum | "_" | "-" | "." | ":" | "@" ;
+
+(* Long option names. A single '-' also supports tools with names such as
+   -output. A trailing ':' requires the --name=value form; a trailing '-'
+   makes it a prefix option such as -Xvalue. The first character after a
+   '-' or '--' prefix cannot be another '-'. *)
+long = ( "--" | "-" ), long-name | "+", name ;
+long-name = long-name-start, { name-char } ;
+long-name-start = ascii-alnum | "_" | "." | ":" | "@" ;
+
+(* Short option names. *)
+short = ( "-" | "+" ), short-char ;
+short-char = ascii-alnum
+           | "!" | "#" | "$" | "%" | "*" | "+" | "," | "." | "/"
+           | ":" | "=" | "?" | "@" | "[" | "]" | "^" | "_"
+           | "{" | "}" | "~" ;
+
+(* Parameter modifiers:
+
+     !  required
+     *  repeatable, or accepts multiple values
+     +  required and repeatable, or accepts multiple values
+     ~  capture all remaining arguments and stop option parsing
+
+   For '*' and '+', a separator enables split values. For example, ',' in
+   '--tags*,' makes each occurrence comma-separated. *)
+modifier = "!"
+         | ( "*" | "+" ), [ separated-char ]
+         | "~" ;
+separated-char = "," | ":" | ";" | "@" | "|" | "/" ;
+
+(* Default values and choices:
+
+     =value       literal default value
+     =`fn`        default value from a shell function
+     [a|b]        fixed choices
+     [=a|b]       fixed choices with a default
+     [`fn`]       choices from a shell function
+     [?`fn`]      choices from a shell function without validation *)
+param-value = "=", ( value | "`", fn-name, "`" )
+            | "[", [ "=" ], choices, "]"
+            | "[", [ "?" ], "`", fn-name, "`", "]" ;
+choices = value, { "|", value } ;
+
+(* Value placeholders shown in help and usage text. @arg accepts a single
+   notation without a modifier. Only @option supports notation modifiers,
+   and only on the final notation. *)
+option-notations = option-notation-last
+                 | notation, { ws, notation }, [ ws, option-notation-last ] ;
+notation = "<", value, ">" ;
+option-notation-last = "<", value, [ notation-modifier ], ">" ;
+notation-modifier = "*" | "+" | "?" ;
+
+(* Bind an environment variable as a fallback value.
+
+     $NAME  use NAME
+     $$     derive the name from the command name, or @meta binname, and
+            the parameter name *)
+bind-env = "$", ( env-name | "$" ) ;
+env-name = env-name-char, { env-name-char } ;
+env-name-char = ? "A".."Z" or "_" ? ;
+
+(* Description text. The first line is the short description; consecutive
+   comment lines after it become the long description. *)
+description = ? rest of the line, optionally followed by consecutive comment lines that are not tags ? ;
+
+(* Name of a shell function used as a default or choice value. The function
+   is called without arguments and its standard output is used as the value
+   or as the list of choices. *)
+fn-name = ? shell function name without whitespace or quoting characters ? ;
+
+(* A default, choice, notation, or metadata value. Values may be enclosed in
+   single or double quotes when they contain spaces or special characters. *)
+value = ? text, optionally enclosed in single or double quotes ? ;
+
+(* ------------------------------------------------------------------------- *)
+(* Parameter anatomy                                                         *)
+(* ------------------------------------------------------------------------- *)
+
+(* The order of the shared parts is fixed:
+
+     @option -t --type+[a|b] $TYPE <FILE+>  List files of a type
+             [1][2]    [3][4]  [5]   [6]     [7]
+
+     1. short       -t
+     2. long        --type
+     3. modifier    +
+     4. param-value [a|b]
+     5. bind-env    $TYPE
+     6. option-notations <FILE+>; only the final notation may have a modifier
+     7. description List files of a type
+
+     @arg files+[a|b] $FILES <PATH>  Files to process
+          [1]   [2][3]  [4]    [5]   [6]
+
+     1. name        files
+     2. modifier    +
+     3. param-value [a|b]
+     4. bind-env    $FILES
+     5. notation    <PATH>
+     6. description Files to process
+*)

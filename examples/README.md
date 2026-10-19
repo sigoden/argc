@@ -2,11 +2,12 @@
 
 Each of these examples demonstrates one aspect or feature of argc.
 
+For guides and reference documentation, see [docs/README.md](../docs/README.md).
+
 - [demo](./demo) - A demo CLI with subcommands, flags, options, and positional args.
 - [multiline](./multiline) - how to write multiline descriptions and help text.
 - [nested-commands](./nested-commands) - how to declare nested subcommands with `::`.
 - [hooks](./hooks) - how to use the `_argc_before` and `_argc_after` hooks.
-- [strict](./strict) - how to use argc scripts in strict mode (`set -eu`).
 - [parallel](./parallel) - how to run subcommands in parallel with `--argc-parallel`.
 
 - [args](./args) - all kinds of `@arg` positional parameter definitions.

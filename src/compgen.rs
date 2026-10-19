@@ -755,7 +755,7 @@ fn convert_arg_value(value: &str) -> Option<ArgcPathValue> {
     } else if ["path", "file", "arg", "any"]
         .iter()
         .any(|v| value.contains(v))
-    // Here need to be contains, becuase user may set output-file or something like that
+    // Here need to be contains, because user may set output-file or something like that
     {
         Some(ArgcPathValue {
             is_dir: false,

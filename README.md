@@ -24,7 +24,7 @@ Argc is a powerful Bash framework that simplifies building full-featured CLIs. I
 - **Environment Variable Integration:**
   - Define, validate, and bind environment variables to options and positional arguments.
 - **Task Automation:**
-  - An Bash-based command runner that automates tasks via Argcfile.sh.
+  - A Bash-based command runner that automates tasks via Argcfile.sh.
 - **Cross-Platform Compatibility:**
   - Seamlessly run your Argc-based scripts on macOS, Linux, Windows, and BSD systems.
 
@@ -103,7 +103,7 @@ val: v1 v2
 Just run `./mycli --help` to see the automatically generated help information for your CLI:
 
 ```
-Usage: example [OPTIONS] [VAL]...
+Usage: mycli [OPTIONS] [VAL]...
 
 Args:
   [VAL]...  Positional param
@@ -117,6 +117,10 @@ Options:
 
 ```
 
+argc reads the comment tags, parses the command line, and prints shell code that
+sets the `argc_*` variables and calls the selected function. The final `eval`
+executes that code, which is why the script works with plain Bash.
+
 With these simple steps, you're ready to leverage Argc and create robust command-line programs!
 
 ## Comment Tags
@@ -125,20 +129,21 @@ Comment tags are standard Bash comments prefixed with `@` and a specific tag. Th
 
 | Tag                                             | Description                           |
 | :---------------------------------------------- | ------------------------------------- |
-| [`@describe`](./docs/specification.md#describe) | Sets the description for the command. |
-| [`@cmd`](./docs/specification.md#cmd)           | Defines a subcommand.                 |
-| [`@alias`](./docs/specification.md#alias)       | Sets aliases for the subcommand.      |
-| [`@arg`](./docs/specification.md#arg)           | Defines a positional argument.        |
-| [`@option`](./docs/specification.md#option)     | Defines an option argument.           |
-| [`@flag`](./docs/specification.md#flag)         | Defines a flag argument.              |
-| [`@env`](./docs/specification.md#env)           | Defines an environment variable.      |
-| [`@meta`](./docs/specification.md#meta)         | Adds metadata.                        |
+| [`@describe`](./docs/comment-tags.md#describe) | Sets the description for the command. |
+| [`@cmd`](./docs/comment-tags.md#cmd)           | Defines a subcommand.                 |
+| [`@alias`](./docs/comment-tags.md#alias)       | Sets aliases for the subcommand.      |
+| [`@arg`](./docs/comment-tags.md#arg)           | Defines a positional argument.        |
+| [`@option`](./docs/comment-tags.md#option)     | Defines an option argument.           |
+| [`@flag`](./docs/comment-tags.md#flag)         | Defines a flag argument.              |
+| [`@env`](./docs/comment-tags.md#env)           | Defines an environment variable.      |
+| [`@meta`](./docs/comment-tags.md#meta)         | Adds metadata.                        |
 
-See [specification](https://github.com/sigoden/argc/blob/main/docs/specification.md) for the grammar and usage of all the comment tags.
+See the [comment tag](./docs/comment-tags.md) for tag formats and
+behavior, and the [grammar](./docs/grammar.ebnf) for formal syntax.
 
 ## Argcscript
 
-Argc is a also command runner built for those who love the efficiency and flexibility of Bash scripting.
+Argc is also a command runner built for those who love the efficiency and flexibility of Bash scripting.
 
 Similar to how Makefile define commands for the `make` tool, Argcscript uses an `Argcfile.sh` to store your commands, referred to as "recipes".
 
@@ -148,7 +153,7 @@ Similar to how Makefile define commands for the `make` tool, Argcscript uses an 
 - **GNU Toolset Integration:** Utilize familiar tools like awk, sed, grep, find, and others.
 - **Environment variables Management**: Load dotenv, document, and validate environment variables effortlessly.
 - **Powerful Shell Autocompletion:** Enjoy autocomplete suggestions for enhanced productivity.
-- **Cross-Platform Compatibility::** Works seamlessly across Linux, macOS, Windows, and BSD systems.
+- **Cross-Platform Compatibility:** Works seamlessly across Linux, macOS, Windows, and BSD systems.
 
 Use `argc --argc-create` to quickly generate a boilerplate `Argcfile.sh`:
 
@@ -163,10 +168,21 @@ argc --argc-create mycli foo bar    # Create ./mycli
 argc --argc-create /tmp/mycli foo   # Create /tmp/mycli
 ```
 
-See [command runner](https://github.com/sigoden/argc/blob/main/docs/command-runner.md) for more details.
+Any argc script can also be used as a project command runner. Name it
+`Argcfile.sh` and run its recipes through `argc`:
+
+```sh
+mv mycli Argcfile.sh
+argc build
+argc test
+```
+
+`argc` finds `Argcfile.sh` in the current directory or one of its parents, so you
+can run recipes from a subdirectory without changing back to the project root.
 
 <img width="2400" height="1080" alt="runner" src="https://github.com/user-attachments/assets/879473cf-1377-48ce-a1b9-03333bde6c59" />
 
+See [command runner](./docs/command-runner.md) for more details.
 
 ## Completions
 
@@ -207,7 +223,9 @@ $ argc --argc-compgen bash ./mycli mycli --
 --version (Print version)
 ```
 
-So argc is a also completion engine, see [argc-completions](https://github.com/sigoden/argc-completions).
+So argc is also a completion engine, see [argc-completions](https://github.com/sigoden/argc-completions).
+
+See [Compgen](./docs/compgen.md) for the completion engine and completion values.
 
 ## Argc-build
 
@@ -230,7 +248,7 @@ argc --argc-build ./mycli ./build/mycli
 Generate man pages for your argc-based CLI.
 
 ```
-argc --argc-mangen <SCRIPT> [OUTDIR]
+argc --argc-mangen <SCRIPT> <OUTDIR>
 ```
 
 ```sh
@@ -238,6 +256,18 @@ argc --argc-mangen ./mycli man/
 
 man man/mycli.1
 ```
+
+## Documentation
+
+The full documentation is in [docs/README.md](./docs/README.md).
+
+- [Comment Tags](./docs/comment-tags.md) — every tag, its format, behavior, and examples
+- [Argc Tooling](./docs/argc-tooling.md) — standalone builds, man pages, JSON export, and parallel execution
+- [Command Runner](./docs/command-runner.md) — recipes, dependencies, hooks, and environment variables
+- [Metadata](./docs/meta.md) -  Every supported `@meta` key and its behavior 
+- [Compgen](./docs/compgen.md) — completion engine, candidate protocol, and patterns
+- [External Subcommands](./docs/external-subcommands.md) — delegating to scripts discovered next to the main script
+- [Examples](./examples/README.md) - Runnable example scripts for tags and runner features
 
 ## License
 

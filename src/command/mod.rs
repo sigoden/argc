@@ -136,7 +136,8 @@ impl Command {
             if after_hook {
                 extra.insert("after_hook".into(), AFTER_HOOK.into());
             }
-        } else if let Some((idx, _)) = &self.default_subcommand {
+        }
+        if let Some((idx, _)) = &self.default_subcommand {
             extra.insert("default_subcommand".into(), (*idx).into());
         }
         if !self.metadata.is_empty() {

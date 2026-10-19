@@ -1511,7 +1511,7 @@ fn comp_flag_option(param: &FlagOptionParam, index: usize) -> Vec<CompItem> {
             param
                 .notations()
                 .last()
-                .expect("Notaion always has at least one")
+                .expect("Notation always has at least one")
         });
     comp_param(param.describe_oneline(), value_name, param.data())
 }

@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-# @describe Demonstrates `@meta symbol` for using a custom option prefix (`+toolchain`)
+# @describe Demonstrates `@meta symbol` for using a custom option prefix (`+nightly`)
 #
 # Mock cargo cli
+# Examples:
+#   prog +nightly build
 # @meta symbol +toolchain[`_choice_toolchain`]
 
 # @cmd Compile the current package

@@ -5,16 +5,18 @@ set -e
 
 # @cmd Upload a file
 # @alias    u
-# @arg target!                      File to upload
+# @option   --visibility[public|private]  Set file visibility
+# @arg target!                            File to upload
 upload() {
-    echo "cmd                       upload"
-    echo "arg:  target              $argc_target"
+    echo "cmd:                      upload"
+    echo "option: --visibility      $argc_visibility"
+    echo "arg:    target            $argc_target"
 }
 
 # @cmd Download a file
 # @alias    d
 # @flag     -f --force              Override existing file
-# @option   -t --tries <NUM>        Set number of retries to NUM
+# @option   -t --tries=3 <NUM>      Set max retries to NUM
 # @arg      source!                 Url to download from
 # @arg      target                  Save file to
 download() {
