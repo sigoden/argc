@@ -7,10 +7,10 @@ prog -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: test-binname
+Usage: test-binname
 
 EOF
 exit 0
 
 # BUILD_OUTPUT
-USAGE: test-binname
+Usage: test-binname

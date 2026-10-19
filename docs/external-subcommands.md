@@ -82,12 +82,12 @@ eval "$(argc --argc-eval "$0" "$@")"
 $ external --help
 Test external subcommands
 
-USAGE: external <COMMAND>
+Usage: external <COMMAND>
 
-COMMANDS:
+Commands:
   builtin  A built-in subcommand [aliases: b]
 
-EXTERNAL COMMANDS:
+External Commands:
   bar  An external subcommand "bar" with options
   foo  An external subcommand "foo"
 

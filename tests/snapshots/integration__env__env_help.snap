@@ -6,12 +6,12 @@ expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}
 # OUTPUT
 Demonstrates all kinds of `@env` declarations
 
-USAGE: envs <COMMAND>
+Usage: envs <COMMAND>
 
-COMMANDS:
+Commands:
   run
 
-ENVIRONMENTS:
+Environments:
   TEST_EA   optional
   TEST_EB*  required
   TEST_EDA  default [default: a]
@@ -25,12 +25,12 @@ ENVIRONMENTS:
 # BUILD_OUTPUT
 Demonstrates all kinds of `@env` declarations
 
-USAGE: envs <COMMAND>
+Usage: envs <COMMAND>
 
-COMMANDS:
+Commands:
   run
 
-ENVIRONMENTS:
+Environments:
   TEST_EA   optional
   TEST_EB*  required
   TEST_EDA  default [default: a]

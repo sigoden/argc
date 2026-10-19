@@ -7,9 +7,9 @@ prog -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog [OPTIONS]
+Usage: prog [OPTIONS]
 
-OPTIONS:
+Options:
   -f, --fc...
   -a, --oa [DIR]...
   -b, --ob <CMD> <DIR+>
@@ -23,9 +23,9 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog [OPTIONS]
+Usage: prog [OPTIONS]
 
-OPTIONS:
+Options:
   -f, --fc...
   -a, --oa [DIR]...
   -b, --ob <CMD> <DIR+>

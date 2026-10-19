@@ -367,7 +367,7 @@ fn get_argc_help(runtime: NativeRuntime) -> Result<String> {
         None,
     )?;
     let origin = argc::ArgcValue::to_bash(&values);
-    let options_marker = "OPTIONS:";
+    let options_marker = "Options:";
     let options_start = match origin.find(options_marker) {
         Some(pos) => pos + options_marker.len(),
         None => bail!("Failed to get argc help"),
@@ -395,7 +395,7 @@ fn get_argc_help(runtime: NativeRuntime) -> Result<String> {
     let output = format!(
         r###"{about}
 
-COMMANDS:
+Commands:
 {commands}"###
     );
     Ok(output)

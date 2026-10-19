@@ -742,7 +742,7 @@ impl Command {
     }
 
     fn render_usage(&self) -> String {
-        let mut output = vec!["USAGE:".to_string()];
+        let mut output = vec!["Usage:".to_string()];
         output.extend(self.cmd_paths());
         let required_options: Vec<String> = self
             .flag_option_params
@@ -789,7 +789,7 @@ impl Command {
             })
             .collect();
         value_size += 2;
-        output.push("OPTIONS:".to_string());
+        output.push("Options:".to_string());
         render_list(
             &mut output,
             list.into_iter().collect(),
@@ -818,7 +818,7 @@ impl Command {
             })
             .collect();
         value_size += 2;
-        output.push("ARGS:".to_string());
+        output.push("Args:".to_string());
         render_list(&mut output, list, value_size, wrap_width);
         output
     }
@@ -842,7 +842,7 @@ impl Command {
             })
             .collect();
         value_size += 2;
-        output.push("ENVIRONMENTS:".to_string());
+        output.push("Environments:".to_string());
         render_list(&mut output, list, value_size, wrap_width);
         output
     }
@@ -863,7 +863,7 @@ impl Command {
             })
             .collect();
         value_size += 2;
-        output.push("COMMANDS:".to_string());
+        output.push("Commands:".to_string());
         render_list(&mut output, list, value_size, wrap_width);
         output
     }
@@ -883,7 +883,7 @@ impl Command {
             })
             .collect();
         value_size += 2;
-        output.push("EXTERNAL COMMANDS:".to_string());
+        output.push("External Commands:".to_string());
         render_list(&mut output, list, value_size, wrap_width);
         output
     }

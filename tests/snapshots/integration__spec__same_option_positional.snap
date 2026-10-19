@@ -7,12 +7,12 @@ prog -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog [OPTIONS] [URL]
+Usage: prog [OPTIONS] [URL]
 
-ARGS:
+Args:
   [URL]
 
-OPTIONS:
+Options:
       --url <URL>
   -h, --help
   -V, --version
@@ -21,12 +21,12 @@ EOF
 exit 0
 
 # BUILD_OUTPUT
-USAGE: prog [OPTIONS] [URL]
+Usage: prog [OPTIONS] [URL]
 
-ARGS:
+Args:
   [URL]
 
-OPTIONS:
+Options:
       --url <URL>
   -h, --help
   -V, --version

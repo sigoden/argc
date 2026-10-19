@@ -4,9 +4,9 @@ expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}
 ---
 
 # OUTPUT
-USAGE: bind-envs options [OPTIONS] --ob <OB>
+Usage: bind-envs options [OPTIONS] --ob <OB>
 
-OPTIONS:
+Options:
       --oa1 <OA1>     [env: BIND_ENVS_OA1]
       --oa2 <OA2>     [env: BIND_ENVS_OA2]
       --oa3 <OA3>     [env: OA]
@@ -24,9 +24,9 @@ OPTIONS:
 
 
 # BUILD_OUTPUT
-USAGE: bind-envs options [OPTIONS] --ob <OB>
+Usage: bind-envs options [OPTIONS] --ob <OB>
 
-OPTIONS:
+Options:
       --oa1 <OA1>     [env: BIND_ENVS_OA1]
       --oa2 <OA2>     [env: BIND_ENVS_OA2]
       --oa3 <OA3>     [env: OA]

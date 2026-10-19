@@ -7,9 +7,9 @@ prog --help
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog <COMMAND>
+Usage: prog <COMMAND>
 
-COMMANDS:
+Commands:
   cat
   do
 
@@ -17,9 +17,9 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog <COMMAND>
+Usage: prog <COMMAND>
 
-COMMANDS:
+Commands:
   cat
   do
 
@@ -28,13 +28,13 @@ prog cat --help
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog cat
+Usage: prog cat
 
 EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog cat
+Usage: prog cat
 
 ************ RUN ************
 prog cat
@@ -56,9 +56,9 @@ prog do --help
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog do <COMMAND>
+Usage: prog do <COMMAND>
 
-COMMANDS:
+Commands:
   foo
   bar
 
@@ -66,9 +66,9 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog do <COMMAND>
+Usage: prog do <COMMAND>
 
-COMMANDS:
+Commands:
   foo
   bar
 
@@ -77,9 +77,9 @@ prog do
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog do <COMMAND>
+Usage: prog do <COMMAND>
 
-COMMANDS:
+Commands:
   foo
   bar
 
@@ -87,9 +87,9 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-USAGE: prog do <COMMAND>
+Usage: prog do <COMMAND>
 
-COMMANDS:
+Commands:
   foo
   bar
 

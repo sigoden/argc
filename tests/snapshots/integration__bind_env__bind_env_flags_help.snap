@@ -6,9 +6,9 @@ expression: "format! (r#\"\n# OUTPUT\n{output}\n\n# BUILD_OUTPUT\n{build_output}
 # OUTPUT
 How to bind env to param
 
-USAGE: bind-envs flags [OPTIONS]
+Usage: bind-envs flags [OPTIONS]
 
-OPTIONS:
+Options:
       --fa1    [env: BIND_ENVS_FA1]
       --fa2    [env: BIND_ENVS_FA2]
       --fa3    [env: FA]
@@ -21,9 +21,9 @@ OPTIONS:
 # BUILD_OUTPUT
 How to bind env to param
 
-USAGE: bind-envs flags [OPTIONS]
+Usage: bind-envs flags [OPTIONS]
 
-OPTIONS:
+Options:
       --fa1    [env: BIND_ENVS_FA1]
       --fa2    [env: BIND_ENVS_FA2]
       --fa3    [env: FA]

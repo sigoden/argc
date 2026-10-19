@@ -13,7 +13,7 @@ fn help_shows_external_commands() {
         .arg(script_path())
         .arg("--help")
         .assert()
-        .stdout(predicate::str::contains("EXTERNAL COMMANDS:"))
+        .stdout(predicate::str::contains("External Commands:"))
         .stdout(predicate::str::contains("bar"))
         .stdout(predicate::str::contains("foo"))
         .stdout(predicate::str::contains(

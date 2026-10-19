@@ -7,16 +7,16 @@ prog cmd
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-USAGE: prog cmd <COMMAND>
+Usage: prog cmd <COMMAND>
 
-COMMANDS:
+Commands:
   foo
 
 EOF
 exit 0
 
 # BUILD_OUTPUT
-USAGE: prog cmd <COMMAND>
+Usage: prog cmd <COMMAND>
 
-COMMANDS:
+Commands:
   foo
