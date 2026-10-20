@@ -243,6 +243,8 @@ fn option_prefixed() {
         script,
         [
             vec!["prog", "-o1", "-Dv1=foo", "-Dv2", "bar"],
+            vec!["prog", "-Dv1=foo", "-Dv1=bar"],
+            vec!["prog", "-Dv1", "-Dv1"],
             vec!["prog", "-v-"]
         ]
     );

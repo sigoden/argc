@@ -18,6 +18,30 @@ argc__positionals=(  )
 error: unexpected argument `-o1` found
 
 ************ RUN ************
+prog -Dv1=foo -Dv1=bar
+
+# OUTPUT
+declare -A argc_D
+argc_D[v1]='foo|bar'
+argc__args=( prog '-Dv1=foo' '-Dv1=bar' )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+error: unexpected argument `-Dv1` found
+
+************ RUN ************
+prog -Dv1 -Dv1
+
+# OUTPUT
+declare -A argc_D
+argc_D[v1]='1|1'
+argc__args=( prog -Dv1 -Dv1 )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+error: unexpected argument `-Dv1` found
+
+************ RUN ************
 prog -v-
 
 # OUTPUT
