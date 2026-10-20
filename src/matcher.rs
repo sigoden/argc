@@ -370,8 +370,14 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
         let last_cmd = *cmds.last().unwrap();
 
         let mut envs = runtime.env_vars();
-        if let Some(dot_envs) = root_cmd.dotenv().and_then(|v| runtime.load_dotenv(v)) {
-            envs.extend(dot_envs)
+        if let Some(value) = root_cmd.dotenv() {
+            for path in expand_dotenv_paths(value, &envs) {
+                if let Some(dot_envs) = runtime.load_dotenv(&path) {
+                    for (key, value) in dot_envs {
+                        envs.entry(key).or_insert(value);
+                    }
+                }
+            }
         }
 
         for param in &last_cmd.env_params {
@@ -1397,6 +1403,61 @@ fn add_param_choice_fn<'a>(choice_fns: &mut HashSet<&'a str>, param: &'a impl Pa
             choice_fns.insert(choice_fn.as_str());
         }
     }
+}
+
+fn expand_dotenv_paths(value: &str, envs: &HashMap<String, String>) -> Vec<String> {
+    shell_words::split(value)
+        .unwrap_or_else(|_| vec![value.to_string()])
+        .into_iter()
+        .map(|path| expand_env_vars(&path, envs))
+        .collect()
+}
+
+fn expand_env_vars(value: &str, envs: &HashMap<String, String>) -> String {
+    let chars: Vec<char> = value.chars().collect();
+    let mut output = String::with_capacity(value.len());
+    let mut i = 0;
+    while i < chars.len() {
+        if chars[i] == '$' {
+            if i + 1 < chars.len() && chars[i + 1] == '{' {
+                if let Some(offset) = chars[i + 2..].iter().position(|c| *c == '}') {
+                    let name: String = chars[i + 2..i + 2 + offset].iter().collect();
+                    if is_env_name(&name) {
+                        if let Some(value) = envs.get(&name) {
+                            output.push_str(value);
+                        }
+                        i += offset + 3;
+                        continue;
+                    }
+                }
+            } else {
+                let mut j = i + 1;
+                while j < chars.len() && (chars[j].is_ascii_alphanumeric() || chars[j] == '_') {
+                    j += 1;
+                }
+                if j > i + 1 && (chars[i + 1].is_ascii_alphabetic() || chars[i + 1] == '_') {
+                    let name: String = chars[i + 1..j].iter().collect();
+                    if let Some(value) = envs.get(&name) {
+                        output.push_str(value);
+                    }
+                    i = j;
+                    continue;
+                }
+            }
+        }
+        output.push(chars[i]);
+        i += 1;
+    }
+    output
+}
+
+fn is_env_name(name: &str) -> bool {
+    let mut chars = name.chars();
+    match chars.next() {
+        Some(c) if c.is_ascii_alphabetic() || c == '_' => {}
+        _ => return false,
+    }
+    chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
 }
 
 #[cfg(feature = "eval")]
