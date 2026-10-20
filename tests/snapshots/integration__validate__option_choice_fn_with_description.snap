@@ -1,0 +1,34 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog cmd --profile dev
+
+# OUTPUT
+argc_profile=dev
+argc__args=( prog cmd --profile dev )
+argc__fn=cmd
+argc__positionals=(  )
+cmd
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="cmd" [2]="--profile" [3]="dev")
+argc__fn=cmd
+argc__positionals=()
+argc_profile=dev
+cmd
+
+************ RUN ************
+prog cmd --profile staging
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+error: invalid value `staging` for `<PROFILE>`
+  [possible values: dev, prod]
+EOF
+exit 1
+
+# RUN_OUTPUT
+error: invalid value `staging` for `<PROFILE>`
+  [possible values: dev, prod]

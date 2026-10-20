@@ -460,7 +460,7 @@ _default_profile() {
 }
 ```
 
-Without `?`, values returned by a choice function are validated. With `?`, the function is used only for completion.
+Without `?`, values returned by a choice function are validated. With `?`, the function is used only for completion. Everything after the first tab on each line is ignored during validation.
 
 ### Value notation
 

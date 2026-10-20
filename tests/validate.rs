@@ -211,6 +211,27 @@ fn option_choice() {
 }
 
 #[test]
+fn option_choice_fn_with_description() {
+    let script = r###"
+# @cmd
+# @option --profile[`_choice_profile`]
+cmd() { :; }
+
+_choice_profile() {
+    printf 'dev\tDevelopment\n'
+    printf 'prod\tProduction\n'
+}
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "cmd", "--profile", "dev"],
+            vec!["prog", "cmd", "--profile", "staging"],
+        ]
+    );
+}
+
+#[test]
 fn option_choice_fn() {
     snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "--cc", "val"]);
 }
