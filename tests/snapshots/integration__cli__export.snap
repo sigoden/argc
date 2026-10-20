@@ -2011,7 +2011,7 @@ expression: stdout
           "id": "X",
           "long_name": "-X",
           "short_name": null,
-          "describe": "prefixied + multi-occurs + choice from fn",
+          "describe": "prefixed + multi-occurs + choice from fn",
           "flag": false,
           "notations": [
             "X"
@@ -2042,7 +2042,7 @@ expression: stdout
           "id": "plus_X",
           "long_name": "+X",
           "short_name": null,
-          "describe": "prefixied + multi-occurs + choice from fn",
+          "describe": "prefixed + multi-occurs + choice from fn",
           "flag": false,
           "notations": [
             "X"
@@ -2100,7 +2100,7 @@ expression: stdout
     },
     {
       "name": "options-assigned",
-      "describe": "Prefixed option",
+      "describe": "Assigned option",
       "version": null,
       "aliases": [],
       "flag_options": [

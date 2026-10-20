@@ -301,8 +301,8 @@ Prefixed option
 Usage: prog options-prefixed [OPTIONS]
 
 Options:
-  -X [X]...   prefixied + multi-occurs + choice from fn
-  +X [X]...   prefixied + multi-occurs + choice from fn
+  -X [X]...   prefixed + multi-occurs + choice from fn
+  +X [X]...   prefixed + multi-occurs + choice from fn
   -h,  -help  Print help
 
 EOF
@@ -314,8 +314,8 @@ Prefixed option
 Usage: prog options-prefixed [OPTIONS]
 
 Options:
-  -X [X]...   prefixied + multi-occurs + choice from fn
-  +X [X]...   prefixied + multi-occurs + choice from fn
+  -X [X]...   prefixed + multi-occurs + choice from fn
+  +X [X]...   prefixed + multi-occurs + choice from fn
   -h,  -help  Print help
 
 ************ RUN ************
@@ -323,7 +323,7 @@ prog options-assigned -h
 
 # OUTPUT
 command cat >&2 <<-'EOF' 
-Prefixed option
+Assigned option
 
 Usage: prog options-assigned [OPTIONS]
 
@@ -335,7 +335,7 @@ EOF
 exit 0
 
 # RUN_OUTPUT
-Prefixed option
+Assigned option
 
 Usage: prog options-assigned [OPTIONS]
 

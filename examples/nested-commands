@@ -2,22 +2,39 @@
 set -e
 
 # @describe Demonstrates nested subcommands declared with `::`
-# 
-# Mock docker cli
 
-# @cmd
-builder() { :; }
-# @cmd
-builder::ls() { :; }
-# @cmd
-builder::prune() { :; }
-# @cmd
-builder::rm() { :; }
-# @cmd
-builder::imagetools() { :; }
-# @cmd
-builder::imagetools::create() { :; }
-# @cmd
-builder::imagetools::inspect() { :; }
+# @meta binname gh
+
+# @cmd Manage repositories
+repo() { :; }
+
+# @cmd Manage autolink references
+repo::autolink() { :; }
+
+# @cmd Create an autolink reference
+# @option --key-prefix! <PREFIX>  Prefix used to match references
+# @option --url-template! <URL>   URL template containing the reference
+repo::autolink::create() {
+    echo "prefix: $argc_key_prefix"
+    echo "url: $argc_url_template"
+}
+
+# @cmd List autolink references
+# @option -R --repo <REPO>  Select another repository
+repo::autolink::list() {
+    echo "autolinks for ${argc_repo:-current repository}"
+}
+
+# @cmd Manage codespaces
+codespace() { :; }
+
+# @cmd Manage forwarded ports
+codespace::ports() { :; }
+
+# @cmd Change the visibility of forwarded ports
+# @arg ports* <PORT>  Port assignments such as 80:org or 3000:private
+codespace::ports::visibility() {
+    printf 'port: %s\n' "${argc_ports[@]}"
+}
 
 eval "$(argc --argc-eval "$0" "$@")"

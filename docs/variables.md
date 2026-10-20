@@ -15,80 +15,51 @@ cmd() {
 }
 ```
 
-## Argc-Generated Variables
+## Argc-generated variables
 
-Argc automatically creates variables corresponding to the options, flags, and positional arguments defined in your script using the `@option`, `@flag`, and `@arg` directives.
+Each declared parameter creates a variable with the `argc_` prefix:
 
-```sh
-# @option --oa
-# @option --ob*  # Multiple values allowed
-# @flag   --fa
-# @arg va
-# @arg vb*
+| Declaration | Variable | Notes |
+| --- | --- | --- |
+| `@option --foo` | `$argc_foo` | |
+| `@option --dry-run` | `$argc_dry_run` | `-`, `.`, `:`, and `@` become `_` |
+| `@option +foo` | `$argc_plus_foo` | Plus-prefixed options add `plus_` |
+| `@option -X-*` | `${argc_X[...]}` | Associative array |
+| `@option --tag*` | `${argc_tag[@]}` | Array |
+| `@option --pair <LEFT> <RIGHT>` | `${argc_pair[@]}` | One occurrence holds multiple values |
+| `@flag --verbose` | `$argc_verbose` | Unset when absent, `1` when present |
+| `@flag --verbose*` | `$argc_verbose` | Number of occurrences |
+| `@arg input` | `$argc_input` | |
+| `@arg files*` | `${argc_files[@]}` | Array |
+| `@arg rest~` | `${argc_rest[@]}` | Array of all remaining arguments |
+| `@meta symbol @file` | `$argc_file` | Symbolic parameter |
 
-eval "$(argc --argc-eval "$0" "$@")"  # Initializes Argc variables
-
-echo '--oa:' $argc_oa
-echo '--ob:' ${argc_ob[@]}  # Accessing multiple values as an array
-echo '--fa:' $argc_fa
-echo '  va:' $argc_va
-echo '  vb:' ${argc_vb[@]}
-```
-
-Running `./script.sh --oa a --ob=b1 --ob=b2 --fa foo bar baz` would output:
-
-```
---oa: a
---ob: b1 b2
---fa: 1
-  va: foo
-  vb: bar baz
-```
+Optional parameters are normally unset when they are not provided. Use `${argc_name:-}` or a default value when the script runs with `set -u`.
 
 ## Built-in Variables
 
 Argc also provides built-in variables that offer information about the parsing process:
 
-*   **`argc__args`**: An array holding all command-line arguments.
-*   **`argc__positionals`**: An array containing only the positional arguments.
-*   **`argc__fn`**: The name of the function that will be executed.
-
-**Additional Variables for Completion (Used internally by Argc-Completions):**
-
-*   **`argc__cmd_arg_index`**: Index of the command argument within `argc__args`.
-*   **`argc__cmd_fn`**: Name of the command function.
-*   **`argc__dash`**: Index of the first em-dash (`--`) within the positional arguments.
-*   **`argc__option`**: Variable name of the option currently being completed.
-
-These variables are particularly useful when creating custom completion scripts. 
+*   **`argc__args`**: An array holding the program name and all command-line arguments.
+*   **`argc__positionals`**: An array containing only the positional arguments. Subcommand names are not included.
+*   **`argc__fn`**: The name of the command function that will be executed, when one is selected.
 
 ## Environment Variables
 
-Several environment variables allow you to tailor Argc's behavior:
+### User-defined
 
-**User-Defined:**
+| Variable | Meaning |
+| --- | --- |
+| `ARGC_SHELL_PATH` | Path to the shell/Bash executable used by argc. The path must exist. |
+| `ARGC_SCRIPT_NAME` | Override the default script filename (`Argcfile.sh`). When set without `.sh`, argc also checks the `.sh` variant. |
 
-*  **`ARGC_SHELL_PATH`**: Specifies the path to the shell/bash executable used by Argc.
-*  **`ARGC_SCRIPT_NAME`**: Overrides the default script filename (Argcfile.sh).
-*  **`ARGC_COMPGEN_DESCRIPTION`**: Disables descriptions for completion candidates if set to 0 or false. 
-*  **`ARGC_COMPGEN_DESCRIPTION_MAX_WIDTH`**: Maximum width for completion descriptions; excess will be truncated with an ellipsis.
-*  **`ARGC_COMPLETIONS_PATH`**: Defines the search path for Argc-based completion scripts.
+### Argc-injected
 
-**Argc-Injected:**
-
-*  **`ARGC_PWD`**: Current working directory (available only in Argcfile.sh).
-
-**Argc-Injected (for completion):**
-*  **`ARGC_OS`**: Operating system type.
-*  **`ARGC_COMPGEN`**: Indicates whether the script is being used for generating completion candidates (1) or not (0).
-*  **`ARGC_CWORD`**: The last word in the processed command line.
-
-It's important to distinguish between these two variables:
-
-*  **`ARGC_CWORD`**: This variable isolates the final word, regardless of any preceding flags or options. For example, in the command `git --git-dir=git`, `ARGC_CWORD` would be `git`.
-*  **`ARGC_LAST_ARG`**: This variable captures the entire last argument, including any flags or options attached to it. In the same example, `ARGC_LAST_ARG` would be `--git-dir=git`.
-
-Understanding these variables is key to effectively leveraging Argc's capabilities and creating robust and user-friendly command-line interfaces.
+| Variable | When set | Meaning |
+| --- | --- | --- |
+| `ARGC_PWD` | `Argcfile.sh` (or an `ARGC_SCRIPT_NAME` script) runs, including via `--argc-eval` | Directory where `argc` was invoked. `PWD` points to the script's directory (the project root for `Argcfile.sh`). |
+| `ARGC_OS` | During completion or choice-function evaluation | Operating system name, such as `linux`, `macos`, or `windows`. |
+| `ARGC_VARS` | `--argc-eval` output | Internal base64-encoded variable snapshot. |
 
 ## Inspecting Variables
 
@@ -99,5 +70,5 @@ When debugging a script, you can dump the internal variables and the `ARGC_*` en
 printenv | grep ARGC_
 ```
 
-- `(set -o posix; set) | grep argc_` lists the argc shell variables (e.g. `argc__args`, `argc__positionals`, `argc_oa`). The `set -o posix` makes the output portable across shells.
+- `(set -o posix; set) | grep argc_` lists the argc shell variables (e.g. `argc__args`, `argc__positionals`, `argc_oa`).
 - `printenv | grep ARGC_` lists the exported `ARGC_*` environment variables (e.g. `ARGC_PWD`, `ARGC_OS`).

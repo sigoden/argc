@@ -2,10 +2,10 @@
 # 
 # Example: eval "$(argc --argc-eval "$0" "$@")"
 
-# @option --argc-create~ <-|FILE> <RECIPES> Create a boilerplate argc script. Use '-' as an alias for Argcfile.sh
+# @option --argc-create~ <-|FILE> <RECIPES>             Create a boilerplate argc script. Use '-' as an alias for Argcfile.sh
 #
 # Examples:
-#     argc --argc-create - build test            # Create Argcfile.sh
+#     argc --argc-create - build test                   # Create Argcfile.sh
 #     argc --argc-create mycli foo bar
 #     argc --argc-create /tmp/mycli foo bar
 
@@ -19,7 +19,7 @@
 #
 # Example: argc --argc-mangen ./examples/demo ./man
 
-# @option --argc-completions <SHELL> <CMDS>             Generate shell completion scripts
+# @option --argc-completions <SHELL> <CMDS*>            Generate shell completion scripts
 #
 # Examples:
 #     source <(argc --argc-completions bash mycli)
@@ -28,13 +28,13 @@
 #     argc --argc-completions fish mycli | source
 #     argc --argc-completions nushell | save --append $nu.config-path
 
-# @option --argc-compgen <SHELL> <-|FILE> <CMD> <ARGS>  Generate completion candidates. Use '-' to resolve the command from $PATH.
+# @option --argc-compgen <SHELL> <-|FILE> <CMD> <ARGS+> Generate completion candidates. Use '-' to resolve the command from $PATH.
 #
 # Examples:
-#     argc --argc-compgen bash - demo download --    # Find demo in $PATH
+#     argc --argc-compgen bash - demo download --       # Find demo in $PATH
 #     argc --argc-compgen bash ./examples/demo demo download --
 
-# @option --argc-export <FILE> <OUTPATH?>              Export command definitions as JSON
+# @option --argc-export <FILE> <OUTPATH?>               Export command definitions as JSON
 #
 # Examples:
 #     argc --argc-export ./examples/demo > /tmp/demo.json

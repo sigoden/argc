@@ -151,9 +151,26 @@ fn build_stdout() {
 
 #[test]
 fn run_build() {
-    let path = locate_script("examples/strict");
     let tmpdir = tmpdir();
-    let outpath = tmpdir.join("strict.sh");
+    let path = tmpdir.path().join("strict.sh");
+    std::fs::write(
+        &path,
+        r#"#!/usr/bin/env bash
+set -eu
+
+# @flag --fa
+# @option --oa
+
+main() {
+    ( set -o posix ; set ) | grep ^argc_
+}
+
+eval "$(argc --argc-eval "$0" "$@")"
+"#,
+    )
+    .unwrap();
+
+    let outpath = tmpdir.join("strict-built.sh");
     argc_bin()
         .arg("--argc-build")
         .arg(&path)
@@ -161,16 +178,7 @@ fn run_build() {
         .assert()
         .success();
 
-    let args = [
-        "--fa",
-        "--oa",
-        "oa1",
-        "--of=of1,of2",
-        "--oca=a",
-        "--ofa",
-        "abc",
-    ]
-    .map(String::from);
+    let args = ["--fa", "--oa", "oa1"].map(String::from);
     let output = run_script(&outpath, &args, &[]);
     assert!(output.contains("argc__fn=main"));
 }
@@ -278,6 +286,15 @@ fn export() {
     let output = argc_bin().arg("--argc-export").arg(path).output().unwrap();
     let stdout = std::str::from_utf8(&output.stdout).unwrap();
     insta::assert_snapshot!(stdout);
+}
+
+#[test]
+fn export_default_subcommand() {
+    let path = locate_script("examples/default-subcommand");
+    let output = argc_bin().arg("--argc-export").arg(path).output().unwrap();
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(value["default_subcommand"], 0);
 }
 
 #[test]

@@ -5,38 +5,50 @@ set -e
 #
 # Compared with GNU parallel, the biggest advantage of argc-parallel is that it preserves `argc_*` variables.
 
-# @cmd
-cmd1() {
-    sleep 3
-    echo cmd1 "$@"
-    echo argc_oa: $argc_oa
-    echo cmd1 stderr >&2
+# @cmd Run the test suite
+# @flag --verbose Show verbose output
+test() {
+    echo "test: running test suite (verbose=${argc_verbose:-0})"
+    sleep 1
+    echo "test: 128 tests passed"
 }
 
-# @cmd
-cmd2() {
-    sleep 3
-    echo cmd2 "$@"
-    echo argc_oa: $argc_oa
-    echo cmd2 stderr >&2
+# @cmd Run the linter
+# @flag --verbose Show verbose output
+lint() {
+    echo "lint: running linter (verbose=${argc_verbose:-0})"
+    sleep 1
+    echo "lint: no issues found"
 }
 
-# @cmd
-# @option --oa
-foo() {
-    argc --argc-parallel "$0" cmd1 abc ::: func ::: cmd2 
+# @cmd Format source files
+# @flag --check Check formatting without changing files
+# @flag --verbose Show verbose output
+format() {
+    # Parallel jobs call this function directly, so they pass --check as $1.
+    if [[ "$argc_check" == 1 ]]; then
+        echo "format: checking formatting (verbose=${argc_verbose:-0})"
+        sleep 1
+        echo "format: all files formatted"
+    else
+        echo "format: formatting files (verbose=${argc_verbose:-0})"
+        sleep 1
+        echo "format: done"
+    fi
 }
 
-# @cmd
-# @option --oa
-bar() {
-    cmd1 abc
-    func
-    cmd2
+# @cmd Run all checks in parallel
+# @flag --verbose Show verbose output
+check() {
+    argc --argc-parallel "$0" test ::: lint ::: format --check
 }
 
-func() {
-    echo func
+# @cmd Run all checks sequentially
+# @flag --verbose Show verbose output
+check-sequential() {
+    test
+    lint
+    format --check
 }
 
 eval "$(argc --argc-eval "$0" "$@")"

@@ -105,13 +105,13 @@ options-mixed() {
 }
 
 # @cmd Prefixed option
-# @option -X-*[`_choice_fn`]       prefixied + multi-occurs + choice from fn
-# @option +X-*[`_choice_fn`]       prefixied + multi-occurs + choice from fn
+# @option -X-*[`_choice_fn`]       prefixed + multi-occurs + choice from fn
+# @option +X-*[`_choice_fn`]       prefixed + multi-occurs + choice from fn
 options-prefixed() {
     _debug "$@"
 }
 
-# @cmd Prefixed option
+# @cmd Assigned option
 # @option -f --follow:[a|b]       assigned + choice
 options-assigned() {
     _debug "$@"

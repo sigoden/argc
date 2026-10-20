@@ -15,13 +15,13 @@ set -e
 # @option --state List units with particular LOAD or SUB or ACTIVE state
 
 # @cmd Start (activate) one or more units
-# @arg UNIT... The unit files to start
+# @arg UNIT+ The unit files to start
 start() {
     :;
 }
 
 # @cmd Stop (deactivate) one or more units
-# @arg UNIT... The unit files to stop
+# @arg UNIT+ The unit files to stop
 stop() {
     :;
 }
