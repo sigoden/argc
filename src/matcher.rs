@@ -1002,17 +1002,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
             .runtime
             .exec_bash_functions(script_path, fns, self.args, envs)?;
         for (i, output) in outputs.into_iter().enumerate() {
-            let choices = output
-                .split('\n')
-                .filter_map(|v| {
-                    let v = v.trim_matches(|c: char| c.is_whitespace() || c == '\0');
-                    if v.is_empty() {
-                        None
-                    } else {
-                        Some(v.to_string())
-                    }
-                })
-                .collect();
+            let choices = parse_choice_fn_output(&output);
             choices_fn_values.insert(fns[i], choices);
         }
         Some(choices_fn_values)
@@ -1407,6 +1397,25 @@ fn add_param_choice_fn<'a>(choice_fns: &mut HashSet<&'a str>, param: &'a impl Pa
             choice_fns.insert(choice_fn.as_str());
         }
     }
+}
+
+#[cfg(feature = "eval")]
+fn parse_choice_fn_output(output: &str) -> Vec<String> {
+    let lines: Vec<&str> = output
+        .split('\n')
+        .map(|v| v.trim_matches(|c: char| c.is_whitespace() || c == '\0'))
+        .filter(|v| !v.is_empty())
+        .collect();
+    lines
+        .into_iter()
+        .map(|line| {
+            line.split_once('\t')
+                .map(|(value, _)| value)
+                .unwrap_or(line)
+                .trim_end_matches('\0')
+                .to_string()
+        })
+        .collect()
 }
 
 #[cfg(feature = "compgen")]

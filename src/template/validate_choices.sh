@@ -1,8 +1,11 @@
 _argc_validate_choices() {
-    local render_name="$1" raw_choices="$2" choices item choice concated_choices=""
+    local render_name="$1" raw_choices="$2" choices item choice line i concated_choices=""
     while IFS= read -r line; do
         choices+=("$line")
     done <<<"$raw_choices"
+    for i in "${!choices[@]}"; do
+        choices[i]="${choices[i]%%$'\t'*}"
+    done
     for choice in "${choices[@]}"; do
         if [[ -z "$concated_choices" ]]; then
             concated_choices="$choice"
