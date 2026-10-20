@@ -1,0 +1,43 @@
+---
+source: tests/validate.rs
+expression: data
+---
+************ RUN ************
+prog -X
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+error: the argument `-X` requires a non-empty key
+EOF
+exit 1
+
+# RUN_OUTPUT
+error: incorrect number of values for `-X [X]...`
+
+************ RUN ************
+prog -X=foo
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+error: the argument `-X` requires a non-empty key
+EOF
+exit 1
+
+# RUN_OUTPUT
+argc_X=([0]="foo")
+argc__args=([0]="prog" [1]="-X=foo")
+argc__positionals=()
+
+************ RUN ************
+prog -X foo
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+error: the argument `-X` requires a non-empty key
+EOF
+exit 1
+
+# RUN_OUTPUT
+argc_X=([0]="foo")
+argc__args=([0]="prog" [1]="-X" [2]="foo")
+argc__positionals=()
