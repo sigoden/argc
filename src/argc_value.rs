@@ -64,11 +64,7 @@ impl ArgcValue {
                     let var_name = argc_var_name(id);
                     list.push(format!("declare -A {var_name}"));
                     list.extend(map.iter().map(|(k, v)| {
-                        let v = v
-                            .iter()
-                            .map(|x| escape_shell_words(x))
-                            .collect::<Vec<String>>()
-                            .join("|");
+                        let v = escape_shell_words(&v.join("|"));
                         let k = escape_shell_words(k);
                         format!(r#"{var_name}[{k}]={v}"#)
                     }));
