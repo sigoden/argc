@@ -181,6 +181,21 @@ fn option_unknown() {
 }
 
 #[test]
+fn option_prefixed_empty_key() {
+    let script = r###"
+# @option -X-*
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "-X"],
+            vec!["prog", "-X=foo"],
+            vec!["prog", "-X", "foo"],
+        ]
+    );
+}
+
+#[test]
 fn option_not_multiple() {
     snapshot!(SCRIPT_OPTIONS, &["prog", "test1", "-e", "-e"]);
 }

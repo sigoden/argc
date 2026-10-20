@@ -73,6 +73,7 @@ pub(crate) enum MatchError {
     InvalidBindEnvironment(usize, String, String, String, Vec<String>),
     InvalidEnvironment(usize, String, String, Vec<String>),
     MismatchValues(usize, String),
+    EmptyPrefixedOptionKey(usize, String),
     NoFlagValue(usize, String),
 }
 
@@ -764,6 +765,19 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
             }
             for (name, indexes) in flag_option_map {
                 if let Some(param) = cmd.flag_option_params.iter().find(|v| v.id() == name) {
+                    if param.prefixed() {
+                        for index in indexes.iter() {
+                            let arg = flag_option_args[*index].0;
+                            if let Some(prefix) = param.match_prefix(arg) {
+                                if prefix.len() == arg.len() {
+                                    return Some(MatchError::EmptyPrefixedOptionKey(
+                                        level,
+                                        arg.to_string(),
+                                    ));
+                                }
+                            }
+                        }
+                    }
                     let values_list: Vec<&[&str]> = indexes
                         .iter()
                         .map(|v| flag_option_args[*v].1.as_slice())
@@ -1110,6 +1124,10 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
             MatchError::MismatchValues(_level, value) => {
                 exit = 1;
                 format!(r###"error: incorrect number of values for `{value}`"###)
+            }
+            MatchError::EmptyPrefixedOptionKey(_level, name) => {
+                exit = 1;
+                format!(r###"error: the argument `{name}` requires a non-empty key"###)
             }
             MatchError::NoFlagValue(_level, name) => {
                 exit = 1;
