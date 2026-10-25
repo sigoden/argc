@@ -136,7 +136,7 @@ Comment tags are standard Bash comments prefixed with `@` and a specific tag. Th
 | [`@option`](./docs/comment-tags.md#option)     | Defines an option argument.           |
 | [`@flag`](./docs/comment-tags.md#flag)         | Defines a flag argument.              |
 | [`@env`](./docs/comment-tags.md#env)           | Defines an environment variable.      |
-| [`@meta`](./docs/comment-tags.md#meta)         | Adds metadata.                        |
+| [`@meta`](./docs/meta.md)                      | Adds metadata.                        |
 
 See the [comment tag](./docs/comment-tags.md) for tag formats and
 behavior, and the [grammar](./docs/grammar.ebnf) for formal syntax.
@@ -159,22 +159,7 @@ Use `argc --argc-create` to quickly generate a boilerplate `Argcfile.sh`:
 
 ```sh
 argc --argc-create - build test     # '-' is an alias for Argcfile.sh
-```
-
-You can also generate a standalone argc-based script with a custom name, or an explicit path:
-
-```sh
-argc --argc-create mycli foo bar    # Create ./mycli
-argc --argc-create /tmp/mycli foo   # Create /tmp/mycli
-```
-
-Any argc script can also be used as a project command runner. Name it
-`Argcfile.sh` and run its recipes through `argc`:
-
-```sh
-mv mycli Argcfile.sh
 argc build
-argc test
 ```
 
 `argc` finds `Argcfile.sh` in the current directory or one of its parents, so you

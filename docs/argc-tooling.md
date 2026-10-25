@@ -42,7 +42,7 @@ argc --argc-create [-|FILE] [RECIPES]...
 ```
 
 ```sh
-argc --argc-create - build test
+argc --argc-create - build test                     # Create Argcfile.sh
 argc --argc-create mycli build test
 argc --argc-create /tmp/mycli build test
 ```

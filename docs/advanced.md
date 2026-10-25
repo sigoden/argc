@@ -4,14 +4,12 @@ This page covers features that extend a basic argc CLI.
 
 ## The `main` Function
 
-`main` is a reserved entry point. It needs no `@cmd` and is not shown in the command list.
-
-- no subcommand
-    - no main: parse params, set `argc_*`, call nothing; the script continues.
-    - main: parse params and call `main`.
-- subcommand/nested-subcommand
-    - no main: with no child selected, show help or report a subcommand error; a selected child calls its own `@cmd` function.
-    - main: with no child selected, call `main` for the root or `<path>::main` for a group (`prog::main`, `prog::sub::main`); a selected child still calls its own `@cmd` function.
+- **no subcommand**
+    - **no main**: parse params, call nothing; the script continues.
+    - **main**: parse params and call `main`.
+- **subcommand/nested-subcommand**
+    - **no main**: with no child selected, show help or report a subcommand error;
+    - **main**: with no child selected, call `main` for the root or `<cmd>[::<subcmd>...]::main` for the nested subcommand.
 
 `main` is not a fallback for unknown subcommand names; those remain normass parsing errors.
 
