@@ -4,6 +4,8 @@ This page covers features that extend a basic argc CLI.
 
 ## The `main` Function
 
+`main` is an ordinary function. If it is defined, argc calls it after parsing when the invocation does not select a child command.
+
 - **no subcommand**
     - **no main**: parse params, call nothing; the script continues.
     - **main**: parse params and call `main`.
@@ -11,7 +13,31 @@ This page covers features that extend a basic argc CLI.
     - **no main**: with no child selected, show help or report a subcommand error;
     - **main**: with no child selected, call `main` for the root or `<cmd>[::<subcmd>...]::main` for the nested subcommand.
 
-`main` is not a fallback for unknown subcommand names; those remain normass parsing errors.
+```sh
+# @cmd
+build() { echo building; }
+
+# @cmd
+build::test() { echo testing; }
+
+build::main() { echo "usage: prog build <test>"; }
+main() { echo "usage: prog <build>"; }
+
+eval "$(argc --argc-eval "$0" "$@")"
+```
+
+```sh
+$ ./prog              # main
+usage: prog <build>
+$ ./prog build        # build::main
+usage: prog build <test>
+$ ./prog build test   # build::test
+testing
+```
+
+In a script without subcommands, `main` simply runs for every invocation. Removing both `main` functions above makes `./prog` and `./prog build` print help instead.
+
+`main` is not a fallback for unknown subcommand names; those remain normal parsing errors.
 
 ## Uncommon Option Styles
 
