@@ -464,7 +464,16 @@ impl Shell {
             .enumerate()
             .map(|(i, c)| {
                 if Self::match_escape_chars(need_escape_chars, c, i, len) {
-                    format!("{for_escape}{c}")
+                    if c == '\\' {
+                        // A literal backslash needs two escape prefixes.
+                        // Zsh's `_describe -Q` collapses one level, so two
+                        // levels leave the `\\` required on the command line.
+                        // Bash uses a one-character prefix, so this still
+                        // produces `\\`, preserving its existing behavior.
+                        format!("{for_escape}{for_escape}")
+                    } else {
+                        format!("{for_escape}{c}")
+                    }
                 } else {
                     c.to_string()
                 }
