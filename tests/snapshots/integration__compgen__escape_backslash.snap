@@ -1,0 +1,43 @@
+---
+source: tests/compgen.rs
+expression: data
+---
+************ COMPGEN Bash `prog --oa ` ************
+a\\b 
+c\\b\ d 
+e\\\\b 
+f\\:b 
+g\ b 
+h:b 
+
+************ COMPGEN Fish `prog --oa ` ************
+a\b
+c\b d
+e\\b
+f\:b
+g b
+h:b
+
+************ COMPGEN Nushell `prog --oa ` ************
+a\b 
+'c\b d' 
+e\\b 
+f\:b 
+'g b' 
+h:b 
+
+************ COMPGEN Powershell `prog --oa ` ************
+a\b	1	a\b		39
+'c\b d'	1	c\b d		39
+e\\b	1	e\\b		39
+f\:b	1	f\:b		39
+'g b'	1	g b		39
+h:b	1	h:b		39
+
+************ COMPGEN Zsh `prog --oa ` ************
+a\\\\b 	a\b	a\b	39
+c\\\\b\\ d 	c\b d	c\b d	39
+e\\\\\\\\b 	e\\b	e\\b	39
+f\\\\\:b 	f\\:b	f\:b	39
+g\\ b 	g b	g b	39
+h\:b 	h\:b	h:b	39

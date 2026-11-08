@@ -960,6 +960,18 @@ _choice_fn() {
 }
 
 #[test]
+fn escape_backslash() {
+    let script = r#"
+# @option --oa[`_choice_fn`]
+_choice_fn() {
+    printf '%s\n' 'a\b' 'c\b d' 'e\\b' 'f\:b' 'g b' 'h:b'
+}
+"#;
+
+    snapshot_compgen_shells!(script, ["prog", "--oa", ""]);
+}
+
+#[test]
 fn bash_shell() {
     let script = r#"
 # @option --oa[`_choice_fn`]
