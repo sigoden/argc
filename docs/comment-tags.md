@@ -221,16 +221,21 @@ See [Bind environment](#bind-environment) for details.
 
 Declares an option that takes a value.
 
-**Format:** `@option (short ws)? long modifier? param-value? bind-env? notations* description?`
+**Format:** `@option name (ws name)* modifier? param-value? bind-env? notations* description?`
+
+A parameter can have one or more names. Each name carries its own prefix: `-`, `+`, or `--`. Names are separated by whitespace. The trailing modifier, choices/default value, and `:`/`-` suffix belong to the parameter; write them on the last name.
 
 ```sh
 # @option -o --output <FILE>          Write output to FILE
+# @option -f -F --file <FILE>         File to read
 # @option -j <N>                      Number of parallel jobs
 # @option --config <FILE>             Path to configuration file
 # @option --include* <PATTERN>        Include matching files
 # @option --color[auto|always|never]  Colorize output
 # @option --token $GITHUB_TOKEN       GitHub access token
 ```
+
+Argc chooses one name as the canonical name for the generated variable and error messages. It prefers a `--` name, then a multi-character `-` name, then a `+` name, then the last name. Among names of the same kind, a body made only of letters, digits, and `_` is preferred over a body containing punctuation. See [Variables](./variables.md#argc-generated-variables) for the exact mapping, including punctuation-only names such as `-@`.
 
 There are also less common option styles, such as `--foo=abc` (where `--foo=` appears in completions), prefix options like `-Xfoo -Xbar`, and plus-prefixed options like `+foo`. All of these are supported. See [Uncommon Option Styles](./advanced.md#uncommon-option-styles).
 
@@ -322,14 +327,19 @@ See [Bind environment](#bind-environment) for details.
 
 Declares a boolean flag. A flag does not accept a value.
 
-**Format:** `@flag (short ws)? long "*"? bind-env? description?`
+**Format:** `@flag name (ws name)* "*"? bind-env? description?`
 
 ```sh
 # @flag -f --force       Overwrite existing files
+# @flag -h -? --help     Print help
 # @flag -q               Suppress output
 # @flag --verbose        Show detailed output
 # @flag --trace*         Repeatable trace flag
 ```
+
+Like `@option`, a flag may have several names with `-`, `+`, or `--` prefixes. The canonical name rules are the same; see [`@option`](#option) and [Variables](./variables.md#argc-generated-variables).
+
+Because names are whitespace-separated, a description that starts with a flag-like token such as `-x` is treated as another name. Rephrase such descriptions or do not start them with `-`/`+`.
 
 A flag is `1` when present and unset when absent:
 

@@ -193,7 +193,7 @@ _argc_version{suffix}() {{
 
 fn build_parse(cmd: &Command, suffix: &str) -> String {
     let mut parse_help = {
-        let help_flags = cmd.help_flags.join(" | ");
+        let help_flags = render_case_patterns(&cmd.help_flags);
         format!(
             r#"
         {help_flags})
@@ -202,7 +202,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
         )
     };
     let parse_version = if cmd.exist_version() {
-        let version_flags = cmd.version_flags.join(" | ");
+        let version_flags = render_case_patterns(&cmd.version_flags);
         format!(
             r#"
         {version_flags})
@@ -237,7 +237,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
             .iter()
             .map(|subcmd| {
                 let paths = subcmd.paths.join("_");
-                let names = subcmd.list_names().join(" | ");
+                let names = render_case_patterns(&subcmd.list_names());
                 format!(
                     r#"
         {names})
@@ -253,7 +253,7 @@ fn build_parse(cmd: &Command, suffix: &str) -> String {
             .subcommands
             .iter()
             .map(|subcmd| {
-                let names = subcmd.list_names().join(" | ");
+                let names = render_case_patterns(&subcmd.list_names());
                 let paths = subcmd.paths.join("_");
                 format!(
                     r#"
@@ -382,9 +382,17 @@ _argc_parse{suffix}() {{
     )
 }
 
+fn render_case_patterns(names: &[String]) -> String {
+    names
+        .iter()
+        .map(|v| format!("\"{v}\""))
+        .collect::<Vec<String>>()
+        .join(" | ")
+}
+
 fn build_parse_flag_option(param: &FlagOptionParam, signs: &IndexSet<char>) -> String {
-    let names = param.list_names().join(" | ");
-    let long_name = param.long_name();
+    let names = render_case_patterns(&param.list_names());
+    let primary_name = param.primary_name();
     let var_name = param.var_name();
     if param.is_flag() {
         if param.id() == "help" || param.id() == "version" {
@@ -394,7 +402,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &IndexSet<char>) -> S
             format!("{var_name}=$(({var_name} + 1))")
         } else {
             format!(
-                r#"_argc_die "error: the argument \`{long_name}\` cannot be used multiple times""#
+                r#"_argc_die "error: the argument \`{primary_name}\` cannot be used multiple times""#
             )
         };
 
@@ -402,7 +410,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &IndexSet<char>) -> S
             r#"
         {names})
             if [[ "$_argc_item" == *=* ]]; then
-                _argc_die "error: flag \`{long_name}\` don't accept any value"
+                _argc_die "error: flag \`{primary_name}\` don't accept any value"
             fi
             _argc_index=$((_argc_index + 1))
             if [[ -n "${{{var_name}:-}}" ]]; then
@@ -441,7 +449,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &IndexSet<char>) -> S
             if [[ -z "${{{var_name}:-}}" ]]; then
                 {var_name}="${{_argc_take_args_values[0]:-}}"
             else
-                _argc_die "error: the argument \`{long_name}\` cannot be used multiple times"
+                _argc_die "error: the argument \`{primary_name}\` cannot be used multiple times"
             fi"#
             )
         };

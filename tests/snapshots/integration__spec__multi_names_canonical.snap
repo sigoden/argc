@@ -1,0 +1,81 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog -h
+
+# OUTPUT
+argc_h=1
+argc__args=( prog -h )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-h")
+argc__positionals=()
+argc_h=1
+
+************ RUN ************
+prog -?
+
+# OUTPUT
+argc_h=1
+argc__args=( prog '-?' )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-?")
+argc__positionals=()
+argc_h=1
+
+************ RUN ************
+prog -f x
+
+# OUTPUT
+argc_dry_run=x
+argc__args=( prog -f x )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-f" [2]="x")
+argc__positionals=()
+argc_dry_run=x
+
+************ RUN ************
+prog --dry-run y
+
+# OUTPUT
+argc_dry_run=y
+argc__args=( prog --dry-run y )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--dry-run" [2]="y")
+argc__positionals=()
+argc_dry_run=y
+
+************ RUN ************
+prog -g z
+
+# OUTPUT
+argc_foo_bar=z
+argc__args=( prog -g z )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-g" [2]="z")
+argc__positionals=()
+argc_foo_bar=z
+
+************ RUN ************
+prog --foo.bar w
+
+# OUTPUT
+argc_foo_bar=w
+argc__args=( prog --foo.bar w )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--foo.bar" [2]="w")
+argc__positionals=()
+argc_foo_bar=w

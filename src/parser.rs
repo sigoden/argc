@@ -13,7 +13,7 @@ use nom::{
         complete::{anychar, char, one_of, satisfy, space0, space1},
         streaming::none_of,
     },
-    combinator::{eof, fail, map, not, opt, peek, rest, success},
+    combinator::{eof, fail, map, not, opt, peek, recognize, rest, success},
     error::ErrorKind,
     multi::{many0, many1, separated_list1},
     sequence::{delimited, pair, preceded, separated_pair, terminated},
@@ -223,59 +223,22 @@ fn parse_tag_unknown(input: &str) -> nom::IResult<&str, Option<EventData>> {
 
 // Parse `@option`
 fn parse_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
-    alt((parse_with_long_option_param, parse_no_long_option_param)).parse(input)
-}
-
-// Parse `@option` with long name
-fn parse_with_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
         (
-            parse_with_long_head,
-            alt((
-                parse_param_modifier_choices_default,
-                parse_param_modifier_choices_fn,
-                parse_param_modifier_choices,
-                parse_param_assign_fn,
-                parse_param_assign,
-                parse_param_modifier,
-            )),
+            parse_prefixed_names,
+            parse_option_extra,
             parse_zero_or_one_bind_env,
             parse_zero_or_many_value_notations,
             parse_tail,
         ),
-        |((short, long_prefix), mut arg, env, value_names, describe)| {
-            arg.env = env;
-            arg.describe = describe.to_string();
-            FlagOptionParam::new(arg, false, short, long_prefix, &value_names)
-        },
-    )
-    .parse(input)
-}
-
-// Parse `@option` without long name
-fn parse_no_long_option_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
-    map(
-        (
-            preceded(space0, alt((tag("-"), tag("+")))),
-            preceded(
-                verify_single_char,
-                alt((
-                    parse_param_modifier_choices_default,
-                    parse_param_modifier_choices_fn,
-                    parse_param_modifier_choices,
-                    parse_param_assign_fn,
-                    parse_param_assign,
-                    parse_param_modifier,
-                )),
-            ),
-            parse_zero_or_one_bind_env,
-            parse_zero_or_many_value_notations,
-            parse_tail,
-        ),
-        |(long_prefix, mut arg, env, value_names, describe)| {
-            arg.env = env;
-            arg.describe = describe.to_string();
-            FlagOptionParam::new(arg, false, None, long_prefix, &value_names)
+        |(names, (modifier, choice, default), env, value_names, describe)| {
+            let mut data = ParamData::new("");
+            data.modifier = modifier;
+            data.choice = choice;
+            data.default = default;
+            data.env = env;
+            data.describe = describe.to_string();
+            FlagOptionParam::new(data, false, &names, &value_names)
         },
     )
     .parse(input)
@@ -330,93 +293,180 @@ fn parse_positional_param(input: &str) -> nom::IResult<&str, PositionalParam> {
 
 // Parse `@flag`
 fn parse_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
-    alt((parse_with_long_flag_param, parse_no_long_flag_param)).parse(input)
-}
-
-// Parse `@flag`
-fn parse_with_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
     map(
         (
-            parse_with_long_head,
-            parse_with_long_flag_name,
+            parse_prefixed_names,
+            parse_flag_extra,
             parse_zero_or_one_bind_env,
             parse_tail,
         ),
-        |((short, long_prefix), mut arg, env, describe)| {
-            arg.env = env;
-            arg.describe = describe.to_string();
-            FlagOptionParam::new(arg, true, short, long_prefix, &[])
+        |(names, modifier, env, describe)| {
+            let mut data = ParamData::new("");
+            data.modifier = modifier;
+            data.env = env;
+            data.describe = describe.to_string();
+            FlagOptionParam::new(data, true, &names, &[])
         },
     )
     .parse(input)
 }
 
-// Parse `@flag` without long name
-fn parse_no_long_flag_param(input: &str) -> nom::IResult<&str, FlagOptionParam> {
-    map(
-        (
-            preceded(space0, alt((tag("-"), tag("+")))),
-            parse_no_long_flag_name,
-            parse_zero_or_one_bind_env,
-            parse_tail,
-        ),
-        |(long_prefix, mut arg, env, describe)| {
-            arg.env = env;
-            arg.describe = describe.to_string();
-            FlagOptionParam::new(arg, true, None, long_prefix, &[])
-        },
-    )
-    .parse(input)
-}
-
-fn parse_with_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
+fn parse_flag_extra(input: &str) -> nom::IResult<&str, Modifier> {
     alt((
-        map(terminated(parse_param_name, tag("*")), |mut arg| {
-            arg.modifier = Modifier::MultipleOptional;
-            arg
-        }),
-        parse_param_name,
+        map(tag("*"), |_| Modifier::MultipleOptional),
+        map(success(()), |_| Modifier::Optional),
     ))
     .parse(input)
 }
 
-fn parse_no_long_flag_name(input: &str) -> nom::IResult<&str, ParamData> {
-    fn parser(input: &str) -> nom::IResult<&str, ParamData> {
-        map(satisfy(is_short_char), |ch| {
-            ParamData::new(&format!("{ch}"))
-        })
-        .parse(input)
-    }
-    map(pair(parser, opt(tag("*"))), |(mut arg, multiple)| {
-        if multiple.is_some() {
-            arg.modifier = Modifier::MultipleOptional;
-        }
-        arg
+type OptionExtra = (Modifier, Option<ChoiceValue>, Option<DefaultValue>);
+
+fn parse_option_extra(input: &str) -> nom::IResult<&str, OptionExtra> {
+    alt((
+        map(
+            pair(
+                parse_modifier_suffix,
+                delimited(char('['), parse_choices_default, char(']')),
+            ),
+            |(modifier, (values, default))| {
+                (
+                    modifier,
+                    Some(ChoiceValue::Values(
+                        values.iter().map(|v| v.to_string()).collect(),
+                    )),
+                    default.map(|v| DefaultValue::Value(v.to_string())),
+                )
+            },
+        ),
+        map(
+            pair(
+                parse_modifier_suffix,
+                delimited(char('['), pair(opt(char('?')), parse_value_fn), char(']')),
+            ),
+            |(modifier, (validate, f))| {
+                (
+                    modifier,
+                    Some(ChoiceValue::Fn(f.into(), validate.is_none())),
+                    None,
+                )
+            },
+        ),
+        map(
+            pair(
+                parse_modifier_suffix,
+                delimited(char('['), parse_choices, char(']')),
+            ),
+            |(modifier, values)| {
+                (
+                    modifier,
+                    Some(ChoiceValue::Values(
+                        values.iter().map(|v| v.to_string()).collect(),
+                    )),
+                    None,
+                )
+            },
+        ),
+        map(preceded(char('='), parse_value_fn), |f| {
+            (
+                Modifier::Optional,
+                None,
+                Some(DefaultValue::Fn(f.to_string())),
+            )
+        }),
+        map(preceded(char('='), parse_default_value), |value| {
+            (
+                Modifier::Optional,
+                None,
+                Some(DefaultValue::Value(value.to_string())),
+            )
+        }),
+        map(parse_modifier_suffix, |modifier| (modifier, None, None)),
+    ))
+    .parse(input)
+}
+
+fn parse_modifier_suffix(input: &str) -> nom::IResult<&str, Modifier> {
+    alt((
+        map(tag("!"), |_| Modifier::Required),
+        map(tag("~"), |_| Modifier::Terminated),
+        map(
+            pair(tag("*"), opt(parse_multi_char)),
+            |(_, multi_char)| match multi_char {
+                Some(c) => Modifier::DelimiterOptional(c),
+                None => Modifier::MultipleOptional,
+            },
+        ),
+        map(
+            pair(tag("+"), opt(parse_multi_char)),
+            |(_, multi_char)| match multi_char {
+                Some(c) => Modifier::DelimiterRequired(c),
+                None => Modifier::MultipleRequired,
+            },
+        ),
+        map(success(()), |_| Modifier::Optional),
+    ))
+    .parse(input)
+}
+
+fn parse_prefixed_names(input: &str) -> nom::IResult<&str, Vec<String>> {
+    map(separated_list1(space1, parse_prefixed_name), |names| {
+        names.into_iter().map(|v| v.to_string()).collect()
     })
     .parse(input)
 }
 
-fn parse_with_long_head(input: &str) -> nom::IResult<&str, (Option<&str>, &str)> {
-    map(
-        alt((pair(
-            opt(terminated(
-                pair(
-                    opt(alt((char::<&str, _>('-'), char('+')))),
-                    satisfy(is_short_char),
-                ),
-                peek(space1),
-            )),
-            preceded(
-                space0,
-                alt((
-                    terminated(tag("--"), peek(not(char('-')))),
-                    terminated(tag("-"), peek(not(char('-')))),
-                    terminated(tag("+"), peek(not(char('+')))),
-                )),
-            ),
-        ),)),
-        |(short, long_prefix)| (short.map(|_| &input[0..2]), long_prefix),
-    )
+fn parse_prefixed_name(input: &str) -> nom::IResult<&str, &str> {
+    let (rest, name) = alt((
+        recognize(pair(tag("--"), parse_long_name_body)),
+        recognize(preceded(tag("-"), parse_dash_name_body)),
+        recognize(preceded(tag("+"), parse_plus_name_body)),
+    ))
+    .parse(input)?;
+    let ends_name = rest
+        .chars()
+        .next()
+        .map(|c| c.is_whitespace() || matches!(c, '!' | '~' | '*' | '+' | '=' | '['))
+        .unwrap_or(true);
+    if ends_name {
+        Ok((rest, name))
+    } else {
+        Err(create_err(input, ErrorKind::Verify))
+    }
+}
+
+fn parse_long_name_body(input: &str) -> nom::IResult<&str, &str> {
+    let (rest, body) = take_while1(is_name_char).parse(input)?;
+    if body.starts_with('-') {
+        Err(create_err(input, ErrorKind::Verify))
+    } else {
+        Ok((rest, body))
+    }
+}
+
+fn parse_dash_name_body(input: &str) -> nom::IResult<&str, &str> {
+    if input.starts_with('-') {
+        Err(create_err(input, ErrorKind::Verify))
+    } else {
+        parse_short_or_long_name_body(input)
+    }
+}
+
+fn parse_plus_name_body(input: &str) -> nom::IResult<&str, &str> {
+    if input.starts_with('+') {
+        Err(create_err(input, ErrorKind::Verify))
+    } else {
+        parse_short_or_long_name_body(input)
+    }
+}
+
+fn parse_short_or_long_name_body(input: &str) -> nom::IResult<&str, &str> {
+    alt((
+        recognize(terminated(
+            satisfy(is_short_char),
+            peek(not(satisfy(is_name_char))),
+        )),
+        take_while1(is_name_char),
+    ))
     .parse(input)
 }
 
@@ -749,18 +799,6 @@ fn notation_text(input: &str, balances: usize) -> nom::IResult<&str, usize> {
     }
 }
 
-fn verify_single_char(input: &str) -> nom::IResult<&str, &str> {
-    if input
-        .chars()
-        .take_while(|v| v.is_ascii_alphanumeric())
-        .count()
-        > 1
-    {
-        return Err(create_err(input, ErrorKind::Verify));
-    }
-    Ok((input, ""))
-}
-
 fn create_err(input: &str, kind: ErrorKind) -> nom::Err<nom::error::Error<&str>> {
     nom::Err::Error(nom::error::Error::new(input, kind))
 }
@@ -934,6 +972,8 @@ mod tests {
     #[test]
     fn test_parse_with_long_option_arg() {
         assert_parse_option_arg!("-f --foo=a <FOO> A foo option");
+        assert_parse_option_arg!("-f -F --file=a <FILE> A file option");
+        assert_parse_option_arg!("-f -F --file! <FILE> A required file option");
         assert_parse_option_arg!("--foo:bar");
         assert_parse_option_arg!("--foo.bar");
         assert_parse_option_arg!("--foo!");
@@ -1042,6 +1082,8 @@ mod tests {
     #[test]
     fn test_parse_with_long_flag_arg() {
         assert_parse_flag_arg!("-f --foo A foo flag");
+        assert_parse_flag_arg!("-h -? --help A help flag");
+        assert_parse_flag_arg!("--foo -bar? description");
         assert_parse_flag_arg!("-. --hidden");
         assert_parse_flag_arg!("--http1.1");
         assert_parse_flag_arg!("--foo A foo flag");
@@ -1068,27 +1110,6 @@ mod tests {
         assert_parse_flag_arg!("-#");
         assert_parse_flag_arg!("-:");
         assert_parse_flag_arg!("-f*");
-    }
-
-    #[test]
-    fn test_parse_with_long_head() {
-        assert_eq!(
-            parse_with_long_head("-f --foo"),
-            Ok(("foo", (Some("-f"), "--")))
-        );
-        assert_eq!(
-            parse_with_long_head("-f -foo"),
-            Ok(("foo", (Some("-f"), "-")))
-        );
-        assert_eq!(parse_with_long_head("--foo"), Ok(("foo", (None, "--"))));
-        assert_eq!(parse_with_long_head("-foo"), Ok(("foo", (None, "-"))));
-        assert_eq!(
-            parse_with_long_head("+f +foo"),
-            Ok(("foo", (Some("+f"), "+")))
-        );
-        assert_eq!(parse_with_long_head("+foo"), Ok(("foo", (None, "+"))));
-        assert!(parse_with_long_head("-f ---foo").is_err());
-        assert!(parse_with_long_head("+f ++foo").is_err());
     }
 
     #[test]

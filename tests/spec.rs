@@ -451,3 +451,65 @@ fn option_value_dash() {
         ]
     );
 }
+
+#[test]
+fn multi_names() {
+    let script = r###"
+# @flag -h -? --help Print help
+# @flag -v -V --version Print version
+# @option -f -F --file <FILE> File
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "-h"],
+            vec!["prog", "-?"],
+            vec!["prog", "--help"],
+            vec!["prog", "-V"],
+            vec!["prog", "--version"],
+            vec!["prog", "-f", "a"],
+            vec!["prog", "-F", "b"],
+            vec!["prog", "--file", "c"],
+        ]
+    );
+}
+
+#[test]
+fn multi_names_special() {
+    let script = r###"
+# @flag -@ at flag
+# @flag -$ dollar flag
+# @flag -f -? maybe flag
+# @flag -@. all special flag
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "-@"],
+            vec!["prog", "-$"],
+            vec!["prog", "-?"],
+            vec!["prog", "-f"],
+            vec!["prog", "-@."],
+        ]
+    );
+}
+
+#[test]
+fn multi_names_canonical() {
+    let script = r###"
+# @flag -h -? maybe flag
+# @option -f --dry-run <VALUE> Dry run
+# @option -g --foo.bar <VALUE> Foo bar
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "-h"],
+            vec!["prog", "-?"],
+            vec!["prog", "-f", "x"],
+            vec!["prog", "--dry-run", "y"],
+            vec!["prog", "-g", "z"],
+            vec!["prog", "--foo.bar", "w"],
+        ]
+    );
+}

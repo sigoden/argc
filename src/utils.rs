@@ -78,6 +78,18 @@ pub fn is_special_var_char(c: char) -> bool {
     matches!(c, '-' | '.' | ':' | '@')
 }
 
+pub(crate) fn is_safe_var_char(c: char) -> bool {
+    c.is_ascii_alphanumeric() || c == '_'
+}
+
+pub(crate) fn is_bad_var_char(c: char) -> bool {
+    !is_safe_var_char(c) && !is_special_var_char(c)
+}
+
+pub(crate) fn encode_var_char(c: char) -> String {
+    format!("0x{:02x}", c as u32)
+}
+
 pub fn sanitize_var_name(id: &str) -> String {
     id.replace(is_special_var_char, "_")
 }

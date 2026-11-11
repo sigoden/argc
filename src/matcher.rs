@@ -133,8 +133,8 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                     }
                 } else if is_rest_args_positional
                     || (cmd.is_empty_flags_options_subcommands()
-                        && !cmd.help_flags.contains(&arg)
-                        && !cmd.version_flags.contains(&arg))
+                        && !cmd.help_flags.iter().any(|v| v == arg)
+                        && !cmd.version_flags.iter().any(|v| v == arg))
                 {
                     add_positional_arg(
                         &mut positional_args,
@@ -160,8 +160,8 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                             comp_option = Some(param.id());
                         } else {
                             if positional_args.is_empty()
-                                && !cmd.help_flags.contains(&k)
-                                && !cmd.version_flags.contains(&k)
+                                && !cmd.help_flags.iter().any(|v| v == k)
+                                && !cmd.version_flags.iter().any(|v| v == k)
                             {
                                 if let Some(subcmd) = cmd.find_default_subcommand() {
                                     match_command(
@@ -260,8 +260,8 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                         }
                     } else {
                         if positional_args.is_empty()
-                            && !cmd.help_flags.contains(&arg)
-                            && !cmd.version_flags.contains(&arg)
+                            && !cmd.help_flags.iter().any(|v| v == arg)
+                            && !cmd.version_flags.iter().any(|v| v == arg)
                         {
                             if let Some(subcmd) = cmd.find_default_subcommand() {
                                 match_command(
@@ -791,7 +791,10 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                     let (min, _) = param.num_args();
                     for values in values_list.iter() {
                         if param.is_flag() && !values.is_empty() {
-                            return Some(MatchError::NoFlagValue(level, param.long_name()));
+                            return Some(MatchError::NoFlagValue(
+                                level,
+                                param.primary_name().to_string(),
+                            ));
                         } else if values.len() < min {
                             return Some(MatchError::MismatchValues(
                                 level,
@@ -812,7 +815,10 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                         }
                     }
                     if !param.multiple_occurs() && values_list.len() > 1 {
-                        return Some(MatchError::NotMultipleArgument(level, param.long_name()));
+                        return Some(MatchError::NotMultipleArgument(
+                            level,
+                            param.primary_name().to_string(),
+                        ));
                     }
                 }
             }
@@ -845,7 +851,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                             level,
                             values[0].to_string(),
                             param.bind_env().unwrap_or_default(),
-                            param.long_name(),
+                            param.primary_name().to_string(),
                             choice_values,
                         ));
                     }
@@ -856,7 +862,7 @@ impl<'a: 'b, 'b, T: Runtime> Matcher<'a, 'b, T> {
                                     level,
                                     value.to_string(),
                                     param.bind_env().unwrap_or_default(),
-                                    param.long_name(),
+                                    param.primary_name().to_string(),
                                     choices,
                                 ));
                             }

@@ -1,0 +1,68 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog -@
+
+# OUTPUT
+argc_0x40=1
+argc__args=( prog -@ )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc_0x40=1
+argc__args=([0]="prog" [1]="-@")
+argc__positionals=()
+
+************ RUN ************
+prog -$
+
+# OUTPUT
+argc_0x24=1
+argc__args=( prog '-$' )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc_0x24=1
+argc__args=([0]="prog" [1]="-\$")
+argc__positionals=()
+
+************ RUN ************
+prog -?
+
+# OUTPUT
+argc_f=1
+argc__args=( prog '-?' )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-?")
+argc__positionals=()
+argc_f=1
+
+************ RUN ************
+prog -f
+
+# OUTPUT
+argc_f=1
+argc__args=( prog -f )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-f")
+argc__positionals=()
+argc_f=1
+
+************ RUN ************
+prog -@.
+
+# OUTPUT
+argc_0x400x2e=1
+argc__args=( prog -@. )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc_0x400x2e=1
+argc__args=([0]="prog" [1]="-@.")
+argc__positionals=()
