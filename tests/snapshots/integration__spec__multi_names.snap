@@ -1,0 +1,135 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog -h
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+Usage: prog [OPTIONS]
+
+Options:
+  -h,  -?, --help         Print help
+  -v,  -V, --version      Print version
+  -f,  -F, --file <FILE>  File
+
+EOF
+exit 0
+
+# RUN_OUTPUT
+Usage: prog [OPTIONS]
+
+Options:
+  -h,  -?, --help         Print help
+  -v,  -V, --version      Print version
+  -f,  -F, --file <FILE>  File
+
+************ RUN ************
+prog -?
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+Usage: prog [OPTIONS]
+
+Options:
+  -h,  -?, --help         Print help
+  -v,  -V, --version      Print version
+  -f,  -F, --file <FILE>  File
+
+EOF
+exit 0
+
+# RUN_OUTPUT
+Usage: prog [OPTIONS]
+
+Options:
+  -h,  -?, --help         Print help
+  -v,  -V, --version      Print version
+  -f,  -F, --file <FILE>  File
+
+************ RUN ************
+prog --help
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+Usage: prog [OPTIONS]
+
+Options:
+  -h,  -?, --help         Print help
+  -v,  -V, --version      Print version
+  -f,  -F, --file <FILE>  File
+
+EOF
+exit 0
+
+# RUN_OUTPUT
+Usage: prog [OPTIONS]
+
+Options:
+  -h,  -?, --help         Print help
+  -v,  -V, --version      Print version
+  -f,  -F, --file <FILE>  File
+
+************ RUN ************
+prog -V
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+prog 0.0.0
+EOF
+exit 0
+
+# RUN_OUTPUT
+prog 0.0.0
+
+************ RUN ************
+prog --version
+
+# OUTPUT
+command cat >&2 <<-'EOF' 
+prog 0.0.0
+EOF
+exit 0
+
+# RUN_OUTPUT
+prog 0.0.0
+
+************ RUN ************
+prog -f a
+
+# OUTPUT
+argc_file=a
+argc__args=( prog -f a )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-f" [2]="a")
+argc__positionals=()
+argc_file=a
+
+************ RUN ************
+prog -F b
+
+# OUTPUT
+argc_file=b
+argc__args=( prog -F b )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-F" [2]="b")
+argc__positionals=()
+argc_file=b
+
+************ RUN ************
+prog --file c
+
+# OUTPUT
+argc_file=c
+argc__args=( prog --file c )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--file" [2]="c")
+argc__positionals=()
+argc_file=c

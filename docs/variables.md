@@ -29,10 +29,31 @@ Each declared parameter creates a variable with the `argc_` prefix:
 | `@option --pair <LEFT> <RIGHT>` | `${argc_pair[@]}` | One occurrence holds multiple values |
 | `@flag --verbose` | `$argc_verbose` | Unset when absent, `1` when present |
 | `@flag --verbose*` | `$argc_verbose` | Number of occurrences |
+| `@flag -@` | `$argc_0x40` | Punctuation-only name uses ASCII code |
+| `@flag -@.` | `$argc_0x400x2e` | Each punctuation character is encoded |
+| `@flag +@` | `$argc_plus_0x40` | Plus-prefixed punctuation-only name |
 | `@arg input` | `$argc_input` | |
 | `@arg files*` | `${argc_files[@]}` | Array |
 | `@arg rest~` | `${argc_rest[@]}` | Array of all remaining arguments |
 | `@meta symbol @file` | `$argc_file` | Symbolic parameter |
+
+When a flag or option has several names, argc chooses a canonical name for the variable and error messages:
+
+1. Prefer the last `--` name.
+2. Otherwise prefer the last multi-character `-` name.
+3. Otherwise use the last name.
+
+`+` names and single-character `-` names have equal priority, so the last of them wins. Within the same priority, a body containing a letter, digit, or `_` is preferred, then a body made only of `-`, `.`, `:`, and `@`, then a body containing other punctuation. For example, `@flag -h -?` uses `-h`, so the variable is `$argc_h`.
+
+A body made entirely of punctuation is encoded with its ASCII codes. `-` is not part of the body and does not get encoded:
+
+```sh
+# @flag -@        # argc_0x40
+# @flag -@.       # argc_0x400x2e
+# @flag +@        # argc_plus_0x40
+```
+
+In a body that also contains normal characters, `-`, `.`, `:`, and `@` still become `_`; other punctuation is encoded. `--dry-run` therefore remains `$argc_dry_run`.
 
 Optional parameters are normally unset when they are not provided. Use `${argc_name:-}` or a default value when the script runs with `set -u`.
 

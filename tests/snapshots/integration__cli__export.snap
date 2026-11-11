@@ -10,8 +10,10 @@ expression: stdout
   "flag_options": [
     {
       "id": "help",
-      "long_name": "--help",
-      "short_name": "-h",
+      "names": [
+        "-h",
+        "--help"
+      ],
       "describe": "",
       "flag": true,
       "notations": [],
@@ -33,8 +35,10 @@ expression: stdout
     },
     {
       "id": "version",
-      "long_name": "--version",
-      "short_name": "-V",
+      "names": [
+        "-V",
+        "--version"
+      ],
       "describe": "",
       "flag": true,
       "notations": [],
@@ -66,8 +70,9 @@ expression: stdout
       "flag_options": [
         {
           "id": "oa",
-          "long_name": "--oa",
-          "short_name": null,
+          "names": [
+            "--oa"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -91,8 +96,10 @@ expression: stdout
         },
         {
           "id": "ob",
-          "long_name": "--ob",
-          "short_name": "-b",
+          "names": [
+            "-b",
+            "--ob"
+          ],
           "describe": "short",
           "flag": false,
           "notations": [
@@ -116,8 +123,9 @@ expression: stdout
         },
         {
           "id": "c",
-          "long_name": "-c",
-          "short_name": null,
+          "names": [
+            "-c"
+          ],
           "describe": "short only",
           "flag": false,
           "notations": [
@@ -141,8 +149,9 @@ expression: stdout
         },
         {
           "id": "oc",
-          "long_name": "--oc",
-          "short_name": null,
+          "names": [
+            "--oc"
+          ],
           "describe": "required",
           "flag": false,
           "notations": [
@@ -166,8 +175,9 @@ expression: stdout
         },
         {
           "id": "od",
-          "long_name": "--od",
-          "short_name": null,
+          "names": [
+            "--od"
+          ],
           "describe": "multi-occurs",
           "flag": false,
           "notations": [
@@ -191,8 +201,9 @@ expression: stdout
         },
         {
           "id": "oe",
-          "long_name": "--oe",
-          "short_name": null,
+          "names": [
+            "--oe"
+          ],
           "describe": "required + multi-occurs",
           "flag": false,
           "notations": [
@@ -216,8 +227,9 @@ expression: stdout
         },
         {
           "id": "of",
-          "long_name": "--of",
-          "short_name": null,
+          "names": [
+            "--of"
+          ],
           "describe": "multi-occurs + comma-separated list",
           "flag": false,
           "notations": [
@@ -241,8 +253,9 @@ expression: stdout
         },
         {
           "id": "ona",
-          "long_name": "--ona",
-          "short_name": null,
+          "names": [
+            "--ona"
+          ],
           "describe": "value notation",
           "flag": false,
           "notations": [
@@ -266,8 +279,9 @@ expression: stdout
         },
         {
           "id": "onb",
-          "long_name": "--onb",
-          "short_name": null,
+          "names": [
+            "--onb"
+          ],
           "describe": "two-args value notations",
           "flag": false,
           "notations": [
@@ -292,8 +306,9 @@ expression: stdout
         },
         {
           "id": "onc",
-          "long_name": "--onc",
-          "short_name": null,
+          "names": [
+            "--onc"
+          ],
           "describe": "unlimited-args value notations",
           "flag": false,
           "notations": [
@@ -318,8 +333,9 @@ expression: stdout
         },
         {
           "id": "oda",
-          "long_name": "--oda",
-          "short_name": null,
+          "names": [
+            "--oda"
+          ],
           "describe": "default",
           "flag": false,
           "notations": [
@@ -346,8 +362,9 @@ expression: stdout
         },
         {
           "id": "odb",
-          "long_name": "--odb",
-          "short_name": null,
+          "names": [
+            "--odb"
+          ],
           "describe": "default from fn",
           "flag": false,
           "notations": [
@@ -374,8 +391,9 @@ expression: stdout
         },
         {
           "id": "oca",
-          "long_name": "--oca",
-          "short_name": null,
+          "names": [
+            "--oca"
+          ],
           "describe": "choice",
           "flag": false,
           "notations": [
@@ -405,8 +423,9 @@ expression: stdout
         },
         {
           "id": "ocb",
-          "long_name": "--ocb",
-          "short_name": null,
+          "names": [
+            "--ocb"
+          ],
           "describe": "choice + default",
           "flag": false,
           "notations": [
@@ -439,8 +458,9 @@ expression: stdout
         },
         {
           "id": "occ",
-          "long_name": "--occ",
-          "short_name": null,
+          "names": [
+            "--occ"
+          ],
           "describe": "multi-occurs + choice",
           "flag": false,
           "notations": [
@@ -470,8 +490,9 @@ expression: stdout
         },
         {
           "id": "ofa",
-          "long_name": "--ofa",
-          "short_name": null,
+          "names": [
+            "--ofa"
+          ],
           "describe": "choice from fn",
           "flag": false,
           "notations": [
@@ -501,8 +522,9 @@ expression: stdout
         },
         {
           "id": "ofb",
-          "long_name": "--ofb",
-          "short_name": null,
+          "names": [
+            "--ofb"
+          ],
           "describe": "choice from fn + no validation",
           "flag": false,
           "notations": [
@@ -532,8 +554,9 @@ expression: stdout
         },
         {
           "id": "ofc",
-          "long_name": "--ofc",
-          "short_name": null,
+          "names": [
+            "--ofc"
+          ],
           "describe": "multi-occurs + choice from fn",
           "flag": false,
           "notations": [
@@ -563,8 +586,9 @@ expression: stdout
         },
         {
           "id": "ofd",
-          "long_name": "--ofd",
-          "short_name": null,
+          "names": [
+            "--ofd"
+          ],
           "describe": "multi-occurs + choice from fn + comma-separated list",
           "flag": false,
           "notations": [
@@ -594,8 +618,9 @@ expression: stdout
         },
         {
           "id": "oxa",
-          "long_name": "--oxa",
-          "short_name": null,
+          "names": [
+            "--oxa"
+          ],
           "describe": "capture all remaining args",
           "flag": false,
           "notations": [
@@ -619,8 +644,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "-help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "-help"
+          ],
           "describe": "Print help",
           "flag": true,
           "notations": [],
@@ -654,8 +681,9 @@ expression: stdout
       "flag_options": [
         {
           "id": "fa",
-          "long_name": "--fa",
-          "short_name": null,
+          "names": [
+            "--fa"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -677,8 +705,10 @@ expression: stdout
         },
         {
           "id": "fb",
-          "long_name": "--fb",
-          "short_name": "-b",
+          "names": [
+            "-b",
+            "--fb"
+          ],
           "describe": "short",
           "flag": true,
           "notations": [],
@@ -700,8 +730,9 @@ expression: stdout
         },
         {
           "id": "c",
-          "long_name": "-c",
-          "short_name": null,
+          "names": [
+            "-c"
+          ],
           "describe": "short only",
           "flag": true,
           "notations": [],
@@ -723,8 +754,9 @@ expression: stdout
         },
         {
           "id": "fd",
-          "long_name": "--fd",
-          "short_name": null,
+          "names": [
+            "--fd"
+          ],
           "describe": "multi-occurs",
           "flag": true,
           "notations": [],
@@ -746,8 +778,10 @@ expression: stdout
         },
         {
           "id": "fe",
-          "long_name": "--fe",
-          "short_name": "-e",
+          "names": [
+            "-e",
+            "--fe"
+          ],
           "describe": "short + multi-occurs",
           "flag": true,
           "notations": [],
@@ -769,8 +803,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "-help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "-help"
+          ],
           "describe": "Print help",
           "flag": true,
           "notations": [],
@@ -804,8 +840,9 @@ expression: stdout
       "flag_options": [
         {
           "id": "fa",
-          "long_name": "-fa",
-          "short_name": null,
+          "names": [
+            "-fa"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -827,8 +864,10 @@ expression: stdout
         },
         {
           "id": "fb",
-          "long_name": "-fb",
-          "short_name": "-b",
+          "names": [
+            "-b",
+            "-fb"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -850,8 +889,9 @@ expression: stdout
         },
         {
           "id": "fd",
-          "long_name": "-fd",
-          "short_name": null,
+          "names": [
+            "-fd"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -873,8 +913,9 @@ expression: stdout
         },
         {
           "id": "oa",
-          "long_name": "-oa",
-          "short_name": null,
+          "names": [
+            "-oa"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -898,8 +939,9 @@ expression: stdout
         },
         {
           "id": "od",
-          "long_name": "-od",
-          "short_name": null,
+          "names": [
+            "-od"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -923,8 +965,9 @@ expression: stdout
         },
         {
           "id": "ona",
-          "long_name": "-ona",
-          "short_name": null,
+          "names": [
+            "-ona"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -948,8 +991,9 @@ expression: stdout
         },
         {
           "id": "oca",
-          "long_name": "-oca",
-          "short_name": null,
+          "names": [
+            "-oca"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -979,8 +1023,9 @@ expression: stdout
         },
         {
           "id": "ofa",
-          "long_name": "-ofa",
-          "short_name": null,
+          "names": [
+            "-ofa"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -1010,8 +1055,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "-help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "-help"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -1045,8 +1092,9 @@ expression: stdout
       "flag_options": [
         {
           "id": "oa",
-          "long_name": "--oa",
-          "short_name": null,
+          "names": [
+            "--oa"
+          ],
           "describe": "multi values, zero or more",
           "flag": false,
           "notations": [
@@ -1070,8 +1118,9 @@ expression: stdout
         },
         {
           "id": "ob",
-          "long_name": "--ob",
-          "short_name": null,
+          "names": [
+            "--ob"
+          ],
           "describe": "multi values, one or more",
           "flag": false,
           "notations": [
@@ -1095,8 +1144,9 @@ expression: stdout
         },
         {
           "id": "oc",
-          "long_name": "--oc",
-          "short_name": null,
+          "names": [
+            "--oc"
+          ],
           "describe": "zero or one",
           "flag": false,
           "notations": [
@@ -1120,8 +1170,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "--help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "--help"
+          ],
           "describe": "Print help",
           "flag": true,
           "notations": [],
@@ -1155,8 +1207,9 @@ expression: stdout
       "flag_options": [
         {
           "id": "plus_oa",
-          "long_name": "+oa",
-          "short_name": null,
+          "names": [
+            "+oa"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -1180,8 +1233,10 @@ expression: stdout
         },
         {
           "id": "plus_ob",
-          "long_name": "+ob",
-          "short_name": "+b",
+          "names": [
+            "+b",
+            "+ob"
+          ],
           "describe": "short",
           "flag": false,
           "notations": [
@@ -1205,8 +1260,9 @@ expression: stdout
         },
         {
           "id": "plus_c",
-          "long_name": "+c",
-          "short_name": null,
+          "names": [
+            "+c"
+          ],
           "describe": "short only",
           "flag": false,
           "notations": [
@@ -1230,8 +1286,9 @@ expression: stdout
         },
         {
           "id": "plus_oc",
-          "long_name": "+oc",
-          "short_name": null,
+          "names": [
+            "+oc"
+          ],
           "describe": "required",
           "flag": false,
           "notations": [
@@ -1255,8 +1312,9 @@ expression: stdout
         },
         {
           "id": "plus_od",
-          "long_name": "+od",
-          "short_name": null,
+          "names": [
+            "+od"
+          ],
           "describe": "multi-occurs",
           "flag": false,
           "notations": [
@@ -1280,8 +1338,9 @@ expression: stdout
         },
         {
           "id": "plus_oe",
-          "long_name": "+oe",
-          "short_name": null,
+          "names": [
+            "+oe"
+          ],
           "describe": "required + multi-occurs",
           "flag": false,
           "notations": [
@@ -1305,8 +1364,9 @@ expression: stdout
         },
         {
           "id": "plus_ona",
-          "long_name": "+ona",
-          "short_name": null,
+          "names": [
+            "+ona"
+          ],
           "describe": "value notation",
           "flag": false,
           "notations": [
@@ -1330,8 +1390,9 @@ expression: stdout
         },
         {
           "id": "plus_onb",
-          "long_name": "+onb",
-          "short_name": null,
+          "names": [
+            "+onb"
+          ],
           "describe": "two-args value notations",
           "flag": false,
           "notations": [
@@ -1356,8 +1417,9 @@ expression: stdout
         },
         {
           "id": "plus_onc",
-          "long_name": "+onc",
-          "short_name": null,
+          "names": [
+            "+onc"
+          ],
           "describe": "unlimited-args value notations",
           "flag": false,
           "notations": [
@@ -1382,8 +1444,9 @@ expression: stdout
         },
         {
           "id": "plus_oda",
-          "long_name": "+oda",
-          "short_name": null,
+          "names": [
+            "+oda"
+          ],
           "describe": "default",
           "flag": false,
           "notations": [
@@ -1410,8 +1473,9 @@ expression: stdout
         },
         {
           "id": "plus_odb",
-          "long_name": "+odb",
-          "short_name": null,
+          "names": [
+            "+odb"
+          ],
           "describe": "default from fn",
           "flag": false,
           "notations": [
@@ -1438,8 +1502,9 @@ expression: stdout
         },
         {
           "id": "plus_oca",
-          "long_name": "+oca",
-          "short_name": null,
+          "names": [
+            "+oca"
+          ],
           "describe": "choice",
           "flag": false,
           "notations": [
@@ -1469,8 +1534,9 @@ expression: stdout
         },
         {
           "id": "plus_ocb",
-          "long_name": "+ocb",
-          "short_name": null,
+          "names": [
+            "+ocb"
+          ],
           "describe": "choice + default",
           "flag": false,
           "notations": [
@@ -1503,8 +1569,9 @@ expression: stdout
         },
         {
           "id": "plus_occ",
-          "long_name": "+occ",
-          "short_name": null,
+          "names": [
+            "+occ"
+          ],
           "describe": "multi-occurs + choice",
           "flag": false,
           "notations": [
@@ -1534,8 +1601,9 @@ expression: stdout
         },
         {
           "id": "plus_ocd",
-          "long_name": "+ocd",
-          "short_name": null,
+          "names": [
+            "+ocd"
+          ],
           "describe": "required + multi-occurs + choice",
           "flag": false,
           "notations": [
@@ -1565,8 +1633,9 @@ expression: stdout
         },
         {
           "id": "plus_ofa",
-          "long_name": "+ofa",
-          "short_name": null,
+          "names": [
+            "+ofa"
+          ],
           "describe": "choice from fn",
           "flag": false,
           "notations": [
@@ -1596,8 +1665,9 @@ expression: stdout
         },
         {
           "id": "plus_ofb",
-          "long_name": "+ofb",
-          "short_name": null,
+          "names": [
+            "+ofb"
+          ],
           "describe": "choice from fn + no validation",
           "flag": false,
           "notations": [
@@ -1627,8 +1697,9 @@ expression: stdout
         },
         {
           "id": "plus_ofc",
-          "long_name": "+ofc",
-          "short_name": null,
+          "names": [
+            "+ofc"
+          ],
           "describe": "multi-occurs + choice from fn",
           "flag": false,
           "notations": [
@@ -1658,8 +1729,9 @@ expression: stdout
         },
         {
           "id": "plus_ofd",
-          "long_name": "+ofd",
-          "short_name": null,
+          "names": [
+            "+ofd"
+          ],
           "describe": "multi-occurs + choice from fn + comma-separated list",
           "flag": false,
           "notations": [
@@ -1689,8 +1761,9 @@ expression: stdout
         },
         {
           "id": "plus_oxa",
-          "long_name": "+oxa",
-          "short_name": null,
+          "names": [
+            "+oxa"
+          ],
           "describe": "capture all remaining args",
           "flag": false,
           "notations": [
@@ -1714,8 +1787,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "-help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "-help"
+          ],
           "describe": "Print help",
           "flag": true,
           "notations": [],
@@ -1749,8 +1824,9 @@ expression: stdout
       "flag_options": [
         {
           "id": "plus_fa",
-          "long_name": "+fa",
-          "short_name": null,
+          "names": [
+            "+fa"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -1772,8 +1848,10 @@ expression: stdout
         },
         {
           "id": "plus_fb",
-          "long_name": "+fb",
-          "short_name": "+b",
+          "names": [
+            "+b",
+            "+fb"
+          ],
           "describe": "short",
           "flag": true,
           "notations": [],
@@ -1795,8 +1873,9 @@ expression: stdout
         },
         {
           "id": "plus_c",
-          "long_name": "+c",
-          "short_name": null,
+          "names": [
+            "+c"
+          ],
           "describe": "short only",
           "flag": true,
           "notations": [],
@@ -1818,8 +1897,9 @@ expression: stdout
         },
         {
           "id": "plus_fd",
-          "long_name": "+fd",
-          "short_name": null,
+          "names": [
+            "+fd"
+          ],
           "describe": "multi-occurs",
           "flag": true,
           "notations": [],
@@ -1841,8 +1921,10 @@ expression: stdout
         },
         {
           "id": "plus_fe",
-          "long_name": "+fe",
-          "short_name": "+e",
+          "names": [
+            "+e",
+            "+fe"
+          ],
           "describe": "short + multi-occurs",
           "flag": true,
           "notations": [],
@@ -1864,8 +1946,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "-help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "-help"
+          ],
           "describe": "Print help",
           "flag": true,
           "notations": [],
@@ -1899,8 +1983,10 @@ expression: stdout
       "flag_options": [
         {
           "id": "a",
-          "long_name": "-a",
-          "short_name": "+a",
+          "names": [
+            "+a",
+            "-a"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -1924,8 +2010,10 @@ expression: stdout
         },
         {
           "id": "plus_b",
-          "long_name": "+b",
-          "short_name": "-b",
+          "names": [
+            "-b",
+            "+b"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -1949,8 +2037,10 @@ expression: stdout
         },
         {
           "id": "c",
-          "long_name": "--c",
-          "short_name": "+c",
+          "names": [
+            "+c",
+            "--c"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -1974,8 +2064,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "-help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "-help"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -2009,8 +2101,9 @@ expression: stdout
       "flag_options": [
         {
           "id": "X",
-          "long_name": "-X",
-          "short_name": null,
+          "names": [
+            "-X"
+          ],
           "describe": "prefixed + multi-occurs + choice from fn",
           "flag": false,
           "notations": [
@@ -2040,8 +2133,9 @@ expression: stdout
         },
         {
           "id": "plus_X",
-          "long_name": "+X",
-          "short_name": null,
+          "names": [
+            "+X"
+          ],
           "describe": "prefixed + multi-occurs + choice from fn",
           "flag": false,
           "notations": [
@@ -2071,8 +2165,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "-help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "-help"
+          ],
           "describe": "Print help",
           "flag": true,
           "notations": [],
@@ -2106,8 +2202,10 @@ expression: stdout
       "flag_options": [
         {
           "id": "follow",
-          "long_name": "--follow",
-          "short_name": "-f",
+          "names": [
+            "-f",
+            "--follow"
+          ],
           "describe": "assigned + choice",
           "flag": false,
           "notations": [
@@ -2137,8 +2235,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "--help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "--help"
+          ],
           "describe": "Print help",
           "flag": true,
           "notations": [],
@@ -2172,8 +2272,9 @@ expression: stdout
       "flag_options": [
         {
           "id": "a",
-          "long_name": "-a",
-          "short_name": null,
+          "names": [
+            "-a"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -2195,8 +2296,9 @@ expression: stdout
         },
         {
           "id": "fa",
-          "long_name": "--fa",
-          "short_name": null,
+          "names": [
+            "--fa"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -2218,8 +2320,10 @@ expression: stdout
         },
         {
           "id": "fb",
-          "long_name": "--fb",
-          "short_name": "-f",
+          "names": [
+            "-f",
+            "--fb"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -2241,8 +2345,9 @@ expression: stdout
         },
         {
           "id": "sa",
-          "long_name": "-sa",
-          "short_name": null,
+          "names": [
+            "-sa"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -2264,8 +2369,9 @@ expression: stdout
         },
         {
           "id": "sb",
-          "long_name": "-sb",
-          "short_name": null,
+          "names": [
+            "-sb"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -2287,8 +2393,9 @@ expression: stdout
         },
         {
           "id": "e",
-          "long_name": "-e",
-          "short_name": null,
+          "names": [
+            "-e"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2312,8 +2419,9 @@ expression: stdout
         },
         {
           "id": "oa",
-          "long_name": "--oa",
-          "short_name": null,
+          "names": [
+            "--oa"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2337,8 +2445,9 @@ expression: stdout
         },
         {
           "id": "ob",
-          "long_name": "--ob",
-          "short_name": null,
+          "names": [
+            "--ob"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2362,8 +2471,9 @@ expression: stdout
         },
         {
           "id": "oc",
-          "long_name": "--oc",
-          "short_name": null,
+          "names": [
+            "--oc"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2387,8 +2497,10 @@ expression: stdout
         },
         {
           "id": "od",
-          "long_name": "--od",
-          "short_name": "-o",
+          "names": [
+            "-o",
+            "--od"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2413,8 +2525,9 @@ expression: stdout
         },
         {
           "id": "oe",
-          "long_name": "--oe",
-          "short_name": null,
+          "names": [
+            "--oe"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2438,8 +2551,9 @@ expression: stdout
         },
         {
           "id": "ca",
-          "long_name": "--ca",
-          "short_name": null,
+          "names": [
+            "--ca"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2470,8 +2584,9 @@ expression: stdout
         },
         {
           "id": "cc",
-          "long_name": "--cc",
-          "short_name": null,
+          "names": [
+            "--cc"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2501,8 +2616,9 @@ expression: stdout
         },
         {
           "id": "cd",
-          "long_name": "--cd",
-          "short_name": null,
+          "names": [
+            "--cd"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2532,8 +2648,9 @@ expression: stdout
         },
         {
           "id": "ce",
-          "long_name": "--ce",
-          "short_name": null,
+          "names": [
+            "--ce"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2563,8 +2680,10 @@ expression: stdout
         },
         {
           "id": "soa",
-          "long_name": "-soa",
-          "short_name": "-s",
+          "names": [
+            "-s",
+            "-soa"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2588,8 +2707,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "-help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "-help"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -2623,8 +2744,10 @@ expression: stdout
       "flag_options": [
         {
           "id": "oa",
-          "long_name": "--oa",
-          "short_name": "-a",
+          "names": [
+            "-a",
+            "--oa"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2648,8 +2771,9 @@ expression: stdout
         },
         {
           "id": "ob",
-          "long_name": "--ob",
-          "short_name": null,
+          "names": [
+            "--ob"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2673,8 +2797,9 @@ expression: stdout
         },
         {
           "id": "oc",
-          "long_name": "--oc",
-          "short_name": null,
+          "names": [
+            "--oc"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2698,8 +2823,9 @@ expression: stdout
         },
         {
           "id": "oca",
-          "long_name": "--oca",
-          "short_name": null,
+          "names": [
+            "--oca"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2729,8 +2855,9 @@ expression: stdout
         },
         {
           "id": "ocb",
-          "long_name": "--ocb",
-          "short_name": null,
+          "names": [
+            "--ocb"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2760,8 +2887,9 @@ expression: stdout
         },
         {
           "id": "occ",
-          "long_name": "--occ",
-          "short_name": null,
+          "names": [
+            "--occ"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2791,8 +2919,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "--help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "--help"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],
@@ -2826,8 +2956,9 @@ expression: stdout
       "flag_options": [
         {
           "id": "oe",
-          "long_name": "--oe",
-          "short_name": null,
+          "names": [
+            "--oe"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2854,8 +2985,9 @@ expression: stdout
         },
         {
           "id": "of",
-          "long_name": "--of",
-          "short_name": null,
+          "names": [
+            "--of"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2882,8 +3014,9 @@ expression: stdout
         },
         {
           "id": "cb",
-          "long_name": "--cb",
-          "short_name": null,
+          "names": [
+            "--cb"
+          ],
           "describe": "",
           "flag": false,
           "notations": [
@@ -2917,8 +3050,10 @@ expression: stdout
         },
         {
           "id": "help",
-          "long_name": "--help",
-          "short_name": "-h",
+          "names": [
+            "-h",
+            "--help"
+          ],
           "describe": "",
           "flag": true,
           "notations": [],

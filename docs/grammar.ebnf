@@ -79,13 +79,14 @@ meta-value = ? rest of the line, trimmed ? ;
 arg = "@arg", ws, name, [ modifier ], [ param-value ],
       [ ws, bind-env ], [ ws, notation ], [ ws, description ] ;
 
-(* Option with an optional short form. A short-only option is written as a
-   single-character long form, for example @option -c. *)
-option = "@option", ws, [ short, ws ], long, [ modifier ], [ param-value ],
+(* Option with one or more names. Each name carries its own prefix. The
+   trailing modifier, param-value, and ':'/'-' suffix belong to the parameter
+   and are written on the last name. *)
+option = "@option", ws, param-name, { ws, param-name }, [ modifier ], [ param-value ],
          [ ws, bind-env ], [ ws, option-notations ], [ ws, description ] ;
 
 (* Boolean flag. A trailing '*' makes the flag repeatable. *)
-flag = "@flag", ws, [ short, ws ], long, [ "*" ],
+flag = "@flag", ws, param-name, { ws, param-name }, [ "*" ],
        [ ws, bind-env ], [ ws, description ] ;
 
 (* Environment variable declaration. A trailing '!' makes it required.
@@ -104,7 +105,8 @@ name-char = ascii-alnum | "_" | "-" | "." | ":" | "@" ;
 (* Long option names. A single '-' also supports tools with names such as
    -output. A trailing ':' requires the --name=value form; a trailing '-'
    makes it a prefix option such as -Xvalue. The first character after a
-   '-' or '--' prefix cannot be another '-'. *)
+   '-' or '--' prefix cannot be another '-', and the first character after
+   a '+' prefix cannot be another '+'. *)
 long = ( "--" | "-" ), long-name | "+", name ;
 long-name = long-name-start, { name-char } ;
 long-name-start = ascii-alnum | "_" | "." | ":" | "@" ;
@@ -115,6 +117,25 @@ short-char = ascii-alnum
            | "!" | "#" | "$" | "%" | "*" | "+" | "," | "." | "/"
            | ":" | "=" | "?" | "@" | "[" | "]" | "^" | "_"
            | "{" | "}" | "~" ;
+
+(* A parameter name. Multiple names are separated by whitespace and may mix
+   '-', '+', and '--' prefixes. One name is chosen as the canonical name for
+   the generated variable and error messages:
+     1. the last '--' name, otherwise
+     2. the last multi-character '-' name, otherwise
+     3. the last name.
+   '+' names and single-character '-' names have equal priority. Within the
+   same priority, prefer a body containing a letter, digit, or '_', then a
+   body made only of '-', '.', ':', and '@', then a body containing other
+   punctuation. If the canonical body consists only of punctuation, the
+   variable uses its ASCII codes, for example -@ becomes argc_0x40 and -$
+   becomes argc_0x24.
+
+   Names are whitespace-separated, so description text that begins with a
+   valid name token such as '-x' is parsed as another name. Rephrase such
+   descriptions or avoid starting them with a flag-like token. *)
+param-name = ( "--", long-name )
+           | ( "-" | "+" ), ( short-char | long-name ) ;
 
 (* Parameter modifiers:
 
@@ -183,13 +204,12 @@ value = ? text, optionally enclosed in single or double quotes ? ;
      @option -t --type+[a|b] $TYPE <FILE+>  List files of a type
              [1][2]    [3][4]  [5]   [6]     [7]
 
-     1. short       -t
-     2. long        --type
-     3. modifier    +
-     4. param-value [a|b]
-     5. bind-env    $TYPE
-     6. option-notations <FILE+>; only the final notation may have a modifier
-     7. description List files of a type
+     1. names       -t --type; the last name carries the modifier
+     2. modifier    +
+     3. param-value [a|b]
+     4. bind-env    $TYPE
+     5. option-notations <FILE+>; only the final notation may have a modifier
+     6. description List files of a type
 
      @arg files+[a|b] $FILES <PATH>  Files to process
           [1]   [2][3]  [4]    [5]   [6]

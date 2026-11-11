@@ -56,8 +56,8 @@ pub(crate) struct Command {
     pub(crate) metadata: Vec<(String, String, Position)>,
     pub(crate) symbols: IndexMap<char, SymbolParam>,
     pub(crate) require_tools: IndexSet<String>,
-    pub(crate) help_flags: Vec<&'static str>,
-    pub(crate) version_flags: Vec<&'static str>,
+    pub(crate) help_flags: Vec<String>,
+    pub(crate) version_flags: Vec<String>,
     pub(crate) external_subcommands: Vec<ExternalSubcommandInfo>,
 }
 
@@ -379,10 +379,11 @@ impl Command {
     pub(crate) fn flag_option_signs(&self) -> IndexSet<char> {
         let mut signs: IndexSet<char> = ['-'].into();
         for param in &self.flag_option_params {
-            if let Some(short) = param.short() {
-                signs.extend(short.chars().take(1))
+            for name in param.list_names() {
+                if let Some(c) = name.chars().next() {
+                    signs.insert(c);
+                }
             }
-            signs.extend(param.long_prefix().chars().take(1))
         }
         signs
     }
@@ -536,27 +537,41 @@ impl Command {
         }
 
         self.help_flags = {
-            let mut flags = vec!["--help", "-help"];
+            let mut flags: Vec<String> = vec!["--help".into(), "-help".into()];
             let short = match self.find_flag_option("-h") {
                 Some(param) => param.id() == "help",
                 None => true,
             };
             if short {
-                flags.push("-h");
+                flags.push("-h".into());
+            }
+            if let Some(param) = self.flag_option_params.iter().find(|p| p.id() == "help") {
+                for name in param.list_names() {
+                    if !flags.contains(&name) {
+                        flags.push(name);
+                    }
+                }
             }
             flags
         };
         self.version_flags = {
-            let mut flags = vec![];
+            let mut flags: Vec<String> = vec![];
             if self.exist_version() {
-                flags.push("--version");
-                flags.push("-version");
+                flags.push("--version".into());
+                flags.push("-version".into());
                 let short = match self.find_flag_option("-V") {
                     Some(param) => param.id() == "version",
                     None => true,
                 };
                 if short {
-                    flags.push("-V");
+                    flags.push("-V".into());
+                }
+                if let Some(param) = self.flag_option_params.iter().find(|p| p.id() == "version") {
+                    for name in param.list_names() {
+                        if !flags.contains(&name) {
+                            flags.push(name);
+                        }
+                    }
                 }
             }
             flags
@@ -566,7 +581,7 @@ impl Command {
         let mut describe = false;
         let mut single = false;
         for param in self.flag_option_params.iter() {
-            if param.long_prefix().len() == 1 {
+            if param.primary_prefix().len() == 1 {
                 single = true;
             }
             if !param.describe().is_empty() {
@@ -609,6 +624,39 @@ impl Command {
                 .flag_option_params
                 .splice(..0, inherited_flag_options);
             subcmd.inherited_flag_options = true;
+            if subcmd.flag_option_params.iter().any(|p| p.id() == "help") {
+                subcmd
+                    .derived_flag_option_params
+                    .retain(|p| p.id() != "help");
+            }
+            if subcmd
+                .flag_option_params
+                .iter()
+                .any(|p| p.id() == "version")
+            {
+                subcmd
+                    .derived_flag_option_params
+                    .retain(|p| p.id() != "version");
+            }
+            let mut help_names = vec![];
+            let mut version_names = vec![];
+            for param in &subcmd.flag_option_params {
+                match param.id() {
+                    "help" => help_names.extend(param.list_names()),
+                    "version" => version_names.extend(param.list_names()),
+                    _ => {}
+                }
+            }
+            for name in help_names {
+                if !subcmd.help_flags.contains(&name) {
+                    subcmd.help_flags.push(name);
+                }
+            }
+            for name in version_names {
+                if !subcmd.version_flags.contains(&name) {
+                    subcmd.version_flags.push(name);
+                }
+            }
         }
         for subcmd in self.subcommands.iter_mut() {
             subcmd.inherit_flag_options();

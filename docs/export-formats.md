@@ -31,9 +31,8 @@ Each entry in `flag_options` has the following fields.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `id` | string | Raw parameter id. Plus-prefixed options use a `plus_` prefix. |
-| `long_name` | string | Long name with its prefix, such as `--foo`, `-c`, or `+foo`. |
-| `short_name` | string or `null` | Explicit short name, such as `-f`. A short-only declaration such as `@option -c` has `long_name: "-c"` and `short_name: null`. |
+| `id` | string | Canonical parameter id. Plus-prefixed names use a `plus_` prefix. |
+| `names` | string[] | All declared names in declaration order, each with its prefix, such as `["-f", "--foo"]`. |
 | `describe` | string | Parameter description. |
 | `flag` | boolean | `true` for a flag, `false` for an option. |
 | `notations` | string[] | Value placeholders, uppercased. Empty for flags. |

@@ -85,11 +85,12 @@ fn render_options_section(roff: &mut Roff, cmd: &Command) {
     roff.control("SH", ["OPTIONS"]);
     for param in cmd.all_flag_options() {
         let mut header = vec![];
-        if let Some(short) = param.short() {
-            header.push(bold(short));
-            header.push(roman(", "));
+        for (index, name) in param.names().iter().enumerate() {
+            if index > 0 {
+                header.push(roman(", "));
+            }
+            header.push(bold(name));
         }
-        header.push(bold(param.long_name()));
         let notations = param.notations();
         if notations.len() == 1 {
             header.push(roman("="));

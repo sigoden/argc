@@ -1,5 +1,8 @@
 use crate::parser::{is_choice_value_terminate, is_default_value_terminate};
-use crate::utils::{argc_var_name, escape_shell_words, sanitize_var_name, to_cobol_case, MAX_ARGS};
+use crate::utils::{
+    argc_var_name, encode_var_char, escape_shell_words, is_bad_var_char, is_safe_var_char,
+    is_special_var_char, sanitize_var_name, to_cobol_case, MAX_ARGS,
+};
 use crate::ArgcValue;
 
 use anyhow::{bail, Result};
@@ -68,8 +71,8 @@ pub(crate) trait Param {
 pub(crate) struct FlagOptionParam {
     data: ParamData,
     id: String,
-    short: Option<String>,
-    long_prefix: String,
+    names: Vec<String>,
+    primary_index: usize,
     prefixed: bool,
     assigned: bool,
     raw_notations: Vec<String>,
@@ -125,23 +128,20 @@ impl Param for FlagOptionParam {
     }
 
     fn render_source(&self) -> String {
-        let mut output = vec![];
-        if let Some(short) = &self.short {
-            output.push(short.to_string());
-        };
-        let mut name_suffix = String::new();
-        if self.prefixed || self.data.name.ends_with('-') {
-            name_suffix.push('-');
+        let mut output = self.names.clone();
+        if let Some(last) = output.last_mut() {
+            let (prefix, body) = split_name(last);
+            let prefix = prefix.to_string();
+            let mut body = body.to_string();
+            if self.prefixed || body.ends_with('-') {
+                body.push('-');
+            }
+            if self.assigned || body.ends_with(':') {
+                body.push(':');
+            }
+            body.push_str(&self.data.render_source_of_extra());
+            *last = format!("{prefix}{body}");
         }
-        if self.assigned || self.data.name.ends_with(':') {
-            name_suffix.push(':');
-        }
-        output.push(format!(
-            "{}{}",
-            self.long_prefix,
-            self.data.render_source_of_name_value(&name_suffix)
-        ));
-
         if let Some(env) = &self.data.env {
             match env {
                 Some(v) => output.push(format!("${v}")),
@@ -165,29 +165,34 @@ impl FlagOptionParam {
     pub(crate) fn new(
         mut data: ParamData,
         flag: bool,
-        short: Option<&str>,
-        long_prefix: &str,
+        names: &[String],
         row_notations: &[&str],
     ) -> Self {
+        let mut names = names.to_vec();
+        let last_index = names.len() - 1;
+        let (last_prefix, last_body) = split_name(&names[last_index]);
+        let last_prefix = last_prefix.to_string();
+        let mut last_body = last_body.to_string();
         let (mut prefixed, mut assigned) = (false, false);
-        if let Some(new_name) = data.name.strip_suffix("::") {
-            data.name = format!("{new_name}:");
-        } else if let Some(new_name) = data.name.strip_suffix(':') {
-            data.name = new_name.to_string();
+        if let Some(new_name) = last_body.strip_suffix("::") {
+            last_body = format!("{new_name}:");
+        } else if let Some(new_name) = last_body.strip_suffix(':') {
+            last_body = new_name.to_string();
             assigned = true;
         }
-        if let Some(new_name) = data.name.strip_suffix("--") {
-            data.name = format!("{new_name}-");
-        } else if let Some(new_name) = data.name.strip_suffix('-') {
-            data.name = new_name.to_string();
+        if let Some(new_name) = last_body.strip_suffix("--") {
+            last_body = format!("{new_name}-");
+        } else if let Some(new_name) = last_body.strip_suffix('-') {
+            last_body = new_name.to_string();
             prefixed = true;
         }
-        let name = data.name.clone();
-        let id = if long_prefix.starts_with('+') {
-            format!("plus_{name}")
-        } else {
-            name.clone()
-        };
+        names[last_index] = format!("{last_prefix}{last_body}");
+
+        let primary_index = select_primary_name(&names);
+        let (prefix, name) = split_name(&names[primary_index]);
+        let name = name.to_string();
+        data.name = name.clone();
+        let id = derive_id(&name, prefix == "+");
         let raw_notations: Vec<String> = row_notations.iter().map(|v| v.to_string()).collect();
         let mut notations = if flag {
             vec![]
@@ -201,8 +206,8 @@ impl FlagOptionParam {
             last_arg.push('~')
         }
         Self {
-            short: short.map(|v| v.to_string()),
-            long_prefix: long_prefix.to_string(),
+            names,
+            primary_index,
             prefixed,
             assigned,
             data,
@@ -217,8 +222,7 @@ impl FlagOptionParam {
     pub(crate) fn export(&self) -> FlagOptionValue {
         FlagOptionValue {
             id: self.id().to_string(),
-            long_name: self.long_name(),
-            short_name: self.short.clone(),
+            names: self.names.clone(),
             describe: self.describe().to_string(),
             flag: self.is_flag(),
             notations: self.notations.clone(),
@@ -253,12 +257,12 @@ impl FlagOptionParam {
         self.prefixed
     }
 
-    pub(crate) fn short(&self) -> &Option<String> {
-        &self.short
+    pub(crate) fn primary_name(&self) -> &str {
+        &self.names[self.primary_index]
     }
 
-    pub(crate) fn long_prefix(&self) -> &str {
-        &self.long_prefix
+    pub(crate) fn primary_prefix(&self) -> &str {
+        split_name(self.primary_name()).0
     }
 
     pub(crate) fn notations(&self) -> &[String] {
@@ -296,16 +300,12 @@ impl FlagOptionParam {
             .and_then(|name| ['*', '+', '?'].into_iter().find(|v| name.ends_with(*v)))
     }
 
-    pub(crate) fn long_name(&self) -> String {
-        format!("{}{}", self.long_prefix, self.data.name)
-    }
-
     pub(crate) fn render_first_notation(&self) -> String {
         format!("<{}>", self.notations[0])
     }
 
     pub(crate) fn render_name_notations(&self) -> String {
-        let mut output = self.long_name();
+        let mut output = self.primary_name().to_string();
         if !self.is_flag() {
             let ch = if self.assigned { '=' } else { ' ' };
             output.push(ch);
@@ -337,16 +337,26 @@ impl FlagOptionParam {
 
     pub(crate) fn render_body(&self) -> String {
         let mut output = String::new();
-        if self.short.is_none() && self.long_prefix.len() == 1 && self.data.name.len() == 1 {
-            output.push_str(&self.long_name());
-        } else {
-            if let Some(short) = &self.short {
-                output.push_str(&format!("{short}, "))
+        if self.names.len() == 1 {
+            let name = &self.names[0];
+            if name.len() > 2 {
+                output.push_str(render_body_indent(name));
+                output.push_str(name);
             } else {
-                output.push_str("    ")
-            };
-            output.push_str(&format!("{:>2}", self.long_prefix));
-            output.push_str(&self.data.name);
+                output.push_str(name);
+            }
+        } else {
+            let first = &self.names[0];
+            if first.len() > 2 {
+                output.push_str(render_body_indent(first));
+            }
+            output.push_str(first);
+            for name in &self.names[1..] {
+                output.push_str(", ");
+                let (prefix, body) = split_name(name);
+                output.push_str(&format!("{prefix:>2}"));
+                output.push_str(body);
+            }
         }
 
         if self.is_flag() {
@@ -439,7 +449,12 @@ impl FlagOptionParam {
     pub(crate) fn create_help_flag(short: Option<&str>, long_prefix: &str, describe: &str) -> Self {
         let mut param_data = ParamData::new("help");
         param_data.describe = describe.to_string();
-        FlagOptionParam::new(param_data, true, short, long_prefix, &[])
+        let mut names = vec![];
+        if let Some(short) = short {
+            names.push(short.to_string());
+        }
+        names.push(format!("{long_prefix}help"));
+        FlagOptionParam::new(param_data, true, &names, &[])
     }
 
     pub(crate) fn create_version_flag(
@@ -449,7 +464,12 @@ impl FlagOptionParam {
     ) -> Self {
         let mut param_data = ParamData::new("version");
         param_data.describe = describe.to_string();
-        FlagOptionParam::new(param_data, true, short, long_prefix, &[])
+        let mut names = vec![];
+        if let Some(short) = short {
+            names.push(short.to_string());
+        }
+        names.push(format!("{long_prefix}version"));
+        FlagOptionParam::new(param_data, true, &names, &[])
     }
 
     pub(crate) fn match_prefix<'a>(&self, arg: &'a str) -> Option<&'a str> {
@@ -478,11 +498,89 @@ impl FlagOptionParam {
     }
 
     pub(crate) fn list_names(&self) -> Vec<String> {
-        let mut output = vec![];
-        output.push(self.long_name());
-        if let Some(short) = &self.short {
-            output.push(short.clone());
+        let mut output = Vec::with_capacity(self.names.len());
+        output.push(self.names[self.primary_index].clone());
+        for (index, name) in self.names.iter().enumerate() {
+            if index != self.primary_index {
+                output.push(name.clone());
+            }
         }
+        output
+    }
+
+    pub(crate) fn names(&self) -> &[String] {
+        &self.names
+    }
+}
+
+fn split_name(name: &str) -> (&str, &str) {
+    if let Some(rest) = name.strip_prefix("--") {
+        ("--", rest)
+    } else if let Some(rest) = name.strip_prefix('-') {
+        ("-", rest)
+    } else if let Some(rest) = name.strip_prefix('+') {
+        ("+", rest)
+    } else {
+        ("", name)
+    }
+}
+
+fn render_body_indent(name: &str) -> &'static str {
+    if name.starts_with("--") {
+        "    "
+    } else {
+        "     "
+    }
+}
+
+fn name_quality(name: &str) -> u8 {
+    let (_, body) = split_name(name);
+    if body.chars().any(is_bad_var_char) {
+        2
+    } else if body.chars().any(is_safe_var_char) {
+        0
+    } else {
+        1
+    }
+}
+
+fn name_prefix_rank(name: &str) -> u8 {
+    let (prefix, body) = split_name(name);
+    match prefix {
+        "--" => 0,
+        "-" if body.chars().count() > 1 => 1,
+        _ => 2,
+    }
+}
+
+fn select_primary_name(names: &[String]) -> usize {
+    let mut best: Option<((u8, u8), usize)> = None;
+    for (index, name) in names.iter().enumerate() {
+        let key = (name_prefix_rank(name), name_quality(name));
+        if best.is_none_or(|(best_key, _)| key <= best_key) {
+            best = Some((key, index));
+        }
+    }
+    best.map(|(_, index)| index).unwrap_or(0)
+}
+
+fn derive_id(name: &str, plus: bool) -> String {
+    let all_special = name.chars().all(|c| !is_safe_var_char(c));
+    let mut output = String::new();
+    for c in name.chars() {
+        if all_special {
+            output.push_str(&encode_var_char(c));
+        } else if is_safe_var_char(c) {
+            output.push(c);
+        } else if is_special_var_char(c) {
+            output.push('_');
+        } else {
+            output.push_str(&encode_var_char(c));
+        }
+    }
+    if plus {
+        format!("plus_{output}")
+    } else {
         output
     }
 }
@@ -491,8 +589,7 @@ impl FlagOptionParam {
 #[derive(Debug, Serialize)]
 pub struct FlagOptionValue {
     pub id: String,
-    pub long_name: String,
-    pub short_name: Option<String>,
+    pub names: Vec<String>,
     pub describe: String,
     pub flag: bool,
     pub notations: Vec<String>,
@@ -845,7 +942,12 @@ impl ParamData {
     #[allow(unused)]
     pub(crate) fn render_source_of_name_value(&self, name_suffix: &str) -> String {
         let mut output = format!("{}{name_suffix}", self.name);
-        output.push_str(&self.modifier.render());
+        output.push_str(&self.render_source_of_extra());
+        output
+    }
+
+    pub(crate) fn render_source_of_extra(&self) -> String {
+        let mut output = self.modifier.render();
         match (&self.choice, &self.default) {
             (Some(ChoiceValue::Values(values)), None) => {
                 output.push_str(&format!("[{}]", Self::render_choice_values(values)));
@@ -993,5 +1095,61 @@ fn must_get_first(value: &[&str]) -> String {
         String::new()
     } else {
         value[0].to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn to_names(values: &[&str]) -> Vec<String> {
+        values.iter().map(|v| v.to_string()).collect()
+    }
+
+    fn flag(values: &[&str]) -> FlagOptionParam {
+        FlagOptionParam::new(ParamData::new(""), true, &to_names(values), &[])
+    }
+
+    fn option(values: &[&str]) -> FlagOptionParam {
+        FlagOptionParam::new(ParamData::new(""), false, &to_names(values), &[])
+    }
+
+    fn flag_with_modifier(values: &[&str], modifier: Modifier) -> FlagOptionParam {
+        let mut data = ParamData::new("");
+        data.modifier = modifier;
+        FlagOptionParam::new(data, true, &to_names(values), &[])
+    }
+
+    #[test]
+    fn test_select_primary_name() {
+        assert_eq!(select_primary_name(&to_names(&["+a", "-a"])), 1);
+        assert_eq!(select_primary_name(&to_names(&["-a", "+b"])), 1);
+        assert_eq!(select_primary_name(&to_names(&["--@", "-f"])), 0);
+        assert_eq!(select_primary_name(&to_names(&["-h", "-?"])), 0);
+        assert_eq!(select_primary_name(&to_names(&["-h", "-?", "--help"])), 2);
+        assert_eq!(select_primary_name(&to_names(&["-f", "-F", "--file"])), 2);
+    }
+
+    #[test]
+    fn test_render_body_multi_names_alignment() {
+        assert_eq!(
+            flag(&["--verbose", "-v"]).render_body(),
+            "    --verbose,  -v"
+        );
+        assert_eq!(flag(&["-q", "--quiet"]).render_body(), "-q, --quiet");
+        assert_eq!(flag(&["--force"]).render_body(), "    --force");
+        assert_eq!(flag(&["-q"]).render_body(), "-q");
+    }
+
+    #[test]
+    fn test_render_source_multi_names() {
+        assert_eq!(
+            flag_with_modifier(&["--foo", "-bar"], Modifier::MultipleOptional).render_source(),
+            "--foo -bar*"
+        );
+        assert_eq!(option(&["-a", "--assign:"]).render_source(), "-a --assign:");
+        assert_eq!(option(&["-X", "-x-"]).render_source(), "-X -x-");
+        assert_eq!(flag(&["--foo--"]).render_source(), "--foo--");
+        assert_eq!(flag(&["--foo::"]).render_source(), "--foo::");
     }
 }
