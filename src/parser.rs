@@ -409,10 +409,17 @@ fn parse_modifier_suffix(input: &str) -> nom::IResult<&str, Modifier> {
 }
 
 fn parse_prefixed_names(input: &str) -> nom::IResult<&str, Vec<String>> {
-    map(separated_list1(space1, parse_prefixed_name), |names| {
+    map(separated_list1(space_once, parse_prefixed_name), |names| {
         names.into_iter().map(|v| v.to_string()).collect()
     })
     .parse(input)
+}
+
+// Exactly one space or tab. Two or more whitespace characters end the name
+// list, so the rest is read as the description. This lets a description begin
+// with a flag-like token (for example `-l with numeric UIDs and GIDs`).
+fn space_once(input: &str) -> nom::IResult<&str, char> {
+    satisfy(|c| c == ' ' || c == '\t').parse(input)
 }
 
 fn parse_prefixed_name(input: &str) -> nom::IResult<&str, &str> {
@@ -1103,6 +1110,49 @@ mod tests {
         assert_parse_flag_arg!("-foo A foo flag");
         assert_parse_flag_arg!("-foo");
         assert_parse_flag_arg!("-foo*");
+    }
+
+    #[test]
+    fn test_parse_flag_names_end_at_multiple_whitespace() {
+        let parse = |input: &str| {
+            let param = parse_flag_param(input).unwrap().1;
+            (param.names().to_vec(), param.describe().to_string())
+        };
+        assert_eq!(
+            parse("-n --numeric-uid-gid  -l with numeric UIDs and GIDs"),
+            (
+                vec!["-n".to_string(), "--numeric-uid-gid".to_string()],
+                "-l with numeric UIDs and GIDs".to_string()
+            )
+        );
+        assert_eq!(
+            parse("-h -? --help Print help"),
+            (
+                vec!["-h".to_string(), "-?".to_string(), "--help".to_string()],
+                "Print help".to_string()
+            )
+        );
+        assert_eq!(
+            parse("-f  --force  desc"),
+            (vec!["-f".to_string()], "--force  desc".to_string())
+        );
+        assert_eq!(
+            parse("-f\t--force\t\tdesc"),
+            (
+                vec!["-f".to_string(), "--force".to_string()],
+                "desc".to_string()
+            )
+        );
+    }
+
+    #[test]
+    fn test_parse_option_names_end_at_multiple_whitespace() {
+        let param = parse_option_param("-o --output  --long desc").unwrap().1;
+        assert_eq!(
+            param.names().to_vec(),
+            vec!["-o".to_string(), "--output".to_string()]
+        );
+        assert_eq!(param.describe(), "--long desc");
     }
 
     #[test]

@@ -1,0 +1,42 @@
+---
+source: tests/spec.rs
+expression: data
+---
+************ RUN ************
+prog -n
+
+# OUTPUT
+argc_numeric_uid_gid=1
+argc__args=( prog -n )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-n")
+argc__positionals=()
+argc_numeric_uid_gid=1
+
+************ RUN ************
+prog --numeric-uid-gid
+
+# OUTPUT
+argc_numeric_uid_gid=1
+argc__args=( prog --numeric-uid-gid )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="--numeric-uid-gid")
+argc__positionals=()
+argc_numeric_uid_gid=1
+
+************ RUN ************
+prog -l
+
+# OUTPUT
+argc_long=1
+argc__args=( prog -l )
+argc__positionals=(  )
+
+# RUN_OUTPUT
+argc__args=([0]="prog" [1]="-l")
+argc__positionals=()
+argc_long=1

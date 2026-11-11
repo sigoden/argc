@@ -221,9 +221,9 @@ See [Bind environment](#bind-environment) for details.
 
 Declares an option that takes a value.
 
-**Format:** `@option name (ws name)* modifier? param-value? bind-env? notations* description?`
+**Format:** `@option name (ws1 name)* modifier? param-value? bind-env? notations* description?` (`ws1` is exactly one space or tab)
 
-A parameter can have one or more names. Each name carries its own prefix: `-`, `+`, or `--`. Names are separated by whitespace. The trailing modifier, choices/default value, and `:`/`-` suffix belong to the parameter; write them on the last name.
+A parameter can have one or more names. Each name carries its own prefix: `-`, `+`, or `--`. Names are separated by exactly one space or tab. Two or more consecutive whitespace characters end the name list and start the description. The trailing modifier, choices/default value, and `:`/`-` suffix belong to the parameter; write them on the last name.
 
 ```sh
 # @option -o --output <FILE>          Write output to FILE
@@ -327,7 +327,7 @@ See [Bind environment](#bind-environment) for details.
 
 Declares a boolean flag. A flag does not accept a value.
 
-**Format:** `@flag name (ws name)* "*"? bind-env? description?`
+**Format:** `@flag name (ws1 name)* "*"? bind-env? description?` (`ws1` is exactly one space or tab)
 
 ```sh
 # @flag -f --force       Overwrite existing files
@@ -339,7 +339,11 @@ Declares a boolean flag. A flag does not accept a value.
 
 Like `@option`, a flag may have several names with `-`, `+`, or `--` prefixes. The canonical name rules are the same; see [`@option`](#option) and [Variables](./variables.md#argc-generated-variables).
 
-Because names are whitespace-separated, a description that starts with a flag-like token such as `-x` is treated as another name. Rephrase such descriptions or do not start them with `-`/`+`.
+Because names are separated by a single space or tab, a description that starts with a flag-like token such as `-x` must be separated from the names by two or more whitespace characters. Otherwise `-x` is treated as another name:
+
+```sh
+# @flag -n --numeric-uid-gid  -l with numeric UIDs and GIDs
+```
 
 A flag is `1` when present and unset when absent:
 

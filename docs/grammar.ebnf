@@ -25,6 +25,7 @@
 (* ------------------------------------------------------------------------- *)
 
 ws = ( " " | "\t" ), { " " | "\t" } ;
+ws1 = ( " " | "\t" ) ;
 eol = ? end of line or end of input ? ;
 ascii-alnum = ? "A".."Z" | "a".."z" | "0".."9" ? ;
 
@@ -82,11 +83,11 @@ arg = "@arg", ws, name, [ modifier ], [ param-value ],
 (* Option with one or more names. Each name carries its own prefix. The
    trailing modifier, param-value, and ':'/'-' suffix belong to the parameter
    and are written on the last name. *)
-option = "@option", ws, param-name, { ws, param-name }, [ modifier ], [ param-value ],
+option = "@option", ws, param-name, { ws1, param-name }, [ modifier ], [ param-value ],
          [ ws, bind-env ], [ ws, option-notations ], [ ws, description ] ;
 
 (* Boolean flag. A trailing '*' makes the flag repeatable. *)
-flag = "@flag", ws, param-name, { ws, param-name }, [ "*" ],
+flag = "@flag", ws, param-name, { ws1, param-name }, [ "*" ],
        [ ws, bind-env ], [ ws, description ] ;
 
 (* Environment variable declaration. A trailing '!' makes it required.
@@ -118,9 +119,10 @@ short-char = ascii-alnum
            | ":" | "=" | "?" | "@" | "[" | "]" | "^" | "_"
            | "{" | "}" | "~" ;
 
-(* A parameter name. Multiple names are separated by whitespace and may mix
-   '-', '+', and '--' prefixes. One name is chosen as the canonical name for
-   the generated variable and error messages:
+(* A parameter name. Multiple names are separated by exactly one space or tab
+   and may mix '-', '+', and '--' prefixes. Two or more whitespace characters
+   end the name list and start the description. One name is chosen as the
+   canonical name for the generated variable and error messages:
      1. the last '--' name, otherwise
      2. the last multi-character '-' name, otherwise
      3. the last name.
@@ -131,9 +133,9 @@ short-char = ascii-alnum
    variable uses its ASCII codes, for example -@ becomes argc_0x40 and -$
    becomes argc_0x24.
 
-   Names are whitespace-separated, so description text that begins with a
-   valid name token such as '-x' is parsed as another name. Rephrase such
-   descriptions or avoid starting them with a flag-like token. *)
+   Because names are separated by a single space or tab, description text
+   that begins with a valid name token such as '-x' is parsed as another name
+   unless it is separated from the names by two or more whitespace characters. *)
 param-name = ( "--", long-name )
            | ( "-" | "+" ), ( short-char | long-name ) ;
 
