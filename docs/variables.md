@@ -41,10 +41,9 @@ When a flag or option has several names, argc chooses a canonical name for the v
 
 1. Prefer the last `--` name.
 2. Otherwise prefer the last multi-character `-` name.
-3. Otherwise prefer the last `+` name.
-4. Otherwise use the last name.
+3. Otherwise use the last name.
 
-Within the same priority, a name whose body contains only letters, digits, and `_` is preferred over one containing punctuation. For example, `@flag -h -?` uses `-h`, so the variable is `$argc_h`.
+`+` names and single-character `-` names have equal priority, so the last of them wins. Within the same priority, a body containing a letter, digit, or `_` is preferred, then a body made only of `-`, `.`, `:`, and `@`, then a body containing other punctuation. For example, `@flag -h -?` uses `-h`, so the variable is `$argc_h`.
 
 A body made entirely of punctuation is encoded with its ASCII codes. `-` is not part of the body and does not get encoded:
 

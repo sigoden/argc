@@ -974,6 +974,9 @@ mod tests {
         assert_parse_option_arg!("-f --foo=a <FOO> A foo option");
         assert_parse_option_arg!("-f -F --file=a <FILE> A file option");
         assert_parse_option_arg!("-f -F --file! <FILE> A required file option");
+        assert_parse_option_arg!("--foo -bar=a <V>");
+        assert_parse_option_arg!("--foo -bar-");
+        assert_parse_option_arg!("--foo -bar:");
         assert_parse_option_arg!("--foo:bar");
         assert_parse_option_arg!("--foo.bar");
         assert_parse_option_arg!("--foo!");
@@ -1084,6 +1087,7 @@ mod tests {
         assert_parse_flag_arg!("-f --foo A foo flag");
         assert_parse_flag_arg!("-h -? --help A help flag");
         assert_parse_flag_arg!("--foo -bar? description");
+        assert_parse_flag_arg!("--foo -bar*");
         assert_parse_flag_arg!("-. --hidden");
         assert_parse_flag_arg!("--http1.1");
         assert_parse_flag_arg!("--foo A foo flag");

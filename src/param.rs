@@ -128,20 +128,20 @@ impl Param for FlagOptionParam {
     }
 
     fn render_source(&self) -> String {
-        let mut names = self.names.clone();
-        let mut primary = names[self.primary_index].clone();
-        let mut name_suffix = String::new();
-        if self.prefixed || self.data.name.ends_with('-') {
-            name_suffix.push('-');
+        let mut output = self.names.clone();
+        if let Some(last) = output.last_mut() {
+            let (prefix, body) = split_name(last);
+            let prefix = prefix.to_string();
+            let mut body = body.to_string();
+            if self.prefixed || body.ends_with('-') {
+                body.push('-');
+            }
+            if self.assigned || body.ends_with(':') {
+                body.push(':');
+            }
+            body.push_str(&self.data.render_source_of_extra());
+            *last = format!("{prefix}{body}");
         }
-        if self.assigned || self.data.name.ends_with(':') {
-            name_suffix.push(':');
-        }
-        primary.push_str(&name_suffix);
-        primary.push_str(&self.data.render_source_of_extra());
-        names[self.primary_index] = primary;
-
-        let mut output = names;
         if let Some(env) = &self.data.env {
             match env {
                 Some(v) => output.push(format!("${v}")),
@@ -340,17 +340,17 @@ impl FlagOptionParam {
         if self.names.len() == 1 {
             let name = &self.names[0];
             if name.len() > 2 {
-                output.push_str(if name.starts_with("--") {
-                    "    "
-                } else {
-                    "     "
-                });
+                output.push_str(render_body_indent(name));
                 output.push_str(name);
             } else {
                 output.push_str(name);
             }
         } else {
-            output.push_str(&self.names[0]);
+            let first = &self.names[0];
+            if first.len() > 2 {
+                output.push_str(render_body_indent(first));
+            }
+            output.push_str(first);
             for name in &self.names[1..] {
                 output.push_str(", ");
                 let (prefix, body) = split_name(name);
@@ -525,6 +525,14 @@ fn split_name(name: &str) -> (&str, &str) {
     }
 }
 
+fn render_body_indent(name: &str) -> &'static str {
+    if name.starts_with("--") {
+        "    "
+    } else {
+        "     "
+    }
+}
+
 fn name_quality(name: &str) -> u8 {
     let (_, body) = split_name(name);
     if body.chars().any(is_bad_var_char) {
@@ -541,15 +549,14 @@ fn name_prefix_rank(name: &str) -> u8 {
     match prefix {
         "--" => 0,
         "-" if body.chars().count() > 1 => 1,
-        "+" => 2,
-        _ => 3,
+        _ => 2,
     }
 }
 
 fn select_primary_name(names: &[String]) -> usize {
     let mut best: Option<((u8, u8), usize)> = None;
     for (index, name) in names.iter().enumerate() {
-        let key = (name_quality(name), name_prefix_rank(name));
+        let key = (name_prefix_rank(name), name_quality(name));
         if best.is_none_or(|(best_key, _)| key <= best_key) {
             best = Some((key, index));
         }
@@ -1088,5 +1095,61 @@ fn must_get_first(value: &[&str]) -> String {
         String::new()
     } else {
         value[0].to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn to_names(values: &[&str]) -> Vec<String> {
+        values.iter().map(|v| v.to_string()).collect()
+    }
+
+    fn flag(values: &[&str]) -> FlagOptionParam {
+        FlagOptionParam::new(ParamData::new(""), true, &to_names(values), &[])
+    }
+
+    fn option(values: &[&str]) -> FlagOptionParam {
+        FlagOptionParam::new(ParamData::new(""), false, &to_names(values), &[])
+    }
+
+    fn flag_with_modifier(values: &[&str], modifier: Modifier) -> FlagOptionParam {
+        let mut data = ParamData::new("");
+        data.modifier = modifier;
+        FlagOptionParam::new(data, true, &to_names(values), &[])
+    }
+
+    #[test]
+    fn test_select_primary_name() {
+        assert_eq!(select_primary_name(&to_names(&["+a", "-a"])), 1);
+        assert_eq!(select_primary_name(&to_names(&["-a", "+b"])), 1);
+        assert_eq!(select_primary_name(&to_names(&["--@", "-f"])), 0);
+        assert_eq!(select_primary_name(&to_names(&["-h", "-?"])), 0);
+        assert_eq!(select_primary_name(&to_names(&["-h", "-?", "--help"])), 2);
+        assert_eq!(select_primary_name(&to_names(&["-f", "-F", "--file"])), 2);
+    }
+
+    #[test]
+    fn test_render_body_multi_names_alignment() {
+        assert_eq!(
+            flag(&["--verbose", "-v"]).render_body(),
+            "    --verbose,  -v"
+        );
+        assert_eq!(flag(&["-q", "--quiet"]).render_body(), "-q, --quiet");
+        assert_eq!(flag(&["--force"]).render_body(), "    --force");
+        assert_eq!(flag(&["-q"]).render_body(), "-q");
+    }
+
+    #[test]
+    fn test_render_source_multi_names() {
+        assert_eq!(
+            flag_with_modifier(&["--foo", "-bar"], Modifier::MultipleOptional).render_source(),
+            "--foo -bar*"
+        );
+        assert_eq!(option(&["-a", "--assign:"]).render_source(), "-a --assign:");
+        assert_eq!(option(&["-X", "-x-"]).render_source(), "-X -x-");
+        assert_eq!(flag(&["--foo--"]).render_source(), "--foo--");
+        assert_eq!(flag(&["--foo::"]).render_source(), "--foo::");
     }
 }

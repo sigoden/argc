@@ -235,7 +235,7 @@ A parameter can have one or more names. Each name carries its own prefix: `-`, `
 # @option --token $GITHUB_TOKEN       GitHub access token
 ```
 
-Argc chooses one name as the canonical name for the generated variable and error messages. It prefers a `--` name, then a multi-character `-` name, then a `+` name, then the last name. Among names of the same kind, a body made only of letters, digits, and `_` is preferred over a body containing punctuation. See [Variables](./variables.md#argc-generated-variables) for the exact mapping, including punctuation-only names such as `-@`.
+Argc chooses one name as the canonical name for the generated variable and error messages. It prefers the last `--` name, then the last multi-character `-` name, then the last name; `+` names and single-character `-` names have equal priority. Within the same priority, a body containing a letter, digit, or `_` is preferred, then a body made only of `-`, `.`, `:`, and `@`, then a body containing other punctuation. See [Variables](./variables.md#argc-generated-variables) for the exact mapping, including punctuation-only names such as `-@`.
 
 There are also less common option styles, such as `--foo=abc` (where `--foo=` appears in completions), prefix options like `-Xfoo -Xbar`, and plus-prefixed options like `+foo`. All of these are supported. See [Uncommon Option Styles](./advanced.md#uncommon-option-styles).
 

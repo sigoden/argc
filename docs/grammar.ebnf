@@ -123,12 +123,13 @@ short-char = ascii-alnum
    the generated variable and error messages:
      1. the last '--' name, otherwise
      2. the last multi-character '-' name, otherwise
-     3. the last '+' name, otherwise
-     4. the last name.
-   Within the same priority, a body made only of letters, digits, and '_'
-   is preferred over a body containing punctuation. If the canonical body
-   consists only of punctuation, the variable uses its ASCII codes, for
-   example -@ becomes argc_0x40 and -$ becomes argc_0x24.
+     3. the last name.
+   '+' names and single-character '-' names have equal priority. Within the
+   same priority, prefer a body containing a letter, digit, or '_', then a
+   body made only of '-', '.', ':', and '@', then a body containing other
+   punctuation. If the canonical body consists only of punctuation, the
+   variable uses its ASCII codes, for example -@ becomes argc_0x40 and -$
+   becomes argc_0x24.
 
    Names are whitespace-separated, so description text that begins with a
    valid name token such as '-x' is parsed as another name. Rephrase such
