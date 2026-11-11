@@ -513,3 +513,19 @@ fn multi_names_canonical() {
         ]
     );
 }
+
+#[test]
+fn multi_names_description() {
+    let script = r###"
+# @flag -l --long  long
+# @flag -n --numeric-uid-gid  -l with numeric UIDs and GIDs
+"###;
+    snapshot_multi!(
+        script,
+        [
+            vec!["prog", "-n"],
+            vec!["prog", "--numeric-uid-gid"],
+            vec!["prog", "-l"],
+        ]
+    );
+}
