@@ -322,7 +322,7 @@ fn to_posix_path(path: &std::path::Path) -> String {
     let path = path.display().to_string().replace('\\', "/");
     let bytes = path.as_bytes();
     if bytes.len() >= 3 && bytes[1] == b':' {
-        format!("/{}{}", &path[..1].to_lowercase(), &path[2..])
+        format!("/{}{}", path[..1].to_lowercase(), &path[2..])
     } else {
         path
     }
