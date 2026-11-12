@@ -72,8 +72,9 @@ pub fn envs() -> HashMap<String, String> {
 }
 
 /// Shell code prepended to `--argc-eval` output. It restores the caller's
-/// `MSYS_NO_PATHCONV` before the command runs and keeps nested argc calls
-/// conversion-free with a wrapper function.
+/// `MSYS_NO_PATHCONV` before the command runs and keeps nested argc script
+/// parsing (`--argc-eval`/`--argc-parallel`) conversion-free with a wrapper
+/// function.
 #[cfg(windows)]
 pub fn restore_code() -> String {
     if env::var_os(RESTORE).is_none() {
@@ -88,9 +89,13 @@ pub fn restore_code() -> String {
     }
     code.push_str("export ARGC_MSYS_NO_PATHCONV_RESTORE\n");
     code.push_str("if ! declare -F argc >/dev/null 2>&1; then\n");
-    code.push_str(
-        "    argc() { MSYS_NO_PATHCONV=1 ARGC_MSYS_NO_PATHCONV_RESTORE=1 command argc \"$@\"; }\n",
-    );
+    code.push_str("    argc() {\n");
+    code.push_str("        case \"${1-}\" in\n");
+    code.push_str("            --argc-eval|--argc-parallel) MSYS_NO_PATHCONV=1 ARGC_MSYS_NO_PATHCONV_RESTORE=1 command argc \"$@\" ;;\n");
+    code.push_str("            --argc-*) command argc \"$@\" ;;\n");
+    code.push_str("            *) MSYS_NO_PATHCONV=1 ARGC_MSYS_NO_PATHCONV_RESTORE=1 command argc \"$@\" ;;\n");
+    code.push_str("        esac\n");
+    code.push_str("    }\n");
     code.push_str("    export -f argc\n");
     code.push_str("fi\n");
     code

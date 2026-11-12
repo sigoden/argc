@@ -210,7 +210,7 @@ fn run() -> Result<i32> {
 }
 
 fn run_eval(runtime: NativeRuntime, args: Vec<String>) -> Result<String> {
-    let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
+    let (source, script_path, cmd_args) = parse_script_args(&args[2..])?;
     let output = if cmd_args
         .get(1)
         .map(|v| v == parallel::PARALLEL_SYMBOL)
@@ -232,12 +232,12 @@ fn run_eval(runtime: NativeRuntime, args: Vec<String>) -> Result<String> {
             runtime,
             &source,
             &cmd_args,
-            Some(&args[2]),
+            Some(&script_path),
             get_term_width(),
         )?;
         let bash_options = get_bash_options();
         let msys_restore = msys::restore_code();
-        let dir_vars = export_dir_vars(&args[2]);
+        let dir_vars = export_dir_vars(&script_path);
         let code = argc::ArgcValue::to_bash(&values);
         let export_vars = export_argc_variables(&code);
         format!("{bash_options}{msys_restore}{dir_vars}{export_vars}{code}")
