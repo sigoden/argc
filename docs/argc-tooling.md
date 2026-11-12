@@ -31,6 +31,8 @@ eval "$(argc --argc-eval "$0" "$@")"
 
 The generated code sets `argc_*` variables, exports the environment, and calls the selected command function. If parsing fails, it emits shell code that prints the error and exits with status `1`, so the surrounding `eval` reports the failure.
 
+On Windows with Git Bash, the generated code also restores the caller's `MSYS_NO_PATHCONV` before the command runs. This keeps arguments such as `/foo` intact instead of letting MSYS convert them to `C:/...`.
+
 This is the core integration point between argc and a script; you rarely need to run it by hand.
 
 ## --argc-create
@@ -52,7 +54,7 @@ argc --argc-create /tmp/mycli build test
 - Otherwise the first argument is `-` or an output path, and the remaining arguments are recipe names. `argc --argc-create build test` creates `./build` containing a `test` recipe.
 - The command refuses to overwrite an existing file.
 - On Unix, the new script is marked executable.
-- On Windows, creating a standalone script without a `.sh` suffix also creates a `.cmd` command shim so it can be invoked without the file extension.
+- On Windows, creating a standalone script without a `.sh` suffix also creates a `.cmd` command shim so it can be invoked without the file extension. The shim runs the script with Git Bash and preserves the caller's `MSYS_NO_PATHCONV` setting so paths beginning with `/` reach argc unchanged.
 
 ## --argc-build
 

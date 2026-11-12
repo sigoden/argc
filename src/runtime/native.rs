@@ -68,14 +68,27 @@ impl Runtime for NativeRuntime {
                 let shell_args = shell_args.clone();
                 let envs = envs.clone();
                 thread::spawn(move || {
-                    process::Command::new(shell)
+                    let mut command = process::Command::new(shell);
+                    command
                         .args(shell_args)
                         .arg(&script_file)
                         .arg(Self::INTERNAL_SYMBOL)
                         .arg(&func)
                         .args(args)
                         .envs(envs)
-                        .env("PATH", path_env)
+                        .env("PATH", path_env);
+                    #[cfg(windows)]
+                    if env::var_os(crate::utils::ARGC_MSYS_NO_PATHCONV_RESTORE).is_some() {
+                        match env::var_os(crate::utils::ARGC_MSYS_NO_PATHCONV) {
+                            Some(value) => {
+                                command.env(crate::utils::MSYS_NO_PATHCONV, value);
+                            }
+                            None => {
+                                command.env_remove(crate::utils::MSYS_NO_PATHCONV);
+                            }
+                        }
+                    }
+                    command
                         .output()
                         .ok()
                         .map(|out| String::from_utf8_lossy(&out.stdout).to_string())
