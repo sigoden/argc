@@ -80,6 +80,8 @@ Argc also provides built-in variables that offer information about the parsing p
 | --- | --- | --- |
 | `ARGC_PWD` | `Argcfile.sh` (or an `ARGC_SCRIPT_NAME` script) runs, including via `--argc-eval` | Directory where `argc` was invoked. `PWD` points to the script's directory (the project root for `Argcfile.sh`). |
 | `ARGC_OS` | During completion or choice-function evaluation | Operating system name, such as `linux`, `macos`, or `windows`. |
+| `ARGC_MSYS_NO_PATHCONV` | Windows Git Bash shim or runner | Internal saved value of the caller's `MSYS_NO_PATHCONV`. |
+| `ARGC_MSYS_NO_PATHCONV_RESTORE` | Windows Git Bash shim or runner | Internal marker telling `--argc-eval` to restore `MSYS_NO_PATHCONV`. |
 | `ARGC_VARS` | `--argc-eval` output | Internal base64-encoded variable snapshot. |
 
 ## Inspecting Variables

@@ -6,6 +6,10 @@ pub const AFTER_HOOK: &str = "_argc_after";
 pub const ROOT_NAME: &str = "prog";
 pub const MAIN_NAME: &str = "main";
 
+pub const MSYS_NO_PATHCONV: &str = "MSYS_NO_PATHCONV";
+pub const ARGC_MSYS_NO_PATHCONV: &str = "ARGC_MSYS_NO_PATHCONV";
+pub const ARGC_MSYS_NO_PATHCONV_RESTORE: &str = "ARGC_MSYS_NO_PATHCONV_RESTORE";
+
 pub(crate) const META_VERSION: &str = "version";
 pub(crate) const META_BINNAME: &str = "binname";
 pub(crate) const META_DOTENV: &str = "dotenv";
