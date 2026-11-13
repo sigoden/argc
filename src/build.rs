@@ -652,7 +652,7 @@ fn build_flag_option_bind_envs(cmd: &Command) -> String {
                 let handle_bind_env = build_handle_bind_env(param, &render_name, 2);
                 format!(
                     r#"
-    if [[ -z "${{{var_name}:-}}" ]] && [[ -n "${{{env_name}:-}}" ]]; then{handle_bind_env}
+    if [[ -z "${{{var_name}+x}}" ]] && [[ -n "${{{env_name}:-}}" ]]; then{handle_bind_env}
     fi"#
                 )
             };
@@ -757,7 +757,7 @@ fn build_default_flag_options(cmd: &Command) -> String {
             let default = build_default(&var_name, param.default(), 2);
             format!(
                 r#"
-    if [[ -z "${{{var_name}:-}}" ]]; then{default}
+    if [[ -z "${{{var_name}+x}}" ]]; then{default}
     fi"#
             )
         })

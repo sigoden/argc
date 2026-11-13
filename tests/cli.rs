@@ -186,6 +186,68 @@ eval "$(argc --argc-eval "$0" "$@")"
 }
 
 #[test]
+fn build_preserves_empty_options_before_fallbacks() {
+    let script = r#"#!/usr/bin/env bash
+set -eu
+
+# @option --label=fallback
+# @option --computed=`_default_label`
+# @option --bound $ARGC_TEST_LABEL
+# @option --many* $ARGC_TEST_LABEL
+main() {
+    printf '<%s>|<%s>|<%s>|<%s>\n' "$argc_label" "$argc_computed" "$argc_bound" "${argc_many[*]}"
+}
+
+_default_label() { printf dynamic; }
+
+eval "$(argc --argc-eval "$0" "$@")"
+"#;
+    let (path, _, script_file) = crate::fixtures::create_argc_script(script, "empty-options.sh");
+    let tmpdir = tmpdir();
+    let outpath = tmpdir.join("built.sh");
+    argc_bin()
+        .arg("--argc-build")
+        .arg(&path)
+        .arg(&outpath)
+        .assert()
+        .success();
+
+    for (args, expected) in [
+        (vec![], "<fallback>|<dynamic>|<from-env>|<from-env>\n"),
+        (
+            vec![
+                "--label=given",
+                "--computed=given",
+                "--bound=given",
+                "--many=given",
+            ],
+            "<given>|<given>|<given>|<given>\n",
+        ),
+        (
+            vec!["--label", "", "--computed", "", "--bound", "", "--many", ""],
+            "<>|<>|<>|<>\n",
+        ),
+        (
+            vec![
+                "--label=",
+                "--computed=",
+                "--bound=",
+                "--many=",
+                "--many=keep",
+            ],
+            "<>|<>|<>|< keep>\n",
+        ),
+    ] {
+        let args: Vec<String> = args.into_iter().map(String::from).collect();
+        for script_path in [std::path::Path::new(&path), outpath.as_path()] {
+            let output = run_script(script_path, &args, &[("ARGC_TEST_LABEL", "from-env")]);
+            assert_eq!(output, expected);
+        }
+    }
+    script_file.close().unwrap();
+}
+
+#[test]
 fn mangen() {
     let path = locate_script("examples/demo");
     let tmpdir = tmpdir();
