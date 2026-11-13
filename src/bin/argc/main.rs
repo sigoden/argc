@@ -1,3 +1,4 @@
+mod msys;
 mod parallel;
 
 use anyhow::{anyhow, bail, Context, Result};
@@ -86,7 +87,7 @@ fn run() -> Result<i32> {
                 println!("Successfully created {outpath}");
                 #[cfg(windows)]
                 if !is_argc_script_path(&outpath) {
-                    if let Some(shim_path) = create_windows_shim(&runtime, &outpath) {
+                    if let Some(shim_path) = msys::create_windows_shim(&runtime, &outpath) {
                         println!("Successfully created {shim_path} (command shim)");
                     }
                 }
@@ -193,6 +194,15 @@ fn run() -> Result<i32> {
                 envs.insert("ARGC_PWD".to_string(), cwd);
             }
         }
+        // Git Bash rewrites leading `/` arguments when it spawns native argc.
+        // Keep them intact while the script parses, then let `--argc-eval` restore it.
+        if msys::is_git_bash(&runtime, &shell)
+            && fs::read_to_string(&script_file)
+                .map(|source| source.contains("--argc-eval"))
+                .unwrap_or(false)
+        {
+            msys::inject(&mut envs);
+        }
         let script_file = script_file.display().to_string();
         let args = [vec![&script_file], args[1..].iter().collect()].concat();
         run_command(&script_file, &shell, &args, envs, Some(&script_dir))
@@ -200,7 +210,7 @@ fn run() -> Result<i32> {
 }
 
 fn run_eval(runtime: NativeRuntime, args: Vec<String>) -> Result<String> {
-    let (source, _script_path, cmd_args) = parse_script_args(&args[2..])?;
+    let (source, script_path, cmd_args) = parse_script_args(&args[2..])?;
     let output = if cmd_args
         .get(1)
         .map(|v| v == parallel::PARALLEL_SYMBOL)
@@ -211,24 +221,26 @@ fn run_eval(runtime: NativeRuntime, args: Vec<String>) -> Result<String> {
             bail!("No parallel command")
         }
         let bash_options = get_bash_options();
+        let msys_restore = msys::restore_code();
         let mut code = retrieve_argc_variables().unwrap_or_default();
         let mut cmds = vec![cmd_args[2].to_string()];
         cmds.extend(cmd_args[3..].iter().map(|v| escape_shell_words(v)));
         code.push_str(&cmds.join(" "));
-        format!("{bash_options}{code}")
+        format!("{bash_options}{msys_restore}{code}")
     } else {
         let values = argc::eval(
             runtime,
             &source,
             &cmd_args,
-            Some(&args[2]),
+            Some(&script_path),
             get_term_width(),
         )?;
         let bash_options = get_bash_options();
-        let dir_vars = export_dir_vars(&args[2]);
+        let msys_restore = msys::restore_code();
+        let dir_vars = export_dir_vars(&script_path);
         let code = argc::ArgcValue::to_bash(&values);
         let export_vars = export_argc_variables(&code);
-        format!("{bash_options}{dir_vars}{export_vars}{code}")
+        format!("{bash_options}{msys_restore}{dir_vars}{export_vars}{code}")
     };
     Ok(output)
 }
@@ -493,26 +505,6 @@ eval "$(argc --argc-eval "$0" "$@")"
     )
 }
 
-#[cfg(windows)]
-fn create_windows_shim(runtime: &NativeRuntime, script_path: &str) -> Option<String> {
-    if Path::new(script_path)
-        .extension()
-        .map(|ext| ext.eq_ignore_ascii_case("sh"))
-        .unwrap_or(false)
-    {
-        return None;
-    }
-    let shim_path = format!("{script_path}.cmd");
-    if Path::new(&shim_path).exists() {
-        return None;
-    }
-    let bash_path = runtime.bash_path()?;
-    let name = Path::new(script_path).file_name()?.to_str()?;
-    let content = format!("@\"{bash_path}\" --noprofile --norc -c \"{name} \\\"$@\\\"\" -- %*\r\n");
-    fs::write(&shim_path, content).ok()?;
-    Some(shim_path)
-}
-
 /// Whether `name` is the argcfile, ignoring case and an optional `.sh` suffix.
 fn is_argc_script_name(name: &str) -> bool {
     let name = name.to_ascii_lowercase();
@@ -722,7 +714,7 @@ fn set_permissions<T: AsRef<Path>>(_path: T) -> Result<()> {
 }
 
 fn get_bash_options() -> String {
-    if is_msys() {
+    if msys::is_msys() {
         "set -o igncr\n".to_string()
     } else {
         String::new()
@@ -730,18 +722,17 @@ fn get_bash_options() -> String {
 }
 
 fn normalize_script_path(path: &str) -> String {
-    if is_msys()
-        && path.len() >= 3
-        && path.starts_with('/')
-        && path.chars().nth(1).map(|v| v.is_ascii_alphabetic()) == Some(true)
-        && path.chars().nth(2) == Some('/')
-    {
-        let drive = path.chars().nth(1).unwrap().to_uppercase();
-        return format!("{}:{}", drive, path[2..].replace('/', "\\"));
+    if msys::is_msys() && path.starts_with('/') {
+        if path.len() >= 3
+            && path.chars().nth(1).map(|v| v.is_ascii_alphabetic()) == Some(true)
+            && path.chars().nth(2) == Some('/')
+        {
+            let drive = path.chars().nth(1).unwrap().to_uppercase();
+            return format!("{}:{}", drive, path[2..].replace('/', "\\"));
+        }
+        if let Some(converted) = msys::cygpath_w(path) {
+            return converted;
+        }
     }
     path.to_string()
-}
-
-fn is_msys() -> bool {
-    cfg!(windows) && env::var("MSYSTEM").is_ok()
 }

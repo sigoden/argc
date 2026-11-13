@@ -98,7 +98,9 @@ fn create_cli_with_shim() {
             let shim = std::fs::read_to_string(tmpdir.path().join("mycli.cmd")).unwrap();
             assert_eq!(
                 shim,
-                format!("@\"{bash_path}\" --noprofile --norc -c \"mycli \\\"$@\\\"\" -- %*\r\n")
+                format!(
+                    "@setlocal DisableDelayedExpansion\r\n@if not defined ARGC_MSYS_NO_PATHCONV_RESTORE set \"ARGC_MSYS_NO_PATHCONV=%MSYS_NO_PATHCONV%\"\r\n@if not defined ARGC_MSYS_NO_PATHCONV_RESTORE set \"ARGC_MSYS_NO_PATHCONV_RESTORE=1\"\r\n@set \"MSYS_NO_PATHCONV=1\"\r\n@\"{bash_path}\" --noprofile --norc \"%~dp0mycli\" %*\r\n@exit /b %ERRORLEVEL%\r\n"
+                )
             );
         }
         None => {

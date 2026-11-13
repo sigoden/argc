@@ -1,3 +1,4 @@
+use crate::msys;
 use anyhow::Result;
 use argc::{NativeRuntime, Runtime};
 use std::collections::HashMap;
@@ -18,6 +19,11 @@ pub fn parallel(
     let pool = ThreadPool::new(num_cpus::get());
     let (tx, rx) = channel();
     let path_env = runtime.path_env_with_current_exe();
+    let msys_envs = if msys::is_git_bash(&runtime, shell) {
+        msys::envs()
+    } else {
+        HashMap::new()
+    };
     let mut shell_extra_args = runtime.shell_args(shell);
     shell_extra_args.push(script_file.to_string());
     shell_extra_args.push(PARALLEL_SYMBOL.to_string());
@@ -25,12 +31,14 @@ pub fn parallel(
         let tx = tx.clone();
         let shell = shell.to_string();
         let path_env = path_env.clone();
+        let msys_envs = msys_envs.clone();
         let shell_extra_args = shell_extra_args.clone();
         pool.execute(move || {
             Command::new(shell)
                 .args(shell_extra_args)
                 .args(job_args)
                 .env("ARGC_PARALLEL", "1")
+                .envs(&msys_envs)
                 .env("PATH", path_env)
                 .output()
                 .ok()

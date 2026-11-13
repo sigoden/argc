@@ -19,6 +19,8 @@ mod main_fn;
 mod meta;
 #[cfg(target_os = "linux")]
 mod misc;
+#[cfg(windows)]
+mod msys;
 mod multiline;
 mod param_fn;
 mod spec;

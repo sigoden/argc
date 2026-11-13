@@ -5,7 +5,6 @@ edition = "2021"
 authors = ["sigoden <sigoden@gmail.com>"]
 description = "A bash CLI framework and command runner"
 license = "MIT OR Apache-2.0"
-homepage = "https://github.com/sigoden/argc"
 repository = "https://github.com/sigoden/argc"
 autotests = false
 categories = ["command-line-utilities", "development-tools"]
