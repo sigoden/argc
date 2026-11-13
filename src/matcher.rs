@@ -1722,8 +1722,5 @@ fn maybe_flag_option(arg: &str, signs: &IndexSet<char>) -> bool {
         Some((v, _)) => v,
         _ => arg,
     };
-    if value.contains(|c: char| c.is_whitespace()) {
-        return false;
-    }
-    true
+    !value.contains(|c: char| c.is_whitespace())
 }
