@@ -184,6 +184,165 @@ eval "$(argc --argc-eval "$0" "$@")"
 }
 
 #[test]
+fn build_preserves_empty_cli_values_before_fallbacks() {
+    let script = r#"#!/usr/bin/env bash
+set -eu
+
+# @option --label=fallback
+# @option --computed=`_default_label`
+# @option --bound $ARGC_TEST_LABEL
+# @option --many* $ARGC_TEST_LABEL
+main() {
+    printf '<%s>|<%s>|<%s>|<%s>\n' "$argc_label" "$argc_computed" "$argc_bound" "${argc_many[*]}"
+}
+
+_default_label() { printf dynamic; }
+
+eval "$(argc --argc-eval "$0" "$@")"
+"#;
+    let (path, _, script_file) = crate::fixtures::create_argc_script(script, "empty-cli-values.sh");
+    let tmpdir = tmpdir();
+    let outpath = tmpdir.join("built.sh");
+    argc_bin()
+        .arg("--argc-build")
+        .arg(&path)
+        .arg(&outpath)
+        .assert()
+        .success();
+
+    for (args, expected) in [
+        (vec![], "<fallback>|<dynamic>|<from-env>|<from-env>\n"),
+        (
+            vec!["--label", "", "--computed", "", "--bound", "", "--many", ""],
+            "<>|<>|<>|<>\n",
+        ),
+        (
+            vec![
+                "--label=",
+                "--computed=",
+                "--bound=",
+                "--many=",
+                "--many=keep",
+            ],
+            "<>|<>|<>|< keep>\n",
+        ),
+    ] {
+        let args: Vec<String> = args.into_iter().map(String::from).collect();
+        for script_path in [std::path::Path::new(&path), outpath.as_path()] {
+            let output = run_script(script_path, &args, &[("ARGC_TEST_LABEL", "from-env")]);
+            assert_eq!(output, expected);
+        }
+    }
+
+    // An explicit empty value must count as provided for duplicate detection too.
+    let args = ["--label", "", "--label", "keep"].map(String::from);
+    for script_path in [std::path::Path::new(&path), outpath.as_path()] {
+        let output = run_script(script_path, &args, &[("ARGC_TEST_LABEL", "from-env")]);
+        assert!(
+            output.contains("cannot be used multiple times"),
+            "output: {output}"
+        );
+    }
+
+    script_file.close().unwrap();
+}
+
+#[test]
+fn build_preserves_empty_env_and_required_values() {
+    let script = r#"#!/usr/bin/env bash
+set -eu
+
+# @option --req!
+# @option --bound $ARGC_TEST_BOUND
+# @option --fallback=dflt $ARGC_TEST_FALLBACK
+# @env ARGC_TEST_TOKEN!
+# @env ARGC_TEST_LEVEL=info
+# @arg name! $ARGC_TEST_NAME
+main() {
+    printf 'req=<%s>|bound=<%s>|fallback=<%s>|token=<%s>|level=<%s>|name=<%s>\n' \
+        "${argc_req:-}" "${argc_bound:-}" "${argc_fallback:-}" "$ARGC_TEST_TOKEN" "$ARGC_TEST_LEVEL" "${argc_name:-}"
+}
+
+eval "$(argc --argc-eval "$0" "$@")"
+"#;
+    let (path, _, script_file) = crate::fixtures::create_argc_script(script, "empty-env-values.sh");
+    let tmpdir = tmpdir();
+    let outpath = tmpdir.join("built.sh");
+    argc_bin()
+        .arg("--argc-build")
+        .arg(&path)
+        .arg(&outpath)
+        .assert()
+        .success();
+
+    // Present but empty env vars must not trigger defaults or required errors.
+    let envs = [
+        ("ARGC_TEST_BOUND", ""),
+        ("ARGC_TEST_FALLBACK", ""),
+        ("ARGC_TEST_TOKEN", ""),
+        ("ARGC_TEST_NAME", ""),
+    ];
+    let args = ["--req", ""].map(String::from);
+    for script_path in [std::path::Path::new(&path), outpath.as_path()] {
+        let output = run_script(script_path, &args, &envs);
+        assert_eq!(
+            output,
+            "req=<>|bound=<>|fallback=<>|token=<>|level=<info>|name=<>\n"
+        );
+    }
+
+    // Unset env vars still fall back to defaults.
+    let args = ["--req", "value"].map(String::from);
+    let envs = [("ARGC_TEST_TOKEN", "token"), ("ARGC_TEST_NAME", "env-name")];
+    for script_path in [std::path::Path::new(&path), outpath.as_path()] {
+        let output = run_script(script_path, &args, &envs);
+        assert_eq!(
+            output,
+            "req=<value>|bound=<>|fallback=<dflt>|token=<token>|level=<info>|name=<env-name>\n"
+        );
+    }
+
+    // Missing required params are still reported.
+    for script_path in [std::path::Path::new(&path), outpath.as_path()] {
+        let output = run_script(script_path, &[], &[]);
+        assert!(output.contains("required"), "output: {output}");
+    }
+
+    script_file.close().unwrap();
+}
+
+#[test]
+fn build_rejects_empty_bound_flag_env() {
+    let script = r#"#!/usr/bin/env bash
+set -eu
+
+# @flag --fa $ARGC_TEST_FA
+main() {
+    printf 'fa=<%s>\n' "${argc_fa:-unset}"
+}
+
+eval "$(argc --argc-eval "$0" "$@")"
+"#;
+    let (path, _, script_file) = crate::fixtures::create_argc_script(script, "empty-bound-flag.sh");
+    let tmpdir = tmpdir();
+    let outpath = tmpdir.join("built.sh");
+    argc_bin()
+        .arg("--argc-build")
+        .arg(&path)
+        .arg(&outpath)
+        .assert()
+        .success();
+
+    for script_path in [std::path::Path::new(&path), outpath.as_path()] {
+        let output = run_script(script_path, &[], &[("ARGC_TEST_FA", "")]);
+        assert!(output.contains("invalid value"), "output: {output}");
+        assert!(output.contains("--fa"), "output: {output}");
+    }
+
+    script_file.close().unwrap();
+}
+
+#[test]
 fn mangen() {
     let path = locate_script("examples/demo");
     let tmpdir = tmpdir();
