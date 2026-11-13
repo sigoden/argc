@@ -3,7 +3,7 @@ _argc_require_params() {
     for item in "${@:2}"; do
         name="${item%%:*}"
         render_name="${item##*:}"
-        if [[ -z "${!name:-}" ]]; then
+        if [[ -z "${!name+x}" ]]; then
             missed_envs="$missed_envs"$'\n'"  $render_name"
         fi
     done

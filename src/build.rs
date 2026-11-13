@@ -413,7 +413,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &IndexSet<char>) -> S
                 _argc_die "error: flag \`{primary_name}\` don't accept any value"
             fi
             _argc_index=$((_argc_index + 1))
-            if [[ -n "${{{var_name}:-}}" ]]; then
+            if [[ -n "${{{var_name}+x}}" ]]; then
                 {variant}
             else
                 {var_name}=1
@@ -446,7 +446,7 @@ fn build_parse_flag_option(param: &FlagOptionParam, signs: &IndexSet<char>) -> S
         } else {
             format!(
                 r#"
-            if [[ -z "${{{var_name}:-}}" ]]; then
+            if [[ -z "${{{var_name}+x}}" ]]; then
                 {var_name}="${{_argc_take_args_values[0]:-}}"
             else
                 _argc_die "error: the argument \`{primary_name}\` cannot be used multiple times"
@@ -633,6 +633,8 @@ fn build_positionals(cmd: &Command) -> String {
     )
 }
 
+// `${var+x}` tests whether the variable is set, so an explicitly provided
+// empty value is not replaced by the value of a bound environment variable.
 fn build_flag_option_bind_envs(cmd: &Command) -> String {
     let mut output = vec![];
     for param in &cmd.flag_option_params {
@@ -642,7 +644,7 @@ fn build_flag_option_bind_envs(cmd: &Command) -> String {
             let code = if param.is_flag() {
                 format!(
                     r#"
-    if [[ -z "${{{var_name}:-}}" ]] && [[ -n "${{{env_name}:-}}" ]]; then
+    if [[ -z "${{{var_name}+x}}" ]] && [[ -n "${{{env_name}+x}}" ]]; then
         if _argc_check_bool {env_name} "{render_name}"; then
             {var_name}=1
         fi
@@ -652,7 +654,7 @@ fn build_flag_option_bind_envs(cmd: &Command) -> String {
                 let handle_bind_env = build_handle_bind_env(param, &render_name, 2);
                 format!(
                     r#"
-    if [[ -z "${{{var_name}:-}}" ]] && [[ -n "${{{env_name}:-}}" ]]; then{handle_bind_env}
+    if [[ -z "${{{var_name}+x}}" ]] && [[ -n "${{{env_name}+x}}" ]]; then{handle_bind_env}
     fi"#
                 )
             };
@@ -669,7 +671,7 @@ fn build_positional_bind_env(param: &PositionalParam) -> String {
             let handle_bind_env = build_handle_bind_env(param, &param.render_notation(), 3);
             format!(
                 r#"
-        elif [[ -n "${{{env_name}:-}}" ]]; then{handle_bind_env}
+        elif [[ -n "${{{env_name}+x}}" ]]; then{handle_bind_env}
             argc__positionals+=("${{_argc_env_values[@]}}")"#
             )
         }
@@ -740,6 +742,8 @@ fn build_required_flag_options(cmd: &Command) -> String {
     )
 }
 
+// `${var+x}` tests whether the variable is set, so an explicitly provided
+// empty value is not replaced by the default value.
 fn build_default_flag_options(cmd: &Command) -> String {
     let default_flag_options: Vec<_> = cmd
         .flag_option_params
@@ -757,7 +761,7 @@ fn build_default_flag_options(cmd: &Command) -> String {
             let default = build_default(&var_name, param.default(), 2);
             format!(
                 r#"
-    if [[ -z "${{{var_name}:-}}" ]]; then{default}
+    if [[ -z "${{{var_name}+x}}" ]]; then{default}
     fi"#
             )
         })
@@ -808,19 +812,19 @@ fn build_envs(cmd: &Command) -> String {
             } else if default.is_empty() {
                 format!(
                     r#"
-        if [[ -n "${{{var_name}:-}}" ]]; then{choice}
+        if [[ -n "${{{var_name}+x}}" ]]; then{choice}
         fi"#
                 )
             } else if choice.is_empty() {
                 format!(
                     r#"
-        if [[ -z "${{{var_name}:-}}" ]]; then{default}
+        if [[ -z "${{{var_name}+x}}" ]]; then{default}
         fi"#
                 )
             } else {
                 format!(
                     r#"
-        if [[ -z "${{{var_name}:-}}" ]]; then{default}
+        if [[ -z "${{{var_name}+x}}" ]]; then{default}
         else{choice}
         fi"#
                 )
